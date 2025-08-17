@@ -2,7 +2,7 @@ using HarmonyLib;
 
 namespace EpicLoot.MagicItemEffects;
 
-public class ModifyFireRate
+public class ModifyMagicFireRate
 {
     [HarmonyPatch(typeof(Attack), nameof(Attack.UpdateProjectile))]
     public static class ModifyFireRate_Attack_UpdateProjectile_Patch
@@ -18,7 +18,7 @@ public class ModifyFireRate
                 originalBurstValue = __instance.m_burstInterval;
 
                 float effectValue =
-                    player.GetTotalActiveMagicEffectValue(MagicEffectType.ModifyFireRate, 0.01f);
+                    player.GetTotalActiveMagicEffectValue(MagicEffectType.ModifyMagicFireRate, 0.01f);
                 if (effectValue > 0)
                 {
                     __instance.m_burstInterval *= 1 - effectValue;
