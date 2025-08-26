@@ -15,6 +15,8 @@ namespace EpicLoot.MagicItemEffects
         {
             var item = __instance.m_spawnItem;
             var player = Player.m_localPlayer;
+            GameObject terrain_water = go ?? collider?.gameObject;
+            if (terrain_water == null) return;
             if ((go.GetComponent<MonsterAI>() || go.GetComponent<BaseAI>()) && item != null && item.HasMagicEffect(MagicEffectType.Apportation))
             {
                 Vector3 weaponPosition = __instance.transform.position;
