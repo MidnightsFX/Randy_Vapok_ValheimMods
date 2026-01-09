@@ -684,8 +684,6 @@ namespace EpicLoot.Magic
                             return "Polearms";
                         case Skills.SkillType.Pickaxes:
                             return "Pickaxes";
-                        case Skills.SkillType.Sneak:
-                            return "Torches";
                     }
                     break;
                 case ItemDrop.ItemData.ItemType.Shield:
@@ -757,42 +755,36 @@ namespace EpicLoot.Magic
             return "Unkown";
         }
 
-        public static string DetermineBossLevelForItem(ItemDrop.ItemData item)
-        {
-            if (item == null || ObjectDB.instance == null)
-            {
+        public static string DetermineBossLevelForItem(ItemDrop.ItemData item) {
+            if (item == null || ObjectDB.instance == null) {
                 return NONE;
             }
 
             Recipe itemRecipe = ObjectDB.instance.GetRecipe(item);
-            if (itemRecipe == null || itemRecipe.m_enabled == false || itemRecipe.m_resources == null)
-            {
+            if (itemRecipe == null || itemRecipe.m_enabled == false || itemRecipe.m_resources == null) {
                 return NONE;
             }
 
-            // This goes through the biome tiers in reverse order, starting from the highest tier
-            // and checking if the current item has materials from that biome
-            // if not it goes down a biome until it finds materials required to craft the item
-            // if an item does not require any materials or has no recipe, it should be listed in UncraftableItemsAlwaysAllowed
-            foreach (KeyValuePair<string, SortingData> sortdata in Config.BiomeSorterData.Reverse())
-            {
-                // TODO: Update this logic to use a more concrete biome order list
-                if (itemRecipe.m_craftingStation != null &&
-                    sortdata.Value.BiomeSpecificCraftingStations.Contains(itemRecipe.m_craftingStation.name))
-                {
-                    return sortdata.Value.BossKey;
-                }
+            // We need to completely evaluate each tier until we find a match, so that we only match the highest tier for the selected item.
 
-                foreach (Piece.Requirement req in itemRecipe.m_resources)
-                {
-                    if (req.m_resItem != null && sortdata.Value.BiomeMaterials.Contains(req.m_resItem.name))
-                    {
-                        return sortdata.Value.BossKey;
+            int tier = 0;
+            int currentMaterialReq = 0;
+            string highestRequirement = NONE;
+            foreach (Piece.Requirement req in itemRecipe.m_resources) {
+                // Walks through the materials required for an item and assigns the highest materials level
+                tier = 0;
+                foreach (KeyValuePair<string, SortingData> sortdata in Config.BiomeSorterData) {
+                    tier++;
+                    if (req.m_resItem != null && sortdata.Value.BiomeMaterials.Contains(req.m_resItem.name) || itemRecipe.m_craftingStation != null && sortdata.Value.BiomeSpecificCraftingStations.Contains(itemRecipe.m_craftingStation.name)) {
+                        if (tier > currentMaterialReq) {
+                            highestRequirement = sortdata.Value.BossKey;
+                            currentMaterialReq = tier;
+                        }
                     }
                 }
             }
-
-            return NONE;
+            EpicLoot.Log($"{item.m_shared.m_name} tier {currentMaterialReq} requires boss key: {highestRequirement}");
+            return highestRequirement;
         }
     }
 }
