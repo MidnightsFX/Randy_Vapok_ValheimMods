@@ -36,9 +36,9 @@ namespace EpicLoot.Crafting
             bool isUnidentified = item.IsUnidentified();
             ItemDrop.ItemData.ItemType type = item.m_shared.m_itemType;
             string name = item.m_shared.m_name;
-
             DisenchantProductsConfig configEntry = Config.DisenchantProducts.Find(x => {
-                if (x.IsMagic != (isMagic || isUnidentified))
+                // Magic item check doesn't apply for unidentified items, since they are considered magic
+                if (x.IsMagic != isMagic && isUnidentified == false)
                 {
                     return false;
                 }
