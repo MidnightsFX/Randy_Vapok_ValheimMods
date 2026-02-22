@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace EpicLoot.Crafting
 {
@@ -23,7 +24,9 @@ namespace EpicLoot.Crafting
     [Serializable]
     public class DisenchantProductsConfig
     {
+        [DefaultValue(false)]
         public bool IsUnidentified;
+        [DefaultValue(false)]
         public bool IsMagic;
         public ItemRarity Rarity;
         public List<string> ItemTypes = new List<string>();
