@@ -77,11 +77,20 @@ namespace EpicLoot
 
         [HarmonyPatch(typeof(UITooltip), nameof(UITooltip.OnHoverStart))]
         [HarmonyPostfix]
-        public static void Postfix()
+        public static void Postfix(GameObject go)
         {
             if (UITooltip.m_tooltip != null)
             {
-                AddScrollbar(UITooltip.m_tooltip, 700f, 350f, 185f, -370f);
+                // These pixel sizes need to be somewhat static to avoid the tooltip spasming, contents are generrated after this is built
+                // so any resizing will result in some user noticible spasming.
+                // The higher the height the more likely that someone will run into the tooltip bounding itself to stay on the screen
+                // ideally we do not want the tooltip to bound itself and have to cover the mouse.
+                RectTransform tooltipTfm = (RectTransform)go.transform;
+                float height = tooltipTfm.position.y - 100f; // 100f Bottom buffer
+                // Bound the height of the tooltip to avoid it getting excessively large or small
+                if (height > 900f) { height = 900f; }
+                if (height < 200f) { height = 200f; }
+                AddScrollbar(UITooltip.m_tooltip, height, 350f, 185f, -1f*((height/2f)+20f));
             }
         }
 
