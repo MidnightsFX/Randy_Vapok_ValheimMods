@@ -75,13 +75,24 @@ namespace EpicLoot
             }
         }
 
+        /// <summary>
+        /// Add a scrollbar to the Tooltip on hover start
+        /// with a set size to prevent sizing spasmings on screen.
+        /// </summary>
         [HarmonyPatch(typeof(UITooltip), nameof(UITooltip.OnHoverStart))]
         [HarmonyPostfix]
-        public static void Postfix()
+        public static void Postfix(GameObject go)
         {
             if (UITooltip.m_tooltip != null)
             {
-                AddScrollbar(UITooltip.m_tooltip, 700f, 350f, 185f, -370f);
+                RectTransform tooltipTfm = (RectTransform)go.transform;
+                float bottomBuffer = 100f;
+                float height = tooltipTfm.position.y - bottomBuffer;
+
+                Mathf.Clamp(height, 200f, 900f);
+                float y = -1f * ((height / 2f) + 20f);
+
+                AddScrollbar(UITooltip.m_tooltip, height, 350f, 185f, y);
             }
         }
 
