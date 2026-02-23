@@ -87,9 +87,9 @@ namespace EpicLoot.Patching
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"Unable to Get Patch Directory: {e.Message}");
-                var debugPath = GetPatchesDirectoryPath(true);
-                Debug.LogWarning($"Attempted path is [{debugPath}]");
+                EpicLoot.LogWarning($"Unable to Get Patch Directory: {e.Message}");
+                string debugPath = GetPatchesDirectoryPath(true);
+                EpicLoot.LogWarning($"Attempted path is [{debugPath}]");
                 return;
             }
 
@@ -97,20 +97,24 @@ namespace EpicLoot.Patching
             {
                 // If the folder does not exist, there are no patches
                 if (string.IsNullOrEmpty(PatchesDirPath))
+                {
                     return;
+                }
 
-                var patchesFolder = new DirectoryInfo(PatchesDirPath);
+                DirectoryInfo patchesFolder = new DirectoryInfo(PatchesDirPath);
                 if (!patchesFolder.Exists)
+                {
                     return;
+                }
 
                 ProcessPatchDirectory(patchesFolder);
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"Unable to Get Patch Directory: {e.Message}");
-                var debugPath = GetPatchesDirectoryPath(true);
-                Debug.LogWarning($"Attempted PatchesDirPath is [{PatchesDirPath}]");
-                Debug.LogWarning($"Attempted debugPath is [{debugPath}]");
+                EpicLoot.LogWarning($"Unable to Get Patch Directory: {e.Message}");
+                string debugPath = GetPatchesDirectoryPath(true);
+                EpicLoot.LogWarning($"Attempted PatchesDirPath is [{PatchesDirPath}]");
+                EpicLoot.LogWarning($"Attempted debugPath is [{debugPath}]");
             }
         }
 
@@ -128,14 +132,14 @@ namespace EpicLoot.Patching
 
             if (files != null)
             {
-                foreach (var file in files)
+                foreach (FileInfo file in files)
                 {
                     ProcessPatchFile(file);
                 }
             }
 
-            var subDirs = dir.GetDirectories();
-            foreach (var subDir in subDirs)
+            DirectoryInfo[] subDirs = dir.GetDirectories();
+            foreach (DirectoryInfo subDir in subDirs)
             {
                 ProcessPatchDirectory(subDir);
             }
@@ -143,9 +147,11 @@ namespace EpicLoot.Patching
 
         public static List<string> ProcessPatchFile(FileInfo file)
         {
-            var defaultTargetFile = "";
+            string defaultTargetFile = "";
             if (ConfigFileNames.Contains(file.Name))
+            {
                 defaultTargetFile = file.Name;
+            }
 
             PatchFile patchFile = null;
             try
@@ -164,7 +170,7 @@ namespace EpicLoot.Patching
                 return null;
             }
 
-            if (!string.IsNullOrEmpty(patchFile.TargetFile) && !string.IsNullOrEmpty(defaultTargetFile) && 
+            if (!string.IsNullOrEmpty(patchFile.TargetFile) && !string.IsNullOrEmpty(defaultTargetFile) &&
                 patchFile.TargetFile != defaultTargetFile)
             {
                 EpicLoot.LogWarningForce($"TargetFile ({patchFile.TargetFile}) specified in patch file ({file.Name}) " +
@@ -172,7 +178,9 @@ namespace EpicLoot.Patching
             }
 
             if (!string.IsNullOrEmpty(patchFile.TargetFile))
-                defaultTargetFile = patchFile.TargetFile.Replace(".json","");
+            {
+                defaultTargetFile = patchFile.TargetFile.Replace(".json", "");
+            }
 
             if (!string.IsNullOrEmpty(defaultTargetFile) && !ConfigFileNames.Contains(defaultTargetFile))
             {
@@ -181,21 +189,24 @@ namespace EpicLoot.Patching
                 return null;
             }
 
-            var requiresSpecifiedSourceFile = string.IsNullOrEmpty(defaultTargetFile);
+            bool requiresSpecifiedSourceFile = string.IsNullOrEmpty(defaultTargetFile);
 
-            var author = string.IsNullOrEmpty(patchFile.Author) ? "<author>" : patchFile.Author;
-            var requireAll = patchFile.RequireAll;
-            var defaultPriority = patchFile.Priority;
-            List<string> files_with_new_patches = new List<string>();
+            string author = string.IsNullOrEmpty(patchFile.Author) ? "<author>" : patchFile.Author;
+            bool requireAll = patchFile.RequireAll;
+            int defaultPriority = patchFile.Priority;
+            List<string> filesWithNewPatches = new List<string>();
 
-            foreach(var patch in patchFile.Patches)
+            foreach (Patch patch in patchFile.Patches)
             {
                 EpicLoot.Log($"Patch: ({file.Name})\n  > Action: {patch.Action}\n  > " +
                     $"Path: {patch.Path}\n  > Value: {patch.Value}");
 
                 patch.Require = requireAll || patch.Require;
                 if (string.IsNullOrEmpty(patch.Author))
+                {
                     patch.Author = author;
+                }
+
                 if (string.IsNullOrEmpty(patch.TargetFile))
                 {
                     if (requiresSpecifiedSourceFile)
@@ -213,51 +224,56 @@ namespace EpicLoot.Patching
                         $"has unknown specified source file ({patch.TargetFile})!");
                     continue;
                 }
-                
+
                 if (patch.Priority < 0)
+                {
                     patch.Priority = defaultPriority;
+                }
 
                 patch.SourceFile = file.Name;
                 EpicLoot.Log($"Adding Patch from {patch.SourceFile} to file {patch.TargetFile} with {patch.Path}");
                 PatchesPerFile.Add(patch.TargetFile, patch);
                 // each patch section can add a different file, but we only need to actually refresh the file once.
-                if (files_with_new_patches.Contains(patch.TargetFile) == false)
+                if (filesWithNewPatches.Contains(patch.TargetFile) == false)
                 {
-                    files_with_new_patches.Add(patch.TargetFile);
+                    filesWithNewPatches.Add(patch.TargetFile);
                 }
             }
-            return files_with_new_patches;
+
+            return filesWithNewPatches;
         }
 
         public static string GetPatchesDirectoryPath(bool debug = false)
         {
-            var patchesFolderPath = Path.Combine(Paths.ConfigPath, "EpicLoot", "patches");
+            string patchesFolderPath = Path.Combine(Paths.ConfigPath, "EpicLoot", "patches");
             
             if (debug)
+            {
                 return patchesFolderPath;
-            
-            var dirInfo = Directory.CreateDirectory(patchesFolderPath);
+            }
+
+            DirectoryInfo dirInfo = Directory.CreateDirectory(patchesFolderPath);
 
             return dirInfo.FullName;
         }
 
         public static string BuildPatchedConfig(string targetFile, JObject sourceJson)
         {
-            var patches = PatchesPerFile.GetValues(targetFile, true).OrderByDescending(x => x.Priority).ToList();
+            List<Patch> patches = PatchesPerFile.GetValues(targetFile, true).OrderByDescending(x => x.Priority).ToList();
 
-            foreach (var patch in patches)
+            foreach (Patch patch in patches)
             {
                 ApplyPatch(sourceJson, patch);
             }
 
-            var output = sourceJson.ToString(Formatting.Indented);
+            string output = sourceJson.ToString(Formatting.Indented);
             return output;
         }
 
         // This is only called on startup, and will modify all base classes that have patches loaded locally
         public static void ApplyAllPatches()
         {
-            foreach (var entry in PatchesPerFile)
+            foreach (KeyValuePair<string, List<Patch>> entry in PatchesPerFile)
             {
                 LoadPatchedJSON(entry.Key);
             }
@@ -265,7 +281,6 @@ namespace EpicLoot.Patching
 
         internal static void LoadPatchedJSON(string filename, bool firstrun = false)
         {
-            //var base_json_string = JObject.Parse(EpicLoot.ReadEmbeddedResourceFile("EpicLoot.config." + filename));
             // If the overhaul config is present, use that as the definition- otherwise fall back to the embedded config
             // Also fall back if the overhaul configuration is invalid, and note with a warning that this happened.
             string baseCfgFile = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), $"{filename}.json");
@@ -299,7 +314,7 @@ namespace EpicLoot.Patching
 
         public static void ApplyPatch(JObject json, Patch patch)
         {
-            var selectedTokens = json.SelectTokens(patch.Path).ToList();
+            List<JToken> selectedTokens = json.SelectTokens(patch.Path).ToList();
             // Removals that have already happened are allowed to re-run without warnings, since they are no-ops
             if (patch.Require && selectedTokens.Count == 0 && patch.Action != PatchAction.Remove)
             {
@@ -308,7 +323,7 @@ namespace EpicLoot.Patching
                 return;
             }
 
-            foreach (var token in selectedTokens)
+            foreach (JToken token in selectedTokens)
             {
                 switch (patch.Action)
                 {
@@ -337,7 +352,7 @@ namespace EpicLoot.Patching
             }
 
             int index = 0;
-            foreach (var item in patch.MultiPropertyName)
+            foreach (string item in patch.MultiPropertyName)
             {
                 Patch_Add(token, item, patch.Value);
                 index ++;
@@ -352,6 +367,7 @@ namespace EpicLoot.Patching
                     $"but has not supplied a json Value! This patch will be ignored!");
                 return;
             }
+
             if (string.IsNullOrEmpty(patch.PropertyName))
             {
                 EpicLoot.LogErrorForce($"Patch ({patch.SourceFile}, {patch.Path}) has action 'Add' " +
@@ -372,12 +388,15 @@ namespace EpicLoot.Patching
 
         internal static void Patch_Add(JToken token, string property, JToken value)
         {
-            var jObject = ((JObject)token);
-            if (jObject.ContainsKey(property) && jObject.Property(property) is JProperty jProperty) {
-                EpicLoot.LogWarningForce($"Patch has action 'Add' but a property with the name ({property}) already exists! " +
+            JObject jObject = (JObject)token;
+            if (jObject.ContainsKey(property) && jObject.Property(property) is JProperty jProperty)
+            {
+                EpicLoot.LogWarning($"Patch has action 'Add' but a property with the name ({property}) already exists! " +
                     $"The property's value will be overwritten");
                 jProperty.Value = value;
-            } else {
+            }
+            else
+            {
                 jObject.Add(property, value);
             }
         }
@@ -410,8 +429,8 @@ namespace EpicLoot.Patching
         {
             if (patch.Value != null)
             {
-                EpicLoot.LogWarningForce($"Patch ({patch.SourceFile}, {patch.Path}) has action 'Remove' " +
-                    $"but has supplied a json Value. (This patch will still be processed)");
+                EpicLoot.LogWarning($"Patch ({patch.SourceFile}, {patch.Path}) has action 'Remove' " +
+                    $"but has supplied an unnecessary json Value. (This patch will still be processed)");
             }
 
             token.Remove();
@@ -419,7 +438,7 @@ namespace EpicLoot.Patching
 
         public static void ApplyPatch_Append(JToken token, Patch patch, bool appendAll = false)
         {
-            var actionName = appendAll ? "AppendAll" : "Append";
+            string actionName = appendAll ? "AppendAll" : "Append";
 
             if (patch.Value == null)
             {
@@ -434,7 +453,7 @@ namespace EpicLoot.Patching
                 {
                     if (patch.Value.Type == JTokenType.Array)
                     {
-                        var mergeSettings = new JsonMergeSettings
+                        JsonMergeSettings mergeSettings = new JsonMergeSettings
                         {
                             // Do not create duplicates when appending arrays
                             MergeArrayHandling = MergeArrayHandling.Union,
@@ -463,7 +482,7 @@ namespace EpicLoot.Patching
 
         public static void ApplyPatch_Insert(JToken token, Patch patch, bool after)
         {
-            var actionName = $"Insert{(after ? "After" : "Before")}";
+            string actionName = $"Insert{(after ? "After" : "Before")}";
             if (patch.Value == null)
             {
                 EpicLoot.LogErrorForce($"Patch ({patch.SourceFile}, {patch.Path}) has action '{actionName}' " +
@@ -471,7 +490,7 @@ namespace EpicLoot.Patching
                 return;
             }
 
-            var parent = token.Parent;
+            JContainer parent = token.Parent;
             if (parent == null)
             {
                 EpicLoot.LogErrorForce($"Patch ({patch.SourceFile}, {patch.Path}) has action '{actionName}' " +
@@ -482,9 +501,13 @@ namespace EpicLoot.Patching
             if (parent.Type == JTokenType.Array)
             {
                 if (after)
+                {
                     token.AddAfterSelf(patch.Value);
+                }
                 else
+                {
                     token.AddBeforeSelf(patch.Value);
+                }
             }
             else if (parent.Type == JTokenType.Object)
             {
@@ -511,7 +534,7 @@ namespace EpicLoot.Patching
             const string actionName = "RemoveAll";
             if (patch.Value != null)
             {
-                EpicLoot.LogWarningForce($"Patch ({patch.SourceFile}, {patch.Path}) has action '{actionName}' " +
+                EpicLoot.LogWarning($"Patch ({patch.SourceFile}, {patch.Path}) has action '{actionName}' " +
                     $"but has supplied a json Value! (This patch will still be processed)");
             }
 
@@ -552,9 +575,9 @@ namespace EpicLoot.Patching
                     $"but has selected a token that is not a json Object! This patch will be ignored!");
                 return;
             }
-            
-            var baseObject = ((JObject)token);
-            var partialObject = ((JObject)patch.Value);
+
+            JObject baseObject = ((JObject)token);
+            JObject partialObject = ((JObject)patch.Value);
 
             MergeObject(baseObject, partialObject);
         }

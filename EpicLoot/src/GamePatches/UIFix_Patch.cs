@@ -88,14 +88,19 @@ namespace EpicLoot
                 RectTransform tooltipTfm = (RectTransform)go.transform;
                 float height = 700f;
                 float xoffset = 185f;
-                if (tooltipTfm.position.x > (Screen.width - 400f)) {
+
+                if (tooltipTfm.position.x > (Screen.width - 400f))
+                {
                     xoffset = -185;
                 }
+
                 // There is not enough room for the tooltip, it should be flipped to above the pointer
                 float yoffset = -1f * Mathf.Abs((height / 2f) + 20f);
-                if ((tooltipTfm.position.y - 100f) <= -height) {
+                if ((tooltipTfm.position.y - 100f) <= -height)
+                {
                     yoffset -= Mathf.Abs(height);
                 }
+
                 AddScrollbar(UITooltip.m_tooltip, height, 350f, xoffset, yoffset);
             }
         }
@@ -137,10 +142,12 @@ namespace EpicLoot
             if (bkgtform != null)
             {
                 Image backgroundImage = bkgtform.GetComponent<Image>();
+                backgroundImage.raycastTarget = false;
                 Image contentbkgImage = contentt.gameObject.AddComponent<Image>();
                 contentbkgImage.color = backgroundImage.color;
                 contentbkgImage.sprite = backgroundImage.sprite;
                 contentbkgImage.type = backgroundImage.type;
+                contentbkgImage.raycastTarget = false;
                 // Remove the header background as it is no longer needed
                 GameObject.Destroy(bkgtform.gameObject);
             }
@@ -169,14 +176,19 @@ namespace EpicLoot
     /// The following class is largely taken from Azumatt's Tooltip Expansion mod:
     /// https://github.com/AzumattDev/TooltipExpansion/blob/main/CodeNShit/Monos/TooltipSizeAdjuster.cs
     /// </summary>
-    public class ScrollWheelHandler : MonoBehaviour {
+    public class ScrollWheelHandler : MonoBehaviour
+    {
         private ScrollRect _scrollRect = null;
 
-        public void Awake() {
+        public void Awake()
+        {
             _scrollRect = GetComponent<ScrollRect>();
-            if (_scrollRect == null) {
+            if (_scrollRect == null)
+            {
                 EpicLoot.LogWarning("ScrollWheelHandler: No ScrollRect found on " + gameObject.name);
-            } else {
+            }
+            else
+            {
                 _scrollRect.verticalNormalizedPosition = 1f;
             }
         }
@@ -185,11 +197,17 @@ namespace EpicLoot
         {
             // Only process if this object is active.
             if (!gameObject.activeInHierarchy || _scrollRect == null)
+            {
                 return;
+            }
 
             // Get scroll wheel input regardless of pointer location.
             float scrollDelta = Input.GetAxis("Mouse ScrollWheel");
-            if (!(Mathf.Abs(scrollDelta) > float.Epsilon)) return;
+            if (!(Mathf.Abs(scrollDelta) > float.Epsilon))
+            {
+                return;
+            }
+
             // Adjust the vertical scroll position.
             float newScrollPosition = _scrollRect.verticalNormalizedPosition + scrollDelta * 0.7f;
             _scrollRect.verticalNormalizedPosition = Mathf.Clamp01(newScrollPosition);

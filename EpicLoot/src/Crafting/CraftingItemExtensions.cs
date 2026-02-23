@@ -19,7 +19,7 @@ namespace EpicLoot.Crafting
                 item.m_shared.m_ammoType.EndsWith(magicMat);
         }
 
-        public static bool IsUnidentified(this ItemDrop.ItemData item)
+        public static bool IsUnidentifiedMaterial(this ItemDrop.ItemData item)
         {
             if (item.m_shared == null)
             {

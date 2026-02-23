@@ -12,7 +12,7 @@ namespace EpicLoot.Crafting
         {
             bool isMagic = __instance.m_itemData.IsMagicCraftingMaterial();
             bool isRunestone = __instance.m_itemData.IsRunestone();
-            bool isUnidentified = __instance.m_itemData.IsUnidentified();
+            bool isUnidentified = __instance.m_itemData.IsUnidentifiedMaterial();
 
             if (isMagic || isRunestone || isUnidentified)
             {
