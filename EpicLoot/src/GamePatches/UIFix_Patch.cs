@@ -86,11 +86,20 @@ namespace EpicLoot
                 // The higher the height the more likely that someone will run into the tooltip bounding itself to stay on the screen
                 // ideally we do not want the tooltip to bound itself and have to cover the mouse.
                 RectTransform tooltipTfm = (RectTransform)go.transform;
-                float height = tooltipTfm.position.y - 100f; // 100f Bottom buffer
+                float height = 700f;
+                float xoffset = 185f;
+                if (tooltipTfm.position.x > (Screen.width - 400f)) {
+                    xoffset = -185;
+                }
                 // Bound the height of the tooltip to avoid it getting excessively large or small
-                if (height > 900f) { height = 900f; }
-                if (height < 200f) { height = 200f; }
-                AddScrollbar(UITooltip.m_tooltip, height, 350f, 185f, -1f*((height/2f)+20f));
+                //if (height > 900f) { height = 900f; }
+                //if (height < 300f) { height = 300f; }
+                // There is not enough room for the tooltip, it should be flipped to above the pointer
+                float yoffset = -1f * Mathf.Abs((height / 2f) + 20f);
+                if ((tooltipTfm.position.y - 100f) <= -height) {
+                    yoffset -= Mathf.Abs(height);
+                }
+                AddScrollbar(UITooltip.m_tooltip, height, 350f, xoffset, yoffset);
             }
         }
 
