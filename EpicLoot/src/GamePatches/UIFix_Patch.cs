@@ -75,25 +75,22 @@ namespace EpicLoot
             }
         }
 
+        /// <summary>
+        /// Add a scrollbar to the Tooltip on hover start
+        /// with a set size to prevent sizing spasmings on screen.
+        /// </summary>
         [HarmonyPatch(typeof(UITooltip), nameof(UITooltip.OnHoverStart))]
         [HarmonyPostfix]
         public static void Postfix(GameObject go)
         {
             if (UITooltip.m_tooltip != null)
             {
-                // These pixel sizes need to be somewhat static to avoid the tooltip spasming, contents are generrated after this is built
-                // so any resizing will result in some user noticible spasming.
-                // The higher the height the more likely that someone will run into the tooltip bounding itself to stay on the screen
-                // ideally we do not want the tooltip to bound itself and have to cover the mouse.
                 RectTransform tooltipTfm = (RectTransform)go.transform;
                 float height = 700f;
                 float xoffset = 185f;
                 if (tooltipTfm.position.x > (Screen.width - 400f)) {
                     xoffset = -185;
                 }
-                // Bound the height of the tooltip to avoid it getting excessively large or small
-                //if (height > 900f) { height = 900f; }
-                //if (height < 300f) { height = 300f; }
                 // There is not enough room for the tooltip, it should be flipped to above the pointer
                 float yoffset = -1f * Mathf.Abs((height / 2f) + 20f);
                 if ((tooltipTfm.position.y - 100f) <= -height) {
