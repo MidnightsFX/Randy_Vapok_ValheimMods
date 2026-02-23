@@ -1,3 +1,11 @@
+## Version 0.12.11
+
+* NEW FEATURE: map pins from bounties and treasure maps can now be toggled in the minimap UI in the bottom left corner! Thanks Rusty!
+* Reduced visibility of patch warnings for adding and removing existing entries, these warnings will no longer be forced and should keep the log file cleaner by default. They will appear if your log settings are set to show Warning and Error.
+* Tweaked descriptions of some base configurations in the epicloot.cfg file to be more clear.
+* UI tooltip compatibility fix when using the VENI mod.
+* Bug fix for sacrificing unidentified items not using the correct configuration because the default value for "isMagic" and "IsUnidentified" was true if not explicitly set. Existing baseconfig "enchantcosts.json" file may still have the issue, you may need to regenerate it to see the update depending on your game patches and settings.
+
 ## Version 0.12.10
 
 * Fixed an issue with enchanting table identifying unknown magic items changing the stack size of the original item (coins and other costs).
