@@ -13,6 +13,14 @@ public static class PlayerExtensions
         return items;
     }
 
+    /// <summary>
+    /// DEPRECATED, DO NOT USE
+    /// </summary>
+    public static List<ItemDrop.ItemData> GetEquipment(this Player player)
+    {
+        return player.GetMagicEquipment();
+    }
+
     public static List<MagicItemEffect> GetAllActiveMagicEffects(this Player player, string effectType = null)
     {
         IEnumerable<MagicItemEffect> equipEffects = player.GetMagicEquipment()

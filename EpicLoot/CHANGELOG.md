@@ -1,3 +1,8 @@
+## Version 0.12.13
+
+* Added back PlayerExtensions.GetEquipment for mods that patch that method.
+  * If you are a mod author please remove your patches to this method! We refactored it to use vanilla methods in version 12.7.
+
 ## Version 0.12.12
 
 * Bug fix for Mead Cooldown reducing all SE_Stats mead times, should now work as intended.
