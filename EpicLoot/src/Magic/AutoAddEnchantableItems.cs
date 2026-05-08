@@ -2,7 +2,6 @@
 using EpicLoot.Config;
 using EpicLoot.Crafting;
 using EpicLoot.GatedItemType;
-using Jotunn.Managers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -51,7 +50,8 @@ namespace EpicLoot.Magic
         {
             if (deregister)
             {
-                MinimapManager.OnVanillaMapDataLoaded -= () => AutoAddEnchantableItems.CheckAndAddAllEnchantableItems();
+                Jotunn.Managers.MinimapManager.OnVanillaMapDataLoaded -=
+                    () => AutoAddEnchantableItems.CheckAndAddAllEnchantableItems();
             }
 
             if (ELConfig.AutoAddEquipment.Value == false && ELConfig.AutoRemoveEquipmentNotFound.Value == false)
@@ -179,7 +179,7 @@ namespace EpicLoot.Magic
                 EpicLoot.Log($"Checking LootSet entry: {lis.Name}");
                 foreach (LootDrop loot in lis.Loot)
                 {
-                    if (validItems.Contains(loot.Item) || metaItemSetNames.Contains(loot.Item) || magicMats.Contains(loot.Item))
+                    if (Jotunn.Managers.PrefabManager.Instance.GetPrefab(loot.Item) != null)
                     {
                         entries.Add(loot);
                         addedItems.Add(loot.Item);
@@ -290,7 +290,7 @@ namespace EpicLoot.Magic
 
         private static void AddRemoveItemsFromVendor(List<ItemTypeInfo> newConfig)
         {
-            if (!ELConfig.AutoAddRemoveEquipmentFromVendor.Value)
+            if (ELConfig.AutoAddRemoveEquipmentFromVendor.Value == false)
             {
                 return;
             }
@@ -321,15 +321,18 @@ namespace EpicLoot.Magic
                         if (existingVendorItems.ContainsKey(itemName))
                         {
                             // Found this entry
+                            EpicLoot.Log($"Found existing vendor entry for {itemName} - price {existingVendorItems[itemName].CoinsCost}, keeping it in the list.");
                             foundItemEntry.Add(itemName);
                         }
                         else
                         {
+                            foundItemEntry.Add(itemName);
                             existingVendorItems.Add(itemName, new SecretStashItemConfig()
                             {
                                 Item = itemName,
                                 CoinsCost = DetermineCoinsCostForItem(bossEntry.Key)
                             });
+                            EpicLoot.Log($"Adding new vendor entry for {itemName} with price {existingVendorItems[itemName].CoinsCost}.");
                         }
                     }
                 }
