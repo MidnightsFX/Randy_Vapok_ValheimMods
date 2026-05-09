@@ -179,7 +179,10 @@ namespace EpicLoot.Magic
                 EpicLoot.Log($"Checking LootSet entry: {lis.Name}");
                 foreach (LootDrop loot in lis.Loot)
                 {
-                    if (Jotunn.Managers.PrefabManager.Instance.GetPrefab(loot.Item) != null)
+                    if (validItems.Contains(loot.Item) ||
+                        metaItemSetNames.Contains(loot.Item) ||
+                        magicMats.Contains(loot.Item) ||
+                        ObjectDB.instance.GetItemPrefab(loot.Item) != null)
                     {
                         entries.Add(loot);
                         addedItems.Add(loot.Item);

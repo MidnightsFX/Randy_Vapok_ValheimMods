@@ -1,3 +1,8 @@
+## Version 0.12.14
+
+* Fixed an issue with auto-adding loot tables causing mobs to not drop loot.
+* All items from the game can now be added to loot tables from patches and work with the "Auto Add ..." configuration settings.
+
 ## Version 0.12.13
 
 * Added back PlayerExtensions.GetEquipment for mods that patch that method.
