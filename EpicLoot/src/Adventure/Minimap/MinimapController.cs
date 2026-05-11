@@ -127,7 +127,6 @@ public class MinimapController : MonoBehaviour
     /// </summary>
     public static void RefreshAdventureToggleContainer()
     {
-        EpicLoot.Log("Refreshing toggle container!");
         if (_adventureToggleContainer == null)
         {
             EpicLoot.LogError("There was an issue setting adventure data for the minimap, toggle container is null!");
@@ -176,7 +175,6 @@ public class MinimapController : MonoBehaviour
     {
         if (ShowAdventureToggleContainer() && show)
         {
-            EpicLoot.Log("Refreshing bounty pins on!");
             AdventureSaveData adventureSaveData = Player.m_localPlayer.GetAdventureSaveData();
             if (adventureSaveData == null) return;
             List<BountyInfo> currentBounties = adventureSaveData.GetInProgressBounties();
@@ -206,7 +204,6 @@ public class MinimapController : MonoBehaviour
         }
         else
         {
-            EpicLoot.Log("Refreshing bounty pins off!");
             foreach (KeyValuePair<string, AreaPinInfo> pinEntry in BountyPins)
             {
                 PinJob pinJob = new PinJob()
@@ -238,7 +235,6 @@ public class MinimapController : MonoBehaviour
 
         if (ShowAdventureToggleContainer() && show)
         {
-            EpicLoot.Log("Refreshing treasure pins on!");
             AdventureSaveData adventureSaveData = Player.m_localPlayer.GetAdventureSaveData();
             if (adventureSaveData == null)
             {
@@ -274,7 +270,6 @@ public class MinimapController : MonoBehaviour
         }
         else
         {
-            EpicLoot.Log("Refreshing treasure pins off!");
             foreach (KeyValuePair<Tuple<int, Heightmap.Biome>, AreaPinInfo> pinEntry in TreasureMapPins)
             {
                 PinJob pinJob = new PinJob()
@@ -383,8 +378,6 @@ public class MinimapController : MonoBehaviour
 
     private void RefreshPins()
     {
-        EpicLoot.Log("Refreshing pins!");
-
         ToggleBounties(ShowAdventureBountyPins());
         ToggleTreasureMaps(ShowAdventureTreasurePins());
     }
