@@ -99,6 +99,9 @@
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>$(GamePathManaged)UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule">
+      <HintPath>$(GamePathManaged)UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.TextCoreTextEngineModule">
       <HintPath>$(GamePathManaged)UnityEngine.TextCoreTextEngineModule.dll</HintPath>
     </Reference>

@@ -1,5 +1,6 @@
 ﻿using EpicLoot.LegendarySystem;
 using EpicLoot.MagicItemEffects;
+using EpicLoot.ShardStones;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,10 +34,34 @@ namespace EpicLoot
         }
     }
 
+    // A single effect socketed into an item via a Runestone or Shard.
+    // Stores enough to apply the effect and to reconstruct the original
+    // socketed item (Runestone/Shard) when it is removed from the socket.
+    [Serializable]
+    public class SocketedEffect
+    {
+        public int Version = 2;
+        public MagicItemEffect Effect;  // null for an inert shard (no effect for the host item type)
+        public string SourcePrefab;     // e.g. "EtchedRunestoneEpic" / "Yellow_Epic_ShardStone"
+        public ItemRarity SourceRarity; // for tooltip range + reconstruction
+        public ShardColor ShardColor = ShardColor.None; // set for shard sockets; None for runestones
+
+        public SocketedEffect()
+        {
+        }
+
+        public SocketedEffect(MagicItemEffect effect, string sourcePrefab, ItemRarity sourceRarity)
+        {
+            Effect = effect;
+            SourcePrefab = sourcePrefab;
+            SourceRarity = sourceRarity;
+        }
+    }
+
     [Serializable]
     public class MagicItem
     {
-        public int Version = 2;
+        public int Version = 3;
         public ItemRarity Rarity;
         public List<MagicItemEffect> Effects = new List<MagicItemEffect>();
         public string TypeNameOverride;
@@ -46,6 +71,9 @@ namespace EpicLoot
         public string LegendaryID;
         public string SetID;
         public bool IsUnidentified = false;
+        public int SocketCount = 0;
+        public ShardColor ShardColor = ShardColor.None;
+        public List<SocketedEffect> Sockets = new List<SocketedEffect>();
 
         public string GetItemTypeName(ItemDrop.ItemData baseItem)
         {
@@ -74,7 +102,35 @@ namespace EpicLoot
             }
 
             tooltip.Append($"</color>");
-            
+
+            if (SocketCount > 0)
+            {
+                tooltip.AppendLine($"$mod_epicloot_sockets ({GetUsedSocketCount()}/{SocketCount}):");
+                foreach (var socket in Sockets)
+                {
+                    if (socket == null)
+                    {
+                        continue;
+                    }
+                    var socketColor = EpicLoot.GetRarityColor(socket.SourceRarity);
+                    // Inline the socketed item's own icon, resolved from its source prefab
+                    var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab);
+                    if (socket.Effect != null)
+                    {
+                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, showRange)}</color>");
+                    }
+                    else if (socket.ShardColor != ShardColor.None)
+                    {
+                        // An inert shard: socketed but has no defined effect for this item type.
+                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} $mod_epicloot_shard_noeffect</color>");
+                    }
+                }
+                for (var i = 0; i < GetOpenSocketCount(); i++)
+                {
+                    tooltip.AppendLine("  <color=#808080> $mod_epicloot_empty_socket</color>");
+                }
+            }
+
             tooltip.AppendLine($"$mod_epicloot_itemtooltip_rarity: {GetRarityDisplay()}<pos=75%>" +
                 $"$mod_epicloot_itemtooltip_effects: <color={color}>{Effects.Count}</color>");
 
@@ -102,25 +158,55 @@ namespace EpicLoot
             return Color.white;
         }
 
+        public ShardColor GetShardColor()
+        {
+            return ShardColor;
+        }
+
         public string GetColorString()
         {
             return EpicLoot.GetRarityColor(Rarity);
         }
 
-        public List<MagicItemEffect> GetEffects(string effectType = null)
+        // Socket helpers
+        public int GetUsedSocketCount() => Sockets.Count;
+        public int GetOpenSocketCount() => Mathf.Max(0, SocketCount - Sockets.Count);
+        public bool HasSockets() => SocketCount > 0;
+        public bool HasOpenSocket() => GetOpenSocketCount() > 0;
+        public IEnumerable<MagicItemEffect> GetSocketedEffects() => Sockets.Where(x => x?.Effect != null).Select(x => x.Effect);
+
+        // includeSocketed defaults to false so all crafting/bookkeeping reads (loot roll, augment,
+        // rune-extract, disenchant, requirements/exclusivity, names) stay rolled-only. Effect
+        // application and tooltip reads pass includeSocketed: true.
+        public List<MagicItemEffect> GetEffects(string effectType = null, bool includeSocketed = false)
         {
-            return effectType == null ? Effects.ToList() : Effects.Where(x => x.EffectType == effectType).ToList();
+            IEnumerable<MagicItemEffect> source = Effects;
+            if (includeSocketed && Sockets.Count > 0)
+            {
+                source = source.Concat(GetSocketedEffects());
+            }
+            return effectType == null ? source.ToList() : source.Where(x => x.EffectType == effectType).ToList();
         }
 
-        public float GetTotalEffectValue(string effectType, float scale = 1.0f)
+        // includeSocketed defaults to true here: GetTotalEffectValue is only called from effect
+        // application (per-item patches) and tooltip display, never from crafting/bookkeeping, so
+        // socketed effects should always count toward the aggregate value.
+        public float GetTotalEffectValue(string effectType, float scale = 1.0f, bool includeSocketed = true)
         {
-            return GetEffects(effectType).Sum(x => x.EffectValue) * scale;
+            return GetEffects(effectType, includeSocketed).Sum(x => x.EffectValue) * scale;
         }
 
-        public bool HasEffect(string effectType, bool checkHealthCritical = false)
+        public bool HasEffect(string effectType, bool checkHealthCritical = false, bool includeSocketed = false)
         {
-            return Effects.Exists(x => x.EffectType == effectType) ||
-                (checkHealthCritical && Effects.Exists(x => x.EffectType == (ModifyWithLowHealth.EffectNameWithLowHealth(effectType))));
+            if (Effects.Exists(x => x.EffectType == effectType))
+            {
+                return true;
+            }
+            if (includeSocketed && Sockets.Exists(x => x?.Effect != null && x.Effect.EffectType == effectType))
+            {
+                return true;
+            }
+            return checkHealthCritical && HasEffect(ModifyWithLowHealth.EffectNameWithLowHealth(effectType), false, includeSocketed);
         }
 
         public bool HasAnyEffect(IEnumerable<string> effectTypes)

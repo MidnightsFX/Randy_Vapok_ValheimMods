@@ -83,9 +83,11 @@ public static class ItemDataExtensions
         return ColorUtility.TryParseHtmlString(colorString, out Color color) ? color : Color.white;
     }
 
-    public static bool HasMagicEffect(this ItemDrop.ItemData itemData, string effectType)
+    // includeSocketed defaults to true: this extension is used by effect-application patches to gate
+    // behavior, so socketed effects should count. The only crafting caller (CheckRequirements) passes false.
+    public static bool HasMagicEffect(this ItemDrop.ItemData itemData, string effectType, bool includeSocketed = true)
     {
-        return itemData.GetMagicItem()?.HasEffect(effectType) ?? false;
+        return itemData.GetMagicItem()?.HasEffect(effectType, includeSocketed: includeSocketed) ?? false;
     }
 
     public static void CreateMagicItem(this ItemDrop.ItemData itemData)

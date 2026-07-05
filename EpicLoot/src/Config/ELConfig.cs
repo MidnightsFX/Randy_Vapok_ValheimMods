@@ -58,6 +58,13 @@ internal class ELConfig
     public static ConfigEntry<TextAnchor> AbilityBarLayoutAlignment;
     public static ConfigEntry<float> AbilityBarIconSpacing;
     public static ConfigEntry<float> SetItemDropChance;
+    public static ConfigEntry<int> SocketCapMagic;
+    public static ConfigEntry<int> SocketCapRare;
+    public static ConfigEntry<int> SocketCapEpic;
+    public static ConfigEntry<int> SocketCapLegendary;
+    public static ConfigEntry<int> SocketCapMythic;
+    public static ConfigEntry<bool> SocketCountIsAlwaysCap;
+    public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
     public static ConfigEntry<float> GlobalDropRateModifier;
     public static ConfigEntry<float> ItemsToMaterialsDropRatio;
     public static ConfigEntry<bool> AlwaysShowWelcomeMessage;
@@ -306,6 +313,26 @@ internal class ELConfig
             "or identified as a set item from the legendaries configuration file.\n" +
             "Min = 0, Max = 1",
             new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
+        SocketCapMagic = BindServerConfig("Sockets", "Socket Cap Magic", 0,
+            "The maximum number of shard sockets a Magic item can roll.",
+            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
+        SocketCapRare = BindServerConfig("Sockets", "Socket Cap Rare", 0,
+            "The maximum number of shard sockets a Rare item can roll.",
+            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
+        SocketCapEpic = BindServerConfig("Sockets", "Socket Cap Epic", 1,
+            "The maximum number of shard sockets an Epic item can roll.",
+            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
+        SocketCapLegendary = BindServerConfig("Sockets", "Socket Cap Legendary", 2,
+            "The maximum number of shard sockets a Legendary item can roll.",
+            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
+        SocketCapMythic = BindServerConfig("Sockets", "Socket Cap Mythic", 3,
+            "The maximum number of shard sockets a Mythic item can roll.",
+            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
+        SocketCountIsAlwaysCap = BindServerConfig("Sockets", "Socket Count Always Equals Cap", false,
+            "When true, items always roll the maximum number of sockets for their rarity. " +
+            "When false, the socket count is randomly rolled between 0 and the cap.");
+        AllowDuplicateSocketedEffects = BindServerConfig("Sockets", "Allow Duplicate Socketed Effects", false,
+            "When false, an effect that is already socketed on an item cannot be socketed again.");
         GlobalDropRateModifier = BindServerConfig("Balance", "Global Drop Rate Modifier", 1.0f,
             "A global percentage that modifies how likely loot is to drop.\n" +
             "1 = Exactly what is in the loot tables will drop.\n" +
@@ -426,6 +453,19 @@ internal class ELConfig
             RecipesHelper.Initialize(RecipesHelper.Config);
         }
         ItemManager.OnItemsRegistered -= InitializeRecipeOnReady;
+    }
+
+    public static int GetSocketCap(ItemRarity rarity)
+    {
+        switch (rarity)
+        {
+            case ItemRarity.Magic: return SocketCapMagic.Value;
+            case ItemRarity.Rare: return SocketCapRare.Value;
+            case ItemRarity.Epic: return SocketCapEpic.Value;
+            case ItemRarity.Legendary: return SocketCapLegendary.Value;
+            case ItemRarity.Mythic: return SocketCapMythic.Value;
+            default: return 0;
+        }
     }
 
     public static string GetLocalizationDirectoryPath()

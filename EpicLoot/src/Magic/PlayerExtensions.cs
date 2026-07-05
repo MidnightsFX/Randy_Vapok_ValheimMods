@@ -25,7 +25,7 @@ public static class PlayerExtensions
     {
         IEnumerable<MagicItemEffect> equipEffects = player.GetMagicEquipment()
             .Where(x => x.IsMagic())
-            .SelectMany(x => x.GetMagicItem().GetEffects(effectType));
+            .SelectMany(x => x.GetMagicItem().GetEffects(effectType, includeSocketed: true));
         List<MagicItemEffect> setEffects = player.GetAllActiveSetMagicEffects(effectType);
         return equipEffects.Concat(setEffects).ToList();
     }
@@ -78,7 +78,7 @@ public static class PlayerExtensions
 
         if (ignoreThisItem != null && player.IsItemEquiped(ignoreThisItem) && ignoreThisItem.IsMagic(out MagicItem magicItem))
         {
-            totalValue -= magicItem.GetTotalEffectValue(effectType, scale);
+            totalValue -= magicItem.GetTotalEffectValue(effectType, scale, includeSocketed: true);
         }
 
         return totalValue;

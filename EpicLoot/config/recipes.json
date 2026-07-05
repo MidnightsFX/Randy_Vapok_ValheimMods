@@ -25,6 +25,51 @@
         { "item": "Coins", "amount": 200 },
         { "item": "Ruby", "amount": 1 }
       ]
+    },
+    {
+      "name": "Recipe_ShardMagic",
+      "item": "ShardMagic",
+      "craftingStation": "forge",
+      "resources": [
+        { "item": "EssenceMagic", "amount": 2 },
+        { "item": "DustMagic", "amount": 2 }
+      ]
+    },
+    {
+      "name": "Recipe_ShardRare",
+      "item": "ShardRare",
+      "craftingStation": "forge",
+      "resources": [
+        { "item": "EssenceRare", "amount": 2 },
+        { "item": "DustRare", "amount": 2 }
+      ]
+    },
+    {
+      "name": "Recipe_ShardEpic",
+      "item": "ShardEpic",
+      "craftingStation": "forge",
+      "resources": [
+        { "item": "EssenceEpic", "amount": 2 },
+        { "item": "DustEpic", "amount": 2 }
+      ]
+    },
+    {
+      "name": "Recipe_ShardLegendary",
+      "item": "ShardLegendary",
+      "craftingStation": "forge",
+      "resources": [
+        { "item": "EssenceLegendary", "amount": 2 },
+        { "item": "DustLegendary", "amount": 2 }
+      ]
+    },
+    {
+      "name": "Recipe_ShardMythic",
+      "item": "ShardMythic",
+      "craftingStation": "forge",
+      "resources": [
+        { "item": "EssenceMythic", "amount": 2 },
+        { "item": "DustMythic", "amount": 2 }
+      ]
     }
   ]
 }

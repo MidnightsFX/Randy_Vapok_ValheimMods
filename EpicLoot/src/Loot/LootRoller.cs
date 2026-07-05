@@ -36,6 +36,7 @@ namespace EpicLoot
         private static WeightedRandomCollection<LegendaryInfo> _weightedMythicTable;
         public static bool CheatRollingItem = false;
         public static int CheatEffectCount;
+        public static int CheatSocketCount = -1;
         public static bool CheatDisableGating;
         public static bool CheatForceMagicEffect;
         public static string ForcedMagicEffect = "";
@@ -518,12 +519,17 @@ namespace EpicLoot
                                     ZNetView.m_forceDisableInit = !initializeObject;
                                     GameObject lootdrop = Object.Instantiate(prefab, dropPoint, randomRotation);
                                     // Ensure that the unidentified item has the correct magic item data for the rarity
-                                    var mic = lootdrop.GetComponent<ItemDrop>().m_itemData.Data().GetOrCreate<MagicItemComponent>();
+                                    var id = lootdrop.GetComponent<ItemDrop>();
+                                    var mic = id.m_itemData.Data().GetOrCreate<MagicItemComponent>();
                                     mic.SetMagicItem(new MagicItem
                                     {
                                         Rarity = rarity,
                                         IsUnidentified = true,
                                     });
+                                    // Persist the rarity/unidentified state into the ZDO so a real
+                                    // world drop survives reload. No-op for the container path where
+                                    // the ZNetView was disabled (Save early-returns on invalid nview).
+                                    id.Save();
                                     ZNetView.m_forceDisableInit = false;
                                     results.Add(lootdrop);
                                     continue;
@@ -739,6 +745,8 @@ namespace EpicLoot
 
             var magicItem = new MagicItem { Rarity = rarity };
 
+            magicItem.SocketCount = CheatSocketCount >= 0 ? CheatSocketCount : RollSocketCountPerRarity(magicItem.Rarity);
+
             var effectCount = CheatEffectCount >= 1 ? CheatEffectCount : RollEffectCountPerRarity(magicItem.Rarity);
 
             if (rarity == ItemRarity.Legendary || rarity == ItemRarity.Mythic)
@@ -847,6 +855,18 @@ namespace EpicLoot
             var countPercents = GetEffectCountsPerRarity(rarity, true);
             _weightedEffectCountTable.Setup(countPercents, x => x.Value);
             return _weightedEffectCountTable.Roll().Key;
+        }
+
+        // Rolls the number of shard sockets an item gets at loot-generation time, capped per rarity.
+        // Unlike effect counts, sockets are not affected by enchanting-table upgrades.
+        public static int RollSocketCountPerRarity(ItemRarity rarity)
+        {
+            var cap = ELConfig.GetSocketCap(rarity);
+            if (cap <= 0)
+            {
+                return 0;
+            }
+            return ELConfig.SocketCountIsAlwaysCap.Value ? cap : Random.Range(0, cap + 1);
         }
 
         public static List<KeyValuePair<int, float>> GetEffectCountsPerRarity(ItemRarity rarity, bool useEnchantingUpgrades)

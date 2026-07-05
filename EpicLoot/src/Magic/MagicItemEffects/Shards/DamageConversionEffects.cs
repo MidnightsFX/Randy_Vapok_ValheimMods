@@ -1,0 +1,81 @@
+using HarmonyLib;
+
+namespace EpicLoot.MagicItemEffects.Shards
+{
+    // Damage-type conversion shard effects. This file holds the defensive incoming-conversion effect and
+    // the DamageConversionHelper shared across the conversion group; the offensive conversions live in
+    // their own files (ConvertPhysicalDamageToLightning.cs, EitrImbueAttack.cs).
+    //
+    //  * Defensive (chest slots) -- PhysTo{Fire,Frost,Poison,Lightning}: move a share of INCOMING
+    //    physical damage onto an element before resistances apply, so pairing one with the matching
+    //    resistance shard turns raw physical into damage the player resists.
+
+    // ---- Defensive: incoming physical -> element (PhysToFire/Frost/Poison/Lightning) -------------
+    public static class IncomingPhysicalConversion
+    {
+        [HarmonyPatch(typeof(Character), nameof(Character.RPC_Damage))]
+        private static class Character_RPC_Damage_Patch
+        {
+            // Runs before ModifyResistance's RPC_Damage prefix (Normal priority) so the converted
+            // element is then reduced by the player's matching percentage resistance -- the intended
+            // shard synergy (e.g. Orange head = fire resist, Orange chest = PhysToFire).
+            [HarmonyPriority(Priority.High)]
+            private static void Prefix(Character __instance, HitData hit)
+            {
+                if (__instance != Player.m_localPlayer)
+                {
+                    return;
+                }
+
+                var player = Player.m_localPlayer;
+                float toFire = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToFire, 0.01f);
+                float toFrost = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToFrost, 0.01f);
+                float toPoison = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToPoison, 0.01f);
+                float toLightning = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToLightning, 0.01f);
+
+                float total = toFire + toFrost + toPoison + toLightning;
+                if (total <= 0f)
+                {
+                    return;
+                }
+
+                float physical = hit.m_damage.m_blunt + hit.m_damage.m_slash + hit.m_damage.m_pierce;
+                if (physical <= 0f)
+                {
+                    return;
+                }
+
+                // Never convert more physical than the hit actually has.
+                if (total > 1f)
+                {
+                    float scale = 1f / total;
+                    toFire *= scale;
+                    toFrost *= scale;
+                    toPoison *= scale;
+                    toLightning *= scale;
+                    total = 1f;
+                }
+
+                hit.m_damage.m_fire += physical * toFire;
+                hit.m_damage.m_frost += physical * toFrost;
+                hit.m_damage.m_poison += physical * toPoison;
+                hit.m_damage.m_lightning += physical * toLightning;
+
+                DamageConversionHelper.RemovePhysicalShare(ref hit.m_damage, total);
+            }
+        }
+    }
+
+    internal static class DamageConversionHelper
+    {
+        // Scales the three physical damage components down so `fraction` of the physical pool is
+        // removed -- its magnitude having already been redistributed onto elements by the caller.
+        internal static void RemovePhysicalShare(ref HitData.DamageTypes damage, float fraction)
+        {
+            float remaining = 1f - fraction;
+            damage.m_blunt *= remaining;
+            damage.m_slash *= remaining;
+            damage.m_pierce *= remaining;
+        }
+    }
+}

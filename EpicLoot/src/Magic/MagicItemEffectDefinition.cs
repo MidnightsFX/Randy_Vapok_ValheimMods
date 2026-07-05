@@ -268,7 +268,7 @@ namespace EpicLoot
                     itemData.m_shared.m_secondaryAttack.m_attackHealth > 0 ||
                     itemData.m_shared.m_attack.m_attackHealthPercentage > 0 ||
                     itemData.m_shared.m_secondaryAttack.m_attackHealthPercentage > 0 ||
-                    itemData.HasMagicEffect(MagicEffectType.Bloodlust);
+                    itemData.HasMagicEffect(MagicEffectType.Bloodlust, includeSocketed: false);
 
                 if (ItemUsesHealthOnAttack.Value != usesHealth)
                 {

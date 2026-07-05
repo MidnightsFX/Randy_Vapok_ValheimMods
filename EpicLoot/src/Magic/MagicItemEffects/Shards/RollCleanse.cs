@@ -1,0 +1,57 @@
+using HarmonyLib;
+using JetBrains.Annotations;
+
+namespace EpicLoot.MagicItemEffects.Shards
+{
+    // Pink (Dodge) utility shard: each successful dodge-roll trims time off the player's active
+    // damage-over-time debuffs (poison, and fire/spirit burning). The shard value is the number of
+    // seconds of remaining DoT duration removed per roll, so rolling repeatedly can cleanse a debuff
+    // outright. Read at the default (flat) scale -- this is seconds, not a percent.
+    public static class RollCleanse
+    {
+        // Rising-edge tracker for the local player's dodge animation, so the cleanse fires once when a
+        // roll begins rather than every frame the dodge animation is playing.
+        private static bool _wasInDodge;
+
+        [HarmonyPatch(typeof(Player), nameof(Player.UpdateDodge))]
+        private static class UpdateDodge_Patch
+        {
+            [UsedImplicitly]
+            private static void Postfix(Player __instance)
+            {
+                if (__instance != Player.m_localPlayer)
+                {
+                    return;
+                }
+
+                var inDodge = __instance.m_inDodge;
+                var rollStarted = inDodge && !_wasInDodge;
+                _wasInDodge = inDodge;
+
+                if (rollStarted)
+                {
+                    ApplyCleanse(__instance);
+                }
+            }
+        }
+
+        private static void ApplyCleanse(Player player)
+        {
+            var seconds = player.GetTotalActiveMagicEffectValue(MagicEffectType.RollCleanse);
+            if (seconds <= 0f)
+            {
+                return;
+            }
+
+            foreach (var se in player.GetSEMan().GetStatusEffects())
+            {
+                if ((se is SE_Poison || se is SE_Burning) && se.m_ttl > 0f)
+                {
+                    // Advance elapsed time toward the effect's TTL. This shortens the remaining duration
+                    // (and drops the unspent DoT damage); SEMan removes it once m_time passes m_ttl.
+                    se.m_time += seconds;
+                }
+            }
+        }
+    }
+}

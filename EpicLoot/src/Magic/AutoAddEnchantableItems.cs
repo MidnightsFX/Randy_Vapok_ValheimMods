@@ -717,8 +717,9 @@ namespace EpicLoot.Magic
                     return "Torches";
                 case ItemDrop.ItemData.ItemType.Tool:
                     return "Tools";
-                case ItemDrop.ItemData.ItemType.Utility:
                 case ItemDrop.ItemData.ItemType.Trinket:
+                    return "Trinket";
+                case ItemDrop.ItemData.ItemType.Utility:
                 case ItemDrop.ItemData.ItemType.Misc:
                     return "Utility";
             }

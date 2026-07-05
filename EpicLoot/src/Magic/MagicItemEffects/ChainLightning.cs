@@ -24,7 +24,7 @@ namespace EpicLoot.MagicItemEffects
 
                 var player = attacker as Player;
                 var weapon = player?.GetCurrentWeapon();
-                if (weapon == null || !weapon.GetMagicItem()?.HasEffect(nameof(MagicEffectType.ChainLightning)) == true)
+                if (weapon == null || !weapon.GetMagicItem()?.HasEffect(nameof(MagicEffectType.ChainLightning), includeSocketed: true) == true)
                     return;
 
                 //float procChance = player.GetTotalActiveMagicEffectValue(MagicEffectType.ChainLightning, .01f) / 2f; - based off buff effect is too strong

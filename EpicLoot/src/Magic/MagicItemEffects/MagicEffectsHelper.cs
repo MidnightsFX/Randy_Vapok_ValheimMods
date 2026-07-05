@@ -17,7 +17,7 @@ namespace EpicLoot.MagicItemEffects
             }
             else if (magicItem != null)
             {
-                return magicItem.GetTotalEffectValue(effectType, scale);
+                return magicItem.GetTotalEffectValue(effectType, scale, includeSocketed: true);
             }
 
             return 0;
@@ -59,7 +59,7 @@ namespace EpicLoot.MagicItemEffects
             }
             else if (itemData.IsMagic(out var magicItem))
             {
-                return magicItem.GetTotalEffectValue(effectType, scale);
+                return magicItem.GetTotalEffectValue(effectType, scale, includeSocketed: true);
             }
 
             return 0;
@@ -79,7 +79,7 @@ namespace EpicLoot.MagicItemEffects
             }
             else if (magicItem != null)
             {
-                return magicItem.HasEffect(effectType);
+                return magicItem.HasEffect(effectType, includeSocketed: true);
             }
             return false;
         }
@@ -94,8 +94,8 @@ namespace EpicLoot.MagicItemEffects
             }
             else if (itemData.IsMagic(out var magicItem))
             {
-                effectValue = magicItem.GetTotalEffectValue(effectType, scale);
-                return magicItem.HasEffect(effectType);
+                effectValue = magicItem.GetTotalEffectValue(effectType, scale, includeSocketed: true);
+                return magicItem.HasEffect(effectType, includeSocketed: true);
             }
             return false;
         }

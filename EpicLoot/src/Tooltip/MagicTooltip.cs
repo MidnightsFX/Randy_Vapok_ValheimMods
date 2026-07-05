@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using EpicLoot.ShardStones;
 
 namespace EpicLoot;
 
@@ -104,7 +105,14 @@ public partial class MagicTooltip(ItemDrop.ItemData item, MagicItem magicItem, i
 
         AddAllEquipmentModifiers();
 
-        MagicEffects();
+        if (Shards.IsShard(item))
+        {
+            AddShardPreview();
+        }
+        else
+        {
+            MagicEffects();
+        }
 
         AddSetTooltip();
         AddAdrenalineStatusEffectTooltip();

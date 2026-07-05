@@ -37,7 +37,7 @@ public sealed class EpicLoot : BaseUnityPlugin
 {
     public const string PluginId = "randyknapp.mods.epicloot";
     public const string DisplayName = "Epic Loot";
-    public const string Version = "0.12.15";
+    public const string Version = "0.13.0";
 
     private static string ConfigFileName = PluginId + ".cfg";
     private static string ConfigFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar + ConfigFileName;
@@ -401,6 +401,7 @@ public sealed class EpicLoot : BaseUnityPlugin
         PrefabManager.OnPrefabsRegistered += SetupAndvaranaut;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
+        ShardStones.Shards.CreateAndLoadShardItems();
         // Needs to trigger late in order to get all potentially added items by other mods
         MinimapManager.OnVanillaMapDataLoaded += () => AutoAddEnchantableItems.CheckAndAddAllEnchantableItems();
 
@@ -544,6 +545,8 @@ public sealed class EpicLoot : BaseUnityPlugin
         ItemManager.Instance.AddItem(genericUnidentified);
         genericPrefab.SetActive(false);
 
+        var unidentifiedPrefabNames = new List<string>();
+
         foreach (string biome in Enum.GetNames(typeof(Heightmap.Biome)))
         {
             if (biome == "None" || biome == "All")
@@ -565,6 +568,7 @@ public sealed class EpicLoot : BaseUnityPlugin
                     IsUnidentified = true,
                 });
                 magicItemComponent.Save();
+                pid.Save();
                 
                 ItemConfig unidentifiedIC = new ItemConfig()
                 {
@@ -575,18 +579,30 @@ public sealed class EpicLoot : BaseUnityPlugin
                 CustomItem custom = new CustomItem(prefab, false, unidentifiedIC);
                 ItemManager.Instance.AddItem(custom);
 
-                // Enable Items once things are working so that ZNet issues don't happen
-                void EnableUnidentified(string prefabname)
-                {
-                    PrefabManager.Instance.GetPrefab(prefabName).SetActive(true);
-                    PrefabManager.Instance.GetPrefab(prefabName).GetComponent<ItemDrop>().m_itemData.m_dropPrefab =
-                        PrefabManager.Instance.GetPrefab(prefabName);
-                    ItemManager.OnItemsRegistered -= () => EnableUnidentified(prefabname);
-                }
-
-                ItemManager.OnItemsRegistered += () => EnableUnidentified(prefabName);
+                unidentifiedPrefabNames.Add(prefabName);
             }
         }
+
+        // Enable items once things are working so that ZNet issues don't happen.
+        // A single idempotent handler activates every registered prefab; a null
+        // lookup logs and continues so one missing prefab can't leave the rest inactive.
+        void EnableUnidentifiedItems()
+        {
+            foreach (string prefabName in unidentifiedPrefabNames)
+            {
+                GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
+                if (prefab == null)
+                {
+                    LogError($"Could not find unidentified prefab '{prefabName}' to activate.");
+                    continue;
+                }
+
+                prefab.SetActive(true);
+                prefab.GetComponent<ItemDrop>().m_itemData.m_dropPrefab = prefab;
+            }
+        }
+
+        ItemManager.OnItemsRegistered += EnableUnidentifiedItems;
     }
 
     private static void RegisterStatusEffects()

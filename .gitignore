@@ -15,6 +15,10 @@
 /**/obj/
 /packages/
 
+# Always ignore the valheim assembly metadata as it gets updated each time a build happens
+ValheimUnity/Assets/ExternalLibraries/**.meta
+ValheimUnity/Assets/Exports.meta
+
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
 

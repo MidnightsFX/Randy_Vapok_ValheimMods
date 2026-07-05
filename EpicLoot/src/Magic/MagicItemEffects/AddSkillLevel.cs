@@ -48,6 +48,7 @@ namespace EpicLoot.MagicItemEffects
             check(MagicEffectType.AddBloodMagicSkill, SkillType.BloodMagic);
             check(MagicEffectType.AddMovementSkills, SkillType.Run, SkillType.Jump, SkillType.Swim, SkillType.Sneak);
             check(MagicEffectType.AddCrafterSkills, SkillType.Crafting, SkillType.Cooking);
+            check(MagicEffectType.IncreaseMeleeSkills, Shards.IncreaseMeleeSkills.MeleeSkills);
 
             return increase;
         }
