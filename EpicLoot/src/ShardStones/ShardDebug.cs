@@ -24,7 +24,7 @@ namespace EpicLoot.ShardStones
                 return;
             }
 
-            var color = ShardColor.Yellow;
+            var color = ShardType.Yellow;
             if (args.Length >= 3 && !Enum.TryParse(args[2], true, out color))
             {
                 context.AddString($"> Unknown shard color '{args[2]}'.");

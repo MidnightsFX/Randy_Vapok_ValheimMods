@@ -55,7 +55,7 @@ namespace EpicLoot.ShardStones
                         continue;
                     }
                     magicItem.Sockets.Add(new SocketedEffect(
-                        effect, ShardSocketManager.GetSourcePrefabName(item), rarity) { ShardColor = color });
+                        effect, ShardSocketManager.GetSourcePrefabName(item), rarity) { ShardType = color });
                 }
                 OpenEquipment.SaveMagicItem(magicItem);
 

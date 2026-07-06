@@ -44,7 +44,7 @@ namespace EpicLoot
         public MagicItemEffect Effect;  // null for an inert shard (no effect for the host item type)
         public string SourcePrefab;     // e.g. "EtchedRunestoneEpic" / "Yellow_Epic_ShardStone"
         public ItemRarity SourceRarity; // for tooltip range + reconstruction
-        public ShardColor ShardColor = ShardColor.None; // set for shard sockets; None for runestones
+        public ShardType ShardType = ShardType.None; // set for shard sockets; None for runestones
 
         public SocketedEffect()
         {
@@ -72,7 +72,7 @@ namespace EpicLoot
         public string SetID;
         public bool IsUnidentified = false;
         public int SocketCount = 0;
-        public ShardColor ShardColor = ShardColor.None;
+        public ShardType ShardColor = ShardType.None;
         public List<SocketedEffect> Sockets = new List<SocketedEffect>();
 
         public string GetItemTypeName(ItemDrop.ItemData baseItem)
@@ -106,7 +106,7 @@ namespace EpicLoot
             if (SocketCount > 0)
             {
                 tooltip.AppendLine($"$mod_epicloot_sockets ({GetUsedSocketCount()}/{SocketCount}):");
-                foreach (var socket in Sockets)
+                foreach (SocketedEffect socket in Sockets)
                 {
                     if (socket == null)
                     {
@@ -114,12 +114,12 @@ namespace EpicLoot
                     }
                     var socketColor = EpicLoot.GetRarityColor(socket.SourceRarity);
                     // Inline the socketed item's own icon, resolved from its source prefab
-                    var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab);
+                    var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab, socket.ShardType);
                     if (socket.Effect != null)
                     {
                         tooltip.AppendLine($"  ◊ <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, showRange)}</color>");
                     }
-                    else if (socket.ShardColor != ShardColor.None)
+                    else if (socket.ShardType != ShardType.None)
                     {
                         // An inert shard: socketed but has no defined effect for this item type.
                         tooltip.AppendLine($"  <color={socketColor}>{iconTag} $mod_epicloot_shard_noeffect</color>");
@@ -158,7 +158,7 @@ namespace EpicLoot
             return Color.white;
         }
 
-        public ShardColor GetShardColor()
+        public ShardType GetShardColor()
         {
             return ShardColor;
         }

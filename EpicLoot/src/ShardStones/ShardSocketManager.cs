@@ -15,10 +15,10 @@ namespace EpicLoot.ShardStones
         // inert shard (one with no defined effect for the equipment's item type), while `color` and
         // `rarity` describe the source shard (color is None for runestones).
         public static bool ResolveSocketedEffect(ItemDrop.ItemData equipment, ItemDrop.ItemData input,
-            out MagicItemEffect effect, out ShardColor color, out ItemRarity rarity)
+            out MagicItemEffect effect, out ShardType color, out ItemRarity rarity)
         {
             effect = null;
-            color = ShardColor.None;
+            color = ShardType.None;
             rarity = ItemRarity.Magic;
 
             if (equipment == null || input == null)
@@ -29,7 +29,7 @@ namespace EpicLoot.ShardStones
             if (Shards.IsShard(input))
             {
                 color = Shards.GetShardColor(input);
-                if (color == ShardColor.None)
+                if (color == ShardType.None)
                 {
                     return false; // malformed shard
                 }
@@ -144,7 +144,7 @@ namespace EpicLoot.ShardStones
 
             // Exclusive-category (e.g. boss) shards obey the same one-per-item / one-across-worn-gear
             // rule on the swap path, measured against the co-resident shards that survive the swap.
-            var coResidentColors = new List<ShardColor>();
+            var coResidentColors = new List<ShardType>();
             foreach (var other in coResident)
             {
                 coResidentColors.Add(Shards.GetShardColor(other));
@@ -203,7 +203,7 @@ namespace EpicLoot.ShardStones
             ResolveSocketedEffect(equipment, input, out var effect, out var color, out var sourceRarity);
             var sourcePrefab = GetSourcePrefabName(input);
 
-            equipMagicItem.Sockets.Add(new SocketedEffect(effect, sourcePrefab, sourceRarity) { ShardColor = color });
+            equipMagicItem.Sockets.Add(new SocketedEffect(effect, sourcePrefab, sourceRarity) { ShardType = color });
             equipment.SaveMagicItem(equipMagicItem);
             ResetCache();
             return true;
@@ -258,7 +258,7 @@ namespace EpicLoot.ShardStones
             item.m_stack = 1;
 
             var magicItem = new MagicItem { Rarity = socketed.SourceRarity };
-            if (socketed.ShardColor == ShardColor.None && socketed.Effect != null)
+            if (socketed.ShardType == ShardType.None && socketed.Effect != null)
             {
                 magicItem.Effects.Add(new MagicItemEffect(socketed.Effect.EffectType, socketed.Effect.EffectValue));
             }
@@ -298,12 +298,12 @@ namespace EpicLoot.ShardStones
         //   2. Cross-equipped: only one shard of an exclusive category across worn gear -- enforced
         //      only when `equipment` is currently worn (an unequipped item is caught at equip time).
         // Non-exclusive inputs (regular shards, runestones) always pass.
-        private static bool CheckExclusiveCategory(ItemDrop.ItemData equipment, ShardColor inputColor,
-            IEnumerable<ShardColor> itemLocalColors, out string reason)
+        private static bool CheckExclusiveCategory(ItemDrop.ItemData equipment, ShardType inputColor,
+            IEnumerable<ShardType> itemLocalColors, out string reason)
         {
             reason = null;
 
-            if (inputColor == ShardColor.None)
+            if (inputColor == ShardType.None)
             {
                 return true;
             }
@@ -316,7 +316,7 @@ namespace EpicLoot.ShardStones
 
             foreach (var color in itemLocalColors)
             {
-                if (color != ShardColor.None && Shards.GetCategory(color) == category)
+                if (color != ShardType.None && Shards.GetCategory(color) == category)
                 {
                     reason = "$mod_epicloot_socket_bosslimit";
                     return false;
@@ -335,12 +335,12 @@ namespace EpicLoot.ShardStones
         }
 
         // The shard colors currently occupying an item's sockets (None for runestone sockets).
-        private static IEnumerable<ShardColor> SocketedColors(IEnumerable<SocketedEffect> sockets)
+        private static IEnumerable<ShardType> SocketedColors(IEnumerable<SocketedEffect> sockets)
         {
-            var colors = new List<ShardColor>();
+            var colors = new List<ShardType>();
             foreach (var socket in sockets)
             {
-                colors.Add(socket != null ? socket.ShardColor : ShardColor.None);
+                colors.Add(socket != null ? socket.ShardType : ShardType.None);
             }
             return colors;
         }
@@ -368,8 +368,8 @@ namespace EpicLoot.ShardStones
         {
             foreach (var socket in magicItem.Sockets)
             {
-                if (socket != null && socket.ShardColor != ShardColor.None &&
-                    Shards.GetCategory(socket.ShardColor) == category)
+                if (socket != null && socket.ShardType != ShardType.None &&
+                    Shards.GetCategory(socket.ShardType) == category)
                 {
                     return true;
                 }
