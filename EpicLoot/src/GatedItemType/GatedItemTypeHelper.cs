@@ -244,7 +244,6 @@ namespace EpicLoot.GatedItemType
             List<string> bossList = null;
 
             // Check if this is a loot table category
-            
             if (LootRoller.LootSetContainsEntry(itemOrType))
             {
                 List<LootTable> ltcategory = LootRoller.GetFullyResolvedLootTable(itemOrType);

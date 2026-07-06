@@ -1,3 +1,31 @@
+## Version 0.12.15
+
+* Fixed an issue with bounties not spawning correctly if not using the Star Level System mod.
+* Fixed an issue with bounty and treasure map pins not displaying until toggled.
+* If you experienced loot not dropping from previous version upgrades (12.12, 12.13) please refresh your BepInEx\config\EpicLoot\baseconfig\loottables.json file to remove null entries.
+
+## Version 0.12.14
+
+* Fixed an issue with auto-adding loot tables causing mobs to not drop loot.
+* All items from the game can now be added to loot tables from patches and work with the "Auto Add ..." configuration settings.
+
+## Version 0.12.13
+
+* Added back PlayerExtensions.GetEquipment for mods that patch that method.
+  * If you are a mod author please remove your patches to this method! We refactored it to use vanilla methods in version 12.7.
+
+## Version 0.12.12
+
+* Bug fix for Mead Cooldown reducing all SE_Stats mead times, should now work as intended.
+* Bug fix for Gambling loot tables not saving values correctly when auto-assigned causing large coin values. 
+  * Needs a adventuredata.json configuration refresh to apply.
+* Bug fix for Modify Armor effect showing up for non-armor applying item types.
+* Bug fix for Modify Elemental Damage effect showing up on the wrong items.
+* Bug fix for a tool tip display issue when items had a subtitle (trinkets).
+* Bug fix for a tool tip display issue for set items not showing equipped correctly.
+* Disabling adventure mode in the main configuration file will now also remove the minimap toggles.
+* Star Level System API support.
+
 ## Version 0.12.11
 
 * NEW FEATURE: map pins from bounties and treasure maps can now be toggled in the minimap UI in the bottom left corner! Thanks Rusty!
