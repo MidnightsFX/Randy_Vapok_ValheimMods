@@ -23,12 +23,12 @@ namespace EpicLoot.ShardStones
 
             foreach (var socket in magicItem.Sockets)
             {
-                if (socket == null || socket.ShardColor == ShardColor.None)
+                if (socket == null || socket.ShardType == ShardType.None)
                 {
                     continue;
                 }
 
-                var category = Shards.GetCategory(socket.ShardColor);
+                var category = Shards.GetCategory(socket.ShardType);
                 if (!Shards.IsExclusive(category))
                 {
                     continue;

@@ -14,7 +14,7 @@ using static ItemDrop;
 namespace EpicLoot.ShardStones
 {
     // A Shard's color determines which set of magical effects it has along with its icon
-    public enum ShardColor
+    public enum ShardType
     {
         // Core Shards
         Red,  // Vitality
@@ -199,111 +199,113 @@ namespace EpicLoot.ShardStones
 
             // A boss shard grants one signature effect on every slot it is allowed into.
             private static ShardDefinition BossShard(string effect)
-                => new ShardDefinition { Category = ShardCategory.Boss, UniformEffect = Boss(effect) };
+            {
+                return new ShardDefinition { Category = ShardCategory.Boss, UniformEffect = Boss(effect) };
+            }
 
             // Full effect grid. Effect names are MagicEffectType constants; ones declared in
             // MagicEffectType_Shards.cs are new (inert until their behavior is implemented). Every
             // effect is globally unique across shards (weapon slots that share an effect count once).
-            public static readonly Dictionary<ShardColor, ShardDefinition> ShardEffects =
-                new Dictionary<ShardColor, ShardDefinition>
+            public static readonly Dictionary<ShardType, ShardDefinition> ShardEffects =
+                new Dictionary<ShardType, ShardDefinition>
                 {
                     // ---- Core ----
-                    { ShardColor.Red, Shard(ShardCategory.Core,                 // Vitality
+                    { ShardType.Red, Shard(ShardCategory.Core,                 // Vitality
                         melee: Proc(MagicEffectType.LifeSteal), ranged: Proc(MagicEffectType.LifeSteal), magic: Proc(MagicEffectType.LifeSteal),
                         head: Pct(MagicEffectType.ModifyHealthRegen), chest: Pool(MagicEffectType.IncreaseHealth), legs: Pool(MagicEffectType.PercentHealth),
                         trinket: Pct(MagicEffectType.DamageTakenGivesAdrenaline), utility: Pct(MagicEffectType.AddHealthRegen)) },
 
-                    { ShardColor.Yellow, Shard(ShardCategory.Core,              // Stamina
+                    { ShardType.Yellow, Shard(ShardCategory.Core,              // Stamina
                         melee: Pct(MagicEffectType.ModifyAttackStaminaUse), ranged: Pct(MagicEffectType.ModifyDrawStaminaUse), magic: Pct(MagicEffectType.StaminaReturnFromEitr),
                         head: Pool(MagicEffectType.PercentStamina), chest: Pct(MagicEffectType.ModifyStaminaRegen), legs: Pool(MagicEffectType.IncreaseStamina),
                         trinket: Pct(MagicEffectType.UseAdrenalineAsStamina), utility: Pct(MagicEffectType.ModifySprintStaminaUse)) },
 
-                    { ShardColor.Cyan, Shard(ShardCategory.Core,                // Eitr
+                    { ShardType.Cyan, Shard(ShardCategory.Core,                // Eitr
                         melee: Pct(MagicEffectType.EitrImbueAttack), ranged: Pct(MagicEffectType.EitrImbueAttack), magic: Pct(MagicEffectType.ModifyAttackEitrUse),
                         head: Pool(MagicEffectType.PercentEitr), chest: Pool(MagicEffectType.IncreaseEitr), legs: Pct(MagicEffectType.ModifyEitrRegen),
                         trinket: Pct(MagicEffectType.EitrUseGivesAdrenaline), utility: Pct(MagicEffectType.EitrShield)) },
 
-                    { ShardColor.Orange, Shard(ShardCategory.Core,              // Fire
+                    { ShardType.Orange, Shard(ShardCategory.Core,              // Fire
                         melee: Pct(MagicEffectType.AddFireDamage), ranged: Pct(MagicEffectType.AddFireDamage), magic: Pct(MagicEffectType.AddFireDamage),
                         head: Pct(MagicEffectType.AddFireResistancePercentage), chest: Pct(MagicEffectType.PhysToFire), legs: Pct(MagicEffectType.Stampede),
                         trinket: Pct(MagicEffectType.BurningAdrenaline), utility: Pct(MagicEffectType.IncreaseHeatResistance)) },
 
-                    { ShardColor.Pink, Shard(ShardCategory.Core,               // Dodge
+                    { ShardType.Pink, Shard(ShardCategory.Core,               // Dodge
                         melee: Pct(MagicEffectType.PerfectDodgeGivesHealth), ranged: Pct(MagicEffectType.PerfectDodgeGivesStamina), magic: Pct(MagicEffectType.PerfectDodgeGivesEitr),
                         head: Pct(MagicEffectType.DecreaseDodgeCost), chest: Pct(MagicEffectType.ReduceFallDamage), legs: Pct(MagicEffectType.DodgeBuff),
                         trinket: Proc(MagicEffectType.PerfectDodge), utility: Pct(MagicEffectType.RollCleanse)) },
 
-                    { ShardColor.Black, Shard(ShardCategory.Core,              // Night-time (EnvMan.IsNight)
+                    { ShardType.Black, Shard(ShardCategory.Core,              // Night-time (EnvMan.IsNight)
                         melee: Pct(MagicEffectType.IncreaseDamageDuringNighttime), ranged: Pct(MagicEffectType.IncreaseDamageDuringNighttime), magic: Pct(MagicEffectType.IncreaseDamageDuringNighttime),
                         head: Pct(MagicEffectType.NightStaminaRegenIncrease), chest: Pct(MagicEffectType.DamageReductionAtNight), legs: Skill(MagicEffectType.AddKnivesSkill),
                         trinket: Pct(MagicEffectType.SummonBatWhenActivatingAdrenaline), utility: Pct(MagicEffectType.ModifyNoise)) },
 
-                    { ShardColor.White, Shard(ShardCategory.Core,             // Daytime (EnvMan.IsDay)
+                    { ShardType.White, Shard(ShardCategory.Core,             // Daytime (EnvMan.IsDay)
                         melee: Pct(MagicEffectType.IncreaseDamageDuringDaytime), ranged: Pct(MagicEffectType.IncreaseDamageDuringDaytime), magic: Pct(MagicEffectType.IncreaseDamageDuringDaytime),
                         head: Pct(MagicEffectType.DayDiscovery), chest: Pct(MagicEffectType.DayArmor), legs: Pct(MagicEffectType.DayStaminaRegen),
                         trinket: Pct(MagicEffectType.DayHealthRegen), utility: Skill(MagicEffectType.AddCrafterSkills)) },
 
-                    { ShardColor.Green, Shard(ShardCategory.Core,             // Movement
+                    { ShardType.Green, Shard(ShardCategory.Core,             // Movement
                         melee: Pct(MagicEffectType.DamageIncreaseFromMovementPenalty), ranged: Pct(MagicEffectType.DamageIncreaseFromMovementPenalty), magic: Pct(MagicEffectType.DamageIncreaseFromMovementPenalty),
                         head: Pct(MagicEffectType.IncreaseXPGainFromMovementPenalty), chest: Pct(MagicEffectType.CarryWeightForMovementPenalty), legs: Pct(MagicEffectType.StaminaIncreaseForMovementPenalty),
                         trinket: Skill(MagicEffectType.AddMovementSkills), utility: Pct(MagicEffectType.ModifyJumpStaminaUse)) },
 
-                    { ShardColor.Purple, Shard(ShardCategory.Core,           // Eitr / Caster
+                    { ShardType.Purple, Shard(ShardCategory.Core,           // Eitr / Caster
                         melee: Proc(MagicEffectType.EitrLeech), ranged: Proc(MagicEffectType.EitrLeech), magic: Pct(MagicEffectType.ModifyMagicFireRate),
                         head: Pct(MagicEffectType.DartingThoughts), chest: Pct(MagicEffectType.ConsumeEitrFirstForBloodCosts), legs: Pct(MagicEffectType.EveryXPointsOfEitrIncreasesStamina),
                         trinket: Pct(MagicEffectType.ConvertEitrCostToStaminaCost), utility: Pct(MagicEffectType.RunningOnEmpty)) },
 
                     // ---- Dark ----
-                    { ShardColor.DarkRed, Shard(ShardCategory.Dark,          // Wrath / Berserk
+                    { ShardType.DarkRed, Shard(ShardCategory.Dark,          // Wrath / Berserk
                         // RangedWeapon lumps bows + crossbows; AddBowsSkill covers the "ranged" theme.
                         melee: Skill(MagicEffectType.IncreaseMeleeSkills), ranged: Skill(MagicEffectType.AddBowsSkill), magic: Pct(MagicEffectType.AddBluntDamage),
                         head: Pct(MagicEffectType.HeadHunter), chest: Proc(MagicEffectType.ChanceToCritOnHit), legs: Pct(MagicEffectType.BulkUp),
                         trinket: Pct(MagicEffectType.DecreaseForsakenCooldown), utility: Pct(MagicEffectType.OffSetAttack)) },
 
-                    { ShardColor.DarkGreen, Shard(ShardCategory.Dark,        // Venom
+                    { ShardType.DarkGreen, Shard(ShardCategory.Dark,        // Venom
                         melee: Pct(MagicEffectType.AddPoisonDamage), ranged: Pct(MagicEffectType.AddPoisonDamage), magic: Pct(MagicEffectType.AddPoisonDamage),
                         head: Pct(MagicEffectType.AddPoisonResistancePercentage), chest: Pct(MagicEffectType.PhysToPoison), legs: Skill(MagicEffectType.AddBlockingSkill),
                         trinket: Pct(MagicEffectType.GainAdrenalineWhenApplyingPoison), utility: Pct(MagicEffectType.IncreaseAllPoisonDamageDone)) },
 
-                    { ShardColor.DarkBlue, Shard(ShardCategory.Dark,         // Cold / Frost
+                    { ShardType.DarkBlue, Shard(ShardCategory.Dark,         // Cold / Frost
                         melee: Pct(MagicEffectType.AddFrostDamage), ranged: Pct(MagicEffectType.AddFrostDamage), magic: Pct(MagicEffectType.AddFrostDamage),
                         head: Pct(MagicEffectType.AddFrostResistancePercentage), chest: Pct(MagicEffectType.PhysToFrost), legs: Skill(MagicEffectType.AddElementalMagicSkill),
                         trinket: Pct(MagicEffectType.AdrenalineIncreasesFrostDamage), utility: Pct(MagicEffectType.Warmth)) },
 
-                    { ShardColor.DarkPurple, Shard(ShardCategory.Dark,       // Blood Magic
+                    { ShardType.DarkPurple, Shard(ShardCategory.Dark,       // Blood Magic
                         melee: Pct(MagicEffectType.ModifyAttackHealthUse), ranged: Pct(MagicEffectType.ModifyAttackHealthUse), magic: Pct(MagicEffectType.ModifyAttackHealthUse),
                         head: Pct(MagicEffectType.KillsReduceNextBloodCost), chest: Pct(MagicEffectType.ReflectDamage), legs: Pct(MagicEffectType.BloodMagicLevelIncreasesHealthRegen),
                         trinket: Pct(MagicEffectType.GainAdrenalineWhenSacrificingHealth), utility: Skill(MagicEffectType.AddBloodMagicSkill)) },
 
-                    { ShardColor.Golden, Shard(ShardCategory.Dark,           // Fortune / Glory
+                    { ShardType.Golden, Shard(ShardCategory.Dark,           // Fortune / Glory
                         melee: Proc(MagicEffectType.ChanceDoubleDamage), ranged: Proc(MagicEffectType.ChanceDoubleDamage), magic: Proc(MagicEffectType.ChanceDoubleDamage),
                         head: Pct(MagicEffectType.QuickLearner), chest: Pct(MagicEffectType.SpendCoinsToIncreaseDamage), legs: Pct(MagicEffectType.LuckWhileFishing),
                         trinket: Proc(MagicEffectType.Luck), utility: Pct(MagicEffectType.Riches)) },
 
                     // ---- Light ----
-                    { ShardColor.LightBlue, Shard(ShardCategory.Light,       // Storm / Lightning
+                    { ShardType.LightBlue, Shard(ShardCategory.Light,       // Storm / Lightning
                         melee: Pct(MagicEffectType.AddLightningDamage), ranged: Pct(MagicEffectType.AddLightningDamage), magic: Pct(MagicEffectType.AddLightningDamage),
                         head: Pct(MagicEffectType.AddLightningResistancePercentage), chest: Pct(MagicEffectType.PhysToLightning), legs: Pct(MagicEffectType.StormRider),
                         trinket: Pct(MagicEffectType.IncreaseAdrenalineGainDuringStorm), utility: Pct(MagicEffectType.ConvertPhysicalDamageToLightning)) },
 
-                    { ShardColor.LightGreen, Shard(ShardCategory.Light,      // Renewal / Nature
+                    { ShardType.LightGreen, Shard(ShardCategory.Light,      // Renewal / Nature
                         melee: Pct(MagicEffectType.HealthGainPerXDamageDone), ranged: Pct(MagicEffectType.HealthGainPerXDamageDone), magic: Pct(MagicEffectType.HealthGainPerXDamageDone),
                         head: Pct(MagicEffectType.PotionEfficacy), chest: Pct(MagicEffectType.Comfortable), legs: Skill(MagicEffectType.AddPickaxesSkill),
                         trinket: Pct(MagicEffectType.AdrenalineIncreasesHealthRegen), utility: Pct(MagicEffectType.BountifulHarvest)) },
 
-                    { ShardColor.Peach, Shard(ShardCategory.Light,           // Logistics
+                    { ShardType.Peach, Shard(ShardCategory.Light,           // Logistics
                         melee: Pct(MagicEffectType.DamageBonusFromPlayerWeight), ranged: Pct(MagicEffectType.DamageBonusFromPlayerWeight), magic: Pct(MagicEffectType.DamageBonusFromPlayerWeight),
                         head: Pool(MagicEffectType.GainMaxStaminaBasedOnPlayerMaxHealth), chest: Pct(MagicEffectType.StaminaRegenBonusFromPlayerWeight), legs: Pct(MagicEffectType.FeatherFall),
                         trinket: Pct(MagicEffectType.SailingSpeed), utility: Pool(MagicEffectType.AddCarryWeight)) },
 
                     // ---- Boss (single signature effect on every slot) ----
-                    { ShardColor.Eikthyr, BossShard(MagicEffectType.ShockingCharge) },
-                    { ShardColor.Elder, BossShard(MagicEffectType.ForestsAid) },
-                    { ShardColor.Bonemass, BossShard(MagicEffectType.PoisonCoating) },
-                    { ShardColor.Moder, BossShard(MagicEffectType.IcyRetribution) },
-                    { ShardColor.Yagluth, BossShard(MagicEffectType.MeteorSummoner) },
-                    { ShardColor.Queen, BossShard(MagicEffectType.EitrSiphon) },
-                    { ShardColor.Fader, BossShard(MagicEffectType.LastFire) },
+                    { ShardType.Eikthyr, BossShard(MagicEffectType.ShockingCharge) },
+                    { ShardType.Elder, BossShard(MagicEffectType.ForestsAid) },
+                    { ShardType.Bonemass, BossShard(MagicEffectType.PoisonCoating) },
+                    { ShardType.Moder, BossShard(MagicEffectType.IcyRetribution) },
+                    { ShardType.Yagluth, BossShard(MagicEffectType.MeteorSummoner) },
+                    { ShardType.Queen, BossShard(MagicEffectType.EitrSiphon) },
+                    { ShardType.Fader, BossShard(MagicEffectType.LastFire) },
 
                     // NOTE: Grey (Craft/Gather) is designed but its ShardColor enum value is commented
                     // out; add it back to the enum and uncomment the block below to enable it.
@@ -313,7 +315,7 @@ namespace EpicLoot.ShardStones
                     //     trinket: Pct(MagicEffectType.GainAdrenalineFromHarvesting), utility: Pct(MagicEffectType.IncreaseHarvestXPGain)) },
                 };
 
-            public static ShardDefinition Get(ShardColor color)
+            public static ShardDefinition Get(ShardType color)
             {
                 return ShardEffects.TryGetValue(color, out var def) ? def : null;
             }
@@ -326,22 +328,22 @@ namespace EpicLoot.ShardStones
                 item.m_shared.m_ammoType.EndsWith(ShardIndicator);
         }
 
-        public static ShardColor GetShardColor(ItemDrop.ItemData item)
+        public static ShardType GetShardColor(ItemDrop.ItemData item)
         {
             if (!IsShard(item))
             {
-                return ShardColor.None;
+                return ShardType.None;
             }
             string[] parts = item.m_shared.m_ammoType.Split('|');
             if (parts.Length < 3)
             {
-                return ShardColor.None;
+                return ShardType.None;
             }
-            if (Enum.TryParse(parts[1], true, out ShardColor color))
+            if (Enum.TryParse(parts[1], true, out ShardType color))
             {
                 return color;
             }
-            return ShardColor.None;
+            return ShardType.None;
         }
 
         public static ItemRarity GetShardRarity(ItemDrop.ItemData item)
@@ -370,7 +372,7 @@ namespace EpicLoot.ShardStones
             return string.Equals(localized, token, StringComparison.Ordinal) ? itemType.ToString() : localized;
         }
 
-        public static ShardEffectDefinition GetShardEffect(ItemDrop.ItemData item, ShardColor color)
+        public static ShardEffectDefinition GetShardEffect(ItemDrop.ItemData item, ShardType color)
         {
             if (!ShardDefinitions.ShardEffects.TryGetValue(color, out var colorEffects))
             {
@@ -570,7 +572,7 @@ namespace EpicLoot.ShardStones
 
         public static bool IsExclusive(ShardCategory category) => ExclusiveCategories.Contains(category);
 
-        public static ShardCategory GetCategory(ShardColor color)
+        public static ShardCategory GetCategory(ShardType color)
         {
             var def = ShardDefinitions.Get(color);
             return def != null ? def.Category : ShardCategory.Core;
@@ -585,7 +587,7 @@ namespace EpicLoot.ShardStones
 
             var shardPrefabNames = new List<string>();
 
-            foreach (string shardColor in Enum.GetNames(typeof(ShardColor)))
+            foreach (string shardColor in Enum.GetNames(typeof(ShardType)))
             {
                 if (shardColor == "None")
                 {
