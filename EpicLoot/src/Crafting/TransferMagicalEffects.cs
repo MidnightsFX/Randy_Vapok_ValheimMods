@@ -1,7 +1,9 @@
 ﻿using EpicLoot.Config;
+using EpicLoot.ShardStones;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace EpicLoot.Crafting;
@@ -16,30 +18,84 @@ public static class TransferMagicalEffects
     {
         if (!IsDoCraft || !ELConfig.TransferMagicItemToCrafts.Value || CraftedItem == null || ConsumedMagicItems.Count == 0) return;
 
-        MagicItem highestTierMagicItem =  null;
-        
-        foreach (var itemData in ConsumedMagicItems)
+        // Gather the magic items from every consumed ingredient, strongest first so that when two
+        // items share an effect type the higher-rarity item's effect wins the exclusivity check.
+        var sources = ConsumedMagicItems
+            .Select(x => x.GetMagicItem())
+            .Where(m => m != null)
+            .OrderByDescending(m => m.Rarity)
+            .ToList();
+        if (sources.Count == 0)
+            return;
+
+        // Rarity is the highest among the sources (affects value-range display and background color;
+        // each effect keeps its own stored value).
+        var newMagicItem = new MagicItem { Rarity = sources[0].Rarity };
+
+        // Bake the valid rolled effects from every source. Socketed effects are handled below with the
+        // sockets themselves, so they are not folded in here (no double-dipping).
+        foreach (var source in sources)
         {
-            var magicItem = itemData.GetMagicItem();
-            if (magicItem == null)
-                continue;
-            if (highestTierMagicItem == null)
-                highestTierMagicItem = magicItem;
-            else
+            foreach (var effect in source.Effects)
             {
-                if (magicItem.Rarity > highestTierMagicItem.Rarity)
-                    highestTierMagicItem = magicItem;
-                else if (magicItem.Rarity == highestTierMagicItem.Rarity)
-                    if (magicItem.Effects.Count > highestTierMagicItem.Effects.Count)
-                        highestTierMagicItem = magicItem;
+                var def = MagicItemEffectDefinitions.Get(effect.EffectType);
+                if (def == null)
+                    continue;
+
+                // Same legality check the socket/rune system uses: allowed on this item type/rarity and
+                // not violating exclusivity with what has already been added. checklootroll:false lets
+                // no-roll (e.g. legendary) effects through when the item type allows them.
+                if (!def.Requirements.CheckRequirements(CraftedItem, newMagicItem, effect.EffectType, checklootroll: false))
+                    continue;
+
+                newMagicItem.Effects.Add(new MagicItemEffect(effect.EffectType, effect.EffectValue));
             }
         }
 
-        if (highestTierMagicItem == null)
-            return;
+        // Transfer sockets from the consumed item with the most sockets, keeping its shards/runestones
+        // in place but re-resolved for the crafted item's type.
+        var socketSource = sources
+            .OrderByDescending(m => m.SocketCount)
+            .ThenByDescending(m => m.Rarity)
+            .FirstOrDefault();
+        if (socketSource != null && socketSource.SocketCount > 0)
+        {
+            newMagicItem.SocketCount = socketSource.SocketCount; // capacity, including any open slots
+            foreach (var socket in socketSource.Sockets)
+            {
+                if (socket == null)
+                    continue;
 
-        IsDoCraft = false;
-        CraftedItem.SaveMagicItem(highestTierMagicItem);
+                var carried = new SocketedEffect(null, socket.SourcePrefab, socket.SourceRarity)
+                {
+                    ShardColor = socket.ShardColor
+                };
+
+                if (socket.ShardColor != ShardColor.None)
+                {
+                    // A shard's effect depends on the host item type, so re-resolve it for the crafted
+                    // item. If it has no mapping for this item type it stays inert (Effect == null).
+                    var shardEffect = Shards.GetShardEffect(CraftedItem, socket.ShardColor);
+                    if (shardEffect != null && shardEffect.ValuesPerRarity.TryGetValue(socket.SourceRarity, out var value))
+                        carried.Effect = new MagicItemEffect(shardEffect.EffectType, value);
+                }
+                else if (socket.Effect != null)
+                {
+                    // A runestone carries a fixed effect; keep it only if valid on the crafted item.
+                    var def = MagicItemEffectDefinitions.Get(socket.Effect.EffectType);
+                    if (def != null && def.Requirements.CheckRequirements(CraftedItem, newMagicItem, socket.Effect.EffectType, checklootroll: false))
+                        carried.Effect = new MagicItemEffect(socket.Effect.EffectType, socket.Effect.EffectValue);
+                }
+
+                newMagicItem.Sockets.Add(carried);
+            }
+        }
+
+        if (newMagicItem.Effects.Count == 0 && newMagicItem.SocketCount == 0)
+            return; // nothing valid carried over; leave the crafted item mundane
+
+        newMagicItem.DisplayName = MagicItemNames.GetNameForItem(CraftedItem, newMagicItem);
+        CraftedItem.SaveMagicItem(newMagicItem);
     }
     
     [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.DoCrafting))]

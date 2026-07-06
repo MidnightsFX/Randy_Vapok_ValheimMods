@@ -1,4 +1,5 @@
 ﻿using EpicLoot.Crafting;
+using EpicLoot.Data;
 using EpicLoot.LootBeams;
 using HarmonyLib;
 
@@ -20,6 +21,19 @@ namespace EpicLoot
             {
                 __instance.gameObject.AddComponent<LootBeam>();
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(ItemDrop), nameof(ItemDrop.LoadFromExternalZDO))]
+    public static class ItemDrop_LoadFromExternalZDO_Patch
+    {
+        // Items taken from an item stand are re-instantiated from the prefab, so Awake/
+        // InitializeCustomData caches an empty MagicItemComponent before LoadFromExternalZDO
+        // reloads m_customData. Re-load the component so its MagicItem is deserialized from the
+        // freshly loaded custom data instead of staying null (item would look un-enchanted).
+        public static void Postfix(ItemDrop __instance)
+        {
+            __instance.m_itemData?.Data().Get<MagicItemComponent>()?.Load();
         }
     }
 

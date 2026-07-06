@@ -354,9 +354,10 @@ internal class ELConfig
             "1 = all materials, no items. Values between 0 and 1 change the ratio of items to materials that drop.\n" +
             "At 0.5, half of everything that drops would be items and the other half would be materials.\n" +
             "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
-        TransferMagicItemToCrafts = BindServerConfig("Balance", "Transfer Enchants to Crafted Items", false,
-            "When enchanted items are used as ingredients in recipes, transfer the highest enchant to the " +
-            "newly crafted item. Default: False.");
+        TransferMagicItemToCrafts = BindServerConfig("Balance", "Transfer Enchants to Crafted Items", true,
+            "When enchanted items are used as ingredients in recipes, transfer every enchantment from the " +
+            "consumed items that is valid on the newly crafted item, along with the highest socket count. " +
+            "Default: True.");
         RuneExtractDestroysItem = BindServerConfig("Balance", "Rune Extract Destroys Item", true,
             "When extracting a rune from an item, the item will be destroyed. If false, the item will be returned intact. " +
             "Default: True.");

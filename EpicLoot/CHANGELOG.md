@@ -1,3 +1,5 @@
+## Version 0.13.0
+
 ## Version 0.12.15
 
 * Fixed an issue with bounties not spawning correctly if not using the Star Level System mod.

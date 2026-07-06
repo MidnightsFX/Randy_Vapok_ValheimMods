@@ -27,7 +27,8 @@ namespace EpicLoot.ShardStones
         Pink, // Dodge
         Purple, // Eitr
         White, // Daytime
-        //Grey,
+        // Grey (Craft/Gather) is appended at the end of this enum instead of here so its ordinal does
+        // not shift the shards below it -- ShardColor is serialized by ordinal on socketed gear.
         // Dark shards
         DarkGreen,
         DarkPurple,
@@ -47,6 +48,9 @@ namespace EpicLoot.ShardStones
         Yagluth, // Chance to summon a meteor on hit
         Queen, // Gain a small amount of eitr from stamina usage
         Fader, // Chance to cause an aoe fire explosion on hit
+
+        // Craft/Gather (kept last so enabling it doesn't shift the ordinals of the shards above)
+        Grey,
 
         // This is the error path
         None
@@ -253,6 +257,11 @@ namespace EpicLoot.ShardStones
                         head: Pct(MagicEffectType.DartingThoughts), chest: Pct(MagicEffectType.ConsumeEitrFirstForBloodCosts), legs: Pct(MagicEffectType.EveryXPointsOfEitrIncreasesStamina),
                         trinket: Pct(MagicEffectType.ConvertEitrCostToStaminaCost), utility: Pct(MagicEffectType.RunningOnEmpty)) },
 
+                    { ShardColor.Grey, Shard(ShardCategory.Core, // ---- Craft / Gather ----
+                        melee: Pct(MagicEffectType.IncreaseHarvestDamage), ranged: Pct(MagicEffectType.IncreaseHarvestDamage), magic: Pct(MagicEffectType.IncreaseHarvestDamage),
+                        head: Pct(MagicEffectType.IncreaseMiningDrop), chest: Skill(MagicEffectType.AddFishingSkill), legs: Pct(MagicEffectType.IncreaseTreeDrop),
+                        trinket: Pct(MagicEffectType.GainAdrenalineFromHarvesting), utility: Pct(MagicEffectType.IncreaseHarvestXPGain)) },
+
                     // ---- Dark ----
                     { ShardColor.DarkRed, Shard(ShardCategory.Dark,          // Wrath / Berserk
                         // RangedWeapon lumps bows + crossbows; AddBowsSkill covers the "ranged" theme.
@@ -305,12 +314,6 @@ namespace EpicLoot.ShardStones
                     { ShardColor.Queen, BossShard(MagicEffectType.EitrSiphon) },
                     { ShardColor.Fader, BossShard(MagicEffectType.LastFire) },
 
-                    // NOTE: Grey (Craft/Gather) is designed but its ShardColor enum value is commented
-                    // out; add it back to the enum and uncomment the block below to enable it.
-                    // { ShardColor.Grey, Shard(ShardCategory.Core,
-                    //     melee: Pct(MagicEffectType.IncreaseHarvestDamage), ranged: Pct(MagicEffectType.IncreaseHarvestDamage), magic: Pct(MagicEffectType.IncreaseHarvestDamage),
-                    //     head: Pct(MagicEffectType.IncreaseMiningDrop), chest: Skill(MagicEffectType.AddFishingSkill), legs: Pct(MagicEffectType.IncreaseTreeDrop),
-                    //     trinket: Pct(MagicEffectType.GainAdrenalineFromHarvesting), utility: Pct(MagicEffectType.IncreaseHarvestXPGain)) },
                 };
 
             public static ShardDefinition Get(ShardColor color)

@@ -117,7 +117,7 @@ namespace EpicLoot
                     var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab);
                     if (socket.Effect != null)
                     {
-                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, showRange)}</color>");
+                        tooltip.AppendLine($"  ◊ <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, showRange)}</color>");
                     }
                     else if (socket.ShardColor != ShardColor.None)
                     {

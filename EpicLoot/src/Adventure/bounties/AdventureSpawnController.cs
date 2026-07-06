@@ -157,7 +157,7 @@ namespace EpicLoot.Adventure
         {
             Vector3 point = spawnPoint.Get();
 
-            const string treasureChestPrefabName = "piece_chest_wood";
+            const string treasureChestPrefabName = "loot_chest_stone";
             var treasureChestPrefab = ZNetScene.instance.GetPrefab(treasureChestPrefabName);
             ZoneSystem.instance.GetGroundData(
                 ref point, out var normal, out var foundBiome, out var biomeArea, out var hmap);
