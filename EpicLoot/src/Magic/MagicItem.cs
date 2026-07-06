@@ -114,7 +114,7 @@ namespace EpicLoot
                     }
                     var socketColor = EpicLoot.GetRarityColor(socket.SourceRarity);
                     // Inline the socketed item's own icon, resolved from its source prefab
-                    var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab, socket.ShardType);
+                    var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab);
                     if (socket.Effect != null)
                     {
                         tooltip.AppendLine($"  ◊ <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, showRange)}</color>");

@@ -121,6 +121,15 @@ public sealed class EpicLoot : BaseUnityPlugin
     {
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;
+
+        // Register definitions for the Shardstone-only effect types (blank tooltips + warnings otherwise).
+        // Re-runs on every config (re)load; the defensive call covers the case where the effect config was
+        // already loaded (during ELConfig construction) before this subscription was added.
+        MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += MagicItemEffects.Shards.ShardEffectDefinitions.RegisterShardEffectDefinitions;
+        if (MagicItemEffectDefinitions.AllDefinitions.Count > 0)
+        {
+            MagicItemEffects.Shards.ShardEffectDefinitions.RegisterShardEffectDefinitions();
+        }
     }
 
     private static void LoadEmbeddedAssembly(Assembly assembly, string assemblyName)

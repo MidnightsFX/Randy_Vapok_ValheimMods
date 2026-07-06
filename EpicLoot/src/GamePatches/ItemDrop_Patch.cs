@@ -16,6 +16,23 @@ namespace EpicLoot
             }
 
             __instance.m_itemData.InitializeCustomData();
+        }
+    }
+
+    // Only magic items get a LootBeam so its per-frame Update doesn't run on every non-magic drop.
+    // This is gated in Start rather than Awake because most drop paths (fresh kills, player/container
+    // drops via ItemDrop.DropItem, item stands via LoadFromExternalZDO) assign the magic data to
+    // m_itemData after Awake has already run. By Start (the following frame) every path has finished
+    // assigning magic, so IsMagic() is reliable here for all of them.
+    [HarmonyPatch(typeof(ItemDrop), nameof(ItemDrop.Start))]
+    public static class ItemDrop_Start_Patch
+    {
+        public static void Postfix(ItemDrop __instance)
+        {
+            if (__instance.m_itemData == null || !__instance.m_itemData.IsMagic())
+            {
+                return;
+            }
 
             if (__instance.gameObject.GetComponent<LootBeam>() == null)
             {

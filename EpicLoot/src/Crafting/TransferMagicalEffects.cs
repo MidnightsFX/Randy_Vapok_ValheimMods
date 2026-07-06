@@ -68,14 +68,14 @@ public static class TransferMagicalEffects
 
                 var carried = new SocketedEffect(null, socket.SourcePrefab, socket.SourceRarity)
                 {
-                    ShardColor = socket.ShardColor
+                    ShardType = socket.ShardType
                 };
 
-                if (socket.ShardColor != ShardColor.None)
+                if (socket.ShardType != ShardType.None)
                 {
                     // A shard's effect depends on the host item type, so re-resolve it for the crafted
                     // item. If it has no mapping for this item type it stays inert (Effect == null).
-                    var shardEffect = Shards.GetShardEffect(CraftedItem, socket.ShardColor);
+                    var shardEffect = Shards.GetShardEffect(CraftedItem, socket.ShardType);
                     if (shardEffect != null && shardEffect.ValuesPerRarity.TryGetValue(socket.SourceRarity, out var value))
                         carried.Effect = new MagicItemEffect(shardEffect.EffectType, value);
                 }
