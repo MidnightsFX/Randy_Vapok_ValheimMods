@@ -26,6 +26,8 @@ public sealed class EpicAssets
     public static AudioClip ItemLoopSFX;
     public static AudioClip AugmentItemSFX;
     public static GameObject MerchantPanel;
+    public static GameObject TemperPanel;
+    
     public static Sprite MapIconTreasureMap;
     public static Sprite MapIconBounty;
     public static AudioClip AbandonBountySFX;
