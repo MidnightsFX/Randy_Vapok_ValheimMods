@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleHelper", "ConsoleHel
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StationsAreContainers", "StationsAreContainers\StationsAreContainers.csproj", "{1BC8AD7D-949C-41E5-A721-CB6CEB68871B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicLoot-UnityLib", "EpicLoot-UnityLib\EpicLoot-UnityLib.csproj", "{8DABA031-AEA4-472F-A9AA-DE8B1AA69DE5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedPortals", "AdvancedPortals\AdvancedPortals.csproj", "{0DDDE55C-5DAF-4B53-B5E2-83B5C44C4682}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicLootAPI", "EpicLootAPI\EpicLootAPI\EpicLootAPI.csproj", "{4358610B-F3F4-4843-B7AF-98B7BC60DCDE}"
@@ -55,10 +53,6 @@ Global
 		{815F37D9-CEEA-4CDA-ABFB-C62FEA26B5F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BC8AD7D-949C-41E5-A721-CB6CEB68871B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1BC8AD7D-949C-41E5-A721-CB6CEB68871B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8DABA031-AEA4-472F-A9AA-DE8B1AA69DE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8DABA031-AEA4-472F-A9AA-DE8B1AA69DE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8DABA031-AEA4-472F-A9AA-DE8B1AA69DE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8DABA031-AEA4-472F-A9AA-DE8B1AA69DE5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0DDDE55C-5DAF-4B53-B5E2-83B5C44C4682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0DDDE55C-5DAF-4B53-B5E2-83B5C44C4682}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4358610B-F3F4-4843-B7AF-98B7BC60DCDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

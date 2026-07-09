@@ -108,6 +108,7 @@
     <None Include="Assets\ExternalLibraries\assembly_valheim.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\JVLMock\Particles_Standard Unlit2.shader" />
+    <None Include="Assets\ExternalLibraries\Newtonsoft.Json.dll" />
     <None Include="Assets\ExternalLibraries\gui_framework.dll" />
     <None Include="Assets\X_RPGVFX\RPG VFX Bundle\Shaders\Distortion.shader" />
     <None Include="Assets\ExternalLibraries\valheim\Splatform.Steam.dll" />
@@ -137,6 +138,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile SSD.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\X_RPGVFX\RPG VFX Bundle\Prefabs\Magic circles\Loop version\How to use.txt" />
+    <None Include="Assets\ExternalLibraries\System.Runtime.Serialization.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
     <None Include="Assets\ExternalLibraries\valheim\assembly_postprocessing.dll" />
     <None Include="Assets\ExternalLibraries\valheim\assembly_guiutils.dll" />
@@ -170,7 +172,7 @@
     <None Include="Assets\X_RPGVFX\RPG VFX Bundle\Scripts\Readme.txt" />
     <None Include="Assets\ExternalLibraries\valheim\Assembly-CSharp.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
-    <None Include="Assets\ExternalLibraries\EpicLoot-UnityLib.dll" />
+    <None Include="Assets\ExternalLibraries\EpicLoot.dll" />
     <None Include="Assets\ExternalLibraries\assembly_googleanalytics.dll" />
     <None Include="Assets\ExternalLibraries\Splatform.Steam.dll" />
     <None Include="Assets\ExternalLibraries\valheim\gui_framework.dll" />
@@ -682,6 +684,10 @@
       <HintPath>Assets\ExternalLibraries\valheim\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Assets\ExternalLibraries\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="gui_framework">
       <HintPath>Assets\ExternalLibraries\gui_framework.dll</HintPath>
       <Private>False</Private>
@@ -726,8 +732,8 @@
       <HintPath>Assets\ExternalLibraries\valheim\com.rlabrecque.steamworks.net.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="EpicLoot-UnityLib">
-      <HintPath>Assets\ExternalLibraries\EpicLoot-UnityLib.dll</HintPath>
+    <Reference Include="EpicLoot">
+      <HintPath>Assets\ExternalLibraries\EpicLoot.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">

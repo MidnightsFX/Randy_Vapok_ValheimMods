@@ -95,10 +95,6 @@ public sealed class EpicLoot : BaseUnityPlugin
     {
         _instance = this;
 
-        Assembly assembly = Assembly.GetExecutingAssembly();
-
-        LoadEmbeddedAssembly(assembly, "EpicLoot-UnityLib.dll");
-
         cfg = new ELConfig(Config);
 
         // Set the referenced common logger to the EL specific reference so that common things get logged
@@ -141,22 +137,6 @@ public sealed class EpicLoot : BaseUnityPlugin
         }
     }
 
-    private static void LoadEmbeddedAssembly(Assembly assembly, string assemblyName)
-    {
-        var stream = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.{assemblyName}");
-        if (stream == null)
-        {
-            LogErrorForce($"Could not load embedded assembly ({assemblyName})!");
-            return;
-        }
-
-        using (stream)
-        {
-            var data = new byte[stream.Length];
-            stream.Read(data, 0, data.Length);
-            Assembly.Load(data);
-        }
-    }
 
     //sealed void Start()
     //{

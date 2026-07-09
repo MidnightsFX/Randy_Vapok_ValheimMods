@@ -584,6 +584,10 @@
       <HintPath>Assets\ExternalLibraries\valheim\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Assets\ExternalLibraries\Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="gui_framework">
       <HintPath>Assets\ExternalLibraries\gui_framework.dll</HintPath>
       <Private>False</Private>
@@ -628,8 +632,8 @@
       <HintPath>Assets\ExternalLibraries\valheim\com.rlabrecque.steamworks.net.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="EpicLoot-UnityLib">
-      <HintPath>Assets\ExternalLibraries\EpicLoot-UnityLib.dll</HintPath>
+    <Reference Include="EpicLoot">
+      <HintPath>Assets\ExternalLibraries\EpicLoot.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib">
