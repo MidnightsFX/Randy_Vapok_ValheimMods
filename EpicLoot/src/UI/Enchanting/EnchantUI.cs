@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,17 +18,6 @@ namespace EpicLoot_UnityLib
         public MultiSelectItemList CostList;
 
         public AudioClip[] EnchantCompleteSFX;
-
-        public delegate List<InventoryItemListElement> GetEnchantableItemsDelegate();
-        public delegate string GetEnchantInfoDelegate(ItemDrop.ItemData item, MagicRarityUnity rarity);
-        public delegate List<InventoryItemListElement> GetEnchantCostDelegate(ItemDrop.ItemData item, MagicRarityUnity rarity);
-        // Returns the success dialog
-        public delegate GameObject EnchantItemDelegate(ItemDrop.ItemData item, MagicRarityUnity rarity);
-
-        public static GetEnchantableItemsDelegate GetEnchantableItems;
-        public static GetEnchantInfoDelegate GetEnchantInfo;
-        public static GetEnchantCostDelegate GetEnchantCost;
-        public static EnchantItemDelegate EnchantItem;
 
         private ToggleGroup _toggleGroup;
         private MagicRarityUnity _rarity;
@@ -59,13 +49,13 @@ namespace EpicLoot_UnityLib
         {
             foreach(AudioSource audioSource in this.GetComponentsInChildren<AudioSource>())
             {
-                audioSource.volume = AudioVolumeLevel();
+                audioSource.volume = EnchantingUIController.GetAudioLevel();
             }
 
             _rarity = MagicRarityUnity.Magic;
             OnRarityChanged();
             RarityButtons[0].isOn = true;
-            List<InventoryItemListElement> items = GetEnchantableItems();
+            List<InventoryItemListElement> items = EnchantingUIController.GetEnchantableItems();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
         }
 
@@ -131,13 +121,13 @@ namespace EpicLoot_UnityLib
             }
 
             ItemDrop.ItemData item = selectedItem.Item1.GetItem();
-            string info = GetEnchantInfo(item, _rarity);
+            string info = EnchantingUIController.GetEnchantInfo(item, _rarity);
 
             EnchantInfo.text = info;
             ScrollEnchantInfoToTop();
 
             CostLabel.enabled = true;
-            List<InventoryItemListElement> cost = GetEnchantCost(item, _rarity);
+            List<InventoryItemListElement> cost = EnchantingUIController.GetEnchantCost(item, _rarity);
             CostList.SetItems(cost.Cast<IListElement>().ToList());
 
             bool canAfford = LocalPlayerCanAffordCost(cost);
@@ -163,7 +153,7 @@ namespace EpicLoot_UnityLib
             }
 
             ItemDrop.ItemData item = selectedItem.Item1.GetItem();
-            List<InventoryItemListElement> cost = GetEnchantCost(item, _rarity);
+            List<InventoryItemListElement> cost = EnchantingUIController.GetEnchantCost(item, _rarity);
 
             Player player = Player.m_localPlayer;
             if (!player.NoCostCheat())
@@ -188,7 +178,7 @@ namespace EpicLoot_UnityLib
             DeselectAll();
             Lock();
 
-            _successDialog = EnchantItem(item, _rarity);
+            _successDialog = EnchantingUIController.EnchantItemAndReturnSuccessDialog(item, _rarity);
 
             RefreshAvailableItems();
         }
@@ -200,7 +190,7 @@ namespace EpicLoot_UnityLib
 
         public void RefreshAvailableItems()
         {
-            List<InventoryItemListElement> items = GetEnchantableItems();
+            List<InventoryItemListElement> items = EnchantingUIController.GetEnchantableItems();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
             OnSelectedItemsChanged();

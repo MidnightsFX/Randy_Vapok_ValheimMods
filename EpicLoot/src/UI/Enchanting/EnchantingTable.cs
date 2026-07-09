@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 
 namespace EpicLoot_UnityLib
@@ -18,8 +19,6 @@ namespace EpicLoot_UnityLib
         public event Action<EnchantingFeature, int> OnFeatureLevelChanged;
         public event Action OnAnyFeatureLevelChanged;
         
-        public delegate bool UpgradesActiveDelegate(EnchantingFeature feature, out bool featureActive);
-        public static UpgradesActiveDelegate UpgradesActive;
 
         private static readonly List<EnchantingFeatureUpgradeRequest> _upgradeRequests = new();
         private ZNetView _nview;
@@ -197,7 +196,7 @@ namespace EpicLoot_UnityLib
 
         private static int GetDefaultFeatureLevel(EnchantingFeature feature)
         {
-            if (!UpgradesActive(feature, out bool featureActive))
+            if (!EnchantingUIController.UpgradesActive(feature, out bool featureActive))
             {
                 return featureActive ? FeatureLevelOne : FeatureUnavailableSentinel;
             }
@@ -226,7 +225,7 @@ namespace EpicLoot_UnityLib
                 return FeatureUnavailableSentinel;
             }
 
-            if (!UpgradesActive(feature, out bool featureActive))
+            if (!EnchantingUIController.UpgradesActive(feature, out bool featureActive))
             {
                 return featureActive ? FeatureLevelOne : FeatureUnavailableSentinel;
             }
@@ -250,7 +249,7 @@ namespace EpicLoot_UnityLib
                 return;
             }
 
-            if (!UpgradesActive(feature, out bool featureActive))
+            if (!EnchantingUIController.UpgradesActive(feature, out bool featureActive))
             {
                 level = featureActive ? FeatureLevelOne : FeatureUnavailableSentinel;
             }

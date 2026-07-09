@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,30 +27,6 @@ namespace EpicLoot_UnityLib
 
         public AudioClip RunicActionCompleted;
 
-        // These use delegates which are connected at runtime from the non-unity side of EL
-        public delegate List<InventoryItemListElement> GetRuneExtractItemsDelegate();
-        public delegate List<InventoryItemListElement> GetRuneEtchItemsDelegate();
-        public delegate List<InventoryItemListElement> GetApplyableRunesDelegate(ItemDrop.ItemData item, string selected_enchantment);
-        public delegate List<Tuple<string, bool>> GetItemEnchantsDelegate(ItemDrop.ItemData item, bool runecheck);
-        public delegate List<InventoryItemListElement> GetRuneExtractCostDelegate(ItemDrop.ItemData item, MagicRarityUnity rarity, float costModifier);
-        public delegate List<InventoryItemListElement> GetRuneEtchCostDelegate(ItemDrop.ItemData item, MagicRarityUnity rarity, float costModifier);
-        public delegate bool RuneItemDestructionEnabledDelegate();
-        public delegate MagicRarityUnity GetItemRarityDelegate(ItemDrop.ItemData item);
-        public delegate ItemDrop.ItemData GetItemEnchantedByRuneDelegate(ItemDrop.ItemData item, int enchantment, float powerModifier);
-        public delegate string GetSelectedEnchantmentByIndexDelegate(ItemDrop.ItemData item, int enchantment);
-        public delegate GameObject ApplyRuneToItemAndReturnSuccess(ItemDrop.ItemData item, ItemDrop.ItemData rune, int enchantment);
-
-        public static GetApplyableRunesDelegate GetApplyableRunes;
-        public static GetRuneExtractItemsDelegate GetRuneExtractItems;
-        public static GetRuneEtchItemsDelegate GetRuneEtchItems;
-        public static GetItemEnchantsDelegate GetItemEnchants;
-        public static GetRuneExtractCostDelegate GetRuneExtractCost;
-        public static GetRuneEtchCostDelegate GetRuneEtchCost;
-        public static GetItemEnchantedByRuneDelegate ItemToBeRuned;
-        public static RuneItemDestructionEnabledDelegate ExtractItemsDestroyed;
-        public static GetItemRarityDelegate GetItemRarity;
-        public static ApplyRuneToItemAndReturnSuccess RuneEnchancedItem;
-        public static GetSelectedEnchantmentByIndexDelegate GetSelectedEnchantmentByIndex;
 
         private RuneAction _runeAction;
         private GameObject _successDialog;
@@ -118,7 +95,7 @@ namespace EpicLoot_UnityLib
             }
 
             // Set the enchantments to be selected based on the enchantments on this item
-            List<Tuple<string, bool>> info = GetItemEnchants(_selectedItem, true);
+            List<Tuple<string, bool>> info = EnchantingUIController.GetEnchantmentEffects(_selectedItem, true);
             RefreshSelectableEnchantments();
             UpdateDisplayAvailableOverwriteEnchantments(); //TODO remove?
 
@@ -133,11 +110,11 @@ namespace EpicLoot_UnityLib
 
             if (_runeAction == RuneAction.Extract)
             {
-                cost = GetRuneExtractCost(_selectedItem, _selectedRarity, costReduction);
+                cost = EnchantingUIController.GetRuneExtractCost(_selectedItem, _selectedRarity, costReduction);
             }
             else if (_runeAction == RuneAction.Etch)
             {
-                cost = GetRuneEtchCost(_selectedItem, _selectedRarity, costReduction);
+                cost = EnchantingUIController.GetRuneEtchCost(_selectedItem, _selectedRarity, costReduction);
             }
             else
             {
@@ -159,7 +136,7 @@ namespace EpicLoot_UnityLib
             }
 
             List<InventoryItemListElement> availableEnchantRunes =
-                GetApplyableRunes(_selectedItem, GetSelectedEnchantmentByIndex(_selectedItem, _selectedEnchantmentIndex));
+                EnchantingUIController.GetApplyableRunesforItem(_selectedItem, EnchantingUIController.GetSelectedEnchantmentNameByIndex(_selectedItem, _selectedEnchantmentIndex));
             AvailableRunes.SetItems(availableEnchantRunes.Cast<IListElement>().ToList());
         }
 
@@ -180,7 +157,7 @@ namespace EpicLoot_UnityLib
         {
             Tuple<InventoryItemListElement, int> entry = AvailableItems.GetSingleSelectedItem<InventoryItemListElement>();
             ItemDrop.ItemData item = entry?.Item1.GetItem();
-            List<Tuple<string, bool>> augmentableEffects = GetItemEnchants(item, true);
+            List<Tuple<string, bool>> augmentableEffects = EnchantingUIController.GetEnchantmentEffects(item, true);
 
             ClearEnchantmentList();
 
@@ -310,7 +287,7 @@ namespace EpicLoot_UnityLib
                 if (selectedItem?.Item1.GetItem() != _selectedItem)
                 {
                     _selectedItem = selectedItem.Item1.GetItem();
-                    _selectedRarity = GetItemRarity(_selectedItem);
+                    _selectedRarity = EnchantingUIController.GetItemRarity(_selectedItem);
                 }
 
                 UpdateDisplaySelectedItemEnchantments();
@@ -343,8 +320,8 @@ namespace EpicLoot_UnityLib
 
             if (_runeAction == RuneAction.Extract)
             {
-                List<InventoryItemListElement> cost = GetRuneExtractCost(item, _selectedRarity, costReduction);
-                ItemDrop.ItemData RuneWithEnchant = ItemToBeRuned(item, _selectedEnchantmentIndex, powerModifier);
+                List<InventoryItemListElement> cost = EnchantingUIController.GetRuneExtractCost(item, _selectedRarity, costReduction);
+                ItemDrop.ItemData RuneWithEnchant = EnchantingUIController.BuildEnchantedRune(item, _selectedEnchantmentIndex, powerModifier);
 
                 if (RuneWithEnchant == null)
                 {
@@ -365,7 +342,7 @@ namespace EpicLoot_UnityLib
                     }
                 }
 
-                bool destroyExtractedItem = ExtractItemsDestroyed();
+                bool destroyExtractedItem = EnchantingUIController.GetRuneDestructionEnabled();
 
                 if (destroyExtractedItem)
                 {
@@ -387,7 +364,7 @@ namespace EpicLoot_UnityLib
                     Destroy(_successDialog);
                 }
 
-                _successDialog = RuneEnchancedItem(itemToEtch, rune, _selectedEnchantmentIndex);
+                _successDialog = EnchantingUIController.RuneEnhanceItemAndReturnSuccess(itemToEtch, rune, _selectedEnchantmentIndex);
                 _successDialog.SetActive(true);
                 // Remove the rune from the inventory
                 InventoryManagement.Instance.RemoveExactItem(rune, 1);
@@ -412,11 +389,11 @@ namespace EpicLoot_UnityLib
             List<InventoryItemListElement> items;
             if (_runeAction == RuneAction.Extract)
             {
-                items = GetRuneExtractItems();
+                items = EnchantingUIController.GetRuneExtractItems();
             }
             else if (_runeAction == RuneAction.Etch)
             {
-                items = GetRuneEtchItems();
+                items = EnchantingUIController.GetRuneEtchItems();
             }
             else
             {
@@ -435,7 +412,7 @@ namespace EpicLoot_UnityLib
             if (selectedItem?.Item1.GetItem() != null)
             {
                 _selectedItem = selectedItem.Item1.GetItem();
-                _selectedRarity = GetItemRarity(_selectedItem);
+                _selectedRarity = EnchantingUIController.GetItemRarity(_selectedItem);
                 UpdateDisplaySelectedItemEnchantments();
                 _selectedEnchantmentIndex = -1;
             }
@@ -476,7 +453,7 @@ namespace EpicLoot_UnityLib
 
             if (_runeAction == RuneAction.Etch)
             {
-                List<InventoryItemListElement> cost = GetRuneEtchCost(_selectedItem, _selectedRarity, costReduction);
+                List<InventoryItemListElement> cost = EnchantingUIController.GetRuneEtchCost(_selectedItem, _selectedRarity, costReduction);
                 CostList.SetItems(cost.Cast<IListElement>().ToList());
                 state = LocalPlayerCanAffordRuneCost(cost);
 
@@ -488,7 +465,7 @@ namespace EpicLoot_UnityLib
             }
             else if (_runeAction == RuneAction.Extract)
             {
-                List<InventoryItemListElement> cost = GetRuneExtractCost(_selectedItem, _selectedRarity, costReduction);
+                List<InventoryItemListElement> cost = EnchantingUIController.GetRuneExtractCost(_selectedItem, _selectedRarity, costReduction);
                 CostList.SetItems(cost.Cast<IListElement>().ToList());
                 state = LocalPlayerCanAffordRuneCost(cost);
             }

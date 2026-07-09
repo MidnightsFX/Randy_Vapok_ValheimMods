@@ -37,61 +37,11 @@ namespace EpicLoot.CraftingV2
 
     public class EnchantingUIController : MonoBehaviour
     {
-        public static void Initialize()
-        {
-            EnchantingTableUI.AugaFixup = EnchantingUIAugaFixup.AugaFixup;
-            EnchantingTableUI.TabActivation = TabActivation;
-            EnchantingTableUI.AudioVolumeLevel = GetAudioLevel;
-            MultiSelectItemList.SortByRarity = SortByRarity;
-            MultiSelectItemList.SortByName = SortByName;
-            MultiSelectItemListElement.SetMagicItem = SetMagicItem;
-            MultiSelectItemListElement.SetItemTooltip = SetItemTooltip;
-            SacrificeUI.GetSacrificeItems = GetSacrificeItems;
-            SacrificeUI.GetSacrificeProducts = GetSacrificeProducts;
-            SacrificeUI.GetIdentifyCost = GetIdentifyCostForCategory;
-            SacrificeUI.GetIdentifyItems = GetUnidentifiedItems;
-            SacrificeUI.GetIdentifyStyles = GetIdentifyStyles;
-            SacrificeUI.GetRandomFilteredLoot = LootRollSelectedItems;
-            SacrificeUI.GetPotentialIdentifications = GetPotentialItemRollsByCategory;
-            ConvertUI.GetConversionRecipes = GetConversionRecipes;
-            SetRarityColor.GetRarityColor = GetRarityColor;
-            EnchantUI.GetEnchantableItems = GetEnchantableItems;
-            EnchantUI.GetEnchantInfo = GetEnchantInfo;
-            EnchantUI.GetEnchantCost = GetEnchantCost;
-            EnchantUI.EnchantItem = EnchantItemAndReturnSuccessDialog;
-            RuneUI.GetRuneExtractItems = GetRuneExtractItems;
-            RuneUI.GetRuneEtchItems = GetRuneEtchItems;
-            RuneUI.GetApplyableRunes = GetApplyableRunesforItem;
-            RuneUI.ExtractItemsDestroyed = GetRuneDestructionEnabled;
-            RuneUI.GetRuneExtractCost = GetRuneExtractCost;
-            RuneUI.GetRuneEtchCost = GetRuneEtchCost;
-            RuneUI.GetItemRarity = GetItemRarity;
-            RuneUI.ItemToBeRuned = BuildEnchantedRune;
-            RuneUI.RuneEnchancedItem = RuneEnhanceItemAndReturnSuccess;
-            RuneUI.GetItemEnchants = GetEnchantmentEffects;
-            RuneUI.GetSelectedEnchantmentByIndex = GetSelectedEnchantmentNameByIndex;
-            AugmentUI.GetAugmentableItems = GetAugmentableItems;
-            AugmentUI.GetAugmentableEffects = GetEnchantmentEffects;
-            AugmentUI.GetAvailableEffects = GetAvailableAugmentEffects;
-            AugmentUI.GetAugmentCost = GetAugmentCost;
-            AugmentUI.AugmentItem = AugmentItem;
-            EnchantingTable.UpgradesActive = UpgradesActive;
-            FeatureStatus.UpgradesActive = UpgradesActive;
-            DisenchantUI.GetDisenchantItems = GetDisenchantItems;
-            DisenchantUI.GetDisenchantCost = GetDisenchantCost;
-            DisenchantUI.DisenchantItem = DisenchantItem;
-            FeatureStatus.MakeFeatureUnlockTooltip = MakeFeatureUnlockTooltip;
-            EnchantingTableUIPanelBase.AudioVolumeLevel = GetAudioLevel;
-            MultiSelectItemListElement.AudioVolumeLevel = GetAudioLevel;
-            PlaySoundOnChecked.AudioVolumeLevel = GetAudioLevel;
-            AugmentChoiceDialog.AudioVolumeLevel = GetAudioLevel;
-        }
-
-        private static float GetAudioLevel() {
+        internal static float GetAudioLevel() {
             return AudioMan.GetSFXVolume() * ELConfig.UIAudioVolumeAdjustment.Value;
         }
 
-        private static bool UpgradesActive(EnchantingFeature feature, out bool featureActive)
+        internal static bool UpgradesActive(EnchantingFeature feature, out bool featureActive)
         {
             EnchantingTabs tabEnum = EnchantingTabs.None;
 
@@ -121,7 +71,7 @@ namespace EpicLoot.CraftingV2
             return ELConfig.EnchantingTableUpgradesActive.Value;
         }
 
-        private static void TabActivation(EnchantingTableUI ui)
+        internal static void TabActivation(EnchantingTableUI ui)
         {
             if (ui == null || ui.TabHandler == null)
             {
@@ -147,7 +97,7 @@ namespace EpicLoot.CraftingV2
             }
         }
 
-        private static void MakeFeatureUnlockTooltip(GameObject obj)
+        internal static void MakeFeatureUnlockTooltip(GameObject obj)
         {
             // EpicLoot.Log($"Setting up tooltip for {obj.name}");
             if (EpicLoot.HasAuga)
@@ -162,7 +112,7 @@ namespace EpicLoot.CraftingV2
             }
         }
 
-        private static void SetMagicItem(MultiSelectItemListElement element, ItemDrop.ItemData item, UITooltip tooltip)
+        internal static void SetMagicItem(MultiSelectItemListElement element, ItemDrop.ItemData item, UITooltip tooltip)
         {
             if (element.ItemIcon != null)
             {
@@ -199,7 +149,7 @@ namespace EpicLoot.CraftingV2
             }
         }
 
-        private static void SetItemTooltip(ItemDrop.ItemData item,
+        internal static void SetItemTooltip(ItemDrop.ItemData item,
             UITooltip tooltip)
         {
             if (EpicLoot.IsAllowedMagicItemType(item))
@@ -212,14 +162,14 @@ namespace EpicLoot.CraftingV2
             }
         }
 
-        private static List<IListElement> SortByRarity(List<IListElement> items)
+        internal static List<IListElement> SortByRarity(List<IListElement> items)
         {
             return items.OrderBy(x => x.GetItem().HasRarity() ? x.GetItem().GetRarity() : (ItemRarity)(-1))
                 .ThenBy(x => Localization.instance.Localize(x.GetItem().GetDecoratedName()))
                 .ToList();
         }
 
-        private static List<IListElement> SortByName(List<IListElement> items)
+        internal static List<IListElement> SortByName(List<IListElement> items)
         {
             Regex richTextRegex = new Regex(@"<[^>]*>");
             return items.OrderBy(x => richTextRegex.Replace(Localization.instance.Localize(
@@ -228,7 +178,7 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        private static List<InventoryItemListElement> GetSacrificeItems()
+        internal static List<InventoryItemListElement> GetSacrificeItems()
         {
             Player player = Player.m_localPlayer;
             List<InventoryItemListElement> result = new List<InventoryItemListElement>();
@@ -295,7 +245,7 @@ namespace EpicLoot.CraftingV2
             }
         }
 
-        private static List<InventoryItemListElement> GetSacrificeProducts(List<Tuple<ItemDrop.ItemData, int>> items)
+        internal static List<InventoryItemListElement> GetSacrificeProducts(List<Tuple<ItemDrop.ItemData, int>> items)
         {
             Dictionary<string, ItemDrop.ItemData> productsSet = new Dictionary<string, ItemDrop.ItemData>();
             foreach (Tuple<ItemDrop.ItemData, int> entry in items)
@@ -325,7 +275,7 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        private static List<ConversionRecipeUnity> GetConversionRecipes(int mode)
+        internal static List<ConversionRecipeUnity> GetConversionRecipes(int mode)
         {
             MaterialConversionType conversionType = (MaterialConversionType)mode;
             List<MaterialConversion> conversions = MaterialConversions.Conversions.GetValues(conversionType, true);
@@ -444,12 +394,12 @@ namespace EpicLoot.CraftingV2
             }
         }
 
-        private static Color GetRarityColor(MagicRarityUnity rarity)
+        internal static Color GetRarityColor(MagicRarityUnity rarity)
         {
             return EpicLoot.GetRarityColorARGB((ItemRarity)rarity);
         }
 
-        private static List<InventoryItemListElement> GetEnchantableItems()
+        internal static List<InventoryItemListElement> GetEnchantableItems()
         {
             return InventoryManagement.Instance.GetAllItems()
                 .Where(item => !item.IsMagic() && EpicLoot.CanBeMagicItem(item))
@@ -457,7 +407,7 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        private static string GetEnchantInfo(ItemDrop.ItemData item, MagicRarityUnity _rarity)
+        internal static string GetEnchantInfo(ItemDrop.ItemData item, MagicRarityUnity _rarity)
         {
             ItemRarity rarity = (ItemRarity)_rarity;
             StringBuilder sb = new StringBuilder();
@@ -512,7 +462,7 @@ namespace EpicLoot.CraftingV2
             return Localization.instance.Localize(sb.ToString());
         }
 
-        private static List<InventoryItemListElement> GetEnchantCost(ItemDrop.ItemData item, MagicRarityUnity _rarity)
+        internal static List<InventoryItemListElement> GetEnchantCost(ItemDrop.ItemData item, MagicRarityUnity _rarity)
         {
             return EnchantHelper.GetEnchantCosts(item, (ItemRarity)_rarity).Select(entry =>
             {
@@ -523,7 +473,7 @@ namespace EpicLoot.CraftingV2
             }).ToList();
         }
 
-        private static GameObject EnchantItemAndReturnSuccessDialog(ItemDrop.ItemData item, MagicRarityUnity rarity)
+        internal static GameObject EnchantItemAndReturnSuccessDialog(ItemDrop.ItemData item, MagicRarityUnity rarity)
         {
             Player player = Player.m_localPlayer;
 
@@ -641,7 +591,7 @@ namespace EpicLoot.CraftingV2
             return lootTables;
         }
 
-        private static List<InventoryItemListElement> LootRollSelectedItems(
+        internal static List<InventoryItemListElement> LootRollSelectedItems(
             string filter, List<Tuple<ItemDrop.ItemData, int>> items, float powerModifier)
         {
             IdentifyTypeConfig category = SelectLootIdentifyDetails(filter);
@@ -672,7 +622,7 @@ namespace EpicLoot.CraftingV2
             return totalRolledItems.Select(item => new InventoryItemListElement() { Item = item }).ToList();
         }
 
-        private static List<InventoryItemListElement> GetPotentialItemRollsByCategory(string filter, List<ItemDrop.ItemData> itemsSelected)
+        internal static List<InventoryItemListElement> GetPotentialItemRollsByCategory(string filter, List<ItemDrop.ItemData> itemsSelected)
         {
             IdentifyTypeConfig category = SelectLootIdentifyDetails(filter);
             List<string> resultItemNames = new List<string>();
@@ -729,12 +679,12 @@ namespace EpicLoot.CraftingV2
             return result;
         }
 
-        private static Dictionary<string, string> GetIdentifyStyles()
+        internal static Dictionary<string, string> GetIdentifyStyles()
         {
             return EnchantCostsHelper.GetIdentificationCategories();
         }
 
-        private static List<InventoryItemListElement> GetIdentifyCostForCategory(
+        internal static List<InventoryItemListElement> GetIdentifyCostForCategory(
             string filter, List<Tuple<ItemDrop.ItemData, int>> items, float costModifier = 1.0f)
         {
             if (items == null || items.Count == 0)
@@ -824,7 +774,7 @@ namespace EpicLoot.CraftingV2
             return results;
         }
 
-        private static List<InventoryItemListElement> GetUnidentifiedItems()
+        internal static List<InventoryItemListElement> GetUnidentifiedItems()
         {
             return InventoryManagement.Instance.GetAllItems()
                 .Where(item => item.IsMagic() && item.IsUnidentified())
@@ -832,7 +782,7 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        private static List<InventoryItemListElement> GetAugmentableItems()
+        internal static List<InventoryItemListElement> GetAugmentableItems()
         {
             return InventoryManagement.Instance.GetAllItems()
                 .Where(item => item.CanBeAugmented() && item.IsRunestone() == false && !item.IsUnidentified())
@@ -840,18 +790,18 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        private static MagicRarityUnity GetItemRarity(ItemDrop.ItemData item)
+        internal static MagicRarityUnity GetItemRarity(ItemDrop.ItemData item)
         {
            ItemRarity rarity = item.GetRarity();
             return (MagicRarityUnity)rarity;
         }
 
-        private static List<InventoryItemListElement> GetRuneExtractItems()
+        internal static List<InventoryItemListElement> GetRuneExtractItems()
         {
             return GetRuneModifyableItems(false);
         }
 
-        private static List<InventoryItemListElement> GetRuneEtchItems()
+        internal static List<InventoryItemListElement> GetRuneEtchItems()
         {
             return GetRuneModifyableItems(true);
         }
@@ -888,7 +838,7 @@ namespace EpicLoot.CraftingV2
             return result;
         }
 
-        private static List<InventoryItemListElement> GetApplyableRunesforItem(ItemDrop.ItemData item, string selectedEffect)
+        internal static List<InventoryItemListElement> GetApplyableRunesforItem(ItemDrop.ItemData item, string selectedEffect)
         {
             MagicItem magicItem = item.GetMagicItem();
             ItemRarity rarity = magicItem.Rarity;
@@ -940,7 +890,7 @@ namespace EpicLoot.CraftingV2
             return returnList;
         }
 
-        private static List<InventoryItemListElement> GetRuneExtractCost(ItemDrop.ItemData item, MagicRarityUnity rarity, float costModifier)
+        internal static List<InventoryItemListElement> GetRuneExtractCost(ItemDrop.ItemData item, MagicRarityUnity rarity, float costModifier)
         {
             return EnchantHelper.GetRuneCost(item, (ItemRarity)rarity, RuneActions.Extract).Select(entry =>
             {
@@ -963,7 +913,7 @@ namespace EpicLoot.CraftingV2
             }).ToList();
         }
 
-        private static List<InventoryItemListElement> GetRuneEtchCost(ItemDrop.ItemData item, MagicRarityUnity rarity, float costModifier)
+        internal static List<InventoryItemListElement> GetRuneEtchCost(ItemDrop.ItemData item, MagicRarityUnity rarity, float costModifier)
         {
             return EnchantHelper.GetRuneCost(item, (ItemRarity)rarity, RuneActions.Etch).Select(entry =>
             {
@@ -986,7 +936,7 @@ namespace EpicLoot.CraftingV2
             }).ToList();
         }
 
-        private static ItemDrop.ItemData BuildEnchantedRune(ItemDrop.ItemData selectedItem, int targetEnchant, float powerModifier)
+        internal static ItemDrop.ItemData BuildEnchantedRune(ItemDrop.ItemData selectedItem, int targetEnchant, float powerModifier)
         {
             MagicItemEffect effect = selectedItem.GetMagicItem().Effects[targetEnchant];
             MagicItemEffect runeEffect = new MagicItemEffect(effect.EffectType);
@@ -1045,7 +995,7 @@ namespace EpicLoot.CraftingV2
             return newItem;
         }
 
-        private static string GetSelectedEnchantmentNameByIndex(ItemDrop.ItemData selectedItem, int targetEnchant)
+        internal static string GetSelectedEnchantmentNameByIndex(ItemDrop.ItemData selectedItem, int targetEnchant)
         {
             if (targetEnchant > selectedItem.GetMagicItem().Effects.Count) {
                 EpicLoot.LogWarning($"Tried to get enchantment {targetEnchant} from item with only {selectedItem.GetMagicItem().Effects.Count} effects");
@@ -1055,12 +1005,12 @@ namespace EpicLoot.CraftingV2
             return selectedItem.GetMagicItem().Effects[targetEnchant].EffectType;
         }
 
-        private static bool GetRuneDestructionEnabled()
+        internal static bool GetRuneDestructionEnabled()
         {
             return ELConfig.RuneExtractDestroysItem.Value;
         }
 
-        private static GameObject RuneEnhanceItemAndReturnSuccess(ItemDrop.ItemData item, ItemDrop.ItemData rune, int enchantment)
+        internal static GameObject RuneEnhanceItemAndReturnSuccess(ItemDrop.ItemData item, ItemDrop.ItemData rune, int enchantment)
         {
             List<MagicItemEffect> runeEffects = rune.GetMagicItem().Effects;
 
@@ -1143,7 +1093,7 @@ namespace EpicLoot.CraftingV2
             return successDialog.gameObject;
         }
 
-        private static List<Tuple<string, bool>> GetEnchantmentEffects(ItemDrop.ItemData item, bool runecheck = false)
+        internal static List<Tuple<string, bool>> GetEnchantmentEffects(ItemDrop.ItemData item, bool runecheck = false)
         {
             List<Tuple<string, bool>> result = new List<Tuple<string, bool>>();
             MagicItem magicItem = item?.GetMagicItem();
@@ -1175,7 +1125,7 @@ namespace EpicLoot.CraftingV2
             return result;
         }
 
-        private static string GetAvailableAugmentEffects(ItemDrop.ItemData item, int augmentindex)
+        internal static string GetAvailableAugmentEffects(ItemDrop.ItemData item, int augmentindex)
         {
             MagicItem magicItem = item?.GetMagicItem();
             if (magicItem == null)
@@ -1210,7 +1160,7 @@ namespace EpicLoot.CraftingV2
             return sb.ToString();
         }
 
-        private static List<InventoryItemListElement> GetAugmentCost(ItemDrop.ItemData item, int augmentindex)
+        internal static List<InventoryItemListElement> GetAugmentCost(ItemDrop.ItemData item, int augmentindex)
         {
             return AugmentHelper.GetAugmentCosts(item, augmentindex)
                 .Select(x =>
@@ -1222,7 +1172,7 @@ namespace EpicLoot.CraftingV2
                 }).ToList();
         }
 
-        private static GameObject AugmentItem(ItemDrop.ItemData item, int augmentindex)
+        internal static GameObject AugmentItem(ItemDrop.ItemData item, int augmentindex)
         {
             // Set as augmented
             MagicItem magicItem = item?.GetMagicItem();
@@ -1311,7 +1261,7 @@ namespace EpicLoot.CraftingV2
             EquipmentEffectCache.Reset(Player.m_localPlayer);
         }
 
-        private static List<InventoryItemListElement> GetDisenchantItems()
+        internal static List<InventoryItemListElement> GetDisenchantItems()
         {
             List<ItemDrop.ItemData> boundItems = InventoryManagement.Instance.GetBoundItems();
 
@@ -1323,7 +1273,7 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        private static List<InventoryItemListElement> GetDisenchantCost(ItemDrop.ItemData item)
+        internal static List<InventoryItemListElement> GetDisenchantCost(ItemDrop.ItemData item)
         {
             List<InventoryItemListElement> result = new List<InventoryItemListElement>();
             if (item == null || !item.IsMagic() || item.IsUnidentified())
@@ -1392,7 +1342,7 @@ namespace EpicLoot.CraftingV2
             return result;
         }
 
-        private static List<InventoryItemListElement> DisenchantItem(ItemDrop.ItemData item)
+        internal static List<InventoryItemListElement> DisenchantItem(ItemDrop.ItemData item)
         {
             List<InventoryItemListElement> bonusItems = new List<InventoryItemListElement>();
             if (item.IsMagic(out MagicItem magicItem) && magicItem.CanBeDisenchanted())

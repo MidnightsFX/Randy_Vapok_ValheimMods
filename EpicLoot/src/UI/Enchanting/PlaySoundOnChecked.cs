@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using EpicLoot.CraftingV2;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace EpicLoot_UnityLib
@@ -8,9 +9,6 @@ namespace EpicLoot_UnityLib
     {
         public AudioSource Audio;
         public AudioClip SFX;
-
-        public delegate float AudioVolumeLevelDelegate();
-        public static AudioVolumeLevelDelegate AudioVolumeLevel;
 
         private Toggle _toggle;
 
@@ -29,7 +27,7 @@ namespace EpicLoot_UnityLib
         {
             if (Audio != null && SFX != null && _toggle.isOn)
             {
-                Audio.volume = AudioVolumeLevel();
+                Audio.volume = EnchantingUIController.GetAudioLevel();
                 Audio.PlayOneShot(SFX, Audio.volume);
             }
         }

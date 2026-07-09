@@ -1,6 +1,6 @@
 ## Version 0.13.0
 
-* Added the "Shard Drop Ratio" balance config (default 0.10): loot drops have this chance to instead drop a randomly selected Core shardstone, rolled at the same rarity as the item it replaces.
+* Fixes tooltip display for enchanted items health use percentage
 * Fixes a bug with Ragnar's ice wave which would cause a player to swim upwards in the air (upon exit) if the effect was used in a dungeon
 * Attack speed compatibility: when another mod already provides AnimationSpeedManager (embedded as a binary), Epic Loot now routes its attack-speed changes into that shared instance instead of running its own copy, so the two mods' attack-speed modifiers stack correctly instead of overwriting each other
 

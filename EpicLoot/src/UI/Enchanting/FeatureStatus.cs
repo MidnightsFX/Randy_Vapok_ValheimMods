@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,17 +15,11 @@ namespace EpicLoot_UnityLib
         public Text ManyStarsLabel;
         public UITooltip Tooltip;
 
-        public delegate void MakeFeatureUnlockTooltipDelegate(GameObject obj);
-        public static MakeFeatureUnlockTooltipDelegate MakeFeatureUnlockTooltip;
-
-        public delegate bool UpgradesActiveDelegate(EnchantingFeature feature, out bool featureActive);
-        public static UpgradesActiveDelegate UpgradesActive;
-
         public void Awake()
         {
             if (Tooltip != null)
             {
-                MakeFeatureUnlockTooltip(Tooltip.gameObject);
+                EnchantingUIController.MakeFeatureUnlockTooltip(Tooltip.gameObject);
             }
         }
 
@@ -117,7 +112,7 @@ namespace EpicLoot_UnityLib
                 {
                     for (int index = 0; index < Stars.Length; index++)
                     {
-                        bool active = level > index && UpgradesActive(Feature, out _);
+                        bool active = level > index && EnchantingUIController.UpgradesActive(Feature, out _);
                         Stars[index].gameObject.SetActive(active);
                     }
 
@@ -127,7 +122,7 @@ namespace EpicLoot_UnityLib
                 UnlockedLabel?.SetActive(level == 0);
             }
 
-            if (Tooltip != null && UpgradesActive(Feature, out _))
+            if (Tooltip != null && EnchantingUIController.UpgradesActive(Feature, out _))
             {
                 Tooltip.m_topic = Localization.instance.Localize(EnchantingTableUpgrades.GetFeatureName(Feature));
 

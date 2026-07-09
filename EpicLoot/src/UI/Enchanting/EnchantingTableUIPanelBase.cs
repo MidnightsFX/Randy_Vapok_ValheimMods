@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using EpicLoot.CraftingV2;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,9 +18,6 @@ namespace EpicLoot_UnityLib
         public AudioClip ProgressLoopSFX;
         public AudioClip CompleteSFX;
         public AudioClip MainActionSFX;
-
-        public delegate float AudioVolumeLevelDelegate();
-        public static AudioVolumeLevelDelegate AudioVolumeLevel;
 
         protected bool _inProgress;
         protected float _countdown;
@@ -57,12 +55,12 @@ namespace EpicLoot_UnityLib
             if (uiSFX && Audio != null)
             {
                 Audio.outputAudioMixerGroup = uiSFX.GetComponent<AudioSource>().outputAudioMixerGroup;
-                Audio.volume = AudioVolumeLevel();
+                Audio.volume = EnchantingUIController.GetAudioLevel();
             }
 
             foreach (AudioSource audioSource in this.GetComponentsInChildren<AudioSource>())
             {
-                audioSource.volume = AudioVolumeLevel();
+                audioSource.volume = EnchantingUIController.GetAudioLevel();
             }
         }
 

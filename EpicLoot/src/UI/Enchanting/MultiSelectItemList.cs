@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,12 +48,6 @@ namespace EpicLoot_UnityLib
 
         public event Action OnSelectedItemsChanged;
         public event Action OnItemsChanged;
-
-        public delegate List<IListElement> SortByRarityDelegate(List<IListElement> items);
-        public delegate List<IListElement> SortByNameDelegate(List<IListElement> items);
-
-        public static SortByRarityDelegate SortByRarity;
-        public static SortByNameDelegate SortByName;
 
         private bool _locked;
         private bool _hasGamepadFocus;
@@ -450,29 +445,15 @@ namespace EpicLoot_UnityLib
             switch (mode)
             {
                 case SortMode.Rarity:
-                    if (SortByRarity != null)
-                    {
-                        return SortByRarity(items);
-                    }
-                    break;
+                    return EnchantingUIController.SortByRarity(items);
                 case SortMode.Name:
-                    if (SortByName != null)
-                    {
-                        return SortByName(items);
-                    }
-                    else
-                    {
-                        return items.OrderBy(x => Localization.instance.Localize(
-                            x.GetItem().m_shared.m_name)).ThenByDescending(x => x.GetItem().m_stack).ToList();
-                    }
+                    return EnchantingUIController.SortByName(items);
                 case SortMode.Quantity:
                     return items.OrderByDescending(x => x.GetItem().m_stack)
                         .ThenBy(x => Localization.instance.Localize(x.GetItem().m_shared.m_name)).ToList();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
-
-            return items.ToList();
         }
 
         public List<Tuple<T, int>> GetSelectedItems<T>()

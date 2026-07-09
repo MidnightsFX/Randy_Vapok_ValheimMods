@@ -102,7 +102,6 @@ public sealed class EpicLoot : BaseUnityPlugin
         InitializeAbilities();
         AddLocalizations();
         LoadAssets();
-        EnchantingUIController.Initialize();
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginId);
 
         LootTableLoaded?.Invoke();

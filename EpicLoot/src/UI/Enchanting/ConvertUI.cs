@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -54,10 +55,6 @@ namespace EpicLoot_UnityLib
         public Text CostLabel;
         public MultiSelectItemList CostList;
 
-        public delegate List<ConversionRecipeUnity> GetConversionRecipesDelegate(int mode);
-
-        public static GetConversionRecipesDelegate GetConversionRecipes;
-
         private Text _progressLabel;
         private ToggleGroup _toggleGroup;
         private MaterialConversionMode _mode;
@@ -92,7 +89,7 @@ namespace EpicLoot_UnityLib
         {
             _mode = 0;
             RefreshMode();
-            List<ConversionRecipeUnity> items = GetConversionRecipes((int)_mode);
+            List<ConversionRecipeUnity> items = EnchantingUIController.GetConversionRecipes((int)_mode);
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
         }
 
@@ -251,7 +248,7 @@ namespace EpicLoot_UnityLib
 
         public void RefreshAvailableItems()
         {
-            List<ConversionRecipeUnity> items = GetConversionRecipes((int)_mode);
+            List<ConversionRecipeUnity> items = EnchantingUIController.GetConversionRecipes((int)_mode);
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
             OnSelectedItemsChanged();

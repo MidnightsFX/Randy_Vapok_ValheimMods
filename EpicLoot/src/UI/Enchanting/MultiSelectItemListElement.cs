@@ -1,4 +1,5 @@
 ﻿using System;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,9 +27,6 @@ namespace EpicLoot_UnityLib
         public bool NoMax;
         public bool UseEnchantAsName = false;
 
-        public delegate float AudioVolumeLevelDelegate();
-        public static AudioVolumeLevelDelegate AudioVolumeLevel;
-
         public AudioSource Audio;
         public AudioClip OnClickSFX;
         public GameObject GamepadFocusIndicator;
@@ -37,14 +35,6 @@ namespace EpicLoot_UnityLib
         public bool SuppressEvents;
 
         public event Action<MultiSelectItemListElement, bool, int> OnSelectionChanged;
-
-        public delegate void SetMagicItemDelegate(MultiSelectItemListElement element, ItemDrop.ItemData item, UITooltip tooltip);
-
-        public static SetMagicItemDelegate SetMagicItem;
-        
-        public delegate void SetItemTooltipDelegate(ItemDrop.ItemData item, UITooltip tooltip);
-        
-        public static SetItemTooltipDelegate SetItemTooltip;
 
         private IListElement _item;
         private int _selectedQuantity;
@@ -84,7 +74,7 @@ namespace EpicLoot_UnityLib
                     Audio.outputAudioMixerGroup = uiSFX.GetComponent<AudioSource>().outputAudioMixerGroup;
                 }
 
-                Audio.volume = AudioVolumeLevel();
+                Audio.volume = EnchantingUIController.GetAudioLevel();
             }
 
             if (!ReadOnly)
@@ -226,31 +216,8 @@ namespace EpicLoot_UnityLib
             }
             else
             {
-                if (SetMagicItem != null)
-                {
-                    SetMagicItem(this, _item.GetItem(), Tooltip);
-                    CheckAndSetNameToEnchantingEffects();
-                }
-                else
-                {
-                    if (MagicBG != null)
-                        MagicBG.enabled = false;
-                    if (ItemIcon != null)
-                        ItemIcon.sprite = _item.GetItem().GetIcon();
-                    if (ItemName != null)
-                    {
-                        if (CheckAndSetNameToEnchantingEffects() == false)
-                        {
-                            ItemName.text = Localization.instance.Localize(_item.GetItem().m_shared.m_name);
-                        }
-                    }
-
-                    if (Tooltip != null)
-                    {
-                        Tooltip.m_topic = Localization.instance.Localize(_item.GetItem().m_shared.m_name);
-                        Tooltip.m_text = Localization.instance.Localize(_item.GetItem().GetTooltip());
-                    }
-                }
+                EnchantingUIController.SetMagicItem(this, _item.GetItem(), Tooltip);
+                CheckAndSetNameToEnchantingEffects();
 
                 if (ItemName != null)
                 {
@@ -259,10 +226,7 @@ namespace EpicLoot_UnityLib
 
                 if (ItemTooltip != null)
                 {
-                    if (SetItemTooltip != null)
-                    {
-                        SetItemTooltip(_item.GetItem(), ItemTooltip);
-                    }
+                    EnchantingUIController.SetItemTooltip(_item.GetItem(), ItemTooltip);
                 }
             }
 
@@ -319,7 +283,7 @@ namespace EpicLoot_UnityLib
 
             if (Audio != null && !ReadOnly && !noSound && prevQuantity != _selectedQuantity)
             {
-                Audio.PlayOneShot(OnClickSFX, AudioVolumeLevel());
+                Audio.PlayOneShot(OnClickSFX, EnchantingUIController.GetAudioLevel());
             }
 
             Refresh();

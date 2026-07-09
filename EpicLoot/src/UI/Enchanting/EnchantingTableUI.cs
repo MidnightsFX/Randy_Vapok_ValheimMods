@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using EpicLoot.CraftingV2;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace EpicLoot_UnityLib
@@ -22,13 +23,6 @@ namespace EpicLoot_UnityLib
 
         public static EnchantingTableUI instance { get; set; }
 
-        public delegate void AugaFixupDelegate(EnchantingTableUI ui);
-        public static AugaFixupDelegate AugaFixup;
-        public delegate void TabActivationDelegate(EnchantingTableUI ui);
-        public static TabActivationDelegate TabActivation;
-        public delegate float AudioVolumeLevelDelegate();
-        public static AudioVolumeLevelDelegate AudioVolumeLevel;
-
         private int _hiddenFrames;
 
         public void Awake()
@@ -45,12 +39,12 @@ namespace EpicLoot_UnityLib
             {
                 Audio.outputAudioMixerGroup =
                     uiSFX.GetComponent<AudioSource>().outputAudioMixerGroup;
-                Audio.volume = AudioVolumeLevel();
+                Audio.volume = EnchantingUIController.GetAudioLevel();
             }
 
             instance.SetupTabs();
 
-            AugaFixup(this);
+            EnchantingUIAugaFixup.AugaFixup(this);
         }
 
         private static void CreateUI(EnchantingTable source)
@@ -95,7 +89,7 @@ namespace EpicLoot_UnityLib
                 }
             }
 
-            TabActivation(this);
+            EnchantingUIController.TabActivation(this);
         }
 
         public static void Show(EnchantingTable source)
@@ -211,12 +205,12 @@ namespace EpicLoot_UnityLib
 
         public static void UpdateTabActivation()
         {
-            TabActivation(instance);
+            EnchantingUIController.TabActivation(instance);
         }
 
         public static void UpdateUpgradeActivation()
         {
-            TabActivation(instance);
+            EnchantingUIController.TabActivation(instance);
         }
 
         public void LockTabs()

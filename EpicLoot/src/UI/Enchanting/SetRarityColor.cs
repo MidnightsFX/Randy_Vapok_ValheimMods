@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,10 +19,6 @@ namespace EpicLoot_UnityLib
     {
         public MagicRarityUnity Rarity = MagicRarityUnity.None;
         public Graphic[] Graphics;
-
-        public delegate Color GetRarityColorDelegate(MagicRarityUnity rarity);
-
-        public static GetRarityColorDelegate GetRarityColor;
 
         private readonly Dictionary<Graphic, Color> _defaultColors = new Dictionary<Graphic, Color>();
 
@@ -43,9 +40,9 @@ namespace EpicLoot_UnityLib
 
         public void Refresh()
         {
-            if (Rarity > MagicRarityUnity.None && GetRarityColor != null)
+            if (Rarity > MagicRarityUnity.None)
             {
-                Color color = GetRarityColor(Rarity);
+                Color color = EnchantingUIController.GetRarityColor(Rarity);
                 foreach (Graphic graphic in Graphics)
                 {
                     graphic.color = color;

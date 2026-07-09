@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot.CraftingV2;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,25 +29,6 @@ namespace EpicLoot_UnityLib
         public Text Warning;
         public Text Explainer;
 
-        public delegate List<InventoryItemListElement> GetSacrificeItemsDelegate();
-        public delegate List<InventoryItemListElement> GetSacrificeProductsDelegate(
-            List<Tuple<ItemDrop.ItemData, int>> items);
-        public delegate List<InventoryItemListElement> GetIdentifyCostDelegate(
-            string filterType, List<Tuple<ItemDrop.ItemData, int>> unidentifiedItems, float cost_modifier);
-        public delegate List<InventoryItemListElement> GetIdentifyItemsDelegate();
-        public delegate List<InventoryItemListElement> GetRandomFilteredLootRollDelegate(
-            string filterType, List<Tuple<ItemDrop.ItemData, int>> unidentifiedItems, float power_modifier);
-        public delegate List<InventoryItemListElement> GetPotentialIdentificationsDelegate(
-            string filterType, List<ItemDrop.ItemData> items_selected);
-        public delegate Dictionary<string, string> GetIdentifyStylesDelegate();
-
-        public static GetSacrificeItemsDelegate GetSacrificeItems;
-        public static GetSacrificeProductsDelegate GetSacrificeProducts;
-        public static GetIdentifyItemsDelegate GetIdentifyItems;
-        public static GetIdentifyCostDelegate GetIdentifyCost;
-        public static GetRandomFilteredLootRollDelegate GetRandomFilteredLoot;
-        public static GetPotentialIdentificationsDelegate GetPotentialIdentifications;
-        public static GetIdentifyStylesDelegate GetIdentifyStyles;
 
         SacrificeMode _sacrificeMode = SacrificeMode.Sacrifice;
 
@@ -64,7 +46,7 @@ namespace EpicLoot_UnityLib
 
             // Build the identify style dropdown options based on the configured styles
             IdentifyStyle.ClearOptions();
-            foreach (KeyValuePair<string, string> entry in GetIdentifyStyles())
+            foreach (KeyValuePair<string, string> entry in EnchantingUIController.GetIdentifyStyles())
             {
                 IdentifyStyle.options.Add(new Dropdown.OptionData(Localization.instance.Localize(entry.Value)));
             }
@@ -79,7 +61,7 @@ namespace EpicLoot_UnityLib
         [UsedImplicitly]
         public void OnEnable()
         {
-            List<InventoryItemListElement> items = GetSacrificeItems();
+            List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems();
             _sacrificeMode = SacrificeMode.Sacrifice;
             IdentifyStylePanel.SetActive(false);
             IdentifyToggle.isOn = false;
@@ -112,7 +94,7 @@ namespace EpicLoot_UnityLib
                 EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(EnchantingFeature.Sacrifice);
             float costReduction = GetCostReduction(featureValues.Item1);
             float powerModifier = GetPowerModifier(featureValues.Item2);
-            List<InventoryItemListElement> cost = GetIdentifyCost(filterType, unidentifiedItems, costReduction);
+            List<InventoryItemListElement> cost = EnchantingUIController.GetIdentifyCostForCategory(filterType, unidentifiedItems, costReduction);
 
             if (!LocalPlayerCanAffordCost(cost))
             {
@@ -127,7 +109,7 @@ namespace EpicLoot_UnityLib
                 }
             }
 
-            List<InventoryItemListElement> identifiedItems = GetRandomFilteredLoot(filterType, unidentifiedItems, powerModifier);
+            List<InventoryItemListElement> identifiedItems = EnchantingUIController.LootRollSelectedItems(filterType, unidentifiedItems, powerModifier);
 
             Cancel();
             RefreshAvailableItems();
@@ -147,7 +129,7 @@ namespace EpicLoot_UnityLib
         private void SacrificeItems()
         {
             List<Tuple<IListElement, int>> selectedItems = AvailableItems.GetSelectedItems<IListElement>();
-            List<InventoryItemListElement> sacrificeProducts = GetSacrificeProducts(selectedItems
+            List<InventoryItemListElement> sacrificeProducts = EnchantingUIController.GetSacrificeProducts(selectedItems
                 .Select(x => new Tuple<ItemDrop.ItemData, int>(x.Item1.GetItem(), x.Item2)).ToList());
 
             Cancel();
@@ -186,7 +168,7 @@ namespace EpicLoot_UnityLib
             }
 
             _sacrificeMode = SacrificeMode.Sacrifice;
-            List<InventoryItemListElement> items = GetSacrificeItems();
+            List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
             Warning.text = Localization.instance.Localize("$mod_epicloot_sacrifice_warning");
@@ -206,7 +188,7 @@ namespace EpicLoot_UnityLib
             }
 
             _sacrificeMode = SacrificeMode.Identify;
-            List<InventoryItemListElement> items = GetIdentifyItems();
+            List<InventoryItemListElement> items = EnchantingUIController.GetUnidentifiedItems();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
             OnSelectedItemsChanged();
@@ -222,12 +204,12 @@ namespace EpicLoot_UnityLib
         {
             if (_sacrificeMode == SacrificeMode.Identify)
             {
-                List<InventoryItemListElement> items = GetIdentifyItems();
+                List<InventoryItemListElement> items = EnchantingUIController.GetUnidentifiedItems();
                 AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             }
             else if (_sacrificeMode == SacrificeMode.Sacrifice)
             {
-                List<InventoryItemListElement> items = GetSacrificeItems();
+                List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems();
                 AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             }
 
@@ -242,7 +224,7 @@ namespace EpicLoot_UnityLib
 
             if (_sacrificeMode == SacrificeMode.Sacrifice)
             {
-                List<InventoryItemListElement> sacrificeProducts = GetSacrificeProducts(selectedItems.Select(
+                List<InventoryItemListElement> sacrificeProducts = EnchantingUIController.GetSacrificeProducts(selectedItems.Select(
                     x => new Tuple<ItemDrop.ItemData, int>(x.Item1.GetItem(), x.Item2)).ToList());
                 SacrificeProducts.SetItems(sacrificeProducts.Cast<IListElement>().ToList());
             }
@@ -250,7 +232,7 @@ namespace EpicLoot_UnityLib
             {
                 string identifyFilter = IdentifyStyle.options[IdentifyStyle.value].text;
                 List<InventoryItemListElement> potentialIdentifyItems =
-                    GetPotentialIdentifications(identifyFilter, selectedItems.Select(x => x.Item1.GetItem()).ToList());
+                    EnchantingUIController.GetPotentialItemRollsByCategory(identifyFilter, selectedItems.Select(x => x.Item1.GetItem()).ToList());
                 SacrificeProducts.SetItems(potentialIdentifyItems.Cast<IListElement>().ToList());
                 List<Tuple<ItemDrop.ItemData, int>> unidentifiedItems = selectedItems.Select(
                     x => new Tuple<ItemDrop.ItemData, int>(x.Item1.GetItem(), x.Item2)).ToList();
@@ -258,7 +240,7 @@ namespace EpicLoot_UnityLib
                     EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(EnchantingFeature.Sacrifice);
                 float costReduction = featureValues.Item1 == 0f || featureValues.Item1 == float.NaN ?
                     1.0f : 1f - (featureValues.Item1 / 100f);
-                List<InventoryItemListElement> cost = GetIdentifyCost(identifyFilter, unidentifiedItems, costReduction);
+                List<InventoryItemListElement> cost = EnchantingUIController.GetIdentifyCostForCategory(identifyFilter, unidentifiedItems, costReduction);
                 CostList.SetItems(cost.Cast<IListElement>().ToList());
                 canAfford = LocalPlayerCanAffordIdentifyCost(cost);
 

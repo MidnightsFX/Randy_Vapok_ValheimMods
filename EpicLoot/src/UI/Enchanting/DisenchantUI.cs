@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot.CraftingV2;
 using UnityEngine.UI;
 
 namespace EpicLoot_UnityLib
@@ -11,18 +12,10 @@ namespace EpicLoot_UnityLib
         public MultiSelectItemList CostList;
         public EnchantBonus BonusPanel;
 
-        public delegate List<InventoryItemListElement> GetDisenchantItemsDelegate();
-        public delegate List<InventoryItemListElement> GetDisenchantCostDelegate(ItemDrop.ItemData item);
-        public delegate List<InventoryItemListElement> DisenchantItemDelegate(ItemDrop.ItemData item);
-
-        public static GetDisenchantItemsDelegate GetDisenchantItems;
-        public static GetDisenchantCostDelegate GetDisenchantCost;
-        public static DisenchantItemDelegate DisenchantItem;
-
         [UsedImplicitly]
         public void OnEnable()
         {
-            List<InventoryItemListElement> items = GetDisenchantItems();
+            List<InventoryItemListElement> items = EnchantingUIController.GetDisenchantItems();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
         }
@@ -38,7 +31,7 @@ namespace EpicLoot_UnityLib
             }
 
             ItemDrop.ItemData item = selectedItem.Item1.GetItem();
-            List<InventoryItemListElement> cost = GetDisenchantCost(item);
+            List<InventoryItemListElement> cost = EnchantingUIController.GetDisenchantCost(item);
             if (!LocalPlayerCanAffordCost(cost))
             {
                 return;
@@ -49,7 +42,7 @@ namespace EpicLoot_UnityLib
                 InventoryManagement.Instance.RemoveItem(costElement.GetItem());
             }
 
-            List<InventoryItemListElement> bonusItems = DisenchantItem(item);
+            List<InventoryItemListElement> bonusItems = EnchantingUIController.DisenchantItem(item);
 
             if (bonusItems.Count > 0)
             {
@@ -64,7 +57,7 @@ namespace EpicLoot_UnityLib
 
         public void RefreshAvailableItems()
         {
-            List<InventoryItemListElement> items = GetDisenchantItems();
+            List<InventoryItemListElement> items = EnchantingUIController.GetDisenchantItems();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
             OnSelectedItemsChanged();
@@ -77,7 +70,7 @@ namespace EpicLoot_UnityLib
             if (selectedItem != null)
             {
                 CostLabel.enabled = true;
-                List<InventoryItemListElement> cost = GetDisenchantCost(selectedItem.Item1.GetItem());
+                List<InventoryItemListElement> cost = EnchantingUIController.GetDisenchantCost(selectedItem.Item1.GetItem());
                 CostList.SetItems(cost.Cast<IListElement>().ToList());
 
                 System.Tuple<float, float> featureValues = EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(EnchantingFeature.Disenchant);

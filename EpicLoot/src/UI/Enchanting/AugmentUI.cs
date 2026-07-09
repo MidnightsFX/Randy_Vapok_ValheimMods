@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,19 +20,6 @@ namespace EpicLoot_UnityLib
         [Header("Cost")]
         public Text CostLabel;
         public MultiSelectItemList CostList;
-
-        public delegate List<InventoryItemListElement> GetAugmentableItemsDelegate();
-        public delegate List<Tuple<string, bool>> GetAugmentableEffectsDelegate(ItemDrop.ItemData item, bool runemode);
-        public delegate string GetAvailableEffectsDelegate(ItemDrop.ItemData item, int augmentIndex);
-        public delegate List<InventoryItemListElement> GetAugmentCostDelegate(ItemDrop.ItemData item, int augmentIndex);
-        // Returns the augment choice dialog
-        public delegate GameObject AugmentItemDelegate(ItemDrop.ItemData item, int augmentIndex);
-
-        public static GetAugmentableItemsDelegate GetAugmentableItems;
-        public static GetAugmentableEffectsDelegate GetAugmentableEffects;
-        public static GetAvailableEffectsDelegate GetAvailableEffects;
-        public static GetAugmentCostDelegate GetAugmentCost;
-        public static AugmentItemDelegate AugmentItem;
 
         private int _augmentIndex;
         private GameObject _choiceDialog;
@@ -72,7 +60,7 @@ namespace EpicLoot_UnityLib
 
             OnAugmentIndexChanged();
 
-            List<InventoryItemListElement> items = GetAugmentableItems();
+            List<InventoryItemListElement> items = EnchantingUIController.GetAugmentableItems();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             DeselectAll();
         }
@@ -154,13 +142,13 @@ namespace EpicLoot_UnityLib
             else
             {
                 ItemDrop.ItemData item = selectedItem.Item1.GetItem();
-                string info = GetAvailableEffects(item, _augmentIndex);
+                string info = EnchantingUIController.GetAvailableAugmentEffects(item, _augmentIndex);
 
                 AvailableEffectsText.text = info;
                 ScrollEnchantInfoToTop();
 
                 CostLabel.enabled = true;
-                List<InventoryItemListElement> cost = GetAugmentCost(item, _augmentIndex);
+                List<InventoryItemListElement> cost = EnchantingUIController.GetAugmentCost(item, _augmentIndex);
                 CostList.SetItems(cost.Cast<IListElement>().ToList());
 
                 Tuple<float, float> featureValues = EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(EnchantingFeature.Augment);
@@ -196,7 +184,7 @@ namespace EpicLoot_UnityLib
             }
 
             ItemDrop.ItemData item = selectedItem.Item1.GetItem();
-            List<InventoryItemListElement> cost = GetAugmentCost(item, _augmentIndex);
+            List<InventoryItemListElement> cost = EnchantingUIController.GetAugmentCost(item, _augmentIndex);
 
             Player player = Player.m_localPlayer;
             if (!player.NoCostCheat())
@@ -218,11 +206,11 @@ namespace EpicLoot_UnityLib
                 Destroy(_choiceDialog);
             }
 
-            _choiceDialog = AugmentItem(item, _augmentIndex);
+            _choiceDialog = EnchantingUIController.AugmentItem(item, _augmentIndex);
 
             foreach (AudioSource audioSource in _choiceDialog.GetComponentsInChildren<AudioSource>())
             {
-                audioSource.volume = AudioVolumeLevel();
+                audioSource.volume = EnchantingUIController.GetAudioLevel();
             }
 
             Lock();
@@ -262,7 +250,7 @@ namespace EpicLoot_UnityLib
             }
 
             ItemDrop.ItemData item = entry?.Item1.GetItem();
-            List<Tuple<string, bool>> augmentableEffects = GetAugmentableEffects(item, false);
+            List<Tuple<string, bool>> augmentableEffects = EnchantingUIController.GetEnchantmentEffects(item, false);
 
             int enchantIndex = 0;
             foreach (Tuple<string, bool> effect in augmentableEffects)
@@ -272,7 +260,7 @@ namespace EpicLoot_UnityLib
                 Toggle enchantmentbutton = enchantmentListElement.GetComponent<Toggle>();
                 foreach (AudioSource audioSource in enchantmentListElement.GetComponentsInChildren<AudioSource>())
                 {
-                    audioSource.volume = AudioVolumeLevel();
+                    audioSource.volume = EnchantingUIController.GetAudioLevel();
                 }
 
                 _AugmentSelectors.Add(enchantmentbutton);
