@@ -362,6 +362,10 @@ namespace EpicLoot.CraftingV2
                     Cost = new List<ConversionRecipeCostUnity>()
                 };
 
+                // Shards have one prefab per color; the produced rarity comes from ProductQuality
+                // (rarity = quality-1), stamped so MagicItem.Rarity and m_quality both reflect the target.
+                StampConversionQuality(recipe.Product, conversion.ProductQuality);
+
                 bool hasSomeItems = false;
                 foreach (MaterialConversionRequirement requirement in conversion.Resources)
                 {
@@ -393,13 +397,18 @@ namespace EpicLoot.CraftingV2
                         requiredAmount = Mathf.CeilToInt(materialConversionAmount * recipe.Amount);
                     }
 
+                    ItemDrop.ItemData costItem = reqItemDrop.m_itemData.Clone();
+                    // A rarity-specific requirement (the "From" shard) carries its quality so the count and
+                    // consumption below match exactly that rarity rather than any shard of the color.
+                    StampConversionQuality(costItem, requirement.Quality);
+
                     recipe.Cost.Add(new ConversionRecipeCostUnity
                     {
-                        Item = reqItemDrop.m_itemData.Clone(),
+                        Item = costItem,
                         Amount = requiredAmount
                     });
 
-                    if (InventoryManagement.Instance.CountItem(reqItemDrop.m_itemData.m_shared.m_name) > 0)
+                    if (InventoryManagement.Instance.CountItem(costItem) > 0)
                     {
                         hasSomeItems = true;
                     }
@@ -412,6 +421,27 @@ namespace EpicLoot.CraftingV2
             }
 
             return result;
+        }
+
+        // Applies a conversion's target quality to a produced/required item clone. For ShardStones
+        // (rarity = quality-1) this stamps MagicItem.Rarity + m_quality via Shards.StampRarity, so the
+        // produced shard is the upgraded rarity and a required shard matches the right rarity in inventory;
+        // other items simply take the raw quality. Quality 0 means "leave the clone as-is".
+        private static void StampConversionQuality(ItemDrop.ItemData item, int quality)
+        {
+            if (item == null || quality <= 0)
+            {
+                return;
+            }
+
+            if (global::EpicLoot.ShardStones.Shards.IsShard(item))
+            {
+                global::EpicLoot.ShardStones.Shards.StampRarity(item, (ItemRarity)(quality - 1));
+            }
+            else
+            {
+                item.m_quality = quality;
+            }
         }
 
         private static Color GetRarityColor(MagicRarityUnity rarity)

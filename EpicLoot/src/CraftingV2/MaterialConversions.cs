@@ -17,6 +17,9 @@ namespace EpicLoot.CraftingV2
     {
         public string Item = "";
         public int Amount = 1;
+        // >0: require a specific item quality. Used for ShardStones, whose rarity is m_quality (= rarity+1)
+        // and which share one name per color; 0 leaves matching quality-agnostic (the default for materials).
+        public int Quality = 0;
     }
 
     [Serializable]
@@ -25,6 +28,9 @@ namespace EpicLoot.CraftingV2
         public string Name = "";
         public string Product = "";
         public int Amount = 1;
+        // >0: stamp the produced item to this quality. For ShardStones this becomes the upgraded rarity
+        // (rarity = quality-1), applied via Shards.StampRarity so the MagicItem metadata matches.
+        public int ProductQuality = 0;
         public MaterialConversionType Type;
         public List<MaterialConversionRequirement> Resources = new List<MaterialConversionRequirement>();
     }

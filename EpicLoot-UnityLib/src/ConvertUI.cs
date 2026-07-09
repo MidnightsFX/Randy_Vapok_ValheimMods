@@ -199,7 +199,11 @@ namespace EpicLoot_UnityLib
                 ConversionRecipeUnity recipe = entry.Item1;
                 int multiple = entry.Item2;
 
-                if (products.TryGetValue(recipe.Product.m_shared.m_name, out ItemDrop.ItemData item))
+                // Key by name AND quality: ShardStones share one name per color across rarities (rarity is
+                // m_quality), so grouping by name alone would merge different-rarity products into one stack.
+                // Non-shard materials are all quality 1, so their grouping is unchanged.
+                string key = recipe.Product.m_shared.m_name + "#" + recipe.Product.m_quality;
+                if (products.TryGetValue(key, out ItemDrop.ItemData item))
                 {
                     item.m_stack += recipe.Amount * multiple;
                 }
@@ -207,7 +211,7 @@ namespace EpicLoot_UnityLib
                 {
                     item = recipe.Product.Clone();
                     item.m_stack = recipe.Amount * multiple;
-                    products.Add(item.m_shared.m_name, item);
+                    products.Add(key, item);
                 }
             }
 
@@ -225,7 +229,10 @@ namespace EpicLoot_UnityLib
 
                 foreach (ConversionRecipeCostUnity recipeCost in recipe.Cost)
                 {
-                    if (costs.TryGetValue(recipeCost.Item.m_shared.m_name, out ItemDrop.ItemData item))
+                    // Key by name AND quality so a required ShardStone at a specific rarity (m_quality) is not
+                    // merged with the same-named shard at another rarity. Non-shards are quality 1: unchanged.
+                    string key = recipeCost.Item.m_shared.m_name + "#" + recipeCost.Item.m_quality;
+                    if (costs.TryGetValue(key, out ItemDrop.ItemData item))
                     {
                         item.m_stack += recipeCost.Amount * multiple;
                     }
@@ -233,7 +240,7 @@ namespace EpicLoot_UnityLib
                     {
                         item = recipeCost.Item.Clone();
                         item.m_stack = recipeCost.Amount * multiple;
-                        costs.Add(item.m_shared.m_name, item);
+                        costs.Add(key, item);
                     }
                 }
             }

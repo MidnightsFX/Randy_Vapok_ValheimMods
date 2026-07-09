@@ -43,20 +43,42 @@ public class InventoryManagement
         return null;
     }
 
+    // Shards share one m_shared.m_name per color across all rarities (rarity is encoded in m_quality), so
+    // count/have/remove for them must match quality too, or a recipe requiring a specific rarity would
+    // consume/afford the wrong one. Returns the item's quality for shards and -1 (match any quality,
+    // vanilla default) for everything else, so non-shard behavior is byte-for-byte unchanged.
+    private static int ShardMatchQuality(ItemDrop.ItemData item)
+    {
+        return item?.m_shared != null && item.m_shared.m_ammoType != null &&
+               item.m_shared.m_ammoType.EndsWith("ShardStone")
+            ? item.m_quality
+            : -1;
+    }
+
     public bool HasItem(ItemDrop.ItemData item)
     {
         Inventory inventory = GetInventory();
-
-        if (inventory == null || inventory.CountItems(item.m_shared.m_name) < item.m_stack)
+        if (inventory == null)
         {
             return false;
         }
 
-        return true;
+        int shardQuality = ShardMatchQuality(item);
+        int count = shardQuality >= 0
+            ? inventory.CountItems(item.m_shared.m_name, shardQuality, false)
+            : inventory.CountItems(item.m_shared.m_name);
+        return count >= item.m_stack;
     }
 
     public int CountItem(ItemDrop.ItemData item)
     {
+        int shardQuality = ShardMatchQuality(item);
+        if (shardQuality >= 0)
+        {
+            Inventory inventory = GetInventory();
+            return inventory == null ? 0 : inventory.CountItems(item.m_shared.m_name, shardQuality, false);
+        }
+
         return CountItem(item.m_shared.m_name);
     }
 
@@ -175,6 +197,14 @@ public class InventoryManagement
 
     public void RemoveItem(ItemDrop.ItemData item)
     {
+        int shardQuality = ShardMatchQuality(item);
+        if (shardQuality >= 0)
+        {
+            Inventory inventory = GetInventory();
+            inventory?.RemoveItem(item.m_shared.m_name, item.m_stack, shardQuality, false);
+            return;
+        }
+
         RemoveItem(item.m_shared.m_name, item.m_stack);
     }
 
