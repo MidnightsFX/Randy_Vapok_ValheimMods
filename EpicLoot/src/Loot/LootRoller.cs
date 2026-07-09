@@ -631,6 +631,20 @@ namespace EpicLoot
                     InitializeMagicItem(itemData);
                 }
 
+                // Shards are non-equipable Materials (so CanBeMagicItem above skips them) and must stay
+                // effect-less until socketed. When the drop entry carries a Rarity weight array, roll the
+                // rarity, clamp it to the shard color's declared set, and stamp it into the shard's
+                // metadata + m_quality -- no rolled effects.
+                if (itemDrop != null && global::EpicLoot.ShardStones.Shards.IsShard(itemDrop.m_itemData) &&
+                    !ArrayUtils.IsNullOrEmpty(lootDrop.Rarity))
+                {
+                    var shardColor = global::EpicLoot.ShardStones.Shards.GetShardColor(itemDrop.m_itemData);
+                    var shardRarity = global::EpicLoot.ShardStones.Shards.ClampToRaritySet(shardColor,
+                        RollItemRarity(lootDrop, luckFactor));
+                    global::EpicLoot.ShardStones.Shards.StampRarity(itemDrop.m_itemData, shardRarity);
+                    itemDrop.Save();
+                }
+
                 results.Add(item);
             }
 

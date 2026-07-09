@@ -130,6 +130,15 @@ public sealed class EpicLoot : BaseUnityPlugin
         {
             MagicItemEffects.Shards.ShardEffectDefinitions.RegisterShardEffectDefinitions();
         }
+
+        // Generate the ShardStone rarity-upgrade recipes (enchanting "Upgrade" tab). Same event/defensive
+        // pattern as the shard effect definitions above: re-runs on every material-conversions (re)load,
+        // with a defensive call if that config was already loaded before this subscription was added.
+        CraftingV2.MaterialConversions.OnSetupMaterialConversions += ShardStones.ShardStoneConversions.RegisterShardStoneUpgradeConversions;
+        if (CraftingV2.MaterialConversions.Config != null)
+        {
+            ShardStones.ShardStoneConversions.RegisterShardStoneUpgradeConversions();
+        }
     }
 
     private static void LoadEmbeddedAssembly(Assembly assembly, string assemblyName)
@@ -382,6 +391,11 @@ public sealed class EpicLoot : BaseUnityPlugin
         EpicAssets.AbilityBar = assetBundle.LoadAsset<GameObject>("AbilityBar");
         EpicAssets.WelcomMessagePrefab = assetBundle.LoadAsset<GameObject>("WelcomeMessage");
 
+        // Register the frost-cone AOE effect (Ragnar set / FrostDamageAOE) so its ZNetView networks
+        // properly, and route its ripped SFX through the volume mixer once AudioMan exists (below).
+        EpicAssets.IceSpikesVFX = assetBundle.LoadAsset<GameObject>(FrostAOE.Attack_DoMeleeAttack_Transpiler.FxPrefabName);
+        PrefabManager.Instance.AddPrefab(new CustomPrefab(EpicAssets.IceSpikesVFX, false));
+
         EpicAssets.BulwarkStatusEffect = assetBundle.LoadAsset<SE_Stats>(EpicAssets.Bulwark_SE_Name);
         EpicAssets.BulwarkMagicShieldVFX = assetBundle.LoadAsset<GameObject>("MagicShield");
         EpicAssets.BulwarkMagicShieldSFX = assetBundle.LoadAsset<GameObject>("sfx_bulwark");
@@ -408,6 +422,9 @@ public sealed class EpicLoot : BaseUnityPlugin
         RegisterStatusEffects();
 
         PrefabManager.OnPrefabsRegistered += SetupAndvaranaut;
+        // Runs during ZNetScene setup (after IceSpikes is registered, while AudioMan exists) so the
+        // frost-cone SFX is routed through the volume mixer instead of playing at full volume.
+        PrefabManager.OnPrefabsRegistered += FrostAOE.HookUpIceSpikesAudio;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
         ShardStones.Shards.CreateAndLoadShardItems();

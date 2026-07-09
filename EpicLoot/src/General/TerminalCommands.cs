@@ -22,6 +22,7 @@ namespace EpicLoot.General
             CommandManager.Instance.AddConsoleCommand(new PrintConfig());
             CommandManager.Instance.AddConsoleCommand(new CheatSocketsCommand());
             CommandManager.Instance.AddConsoleCommand(new SpawnShardCommand());
+            CommandManager.Instance.AddConsoleCommand(new MagicShardsCommand());
             CommandManager.Instance.AddConsoleCommand(new SocketInfoCommand());
             CommandManager.Instance.AddConsoleCommand(new SocketCommand());
             CommandManager.Instance.AddConsoleCommand(new UnsocketCommand());
@@ -174,6 +175,22 @@ namespace EpicLoot.General
                 fullArgs[0] = Name;
                 args.CopyTo(fullArgs, 1);
                 ShardDebug.SpawnShard(Console.instance, fullArgs);
+            }
+        }
+
+        internal class MagicShardsCommand : ConsoleCommand
+        {
+            public override string Name => "magicshards";
+            public override string Help => "Spawns one of each shard color in your inventory eg: magicshards <rarity>";
+            public override bool IsCheat => true;
+
+            public override void Run(string[] args)
+            {
+                // ShardDebug.SpawnAllShards expects the command name at index 0, but Jotunn strips it from args.
+                var fullArgs = new string[args.Length + 1];
+                fullArgs[0] = Name;
+                args.CopyTo(fullArgs, 1);
+                ShardDebug.SpawnAllShards(Console.instance, fullArgs);
             }
         }
 

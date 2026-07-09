@@ -40,6 +40,8 @@ public sealed class EpicAssets
     public static SE_Stats UndyingStatusEffect;
     public static SE_Stats DodgeBuffStatusEffect;
 
+    public static GameObject IceSpikesVFX;
+
     public static GameObject BulwarkMagicShieldVFX;
     public static GameObject BulwarkMagicShieldSFX;
 

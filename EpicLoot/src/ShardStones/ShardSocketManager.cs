@@ -257,8 +257,17 @@ namespace EpicLoot.ShardStones
             item.m_dropPrefab = prefab;
             item.m_stack = 1;
 
+            if (socketed.ShardType != ShardType.None)
+            {
+                // Loose shards carry no baked effect (it is derived from the host when socketed). Restore
+                // rarity through StampRarity so m_quality is set too and the shard stacks with like shards.
+                Shards.StampRarity(item, socketed.SourceRarity);
+                return item;
+            }
+
+            // Runestone: rebuild its fixed single effect (its prefab is already rarity-specific).
             var magicItem = new MagicItem { Rarity = socketed.SourceRarity };
-            if (socketed.ShardType == ShardType.None && socketed.Effect != null)
+            if (socketed.Effect != null)
             {
                 magicItem.Effects.Add(new MagicItemEffect(socketed.Effect.EffectType, socketed.Effect.EffectValue));
             }
@@ -275,10 +284,11 @@ namespace EpicLoot.ShardStones
                 return $"EtchedRunestone{input.GetMagicItem().Rarity}";
             }
 
+            // Shards are one prefab per color now (rarity lives in metadata); ammoType = "{Color}|ShardStone".
             string[] shardData = input.m_shared.m_ammoType.Split('|');
-            if (shardData.Length == 3)
+            if (shardData.Length >= 2)
             {
-                return $"{shardData[1]}_{shardData[0]}_ShardStone";
+                return $"{shardData[0]}_ShardStone";
             }
 
             return "";

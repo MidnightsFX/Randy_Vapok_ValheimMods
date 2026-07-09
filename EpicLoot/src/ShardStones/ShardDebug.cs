@@ -31,28 +31,73 @@ namespace EpicLoot.ShardStones
                 return;
             }
 
-            // Prefab names are built in Shards.CreateAndLoadShardItems as "{Color}_{Rarity}_ShardStone".
-            string prefabName = $"{color}_{rarity}_ShardStone";
+            var actualRarity = Shards.ClampToRaritySet(color, rarity);
+            if (TrySpawnShard(context, color, actualRarity))
+            {
+                context.AddString($"> Spawned {color} Shard ({actualRarity}).");
+            }
+        }
+
+        // Spawns one shard of every color (except the None error path) at the given rarity (default Epic).
+        public static void SpawnAllShards(Terminal context, string[] args)
+        {
+            if (Player.m_localPlayer == null)
+            {
+                return;
+            }
+
+            var rarity = ItemRarity.Epic;
+            if (args.Length >= 2 && !Enum.TryParse(args[1], true, out rarity))
+            {
+                context.AddString($"> Unknown rarity '{args[1]}'. Use Magic/Rare/Epic/Legendary/Mythic.");
+                return;
+            }
+
+            var spawned = 0;
+            foreach (ShardType color in Enum.GetValues(typeof(ShardType)))
+            {
+                if (color == ShardType.None)
+                {
+                    continue;
+                }
+
+                if (TrySpawnShard(context, color, Shards.ClampToRaritySet(color, rarity)))
+                {
+                    spawned++;
+                }
+            }
+
+            context.AddString($"> Spawned {spawned} shard(s) ({rarity}).");
+        }
+
+        // Clones the requested shard prefab into the player's inventory. Returns false (and prints why) if
+        // the prefab is missing or the inventory rejects it.
+        private static bool TrySpawnShard(Terminal context, ShardType color, ItemRarity rarity)
+        {
+            // One prefab per color now (Shards.CreateAndLoadShardItems); rarity is stamped per instance.
+            string prefabName = $"{color}_ShardStone";
             var shard = PrefabManager.Instance.GetPrefab(prefabName);
             ItemDrop id = shard != null ? shard.GetComponent<ItemDrop>() : null;
             if (id == null)
             {
                 context.AddString($"> Failed to get shard prefab '{prefabName}'.");
-                return;
+                return false;
             }
 
             // Clone so we add a fresh item rather than the shared prefab's ItemData reference.
             var itemData = id.m_itemData.Clone();
             itemData.m_dropPrefab = shard;
             itemData.m_stack = 1;
+            // Stamp the requested rarity into metadata + m_quality (rarity is not baked into the prefab).
+            Shards.StampRarity(itemData, rarity);
 
             bool status = Player.m_localPlayer.GetInventory().AddItem(itemData);
             if (!status)
             {
-                context.AddString($"> Failed to add shard to inventory.");
-                return;
+                context.AddString($"> Failed to add {color} shard to inventory.");
+                return false;
             }
-            context.AddString($"> Spawned {color} Shard ({rarity}).");
+            return true;
         }
 
         public static void PrintSocketInfo(Terminal context)

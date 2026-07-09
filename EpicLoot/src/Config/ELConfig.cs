@@ -9,6 +9,7 @@ using EpicLoot.GatedItemType;
 using EpicLoot.LegendarySystem;
 using EpicLoot.Magic;
 using EpicLoot.Patching;
+using EpicLoot.ShardStones;
 using EpicLoot_UnityLib;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -87,6 +88,8 @@ internal class ELConfig
     public static ConfigEntry<bool> AutoAddRemoveEquipmentFromLootLists;
     public static ConfigEntry<bool> EnableHotReloadPatches;
     public static ConfigEntry<bool> AlwaysRefreshCoreConfigs;
+    public static ConfigEntry<int> TooltipMaxWidth;
+    public static ConfigEntry<int> TooltipMaxHeight;
 
     public static ConfigEntry<bool> RuneExtractDestroysItem;
 
@@ -102,6 +105,7 @@ internal class ELConfig
     private static CustomRPC MaterialConversionRPC;
     private static CustomRPC EnchantingUpgradesRPC;
     private static CustomRPC AutoSorterConfigurationRPC;
+    private static CustomRPC ShardStonesRPC;
 
     private static string LocalizationDir = GetLocalizationDirectoryPath();
     private static readonly List<string> LocalizationLanguages = new List<string>() {
@@ -179,8 +183,10 @@ internal class ELConfig
             OnServerRecieveConfigs, OnClientRecieveMaterialConversionConfigs);
         EnchantingUpgradesRPC = NetworkManager.Instance.AddRPC("EnchantingUpgradesRPC",
             OnServerRecieveConfigs, OnClientRecieveEnchantingUpgradesConfigs);
-        AutoSorterConfigurationRPC = NetworkManager.Instance.AddRPC("AutoSorterConfigurationRPC", 
+        AutoSorterConfigurationRPC = NetworkManager.Instance.AddRPC("AutoSorterConfigurationRPC",
             OnServerRecieveConfigs, OnClientRecieveAutoSorterConfigs);
+        ShardStonesRPC = NetworkManager.Instance.AddRPC("epicloot_shardstones_RPC",
+            OnServerRecieveConfigs, OnClientRecieveShardStonesConfigs);
     }
 
     private void CreateConfigValues(ConfigFile Config)
@@ -236,6 +242,10 @@ internal class ELConfig
             "1 = full UI sounds\n" +
             "0 = no UI sounds",
             new AcceptableValueRange<float>(0, 1)));
+
+        // Tooltips
+        TooltipMaxWidth = Config.Bind("Tooltips", "Max Width", 350, new ConfigDescription("Maximum width of the item tooltip box, in pixels.", new AcceptableValueRange<int>(150, 1200)));
+        TooltipMaxHeight = Config.Bind("Tooltips", "Max Height", 650, new ConfigDescription("Maximum height of the item tooltip box, in pixels. Content taller than this scrolls.", new AcceptableValueRange<int>(350, 4000)));
 
         // Logging
         _loggingEnabled = Config.Bind("Logging", "Logging Enabled", true, "Enable logging");
@@ -413,6 +423,8 @@ internal class ELConfig
             LootTablesRPC, LootRoller.GetCFG);
         SychronizeConfig<MagicItemEffectsList>("magiceffects.json", MagicItemEffectDefinitions.Initialize,
             MagicEffectsRPC, MagicItemEffectDefinitions.GetMagicItemEffectDefinitions);
+        SychronizeConfig<ShardStonesConfig>("shardstones.json", Shards.InitializeShardDefinitions,
+            ShardStonesRPC, Shards.GetCFG);
         // Adventure data has to be loaded before iteminfo, as iteminfo uses the adventure data to determine what items can drop
         SychronizeConfig<AdventureDataConfig>("adventuredata.json", AdventureDataManager.Initialize,
             AdventureDataRPC, AdventureDataManager.GetCFG);
@@ -752,6 +764,12 @@ internal class ELConfig
     private static IEnumerator OnClientRecieveAutoSorterConfigs(long sender, ZPackage package)
     {
         AutoAddEnchantableItems.InitializeConfig(ClientRecieveParseJsonConfig<AutoSorterConfiguration>(package.ReadString()));
+        yield return null;
+    }
+
+    private static IEnumerator OnClientRecieveShardStonesConfigs(long sender, ZPackage package)
+    {
+        Shards.InitializeShardDefinitions(ClientRecieveParseJsonConfig<ShardStonesConfig>(package.ReadString()));
         yield return null;
     }
 

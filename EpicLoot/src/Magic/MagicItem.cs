@@ -42,7 +42,7 @@ namespace EpicLoot
     {
         public int Version = 2;
         public MagicItemEffect Effect;  // null for an inert shard (no effect for the host item type)
-        public string SourcePrefab;     // e.g. "EtchedRunestoneEpic" / "Yellow_Epic_ShardStone"
+        public string SourcePrefab;     // e.g. "EtchedRunestoneEpic" / "Yellow_ShardStone"
         public ItemRarity SourceRarity; // for tooltip range + reconstruction
         public ShardType ShardType = ShardType.None; // set for shard sockets; None for runestones
 
@@ -117,7 +117,7 @@ namespace EpicLoot
                     var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab);
                     if (socket.Effect != null)
                     {
-                        tooltip.AppendLine($"  ◊ <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, showRange)}</color>");
+                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, showRange)}</color>");
                     }
                     else if (socket.ShardType != ShardType.None)
                     {
@@ -127,7 +127,7 @@ namespace EpicLoot
                 }
                 for (var i = 0; i < GetOpenSocketCount(); i++)
                 {
-                    tooltip.AppendLine("  <color=#808080> $mod_epicloot_empty_socket</color>");
+                    tooltip.AppendLine("  ◊<color=#808080> $mod_epicloot_empty_socket</color>");
                 }
             }
 

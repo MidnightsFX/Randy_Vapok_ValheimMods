@@ -67,7 +67,11 @@ namespace EpicLoot.MagicItemEffects
         {
             if (owner != null && owner.IsPlayer() && __instance != null && __instance.m_nview != null)
             {
-                __instance.m_nview.GetZDO().Set("epic loot modify stagger damage",
+                var zdo = __instance.m_nview.GetZDO();
+                if (zdo == null)
+                    return;
+
+                zdo.Set("epic loot modify stagger damage",
                     ModifyStaggerDamage_Character_Damage_Patch.ReadStaggerDamageValue((Player)owner));
             }
         }
