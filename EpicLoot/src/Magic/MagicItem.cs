@@ -42,10 +42,28 @@ namespace EpicLoot
         public string TypeNameOverride;
         public int AugmentedEffectIndex = -1;
         public List<int> AugmentedEffectIndices = new List<int>();
+        public List<int> TemperedEffectIndices = new List<int>();
         public string DisplayName;
         public string LegendaryID;
         public string SetID;
         public bool IsUnidentified = false;
+
+        public MagicItem()
+        {
+        }
+
+        public MagicItem(int version, ItemRarity rarity, string typeNameOverride, int augmentedEffectIndex, List<int> augmentedEffectIndices, string displayName, string legendaryID, string setID, bool isUnidentified)
+        {
+            Version = version;
+            Rarity = rarity;
+            TypeNameOverride = typeNameOverride;
+            AugmentedEffectIndex = augmentedEffectIndex;
+            AugmentedEffectIndices = augmentedEffectIndices;
+            DisplayName = displayName;
+            LegendaryID = legendaryID;
+            SetID = setID;
+            IsUnidentified = isUnidentified;
+        }
 
         public string GetItemTypeName(ItemDrop.ItemData baseItem)
         {
@@ -53,6 +71,40 @@ namespace EpicLoot
                 Localization.instance.Localize(baseItem.m_shared.m_name).ToLowerInvariant() : TypeNameOverride;
         }
 
+        public string GetMagicEffectPip(int effectIndex)
+        {
+            if (EpicLoot.HasAuga)
+            {
+                if (HasBeenAugmented(effectIndex))
+                {
+                    return "▾";
+                }
+
+                if (HasBeenTempered(effectIndex))
+                {
+                    return "▲";
+                }
+
+                return "♦";
+            }
+            else
+            {
+                if (HasBeenAugmented(effectIndex))
+                {
+                    return "▼";
+                }
+
+                if (HasBeenTempered(effectIndex))
+                {
+                    return "▲";
+                }
+
+                return "◆";
+            }
+
+        }
+        public bool HasBeenAugmented(int index) => AugmentedEffectIndex == index || AugmentedEffectIndices.Contains(index);
+        public bool HasBeenTempered(int index) => TemperedEffectIndices.Contains(index);
         public string GetRarityDisplay()
         {
             var color = GetColorString();
@@ -69,7 +121,7 @@ namespace EpicLoot
             for (var index = 0; index < Effects.Count; index++)
             {
                 var effect = Effects[index];
-                var pip = EpicLoot.GetMagicEffectPip(IsEffectAugmented(index));
+                var pip = GetMagicEffectPip(index);
                 tooltip.AppendLine($"{pip} {GetEffectText(effect, Rarity, showRange)}");
             }
 

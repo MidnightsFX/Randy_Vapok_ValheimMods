@@ -58,6 +58,12 @@
       <Link>EpicLoot-UnityLib.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
+    
+    <ItemGroup>
+        <EmbeddedResource Include="..\ValheimUnity/AssetBundles\temperbundle">
+            <Link>temperbundle</Link>
+        </EmbeddedResource>
+    </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EpicLoot-UnityLib\EpicLoot-UnityLib.csproj">

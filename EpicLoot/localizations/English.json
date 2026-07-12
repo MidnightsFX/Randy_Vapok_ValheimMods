@@ -1480,5 +1480,19 @@
     "mod_epicloot_search_placeholder": "Search...",
     "mod_epicloot_no_active_adventures": "No active adventures",
     "mod_epicloot_set_bonuses": "Set Bonuses",
-    "mod_epicloot_legendary_sets": "Legendary Sets"
+    "mod_epicloot_legendary_sets": "Legendary Sets",
+  
+    "mod_epicloot_enchantments": "Enchantments",
+    "mod_epicloot_output": "Output",
+    "mod_epicloot_history": "History",
+    "mod_epicloot_requirements": "Requirements",
+    "mod_epicloot_info": "Info",
+    "mod_epicloot_min": "Min",
+    "mod_epicloot_max": "Max",
+    "mod_epicloot_increment": "Increment",
+    "mod_epicloot_minmax": "Min Max",
+    "mod_epicloot_successchance": "Success Chance",
+    "mod_epicloot_criticalsuccess": "Critical Success",
+    "mod_epicloot_criticalfail": "Critical Fail",
+    "mod_epicloot_temper": "Temper"
 }
