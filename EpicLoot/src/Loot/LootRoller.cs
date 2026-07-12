@@ -455,6 +455,11 @@ namespace EpicLoot
 
                 var lootDrop = ResolveLootDrop(ld);
 
+                // Expand a "{Rarity}" placeholder into a concrete per-rarity prefab name before any of the
+                // branches below look the prefab up. Remembers the rolled rarity so a shard spawned from a
+                // token entry is stamped with that same roll (see the shard branch after the spawn).
+                ItemRarity? tokenShardRarity = ExpandRarityToken(lootDrop, luckFactor);
+
                 var itemName = !string.IsNullOrEmpty(lootDrop?.Item) ? lootDrop.Item : "Invalid Item Name";
                 var rarityLength = lootDrop?.Rarity?.Length != null ? lootDrop.Rarity.Length : -1;
                 EpicLoot.Log($"Item: {itemName} - Rarity Count: {rarityLength} - Weight: {lootDrop.Weight}");
@@ -632,15 +637,14 @@ namespace EpicLoot
                 }
 
                 // Shards are non-equipable Materials (so CanBeMagicItem above skips them) and must stay
-                // effect-less until socketed. When the drop entry carries a Rarity weight array, roll the
-                // rarity, clamp it to the shard color's declared set, and stamp it into the shard's
-                // metadata + m_quality -- no rolled effects.
-                if (itemDrop != null && global::EpicLoot.ShardStones.Shards.IsShard(itemDrop.m_itemData) &&
-                    !ArrayUtils.IsNullOrEmpty(lootDrop.Rarity))
+                // effect-less until socketed. Ensure the spawned shard carries its rarity metadata: reuse
+                // the rarity rolled for a "{Rarity}" token entry, otherwise fall back to whatever the
+                // per-rarity prefab baked. An explicit stamp is required because Instantiate does not copy
+                // baked custom data on the container/disabled-init path.
+                if (itemDrop != null && global::EpicLoot.ShardStones.Shards.IsShard(itemDrop.m_itemData))
                 {
-                    var shardColor = global::EpicLoot.ShardStones.Shards.GetShardColor(itemDrop.m_itemData);
-                    var shardRarity = global::EpicLoot.ShardStones.Shards.ClampToRaritySet(shardColor,
-                        RollItemRarity(lootDrop, luckFactor));
+                    var shardRarity = tokenShardRarity ??
+                        global::EpicLoot.ShardStones.Shards.GetShardRarity(itemDrop.m_itemData);
                     global::EpicLoot.ShardStones.Shards.StampRarity(itemDrop.m_itemData, shardRarity);
                     itemDrop.Save();
                 }
@@ -978,6 +982,35 @@ namespace EpicLoot
             }
 
             return results;
+        }
+
+        // Expands a "{Rarity}" placeholder in a resolved loot entry's Item name into a concrete per-rarity
+        // prefab name (e.g. "Red_{Rarity}_ShardStone" -> "Red_Rare_ShardStone"). The rarity is rolled from
+        // the entry's Rarity[] weights; when the name is "{Color}_{Rarity}_..." the roll is clamped to that
+        // shard color's declared rarity set, so a weight aimed at a rarity the color lacks snaps to the
+        // nearest valid one rather than naming a missing prefab. Returns the rolled rarity so the caller can
+        // stamp the spawned shard with the same roll, or null when there is no token. Mutates lootDrop.Item
+        // in place -- safe because ResolveLootDrop returns a fresh copy.
+        private static ItemRarity? ExpandRarityToken(LootDrop lootDrop, float luckFactor)
+        {
+            const string token = "{Rarity}";
+            if (lootDrop?.Item == null || !lootDrop.Item.Contains(token))
+            {
+                return null;
+            }
+
+            var rarity = RollItemRarity(lootDrop, luckFactor);
+
+            int sep = lootDrop.Item.IndexOf("_" + token, StringComparison.Ordinal);
+            if (sep > 0 &&
+                Enum.TryParse(lootDrop.Item.Substring(0, sep), true, out global::EpicLoot.ShardStones.ShardType color) &&
+                color != global::EpicLoot.ShardStones.ShardType.None)
+            {
+                rarity = global::EpicLoot.ShardStones.Shards.ClampToRaritySet(color, rarity);
+            }
+
+            lootDrop.Item = lootDrop.Item.Replace(token, rarity.ToString());
+            return rarity;
         }
 
         public static ItemRarity RollItemRarity(LootDrop lootDrop, float luckFactor)

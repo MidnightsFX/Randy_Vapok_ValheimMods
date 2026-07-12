@@ -114,8 +114,8 @@ namespace EpicLoot.ShardStones {
     public class ShardDefinition {
         public ShardCategory Category = ShardCategory.Core;
 
-        // The rarities this shard can be created/dropped at. A shard's rarity is stored per instance in
-        // its MagicItem metadata (and mirrored to m_quality for stacking); this set constrains drop rolls
+        // The rarities this shard can be created/dropped at. Each (color, rarity) is a distinct prefab and
+        // a shard's rarity is stored per instance in its MagicItem metadata; this set constrains drop rolls
         // and debug spawns (see Shards.ClampToRaritySet). Left empty here on purpose: Newtonsoft APPENDS
         // to a pre-initialized collection, so a non-empty default would merge with the JSON list;
         // InitializeShardDefinitions backfills all five when the config omits it.
@@ -146,8 +146,8 @@ namespace EpicLoot.ShardStones {
     public static class Shards {
         public static readonly String ShardIndicator = "ShardStone";
 
-        // Shards stack, separated by rarity via m_quality (see StampRarity). This is the shared per-color
-        // prefab stack cap; identical-rarity shards merge up to this many.
+        // Per-(color, rarity) prefab stack cap. Each (color, rarity) is a distinct prefab with a distinct
+        // display name, so only identical-rarity shards of the same color merge -- up to this many.
         private const int ShardStackSize = 100;
 
         // Shard effect/rarity definitions, loaded from config/shardstones.json (registered in
@@ -178,10 +178,10 @@ namespace EpicLoot.ShardStones {
             return new ShardStonesConfig { Shards = _definitions };
         }
 
-        // Sets a shard instance's rarity in BOTH places that must never drift: the MagicItem metadata
-        // (the semantic source of truth that code reads) and m_quality (the stacking key -- vanilla
-        // stacking matches name+quality+worldLevel, so different rarities stay in separate stacks).
-        // Always assign shard rarity through here.
+        // Sets a shard instance's rarity in its MagicItem metadata -- the semantic source of truth read
+        // by GetShardRarity, socketing, and tooltips. Rarity is otherwise encoded in the prefab name /
+        // distinct display name (see CreateAndLoadShardItems), which is what separates inventory stacks;
+        // m_quality is no longer used for shards. Always assign shard rarity through here.
         public static void StampRarity(ItemDrop.ItemData item, ItemRarity rarity) {
             if (item == null) {
                 return;
@@ -190,7 +190,6 @@ namespace EpicLoot.ShardStones {
             var magicItem = mic.MagicItem ?? new MagicItem();
             magicItem.Rarity = rarity;
             mic.SetMagicItem(magicItem);
-            item.m_quality = (int)rarity + 1;
         }
 
         // Snaps a rarity to the nearest one in a color's declared set (Rarities in shardstones.json).
@@ -210,22 +209,6 @@ namespace EpicLoot.ShardStones {
                 }
             }
             return best;
-        }
-
-        // The lowest rarity a color is valid at -- the template default baked into the shared prefab
-        // before real instances are re-stamped at drop/spawn/unsocket. Falls back to Magic.
-        private static ItemRarity DefaultRarity(ShardType color) {
-            var set = ShardDefinitions.Get(color)?.Rarities;
-            if (set == null || set.Count == 0) {
-                return ItemRarity.Magic;
-            }
-            ItemRarity lowest = set[0];
-            foreach (var r in set) {
-                if ((int)r < (int)lowest) {
-                    lowest = r;
-                }
-            }
-            return lowest;
         }
 
         // Accessors kept under the ShardDefinitions name for existing call sites (MagicTooltipShard,
@@ -260,8 +243,8 @@ namespace EpicLoot.ShardStones {
         }
 
         public static ItemRarity GetShardRarity(ItemDrop.ItemData item) {
-            // A shard's rarity is stored in its MagicItem metadata (the semantic source of truth);
-            // m_quality mirrors it only so different rarities stay in separate stacks.
+            // A shard's rarity is stored in its MagicItem metadata (the semantic source of truth); the
+            // prefab name / display name also encode it, but this metadata is what code reads.
             if (!IsShard(item)) {
                 return ItemRarity.Magic;
             }
@@ -474,33 +457,34 @@ namespace EpicLoot.ShardStones {
 
                 Enum.TryParse(shardColor, true, out ShardType color);
 
-                // One prefab per color. Rarity is NOT baked into the prefab -- it is stamped per instance
-                // (drop/spawn/unsocket) into MagicItem metadata + m_quality. Shards stack, separated by
-                // rarity via m_quality, so m_maxQuality stays 1 (no "level" badge / upgrade UI).
-                var prefab = UnityEngine.Object.Instantiate(genericPrefab);
-                string PrefabName = $"{shardColor}_ShardStone";
-                prefab.name = PrefabName;
-                ItemDrop pid = prefab.GetComponent<ItemDrop>();
-                pid.m_itemData.m_dropPrefab = prefab;
-                pid.m_itemData.m_shared.m_icons = new Sprite[] { EpicAssets.AssetBundle.LoadAsset<Sprite>($"Assets/EpicLoot/Sprites/Shardstones/{shardColor}.png") };
-                pid.m_itemData.m_shared.m_ammoType = $"{shardColor}|ShardStone";
-                pid.m_itemData.m_shared.m_maxStackSize = ShardStackSize;
-                pid.m_itemData.m_shared.m_maxQuality = 1;
+                foreach(ItemRarity rarity in ShardDefinitions.Get(color).Rarities) {
+                    var prefab = UnityEngine.Object.Instantiate(genericPrefab);
+                    string PrefabName = $"{shardColor}_{rarity}_ShardStone";
+                    prefab.name = PrefabName;
+                    ItemDrop pid = prefab.GetComponent<ItemDrop>();
+                    pid.m_itemData.m_dropPrefab = prefab;
+                    pid.m_itemData.m_shared.m_icons = new Sprite[] { EpicAssets.AssetBundle.LoadAsset<Sprite>($"Assets/EpicLoot/Sprites/Shardstones/{shardColor}.png") };
+                    pid.m_itemData.m_shared.m_ammoType = $"{shardColor}|ShardStone";
+                    pid.m_itemData.m_shared.m_maxStackSize = ShardStackSize;
 
-                // Template default: the lowest rarity this color is valid at. StampRarity sets the
-                // MagicItem metadata and mirrors it to m_quality.
-                StampRarity(pid.m_itemData, DefaultRarity(color));
-                pid.Save();
+                    // Bake this prefab's rarity into its MagicItem metadata (the semantic source of
+                    // truth read by GetShardRarity/socketing). Rarity is part of the prefab identity now.
+                    StampRarity(pid.m_itemData, rarity);
+                    pid.Save();
 
-                ItemConfig ShardItemConfig = new ItemConfig() {
-                    Name = $"$mod_epicloot_shard_{shardColor} $mod_epicloot_assets_shardstone",
-                    Description = "$mod_epicloot_assets_shardstone_introduce",
-                };
+                    // Include the rarity in the display name so each (color, rarity) prefab is a
+                    // distinct name -- that is what keeps different rarities in separate inventory
+                    // stacks (vanilla merges by name), e.g. "$mod_epicloot_Rare Red Shardstone".
+                    ItemConfig ShardItemConfig = new ItemConfig() {
+                        Name = $"{EpicLoot.GetRarityDisplayName(rarity)} $mod_epicloot_shard_{shardColor} $mod_epicloot_assets_shardstone",
+                        Description = "$mod_epicloot_assets_shardstone_introduce",
+                    };
 
-                CustomItem custom = new CustomItem(prefab, false, ShardItemConfig);
-                ItemManager.Instance.AddItem(custom);
+                    CustomItem custom = new CustomItem(prefab, false, ShardItemConfig);
+                    ItemManager.Instance.AddItem(custom);
 
-                shardPrefabNames.Add(PrefabName);
+                    shardPrefabNames.Add(PrefabName);
+                }
             }
 
             // Enable items once things are working so that ZNet issues don't happen.

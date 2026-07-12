@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot;
 using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,7 +33,7 @@ namespace EpicLoot_UnityLib
         private GameObject _successDialog;
         private ItemDrop.ItemData _selectedItem;
         private ItemDrop.ItemData _selectedOverrideRune;
-        private MagicRarityUnity _selectedRarity = MagicRarityUnity.Magic;
+        private ItemRarity _selectedRarity = ItemRarity.Magic;
         private int _selectedEnchantmentIndex = -1;
 
         private enum RuneAction
@@ -236,7 +237,7 @@ namespace EpicLoot_UnityLib
         {
             _runeAction = RuneAction.Extract;
             MainButton.GetComponentInChildren<Text>().text = Localization.instance.Localize("$mod_epicloot_rune_extract");
-            Warning.text = Localization.instance.Localize("$mod_epicloot_rune_extract_warning");
+            Warning.text = Localization.instance.Localize(EnchantingUIController.GetRuneExtractWarningKey());
 
             // Deselect runes and clear them
             AvailableRunesWindow.SetActive(false);
@@ -342,12 +343,21 @@ namespace EpicLoot_UnityLib
                     }
                 }
 
-                bool destroyExtractedItem = EnchantingUIController.GetRuneDestructionEnabled();
-
-                if (destroyExtractedItem)
+                // Apply the configured effect to the source item. The rune was already built above.
+                switch (EnchantingUIController.GetRuneExtractMode())
                 {
-                    // Destroy the item
-                    InventoryManagement.Instance.RemoveExactItem(item, 1);
+                    case RuneExtractMode.KeepItem:
+                        // Item returned untouched.
+                        break;
+                    case RuneExtractMode.ReduceEnchants:
+                        EnchantingUIController.ReduceItemAfterRuneExtract(item, _selectedEnchantmentIndex, reduceRarity: false);
+                        break;
+                    case RuneExtractMode.ReduceEnchantsAndRarity:
+                        EnchantingUIController.ReduceItemAfterRuneExtract(item, _selectedEnchantmentIndex, reduceRarity: true);
+                        break;
+                    case RuneExtractMode.DestroyItem:
+                        InventoryManagement.Instance.RemoveExactItem(item, 1);
+                        break;
                 }
 
                 InventoryManagement.Instance.GiveItem(RuneWithEnchant);

@@ -10,6 +10,7 @@ public partial class MagicTooltip
     {
         var color = Shards.GetShardColor(item);
         var def = Shards.ShardDefinitions.Get(color);
+        var showDetails = MagicItem.ShowEffectDetails;
 
         text.Append("\n");
         if (def == null || (def.UniformEffect == null && def.TypeEffects.Count == 0))
@@ -31,6 +32,7 @@ public partial class MagicTooltip
                     var allSlots = Localization.instance.Localize("$mod_epicloot_shard_allslots");
                     var uniformText = MagicItem.GetEffectText(uniformDef, uniformValue);
                     text.AppendLine($"  <color={magicColor}>{allSlots}: {uniformText}</color>");
+                    AppendShardEffectDetails(uniformDef.Type, uniformValue, showDetails);
                 }
             }
 
@@ -58,6 +60,25 @@ public partial class MagicTooltip
             var typeName = Shards.GetCategoryDisplayName(pair.Key);
             var effectText = MagicItem.GetEffectText(effectMagicDef, value);
             text.AppendLine($"  <color={magicColor}>{typeName}: {effectText}</color>");
+            AppendShardEffectDetails(effectMagicDef.Type, value, showDetails);
+        }
+    }
+
+    // Appends the dim, indented detail block (description + config) under a previewed shard effect
+    // when Shift is held. A shard grants a fixed value per rarity, so the range line is suppressed by
+    // passing a single-value override; only the description and any config lines are shown.
+    private void AppendShardEffectDetails(string effectType, float value, bool showDetails)
+    {
+        if (!showDetails)
+        {
+            return;
+        }
+
+        var fixedValue = new MagicItemEffectDefinition.ValueDef { MinValue = value, MaxValue = value, Increment = 0 };
+        var block = MagicItem.GetEffectDetailBlock(new MagicItemEffect(effectType, value), magicItem.Rarity, null, fixedValue, "     ");
+        if (block.Length > 0)
+        {
+            text.Append($"<color=#c0c0c0ff>{block}</color>");
         }
     }
 }

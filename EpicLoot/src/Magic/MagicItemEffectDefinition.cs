@@ -9,6 +9,21 @@ using static ItemDrop;
 
 namespace EpicLoot
 {
+    // Why a requirement check failed, so callers (e.g. shard socketing) can give specific feedback
+    // instead of a single generic "not allowed" message. Other is the catch-all for any failure path
+    // that wasn't explicitly categorized, including checks added to CheckRequirements later.
+    public enum RequirementFailure
+    {
+        None,
+        Other,
+        NoRoll,
+        ConflictingEffect,
+        MissingRequiredEffect,
+        ItemTypeNotAllowed,
+        RarityNotAllowed,
+        ItemPropertyMismatch
+    }
+
     [Serializable]
     public class MagicItemEffectRequirements
     {
@@ -106,17 +121,36 @@ namespace EpicLoot
 
         public bool CheckRequirements([NotNull] ItemDrop.ItemData itemData, [NotNull] MagicItem magicItem, string magicEffectType = null, bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false)
         {
+            return CheckRequirements(itemData, magicItem, out _, out _, magicEffectType, checklootroll, checkaugmentroll, checkruneroll);
+        }
+
+        // Same predicate as the overload above, but also reports WHY it failed (see RequirementFailure) so
+        // callers can surface a specific reason. For ConflictingEffect, `conflictEffectType` names the
+        // offending effect already on the item. `failure` defaults to Other so any uncategorized early-out
+        // (e.g. a check added later without a category) surfaces as unknown rather than reading as success.
+        public bool CheckRequirements([NotNull] ItemDrop.ItemData itemData, [NotNull] MagicItem magicItem,
+            out RequirementFailure failure, out string conflictEffectType, string magicEffectType = null,
+            bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false)
+        {
+            failure = RequirementFailure.Other;
+            conflictEffectType = null;
+
             if (checklootroll && NoRoll) {
+                failure = RequirementFailure.NoRoll;
                 return false;
             }
 
             if (ExclusiveSelf && magicItem.HasEffect(magicEffectType))
             {
+                failure = RequirementFailure.ConflictingEffect;
+                conflictEffectType = magicEffectType;
                 return false;
             }
 
             if (ExclusiveEffectTypes?.Count > 0 && magicItem.HasAnyEffect(ExclusiveEffectTypes))
             {
+                failure = RequirementFailure.ConflictingEffect;
+                conflictEffectType = ExclusiveEffectTypes.FirstOrDefault(t => magicItem.HasEffect(t));
                 return false;
             }
 
@@ -135,6 +169,7 @@ namespace EpicLoot
                     }
                     else
                     {
+                        failure = RequirementFailure.MissingRequiredEffect;
                         return false;
                     }
                 }
@@ -142,98 +177,116 @@ namespace EpicLoot
 
             if (!AllowByItemType(itemData))
             {
+                failure = RequirementFailure.ItemTypeNotAllowed;
                 return false;
             }
 
             if (ExcludeByItemType(itemData))
             {
+                failure = RequirementFailure.ItemTypeNotAllowed;
                 return false;
             }
 
             if (AllowedRarities?.Count > 0 && !AllowedRarities.Contains(magicItem.Rarity))
             {
+                failure = RequirementFailure.RarityNotAllowed;
                 return false;
             }
 
             if (ExcludedRarities?.Count > 0 && ExcludedRarities.Contains(magicItem.Rarity))
             {
+                failure = RequirementFailure.RarityNotAllowed;
                 return false;
             }
 
             if (AllowedSkillTypes?.Count > 0 && !AllowedSkillTypes.Contains(itemData.m_shared.m_skillType))
             {
+                failure = RequirementFailure.ItemTypeNotAllowed;
                 return false;
             }
 
             if (ExcludedSkillTypes?.Count > 0 && ExcludedSkillTypes.Contains(itemData.m_shared.m_skillType))
             {
+                failure = RequirementFailure.ItemTypeNotAllowed;
                 return false;
             }
 
             if (AllowedItemNames?.Count > 0 && !(AllowedItemNames.Contains(itemData.m_shared.m_name) ||
                 AllowedItemNames.Contains(itemData.m_dropPrefab?.name)))
             {
+                failure = RequirementFailure.ItemTypeNotAllowed;
                 return false;
             }
 
             if (ExcludedItemNames?.Count > 0 && (ExcludedItemNames.Contains(itemData.m_shared.m_name) ||
                 ExcludedItemNames.Contains(itemData.m_dropPrefab?.name)))
             {
+                failure = RequirementFailure.ItemTypeNotAllowed;
                 return false;
             }
 
             if (ItemHasPhysicalDamage != null &&
                 (ItemHasPhysicalDamage == itemData.m_shared.m_damages.GetTotalPhysicalDamage() <= 0))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
 
             if (ItemHasElementalDamage != null &&
                 (ItemHasElementalDamage == !itemData.EpicLootHasElementalDamage()))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
             
             if (ItemHasChopDamage != null &&
                 (ItemHasChopDamage == itemData.m_shared.m_damages.m_chop <= 0))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
 
             if (ItemUsesDurability != null &&
                 (ItemUsesDurability == !itemData.m_shared.m_useDurability))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
 
             if (ItemHasNegativeMovementSpeedModifier != null &&
                 (ItemHasNegativeMovementSpeedModifier == itemData.m_shared.m_movementModifier >= 0))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
 
             if (ItemHasBlockPower != null && (ItemHasBlockPower == itemData.m_shared.m_blockPower <= 0))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
 
             if (ItemHasParryPower != null && (ItemHasParryPower == itemData.m_shared.m_timedBlockBonus <= 0))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
 
             if (ItemHasNoParryPower != null && (ItemHasNoParryPower == itemData.m_shared.m_timedBlockBonus > 0))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
 
             if (ItemHasArmor != null && (ItemHasArmor == (itemData.m_shared.m_armor <= 0 || !IsArmorType(itemData.m_shared.m_itemType))))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
 
             if (ItemHasBackstabBonus != null && (ItemHasBackstabBonus == itemData.m_shared.m_backstabBonus <= 0))
             {
+                failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
 
@@ -243,6 +296,7 @@ namespace EpicLoot
                     itemData.m_shared.m_secondaryAttack.m_attackStamina > 0;
                 if (ItemUsesStaminaOnAttack.Value != hasStamina)
                 {
+                    failure = RequirementFailure.ItemPropertyMismatch;
                     return false;
                 }
             }
@@ -258,6 +312,7 @@ namespace EpicLoot
 
                 if (ItemUsesEitrOnAttack.Value != hasEitr)
                 {
+                    failure = RequirementFailure.ItemPropertyMismatch;
                     return false;
                 }
             }
@@ -272,6 +327,7 @@ namespace EpicLoot
 
                 if (ItemUsesHealthOnAttack.Value != usesHealth)
                 {
+                    failure = RequirementFailure.ItemPropertyMismatch;
                     return false;
                 }
             }
@@ -283,10 +339,12 @@ namespace EpicLoot
 
                 if (ItemUsesDrawStaminaOnAttack.Value != drawStamina)
                 {
+                    failure = RequirementFailure.ItemPropertyMismatch;
                     return false;
                 }
             }
 
+            failure = RequirementFailure.None;
             return true;
         }
 
@@ -361,14 +419,24 @@ namespace EpicLoot
         public string Ability;
         public Dictionary<string, float> Config = new Dictionary<string, float>();
 
-        public string GetDescriptionTextWithConfig() {
-            string description = Description;
-            if (Config != null && Config.Count > 0) {
-                foreach(var kvp in Config) {
-                    description += $" {kvp.Key}: {kvp.Value}";
-                }
+        // Human-readable label for a Config key, used in the detailed (Shift) tooltip. Resolved via a
+        // two-tier localization lookup with a raw-key fallback: a per-effect override token first
+        // (mod_epicloot_me_<type>_config_<key>), then a shared generic token (mod_epicloot_config_<key>),
+        // then the raw key name when neither is defined. Mirrors the fallback idiom in Shards.GetCategoryDisplayName.
+        public string GetConfigLabel(string key) {
+            var perEffect = $"mod_epicloot_me_{Type.ToLowerInvariant()}_config_{key.ToLowerInvariant()}";
+            var localizedPerEffect = Localization.instance.Localize($"${perEffect}");
+            if (!string.Equals(localizedPerEffect, perEffect, StringComparison.Ordinal)) {
+                return localizedPerEffect;
             }
-            return description;
+
+            var generic = $"mod_epicloot_config_{key.ToLowerInvariant()}";
+            var localizedGeneric = Localization.instance.Localize($"${generic}");
+            if (!string.Equals(localizedGeneric, generic, StringComparison.Ordinal)) {
+                return localizedGeneric;
+            }
+
+            return key;
         }
 
         public List<string> GetAllowedItemTypes()

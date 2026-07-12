@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot;
 using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,7 +21,7 @@ namespace EpicLoot_UnityLib
         public AudioClip[] EnchantCompleteSFX;
 
         private ToggleGroup _toggleGroup;
-        private MagicRarityUnity _rarity;
+        private ItemRarity _rarity;
         private GameObject _successDialog;
 
         public override void Awake()
@@ -52,7 +53,7 @@ namespace EpicLoot_UnityLib
                 audioSource.volume = EnchantingUIController.GetAudioLevel();
             }
 
-            _rarity = MagicRarityUnity.Magic;
+            _rarity = ItemRarity.Magic;
             OnRarityChanged();
             RarityButtons[0].isOn = true;
             List<InventoryItemListElement> items = EnchantingUIController.GetEnchantableItems();
@@ -92,13 +93,13 @@ namespace EpicLoot_UnityLib
 
         public void RefreshRarity()
         {
-            MagicRarityUnity prevRarity = _rarity;
+            ItemRarity prevRarity = _rarity;
             for (int index = 0; index < RarityButtons.Count; index++)
             {
                 Toggle button = RarityButtons[index];
                 if (button.isOn)
                 {
-                    _rarity = (MagicRarityUnity)index;
+                    _rarity = (ItemRarity)index;
                 }
             }
 

@@ -42,7 +42,7 @@ namespace EpicLoot
     {
         public int Version = 2;
         public MagicItemEffect Effect;  // null for an inert shard (no effect for the host item type)
-        public string SourcePrefab;     // e.g. "EtchedRunestoneEpic" / "Yellow_ShardStone"
+        public string SourcePrefab;     // e.g. "EtchedRunestoneEpic" / "Yellow_Epic_ShardStone"
         public ItemRarity SourceRarity; // for tooltip range + reconstruction
         public ShardType ShardType = ShardType.None; // set for shard sockets; None for runestones
 
@@ -87,9 +87,13 @@ namespace EpicLoot
             return $"<color={color}>{EpicLoot.GetRarityDisplayName(Rarity)}</color>";
         }
 
+        // True while the player holds Shift, used to reveal the detailed per-effect tooltip block
+        // (description, roll range, config values). Shared by the magic-item and loose-shard tooltips.
+        public static bool ShowEffectDetails => ZInput.GetKey(KeyCode.LeftShift) || ZInput.GetKey(KeyCode.RightShift);
+
         public string GetTooltip()
         {
-            var showRange = ZInput.GetKey(KeyCode.LeftShift) || ZInput.GetKey(KeyCode.RightShift);
+            var showRange = ShowEffectDetails;
 
             var color = GetColorString();
             var tooltip = new StringBuilder();
@@ -98,7 +102,19 @@ namespace EpicLoot
             {
                 var effect = Effects[index];
                 var pip = EpicLoot.GetMagicEffectPip(IsEffectAugmented(index));
-                tooltip.AppendLine($"{pip} {GetEffectText(effect, Rarity, showRange)}");
+                if (showRange)
+                {
+                    // Header without the inline range; the range and other details go in the block below.
+                    // Close/reopen the rarity color around the dim detail block rather than nesting tags.
+                    tooltip.AppendLine($"{pip} {GetEffectText(effect, Rarity, false, LegendaryID)}");
+                    tooltip.Append($"</color><color=#c0c0c0ff>");
+                    tooltip.Append(GetEffectDetailBlock(effect, Rarity, LegendaryID, null, "   "));
+                    tooltip.Append($"</color><color={color}>");
+                }
+                else
+                {
+                    tooltip.AppendLine($"{pip} {GetEffectText(effect, Rarity, false)}");
+                }
             }
 
             tooltip.Append($"</color>");
@@ -117,7 +133,13 @@ namespace EpicLoot
                     var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab);
                     if (socket.Effect != null)
                     {
-                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, showRange)}</color>");
+                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, false)}</color>");
+                        if (showRange)
+                        {
+                            tooltip.Append($"<color=#c0c0c0ff>");
+                            tooltip.Append(GetEffectDetailBlock(socket.Effect, socket.SourceRarity, null, null, "     "));
+                            tooltip.Append($"</color>");
+                        }
                     }
                     else if (socket.ShardType != ShardType.None)
                     {
@@ -253,6 +275,58 @@ namespace EpicLoot
         public static string GetEffectText(MagicItemEffect effect, MagicItemEffectDefinition.ValueDef valuesOverride)
         {
             return GetEffectText(effect, ItemRarity.Legendary, false, null, valuesOverride);
+        }
+
+        // Builds the indented, per-effect detail lines shown under an effect when Shift is held: the
+        // localized Description (with the X marker filled in with this item's rolled value), the roll
+        // range on its own line, and any Config values with human-readable labels. Every piece is
+        // optional and omitted when the effect has no data for it, so an effect with none of them
+        // contributes nothing. Returns raw text (no color tags); callers wrap it in a dim color.
+        public static string GetEffectDetailBlock(MagicItemEffect effect, ItemRarity rarity,
+            string legendaryID, MagicItemEffectDefinition.ValueDef valuesOverride, string indent)
+        {
+            var effectDef = MagicItemEffectDefinitions.Get(effect.EffectType);
+            if (effectDef == null)
+            {
+                return string.Empty;
+            }
+
+            var values = valuesOverride ?? (string.IsNullOrEmpty(legendaryID) ?
+                effectDef.GetValuesForRarity(rarity) :
+                UniqueLegendaryHelper.GetLegendaryEffectValues(legendaryID, effect.EffectType));
+
+            var block = new StringBuilder();
+
+            if (!string.IsNullOrEmpty(effectDef.Description))
+            {
+                var description = Localization.instance.Localize(effectDef.Description);
+                description = ApplyValueToDescription(description, effect.EffectValue);
+                block.Append($"{indent}{description}\n");
+            }
+
+            if (values != null && !Mathf.Approximately(values.MinValue, values.MaxValue))
+            {
+                block.Append($"{indent}$mod_epicloot_detail_range: [{values.MinValue}-{values.MaxValue}]\n");
+            }
+
+            if (effectDef.Config != null && effectDef.Config.Count > 0)
+            {
+                foreach (var kvp in effectDef.Config)
+                {
+                    block.Append($"{indent}{effectDef.GetConfigLabel(kvp.Key)}: {kvp.Value:0.###}\n");
+                }
+            }
+
+            return block.ToString();
+        }
+
+        // Replaces the standard "X" value marker embedded in a localized Description with this item's
+        // rolled value, preserving the marker's styling. The handful of non-standard markers (X/2, X%)
+        // don't match and stay generic.
+        private static string ApplyValueToDescription(string localizedDescription, float value)
+        {
+            return localizedDescription.Replace("<b><color=yellow>X</color></b>",
+                $"<b><color=yellow>{value:0.#}</color></b>");
         }
 
         public void ReplaceEffect(int index, MagicItemEffect newEffect)

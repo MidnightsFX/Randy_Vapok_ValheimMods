@@ -8,13 +8,6 @@ using UnityEngine.UI;
 
 namespace EpicLoot_UnityLib
 {
-    public enum MaterialConversionMode
-    {
-        Upgrade,
-        Convert,
-        Junk
-    }
-
     public class ConversionRecipeCostUnity
     {
         public ItemDrop.ItemData Item;
@@ -57,7 +50,7 @@ namespace EpicLoot_UnityLib
 
         private Text _progressLabel;
         private ToggleGroup _toggleGroup;
-        private MaterialConversionMode _mode;
+        private MaterialConversionType _mode;
 
         public override void Awake()
         {
@@ -89,7 +82,7 @@ namespace EpicLoot_UnityLib
         {
             _mode = 0;
             RefreshMode();
-            List<ConversionRecipeUnity> items = EnchantingUIController.GetConversionRecipes((int)_mode);
+            List<ConversionRecipeUnity> items = EnchantingUIController.GetConversionRecipes(_mode);
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
         }
 
@@ -110,13 +103,13 @@ namespace EpicLoot_UnityLib
 
         public void RefreshMode()
         {
-            MaterialConversionMode prevMode = _mode;
+            MaterialConversionType prevMode = _mode;
             for (int index = 0; index < ModeButtons.Count; index++)
             {
                 Toggle button = ModeButtons[index];
                 if (button.isOn)
                 {
-                    _mode = (MaterialConversionMode)index;
+                    _mode = (MaterialConversionType)index;
                 }
             }
 
@@ -133,7 +126,7 @@ namespace EpicLoot_UnityLib
 
             switch (_mode)
             {
-                case MaterialConversionMode.Upgrade:
+                case MaterialConversionType.Upgrade:
                     CostLabel.text = Localization.instance.Localize("$mod_epicloot_upgradecost");
                     _progressLabel.text = Localization.instance.Localize("$mod_epicloot_upgradeprogress");
                     if (_useTMP)
@@ -142,7 +135,7 @@ namespace EpicLoot_UnityLib
                         _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_upgrade");
                     break;
 
-                case MaterialConversionMode.Convert:
+                case MaterialConversionType.Convert:
                     CostLabel.text = Localization.instance.Localize("$mod_epicloot_convertcost");
                     _progressLabel.text = Localization.instance.Localize("$mod_epicloot_convertprogress");
                     if (_useTMP)
@@ -151,7 +144,7 @@ namespace EpicLoot_UnityLib
                         _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_convert");
                     break;
 
-                case MaterialConversionMode.Junk:
+                case MaterialConversionType.Junk:
                     CostLabel.text = Localization.instance.Localize("$mod_epicloot_junkcost");
                     _progressLabel.text = Localization.instance.Localize("$mod_epicloot_junkprogress");
                     if (_useTMP)
@@ -196,10 +189,9 @@ namespace EpicLoot_UnityLib
                 ConversionRecipeUnity recipe = entry.Item1;
                 int multiple = entry.Item2;
 
-                // Key by name AND quality: ShardStones share one name per color across rarities (rarity is
-                // m_quality), so grouping by name alone would merge different-rarity products into one stack.
-                // Non-shard materials are all quality 1, so their grouping is unchanged.
-                string key = recipe.Product.m_shared.m_name + "#" + recipe.Product.m_quality;
+                // Each (color, rarity) ShardStone has a distinct display name, so grouping by name keeps
+                // different-rarity products in separate stacks.
+                string key = recipe.Product.m_shared.m_name;
                 if (products.TryGetValue(key, out ItemDrop.ItemData item))
                 {
                     item.m_stack += recipe.Amount * multiple;
@@ -226,9 +218,9 @@ namespace EpicLoot_UnityLib
 
                 foreach (ConversionRecipeCostUnity recipeCost in recipe.Cost)
                 {
-                    // Key by name AND quality so a required ShardStone at a specific rarity (m_quality) is not
-                    // merged with the same-named shard at another rarity. Non-shards are quality 1: unchanged.
-                    string key = recipeCost.Item.m_shared.m_name + "#" + recipeCost.Item.m_quality;
+                    // Each (color, rarity) ShardStone has a distinct display name, so grouping by name keeps
+                    // a required shard of one rarity separate from the same-color shard at another rarity.
+                    string key = recipeCost.Item.m_shared.m_name;
                     if (costs.TryGetValue(key, out ItemDrop.ItemData item))
                     {
                         item.m_stack += recipeCost.Amount * multiple;
@@ -248,7 +240,7 @@ namespace EpicLoot_UnityLib
 
         public void RefreshAvailableItems()
         {
-            List<ConversionRecipeUnity> items = EnchantingUIController.GetConversionRecipes((int)_mode);
+            List<ConversionRecipeUnity> items = EnchantingUIController.GetConversionRecipes(_mode);
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
             OnSelectedItemsChanged();
@@ -266,7 +258,7 @@ namespace EpicLoot_UnityLib
             Tuple<float, float> baseFeatureValues = EnchantingTableUI.instance.SourceTable.GetFeatureValue(EnchantingFeature.ConvertMaterials, 0);
             Tuple<float, float> currentFeatureValues = EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(EnchantingFeature.ConvertMaterials);
             bool isBonusCost = false;
-            if (_mode == MaterialConversionMode.Upgrade)
+            if (_mode == MaterialConversionType.Upgrade)
             {
                 if (currentFeatureValues.Item1 < baseFeatureValues.Item1 &&
                     allProducts.Any(x => x.Item.m_shared.m_ammoType.EndsWith("MagicCraftingMaterial")))

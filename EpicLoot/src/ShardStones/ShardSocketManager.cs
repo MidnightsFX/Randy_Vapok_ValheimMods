@@ -102,11 +102,19 @@ namespace EpicLoot.ShardStones
 
             // Reuse the rune-roll legality rules: the effect must be allowed on this equipment type
             // and must not violate exclusivity with the item's rolled effects.
-            if (!def.Requirements.CheckRequirements(equipment, equipMagicItem, effect.EffectType,
-                    checklootroll: false, checkaugmentroll: false, checkruneroll: true))
+            if (!def.Requirements.CheckRequirements(equipment, equipMagicItem, out var failure, out var conflictType,
+                    effect.EffectType, checklootroll: false, checkaugmentroll: false, checkruneroll: true))
             {
-                reason = "$mod_epicloot_socket_notallowed";
-                return false;
+                // ExclusiveSelf (and self-listed ExclusiveEffectTypes) reports the SAME effect as the
+                // conflict; that is exactly "the effect is already present on the item". Genuine
+                // cross-effect exclusivity reports a different effect and is still enforced.
+                var sameEffectAlreadyOnItem = failure == RequirementFailure.ConflictingEffect
+                    && conflictType == effect.EffectType;
+                if (!(sameEffectAlreadyOnItem && AllowMatchingItemEffect(color)))
+                {
+                    reason = DescribeRequirementFailure(equipMagicItem, failure, conflictType);
+                    return false;
+                }
             }
 
             if (!ELConfig.AllowDuplicateSocketedEffects.Value &&
@@ -167,11 +175,17 @@ namespace EpicLoot.ShardStones
                 return false;
             }
 
-            if (!def.Requirements.CheckRequirements(equipment, equipMagicItem, effect.EffectType,
-                    checklootroll: false, checkaugmentroll: false, checkruneroll: true))
+            if (!def.Requirements.CheckRequirements(equipment, equipMagicItem, out var failure, out var conflictType,
+                    effect.EffectType, checklootroll: false, checkaugmentroll: false, checkruneroll: true))
             {
-                reason = "$mod_epicloot_socket_notallowed";
-                return false;
+                // Same same-effect bypass as CanSocket, keyed by input type (see AllowMatchingItemEffect).
+                var sameEffectAlreadyOnItem = failure == RequirementFailure.ConflictingEffect
+                    && conflictType == effect.EffectType;
+                if (!(sameEffectAlreadyOnItem && AllowMatchingItemEffect(color)))
+                {
+                    reason = DescribeRequirementFailure(equipMagicItem, failure, conflictType);
+                    return false;
+                }
             }
 
             if (!ELConfig.AllowDuplicateSocketedEffects.Value)
@@ -260,7 +274,8 @@ namespace EpicLoot.ShardStones
             if (socketed.ShardType != ShardType.None)
             {
                 // Loose shards carry no baked effect (it is derived from the host when socketed). Restore
-                // rarity through StampRarity so m_quality is set too and the shard stacks with like shards.
+                // rarity through StampRarity so the reconstructed shard carries its MagicItem rarity
+                // metadata (its prefab name already encodes the same rarity).
                 Shards.StampRarity(item, socketed.SourceRarity);
                 return item;
             }
@@ -284,11 +299,12 @@ namespace EpicLoot.ShardStones
                 return $"EtchedRunestone{input.GetMagicItem().Rarity}";
             }
 
-            // Shards are one prefab per color now (rarity lives in metadata); ammoType = "{Color}|ShardStone".
+            // Shards are one prefab per (color, rarity); the name encodes both. ammoType = "{Color}|ShardStone"
+            // carries the color, and the rarity comes from the shard's MagicItem metadata.
             string[] shardData = input.m_shared.m_ammoType.Split('|');
             if (shardData.Length >= 2)
             {
-                return $"{shardData[0]}_ShardStone";
+                return $"{shardData[0]}_{Shards.GetShardRarity(input)}_ShardStone";
             }
 
             return "";
@@ -300,6 +316,46 @@ namespace EpicLoot.ShardStones
             {
                 EquipmentEffectCache.Reset(Player.m_localPlayer);
             }
+        }
+
+        // Maps a rune-roll requirement failure (from MagicItemEffectRequirements.CheckRequirements) to a
+        // specific, player-facing socket message. For a conflict, name the offending effect already on the
+        // item so the player knows what stands in the way. Unknown/uncategorized failures fall back to a
+        // generic message rather than claiming a wrong reason.
+        private static string DescribeRequirementFailure(MagicItem magicItem, RequirementFailure failure, string conflictEffectType)
+        {
+            switch (failure)
+            {
+                case RequirementFailure.ConflictingEffect:
+                    var existing = conflictEffectType != null
+                        ? magicItem.Effects.Find(e => e.EffectType == conflictEffectType)
+                        : null;
+                    if (existing != null)
+                    {
+                        var effectText = MagicItem.GetEffectText(existing, magicItem.Rarity, false);
+                        return $"$mod_epicloot_socket_conflict: {effectText}";
+                    }
+                    return "$mod_epicloot_socket_conflict";
+                case RequirementFailure.MissingRequiredEffect:
+                    return "$mod_epicloot_socket_missingreq";
+                case RequirementFailure.RarityNotAllowed:
+                    return "$mod_epicloot_socket_raritynotallowed";
+                case RequirementFailure.ItemPropertyMismatch:
+                    return "$mod_epicloot_socket_itemreq";
+                case RequirementFailure.ItemTypeNotAllowed:
+                    return "$mod_epicloot_socket_notallowed";
+                default:
+                    return "$mod_epicloot_socket_generic";
+            }
+        }
+
+        // Whether the configured input type may socket an effect the item already carries as a rolled
+        // effect. color != None => shardstone; color == None => runestone. Each type has its own toggle.
+        private static bool AllowMatchingItemEffect(ShardType color)
+        {
+            return color != ShardType.None
+                ? ELConfig.AllowShardstoneDuplicateItemEffect.Value
+                : ELConfig.AllowRunestoneDuplicateItemEffect.Value;
         }
 
         // Enforces exclusive-category rules for socketing `inputColor` into `equipment`:

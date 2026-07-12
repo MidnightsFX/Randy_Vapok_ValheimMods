@@ -1,23 +1,14 @@
 ﻿using System.Collections.Generic;
+using EpicLoot;
 using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace EpicLoot_UnityLib
 {
-    public enum MagicRarityUnity
-    {
-        None = -1,
-        Magic,
-        Rare,
-        Epic,
-        Legendary,
-        Mythic
-    }
-
     public class SetRarityColor : MonoBehaviour
     {
-        public MagicRarityUnity Rarity = MagicRarityUnity.None;
+        public ItemRarity Rarity = (ItemRarity)(-1);
         public Graphic[] Graphics;
 
         private readonly Dictionary<Graphic, Color> _defaultColors = new Dictionary<Graphic, Color>();
@@ -32,7 +23,7 @@ namespace EpicLoot_UnityLib
             Refresh();
         }
 
-        public void SetRarity(MagicRarityUnity rarity)
+        public void SetRarity(ItemRarity rarity)
         {
             Rarity = rarity;
             Refresh();
@@ -40,7 +31,7 @@ namespace EpicLoot_UnityLib
 
         public void Refresh()
         {
-            if (Rarity > MagicRarityUnity.None)
+            if ((int)Rarity >= 0)
             {
                 Color color = EnchantingUIController.GetRarityColor(Rarity);
                 foreach (Graphic graphic in Graphics)

@@ -74,8 +74,8 @@ namespace EpicLoot.ShardStones
         // the prefab is missing or the inventory rejects it.
         private static bool TrySpawnShard(Terminal context, ShardType color, ItemRarity rarity)
         {
-            // One prefab per color now (Shards.CreateAndLoadShardItems); rarity is stamped per instance.
-            string prefabName = $"{color}_ShardStone";
+            // One prefab per (color, rarity) now (Shards.CreateAndLoadShardItems); the name encodes both.
+            string prefabName = $"{color}_{rarity}_ShardStone";
             var shard = PrefabManager.Instance.GetPrefab(prefabName);
             ItemDrop id = shard != null ? shard.GetComponent<ItemDrop>() : null;
             if (id == null)
@@ -88,7 +88,8 @@ namespace EpicLoot.ShardStones
             var itemData = id.m_itemData.Clone();
             itemData.m_dropPrefab = shard;
             itemData.m_stack = 1;
-            // Stamp the requested rarity into metadata + m_quality (rarity is not baked into the prefab).
+            // The prefab already bakes this rarity; re-stamp defensively so the metadata is present
+            // regardless of how the clone was produced.
             Shards.StampRarity(itemData, rarity);
 
             bool status = Player.m_localPlayer.GetInventory().AddItem(itemData);

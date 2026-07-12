@@ -41,6 +41,7 @@ internal class ELConfig
     public static ConfigEntry<int> _legendaryMaterialIconColor;
     public static ConfigEntry<int> _mythicMaterialIconColor;
     public static ConfigEntry<bool> UseScrollingCraftDescription;
+    public static ConfigEntry<bool> ShowEnchantSelectionChance;
     public static ConfigEntry<bool> TransferMagicItemToCrafts;
     public static ConfigEntry<bool> _loggingEnabled;
     public static ConfigEntry<LogLevel> _logLevel;
@@ -66,6 +67,8 @@ internal class ELConfig
     public static ConfigEntry<int> SocketCapMythic;
     public static ConfigEntry<bool> SocketCountIsAlwaysCap;
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
+    public static ConfigEntry<bool> AllowShardstoneDuplicateItemEffect;
+    public static ConfigEntry<bool> AllowRunestoneDuplicateItemEffect;
     public static ConfigEntry<float> GlobalDropRateModifier;
     public static ConfigEntry<float> ItemsToMaterialsDropRatio;
     public static ConfigEntry<bool> AlwaysShowWelcomeMessage;
@@ -90,8 +93,9 @@ internal class ELConfig
     public static ConfigEntry<bool> AlwaysRefreshCoreConfigs;
     public static ConfigEntry<int> TooltipMaxWidth;
     public static ConfigEntry<int> TooltipMaxHeight;
+    public static ConfigEntry<float> TraderPanelPositionX;
 
-    public static ConfigEntry<bool> RuneExtractDestroysItem;
+    public static ConfigEntry<RuneExtractMode> RuneExtractItemMode;
 
     private static CustomRPC LootTablesRPC;
     private static CustomRPC MagicEffectsRPC;
@@ -234,6 +238,9 @@ internal class ELConfig
         UseScrollingCraftDescription = Config.Bind("Crafting UI", "Use Scrolling Craft Description", true,
             "Changes the item description in the crafting panel to scroll instead of scale when it gets too " +
             "long for the space.");
+        ShowEnchantSelectionChance = BindServerConfig("Crafting UI", "Show Enchant Selection Chance", false,
+            "When true, the Enchant and Augment panels show the weighted chance that each available effect " +
+            "is selected on a single roll, displayed right after the bullet for each effect.");
         ShowEquippedAndHotbarItemsInSacrificeTab = Config.Bind("Crafting UI",
             "ShowEquippedAndHotbarItemsInSacrificeTab", false,
             "If set to false, hides the items that are equipped or on your hotbar in the Sacrifice items list.");
@@ -255,6 +262,13 @@ internal class ELConfig
         // General
         UseGeneratedMagicItemNames = Config.Bind("General", "Use Generated Magic Item Names", true,
             "If true, magic items uses special, randomly generated names based on their rarity, type, and magic effects.");
+        TraderPanelPositionX = Config.Bind("General", "Trader Panel X Position", -200f,
+            "The horizontal on-screen position (RectTransform anchoredPosition X, anchored to the " +
+            "top-right of the trader window) of the EpicLoot adventure trader panel. Dragging the " +
+            "panel in-game updates this automatically. Default: -200. More negative moves it left, " +
+            "toward 0 (and positive) moves it right.");
+        TraderPanelPositionX.SettingChanged += (_, _) =>
+            MerchantPanel.Instance?.ApplyConfiguredPosition();
         AutoAddEquipment = BindServerConfig("General", "Auto Add Equipment", true,
             "Automatically adds equipment types that can be enchanted to possible drops and gates them" +
             "behind their respective bosses. Disabling this also disables automatic removal of items not found.");
@@ -343,6 +357,10 @@ internal class ELConfig
             "When false, the socket count is randomly rolled between 0 and the cap.");
         AllowDuplicateSocketedEffects = BindServerConfig("Sockets", "Allow Duplicate Socketed Effects", false,
             "When false, an effect that is already socketed on an item cannot be socketed again.");
+        AllowShardstoneDuplicateItemEffect = BindServerConfig("Sockets", "Allow Shardstone On Matching Item Effect", false,
+            "When true, a shardstone may be socketed even when the item already has that same effect from being enchanted/rolled.");
+        AllowRunestoneDuplicateItemEffect = BindServerConfig("Sockets", "Allow Runestone On Matching Item Effect", false,
+            "When true, a runestone may be socketed even when the item already has that same effect from being enchanted/rolled.");
         GlobalDropRateModifier = BindServerConfig("Balance", "Global Drop Rate Modifier", 1.0f,
             "A global percentage that modifies how likely loot is to drop.\n" +
             "1 = Exactly what is in the loot tables will drop.\n" +
@@ -368,9 +386,15 @@ internal class ELConfig
             "When enchanted items are used as ingredients in recipes, transfer every enchantment from the " +
             "consumed items that is valid on the newly crafted item, along with the highest socket count. " +
             "Default: True.");
-        RuneExtractDestroysItem = BindServerConfig("Balance", "Rune Extract Destroys Item", true,
-            "When extracting a rune from an item, the item will be destroyed. If false, the item will be returned intact. " +
-            "Default: True.");
+        RuneExtractItemMode = BindServerConfig("Balance", "Rune Extract Mode", RuneExtractMode.ReduceEnchants,
+            "Controls what happens to the source item when a rune is extracted from it.\n" +
+            "KeepItem = the item is returned untouched.\n" +
+            "ReduceEnchants = the extracted enchantment is removed from the item (item kept).\n" +
+            "ReduceEnchantsAndRarity = the extracted enchantment is removed, the item's rarity is reduced " +
+            "one tier, and remaining effect values are clamped to the new rarity's max.\n" +
+            "DestroyItem = the item is consumed.\n" +
+            "If the extracted enchantment is the item's only enchantment, the item reverts to a normal item.\n" +
+            "Default: ReduceEnchants.");
 
         // Debug
         AlwaysShowWelcomeMessage = Config.Bind("Debug", "Show Welcome Message, automatically set to false once config is viewed.", true,

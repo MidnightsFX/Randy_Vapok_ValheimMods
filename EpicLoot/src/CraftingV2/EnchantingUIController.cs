@@ -275,9 +275,9 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        internal static List<ConversionRecipeUnity> GetConversionRecipes(int mode)
+        internal static List<ConversionRecipeUnity> GetConversionRecipes(MaterialConversionType mode)
         {
-            MaterialConversionType conversionType = (MaterialConversionType)mode;
+            MaterialConversionType conversionType = mode;
             List<MaterialConversion> conversions = MaterialConversions.Conversions.GetValues(conversionType, true);
 
             Tuple<float, float> featureValues = EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(
@@ -305,16 +305,14 @@ namespace EpicLoot.CraftingV2
 
                 itemDrop.m_itemData.m_dropPrefab = prefab;
 
+                // The product is a full per-rarity prefab (e.g. {color}_{rarity}_ShardStone) whose baked
+                // metadata already carries the correct rarity, so the clone needs no quality stamping.
                 ConversionRecipeUnity recipe = new ConversionRecipeUnity()
                 {
                     Product = itemDrop.m_itemData.Clone(),
                     Amount = conversion.Amount,
                     Cost = new List<ConversionRecipeCostUnity>()
                 };
-
-                // Shards have one prefab per color; the produced rarity comes from ProductQuality
-                // (rarity = quality-1), stamped so MagicItem.Rarity and m_quality both reflect the target.
-                StampConversionQuality(recipe.Product, conversion.ProductQuality);
 
                 bool hasSomeItems = false;
                 foreach (MaterialConversionRequirement requirement in conversion.Resources)
@@ -347,10 +345,9 @@ namespace EpicLoot.CraftingV2
                         requiredAmount = Mathf.CeilToInt(materialConversionAmount * recipe.Amount);
                     }
 
+                    // A rarity-specific requirement (e.g. the "From" shard) is its own full per-rarity
+                    // prefab, so the clone already carries the right rarity/name -- no quality stamping.
                     ItemDrop.ItemData costItem = reqItemDrop.m_itemData.Clone();
-                    // A rarity-specific requirement (the "From" shard) carries its quality so the count and
-                    // consumption below match exactly that rarity rather than any shard of the color.
-                    StampConversionQuality(costItem, requirement.Quality);
 
                     recipe.Cost.Add(new ConversionRecipeCostUnity
                     {
@@ -373,30 +370,9 @@ namespace EpicLoot.CraftingV2
             return result;
         }
 
-        // Applies a conversion's target quality to a produced/required item clone. For ShardStones
-        // (rarity = quality-1) this stamps MagicItem.Rarity + m_quality via Shards.StampRarity, so the
-        // produced shard is the upgraded rarity and a required shard matches the right rarity in inventory;
-        // other items simply take the raw quality. Quality 0 means "leave the clone as-is".
-        private static void StampConversionQuality(ItemDrop.ItemData item, int quality)
+        internal static Color GetRarityColor(ItemRarity rarity)
         {
-            if (item == null || quality <= 0)
-            {
-                return;
-            }
-
-            if (global::EpicLoot.ShardStones.Shards.IsShard(item))
-            {
-                global::EpicLoot.ShardStones.Shards.StampRarity(item, (ItemRarity)(quality - 1));
-            }
-            else
-            {
-                item.m_quality = quality;
-            }
-        }
-
-        internal static Color GetRarityColor(MagicRarityUnity rarity)
-        {
-            return EpicLoot.GetRarityColorARGB((ItemRarity)rarity);
+            return EpicLoot.GetRarityColorARGB(rarity);
         }
 
         internal static List<InventoryItemListElement> GetEnchantableItems()
@@ -407,9 +383,23 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        internal static string GetEnchantInfo(ItemDrop.ItemData item, MagicRarityUnity _rarity)
+        // Builds the "x% " prefix shown after the bullet for an available effect, representing the
+        // weighted chance that effect is chosen on a single roll (SelectionWeight / total). Returns
+        // empty when the display is disabled or the pool has no weight, leaving the line unchanged.
+        private static string GetSelectionChancePrefix(float selectionWeight, float totalSelectionWeight)
         {
-            ItemRarity rarity = (ItemRarity)_rarity;
+            if (!ELConfig.ShowEnchantSelectionChance.Value || totalSelectionWeight <= 0f)
+            {
+                return string.Empty;
+            }
+
+            float chance = selectionWeight / totalSelectionWeight * 100f;
+            return $"{chance:0.#}% ";
+        }
+
+        internal static string GetEnchantInfo(ItemDrop.ItemData item, ItemRarity _rarity)
+        {
+            ItemRarity rarity = _rarity;
             StringBuilder sb = new StringBuilder();
             string rarityColor = EpicLoot.GetRarityColor(rarity);
             string rarityDisplay = EpicLoot.GetRarityDisplayName(rarity);
@@ -448,13 +438,15 @@ namespace EpicLoot.CraftingV2
 
             MagicItem tempMagicItem = new MagicItem() { Rarity = rarity };
             List<MagicItemEffectDefinition> availableEffects = MagicItemEffectDefinitions.GetAvailableEffects(item, tempMagicItem);
+            float totalSelectionWeight = availableEffects.Sum(x => x.SelectionWeight);
 
             foreach (MagicItemEffectDefinition effectDef in availableEffects)
             {
                 MagicItemEffectDefinition.ValueDef values = effectDef.GetValuesForRarity(rarity);
                 string valueDisplay = values != null ? Mathf.Approximately(values.MinValue, values.MaxValue) ?
                     $"{values.MinValue}" : $"({values.MinValue}-{values.MaxValue})" : "";
-                sb.AppendLine($"‣ {string.Format(Localization.instance.Localize(effectDef.DisplayText), valueDisplay)}");
+                string chancePrefix = GetSelectionChancePrefix(effectDef.SelectionWeight, totalSelectionWeight);
+                sb.AppendLine($"‣ {chancePrefix}{string.Format(Localization.instance.Localize(effectDef.DisplayText), valueDisplay)}");
             }
 
             sb.Append("</color>");
@@ -462,9 +454,9 @@ namespace EpicLoot.CraftingV2
             return Localization.instance.Localize(sb.ToString());
         }
 
-        internal static List<InventoryItemListElement> GetEnchantCost(ItemDrop.ItemData item, MagicRarityUnity _rarity)
+        internal static List<InventoryItemListElement> GetEnchantCost(ItemDrop.ItemData item, ItemRarity _rarity)
         {
-            return EnchantHelper.GetEnchantCosts(item, (ItemRarity)_rarity).Select(entry =>
+            return EnchantHelper.GetEnchantCosts(item, _rarity).Select(entry =>
             {
                 ItemDrop.ItemData itemData = entry.Key.m_itemData.Clone();
                 itemData.m_dropPrefab = entry.Key.gameObject;
@@ -473,7 +465,7 @@ namespace EpicLoot.CraftingV2
             }).ToList();
         }
 
-        internal static GameObject EnchantItemAndReturnSuccessDialog(ItemDrop.ItemData item, MagicRarityUnity rarity)
+        internal static GameObject EnchantItemAndReturnSuccessDialog(ItemDrop.ItemData item, ItemRarity rarity)
         {
             Player player = Player.m_localPlayer;
 
@@ -484,7 +476,7 @@ namespace EpicLoot.CraftingV2
             }
 
             float luckFactor = player.GetTotalActiveMagicEffectValue(MagicEffectType.Luck, 0.01f);
-            MagicItem magicItem = LootRoller.RollMagicItem((ItemRarity)rarity, item, luckFactor);
+            MagicItem magicItem = LootRoller.RollMagicItem(rarity, item, luckFactor);
 
             MagicItemComponent magicItemComponent = item.Data().GetOrCreate<MagicItemComponent>();
             magicItemComponent.SetMagicItem(magicItem);
@@ -790,10 +782,10 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        internal static MagicRarityUnity GetItemRarity(ItemDrop.ItemData item)
+        internal static ItemRarity GetItemRarity(ItemDrop.ItemData item)
         {
            ItemRarity rarity = item.GetRarity();
-            return (MagicRarityUnity)rarity;
+            return rarity;
         }
 
         internal static List<InventoryItemListElement> GetRuneExtractItems()
@@ -890,9 +882,9 @@ namespace EpicLoot.CraftingV2
             return returnList;
         }
 
-        internal static List<InventoryItemListElement> GetRuneExtractCost(ItemDrop.ItemData item, MagicRarityUnity rarity, float costModifier)
+        internal static List<InventoryItemListElement> GetRuneExtractCost(ItemDrop.ItemData item, ItemRarity rarity, float costModifier)
         {
-            return EnchantHelper.GetRuneCost(item, (ItemRarity)rarity, RuneActions.Extract).Select(entry =>
+            return EnchantHelper.GetRuneCost(item, rarity, RuneActions.Extract).Select(entry =>
             {
                 ItemDrop.ItemData itemData = entry.Key.m_itemData.Clone();
                 itemData.m_dropPrefab = entry.Key.gameObject;
@@ -913,9 +905,9 @@ namespace EpicLoot.CraftingV2
             }).ToList();
         }
 
-        internal static List<InventoryItemListElement> GetRuneEtchCost(ItemDrop.ItemData item, MagicRarityUnity rarity, float costModifier)
+        internal static List<InventoryItemListElement> GetRuneEtchCost(ItemDrop.ItemData item, ItemRarity rarity, float costModifier)
         {
-            return EnchantHelper.GetRuneCost(item, (ItemRarity)rarity, RuneActions.Etch).Select(entry =>
+            return EnchantHelper.GetRuneCost(item, rarity, RuneActions.Etch).Select(entry =>
             {
                 ItemDrop.ItemData itemData = entry.Key.m_itemData.Clone();
                 itemData.m_dropPrefab = entry.Key.gameObject;
@@ -1005,9 +997,69 @@ namespace EpicLoot.CraftingV2
             return selectedItem.GetMagicItem().Effects[targetEnchant].EffectType;
         }
 
-        internal static bool GetRuneDestructionEnabled()
+        internal static RuneExtractMode GetRuneExtractMode()
         {
-            return ELConfig.RuneExtractDestroysItem.Value;
+            return ELConfig.RuneExtractItemMode.Value;
+        }
+
+        // The extract-tab warning localization key that matches the configured extract mode.
+        internal static string GetRuneExtractWarningKey()
+        {
+            switch (GetRuneExtractMode())
+            {
+                case RuneExtractMode.KeepItem:
+                    return "$mod_epicloot_rune_extract_warning_keep";
+                case RuneExtractMode.ReduceEnchants:
+                    return "$mod_epicloot_rune_extract_warning_reduce";
+                case RuneExtractMode.ReduceEnchantsAndRarity:
+                    return "$mod_epicloot_rune_extract_warning_reduce_rarity";
+                case RuneExtractMode.DestroyItem:
+                default:
+                    return "$mod_epicloot_rune_extract_warning_destroy";
+            }
+        }
+
+        // Applies the item-reduction side effect after a rune has been extracted from it.
+        // reduceRarity: also drop the item one rarity tier and clamp remaining effect values down.
+        // If no rolled effects remain, the item is reverted to a plain, non-magic item.
+        internal static void ReduceItemAfterRuneExtract(ItemDrop.ItemData item, int targetEnchant, bool reduceRarity)
+        {
+            MagicItem magicItem = item.GetMagicItem();
+            if (magicItem == null || targetEnchant < 0 || targetEnchant >= magicItem.Effects.Count)
+            {
+                return;
+            }
+
+            magicItem.Effects.RemoveAt(targetEnchant);
+
+            // Drop stale augmented-effect bookkeeping so the augmented pip can't point at the wrong effect.
+            magicItem.AugmentedEffectIndex = -1;
+            magicItem.AugmentedEffectIndices?.Clear();
+
+            // No rolled effects left -> revert to a plain, non-magic item.
+            if (magicItem.Effects.Count == 0)
+            {
+                item.Data().Remove<MagicItemComponent>();
+                return;
+            }
+
+            if (reduceRarity && magicItem.Rarity > ItemRarity.Magic)
+            {
+                magicItem.Rarity = magicItem.Rarity - 1;
+
+                // Clamp remaining effect values down to the new (lower) rarity's max.
+                foreach (MagicItemEffect effect in magicItem.Effects)
+                {
+                    MagicItemEffectDefinition.ValueDef values =
+                        MagicItemEffectDefinitions.Get(effect.EffectType)?.GetValuesForRarity(magicItem.Rarity);
+                    if (values != null && effect.EffectValue > values.MaxValue)
+                    {
+                        effect.EffectValue = values.MaxValue;
+                    }
+                }
+            }
+
+            item.SaveMagicItem(magicItem);
         }
 
         internal static GameObject RuneEnhanceItemAndReturnSuccess(ItemDrop.ItemData item, ItemDrop.ItemData rune, int enchantment)
@@ -1146,6 +1198,8 @@ namespace EpicLoot.CraftingV2
             List<MagicItemEffectDefinition> availableEffects = MagicItemEffectDefinitions.GetAvailableEffects(
                 item.Extended(), item.GetMagicItem(), valuelessEffect ? -1 : augmentindex);
 
+            float totalSelectionWeight = availableEffects.Sum(x => x.SelectionWeight);
+
             StringBuilder sb = new StringBuilder();
             sb.Append($"<color={rarityColor}>");
             foreach (MagicItemEffectDefinition effectDef in availableEffects)
@@ -1153,7 +1207,8 @@ namespace EpicLoot.CraftingV2
                 MagicItemEffectDefinition.ValueDef values = effectDef.GetValuesForRarity(item.GetRarity());
                 string valueDisplay = values != null ? Mathf.Approximately(values.MinValue, values.MaxValue) ?
                     $"{values.MinValue}" : $"({values.MinValue}-{values.MaxValue})" : "";
-                sb.AppendLine($"‣ {string.Format(Localization.instance.Localize(effectDef.DisplayText), valueDisplay)}");
+                string chancePrefix = GetSelectionChancePrefix(effectDef.SelectionWeight, totalSelectionWeight);
+                sb.AppendLine($"‣ {chancePrefix}{string.Format(Localization.instance.Localize(effectDef.DisplayText), valueDisplay)}");
             }
             sb.Append("</color>");
 

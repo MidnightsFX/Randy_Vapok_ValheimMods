@@ -106,6 +106,15 @@ namespace EpicLoot_UnityLib
             }
 
             instance.SourceTable = source;
+
+            // On first creation the prefab is instantiated already-active, so every panel and tab
+            // FeatureStatus ran OnEnable before SourceTable was assigned and skipped subscribing to
+            // the table's change events. Force an inactive->active transition so their OnEnable runs
+            // again with SourceTable set (this is what the close/reopen path already does).
+            if (instance.Root.activeSelf)
+            {
+                instance.Root.SetActive(false);
+            }
             instance.Root.SetActive(true);
             instance.Scrim.SetActive(true);
             instance.SourceTable.Refresh();

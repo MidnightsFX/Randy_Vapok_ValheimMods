@@ -27,6 +27,7 @@ namespace EpicLoot_UnityLib
         {
             if (EnchantingTableUI.instance != null && EnchantingTableUI.instance.SourceTable != null)
             {
+                EnchantingTableUI.instance.SourceTable.OnFeatureLevelChanged -= OnFeatureLevelChanged;
                 EnchantingTableUI.instance.SourceTable.OnFeatureLevelChanged += OnFeatureLevelChanged;
             }
 

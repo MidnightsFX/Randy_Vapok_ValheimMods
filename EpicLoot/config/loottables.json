@@ -112,77 +112,77 @@
     {
       "Name": "ShardT1",
       "Loot": [
-        { "Item": "Yellow_ShardStone", "Rarity": [ 100, 0, 0, 0, 0 ] },
-        { "Item": "Cyan_ShardStone",   "Rarity": [ 100, 0, 0, 0, 0 ] },
-        { "Item": "Green_ShardStone",  "Rarity": [ 100, 0, 0, 0, 0 ] }
+        { "Item": "Yellow_{Rarity}_ShardStone", "Rarity": [ 100, 0, 0, 0, 0 ] },
+        { "Item": "Cyan_{Rarity}_ShardStone",   "Rarity": [ 100, 0, 0, 0, 0 ] },
+        { "Item": "Green_{Rarity}_ShardStone",  "Rarity": [ 100, 0, 0, 0, 0 ] }
       ]
     },
     {
       "Name": "ShardT2",
       "Loot": [
-        { "Item": "Red_ShardStone",    "Weight": 4, "Rarity": [ 0, 100, 0, 0, 0 ] },
-        { "Item": "Grey_ShardStone",   "Weight": 4, "Rarity": [ 0, 100, 0, 0, 0 ] },
-        { "Item": "Golden_ShardStone", "Weight": 4, "Rarity": [ 0, 100, 0, 0, 0 ] },
+        { "Item": "Red_{Rarity}_ShardStone",    "Weight": 4, "Rarity": [ 0, 100, 0, 0, 0 ] },
+        { "Item": "Grey_{Rarity}_ShardStone",   "Weight": 4, "Rarity": [ 0, 100, 0, 0, 0 ] },
+        { "Item": "Golden_{Rarity}_ShardStone", "Weight": 4, "Rarity": [ 0, 100, 0, 0, 0 ] },
         { "Item": "ShardT1",           "Weight": 3 }
       ]
     },
     {
       "Name": "ShardT3",
       "Loot": [
-        { "Item": "White_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 100, 0, 0 ] },
-        { "Item": "LightBlue_ShardStone", "Weight": 4, "Rarity": [ 0, 0, 100, 0, 0 ] },
-        { "Item": "DarkBlue_ShardStone",  "Weight": 4, "Rarity": [ 0, 0, 100, 0, 0 ] },
+        { "Item": "White_{Rarity}_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 100, 0, 0 ] },
+        { "Item": "LightBlue_{Rarity}_ShardStone", "Weight": 4, "Rarity": [ 0, 0, 100, 0, 0 ] },
+        { "Item": "DarkBlue_{Rarity}_ShardStone",  "Weight": 4, "Rarity": [ 0, 0, 100, 0, 0 ] },
         { "Item": "ShardT2",              "Weight": 3 }
       ]
     },
     {
       "Name": "ShardT4",
       "Loot": [
-        { "Item": "Black_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
-        { "Item": "Peach_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
-        { "Item": "DarkGreen_ShardStone", "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
+        { "Item": "Black_{Rarity}_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
+        { "Item": "Peach_{Rarity}_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
+        { "Item": "DarkGreen_{Rarity}_ShardStone", "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
         { "Item": "ShardT3",              "Weight": 3 }
       ]
     },
     {
       "Name": "ShardT5",
       "Loot": [
-        { "Item": "LightGreen_ShardStone", "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
-        { "Item": "Purple_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
-        { "Item": "Pink_ShardStone",       "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
+        { "Item": "LightGreen_{Rarity}_ShardStone", "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
+        { "Item": "Purple_{Rarity}_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
+        { "Item": "Pink_{Rarity}_ShardStone",       "Weight": 4, "Rarity": [ 0, 0, 0, 100, 0 ] },
         { "Item": "ShardT4",               "Weight": 3 }
       ]
     },
     {
       "Name": "ShardT6",
       "Loot": [
-        { "Item": "DarkPurple_ShardStone", "Weight": 4, "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Orange_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "DarkRed_ShardStone",    "Weight": 4, "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "DarkPurple_{Rarity}_ShardStone", "Weight": 4, "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Orange_{Rarity}_ShardStone",     "Weight": 4, "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "DarkRed_{Rarity}_ShardStone",    "Weight": 4, "Rarity": [ 0, 0, 0, 0, 100 ] },
         { "Item": "ShardT5",               "Weight": 3 }
       ]
     },
     {
       "Name": "ShardT7",
       "Loot": [
-        { "Item": "Red_ShardStone",        "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Yellow_ShardStone",     "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Cyan_ShardStone",       "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Orange_ShardStone",     "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Pink_ShardStone",       "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Black_ShardStone",      "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "White_ShardStone",      "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Green_ShardStone",      "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Purple_ShardStone",     "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Grey_ShardStone",       "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "DarkRed_ShardStone",    "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "DarkGreen_ShardStone",  "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "DarkBlue_ShardStone",   "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "DarkPurple_ShardStone", "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Golden_ShardStone",     "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "LightBlue_ShardStone",  "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "LightGreen_ShardStone", "Rarity": [ 0, 0, 0, 0, 100 ] },
-        { "Item": "Peach_ShardStone",      "Rarity": [ 0, 0, 0, 0, 100 ] }
+        { "Item": "Red_{Rarity}_ShardStone",        "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Yellow_{Rarity}_ShardStone",     "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Cyan_{Rarity}_ShardStone",       "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Orange_{Rarity}_ShardStone",     "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Pink_{Rarity}_ShardStone",       "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Black_{Rarity}_ShardStone",      "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "White_{Rarity}_ShardStone",      "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Green_{Rarity}_ShardStone",      "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Purple_{Rarity}_ShardStone",     "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Grey_{Rarity}_ShardStone",       "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "DarkRed_{Rarity}_ShardStone",    "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "DarkGreen_{Rarity}_ShardStone",  "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "DarkBlue_{Rarity}_ShardStone",   "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "DarkPurple_{Rarity}_ShardStone", "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Golden_{Rarity}_ShardStone",     "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "LightBlue_{Rarity}_ShardStone",  "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "LightGreen_{Rarity}_ShardStone", "Rarity": [ 0, 0, 0, 0, 100 ] },
+        { "Item": "Peach_{Rarity}_ShardStone",      "Rarity": [ 0, 0, 0, 0, 100 ] }
       ]
     },
     {
