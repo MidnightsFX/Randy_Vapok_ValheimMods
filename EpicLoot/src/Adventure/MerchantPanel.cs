@@ -279,7 +279,7 @@ namespace EpicLoot.Adventure
                 return;
             }
 
-            _rt.anchoredPosition = new Vector2(ELConfig.TraderPanelPositionX.Value, _rt.anchoredPosition.y);
+            _rt.anchoredPosition = new Vector2(ELConfig.TraderPanelPositionX.Value, ELConfig.TraderPanelPositionY.Value);
         }
 
         public void OnBeginDrag(PointerEventData eventData)
@@ -306,6 +306,7 @@ namespace EpicLoot.Adventure
         {
             // Persists automatically because cfg.SaveOnConfigSet is true.
             ELConfig.TraderPanelPositionX.Value = _rt.anchoredPosition.x;
+            ELConfig.TraderPanelPositionY.Value = _rt.anchoredPosition.y;
         }
 
         public Currencies GetPlayerCurrencies()

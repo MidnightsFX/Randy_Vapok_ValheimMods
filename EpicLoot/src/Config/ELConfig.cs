@@ -94,8 +94,16 @@ internal class ELConfig
     public static ConfigEntry<int> TooltipMaxWidth;
     public static ConfigEntry<int> TooltipMaxHeight;
     public static ConfigEntry<float> TraderPanelPositionX;
+    public static ConfigEntry<float> TraderPanelPositionY;
+    public static ConfigEntry<float> TemperPanelPositionX;
+    public static ConfigEntry<float> TemperPanelPositionY;
 
     public static ConfigEntry<RuneExtractMode> RuneExtractItemMode;
+
+    public static ConfigEntry<bool> TemperDestroysItem;
+    public static ConfigEntry<float> TemperChanceToDestroy;
+    public static ConfigEntry<float> TemperBaseChance;
+    public static ConfigEntry<float> TemperDecrement;
 
     private static CustomRPC LootTablesRPC;
     private static CustomRPC MagicEffectsRPC;
@@ -269,6 +277,24 @@ internal class ELConfig
             "toward 0 (and positive) moves it right.");
         TraderPanelPositionX.SettingChanged += (_, _) =>
             MerchantPanel.Instance?.ApplyConfiguredPosition();
+        TraderPanelPositionY = Config.Bind("General", "Trader Panel Y Position", -155f,
+            "The vertical on-screen position (RectTransform anchoredPosition Y, anchored to the " +
+            "top-right of the trader window) of the EpicLoot adventure trader panel. Dragging the " +
+            "panel in-game updates this automatically. Default: -155.");
+        TraderPanelPositionY.SettingChanged += (_, _) =>
+            MerchantPanel.Instance?.ApplyConfiguredPosition();
+        TemperPanelPositionX = Config.Bind("General", "Temper Panel X Position", -200f,
+            "The horizontal on-screen position (RectTransform anchoredPosition X, anchored to the " +
+            "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
+            "in-game updates this automatically. Default: -200.");
+        TemperPanelPositionY = Config.Bind("General", "Temper Panel Y Position", -155f,
+            "The vertical on-screen position (RectTransform anchoredPosition Y, anchored to the " +
+            "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
+            "in-game updates this automatically. Default: -155.");
+        TemperPanelPositionX.SettingChanged += (_, _) =>
+            global::EpicLoot.TemperPanel.Instance?.ApplyConfiguredPosition();
+        TemperPanelPositionY.SettingChanged += (_, _) =>
+            global::EpicLoot.TemperPanel.Instance?.ApplyConfiguredPosition();
         AutoAddEquipment = BindServerConfig("General", "Auto Add Equipment", true,
             "Automatically adds equipment types that can be enchanted to possible drops and gates them" +
             "behind their respective bosses. Disabling this also disables automatic removal of items not found.");
@@ -437,6 +463,16 @@ internal class ELConfig
             "Toggles limiting bounties. Players unable to purchase if enabled and maximum bounty in-progress count is met");
         MaxInProgressBounties = BindServerConfig("Bounty Management", "Max Bounties Per Player", 5,
             "Max amount of in-progress bounties allowed per player.");
+        
+        // Tempering
+        TemperDestroysItem = BindServerConfig("Tempering", "Fail Destroys Item", false,
+            "When tempering fails, the item will be destroyed. If False, the item will be returned intact. Default value: False");
+        TemperBaseChance = BindServerConfig("Tempering", "Base Chance", 0.5f,
+            "Base chance to temper item when below max value. When effect value is at max, the chance is at the base. If value is above max value, the chance is reduces by the decrement chance. Default value: 0.5");
+        TemperDecrement = BindServerConfig("Tempering", "Decrement Amount", 0.15f,
+            "Decrement amount when effect value is above max value. Does not apply if value is below max value. Decrement amount is multiplied by the increment amount the value is above max value. Default value: 0.15");
+        TemperChanceToDestroy = BindServerConfig("Tempering", "Destroy Chance", 0.5f,
+            "If Fail Destroys Item is enabled, Destroy Chance rolls if item should be destroyed. Default value: 0.5");
     }
 
     public static void InitializeConfig()

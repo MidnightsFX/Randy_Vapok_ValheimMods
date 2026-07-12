@@ -2,6 +2,7 @@
 using EpicLoot.Crafting;
 using EpicLoot.Data;
 using EpicLoot.LegendarySystem;
+using EpicLoot.ShardStones;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,11 @@ public static class ItemDataExtensions
     {
         MagicItemComponent magicData = itemData.Data().Get<MagicItemComponent>();
         return magicData != null && magicData.MagicItem != null;
+    }
+
+    public static bool IsShardStone(this ItemDrop.ItemData itemData) {
+        MagicItemComponent magicData = itemData.Data().Get<MagicItemComponent>();
+        return magicData != null && magicData.MagicItem != null && magicData.MagicItem.ShardColor != ShardType.None;
     }
 
     public static bool IsUnidentified(this ItemDrop.ItemData itemData)

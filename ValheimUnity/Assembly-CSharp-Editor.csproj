@@ -617,6 +617,10 @@
       <HintPath>Assets\ExternalLibraries\Mono.Cecil.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="AdvancedPortals">
+      <HintPath>Assets\ExternalLibraries\AdvancedPortals.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="BepInEx">
       <HintPath>Assets\ExternalLibraries\valheim\BepInEx.dll</HintPath>
       <Private>False</Private>

@@ -361,6 +361,8 @@ public sealed class EpicLoot : BaseUnityPlugin
         EpicAssets.AugmentItemSFX = assetBundle.LoadAsset<AudioClip>("AugmentItem");
 
         EpicAssets.MerchantPanel = assetBundle.LoadAsset<GameObject>("MerchantPanel");
+        EpicAssets.TemperPanel = assetBundle.LoadAsset<GameObject>("TemperPanel");
+        
         EpicAssets.MapIconTreasureMap = assetBundle.LoadAsset<Sprite>("TreasureMapIcon");
         EpicAssets.MapIconBounty = assetBundle.LoadAsset<Sprite>("MapIconBounty");
         EpicAssets.AbandonBountySFX = assetBundle.LoadAsset<AudioClip>("AbandonBounty");
@@ -801,7 +803,7 @@ public sealed class EpicLoot : BaseUnityPlugin
 
     public static string GetMagicEffectPip(bool hasBeenAugmented)
     {
-        return HasAuga ? (hasBeenAugmented ? "▾" : "♦") : (hasBeenAugmented ? "▼" : "◆"); // //🞠🞛
+        return HasAuga ? (hasBeenAugmented ? "▾" : "♦") : (hasBeenAugmented ? "▼" : "◆"); // //🞠🞛 
     }
 
     private static bool IsNotRestrictedItem(ItemDrop.ItemData item)
