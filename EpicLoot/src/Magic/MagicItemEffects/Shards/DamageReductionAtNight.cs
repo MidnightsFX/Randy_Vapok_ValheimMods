@@ -1,5 +1,3 @@
-using HarmonyLib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
@@ -8,23 +6,19 @@ namespace EpicLoot.MagicItemEffects.Shards
     // are authored as whole-number percents, hence the 0.01f; the reduction is clamped to 0-100%.
     public static class DamageReductionAtNight
     {
-        [HarmonyPatch(typeof(Character), nameof(Character.RPC_Damage))]
-        private static class RPC_Damage_Patch
+        // Prefix handler invoked by CharacterRpcDamageDispatch (victim-side incoming modifier).
+        public static void ModifyIncoming(Character __instance, HitData hit)
         {
-            [UsedImplicitly]
-            private static void Prefix(Character __instance, HitData hit)
+            if (hit == null || __instance != Player.m_localPlayer || !EnvMan.IsNight())
             {
-                if (hit == null || __instance != Player.m_localPlayer || !EnvMan.IsNight())
-                {
-                    return;
-                }
+                return;
+            }
 
-                var reduction = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
-                    MagicEffectType.DamageReductionAtNight, 0.01f);
-                if (reduction > 0f)
-                {
-                    hit.m_damage.Modify(1f - Mathf.Clamp01(reduction));
-                }
+            var reduction = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
+                MagicEffectType.DamageReductionAtNight, 0.01f);
+            if (reduction > 0f)
+            {
+                hit.m_damage.Modify(1f - Mathf.Clamp01(reduction));
             }
         }
     }

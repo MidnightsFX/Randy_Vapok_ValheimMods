@@ -1,52 +1,44 @@
-﻿using HarmonyLib;
-using System.Diagnostics;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 namespace EpicLoot.MagicItemEffects
 {
     public class ChainLightning
     {
-        [HarmonyPatch(typeof(Character), nameof(Character.Damage))]
-        public static class ChainLightningEffect_Damage_Patch
+        // Postfix handler invoked by CharacterDamageDispatch (on-hit reaction).
+        public static void OnDamageDealt(Character __instance, HitData hit, Character attacker)
         {
+            if (attacker == null || !attacker.IsPlayer()) return;
 
-            public static void Postfix(Character __instance, HitData hit)
+            var player = attacker as Player;
+            var weapon = player?.GetCurrentWeapon();
+            if (weapon == null || !weapon.GetMagicItem()?.HasEffect(nameof(MagicEffectType.ChainLightning), includeSocketed: true) == true)
+                return;
+
+            //float procChance = player.GetTotalActiveMagicEffectValue(MagicEffectType.ChainLightning, .01f) / 2f; - based off buff effect is too strong
+            float procChance = .15f;
+            //hmmm
+
+            //Check if damage is from weapon
+            Skills.SkillType skill = hit.m_skill;
+            if (skill != Skills.SkillType.Swords &&
+                skill != Skills.SkillType.Clubs &&
+                skill != Skills.SkillType.Knives &&
+                skill != Skills.SkillType.Unarmed &&
+                skill != Skills.SkillType.Axes &&
+                skill != Skills.SkillType.Polearms &&
+                skill != Skills.SkillType.Spears &&
+                skill != Skills.SkillType.Bows &&
+                skill != Skills.SkillType.Crossbows &&
+                skill != Skills.SkillType.ElementalMagic &&
+                skill != Skills.SkillType.BloodMagic
+                )
+                return;
+
+            if (Random.value <= procChance)
             {
-                Character attacker = hit.GetAttacker();
-                if (attacker == null || !attacker.IsPlayer()) return;
-
-                var player = attacker as Player;
-                var weapon = player?.GetCurrentWeapon();
-                if (weapon == null || !weapon.GetMagicItem()?.HasEffect(nameof(MagicEffectType.ChainLightning), includeSocketed: true) == true)
-                    return;
-
-                //float procChance = player.GetTotalActiveMagicEffectValue(MagicEffectType.ChainLightning, .01f) / 2f; - based off buff effect is too strong
-                float procChance = .15f;
-                //hmmm
-
-                //Check if damage is from weapon
-                Skills.SkillType skill = hit.m_skill;
-                if (skill != Skills.SkillType.Swords &&
-                    skill != Skills.SkillType.Clubs &&
-                    skill != Skills.SkillType.Knives &&
-                    skill != Skills.SkillType.Unarmed &&
-                    skill != Skills.SkillType.Axes &&
-                    skill != Skills.SkillType.Polearms &&
-                    skill != Skills.SkillType.Spears &&
-                    skill != Skills.SkillType.Bows &&
-                    skill != Skills.SkillType.Crossbows &&
-                    skill != Skills.SkillType.ElementalMagic &&  
-                    skill != Skills.SkillType.BloodMagic
-                    )
-                    return;
-
-                if (Random.value <= procChance)
-                {
-                    TriggerChainLightningEffect(__instance, player);
-                }
+                TriggerChainLightningEffect(__instance, player);
             }
-
         }
         private static void TriggerChainLightningEffect(Character target, Player player)
         {

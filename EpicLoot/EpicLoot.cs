@@ -114,6 +114,13 @@ public sealed class EpicLoot : BaseUnityPlugin
 
     private static void RegisterMagicEffectEvents()
     {
+        // Register per-effect tooltip display-value providers (effects that show more than one number).
+        // These are keyed by effect-type constant and don't depend on config load, so register once here.
+        MagicItemEffects.BulkupEffect.RegisterDisplayValues();
+        MagicItemEffects.Shards.HealthGainPerXDamageDone.RegisterDisplayValues();
+        MagicItemEffects.Shards.SpendCoinsToIncreaseDamage.RegisterDisplayValues();
+        MagicItemEffects.Shards.ChanceToCritOnHit.RegisterDisplayValues();
+
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;
 
@@ -406,6 +413,10 @@ public sealed class EpicLoot : BaseUnityPlugin
         // Runs during ZNetScene setup (after IceSpikes is registered, while AudioMan exists) so the
         // frost-cone SFX is routed through the volume mixer instead of playing at full volume.
         PrefabManager.OnPrefabsRegistered += FrostAOE.HookUpIceSpikesAudio;
+        // Registers the networked, damage-free 'lightningAOE' strike-visual clone into ZNetScene on every
+        // client each world load (fires as a ZNetScene.Awake postfix), so remote clients can resolve a synced
+        // strike ZDO. Idempotent -- the clone is built once and re-injected into each fresh ZNetScene.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.StrikeCausesLightning.RegisterVisualPrefab;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
         ShardStones.Shards.CreateAndLoadShardItems();

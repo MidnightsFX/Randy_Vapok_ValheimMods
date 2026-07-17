@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
+using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
@@ -9,37 +9,43 @@ namespace EpicLoot.MagicItemEffects.Shards
     public static class SpendCoinsToIncreaseDamage
     {
         // Coins spent per boosted hit. Tunable; the prefab name matches how CoinHoarder locates coins.
-        private const int CoinsPerHit = 5;
+        private const int CoinPercentPerHit = 5;
         private const string CoinsPrefab = "Coins";
 
-        [HarmonyPatch(typeof(Character), nameof(Character.Damage))]
-        private static class Character_Damage_Patch
+        // Tooltip: "Spend {1} Coins for +{0}% Damage" -- {1} surfaces the per-hit coin cost from the const.
+        public static void RegisterDisplayValues()
         {
-            private static void Prefix(HitData hit)
+            MagicItem.RegisterDisplayValues(MagicEffectType.SpendCoinsToIncreaseDamage,
+                value => new object[] { value, value, CoinPercentPerHit });
+        }
+
+        // Prefix handler invoked by CharacterDamageDispatch (attacker-side outgoing modifier).
+        public static void ModifyOutgoingHit(HitData hit, Character attacker)
+        {
+            if (!(attacker is Player player) || player != Player.m_localPlayer)
             {
-                if (!(hit.GetAttacker() is Player player) || player != Player.m_localPlayer)
-                {
-                    return;
-                }
-
-                // Socketed on chest armor, so this is a player-wide effect.
-                float bonus = player.GetTotalActiveMagicEffectValue(MagicEffectType.SpendCoinsToIncreaseDamage, 0.01f);
-                if (bonus <= 0f)
-                {
-                    return;
-                }
-
-                List<ItemDrop.ItemData> coins = player.GetInventory().GetAllItems()
-                    .Where(i => i.m_dropPrefab != null && i.m_dropPrefab.name == CoinsPrefab).ToList();
-                if (coins.Sum(c => c.m_stack) < CoinsPerHit)
-                {
-                    return;
-                }
-
-                // Remove by the coin item's own display name (robust to world-level gating).
-                player.GetInventory().RemoveItem(coins[0].m_shared.m_name, CoinsPerHit, -1, false);
-                hit.m_damage.Modify(1f + bonus);
+                return;
             }
+
+            // Socketed on chest armor, so this is a player-wide effect.
+            float bonus = player.GetTotalActiveMagicEffectValue(MagicEffectType.SpendCoinsToIncreaseDamage);
+            if (bonus <= 0f)
+            {
+                return;
+            }
+
+            List<ItemDrop.ItemData> coins = player.GetInventory().GetAllItems()
+                .Where(i => i.m_dropPrefab != null && i.m_dropPrefab.name == CoinsPrefab).ToList();
+            int sum = coins.Sum(c => c.m_stack);
+            int cost = Mathf.RoundToInt(bonus + (sum * CoinPercentPerHit * 0.01f));
+            if (sum < cost)
+            {
+                return;
+            }
+
+            // Remove by the coin item's own display name (robust to world-level gating).
+            player.GetInventory().RemoveItem(coins[0].m_shared.m_name, cost, -1, false);
+            hit.m_damage.Modify(1f + (bonus * 0.01f));
         }
     }
 }

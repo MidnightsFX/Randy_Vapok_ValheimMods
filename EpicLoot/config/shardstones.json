@@ -89,6 +89,16 @@
             "Legendary": 5,
             "Mythic": 6
           }
+        },
+        "Shoulders": {
+          "EffectType": "BulkUp",
+          "ValuesPerRarity": {
+            "Magic": 2,
+            "Rare": 3,
+            "Epic": 4,
+            "Legendary": 5,
+            "Mythic": 6
+          }
         }
       }
     },
@@ -181,6 +191,16 @@
             "Legendary": 5,
             "Mythic": 6
           }
+        },
+        "Shoulders": {
+          "EffectType": "StaminaOnKill",
+          "ValuesPerRarity": {
+            "Magic": 4,
+            "Rare": 6,
+            "Epic": 8,
+            "Legendary": 10,
+            "Mythic": 12
+          }
         }
       }
     },
@@ -266,6 +286,16 @@
         },
         "Utility": {
           "EffectType": "EitrShield",
+          "ValuesPerRarity": {
+            "Magic": 2,
+            "Rare": 3,
+            "Epic": 4,
+            "Legendary": 5,
+            "Mythic": 6
+          }
+        },
+        "Shoulders": {
+          "EffectType": "HeartyEitr",
           "ValuesPerRarity": {
             "Magic": 2,
             "Rare": 3,
@@ -365,6 +395,16 @@
             "Legendary": 5,
             "Mythic": 6
           }
+        },
+        "Shoulders": {
+          "EffectType": "BurningSpeed",
+          "ValuesPerRarity": {
+            "Magic": 5,
+            "Rare": 9,
+            "Epic": 13,
+            "Legendary": 17,
+            "Mythic": 20
+          }
         }
       }
     },
@@ -456,6 +496,16 @@
             "Epic": 4,
             "Legendary": 5,
             "Mythic": 6
+          }
+        },
+        "Shoulders": {
+          "EffectType": "PerfectDodgeGivesSpeed",
+          "ValuesPerRarity": {
+            "Magic": 10,
+            "Rare": 15,
+            "Epic": 20,
+            "Legendary": 25,
+            "Mythic": 30
           }
         }
       }
@@ -549,6 +599,16 @@
             "Legendary": 5,
             "Mythic": 6
           }
+        },
+        "Shoulders": {
+          "EffectType": "NightCarryWeight",
+          "ValuesPerRarity": {
+            "Magic": 10,
+            "Rare": 15,
+            "Epic": 20,
+            "Legendary": 25,
+            "Mythic": 30
+          }
         }
       }
     },
@@ -640,6 +700,16 @@
             "Epic": 3,
             "Legendary": 4,
             "Mythic": 5
+          }
+        },
+        "Shoulders": {
+          "EffectType": "DaySailingSpeed",
+          "ValuesPerRarity": {
+            "Magic": 5,
+            "Rare": 8,
+            "Epic": 11,
+            "Legendary": 14,
+            "Mythic": 17
           }
         }
       }
@@ -733,6 +803,16 @@
             "Legendary": 5,
             "Mythic": 6
           }
+        },
+        "Shoulders": {
+          "EffectType": "ArmorFromMovementPenalty",
+          "ValuesPerRarity": {
+            "Magic": 5,
+            "Rare": 8,
+            "Epic": 11,
+            "Legendary": 14,
+            "Mythic": 17
+          }
         }
       }
     },
@@ -824,6 +904,16 @@
             "Epic": 4,
             "Legendary": 5,
             "Mythic": 6
+          }
+        },
+        "Shoulders": {
+          "EffectType": "ReduceEitrCost",
+          "ValuesPerRarity": {
+            "Magic": 5,
+            "Rare": 7.5,
+            "Epic": 10,
+            "Legendary": 12.5,
+            "Mythic": 15
           }
         }
       }
@@ -917,6 +1007,16 @@
             "Legendary": 5,
             "Mythic": 6
           }
+        },
+        "Shoulders": {
+          "EffectType": "ReduceFishingStaminaCost",
+          "ValuesPerRarity": {
+            "Magic": 10,
+            "Rare": 18,
+            "Epic": 25,
+            "Legendary": 33,
+            "Mythic": 40
+          }
         }
       }
     },
@@ -941,7 +1041,7 @@
           }
         },
         "RangedWeapon": {
-          "EffectType": "AddBowsSkill",
+          "EffectType": "IncreaseRangedSkills",
           "ValuesPerRarity": {
             "Magic": 1,
             "Rare": 2,
@@ -981,13 +1081,13 @@
           }
         },
         "Legs": {
-          "EffectType": "BulkUp",
+          "EffectType": "BloodDrinker",
           "ValuesPerRarity": {
-            "Magic": 2,
-            "Rare": 3,
-            "Epic": 4,
-            "Legendary": 5,
-            "Mythic": 6
+            "Magic": 3,
+            "Rare": 6,
+            "Epic": 9,
+            "Legendary": 12,
+            "Mythic": 15
           }
         },
         "Trinket": {
@@ -1008,6 +1108,16 @@
             "Epic": 4,
             "Legendary": 5,
             "Mythic": 6
+          }
+        },
+        "Shoulders": {
+          "EffectType": "ReduceArmorIncreaseDamage",
+          "ValuesPerRarity": {
+            "Magic": 5,
+            "Rare": 9,
+            "Epic": 13,
+            "Legendary": 17,
+            "Mythic": 20
           }
         }
       }
@@ -1101,6 +1211,16 @@
             "Legendary": 5,
             "Mythic": 6
           }
+        },
+        "Shoulders": {
+          "EffectType": "PoisonToTrueDamage",
+          "ValuesPerRarity": {
+            "Magic": 10,
+            "Rare": 15,
+            "Epic": 20,
+            "Legendary": 25,
+            "Mythic": 30
+          }
         }
       }
     },
@@ -1177,11 +1297,11 @@
         "Trinket": {
           "EffectType": "AdrenalineIncreasesFrostDamage",
           "ValuesPerRarity": {
-            "Magic": 2,
-            "Rare": 3,
-            "Epic": 4,
-            "Legendary": 5,
-            "Mythic": 6
+            "Magic": 3,
+            "Rare": 4,
+            "Epic": 5,
+            "Legendary": 6,
+            "Mythic": 7
           }
         },
         "Utility": {
@@ -1192,6 +1312,16 @@
             "Epic": 4,
             "Legendary": 5,
             "Mythic": 6
+          }
+        },
+        "Shoulders": {
+          "EffectType": "IcyWeight",
+          "ValuesPerRarity": {
+            "Magic": 5,
+            "Rare": 8,
+            "Epic": 11,
+            "Legendary": 14,
+            "Mythic": 17
           }
         }
       }
@@ -1285,6 +1415,16 @@
             "Legendary": 4,
             "Mythic": 5
           }
+        },
+        "Shoulders": {
+          "EffectType": "GainEitrWhenSacrificingHealth",
+          "ValuesPerRarity": {
+            "Magic": 2,
+            "Rare": 3,
+            "Epic": 4,
+            "Legendary": 5,
+            "Mythic": 6
+          }
         }
       }
     },
@@ -1341,21 +1481,21 @@
         "Chest": {
           "EffectType": "SpendCoinsToIncreaseDamage",
           "ValuesPerRarity": {
-            "Magic": 2,
-            "Rare": 3,
-            "Epic": 4,
-            "Legendary": 5,
-            "Mythic": 6
+            "Magic": 4,
+            "Rare": 8,
+            "Epic": 12,
+            "Legendary": 16,
+            "Mythic": 20
           }
         },
         "Legs": {
           "EffectType": "LuckWhileFishing",
           "ValuesPerRarity": {
-            "Magic": 2,
-            "Rare": 3,
-            "Epic": 4,
-            "Legendary": 5,
-            "Mythic": 6
+            "Magic": 5,
+            "Rare": 10,
+            "Epic": 15,
+            "Legendary": 20,
+            "Mythic": 25
           }
         },
         "Trinket": {
@@ -1376,6 +1516,16 @@
             "Epic": 4,
             "Legendary": 5,
             "Mythic": 6
+          }
+        },
+        "Shoulders": {
+          "EffectType": "LuckyCraft",
+          "ValuesPerRarity": {
+            "Magic": 2,
+            "Rare": 4,
+            "Epic": 6,
+            "Legendary": 8,
+            "Mythic": 10
           }
         }
       }
@@ -1469,6 +1619,16 @@
             "Legendary": 5,
             "Mythic": 6
           }
+        },
+        "Shoulders": {
+          "EffectType": "StrikeCausesLightning",
+          "ValuesPerRarity": {
+            "Magic": 2,
+            "Rare": 4,
+            "Epic": 6,
+            "Legendary": 8,
+            "Mythic": 10
+          }
         }
       }
     },
@@ -1516,20 +1676,20 @@
           "EffectType": "PotionEfficacy",
           "ValuesPerRarity": {
             "Magic": 2,
-            "Rare": 3,
-            "Epic": 4,
-            "Legendary": 5,
-            "Mythic": 6
+            "Rare": 4,
+            "Epic": 6,
+            "Legendary": 8,
+            "Mythic": 10
           }
         },
         "Chest": {
           "EffectType": "Comfortable",
           "ValuesPerRarity": {
-            "Magic": 2,
-            "Rare": 3,
-            "Epic": 4,
-            "Legendary": 5,
-            "Mythic": 6
+            "Magic": 1,
+            "Rare": 2,
+            "Epic": 3,
+            "Legendary": 4,
+            "Mythic": 5
           }
         },
         "Legs": {
@@ -1560,6 +1720,16 @@
             "Epic": 4,
             "Legendary": 5,
             "Mythic": 6
+          }
+        },
+        "Shoulders": {
+          "EffectType": "RestingHealthRegen",
+          "ValuesPerRarity": {
+            "Magic": 20,
+            "Rare": 40,
+            "Epic": 60,
+            "Legendary": 80,
+            "Mythic": 100
           }
         }
       }
@@ -1625,13 +1795,13 @@
           }
         },
         "Legs": {
-          "EffectType": "FeatherFall",
+          "EffectType": "GainMaxCarryWeightFromRested",
           "ValuesPerRarity": {
-            "Magic": 2,
-            "Rare": 3,
-            "Epic": 4,
-            "Legendary": 5,
-            "Mythic": 6
+            "Magic": 1,
+            "Rare": 2,
+            "Epic": 3,
+            "Legendary": 4,
+            "Mythic": 5
           }
         },
         "Trinket": {
@@ -1653,13 +1823,26 @@
             "Legendary": 8,
             "Mythic": 10
           }
+        },
+        "Shoulders": {
+          "EffectType": "BatteringRam",
+          "ValuesPerRarity": {
+            "Magic": 2,
+            "Rare": 3,
+            "Epic": 4,
+            "Legendary": 5,
+            "Mythic": 6
+          }
         }
       }
     },
     "Eikthyr": {
       "Category": "Boss",
       "Rarities": [
-        "Rare"
+        "Rare",
+        "Epic",
+        "Legendary",
+        "Mythic"
       ],
       "UniformEffect": {
         "EffectType": "ShockingCharge",
@@ -1676,7 +1859,10 @@
     "Elder": {
       "Category": "Boss",
       "Rarities": [
-        "Rare"
+        "Rare",
+        "Epic",
+        "Legendary",
+        "Mythic"
       ],
       "UniformEffect": {
         "EffectType": "ForestsAid",
@@ -1693,10 +1879,12 @@
     "Bonemass": {
       "Category": "Boss",
       "Rarities": [
-        "Epic"
+        "Epic",
+        "Legendary",
+        "Mythic"
       ],
       "UniformEffect": {
-        "EffectType": "PoisonCoating",
+        "EffectType": "CorpseRot",
         "ValuesPerRarity": {
           "Magic": 5,
           "Rare": 10,
@@ -1710,7 +1898,9 @@
     "Moder": {
       "Category": "Boss",
       "Rarities": [
-        "Epic"
+        "Epic",
+        "Legendary",
+        "Mythic"
       ],
       "UniformEffect": {
         "EffectType": "IcyRetribution",
@@ -1727,7 +1917,8 @@
     "Yagluth": {
       "Category": "Boss",
       "Rarities": [
-        "Legendary"
+        "Legendary",
+        "Mythic"
       ],
       "UniformEffect": {
         "EffectType": "MeteorSummoner",
@@ -1744,16 +1935,17 @@
     "Queen": {
       "Category": "Boss",
       "Rarities": [
-        "Legendary"
+        "Legendary",
+        "Mythic"
       ],
       "UniformEffect": {
-        "EffectType": "EitrSiphon",
+        "EffectType": "Everflow",
         "ValuesPerRarity": {
-          "Magic": 5,
-          "Rare": 10,
-          "Epic": 15,
-          "Legendary": 20,
-          "Mythic": 25
+          "Magic": 7,
+          "Rare": 8,
+          "Epic": 9,
+          "Legendary": 10,
+          "Mythic": 11
         }
       },
       "TypeEffects": {}
@@ -1764,13 +1956,13 @@
         "Mythic"
       ],
       "UniformEffect": {
-        "EffectType": "LastFire",
+        "EffectType": "NecroticFire",
         "ValuesPerRarity": {
-          "Magic": 5,
-          "Rare": 10,
-          "Epic": 15,
-          "Legendary": 20,
-          "Mythic": 25
+          "Magic": 0.2,
+          "Rare": 0.4,
+          "Epic": 0.6,
+          "Legendary": 0.8,
+          "Mythic": 1.0
         }
       },
       "TypeEffects": {}

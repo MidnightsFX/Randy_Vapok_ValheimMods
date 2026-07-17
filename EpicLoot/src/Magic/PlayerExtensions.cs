@@ -122,6 +122,17 @@ public static class PlayerExtensions
     public static Player GetPlayerWithEquippedItem(ItemDrop.ItemData itemData)
     {
         // TODO: evaluate if this returns magic items of other players correctly
-        return Player.s_players.FirstOrDefault(player => player.IsItemEquiped(itemData));
+        // Hot path (called from ModifyArmor on every GetArmor): manual loop instead of a LINQ
+        // FirstOrDefault(closure) so we don't allocate a capturing closure on every call.
+        List<Player> players = Player.s_players;
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (players[i].IsItemEquiped(itemData))
+            {
+                return players[i];
+            }
+        }
+
+        return null;
     }
 }

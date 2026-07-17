@@ -1,5 +1,3 @@
-using HarmonyLib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
@@ -16,23 +14,26 @@ namespace EpicLoot.MagicItemEffects.Shards
         // in intent from ChanceDoubleDamage (a Fortune-shard proc) even though the default multiplier matches.
         private const float CritDamageMultiplier = 2f;
 
-        [HarmonyPatch(typeof(Character), nameof(Character.Damage))]
-        private static class Character_Damage_Patch
+        // Tooltip: "{0}% Chance to Crit for {1}x Damage" -- {1} surfaces the crit multiplier from the const.
+        public static void RegisterDisplayValues()
         {
-            [UsedImplicitly]
-            private static void Prefix(HitData hit)
-            {
-                if (hit == null || hit.GetAttacker() != Player.m_localPlayer)
-                {
-                    return;
-                }
+            MagicItem.RegisterDisplayValues(MagicEffectType.ChanceToCritOnHit,
+                value => new object[] { value, CritDamageMultiplier });
+        }
 
-                var chance = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
-                    MagicEffectType.ChanceToCritOnHit, 0.01f);
-                if (chance > 0f && Random.value < chance)
-                {
-                    hit.m_damage.Modify(CritDamageMultiplier);
-                }
+        // Prefix handler invoked by CharacterDamageDispatch (attacker-side outgoing modifier).
+        public static void ModifyOutgoingHit(HitData hit, Character attacker)
+        {
+            if (hit == null || attacker != Player.m_localPlayer)
+            {
+                return;
+            }
+
+            var chance = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
+                MagicEffectType.ChanceToCritOnHit, 0.01f);
+            if (chance > 0f && Random.value < chance)
+            {
+                hit.m_damage.Modify(CritDamageMultiplier);
             }
         }
     }

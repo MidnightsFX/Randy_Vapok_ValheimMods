@@ -21,6 +21,8 @@ public static class ItemDataExtensions
     }
 
     public static bool IsShardStone(this ItemDrop.ItemData itemData) {
+        // Every shard bakes its color into MagicItem.ShardColor when stamped (Shards.StampShard), so a
+        // non-None color is the shard marker. Pure enum comparison -- no m_ammoType string parse.
         MagicItemComponent magicData = itemData.Data().Get<MagicItemComponent>();
         return magicData != null && magicData.MagicItem != null && magicData.MagicItem.ShardColor != ShardType.None;
     }

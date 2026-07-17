@@ -1,6 +1,3 @@
-using HarmonyLib;
-using JetBrains.Annotations;
-
 namespace EpicLoot.MagicItemEffects.Shards
 {
     // Orange trinket shard: dealing fire damage stokes adrenaline — gain adrenaline equal to value% of
@@ -9,22 +6,18 @@ namespace EpicLoot.MagicItemEffects.Shards
     // player has a max-adrenaline source. Shard values are authored as whole-number percents.
     public static class BurningAdrenaline
     {
-        [HarmonyPatch(typeof(Character), nameof(Character.Damage))]
-        private static class Damage_Patch
+        // Postfix handler invoked by CharacterDamageDispatch (on-hit reaction).
+        public static void OnDamageDealt(HitData hit, Character attacker)
         {
-            [UsedImplicitly]
-            private static void Postfix(HitData hit)
+            if (hit == null || hit.m_damage.m_fire <= 0f || attacker != Player.m_localPlayer)
             {
-                if (hit == null || hit.m_damage.m_fire <= 0f || hit.GetAttacker() != Player.m_localPlayer)
-                {
-                    return;
-                }
+                return;
+            }
 
-                var fraction = Player.m_localPlayer.GetTotalActiveMagicEffectValue(MagicEffectType.BurningAdrenaline, 0.01f);
-                if (fraction > 0f)
-                {
-                    Player.m_localPlayer.AddAdrenaline(hit.m_damage.m_fire * fraction);
-                }
+            var fraction = Player.m_localPlayer.GetTotalActiveMagicEffectValue(MagicEffectType.BurningAdrenaline, 0.01f);
+            if (fraction > 0f)
+            {
+                Player.m_localPlayer.AddAdrenaline(hit.m_damage.m_fire * fraction);
             }
         }
     }

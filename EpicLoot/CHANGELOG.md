@@ -1,8 +1,26 @@
 ## Version 0.13.0
 
+New Content:
+* Shardstones Added! Shardstones are a new item that can be attached to weapons with available shardsockets
+    * Interacting with an enchanted item that has a shard socket will pull up a small storage UI, allowing you to socket or remove shards. 
+    * Shardstones can be found in the world as loot
+    * 90+ new magic effects have been added and are primarily available through shardstones, some shardstones provide access to lower power existing enchants also
+* Tempering (Thanks Rusty!)
+    * Tempering allows you to pay to increase the value of an existing enchantment (service provided by Hildir)
+    * Tempering can be configured to allow upgrading past a tiers normal maximum.
+    * Careful! Tempering can downgrade enchantments too if you critically fail (its configurable don't worry).
+* Runestone Balance options
+    * Runestone extraction can now be configured with new options: KeepItem / ReduceEnchants / ReduceEnchantsAndRarity / DestroyItem
+    * Runestones can also be socketed into shardsockets
+* Improved Tooltips!
+    * User-side configuration allows you to expand vertical or horizontally (or shrink) tooltips (scrollbar automatically used, as needed)
+    * SHIFT when moused over an item will now show extended tooltip information, this includes more detailed descriptions, configurable effects and precise values for multiple parts of the effects
+
+Bugfixes:
 * Fixes tooltip display for enchanted items health use percentage
 * Fixes a bug with Ragnar's ice wave which would cause a player to swim upwards in the air (upon exit) if the effect was used in a dungeon
 * Attack speed compatibility: when another mod already provides AnimationSpeedManager (embedded as a binary), Epic Loot now routes its attack-speed changes into that shared instance instead of running its own copy, so the two mods' attack-speed modifiers stack correctly instead of overwriting each other
+* Merchant panels are now draggable, and save their position client side
 
 ## Version 0.12.15
 

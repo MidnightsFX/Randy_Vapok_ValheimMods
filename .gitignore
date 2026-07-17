@@ -18,6 +18,7 @@
 # Always ignore the valheim assembly metadata as it gets updated each time a build happens
 ValheimUnity/Assets/ExternalLibraries/**.meta
 ValheimUnity/Assets/Exports.meta
+EpicLoot/ValheimUnity/Assets/ExternalLibraries/EpicLoot.dll
 
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta

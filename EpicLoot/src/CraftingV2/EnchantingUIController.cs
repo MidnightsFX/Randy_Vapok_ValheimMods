@@ -443,10 +443,8 @@ namespace EpicLoot.CraftingV2
             foreach (MagicItemEffectDefinition effectDef in availableEffects)
             {
                 MagicItemEffectDefinition.ValueDef values = effectDef.GetValuesForRarity(rarity);
-                string valueDisplay = values != null ? Mathf.Approximately(values.MinValue, values.MaxValue) ?
-                    $"{values.MinValue}" : $"({values.MinValue}-{values.MaxValue})" : "";
                 string chancePrefix = GetSelectionChancePrefix(effectDef.SelectionWeight, totalSelectionWeight);
-                sb.AppendLine($"‣ {chancePrefix}{string.Format(Localization.instance.Localize(effectDef.DisplayText), valueDisplay)}");
+                sb.AppendLine($"‣ {chancePrefix}{MagicItem.GetEffectTextRange(effectDef, values)}");
             }
 
             sb.Append("</color>");
@@ -1205,10 +1203,8 @@ namespace EpicLoot.CraftingV2
             foreach (MagicItemEffectDefinition effectDef in availableEffects)
             {
                 MagicItemEffectDefinition.ValueDef values = effectDef.GetValuesForRarity(item.GetRarity());
-                string valueDisplay = values != null ? Mathf.Approximately(values.MinValue, values.MaxValue) ?
-                    $"{values.MinValue}" : $"({values.MinValue}-{values.MaxValue})" : "";
                 string chancePrefix = GetSelectionChancePrefix(effectDef.SelectionWeight, totalSelectionWeight);
-                sb.AppendLine($"‣ {chancePrefix}{string.Format(Localization.instance.Localize(effectDef.DisplayText), valueDisplay)}");
+                sb.AppendLine($"‣ {chancePrefix}{MagicItem.GetEffectTextRange(effectDef, values)}");
             }
             sb.Append("</color>");
 

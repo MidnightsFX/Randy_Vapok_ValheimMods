@@ -267,7 +267,37 @@ namespace EpicLoot
         // socketed effects should always count toward the aggregate value.
         public float GetTotalEffectValue(string effectType, float scale = 1.0f, bool includeSocketed = true)
         {
-            return GetEffects(effectType, includeSocketed).Sum(x => x.EffectValue) * scale;
+            return SumEffectValue(effectType, scale, includeSocketed);
+        }
+
+        // Allocation-free equivalent of GetEffects(effectType, includeSocketed).Sum(...) * scale.
+        // Used on the hot per-item effect-application patches (armor/durability) which are called from
+        // vanilla UI/render loops, so it iterates the backing lists directly rather than building
+        // intermediate LINQ lists/iterators each call.
+        public float SumEffectValue(string effectType, float scale = 1.0f, bool includeSocketed = true)
+        {
+            float total = 0f;
+            for (int i = 0; i < Effects.Count; i++)
+            {
+                if (Effects[i].EffectType == effectType)
+                {
+                    total += Effects[i].EffectValue;
+                }
+            }
+
+            if (includeSocketed)
+            {
+                for (int i = 0; i < Sockets.Count; i++)
+                {
+                    MagicItemEffect effect = Sockets[i]?.Effect;
+                    if (effect != null && effect.EffectType == effectType)
+                    {
+                        total += effect.EffectValue;
+                    }
+                }
+            }
+
+            return total * scale;
         }
 
         public bool HasEffect(string effectType, bool checkHealthCritical = false, bool includeSocketed = false)
@@ -293,11 +323,110 @@ namespace EpicLoot
             return !Effects.Any(x => !MagicItemEffectDefinitions.Get(x.EffectType)?.CanBeDisenchanted ?? false);
         }
 
+        // Per-effect override that supplies the full ordered set of {0},{1},... format args for an
+        // effect's DisplayText, derived from the item's rolled value. Effects that show more than one
+        // number (e.g. BulkUp: +health/-regen, or a rolled value plus a hardcoded constant) register a
+        // provider here; everything else defaults to a single {0} = value. Providers must be PURE (they
+        // are probed with dummy values to count/classify placeholders) and return float values.
+        private static readonly Dictionary<string, Func<float, object[]>> DisplayValueProviders = new();
+
+        public static void RegisterDisplayValues(string effectType, Func<float, object[]> provider)
+        {
+            if (string.IsNullOrEmpty(effectType) || provider == null)
+            {
+                return;
+            }
+            DisplayValueProviders[effectType] = provider;
+        }
+
+        // Builds the {0},{1},... args for an effect's DisplayText from its rolled value, using the
+        // registered provider if any. Always returns at least one element so string.Format has a {0}.
+        private static object[] GetDisplayArgs(string effectType, float value)
+        {
+            if (!string.IsNullOrEmpty(effectType) && DisplayValueProviders.TryGetValue(effectType, out var provider))
+            {
+                var args = provider(value);
+                if (args != null && args.Length > 0)
+                {
+                    return args;
+                }
+            }
+            return new object[] { value };
+        }
+
+        // Formats a DisplayText with the given args, falling back to the raw localized text if the
+        // string references a placeholder index the args don't cover (guards a mis-authored
+        // localization/provider mismatch from throwing out of a whole tooltip/panel).
+        private static string FormatDisplayText(string displayText, object[] args)
+        {
+            var localizedDisplayText = Localization.instance.Localize(displayText);
+            try
+            {
+                return string.Format(localizedDisplayText, args);
+            }
+            catch (FormatException e)
+            {
+                EpicLoot.LogWarning($"DisplayText format error for '{localizedDisplayText}': {e.Message}");
+                return localizedDisplayText;
+            }
+        }
+
         public static string GetEffectText(MagicItemEffectDefinition effectDef, float value)
         {
-            var localizedDisplayText = Localization.instance.Localize(effectDef.DisplayText);
-            var result = string.Format(localizedDisplayText, value);
-            return result;
+            return FormatDisplayText(effectDef.DisplayText, GetDisplayArgs(effectDef.Type, value));
+        }
+
+        // Range preview (compendium/enchant/augment): fills each placeholder with that derived value's
+        // own min-max range. A constant slot (min == max, e.g. a fixed "200") collapses to a single
+        // number rather than a range. A null value def (valueless effect) fills placeholders with "".
+        public static string GetEffectTextRange(MagicItemEffectDefinition effectDef, MagicItemEffectDefinition.ValueDef values)
+        {
+            if (values == null)
+            {
+                var count = GetDisplayArgs(effectDef.Type, 0f).Length;
+                var empties = new object[count];
+                for (var i = 0; i < count; i++)
+                {
+                    empties[i] = string.Empty;
+                }
+                return FormatDisplayText(effectDef.DisplayText, empties);
+            }
+
+            var argsMin = GetDisplayArgs(effectDef.Type, values.MinValue);
+            var argsMax = GetDisplayArgs(effectDef.Type, values.MaxValue);
+            var display = new object[argsMin.Length];
+            for (var i = 0; i < argsMin.Length; i++)
+            {
+                var min = argsMin[i];
+                var max = i < argsMax.Length ? argsMax[i] : argsMin[i];
+                display[i] = (min is float fMin && max is float fMax && !Mathf.Approximately(fMin, fMax))
+                    ? $"({min}-{max})"
+                    : $"{min}";
+            }
+            return FormatDisplayText(effectDef.DisplayText, display);
+        }
+
+        // Builds args where rolled-value slots become valueToken but constant slots (e.g. a fixed
+        // "200"/"2x") keep their real value, detected by probing the provider with two different inputs:
+        // a slot whose value changes is rolled-value; a slot that stays put is constant.
+        private static object[] GetGenericArgs(string effectType, string valueToken)
+        {
+            var probeA = GetDisplayArgs(effectType, 1f);
+            var probeB = GetDisplayArgs(effectType, 2f);
+            var args = new object[probeA.Length];
+            for (var i = 0; i < probeA.Length; i++)
+            {
+                var isConstant = i < probeB.Length && Equals(probeA[i], probeB[i]);
+                args[i] = isConstant ? probeA[i] : valueToken;
+            }
+            return args;
+        }
+
+        // Generic preview (compendium "explain"/set X-marker, tempering old->new transition): the
+        // rolled-value placeholders get valueToken; constant placeholders show their real value.
+        public static string GetEffectTextGeneric(MagicItemEffectDefinition effectDef, string valueToken)
+        {
+            return FormatDisplayText(effectDef.DisplayText, GetGenericArgs(effectDef.Type, valueToken));
         }
 
         public static string GetEffectText(MagicItemEffect effect, ItemRarity rarity,
@@ -351,9 +480,7 @@ namespace EpicLoot
 
             if (!string.IsNullOrEmpty(effectDef.Description))
             {
-                var description = Localization.instance.Localize(effectDef.Description);
-                description = ApplyValueToDescription(description, effect.EffectValue);
-                block.Append($"{indent}{description}\n");
+                block.Append($"{indent}{GetEffectDescription(effectDef, effect.EffectValue)}\n");
             }
 
             if (values != null && !Mathf.Approximately(values.MinValue, values.MaxValue))
@@ -370,6 +497,24 @@ namespace EpicLoot
             }
 
             return block.ToString();
+        }
+
+        // Concrete-value description (Shift detail block, shard preview): substitutes any {0},{1},...
+        // placeholders with this effect's provider values, then fills the legacy
+        // "<b><color=yellow>X</color></b>" marker with the rolled value. Descriptions using neither
+        // convention pass through unchanged (string.Format is a no-op without placeholders).
+        public static string GetEffectDescription(MagicItemEffectDefinition effectDef, float value)
+        {
+            var description = FormatDisplayText(effectDef.Description, GetDisplayArgs(effectDef.Type, value));
+            return ApplyValueToDescription(description, value);
+        }
+
+        // Generic description (compendium "explain" page): substitutes {0},{1},... with the generic
+        // marker (constant slots keep their real value); the legacy "X" marker is already generic and is
+        // left in place.
+        public static string GetEffectDescriptionGeneric(MagicItemEffectDefinition effectDef, string valueToken)
+        {
+            return FormatDisplayText(effectDef.Description, GetGenericArgs(effectDef.Type, valueToken));
         }
 
         // Replaces the standard "X" value marker embedded in a localized Description with this item's

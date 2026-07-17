@@ -1,6 +1,4 @@
 using EpicLoot.General;
-using HarmonyLib;
-using JetBrains.Annotations;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
@@ -10,29 +8,25 @@ namespace EpicLoot.MagicItemEffects.Shards
     // Shard values are authored as whole-number percents, hence the 0.01f.
     public static class DamageTakenGivesAdrenaline
     {
-        [HarmonyPatch(typeof(Character), nameof(Character.RPC_Damage))]
-        private static class RPC_Damage_Patch
+        // Postfix handler invoked by CharacterRpcDamageDispatch (on-damage-taken reaction).
+        public static void OnDamageTaken(Character __instance, HitData hit)
         {
-            [UsedImplicitly]
-            private static void Postfix(Character __instance, HitData hit)
+            if (hit == null || __instance != Player.m_localPlayer)
             {
-                if (hit == null || __instance != Player.m_localPlayer)
-                {
-                    return;
-                }
+                return;
+            }
 
-                var fraction = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
-                    MagicEffectType.DamageTakenGivesAdrenaline, 0.01f);
-                if (fraction <= 0f)
-                {
-                    return;
-                }
+            var fraction = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
+                MagicEffectType.DamageTakenGivesAdrenaline, 0.01f);
+            if (fraction <= 0f)
+            {
+                return;
+            }
 
-                var damage = hit.m_damage.EpicLootGetTotalDamageAgainstPlayer();
-                if (damage > 0f)
-                {
-                    Player.m_localPlayer.AddAdrenaline(damage * fraction);
-                }
+            var damage = hit.m_damage.EpicLootGetTotalDamageAgainstPlayer();
+            if (damage > 0f)
+            {
+                Player.m_localPlayer.AddAdrenaline(damage * fraction);
             }
         }
     }

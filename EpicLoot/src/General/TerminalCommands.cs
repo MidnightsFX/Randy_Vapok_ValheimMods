@@ -21,11 +21,7 @@ namespace EpicLoot.General
             CommandManager.Instance.AddConsoleCommand(new LuckTestCommand());
             CommandManager.Instance.AddConsoleCommand(new PrintConfig());
             CommandManager.Instance.AddConsoleCommand(new CheatSocketsCommand());
-            CommandManager.Instance.AddConsoleCommand(new SpawnShardCommand());
             CommandManager.Instance.AddConsoleCommand(new MagicShardsCommand());
-            CommandManager.Instance.AddConsoleCommand(new SocketInfoCommand());
-            CommandManager.Instance.AddConsoleCommand(new SocketCommand());
-            CommandManager.Instance.AddConsoleCommand(new UnsocketCommand());
         }
 
         internal class LuckTestCommand : ConsoleCommand
@@ -162,22 +158,6 @@ namespace EpicLoot.General
             }
         }
 
-        internal class SpawnShardCommand : ConsoleCommand
-        {
-            public override string Name => "spawnshard";
-            public override string Help => "Spawns a socket shard in your inventory eg: spawnshard <rarity> <color>";
-            public override bool IsCheat => true;
-
-            public override void Run(string[] args)
-            {
-                // SocketDebug.SpawnShard expects the command name at index 0, but Jotunn strips it from args.
-                var fullArgs = new string[args.Length + 1];
-                fullArgs[0] = Name;
-                args.CopyTo(fullArgs, 1);
-                ShardDebug.SpawnShard(Console.instance, fullArgs);
-            }
-        }
-
         internal class MagicShardsCommand : ConsoleCommand
         {
             public override string Name => "magicshards";
@@ -191,42 +171,6 @@ namespace EpicLoot.General
                 fullArgs[0] = Name;
                 args.CopyTo(fullArgs, 1);
                 ShardDebug.SpawnAllShards(Console.instance, fullArgs);
-            }
-        }
-
-        internal class SocketInfoCommand : ConsoleCommand
-        {
-            public override string Name => "socketinfo";
-            public override string Help => "Prints socket info for your equipped magic items";
-            public override bool IsCheat => true;
-
-            public override void Run(string[] args)
-            {
-                ShardDebug.PrintSocketInfo(Console.instance);
-            }
-        }
-
-        internal class SocketCommand : ConsoleCommand
-        {
-            public override string Name => "socket";
-            public override string Help => "Sockets the first eligible shard into the first equipped item with an open socket";
-            public override bool IsCheat => true;
-
-            public override void Run(string[] args)
-            {
-                ShardDebug.SocketFirstEligible(Console.instance);
-            }
-        }
-
-        internal class UnsocketCommand : ConsoleCommand
-        {
-            public override string Name => "unsocket";
-            public override string Help => "Removes the first socketed shard from your equipped items";
-            public override bool IsCheat => true;
-
-            public override void Run(string[] args)
-            {
-                ShardDebug.UnsocketFirst(Console.instance);
             }
         }
     }

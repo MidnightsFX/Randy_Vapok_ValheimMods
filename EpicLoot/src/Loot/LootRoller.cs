@@ -645,7 +645,7 @@ namespace EpicLoot
                 {
                     var shardRarity = tokenShardRarity ??
                         global::EpicLoot.ShardStones.Shards.GetShardRarity(itemDrop.m_itemData);
-                    global::EpicLoot.ShardStones.Shards.StampRarity(itemDrop.m_itemData, shardRarity);
+                    global::EpicLoot.ShardStones.Shards.StampShard(itemDrop.m_itemData, shardRarity);
                     itemDrop.Save();
                 }
 

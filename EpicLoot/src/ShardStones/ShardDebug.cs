@@ -88,9 +88,9 @@ namespace EpicLoot.ShardStones
             var itemData = id.m_itemData.Clone();
             itemData.m_dropPrefab = shard;
             itemData.m_stack = 1;
-            // The prefab already bakes this rarity; re-stamp defensively so the metadata is present
+            // The prefab already bakes this rarity/color; re-stamp defensively so the metadata is present
             // regardless of how the clone was produced.
-            Shards.StampRarity(itemData, rarity);
+            Shards.StampShard(itemData, rarity);
 
             bool status = Player.m_localPlayer.GetInventory().AddItem(itemData);
             if (!status)

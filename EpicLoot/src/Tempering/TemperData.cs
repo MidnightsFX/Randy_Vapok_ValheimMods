@@ -128,8 +128,7 @@ public class TemperData
     }
     private void UpdateLog(string color)
     {
-        string localizedText = Localization.instance.Localize(selectedDefinition.DisplayText);
-        string message = string.Format(localizedText, $"{_tempValue} → {_tempUpdatedValue}");
+        string message = MagicItem.GetEffectTextGeneric(selectedDefinition, $"{_tempValue} → {_tempUpdatedValue}");
         TemperPanel.Instance.UpdateLog($"<color={color}>{message}</color>");
     }
     private string SelectWeightedEffect(List<MagicItemEffect> effects)
@@ -177,17 +176,16 @@ public class TemperData
             MagicItemEffect effect = _tempItem.Effects[i];
             string pip = _tempItem.GetMagicEffectPip(i);
             MagicItemEffectDefinition def = MagicItemEffectDefinitions.Get(effect.EffectType);
-            string localizedDisplayText = Localization.instance.Localize(def.DisplayText);
 
             string result;
             if (effect.EffectType == selectedEffect.EffectType)
             {
-                result = string.Format(localizedDisplayText,
+                result = MagicItem.GetEffectTextGeneric(def,
                     $"{effect.EffectValue - selectedValues.Increment} <color={SUCCESS_GREEN}>→ {effect.EffectValue}</color>");
             }
             else
             {
-                result = string.Format(localizedDisplayText, effect.EffectValue);
+                result = MagicItem.GetEffectText(def, effect.EffectValue);
             }
             if (showRange)
             {

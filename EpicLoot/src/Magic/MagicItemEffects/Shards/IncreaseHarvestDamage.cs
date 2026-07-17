@@ -1,5 +1,4 @@
-using HarmonyLib;
-using JetBrains.Annotations;
+using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
@@ -10,25 +9,21 @@ namespace EpicLoot.MagicItemEffects.Shards
     // whole-number percents, hence the 0.01f.
     public static class IncreaseHarvestDamage
     {
-        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetDamage), typeof(int), typeof(float))]
-        private static class GetDamage_Patch
+        // GetDamage postfix handler invoked by ModifyDamage (per-weapon modifier).
+        public static void ModifyWeaponDamage(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result)
         {
-            [UsedImplicitly]
-            private static void Postfix(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result)
+            var player = Player.m_localPlayer;
+            if (player == null || !player.IsItemEquiped(__instance))
             {
-                var player = Player.m_localPlayer;
-                if (player == null || !player.IsItemEquiped(__instance))
-                {
-                    return;
-                }
+                return;
+            }
 
-                var bonus = MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-                    player, __instance, MagicEffectType.IncreaseHarvestDamage, 0.01f);
-                if (bonus != 0f)
-                {
-                    __result.m_chop *= 1f + bonus;
-                    __result.m_pickaxe *= 1f + bonus;
-                }
+            var bonus = MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
+                player, __instance, MagicEffectType.IncreaseHarvestDamage, 0.01f);
+            if (bonus != 0f)
+            {
+                __result.m_chop *= 1f + bonus;
+                __result.m_pickaxe *= 1f + bonus;
             }
         }
     }

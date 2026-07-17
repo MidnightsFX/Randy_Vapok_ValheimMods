@@ -61,6 +61,7 @@ namespace EpicLoot
         public static string DamageBonusFromPlayerWeight = nameof(DamageBonusFromPlayerWeight);
         public static string StaminaRegenBonusFromPlayerWeight = nameof(StaminaRegenBonusFromPlayerWeight);
         public static string GainMaxStaminaBasedOnPlayerMaxHealth = nameof(GainMaxStaminaBasedOnPlayerMaxHealth);
+        public static string GainMaxCarryWeightFromRested = nameof(GainMaxCarryWeightFromRested);
         public static string DamageIncreaseFromMovementPenalty = nameof(DamageIncreaseFromMovementPenalty);
         public static string IncreaseXPGainFromMovementPenalty = nameof(IncreaseXPGainFromMovementPenalty);
         public static string CarryWeightForMovementPenalty = nameof(CarryWeightForMovementPenalty);
@@ -76,12 +77,14 @@ namespace EpicLoot
         public static string SailingSpeed = nameof(SailingSpeed);
         public static string PotionEfficacy = nameof(PotionEfficacy);
         public static string IncreaseMeleeSkills = nameof(IncreaseMeleeSkills); // new melee-skill bundle
+        public static string IncreaseRangedSkills = nameof(IncreaseRangedSkills); // new ranged-skill bundle
 
         // --- Element / status mechanics ---
         public static string IncreaseAllPoisonDamageDone = nameof(IncreaseAllPoisonDamageDone);
         public static string KillsReduceNextBloodCost = nameof(KillsReduceNextBloodCost);
         public static string BloodMagicLevelIncreasesHealthRegen = nameof(BloodMagicLevelIncreasesHealthRegen);
         public static string ChanceToCritOnHit = nameof(ChanceToCritOnHit);
+        public static string BloodDrinker = nameof(BloodDrinker); // DarkRed legs: max-health-for-lifesteal tradeoff
 
         // --- Movement / misc ---
         public static string Stampede = nameof(Stampede);
@@ -89,13 +92,32 @@ namespace EpicLoot
         public static string RollCleanse = nameof(RollCleanse);
         public static string StormRider = nameof(StormRider);
 
+        // --- Shoulder (Shoulders slot) effects (one per non-boss shard; Red reuses BulkUp) ---
+        public static string StaminaOnKill = nameof(StaminaOnKill);                             // Yellow
+        public static string HeartyEitr = nameof(HeartyEitr);                                   // Cyan
+        public static string BurningSpeed = nameof(BurningSpeed);                               // Orange
+        public static string PerfectDodgeGivesSpeed = nameof(PerfectDodgeGivesSpeed);           // Pink
+        public static string NightCarryWeight = nameof(NightCarryWeight);                       // Black
+        public static string DaySailingSpeed = nameof(DaySailingSpeed);                         // White
+        public static string ArmorFromMovementPenalty = nameof(ArmorFromMovementPenalty);       // Green
+        public static string ReduceEitrCost = nameof(ReduceEitrCost);                           // Purple
+        public static string ReduceFishingStaminaCost = nameof(ReduceFishingStaminaCost);       // Grey
+        public static string ReduceArmorIncreaseDamage = nameof(ReduceArmorIncreaseDamage);     // DarkRed
+        public static string PoisonToTrueDamage = nameof(PoisonToTrueDamage);                   // DarkGreen
+        public static string IcyWeight = nameof(IcyWeight);                                     // DarkBlue
+        public static string GainEitrWhenSacrificingHealth = nameof(GainEitrWhenSacrificingHealth); // DarkPurple
+        public static string LuckyCraft = nameof(LuckyCraft);                                   // Golden
+        public static string StrikeCausesLightning = nameof(StrikeCausesLightning);             // LightBlue
+        public static string RestingHealthRegen = nameof(RestingHealthRegen);                   // LightGreen
+        public static string BatteringRam = nameof(BatteringRam);                               // Peach
+
         // --- Boss signature effects (boss-tier power) ---
         public static string ShockingCharge = nameof(ShockingCharge);
         public static string ForestsAid = nameof(ForestsAid);
-        public static string PoisonCoating = nameof(PoisonCoating);
+        public static string CorpseRot = nameof(CorpseRot);
         public static string IcyRetribution = nameof(IcyRetribution);
         public static string MeteorSummoner = nameof(MeteorSummoner);
-        public static string EitrSiphon = nameof(EitrSiphon);
-        public static string LastFire = nameof(LastFire);
+        public static string Everflow = nameof(Everflow);
+        public static string NecroticFire = nameof(NecroticFire);
     }
 }

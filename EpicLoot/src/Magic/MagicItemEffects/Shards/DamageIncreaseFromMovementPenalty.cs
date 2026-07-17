@@ -1,5 +1,4 @@
-using HarmonyLib;
-using JetBrains.Annotations;
+using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
@@ -9,25 +8,21 @@ namespace EpicLoot.MagicItemEffects.Shards
     // dual-wielding. Shard values are authored as whole-number percents, hence the 0.01f.
     public static class DamageIncreaseFromMovementPenalty
     {
-        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetDamage), typeof(int), typeof(float))]
-        private static class GetDamage_Patch
+        // GetDamage postfix handler invoked by ModifyDamage (per-weapon modifier).
+        public static void ModifyWeaponDamage(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result)
         {
-            [UsedImplicitly]
-            private static void Postfix(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result)
+            var player = Player.m_localPlayer;
+            if (player == null || !player.IsItemEquiped(__instance))
             {
-                var player = Player.m_localPlayer;
-                if (player == null || !player.IsItemEquiped(__instance))
-                {
-                    return;
-                }
+                return;
+            }
 
-                var pct = MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-                    player, __instance, MagicEffectType.DamageIncreaseFromMovementPenalty, 0.01f);
-                var bonus = pct * PenaltyScaling.MovementPenaltyFactor(player);
-                if (bonus != 0f)
-                {
-                    __result.Modify(1f + bonus);
-                }
+            var pct = MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
+                player, __instance, MagicEffectType.DamageIncreaseFromMovementPenalty, 0.01f);
+            var bonus = pct * PenaltyScaling.MovementPenaltyFactor(player);
+            if (bonus != 0f)
+            {
+                __result.Modify(1f + bonus);
             }
         }
     }

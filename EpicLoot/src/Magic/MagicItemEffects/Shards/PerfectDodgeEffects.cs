@@ -79,8 +79,8 @@ namespace EpicLoot.MagicItemEffects.Shards
     }
 
     // ---- Trinket proc: a chance, on a dodge roll, to open a brief damage-immunity window -----------
-    // so more incoming hits land as perfect dodges. Self-contained (mirrors LastFire's timed-immunity
-    // pattern); the reward effects above still fire off the vanilla perfect-dodge trigger.
+    // so more incoming hits land as perfect dodges. Self-contained (a brief timed-immunity window);
+    // the reward effects above still fire off the vanilla perfect-dodge trigger.
     public static class PerfectDodge
     {
         private const float ImmunityWindow = 0.5f; // seconds of immunity granted on a successful proc
@@ -117,17 +117,13 @@ namespace EpicLoot.MagicItemEffects.Shards
             }
         }
 
-        // While the window is open, negate incoming damage to the local player.
-        [HarmonyPatch(typeof(Character), nameof(Character.RPC_Damage))]
-        private static class RPC_Damage_Patch
+        // Prefix handler invoked by CharacterRpcDamageDispatch: while the immunity window is open, negate
+        // incoming damage to the local player.
+        public static void ModifyIncoming(Character __instance, HitData hit)
         {
-            [UsedImplicitly]
-            private static void Prefix(Character __instance, HitData hit)
+            if (hit != null && __instance == Player.m_localPlayer && Time.time < _immuneUntil)
             {
-                if (hit != null && __instance == Player.m_localPlayer && Time.time < _immuneUntil)
-                {
-                    hit.m_damage.Modify(0f);
-                }
+                hit.m_damage.Modify(0f);
             }
         }
     }
@@ -147,6 +143,55 @@ namespace EpicLoot.MagicItemEffects.Shards
                 }
 
                 __result -= __instance.GetTotalActiveMagicEffectValue(MagicEffectType.DecreaseDodgeCost, 0.01f);
+            }
+        }
+    }
+
+    // ---- Shoulder: a perfect dodge grants a brief burst of movement speed ---------------------------
+    // Hangs off the same vanilla perfect-dodge trigger as the reward effects above, opening a short window
+    // during which the local player's move speed is boosted. The boost is applied through
+    // SEMan.ApplyStatusEffectSpeedMods (the hook the game's own speed status effects use). Shard values are
+    // authored as whole-number percents, hence the 0.01f.
+    public static class PerfectDodgeGivesSpeed
+    {
+        private const float SpeedWindow = 1f; // seconds of the speed buff granted on a perfect dodge
+        private static float _speedUntil;
+
+        [HarmonyPatch(typeof(Player), "RPC_HitWhileDodging")]
+        private static class RPC_HitWhileDodging_Patch
+        {
+            [UsedImplicitly]
+            private static void Postfix(Player __instance)
+            {
+                if (__instance != Player.m_localPlayer)
+                {
+                    return;
+                }
+
+                if (__instance.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesSpeed, 0.01f) > 0f)
+                {
+                    _speedUntil = Time.time + SpeedWindow;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(SEMan), nameof(SEMan.ApplyStatusEffectSpeedMods))]
+        private static class ApplyStatusEffectSpeedMods_Patch
+        {
+            [UsedImplicitly]
+            private static void Postfix(SEMan __instance, ref float speed)
+            {
+                if (__instance.m_character != Player.m_localPlayer || Time.time >= _speedUntil)
+                {
+                    return;
+                }
+
+                var bonus = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
+                    MagicEffectType.PerfectDodgeGivesSpeed, 0.01f);
+                if (bonus != 0f)
+                {
+                    speed *= 1f + bonus;
+                }
             }
         }
     }

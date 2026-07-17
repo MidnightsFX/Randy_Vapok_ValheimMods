@@ -4,7 +4,7 @@ using EpicLoot.Adventure;
 using EpicLoot.Crafting;
 using EpicLoot.CraftingV2;
 using EpicLoot.LegendarySystem;
-using EpicLoot.MagicItemEffects;
+using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using System;

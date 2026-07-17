@@ -1,6 +1,4 @@
 using EpicLoot.General;
-using HarmonyLib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
@@ -11,35 +9,31 @@ namespace EpicLoot.MagicItemEffects.Shards
     // source. Shard values are authored as whole-number percents, hence the 0.01f.
     public static class AdrenalineIncreasesFrostDamage
     {
-        [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetDamage), typeof(int), typeof(float))]
-        private static class GetDamage_Patch
+        // GetDamage postfix handler invoked by ModifyDamage (per-weapon modifier).
+        public static void ModifyWeaponDamage(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result)
         {
-            [UsedImplicitly]
-            private static void Postfix(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result)
+            var player = Player.m_localPlayer;
+            if (player == null || !player.IsItemEquiped(__instance))
             {
-                var player = Player.m_localPlayer;
-                if (player == null || !player.IsItemEquiped(__instance))
-                {
-                    return;
-                }
+                return;
+            }
 
-                var maxAdrenaline = player.GetMaxAdrenaline();
-                if (maxAdrenaline <= 0f)
-                {
-                    return;
-                }
+            var maxAdrenaline = player.GetMaxAdrenaline();
+            if (maxAdrenaline <= 0f)
+            {
+                return;
+            }
 
-                var fraction = player.GetTotalActiveMagicEffectValue(MagicEffectType.AdrenalineIncreasesFrostDamage, 0.01f);
-                if (fraction <= 0f)
-                {
-                    return;
-                }
+            var fraction = player.GetTotalActiveMagicEffectValue(MagicEffectType.AdrenalineIncreasesFrostDamage, 0.01f);
+            if (fraction <= 0f)
+            {
+                return;
+            }
 
-                var bonus = __result.EpicLootGetTotalDamage() * fraction * Mathf.Clamp01(player.GetAdrenaline() / maxAdrenaline);
-                if (bonus > 0f)
-                {
-                    __result.m_frost += bonus;
-                }
+            var bonus = __result.EpicLootGetTotalDamage() * fraction * Mathf.Clamp01(player.GetAdrenaline() / maxAdrenaline);
+            if (bonus > 0f)
+            {
+                __result.m_frost += bonus;
             }
         }
     }

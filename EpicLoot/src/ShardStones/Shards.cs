@@ -178,17 +178,22 @@ namespace EpicLoot.ShardStones {
             return new ShardStonesConfig { Shards = _definitions };
         }
 
-        // Sets a shard instance's rarity in its MagicItem metadata -- the semantic source of truth read
-        // by GetShardRarity, socketing, and tooltips. Rarity is otherwise encoded in the prefab name /
-        // distinct display name (see CreateAndLoadShardItems), which is what separates inventory stacks;
-        // m_quality is no longer used for shards. Always assign shard rarity through here.
-        public static void StampRarity(ItemDrop.ItemData item, ItemRarity rarity) {
+        // Stamps a shard instance's identity metadata -- rarity AND color -- into its MagicItem, the
+        // semantic source of truth read by GetShardRarity, IsShardStone, socketing, and tooltips. Both
+        // are otherwise encoded only in the prefab name / distinct display name (rarity, which separates
+        // inventory stacks) and m_ammoType (color); Instantiate does not copy baked custom data on the
+        // container/disabled-init path, so every shard spawn path must funnel through here to
+        // (re)establish the metadata. Color is derived from the item's own m_ammoType via GetShardColor,
+        // so callers only supply the rarity. m_quality is no longer used for shards. Always assign shard
+        // metadata through here.
+        public static void StampShard(ItemDrop.ItemData item, ItemRarity rarity) {
             if (item == null) {
                 return;
             }
             var mic = item.Data().GetOrCreate<MagicItemComponent>();
             var magicItem = mic.MagicItem ?? new MagicItem();
             magicItem.Rarity = rarity;
+            magicItem.ShardColor = GetShardColor(item);
             mic.SetMagicItem(magicItem);
         }
 
@@ -467,9 +472,10 @@ namespace EpicLoot.ShardStones {
                     pid.m_itemData.m_shared.m_ammoType = $"{shardColor}|ShardStone";
                     pid.m_itemData.m_shared.m_maxStackSize = ShardStackSize;
 
-                    // Bake this prefab's rarity into its MagicItem metadata (the semantic source of
-                    // truth read by GetShardRarity/socketing). Rarity is part of the prefab identity now.
-                    StampRarity(pid.m_itemData, rarity);
+                    // Bake this prefab's rarity and color into its MagicItem metadata (the semantic
+                    // source of truth read by GetShardRarity/IsShardStone/socketing). The ammoType set
+                    // just above is what StampShard reads to derive the color.
+                    StampShard(pid.m_itemData, rarity);
                     pid.Save();
 
                     // Include the rarity in the display name so each (color, rarity) prefab is a

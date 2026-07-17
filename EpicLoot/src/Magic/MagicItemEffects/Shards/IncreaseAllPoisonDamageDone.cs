@@ -1,6 +1,3 @@
-using HarmonyLib;
-using JetBrains.Annotations;
-
 namespace EpicLoot.MagicItemEffects.Shards
 {
     // DarkGreen utility shard: +% to ALL poison damage the local player deals. Character.Damage carries the
@@ -12,23 +9,19 @@ namespace EpicLoot.MagicItemEffects.Shards
     // authored as whole-number percents, hence the 0.01f.
     public static class IncreaseAllPoisonDamageDone
     {
-        [HarmonyPatch(typeof(Character), nameof(Character.Damage))]
-        private static class Character_Damage_Patch
+        // Prefix handler invoked by CharacterDamageDispatch (attacker-side outgoing modifier).
+        public static void ModifyOutgoingHit(HitData hit, Character attacker)
         {
-            [UsedImplicitly]
-            private static void Prefix(HitData hit)
+            if (hit == null || hit.m_damage.m_poison <= 0f || attacker != Player.m_localPlayer)
             {
-                if (hit == null || hit.m_damage.m_poison <= 0f || hit.GetAttacker() != Player.m_localPlayer)
-                {
-                    return;
-                }
+                return;
+            }
 
-                var bonus = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
-                    MagicEffectType.IncreaseAllPoisonDamageDone, 0.01f);
-                if (bonus > 0f)
-                {
-                    hit.m_damage.m_poison *= 1f + bonus;
-                }
+            var bonus = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
+                MagicEffectType.IncreaseAllPoisonDamageDone, 0.01f);
+            if (bonus > 0f)
+            {
+                hit.m_damage.m_poison *= 1f + bonus;
             }
         }
     }

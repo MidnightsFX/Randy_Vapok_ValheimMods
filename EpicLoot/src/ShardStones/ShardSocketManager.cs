@@ -100,10 +100,13 @@ namespace EpicLoot.ShardStones
                 return false;
             }
 
-            // Reuse the rune-roll legality rules: the effect must be allowed on this equipment type
-            // and must not violate exclusivity with the item's rolled effects.
+            // Reuse the rune-roll legality rules: the effect must not violate exclusivity with the item's
+            // rolled effects. Host-item gating (item type/skill/etc.) is skipped for shards
+            // (checkItemTypeGating: color == None) because the shard config's per-slot grid already decides
+            // which effect a given slot yields; a runestone (color == None) still obeys full host gating.
             if (!def.Requirements.CheckRequirements(equipment, equipMagicItem, out var failure, out var conflictType,
-                    effect.EffectType, checklootroll: false, checkaugmentroll: false, checkruneroll: true))
+                    effect.EffectType, checklootroll: false, checkaugmentroll: false, checkruneroll: true,
+                    checkItemTypeGating: color == ShardType.None))
             {
                 // ExclusiveSelf (and self-listed ExclusiveEffectTypes) reports the SAME effect as the
                 // conflict; that is exactly "the effect is already present on the item". Genuine
@@ -176,7 +179,8 @@ namespace EpicLoot.ShardStones
             }
 
             if (!def.Requirements.CheckRequirements(equipment, equipMagicItem, out var failure, out var conflictType,
-                    effect.EffectType, checklootroll: false, checkaugmentroll: false, checkruneroll: true))
+                    effect.EffectType, checklootroll: false, checkaugmentroll: false, checkruneroll: true,
+                    checkItemTypeGating: color == ShardType.None))
             {
                 // Same same-effect bypass as CanSocket, keyed by input type (see AllowMatchingItemEffect).
                 var sameEffectAlreadyOnItem = failure == RequirementFailure.ConflictingEffect
@@ -274,9 +278,9 @@ namespace EpicLoot.ShardStones
             if (socketed.ShardType != ShardType.None)
             {
                 // Loose shards carry no baked effect (it is derived from the host when socketed). Restore
-                // rarity through StampRarity so the reconstructed shard carries its MagicItem rarity
-                // metadata (its prefab name already encodes the same rarity).
-                Shards.StampRarity(item, socketed.SourceRarity);
+                // rarity and color through StampShard so the reconstructed shard carries its MagicItem
+                // metadata (its prefab name/ammoType already encode the same rarity and color).
+                Shards.StampShard(item, socketed.SourceRarity);
                 return item;
             }
 

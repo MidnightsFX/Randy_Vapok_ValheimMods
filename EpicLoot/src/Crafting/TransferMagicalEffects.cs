@@ -18,6 +18,12 @@ public static class TransferMagicalEffects
     {
         if (!IsDoCraft || !ELConfig.TransferMagicItemToCrafts.Value || CraftedItem == null || ConsumedMagicItems.Count == 0) return;
 
+        // Never clobber a crafted item that already carries magic. Fresh crafts are never pre-enchanted,
+        // so this only skips items that already have enchants — e.g. upgrading a magic item, whose data
+        // ItemDataManager (CopyCustomDataFromUpgradedItem) re-applies during AddItem, before this postfix.
+        if (CraftedItem.GetMagicItem() != null)
+            return;
+
         // Gather the magic items from every consumed ingredient, strongest first so that when two
         // items share an effect type the higher-rarity item's effect wins the exclusivity check.
         var sources = ConsumedMagicItems
@@ -117,8 +123,10 @@ public static class TransferMagicalEffects
         }
     }
 
+    // DoCrafting adds the crafted item through the Vector2i overload; the bool overload merely delegates
+    // to this one, so patching here is the single choke point that reliably captures the crafted item.
     [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), new []{typeof(string), typeof(int), typeof(int),
-        typeof(int), typeof(long),typeof(string),typeof(bool)})]
+        typeof(int), typeof(long), typeof(string), typeof(Vector2i), typeof(bool)})]
     static class InventoryAddItemPatch
     {
         [UsedImplicitly]
@@ -146,17 +154,20 @@ public static class TransferMagicalEffects
         {
             if (!IsDoCraft || __instance == null) return;
 
+            // Mirror vanilla's stack-decrement loop exactly, but record every item drawn from (not just
+            // the one that finishes the requirement) so multi-quantity requirements spread across several
+            // magic stacks carry over all of their effects.
             foreach (var itemData in __instance.m_inventory)
             {
-                if (itemData.m_shared.m_name == name 
-                    && (itemQuality < 0 || itemData.m_quality == itemQuality) 
+                if (itemData.m_shared.m_name == name
+                    && (itemQuality < 0 || itemData.m_quality == itemQuality)
                     && (!worldLevelBased || itemData.m_worldLevel >= Game.m_worldLevel))
                 {
                     var num = Mathf.Min(itemData.m_stack, amount);
+                    if (num <= 0) continue;
                     amount -= num;
-                    if (amount > 0) continue;
                     CheckConsumedResource(itemData);
-                    break;
+                    if (amount <= 0) break;
                 }
             }
         }

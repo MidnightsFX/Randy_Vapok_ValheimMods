@@ -119,18 +119,21 @@ namespace EpicLoot
             return !string.IsNullOrEmpty(typeName) && ExcludedItemTypes.Contains(typeName);
         }
 
-        public bool CheckRequirements([NotNull] ItemDrop.ItemData itemData, [NotNull] MagicItem magicItem, string magicEffectType = null, bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false)
+        public bool CheckRequirements([NotNull] ItemDrop.ItemData itemData, [NotNull] MagicItem magicItem, string magicEffectType = null, bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false, bool checkItemTypeGating = true)
         {
-            return CheckRequirements(itemData, magicItem, out _, out _, magicEffectType, checklootroll, checkaugmentroll, checkruneroll);
+            return CheckRequirements(itemData, magicItem, out _, out _, magicEffectType, checklootroll, checkaugmentroll, checkruneroll, checkItemTypeGating);
         }
 
         // Same predicate as the overload above, but also reports WHY it failed (see RequirementFailure) so
         // callers can surface a specific reason. For ConflictingEffect, `conflictEffectType` names the
         // offending effect already on the item. `failure` defaults to Other so any uncategorized early-out
         // (e.g. a check added later without a category) surfaces as unknown rather than reading as success.
+        // When checkItemTypeGating is false, the host-item gating (item type/skill/name/rarity/property
+        // predicates) is skipped and only effect-composition rules (exclusivity / must-have) are enforced;
+        // shard socketing passes false because the shard config's per-slot grid is the placement authority.
         public bool CheckRequirements([NotNull] ItemDrop.ItemData itemData, [NotNull] MagicItem magicItem,
             out RequirementFailure failure, out string conflictEffectType, string magicEffectType = null,
-            bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false)
+            bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false, bool checkItemTypeGating = true)
         {
             failure = RequirementFailure.Other;
             conflictEffectType = null;
@@ -174,6 +177,30 @@ namespace EpicLoot
                     }
                 }
             }
+
+            // Host-item gating: item type, skill type, item name, rarity, and item-property predicates.
+            // Shards bypass this (checkItemTypeGating == false): a shard's placement is decided
+            // authoritatively by the per-slot effect grid in config/shardstones.json, so re-applying an
+            // effect's rune/loot-roll host requirements here would wrongly reject valid slot mappings
+            // (e.g. AddPickaxesSkill -- a Pickaxes-skill weapon effect -- resolved onto the Legs armor
+            // slot). The effect-composition rules (exclusivity / must-have, above) still apply to shards.
+            if (checkItemTypeGating && !CheckItemTypeRequirements(itemData, magicItem, out failure))
+            {
+                return false;
+            }
+
+            failure = RequirementFailure.None;
+            return true;
+        }
+
+        // Host-item gating extracted from CheckRequirements: does this effect fit THIS specific host item
+        // and rarity (as opposed to the effect-composition/exclusivity rules)? Returns false with a
+        // categorized `failure` on the first unmet requirement. Skipped for shard socketing, where the
+        // shard config's per-slot grid is the placement authority (see CheckRequirements).
+        private bool CheckItemTypeRequirements([NotNull] ItemDrop.ItemData itemData, [NotNull] MagicItem magicItem,
+            out RequirementFailure failure)
+        {
+            failure = RequirementFailure.Other;
 
             if (!AllowByItemType(itemData))
             {
@@ -238,7 +265,7 @@ namespace EpicLoot
                 failure = RequirementFailure.ItemPropertyMismatch;
                 return false;
             }
-            
+
             if (ItemHasChopDamage != null &&
                 (ItemHasChopDamage == itemData.m_shared.m_damages.m_chop <= 0))
             {
@@ -316,7 +343,7 @@ namespace EpicLoot
                     return false;
                 }
             }
-            
+
             if (ItemUsesHealthOnAttack != null)
             {
                 bool usesHealth = itemData.m_shared.m_attack.m_attackHealth > 0 ||

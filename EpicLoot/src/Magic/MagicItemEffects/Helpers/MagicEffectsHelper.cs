@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace EpicLoot.MagicItemEffects
+namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
     public static class MagicEffectsHelper
     {
@@ -104,6 +104,49 @@ namespace EpicLoot.MagicItemEffects
         {
             var setEffects = player.GetAllActiveSetMagicEffects(MagicEffectType.ModifyArmor);
             return setEffects.Count > 0 ? scale * setEffects.Sum(x => x.EffectValue) : 0;
+        }
+
+        // --- Shared guards/lookups for effect dispatchers -------------------------------------------
+        // These fold the boilerplate that nearly every on-hit / on-damage effect repeats. Used by the
+        // Character.Damage / Character.RPC_Damage dispatchers (see Dispatch/) so each effect's handler
+        // can assume the guard already passed and just do its work.
+
+        /// <summary>
+        /// True when <paramref name="hit"/> is an outgoing hit dealt by the local player (attacker side).
+        /// Runs once, on the attacker's client, before Character.Damage forwards to the target.
+        /// </summary>
+        public static bool IsLocalOutgoingHit(HitData hit, out Player player)
+        {
+            player = Player.m_localPlayer;
+            return hit != null && player != null && hit.GetAttacker() == player;
+        }
+
+        /// <summary>
+        /// True when <paramref name="instance"/> is the local player receiving damage / owning regen.
+        /// </summary>
+        public static bool IsLocalVictim(Character instance)
+        {
+            return instance != null && instance == Player.m_localPlayer;
+        }
+
+        /// <summary>
+        /// Null-safe read of a whole-number-percent effect summed across the local player's equipment
+        /// (shard values are authored as percents, hence the default 0.01f scale).
+        /// </summary>
+        public static float GetLocalPercent(string effectType, float scale = 0.01f)
+        {
+            var player = Player.m_localPlayer;
+            return player != null ? player.GetTotalActiveMagicEffectValue(effectType, scale) : 0f;
+        }
+
+        /// <summary>
+        /// The weapon that produced the current attack: the in-progress melee attack's weapon when one is
+        /// active (<see cref="Attack_Patch.ActiveAttack"/>), otherwise the player's currently equipped
+        /// weapon. Used by on-hit effects socketed into the attacking weapon.
+        /// </summary>
+        public static ItemDrop.ItemData GetActiveWeapon(Player player)
+        {
+            return Attack_Patch.ActiveAttack?.m_weapon ?? player?.GetCurrentWeapon();
         }
     }
 }

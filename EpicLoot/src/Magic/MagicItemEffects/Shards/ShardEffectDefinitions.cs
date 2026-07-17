@@ -15,6 +15,18 @@ namespace EpicLoot.MagicItemEffects.Shards
     // EpicLoot.ShardStones.Shards class.
     public static class ShardEffectDefinitions
     {
+        // Per-effect Config blocks for shard effects that read tunables from MagicItemEffectDefinition.Config
+        // (via MagicItemEffectDefinitions.GetEffectConfig). This mirrors the "Config" attribute a
+        // magiceffects.json entry would carry; it is supplied here because shard effects are defined in code
+        // rather than the overhaul config. Keys also surface in the detailed (Shift) tooltip -- see
+        // MagicItem.GetEffectText / MagicItemEffectDefinition.GetConfigLabel.
+        private static readonly Dictionary<string, Dictionary<string, float>> EffectConfigs =
+            new Dictionary<string, Dictionary<string, float>>
+            {
+                // Queen's Everflow (QueenEverflow): how many times the regen buff may stack.
+                { MagicEffectType.Everflow, new Dictionary<string, float> { { "MaxStacks", QueenEverflow.DefaultMaxStacks } } },
+            };
+
         public static void RegisterShardEffectDefinitions()
         {
             foreach (var pair in CollectShardEffects())
@@ -78,6 +90,9 @@ namespace EpicLoot.MagicItemEffects.Shards
                 Description = $"$mod_epicloot_me_{lower}_desc",
                 Requirements = requirements,
                 ValuesPerRarity = BuildValues(valuesPerRarity),
+                Config = EffectConfigs.TryGetValue(type, out var config)
+                    ? new Dictionary<string, float>(config)
+                    : new Dictionary<string, float>(),
                 CanBeAugmented = false,
                 CanBeDisenchanted = false,
                 CanBeRunified = false,
