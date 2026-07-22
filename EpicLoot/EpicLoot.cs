@@ -417,6 +417,10 @@ public sealed class EpicLoot : BaseUnityPlugin
         // client each world load (fires as a ZNetScene.Awake postfix), so remote clients can resolve a synced
         // strike ZDO. Idempotent -- the clone is built once and re-injected into each fresh ZNetScene.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.StrikeCausesLightning.RegisterVisualPrefab;
+        // Registers our player-faction, tamed clone of the vanilla 'Bat' into ZNetScene on every client each
+        // world load (same manual injection as the strike visual above), so the SummonBat trinket shard can
+        // spawn a reload-safe pet that stays friendly. Idempotent -- built once and re-injected each ZNetScene.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.SummonBatWhenActivatingAdrenaline.RegisterTamedBatPrefab;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
         ShardStones.Shards.CreateAndLoadShardItems();
