@@ -107,7 +107,6 @@ public sealed class EpicLoot : BaseUnityPlugin
         LootTableLoaded?.Invoke();
         RegisterMagicEffectEvents();
 
-        TerminalCommands.AddTerminalCommands();
         // Main file config watcher
         SetupWatcher();
     }

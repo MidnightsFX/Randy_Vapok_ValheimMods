@@ -664,7 +664,7 @@ namespace EpicLoot
             return item;
         }
 
-        private static LootDrop ResolveLootDrop(LootDrop lootDrop)
+        public static LootDrop ResolveLootDrop(LootDrop lootDrop)
         {
             var result = new LootDrop { Item = lootDrop.Item, Rarity = ArrayUtils.Copy(lootDrop.Rarity), Weight = lootDrop.Weight };
             var needsResolve = true;
