@@ -1,6 +1,7 @@
 ﻿using EpicLoot.Crafting;
 using EpicLoot.Data;
 using EpicLoot.LootBeams;
+using EpicLoot.ShardStones;
 using HarmonyLib;
 
 namespace EpicLoot
@@ -51,6 +52,10 @@ namespace EpicLoot
         public static void Postfix(ItemDrop __instance)
         {
             __instance.m_itemData?.Data().Get<MagicItemComponent>()?.Load();
+
+            // LoadFromZDO clears m_customData before repopulating it, so a shard taken off an item stand
+            // can land here with its magic data gone. Its identity is in m_shared, so rebuild from that.
+            Shards.EnsureShardMetadata(__instance.m_itemData);
         }
     }
 

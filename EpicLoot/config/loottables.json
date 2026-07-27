@@ -6,6 +6,13 @@
     "Legendary":  [ [4, 80], [5, 18], [6,  2] ],
     "Mythic":     [ [5, 80], [6, 18], [7,  2] ]
   },
+  "SocketCounts": {
+    "Magic":      [ [0, 90], [1, 10] ],
+    "Rare":       [ [0, 75], [1, 25] ],
+    "Epic":       [ [0, 50], [1, 45], [2,  5] ],
+    "Legendary":  [ [0, 15], [1, 55], [2, 30] ],
+    "Mythic":     [ [0,  5], [1, 30], [2, 40], [3, 25] ]
+  },
   "RestrictedItems": [
     "$item_tankard",
     "$item_tankard_odin",
@@ -184,6 +191,46 @@
         { "Item": "LightGreen_{Rarity}_ShardStone", "Rarity": [ 0, 0, 0, 0, 100 ] },
         { "Item": "Peach_{Rarity}_ShardStone",      "Rarity": [ 0, 0, 0, 0, 100 ] }
       ]
+    },
+    {
+      "Name": "ShardStone_None",
+      "Loot": [ { "Item": "ShardT1" } ]
+    },
+    {
+      "Name": "ShardStone_Meadows",
+      "Loot": [ { "Item": "ShardT1" } ]
+    },
+    {
+      "Name": "ShardStone_BlackForest",
+      "Loot": [ { "Item": "ShardT1" } ]
+    },
+    {
+      "Name": "ShardStone_Ocean",
+      "Loot": [ { "Item": "ShardT1" }, { "Item": "ShardT2" } ]
+    },
+    {
+      "Name": "ShardStone_Swamp",
+      "Loot": [ { "Item": "ShardT2" } ]
+    },
+    {
+      "Name": "ShardStone_Mountain",
+      "Loot": [ { "Item": "ShardT3" } ]
+    },
+    {
+      "Name": "ShardStone_Plains",
+      "Loot": [ { "Item": "ShardT4" } ]
+    },
+    {
+      "Name": "ShardStone_Mistlands",
+      "Loot": [ { "Item": "ShardT5" } ]
+    },
+    {
+      "Name": "ShardStone_AshLands",
+      "Loot": [ { "Item": "ShardT6" } ]
+    },
+    {
+      "Name": "ShardStone_DeepNorth",
+      "Loot": [ { "Item": "ShardT7" } ]
     },
     {
       "Name": "Tier0Weapons",
@@ -1644,6 +1691,18 @@
       ]
     },
     {
+      "Object": "Eikthyr",
+      "LeveledLoot": [
+        {
+          "Level": 1,
+          "Drops": [ [0, 50], [1, 50] ],
+          "Loot": [
+            { "Item": "Eikthyr_{Rarity}_ShardStone", "Weight": 1, "Rarity": [ 0, 70, 25, 5, 0 ] }
+          ]
+        }
+      ]
+    },
+    {
       "Object": "gd_king",
       "LeveledLoot": [
         {
@@ -1686,6 +1745,18 @@
           "Drops": [ [1, 0], [2, 40], [3, 50], [4, 10] ],
           "Loot": [
             { "Item": "gd_king.1", "Weight": 1, "Rarity": [ 0, 25, 50, 23, 2 ] }
+          ]
+        }
+      ]
+    },
+    {
+      "Object": "gd_king",
+      "LeveledLoot": [
+        {
+          "Level": 1,
+          "Drops": [ [0, 50], [1, 50] ],
+          "Loot": [
+            { "Item": "Elder_{Rarity}_ShardStone", "Weight": 1, "Rarity": [ 0, 60, 30, 10, 0 ] }
           ]
         }
       ]
@@ -1738,6 +1809,18 @@
       ]
     },
     {
+      "Object": "Bonemass",
+      "LeveledLoot": [
+        {
+          "Level": 1,
+          "Drops": [ [0, 50], [1, 50] ],
+          "Loot": [
+            { "Item": "Bonemass_{Rarity}_ShardStone", "Weight": 1, "Rarity": [ 0, 0, 70, 25, 5 ] }
+          ]
+        }
+      ]
+    },
+    {
       "Object": "Dragon",
       "LeveledLoot": [
         {
@@ -1780,6 +1863,18 @@
           "Drops": [ [4, 60], [5, 35], [6, 5] ],
           "Loot": [
             { "Item": "Dragon.1", "Weight": 1, "Rarity": [ 0, 0, 60, 35, 5 ] }
+          ]
+        }
+      ]
+    },
+    {
+      "Object": "Dragon",
+      "LeveledLoot": [
+        {
+          "Level": 1,
+          "Drops": [ [0, 50], [1, 50] ],
+          "Loot": [
+            { "Item": "Moder_{Rarity}_ShardStone", "Weight": 1, "Rarity": [ 0, 0, 60, 30, 10 ] }
           ]
         }
       ]
@@ -1832,6 +1927,18 @@
       ]
     },
     {
+      "Object": "GoblinKing",
+      "LeveledLoot": [
+        {
+          "Level": 1,
+          "Drops": [ [0, 50], [1, 50] ],
+          "Loot": [
+            { "Item": "Yagluth_{Rarity}_ShardStone", "Weight": 1, "Rarity": [ 0, 0, 0, 80, 20 ] }
+          ]
+        }
+      ]
+    },
+    {
       "Object": "SeekerQueen",
       "LeveledLoot": [
         {
@@ -1879,6 +1986,18 @@
       ]
     },
     {
+      "Object": "SeekerQueen",
+      "LeveledLoot": [
+        {
+          "Level": 1,
+          "Drops": [ [0, 50], [1, 50] ],
+          "Loot": [
+            { "Item": "Queen_{Rarity}_ShardStone", "Weight": 1, "Rarity": [ 0, 0, 0, 70, 30 ] }
+          ]
+        }
+      ]
+    },
+    {
       "Object": "Fader",
       "LeveledLoot": [
         {
@@ -1921,6 +2040,18 @@
           "Drops": [ [5, 50], [6, 40], [7, 10] ],
           "Loot": [
             { "Item": "Fader.1", "Weight": 1, "Rarity": [ 0, 0, 0, 0, 100 ] }
+          ]
+        }
+      ]
+    },
+    {
+      "Object": "Fader",
+      "LeveledLoot": [
+        {
+          "Level": 1,
+          "Drops": [ [0, 50], [1, 50] ],
+          "Loot": [
+            { "Item": "Fader_{Rarity}_ShardStone", "Weight": 1, "Rarity": [ 0, 0, 0, 0, 100 ] }
           ]
         }
       ]

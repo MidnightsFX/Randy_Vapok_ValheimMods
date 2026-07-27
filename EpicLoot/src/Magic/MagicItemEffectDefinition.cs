@@ -490,18 +490,16 @@ namespace EpicLoot
         // Human-readable label for a Config key, used in the detailed (Shift) tooltip. Resolved via a
         // two-tier localization lookup with a raw-key fallback: a per-effect override token first
         // (mod_epicloot_me_<type>_config_<key>), then a shared generic token (mod_epicloot_config_<key>),
-        // then the raw key name when neither is defined. Mirrors the fallback idiom in Shards.GetCategoryDisplayName.
+        // then the raw key name when neither is defined. Most keys resolve at the generic tier; the
+        // per-effect tier exists for keys whose meaning differs between effects (e.g. Riches values).
         public string GetConfigLabel(string key) {
-            var perEffect = $"mod_epicloot_me_{Type.ToLowerInvariant()}_config_{key.ToLowerInvariant()}";
-            var localizedPerEffect = Localization.instance.Localize($"${perEffect}");
-            if (!string.Equals(localizedPerEffect, perEffect, StringComparison.Ordinal)) {
-                return localizedPerEffect;
+            var lowerKey = key.ToLowerInvariant();
+            if (Extensions.TryLocalize($"mod_epicloot_me_{Type.ToLowerInvariant()}_config_{lowerKey}", out var perEffect)) {
+                return perEffect;
             }
 
-            var generic = $"mod_epicloot_config_{key.ToLowerInvariant()}";
-            var localizedGeneric = Localization.instance.Localize($"${generic}");
-            if (!string.Equals(localizedGeneric, generic, StringComparison.Ordinal)) {
-                return localizedGeneric;
+            if (Extensions.TryLocalize($"mod_epicloot_config_{lowerKey}", out var generic)) {
+                return generic;
             }
 
             return key;

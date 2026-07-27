@@ -21,10 +21,9 @@ public static class ItemDataExtensions
     }
 
     public static bool IsShardStone(this ItemDrop.ItemData itemData) {
-        // Every shard bakes its color into MagicItem.ShardColor when stamped (Shards.StampShard), so a
-        // non-None color is the shard marker. Pure enum comparison -- no m_ammoType string parse.
-        MagicItemComponent magicData = itemData.Data().Get<MagicItemComponent>();
-        return magicData != null && magicData.MagicItem != null && magicData.MagicItem.ShardColor != ShardType.None;
+        // A shard is identified by its shared data, not its magic data, so this answers correctly even
+        // for an instance whose MagicItem has not been rebuilt yet.
+        return Shards.IsShard(itemData);
     }
 
     public static bool IsUnidentified(this ItemDrop.ItemData itemData)
@@ -320,6 +319,11 @@ public static class ItemDataExtensions
     /// </summary>
     public static void InitializeCustomData(this ItemDrop.ItemData itemData)
     {
+        // Shards rebuild their own magic data from m_shared.m_ammoType, so they need neither the prefab
+        // reference nor its baked custom data. Done ahead of the m_dropPrefab check so a shard is healed
+        // even when the prefab is unresolved. Cheap no-op for everything else.
+        Shards.EnsureShardMetadata(itemData);
+
         GameObject prefab = itemData.m_dropPrefab;
         if (prefab == null)
         {

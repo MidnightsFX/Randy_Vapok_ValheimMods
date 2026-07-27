@@ -47,9 +47,20 @@ namespace EpicLoot
     }
 
     [Serializable]
+    public class SocketCountsConfig
+    {
+        public float[][] Magic;
+        public float[][] Rare;
+        public float[][] Epic;
+        public float[][] Legendary;
+        public float[][] Mythic;
+    }
+
+    [Serializable]
     public class LootConfig
     {
         public MagicEffectsCountConfig MagicEffectsCount;
+        public SocketCountsConfig SocketCounts;
         public LootItemSet[] ItemSets;
         public LootTable[] LootTables;
         public List<string> RestrictedItems = new List<string>();

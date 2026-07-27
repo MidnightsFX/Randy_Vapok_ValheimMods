@@ -11,6 +11,9 @@
     "el_overhaul_balanced": "Balanced",
     "el_overhaul_minimal": "Minimal",
 
+    "el_configupdate_title": "Epic Loot: Outdated Configs",
+    "el_configupdate_body": "Epic Loot has updated to version {0}. Configs you have not changed were refreshed automatically, but these have local changes and were left alone:\n\n{1}\n\nThey will not receive new content or balance changes while they differ from the defaults.\n\nReplace them with the new defaults? Your current files will be backed up to <color=#ffd700>BepInEx/config/EpicLoot/baseconfig-backup</color> first. Restarting the game afterwards is recommended.\n\nChoosing No keeps your versions, and you will only be asked again if these configs change in a future update.",
+
     "mod_epicloot_itemtype_helmet": "Helmet",
     "mod_epicloot_itemtype_chest": "Chest",
     "mod_epicloot_itemtype_legs": "Legs",
@@ -28,7 +31,7 @@
     "mod_epicloot_craftingmaterial": "crafting material",
 
     "mod_epicloot_assets_shardstone": "Shardstone",
-    "mod_epicloot_assets_shardstone_introduce": "This shardstone looks like it would fit nicely slot. Press Interact (E) to open a slotted weapon and insert the shard.",
+    "mod_epicloot_assets_shardstone_introduce": "This shardstone looks like it would fit into a slot. Press Interact (E) to open a slotted weapon and insert the shard.",
 
     "mod_epicloot_sockets": "Shard Slot",
     "mod_epicloot_empty_socket": "Empty Shard Slot",
@@ -38,15 +41,24 @@
     "mod_epicloot_config_maxresistance": "Max Resistance",
     "mod_epicloot_config_maxstacks": "Max Stacks",
     "mod_epicloot_config_chance": "Chance",
-    "mod_epicloot_config_damage": "Damage",
-    "mod_epicloot_config_projectiles": "Projectiles",
-    "mod_epicloot_config_accuracy": "Accuracy",
-    "mod_epicloot_config_costscale": "Cost Scale",
+    "mod_epicloot_config_damage": "Damage Multiplier",
+    "mod_epicloot_config_projectiles": "Projectile Multiplier",
+    "mod_epicloot_config_accuracy": "Spread Multiplier",
+    "mod_epicloot_config_costscale": "Attack Cost Multiplier",
     "mod_epicloot_config_coins": "Coins",
     "mod_epicloot_config_amber": "Amber",
     "mod_epicloot_config_amberpearl": "Amber Pearl",
     "mod_epicloot_config_ruby": "Ruby",
     "mod_epicloot_config_silvernecklace": "Silver Necklace",
+
+    "mod_epicloot_me_modifylowhealth_config_max": "Max Low Health Threshold",
+    "mod_epicloot_me_riches_config_coins": "Coin Value",
+    "mod_epicloot_me_riches_config_amber": "Amber Value",
+    "mod_epicloot_me_riches_config_amberpearl": "Amber Pearl Value",
+    "mod_epicloot_me_riches_config_ruby": "Ruby Value",
+    "mod_epicloot_me_riches_config_silvernecklace": "Silver Necklace Value",
+    "mod_epicloot_me_doublemagicshot_config_chance": "Extra Shot Chance",
+    "mod_epicloot_me_triplebowshot_config_chance": "Triple Shot Chance",
 
     "mod_epicloot_press_socket": "[<color=yellow><b>$KEY_Use</b></color>] Slot",
     "mod_epicloot_socket_notmagic": "This item cannot be slotted",
@@ -407,6 +419,8 @@
     "mod_epicloot_enchantprogress": "Enchanting item...",
     "mod_epicloot_enchant_effect": "effect",
     "mod_epicloot_enchant_effects": "effects",
+    "mod_epicloot_enchant_socket": "shard slot",
+    "mod_epicloot_enchant_sockets": "shard slots",
 
     "mod_epicloot_runes": "Runes",
     "mod_epicloot_runemanagement": "Rune Manipulation",

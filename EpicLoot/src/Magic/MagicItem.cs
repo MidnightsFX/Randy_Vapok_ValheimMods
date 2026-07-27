@@ -73,7 +73,6 @@ namespace EpicLoot
         public string SetID;
         public bool IsUnidentified = false;
         public int SocketCount = 0;
-        public ShardType ShardColor = ShardType.None;
         public List<SocketedEffect> Sockets = new List<SocketedEffect>();
 
         public MagicItem()
@@ -230,11 +229,6 @@ namespace EpicLoot
                 return color;
             }
             return Color.white;
-        }
-
-        public ShardType GetShardColor()
-        {
-            return ShardColor;
         }
 
         public string GetColorString()

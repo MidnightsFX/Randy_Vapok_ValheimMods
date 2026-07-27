@@ -37,7 +37,7 @@ public static partial class TerminalManager
             _ = new Command("magicitemset", "spawn magic item set: [setID]", SpawnMagicItemSet, GetMagicItemSetOptions, isCheat: true, alternates: "miset");
             _ = new Command("checkstackquality", "show list of items that have a max stack size over 1 and max quality over 1", CheckStackQuality, isCheat: true);
             _ = new Command("magicmats", "spawn all magic materials with half stack", SpawnMagicCraftingMaterials, isCheat: true);
-            _ = new Command("magicshards", "spawn all shardstones", SpawnMagicShards, isCheat: true);
+            _ = new Command("magicshards", "spawn all shardstones: [rarity] (random valid rarity per shard if omitted)", SpawnMagicShards, isCheat: true);
             _ = new Command("alwaysdrop", "toggle always drop", ToggleAlwaysDrop, isCheat: true);
             _ = new Command("cheatgating", "toggle cheat gating", ToggleCheatGating, isCheat: true);
             _ = new Command("cheatsockets", "forces the provided number of sockets to always roll onto drops", CheatSockets, isCheat: true);

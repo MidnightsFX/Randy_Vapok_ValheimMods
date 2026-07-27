@@ -137,6 +137,8 @@ namespace EpicLoot.Magic
                 string contents = JsonConvert.SerializeObject(new ItemInfoConfig() { ItemInfo = newConfig }, Formatting.Indented);
                 string overhaulFileLocation = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), "iteminfo.json");
                 File.WriteAllText(overhaulFileLocation, contents);
+                // Claim this as the mod's own output so a later launch does not read it as a player edit.
+                ConfigVersionManager.RecordWrittenContent("iteminfo", contents);
             }
             catch (Exception e)
             {
@@ -279,11 +281,14 @@ namespace EpicLoot.Magic
                     ItemSets = updatedItemSets.ToArray(),
                     LootTables = updatedLootTables.ToArray(),
                     MagicEffectsCount = LootRoller.Config.MagicEffectsCount,
+                    SocketCounts = LootRoller.Config.SocketCounts,
                     RestrictedItems = LootRoller.Config.RestrictedItems
                 };
                 string contents = JsonConvert.SerializeObject(newLootConfig, Formatting.Indented);
                 string overhaulFileLocation = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), "loottables.json");
                 File.WriteAllText(overhaulFileLocation, contents);
+                // Claim this as the mod's own output so a later launch does not read it as a player edit.
+                ConfigVersionManager.RecordWrittenContent("loottables", contents);
             }
             catch (Exception e)
             {
@@ -356,6 +361,8 @@ namespace EpicLoot.Magic
                 string contents = JsonConvert.SerializeObject(AdventureDataConfigReplacement, Formatting.Indented);
                 string overhaulFileLocation = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), "adventuredata.json");
                 File.WriteAllText(overhaulFileLocation, contents);
+                // Claim this as the mod's own output so a later launch does not read it as a player edit.
+                ConfigVersionManager.RecordWrittenContent("adventuredata", contents);
             }
             catch (Exception e)
             {

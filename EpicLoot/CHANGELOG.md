@@ -6,6 +6,7 @@ New Content:
     * Interacting with an enchanted item that has a shard socket will pull up a small storage UI, allowing you to socket or remove shards. 
     * Shardstones can be found in the world as loot
     * 90+ new magic effects have been added and are primarily available through shardstones, some shardstones provide access to lower power existing enchants also
+    * The enchanting table's probability panel now lists shard slot odds alongside effect count odds
 * Tempering (Thanks Rusty!)
     * Tempering allows you to pay to increase the value of an existing enchantment (service provided by Hildir)
     * Tempering can be configured to allow upgrading past a tiers normal maximum.
@@ -19,10 +20,21 @@ New Content:
 * Terminal Commands upgraded (Thanks Rusty!)
     * Terminal commands now have better completion and more options
     * Color based formatting for rarity loot table rolls!
+* Config option to show computed roll chance for all effects when enchanting an item
+* Base configs now keep themselves up to date
+    * Epic Loot now tracks config file versions and will prompt you to update configs which have been customized
+    * Configs you *have* edited are never overwritten on their own. If an update changes one of them, a prompt at the main menu offers to replace it, copying your version to `BepInEx\config\EpicLoot\baseconfig-backup` first. Declining is remembered per file, and you are only asked again if that config changes in a future update
+    * Configs targeted by a patch file are unaffected, as they are already rebuilt from the current defaults every launch
+    * Dedicated servers log the affected files instead of prompting. 
+    * Enabling `Always Refresh Core Configs` activates the patch system and prevents config file prompts (configs are rebuilt every restart, and only changes defined in patches will be applied)
 
 API:
 * New magic effect requirement flags: `ItemGivesAdrenaline` (item's attack grants above-default adrenaline) and `ItemHasAdrenaline` (item provides a max adrenaline pool)
   * Note: `ItemGivesAdrenaline` requires that the item gives more than 1 adrenaline. This is due to all items by default adding 1 adrenaline.
+* New magic effect requirements allowed from the API
+    * API magic effect requirements when defined for an effect will be evaluated for all items, allowing only items which fit the filter (Thanks Warp!)   
+
+
 
 Bugfixes:
 * Fixes tooltip display for enchanted items health use percentage

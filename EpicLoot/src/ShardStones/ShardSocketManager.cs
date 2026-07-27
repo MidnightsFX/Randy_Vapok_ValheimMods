@@ -277,10 +277,9 @@ namespace EpicLoot.ShardStones
 
             if (socketed.ShardType != ShardType.None)
             {
-                // Loose shards carry no baked effect (it is derived from the host when socketed). Restore
-                // rarity and color through StampShard so the reconstructed shard carries its MagicItem
-                // metadata (its prefab name/ammoType already encode the same rarity and color).
-                Shards.StampShard(item, socketed.SourceRarity);
+                // Loose shards carry no baked effect (it is derived from the host when socketed), and the
+                // clone above already carries the source prefab's identity and magic data -- the prefab is
+                // per (color, rarity), and Clone copies m_customData. Nothing left to restore.
                 return item;
             }
 
@@ -303,15 +302,10 @@ namespace EpicLoot.ShardStones
                 return $"EtchedRunestone{input.GetMagicItem().Rarity}";
             }
 
-            // Shards are one prefab per (color, rarity); the name encodes both. ammoType = "{Color}|ShardStone"
-            // carries the color, and the rarity comes from the shard's MagicItem metadata.
-            string[] shardData = input.m_shared.m_ammoType.Split('|');
-            if (shardData.Length >= 2)
-            {
-                return $"{shardData[0]}_{Shards.GetShardRarity(input)}_ShardStone";
-            }
-
-            return "";
+            // Shards are one prefab per (color, rarity), and ammoType = "{Color}|{Rarity}|ShardStone"
+            // carries both -- so the prefab name is rebuilt purely from the shard's own shared data.
+            var color = Shards.GetShardColor(input);
+            return color != ShardType.None ? $"{color}_{Shards.GetShardRarity(input)}_ShardStone" : "";
         }
 
         private static void ResetCache()

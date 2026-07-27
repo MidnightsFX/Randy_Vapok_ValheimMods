@@ -50,8 +50,10 @@ namespace EpicLoot.MagicItemEffects.Shards {
             if (value <= 0f) {
                 return;
             }
-
-            SpawnNova(player.transform.position);
+            // Spawn the nova at visibly above the players feet, but close to the ground
+            Vector3 playerNovaPosition = player.transform.position;
+            playerNovaPosition.y += 0.6f;
+            SpawnNova(playerNovaPosition);
             DamageInRadius.DamageEnemiesInRadius(player, player.GetCenterPoint(), NovaRadius,
                 new HitData.DamageTypes { m_frost = value * FrostPerTier });
             ShowCooldown(player, GetCooldown(player));

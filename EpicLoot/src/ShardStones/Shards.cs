@@ -1,6 +1,7 @@
 using EpicLoot.Crafting;
 using EpicLoot.Data;
 using EpicLoot.GatedItemType;
+using EpicLoot.General;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Jotunn.Configs;
@@ -178,23 +179,28 @@ namespace EpicLoot.ShardStones {
             return new ShardStonesConfig { Shards = _definitions };
         }
 
-        // Stamps a shard instance's identity metadata -- rarity AND color -- into its MagicItem, the
-        // semantic source of truth read by GetShardRarity, IsShardStone, socketing, and tooltips. Both
-        // are otherwise encoded only in the prefab name / distinct display name (rarity, which separates
-        // inventory stacks) and m_ammoType (color); Instantiate does not copy baked custom data on the
-        // container/disabled-init path, so every shard spawn path must funnel through here to
-        // (re)establish the metadata. Color is derived from the item's own m_ammoType via GetShardColor,
-        // so callers only supply the rarity. m_quality is no longer used for shards. Always assign shard
-        // metadata through here.
-        public static void StampShard(ItemDrop.ItemData item, ItemRarity rarity) {
-            if (item == null) {
-                return;
+        // Brings a shard's MagicItem in line with its identity. Color and rarity both come from
+        // m_shared.m_ammoType, which Unity deep-copies on Instantiate and which is always rebuilt from
+        // the prefab on load, so this takes no rarity argument and cannot be called with a wrong one.
+        // The MagicItem it creates is purely cosmetic -- it is what makes a shard report IsMagic(),
+        // giving it a rarity-colored name, magic background and magic tooltip. Idempotent and cheap:
+        // no-ops for non-shards and for shards already carrying the right rarity, so it is safe on hot
+        // paths. This is what makes every shard prefab directly safe to Instantiate -- no caller stamps.
+        public static bool EnsureShardMetadata(ItemDrop.ItemData item) {
+            if (!IsShard(item)) {
+                return false;
             }
+
+            var rarity = GetShardRarity(item);
             var mic = item.Data().GetOrCreate<MagicItemComponent>();
+            if (mic.MagicItem != null && mic.MagicItem.Rarity == rarity) {
+                return false;
+            }
+
             var magicItem = mic.MagicItem ?? new MagicItem();
             magicItem.Rarity = rarity;
-            magicItem.ShardColor = GetShardColor(item);
             mic.SetMagicItem(magicItem);
+            return true;
         }
 
         // Snaps a rarity to the nearest one in a color's declared set (Rarities in shardstones.json).
@@ -216,6 +222,16 @@ namespace EpicLoot.ShardStones {
             return best;
         }
 
+        // Picks a uniformly random rarity from a color's declared set (Rarities in shardstones.json).
+        // Falls back to Magic when the set is empty/undefined, mirroring GetShardRarity's default.
+        public static ItemRarity RandomRarityFromSet(ShardType color) {
+            var set = ShardDefinitions.Get(color)?.Rarities;
+            if (set == null || set.Count == 0) {
+                return ItemRarity.Magic;
+            }
+            return set[UnityEngine.Random.Range(0, set.Count)];
+        }
+
         // Accessors kept under the ShardDefinitions name for existing call sites (MagicTooltipShard,
         // ShardEffectDefinitions). Backed by the config loaded above.
         public static class ShardDefinitions {
@@ -226,34 +242,46 @@ namespace EpicLoot.ShardStones {
             }
         }
 
-        // Check if this is a shard item
+        // A shard's identity -- color and rarity -- lives entirely in its m_shared.m_ammoType, formatted
+        // as "{Color}|{Rarity}|ShardStone" (e.g. "Yellow|Epic|ShardStone"). m_shared is a serialized
+        // field, so Unity deep-copies it on Instantiate and the game rebuilds it from the prefab on every
+        // load; that is what makes identity impossible to lose on any spawn path. Custom data
+        // (m_customData / MagicItem) is [NonSerialized] and must never be the source of truth here.
+        private const int ShardAmmoTypeParts = 3;
+
+        // Check if this is a shard item. Runs on every ItemDrop.Awake (via InitializeCustomData), so it
+        // stays cheap and must not throw on a modded item with an unset ammoType.
         public static bool IsShard(ItemDrop.ItemData item) {
             return item?.m_shared != null && item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Material &&
+                !string.IsNullOrEmpty(item.m_shared.m_ammoType) &&
                 item.m_shared.m_ammoType.EndsWith(ShardIndicator);
         }
 
         public static ShardType GetShardColor(ItemDrop.ItemData item) {
-            // Color lives in parts[0] of the 2-part ammoType (e.g. "Yellow|ShardStone").
-            if (!IsShard(item)) {
+            if (!TryGetShardParts(item, out var parts)) {
                 return ShardType.None;
             }
-            string[] parts = item.m_shared.m_ammoType.Split('|');
-            if (parts.Length < 2) {
-                return ShardType.None;
-            }
-            if (Enum.TryParse(parts[0], true, out ShardType color)) {
-                return color;
-            }
-            return ShardType.None;
+            return Enum.TryParse(parts[0], true, out ShardType color) ? color : ShardType.None;
         }
 
         public static ItemRarity GetShardRarity(ItemDrop.ItemData item) {
-            // A shard's rarity is stored in its MagicItem metadata (the semantic source of truth); the
-            // prefab name / display name also encode it, but this metadata is what code reads.
-            if (!IsShard(item)) {
+            if (!TryGetShardParts(item, out var parts)) {
                 return ItemRarity.Magic;
             }
-            return item.IsMagic(out var magicItem) ? magicItem.Rarity : ItemRarity.Magic;
+            return Enum.TryParse(parts[1], true, out ItemRarity rarity) ? rarity : ItemRarity.Magic;
+        }
+
+        private static bool TryGetShardParts(ItemDrop.ItemData item, out string[] parts) {
+            parts = null;
+            if (!IsShard(item)) {
+                return false;
+            }
+            var split = item.m_shared.m_ammoType.Split('|');
+            if (split.Length != ShardAmmoTypeParts) {
+                return false;
+            }
+            parts = split;
+            return true;
         }
 
         public static ShardEffectDefinition GetShardEffect(ItemDrop.ItemData item, ShardType color) {
@@ -427,8 +455,7 @@ namespace EpicLoot.ShardStones {
         // "Melee Weapon". Falls back to the raw enum name when no localization key is defined.
         public static string GetCategoryDisplayName(ShardSlotCategory category) {
             var token = $"mod_epicloot_shardslot_{category.ToString().ToLowerInvariant()}";
-            var localized = Localization.instance.Localize($"${token}");
-            return string.Equals(localized, token, StringComparison.Ordinal) ? category.ToString() : localized;
+            return Extensions.TryLocalize(token, out var localized) ? localized : category.ToString();
         }
 
         // Categories whose shards are mutually exclusive: a player may wear at most one socketed
@@ -469,14 +496,16 @@ namespace EpicLoot.ShardStones {
                     ItemDrop pid = prefab.GetComponent<ItemDrop>();
                     pid.m_itemData.m_dropPrefab = prefab;
                     pid.m_itemData.m_shared.m_icons = new Sprite[] { EpicAssets.AssetBundle.LoadAsset<Sprite>($"Assets/EpicLoot/Sprites/Shardstones/{shardColor}.png") };
-                    pid.m_itemData.m_shared.m_ammoType = $"{shardColor}|ShardStone";
+                    // The ammoType is this shard's identity: color and rarity both live here, in shared
+                    // data that survives Instantiate. Everything downstream reads it rather than the
+                    // prefab name or any baked custom data.
+                    pid.m_itemData.m_shared.m_ammoType = $"{shardColor}|{rarity}|ShardStone";
                     pid.m_itemData.m_shared.m_maxStackSize = ShardStackSize;
 
-                    // Bake this prefab's rarity and color into its MagicItem metadata (the semantic
-                    // source of truth read by GetShardRarity/IsShardStone/socketing). The ammoType set
-                    // just above is what StampShard reads to derive the color.
-                    StampShard(pid.m_itemData, rarity);
-                    pid.Save();
+                    // Bake the cosmetic MagicItem onto the prefab too, so the paths that Clone() an
+                    // ItemData straight off a prefab (conversions, socket reconstruction) get it without
+                    // waiting for a hook. Instances created by Instantiate are healed on Awake instead.
+                    EnsureShardMetadata(pid.m_itemData);
 
                     // Include the rarity in the display name so each (color, rarity) prefab is a
                     // distinct name -- that is what keeps different rarities in separate inventory

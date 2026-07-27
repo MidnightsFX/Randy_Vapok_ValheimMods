@@ -11,6 +11,9 @@ public partial class MagicTooltip
         var color = Shards.GetShardColor(item);
         var def = Shards.ShardDefinitions.Get(color);
         var showDetails = MagicItem.ShowEffectDetails;
+        // Read the rarity from the shard's own shared data rather than magicItem, keeping every shard
+        // lookup on the one source of truth.
+        var rarity = Shards.GetShardRarity(item);
 
         text.Append("\n");
         if (def == null || (def.UniformEffect == null && def.TypeEffects.Count == 0))
@@ -24,7 +27,7 @@ public partial class MagicTooltip
         // A uniform shard (e.g. a boss shard) grants one effect on every slot it is allowed into.
         if (def.UniformEffect != null)
         {
-            if (def.UniformEffect.ValuesPerRarity.TryGetValue(magicItem.Rarity, out var uniformValue))
+            if (def.UniformEffect.ValuesPerRarity.TryGetValue(rarity, out var uniformValue))
             {
                 var uniformDef = MagicItemEffectDefinitions.Get(def.UniformEffect.EffectType);
                 if (uniformDef != null)
@@ -46,7 +49,7 @@ public partial class MagicTooltip
         foreach (var pair in def.TypeEffects)
         {
             var effectDef = pair.Value;
-            if (!effectDef.ValuesPerRarity.TryGetValue(magicItem.Rarity, out var value))
+            if (!effectDef.ValuesPerRarity.TryGetValue(rarity, out var value))
             {
                 continue;
             }
@@ -75,7 +78,8 @@ public partial class MagicTooltip
         }
 
         var fixedValue = new MagicItemEffectDefinition.ValueDef { MinValue = value, MaxValue = value, Increment = 0 };
-        var block = MagicItem.GetEffectDetailBlock(new MagicItemEffect(effectType, value), magicItem.Rarity, null, fixedValue, "     ");
+        var block = MagicItem.GetEffectDetailBlock(new MagicItemEffect(effectType, value),
+            Shards.GetShardRarity(item), null, fixedValue, "     ");
         if (block.Length > 0)
         {
             text.Append($"<color=#c0c0c0ff>{block}</color>");

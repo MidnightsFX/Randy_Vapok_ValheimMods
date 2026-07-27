@@ -12,7 +12,7 @@ namespace EpicLoot.ShardStones
     // icon's own GPU texture directly -- no atlas, no ReadPixels -- so it works even for non-readable
     // AssetBundle textures. Assets are built lazily on first use, per prefab, and cached; everything is
     // wrapped in try/catch: if anything fails we hand back an empty tag and the tooltip renders exactly
-    // as before (glyph only). Keying on the source prefab (rather than ShardColor) means runestones and
+    // as before (glyph only). Keying on the source prefab (rather than the shard color) means runestones and
     // any unique/new shard show their real icon without needing a matching enum value or sprite file.
     public static class ShardTooltipSprites
     {

@@ -429,6 +429,21 @@ namespace EpicLoot.CraftingV2
                     sb.AppendLine($"‣ {label} {percent}%");
             }
 
+            // Socket odds come from the same roll, but enchanting upgrades never affect them, so there
+            // are no bonus lines here. The 0-socket entry is implied by the others and left out.
+            List<KeyValuePair<int, float>> socketCountWeights = LootRoller.GetSocketCountsPerRarity(rarity);
+            float totalSocketWeight = socketCountWeights.Sum(x => x.Value);
+            foreach (KeyValuePair<int, float> socketCountEntry in socketCountWeights)
+            {
+                int count = socketCountEntry.Key;
+                if (count <= 0 || totalSocketWeight <= 0)
+                    continue;
+
+                int percent = (int)(socketCountEntry.Value / totalSocketWeight * 100.0f);
+                string label = count == 1 ? $"{count} $mod_epicloot_enchant_socket" : $"{count} $mod_epicloot_enchant_sockets";
+                sb.AppendLine($"‣ {label} {percent}%");
+            }
+
             sb.Append("</color>");
 
             sb.AppendLine();

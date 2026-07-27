@@ -60,12 +60,6 @@ internal class ELConfig
     public static ConfigEntry<TextAnchor> AbilityBarLayoutAlignment;
     public static ConfigEntry<float> AbilityBarIconSpacing;
     public static ConfigEntry<float> SetItemDropChance;
-    public static ConfigEntry<int> SocketCapMagic;
-    public static ConfigEntry<int> SocketCapRare;
-    public static ConfigEntry<int> SocketCapEpic;
-    public static ConfigEntry<int> SocketCapLegendary;
-    public static ConfigEntry<int> SocketCapMythic;
-    public static ConfigEntry<bool> SocketCountIsAlwaysCap;
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
     public static ConfigEntry<bool> AllowShardstoneDuplicateItemEffect;
     public static ConfigEntry<bool> AllowRunestoneDuplicateItemEffect;
@@ -86,6 +80,7 @@ internal class ELConfig
     public static ConfigEntry<bool> AutoRemoveEquipmentNotFound;
     public static ConfigEntry<bool> OnlyAddEquipmentWithRecipes;
     public static ConfigEntry<float> ItemsUnidentifiedDropRatio;
+    public static ConfigEntry<float> ShardStoneDropRatio;
     public static ConfigEntry<float> UIAudioVolumeAdjustment;
     public static ConfigEntry<bool> AutoAddRemoveEquipmentFromVendor;
     public static ConfigEntry<bool> AutoAddRemoveEquipmentFromLootLists;
@@ -167,9 +162,13 @@ internal class ELConfig
         CreateConfigValues(Config);
         SetupConfigRPCs();
         FilePatching.LoadAllPatches();
+        // Bring any config the player has not edited up to date first, so InitializeConfig reads the
+        // refreshed contents rather than relying on a file watcher to fire part way through Awake.
+        ConfigVersionManager.RefreshUnmodifiedConfigs();
         // InitializeConfig applies patches per file via SychronizeConfig -> LoadPatchedJSON, so a separate
         // ApplyAllPatches() pass here would be redundant (and cause extra file-watcher reloads).
         InitializeConfig();
+        ConfigVersionManager.StampInitializedConfigs();
         FilePatching.LogAppliedPatchSummary();
     }
 
@@ -365,24 +364,6 @@ internal class ELConfig
             "or identified as a set item from the legendaries configuration file.\n" +
             "Min = 0, Max = 1",
             new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
-        SocketCapMagic = BindServerConfig("Sockets", "Socket Cap Magic", 0,
-            "The maximum number of shard sockets a Magic item can roll.",
-            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
-        SocketCapRare = BindServerConfig("Sockets", "Socket Cap Rare", 0,
-            "The maximum number of shard sockets a Rare item can roll.",
-            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
-        SocketCapEpic = BindServerConfig("Sockets", "Socket Cap Epic", 1,
-            "The maximum number of shard sockets an Epic item can roll.",
-            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
-        SocketCapLegendary = BindServerConfig("Sockets", "Socket Cap Legendary", 2,
-            "The maximum number of shard sockets a Legendary item can roll.",
-            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
-        SocketCapMythic = BindServerConfig("Sockets", "Socket Cap Mythic", 3,
-            "The maximum number of shard sockets a Mythic item can roll.",
-            new AcceptableValueRange<int>(minValue: 0, maxValue: 6));
-        SocketCountIsAlwaysCap = BindServerConfig("Sockets", "Socket Count Always Equals Cap", false,
-            "When true, items always roll the maximum number of sockets for their rarity. " +
-            "When false, the socket count is randomly rolled between 0 and the cap.");
         AllowDuplicateSocketedEffects = BindServerConfig("Sockets", "Allow Duplicate Socketed Effects", false,
             "When false, an effect that is already socketed on an item cannot be socketed again.");
         AllowShardstoneDuplicateItemEffect = BindServerConfig("Sockets", "Allow Shardstone On Matching Item Effect", false,
@@ -396,6 +377,16 @@ internal class ELConfig
             "2 = The number of items in the drop table are twice as likely to drop " +
             "(note, this doesn't double the number of loot dropped, just doubles the relative chance for it to drop).\n" +
             "Min = 0, Max = 4", new AcceptableValueRange<float>(minValue: 0, maxValue: 4));
+        ShardStoneDropRatio = BindServerConfig("Balance", "Shard Stone Drop Ratio", 0.1f,
+            "Sets the chance that a rolled loot drop is replaced by a shard stone, chosen from the " +
+            "shard set assigned to the biome at the drop point (the ShardStone_{Biome} item sets in " +
+            "loottables.json).\n" +
+            "This value is evaluated first, Items Unidentified Drop Ratio and Items To Materials " +
+            "Drop Ratio then use the remaining value for their ratio calculations.\n" +
+            "0 = no shard stones drop from normal loot. Elite creature and boss shard drops come " +
+            "from the loot tables directly and are not affected by this setting.\n" +
+            "1 = every loot drop becomes a shard stone.",
+            new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         ItemsUnidentifiedDropRatio = BindServerConfig("Balance", "Items Unidentified Drop Ratio", 0.0f,
             "Sets the chance that loot is dropped as unidentified items. " +
             "This value is set first, " +
@@ -528,19 +519,6 @@ internal class ELConfig
             RecipesHelper.Initialize(RecipesHelper.Config);
         }
         ItemManager.OnItemsRegistered -= InitializeRecipeOnReady;
-    }
-
-    public static int GetSocketCap(ItemRarity rarity)
-    {
-        switch (rarity)
-        {
-            case ItemRarity.Magic: return SocketCapMagic.Value;
-            case ItemRarity.Rare: return SocketCapRare.Value;
-            case ItemRarity.Epic: return SocketCapEpic.Value;
-            case ItemRarity.Legendary: return SocketCapLegendary.Value;
-            case ItemRarity.Mythic: return SocketCapMythic.Value;
-            default: return 0;
-        }
     }
 
     public static string GetLocalizationDirectoryPath()
