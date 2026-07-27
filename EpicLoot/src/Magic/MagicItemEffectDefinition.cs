@@ -57,6 +57,7 @@ namespace EpicLoot
         public bool? ItemHasAdrenaline;
 
         public List<string> CustomFlags;
+        public List<string> ExternalRequirements;
 
         public bool AllowByItemType([NotNull] ItemDrop.ItemData itemData)
         {
@@ -188,6 +189,17 @@ namespace EpicLoot
             // slot). The effect-composition rules (exclusivity / must-have, above) still apply to shards.
             if (checkItemTypeGating && !CheckItemTypeRequirements(itemData, magicItem, out failure))
             {
+                return false;
+            }
+
+            // External requirements are arbitrary predicates registered by other mods against a specific
+            // effect (API.RegisterMagicEffectRequirement). Unlike host-item gating they are NOT skipped when
+            // checkItemTypeGating is false: a mod's hard requirement must hold on every path, shard socketing
+            // included, so it can never be silently bypassed by the shard config's per-slot grid.
+            if (!API.CheckMagicEffectExternalRequirements(ExternalRequirements, itemData, magicItem,
+                magicEffectType, checklootroll, checkaugmentroll, checkruneroll))
+            {
+                failure = RequirementFailure.Other;
                 return false;
             }
 
