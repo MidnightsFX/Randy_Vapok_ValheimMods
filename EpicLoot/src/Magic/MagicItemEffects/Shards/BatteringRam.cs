@@ -7,7 +7,7 @@ namespace EpicLoot.MagicItemEffects.Shards
 {
     // Peach shoulder shard: charging into enemies deals blunt damage based on how fast you are moving and
     // how much you are carrying -- a loaded, sprinting player is a wrecking ball. Checked each frame on the
-    // local player (mirrors Stampede's Player.Update approach): while moving above a threshold on the
+    // local player (mirrors Trailblazer's Player.Update approach): while moving above a threshold on the
     // ground, nearby enemies take a blunt hit scaled by carried weight, throttled per target. The shard
     // value is a small flat coefficient.
     public static class BatteringRam

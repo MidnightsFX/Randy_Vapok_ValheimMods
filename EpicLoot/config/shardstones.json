@@ -367,7 +367,7 @@
           }
         },
         "Legs": {
-          "EffectType": "Stampede",
+          "EffectType": "Trailblazer",
           "ValuesPerRarity": {
             "Magic": 2,
             "Rare": 3,

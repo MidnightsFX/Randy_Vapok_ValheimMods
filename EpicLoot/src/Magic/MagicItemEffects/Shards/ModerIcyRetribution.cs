@@ -192,11 +192,11 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 return _cooldownIndicator;
             }
 
-            var icon = ObjectDB.instance?.GetItemPrefab("TrophyDragon")?
+            var icon = ObjectDB.instance?.GetItemPrefab("TrophyDragonQueen")?
                 .GetComponent<ItemDrop>()?.m_itemData.GetIcon();
             if (icon == null) {
                 if (!_cooldownMissingLogged) {
-                    EpicLoot.LogWarning("ModerIcyRetribution: could not find 'TrophyDragon' icon; cooldown indicator will not display.");
+                    EpicLoot.LogWarning("ModerIcyRetribution: could not find 'TrophyDragonQueen' icon; cooldown indicator will not display.");
                     _cooldownMissingLogged = true;
                 }
                 return null;

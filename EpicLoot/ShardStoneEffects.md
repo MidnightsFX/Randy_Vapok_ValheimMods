@@ -12,7 +12,7 @@ Legendary → Mythic).
 | **Red** (Vitality) ☑️ | LifeSteal | LifeSteal | LifeSteal | ModifyHealthRegen | IncreaseHealth | PercentHealth | BulkUp | DamageTakenGivesAdrenaline | AddHealthRegen |
 | **Yellow** (Stamina) ☑️ | ModifyAttackStaminaUse | ModifyDrawStaminaUse | StaminaReturnFromEitr | PercentStamina | ModifyStaminaRegen | IncreaseStamina | StaminaOnKill | UseAdrenalineAsStamina | ModifySprintStaminaUse |
 | **Cyan** (Eitr) ☑️ | EitrImbueAttack | EitrImbueAttack | ModifyAttackEitrUse | PercentEitr | IncreaseEitr | ModifyEitrRegen | HeartyEitr | EitrUseGivesAdrenaline | EitrShield |
-| **Orange** (Fire) | AddFireDamage | AddFireDamage | AddFireDamage | AddFireResistancePercentage | PhysToFire | Stampede | BurningSpeed | BurningAdrenaline | IncreaseHeatResistance |
+| **Orange** (Fire) | AddFireDamage | AddFireDamage | AddFireDamage | AddFireResistancePercentage | PhysToFire | Trailblazer | BurningSpeed | BurningAdrenaline | IncreaseHeatResistance |
 | **Pink** (Dodge) | PerfectDodgeGivesHealth | PerfectDodgeGivesStamina | PerfectDodgeGivesEitr | DecreaseDodgeCost | ReduceFallDamage | DodgeBuff | PerfectDodgeGivesSpeed | PerfectDodge | RollCleanse |
 | **Black** (Night) | IncreaseDamageDuringNighttime ☑️ | IncreaseDamageDuringNighttime ☑️ | IncreaseDamageDuringNighttime  ☑️| NightStaminaRegenIncrease | DamageReductionAtNight | AddKnivesSkill ☑️ | NightCarryWeight ☑️ | SummonBatWhenActivatingAdrenaline :x: | ModifyNoise ☑️ |
 | **White**  (Day) | IncreaseDamageDuringDaytime | IncreaseDamageDuringDaytime | IncreaseDamageDuringDaytime | DayDiscovery | DayArmor | DayStaminaRegen | DaySailingSpeed | DayHealthRegen | AddCrafterSkills |

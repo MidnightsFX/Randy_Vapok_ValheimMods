@@ -53,6 +53,8 @@ namespace EpicLoot
         public bool? ItemUsesEitrOnAttack;
         public bool? ItemUsesHealthOnAttack;
         public bool? ItemUsesDrawStaminaOnAttack;
+        public bool? ItemGivesAdrenaline;
+        public bool? ItemHasAdrenaline;
 
         public List<string> CustomFlags;
 
@@ -365,6 +367,33 @@ namespace EpicLoot
                     itemData.m_shared.m_secondaryAttack.m_drawStaminaDrain > 0;
 
                 if (ItemUsesDrawStaminaOnAttack.Value != drawStamina)
+                {
+                    failure = RequirementFailure.ItemPropertyMismatch;
+                    return false;
+                }
+            }
+
+            if (ItemGivesAdrenaline != null)
+            {
+                // m_attackAdrenaline defaults to 1 on every attack; only above-default values count as
+                // deliberate adrenaline gain.
+                bool givesAdrenaline = itemData.m_shared.m_attack.m_attackAdrenaline > 1 ||
+                    itemData.m_shared.m_attack.m_attackUseAdrenaline > 1 ||
+                    itemData.m_shared.m_secondaryAttack.m_attackAdrenaline > 1 ||
+                    itemData.m_shared.m_secondaryAttack.m_attackUseAdrenaline > 1;
+
+                if (ItemGivesAdrenaline.Value != givesAdrenaline)
+                {
+                    failure = RequirementFailure.ItemPropertyMismatch;
+                    return false;
+                }
+            }
+
+            if (ItemHasAdrenaline != null)
+            {
+                bool hasAdrenaline = itemData.m_shared.m_maxAdrenaline > 0;
+
+                if (ItemHasAdrenaline.Value != hasAdrenaline)
                 {
                     failure = RequirementFailure.ItemPropertyMismatch;
                     return false;

@@ -76,11 +76,12 @@ namespace EpicLoot.MagicItemEffects.Shards
             var lower = type.ToLowerInvariant();
             var requirements = new MagicItemEffectRequirements { NoRoll = true };
 
-            // Adrenaline effects only function on trinkets (which supply the adrenaline pool), so keep them
-            // legal on trinkets alone -- the shard grid already assigns them only to the trinket slot.
+            // Adrenaline effects only function alongside an adrenaline pool, so keep them legal only on
+            // items that supply one (m_maxAdrenaline > 0, i.e. adrenaline trinkets) -- the shard grid
+            // already assigns them only to the trinket slot.
             if (type.Contains("Adrenaline"))
             {
-                requirements.AllowedItemTypes = new List<string> { "Trinket" };
+                requirements.ItemHasAdrenaline = true;
             }
 
             return new MagicItemEffectDefinition

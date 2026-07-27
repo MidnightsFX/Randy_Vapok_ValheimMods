@@ -35,6 +35,18 @@ namespace EpicLoot.ShardStones {
             new UpgradeStep { From = ItemRarity.Legendary, To = ItemRarity.Mythic,    Currency = "ShardLegendary", Amount = 7 },
         };
 
+        // Boss shardstones additionally cost 1 trophy of the matching boss per upgrade step, so leveling one
+        // up gates on re-fighting (or having beaten) that boss. Values are the vanilla trophy prefab names.
+        private static readonly Dictionary<ShardType, string> BossTrophies = new Dictionary<ShardType, string> {
+            { ShardType.Eikthyr,  "TrophyEikthyr" },
+            { ShardType.Elder,    "TrophyTheElder" },
+            { ShardType.Bonemass, "TrophyBonemass" },
+            { ShardType.Moder,    "TrophyDragonQueen" },
+            { ShardType.Yagluth,  "TrophyGoblinKing" },
+            { ShardType.Queen,    "TrophySeekerQueen" },
+            { ShardType.Fader,    "TrophyFader" },
+        };
+
         public static void RegisterShardStoneUpgradeConversions() {
             var config = MaterialConversions.Config;
             if (config == null) {
@@ -48,9 +60,20 @@ namespace EpicLoot.ShardStones {
                     continue;
                 }
 
-                var rarities = Shards.ShardDefinitions.Get(color)?.Rarities;
+                var def = Shards.ShardDefinitions.Get(color);
+                var rarities = def?.Rarities;
                 if (rarities == null) {
                     continue;
+                }
+
+                // Boss shards charge an extra trophy per step. A Boss-category color with no mapped trophy
+                // (e.g. a boss added later without updating BossTrophies) still gets a working upgrade path.
+                string bossTrophy = null;
+                if (def.Category == ShardCategory.Boss) {
+                    if (!BossTrophies.TryGetValue(color, out bossTrophy)) {
+                        EpicLoot.LogWarning($"ShardStoneConversions: no boss trophy mapped for '{colorName}'; " +
+                                            "emitting its upgrade recipes without a trophy cost.");
+                    }
                 }
 
                 foreach (var step in Steps) {
@@ -59,15 +82,20 @@ namespace EpicLoot.ShardStones {
                         continue;
                     }
 
+                    var resources = new List<MaterialConversionRequirement> {
+                        new MaterialConversionRequirement { Item = $"{colorName}_{step.From}_ShardStone", Amount = 1 },
+                        new MaterialConversionRequirement { Item = step.Currency, Amount = step.Amount },
+                    };
+                    if (bossTrophy != null) {
+                        resources.Add(new MaterialConversionRequirement { Item = bossTrophy, Amount = 1 });
+                    }
+
                     config.MaterialConversions.Add(new MaterialConversion {
                         Name = $"{NamePrefix}{colorName}_{step.To}",
                         Product = $"{colorName}_{step.To}_ShardStone",
                         Amount = 1,
                         Type = MaterialConversionType.Upgrade,
-                        Resources = new List<MaterialConversionRequirement> {
-                            new MaterialConversionRequirement { Item = $"{colorName}_{step.From}_ShardStone", Amount = 1 },
-                            new MaterialConversionRequirement { Item = step.Currency, Amount = step.Amount },
-                        }
+                        Resources = resources
                     });
                 }
             }

@@ -292,8 +292,8 @@
     "mod_epicloot_me_chancetocritonhit_display": "{0}% Chance to Crit for {1}x Damage",
     "mod_epicloot_me_chancetocritonhit_desc": "{0}% chance for a hit to critically strike for double damage.",
 
-    "mod_epicloot_me_stampede_display": "Burning Trail: {0} Fire per Tick",
-    "mod_epicloot_me_stampede_desc": "Leave a burning trail while running that deals {0} fire damage per tick.",
+    "mod_epicloot_me_trailblazer_display": "Burning Trail: {0} Fire per Tick",
+    "mod_epicloot_me_trailblazer_desc": "Leave a burning trail while running that deals {0} fire damage per tick.",
     "mod_epicloot_me_reducefalldamage_display": "-{0}% Fall Damage",
     "mod_epicloot_me_reducefalldamage_desc": "Reduce fall damage by {0}%.",
     "mod_epicloot_me_rollcleanse_display": "Dodge Cleanses {0}s of DoTs",

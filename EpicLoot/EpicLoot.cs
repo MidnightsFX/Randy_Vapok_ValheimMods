@@ -323,6 +323,12 @@ public sealed class EpicLoot : BaseUnityPlugin
         }
     }
 
+    public static void LogForce(string message)
+    {
+        // Intentionally NOT gated by _loggingEnabled/_logLevel: some diagnostics must always be visible.
+        _instance.Logger.LogInfo(message);
+    }
+
     public static void LogWarningForce(string message)
     {
         _instance.Logger.LogWarning(message);
@@ -420,6 +426,9 @@ public sealed class EpicLoot : BaseUnityPlugin
         // world load (same manual injection as the strike visual above), so the SummonBat trinket shard can
         // spawn a reload-safe pet that stays friendly. Idempotent -- built once and re-injected each ZNetScene.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.SummonBatWhenActivatingAdrenaline.RegisterTamedBatPrefab;
+        // Registers the local-only 'vfx_FireAddFuel' fire-patch clone the Trailblazer shard drops behind the
+        // running player (same manual injection as above). Idempotent -- built once and re-injected each ZNetScene.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.Trailblazer.RegisterVfxPrefab;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
         ShardStones.Shards.CreateAndLoadShardItems();

@@ -87,7 +87,7 @@ namespace EpicLoot
         public static string BloodDrinker = nameof(BloodDrinker); // DarkRed legs: max-health-for-lifesteal tradeoff
 
         // --- Movement / misc ---
-        public static string Stampede = nameof(Stampede);
+        public static string Trailblazer = nameof(Trailblazer);
         public static string ReduceFallDamage = nameof(ReduceFallDamage);
         public static string RollCleanse = nameof(RollCleanse);
         public static string StormRider = nameof(StormRider);

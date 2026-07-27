@@ -167,8 +167,10 @@ internal class ELConfig
         CreateConfigValues(Config);
         SetupConfigRPCs();
         FilePatching.LoadAllPatches();
+        // InitializeConfig applies patches per file via SychronizeConfig -> LoadPatchedJSON, so a separate
+        // ApplyAllPatches() pass here would be redundant (and cause extra file-watcher reloads).
         InitializeConfig();
-        FilePatching.ApplyAllPatches();
+        FilePatching.LogAppliedPatchSummary();
     }
 
     public void SetupConfigRPCs()
@@ -557,6 +559,13 @@ internal class ELConfig
 
     public static string GetDefaultEmbeddedFileLocation(string configName)
     {
+        // Callers may pass the config name with or without extension; the embedded resource names
+        // (and the magiceffects overhaul check below) require the ".json" suffix.
+        if (!configName.EndsWith(".json"))
+        {
+            configName += ".json";
+        }
+
         string embeddedcfgpath = "EpicLoot.config." + configName;
         if (configName == "magiceffects.json")
         {
@@ -577,12 +586,9 @@ internal class ELConfig
     {
         string baseCfgLocation = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), filename);
 
-        // Ensure that the core config file exists
-        if (File.Exists(baseCfgLocation) == false || AlwaysRefreshCoreConfigs.Value)
-        {
-            CreateBaseConfigurations(baseCfgLocation, filename);
-            FilePatching.LoadPatchedJSON(filename.Split('.')[0], true);
-        }
+        // Ensure the base config file exists and reflects the current patches before we read it.
+        // LoadPatchedJSON handles the missing-file / AlwaysRefreshCoreConfigs / has-patches cases internally.
+        FilePatching.LoadPatchedJSON(filename.Split('.')[0]);
 
         // Attempt to parse the core config, if its not valid use the embedded default config
         try

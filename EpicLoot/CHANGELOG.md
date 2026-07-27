@@ -2,6 +2,7 @@
 
 New Content:
 * Shardstones Added! Shardstones are a new item that can be attached to weapons with available shardsockets
+    * Thanks Leslie, Warp and Rusty for contributing effects 
     * Interacting with an enchanted item that has a shard socket will pull up a small storage UI, allowing you to socket or remove shards. 
     * Shardstones can be found in the world as loot
     * 90+ new magic effects have been added and are primarily available through shardstones, some shardstones provide access to lower power existing enchants also
@@ -15,12 +16,22 @@ New Content:
 * Improved Tooltips!
     * User-side configuration allows you to expand vertical or horizontally (or shrink) tooltips (scrollbar automatically used, as needed)
     * SHIFT when moused over an item will now show extended tooltip information, this includes more detailed descriptions, configurable effects and precise values for multiple parts of the effects
+* Terminal Commands upgraded (Thanks Rusty!)
+    * Terminal commands now have better completion and more options
+    * Color based formatting for rarity loot table rolls!
+
+API:
+* New magic effect requirement flags: `ItemGivesAdrenaline` (item's attack grants above-default adrenaline) and `ItemHasAdrenaline` (item provides a max adrenaline pool)
+  * Note: `ItemGivesAdrenaline` requires that the item gives more than 1 adrenaline. This is due to all items by default adding 1 adrenaline.
 
 Bugfixes:
 * Fixes tooltip display for enchanted items health use percentage
 * Fixes a bug with Ragnar's ice wave which would cause a player to swim upwards in the air (upon exit) if the effect was used in a dungeon
 * Attack speed compatibility: when another mod already provides AnimationSpeedManager (embedded as a binary), Epic Loot now routes its attack-speed changes into that shared instance instead of running its own copy, so the two mods' attack-speed modifiers stack correctly instead of overwriting each other
 * Merchant panels are now draggable, and save their position client side
+* Config patches now honor the `Priority` field reliably and equal-priority patches are now applied in a deterministic order instead of depending on the filesystem's file listing order
+* When any config patches are active, Epic Loot now always logs a one-line summary of how many patches were applied (regardless of your logging settings) to make patched setups obvious in bug reports
+* Adventure data (Treasure hunts, bounties etc) is now compressed and cleaned resulting in massive reductions in stored custom data
 
 ## Version 0.12.15
 
