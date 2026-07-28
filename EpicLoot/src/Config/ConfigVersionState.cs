@@ -151,7 +151,7 @@ public class ConfigVersionState
             return "";
         }
 
-        string normalized = text.Replace("﻿", "").Replace("\r\n", "\n").Replace("\r", "\n").Trim();
+        string normalized = text.Replace("\uFEFF", "").Replace("\r\n", "\n").Replace("\r", "\n").Trim();
 
         using (SHA256 sha = SHA256.Create())
         {

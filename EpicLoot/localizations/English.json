@@ -12,7 +12,7 @@
     "el_overhaul_minimal": "Minimal",
 
     "el_configupdate_title": "Epic Loot: Outdated Configs",
-    "el_configupdate_body": "Epic Loot has updated to version {0}. Configs you have not changed were refreshed automatically, but these have local changes and were left alone:\n\n{1}\n\nThey will not receive new content or balance changes while they differ from the defaults.\n\nReplace them with the new defaults? Your current files will be backed up to <color=#ffd700>BepInEx/config/EpicLoot/baseconfig-backup</color> first. Restarting the game afterwards is recommended.\n\nChoosing No keeps your versions, and you will only be asked again if these configs change in a future update.",
+    "el_configupdate_body": "Epic Loot has updated to version {0}. Configs you have not changed were refreshed automatically, but these have local changes and were left alone:\n\n{1}\n\nThey will not receive new content or balance changes while they differ from the defaults.\n\nReplace them with the new defaults? Your current files will be backed up to <color=#ffd700>BepInEx/config/EpicLoot/baseconfig-backup</color> first.\n\nChoosing No keeps your versions, and you will only be asked again if these configs change in a future update.",
 
     "mod_epicloot_itemtype_helmet": "Helmet",
     "mod_epicloot_itemtype_chest": "Chest",
