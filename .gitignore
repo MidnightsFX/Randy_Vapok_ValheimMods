@@ -73,7 +73,6 @@ crashlytics-build.properties
 *.swp
 /valheim_Data/BepInEx-out/plugins/ExtendedItemDataFramework.dll
 /valheim_Data/BepInEx-out/plugins/EpicLoot/translations.json
-/valheim_Data/BepInEx-out/plugins/EpicLoot/recipes.json
 /valheim_Data/BepInEx-out/plugins/EpicLoot/magiceffects.json
 /valheim_Data/BepInEx-out/plugins/EpicLoot/loottables.json
 /valheim_Data/BepInEx-out/plugins/EpicLoot/legendaries.json

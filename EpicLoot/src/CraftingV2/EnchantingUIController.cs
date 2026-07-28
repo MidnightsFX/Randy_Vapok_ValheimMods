@@ -3,6 +3,7 @@ using EpicLoot.Config;
 using EpicLoot.Crafting;
 using EpicLoot.Data;
 using EpicLoot.GatedItemType;
+using EpicLoot.ShardStones;
 using EpicLoot_UnityLib;
 using Jotunn.Managers;
 using System;
@@ -1393,9 +1394,14 @@ namespace EpicLoot.CraftingV2
             return result;
         }
 
-        internal static List<InventoryItemListElement> DisenchantItem(ItemDrop.ItemData item)
+        // Strips the item's magic and returns everything owed back to the player: the shards/runestones
+        // it was carrying in its sockets, plus the sacrifice products on a lucky bonus roll.
+        // `bonusRolled` is true only for that lucky roll, so the caller can reserve the bonus
+        // presentation for it rather than firing it for a plain socket return.
+        internal static List<InventoryItemListElement> DisenchantItem(ItemDrop.ItemData item, out bool bonusRolled)
         {
-            List<InventoryItemListElement> bonusItems = new List<InventoryItemListElement>();
+            bonusRolled = false;
+            List<InventoryItemListElement> returnedItems = new List<InventoryItemListElement>();
             if (item.IsMagic(out MagicItem magicItem) && magicItem.CanBeDisenchanted())
             {
                 Tuple<float, float> featureValues = EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(
@@ -1409,15 +1415,44 @@ namespace EpicLoot.CraftingV2
 
                 if (Random.Range(0, 99) < bonusItemChance)
                 {
-                    EnchantingTableUI.instance.PlayEnchantBonusSFX();
-
-                    bonusItems = GetSacrificeProducts(new List<Tuple<ItemDrop.ItemData, int>>() { new(item, 1) });
+                    List<InventoryItemListElement> bonusItems =
+                        GetSacrificeProducts(new List<Tuple<ItemDrop.ItemData, int>>() { new(item, 1) });
+                    bonusRolled = bonusItems.Count > 0;
+                    returnedItems.AddRange(bonusItems);
                 }
+
+                // Disenchanting drops the MagicItem wholesale, sockets included, so anything socketed
+                // has to be handed back before it goes.
+                returnedItems.AddRange(ReclaimSockets(magicItem));
 
                 item.Data().Remove<MagicItemComponent>();
             }
 
-            return bonusItems;
+            return returnedItems;
+        }
+
+        // The socketed shards/runestones that survive disenchanting: everything whose removal policy is
+        // not Locked. Break-only sockets come back intact -- disenchanting already costs materials and
+        // every rolled effect on the item, which stands in for breaking them out one at a time.
+        // Permanently bound sockets (Locked) are destroyed along with the enchantment.
+        private static List<InventoryItemListElement> ReclaimSockets(MagicItem magicItem)
+        {
+            List<InventoryItemListElement> result = new List<InventoryItemListElement>();
+            foreach (SocketedEffect socketed in magicItem.Sockets)
+            {
+                if (ShardSocketManager.GetRemovalPolicy(socketed) == SocketRemoval.Locked)
+                {
+                    continue;
+                }
+
+                ItemDrop.ItemData socketItem = ShardSocketManager.ReconstructShardItem(socketed);
+                if (socketItem != null)
+                {
+                    result.Add(new InventoryItemListElement() { Item = socketItem });
+                }
+            }
+
+            return result;
         }
     }
 }

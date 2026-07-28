@@ -60,7 +60,6 @@ namespace EpicLoot.Patching
             "loottables",
             "magiceffects",
             "iteminfo",
-            "recipes",
             "enchantcosts",
             "itemnames",
             "itemsorter",

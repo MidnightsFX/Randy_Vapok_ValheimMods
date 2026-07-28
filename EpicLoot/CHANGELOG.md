@@ -28,13 +28,11 @@ New Content:
     * Dedicated servers log the affected files instead of prompting. 
     * Enabling `Always Refresh Core Configs` activates the patch system and prevents config file prompts (configs are rebuilt every restart, and only changes defined in patches will be applied)
 
-API:
-* New magic effect requirement flags: `ItemGivesAdrenaline` (item's attack grants above-default adrenaline) and `ItemHasAdrenaline` (item provides a max adrenaline pool)
-  * Note: `ItemGivesAdrenaline` requires that the item gives more than 1 adrenaline. This is due to all items by default adding 1 adrenaline.
-* New magic effect requirements allowed from the API
-    * API magic effect requirements when defined for an effect will be evaluated for all items, allowing only items which fit the filter (Thanks Warp!)   
-
-
+Changes:
+* Shards are now crafted at the enchanting table instead of the forge
+* The Leather Belt, Silver Ring and Gold Ruby Ring are now configurable
+* Enchanting table required resources are now easily configurable
+    * Resources to build the enchanting table has been changed to 10 wood, 2 greydwarf eyes
 
 Bugfixes:
 * Fixes tooltip display for enchanted items health use percentage
@@ -45,6 +43,15 @@ Bugfixes:
 * When any config patches are active, Epic Loot now always logs a one-line summary of how many patches were applied (regardless of your logging settings) to make patched setups obvious in bug reports
 * Adventure data (Treasure hunts, bounties etc) is now compressed and cleaned resulting in massive reductions in stored custom data
 * Transfer Enchantments through crafting now works properly
+
+API:
+* New magic effect requirement flags: `ItemGivesAdrenaline` (item's attack grants above-default adrenaline) and `ItemHasAdrenaline` (item provides a max adrenaline pool)
+  * Note: `ItemGivesAdrenaline` requires that the item gives more than 1 adrenaline. This is due to all items by default adding 1 adrenaline.
+* New magic effect requirements allowed from the API
+    * API magic effect requirements when defined for an effect will be evaluated for all items, allowing only items which fit the filter (Thanks Warp!)
+* `recipes.json` has been removed (its contained recipes are now handled and directly exposed in the Bepinex config file [Randyknapp.epicloot.cfg])
+    * Mod authors: `API.AddRecipe`, `API.AddRecipes` and `API.UpdateRecipes` are now deprecated
+
 
 ## Version 0.12.15
 

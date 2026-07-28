@@ -42,14 +42,19 @@ namespace EpicLoot_UnityLib
                 InventoryManagement.Instance.RemoveItem(costElement.GetItem());
             }
 
-            List<InventoryItemListElement> bonusItems = EnchantingUIController.DisenchantItem(item);
+            // Returned items are the bonus roll plus any shards/runestones freed from the item's sockets;
+            // only the bonus roll gets the bonus fanfare.
+            List<InventoryItemListElement> returnedItems = EnchantingUIController.DisenchantItem(item, out bool bonusRolled);
 
-            if (bonusItems.Count > 0)
+            if (bonusRolled)
             {
                 EnchantingTableUI.instance.PlayEnchantBonusSFX();
                 BonusPanel.Show();
+            }
 
-                GiveItemsToPlayer(bonusItems);
+            if (returnedItems.Count > 0)
+            {
+                GiveItemsToPlayer(returnedItems);
             }
 
             RefreshAvailableItems();

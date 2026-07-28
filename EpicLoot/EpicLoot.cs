@@ -66,11 +66,12 @@ public sealed class EpicLoot : BaseUnityPlugin
         "Essence"
     };
 
+    /// <summary>
+    /// Plain, non-craftable items registered straight from the bundle. Craftable items are declared in
+    /// <see cref="LoadCraftableItems"/> instead, so their recipe and station are config driven.
+    /// </summary>
     public static string[] ItemNames = new string[]
     {
-        "LeatherBelt",
-        "SilverRing",
-        "GoldRubyRing",
         "ForestToken",
         "IronBountyToken",
         "GoldBountyToken"
@@ -94,6 +95,10 @@ public sealed class EpicLoot : BaseUnityPlugin
     void Awake()
     {
         _instance = this;
+
+        // Wire the shared Common support layer (config binder, piece loader, drawers) to this plugin before
+        // any config is bound, so ConfigBinder and ModLogger have a config file and log source to use.
+        ModContext.Initialize(this, Logger, "EpicLoot");
 
         cfg = new ELConfig(Config);
 
@@ -350,6 +355,8 @@ public sealed class EpicLoot : BaseUnityPlugin
         }
 
         EpicAssets.AssetBundle = assetBundle;
+        // Shared Common loaders (PieceLoader) resolve their prefabs through here.
+        ModContext.AssetBundle = assetBundle;
         EpicAssets.EquippedSprite = assetBundle.LoadAsset<Sprite>("Equipped");
         EpicAssets.AugaEquippedSprite = assetBundle.LoadAsset<Sprite>("AugaEquipped");
         EpicAssets.GenericSetItemSprite = assetBundle.LoadAsset<Sprite>("GenericSetItemMarker");
@@ -460,46 +467,60 @@ public sealed class EpicLoot : BaseUnityPlugin
         }
     }
 
+    /// <summary>
+    /// Registers the build pieces through the shared <see cref="PieceLoader"/>, which exposes each piece's
+    /// build cost, category and workbench requirement as server-synced config entries that apply live.
+    /// None of these pieces required a crafting station before, hence RequiresWorkbench = false.
+    /// </summary>
     private static void LoadPieces()
     {
-        GameObject enchanter = EpicAssets.AssetBundle.LoadAsset<GameObject>("piece_enchanter");
-        PieceConfig enchanterPC = new PieceConfig();
-        enchanterPC.PieceTable = "Hammer";
-        enchanterPC.Category = PieceCategories.Misc;
-        enchanterPC.AllowedInDungeons = false;
-        enchanterPC.Requirements = new RequirementConfig[]
+        PieceLoader.Register(new PieceLoader.BuildPiece
         {
-            new RequirementConfig() { Item = "Stone", Amount = 10, Recover = true },
-            new RequirementConfig() { Item = "SurtlingCore", Amount = 3, Recover = true },
-            new RequirementConfig() { Item = "Copper", Amount = 3, Recover = true },
-            new RequirementConfig() { Item = "SwordCheat", Amount = 1, Recover = false }
-        };
-        PieceManager.Instance.AddPiece(new CustomPiece(enchanter, true, enchanterPC));
+            Name = "Enchanter",
+            Prefab = "piece_enchanter",
+            Category = PieceCategories.Misc,
+            RequiresWorkbench = false,
+            AllowedInDungeons = false,
+            Enabled = false,
+            PieceCost = new List<PieceLoader.PieceCost>
+            {
+                new PieceLoader.PieceCost { Prefab = "Stone", Amount = 10, Refundable = true },
+                new PieceLoader.PieceCost { Prefab = "SurtlingCore", Amount = 3, Refundable = true },
+                new PieceLoader.PieceCost { Prefab = "Copper", Amount = 3, Refundable = true },
+                new PieceLoader.PieceCost { Prefab = "SwordCheat", Amount = 1, Refundable = false }
+            }
+        });
 
-        GameObject augmenter = EpicAssets.AssetBundle.LoadAsset<GameObject>("piece_augmenter");
-        PieceConfig augmenterPC = new PieceConfig();
-        augmenterPC.PieceTable = "Hammer";
-        augmenterPC.Category = PieceCategories.Misc;
-        augmenterPC.AllowedInDungeons = false;
-        augmenterPC.Requirements = new RequirementConfig[]
+        PieceLoader.Register(new PieceLoader.BuildPiece
         {
-            new RequirementConfig() { Item = "Obsidian", Amount = 10, Recover = true },
-            new RequirementConfig() { Item = "Crystal", Amount = 3, Recover = true },
-            new RequirementConfig() { Item = "Bronze", Amount = 3, Recover = true },
-            new RequirementConfig() { Item = "SwordCheat", Amount = 1, Recover = false }
-        };
-        PieceManager.Instance.AddPiece(new CustomPiece(augmenter, true, augmenterPC));
+            Name = "Augmenter",
+            Prefab = "piece_augmenter",
+            Category = PieceCategories.Misc,
+            RequiresWorkbench = false,
+            AllowedInDungeons = false,
+            Enabled = false,
+            PieceCost = new List<PieceLoader.PieceCost>
+            {
+                new PieceLoader.PieceCost { Prefab = "Obsidian", Amount = 10, Refundable = true },
+                new PieceLoader.PieceCost { Prefab = "Crystal", Amount = 3, Refundable = true },
+                new PieceLoader.PieceCost { Prefab = "Bronze", Amount = 3, Refundable = true },
+                new PieceLoader.PieceCost { Prefab = "SwordCheat", Amount = 1, Refundable = false }
+            }
+        });
 
-        GameObject table = EpicAssets.AssetBundle.LoadAsset<GameObject>("piece_enchantingtable");
-        PieceConfig tablePC = new PieceConfig();
-        tablePC.PieceTable = "Hammer";
-        tablePC.Category = PieceCategories.Crafting;
-        tablePC.Requirements = new RequirementConfig[]
+        PieceLoader.Register(new PieceLoader.BuildPiece
         {
-            new RequirementConfig() { Item = "FineWood", Amount = 10, Recover = true },
-            new RequirementConfig() { Item = "SurtlingCore", Amount = 1, Recover = true }
-        };
-        PieceManager.Instance.AddPiece(new CustomPiece(table, true, tablePC));
+            Name = "Enchanting Table",
+            Prefab = "piece_enchantingtable",
+            Category = PieceCategories.Crafting,
+            RequiresWorkbench = false,
+            AllowedInDungeons = false,
+            PieceCost = new List<PieceLoader.PieceCost>
+            {
+                new PieceLoader.PieceCost { Prefab = "Wood", Amount = 10, Refundable = true },
+                new PieceLoader.PieceCost { Prefab = "GreydwarfEye", Amount = 2, Refundable = true },
+            }
+        });
     }
 
     private static void LoadItems()
@@ -518,6 +539,79 @@ public sealed class EpicLoot : BaseUnityPlugin
         itemDrop.m_itemData.m_shared.m_name = "";
         var dummyItem = new CustomItem(dummyGO, false);
         ItemManager.Instance.AddItem(dummyItem);
+
+        LoadCraftableItems();
+    }
+
+    /// <summary>
+    /// Registers the craftable items through the shared <see cref="ItemBatchLoader"/>, which gives each one
+    /// server-synced config entries for its recipe, crafting station, station level and craft amount, all
+    /// applying live without a restart.
+    /// </summary>
+    private static void LoadCraftableItems()
+    {
+        // EpicLoot's bundle stores assets under bare names, and these prefabs are authored against the real
+        // game assets (no JVLmock_ references to resolve) and carry their own icons.
+        ItemBatchLoader.PrefabPathFormat = null;
+        ItemBatchLoader.IconPathFormat = null;
+        ItemBatchLoader.FixReferences = false;
+
+        var loader = new ItemBatchLoader();
+
+        loader.AddDefinition(new ItemDefinition
+        {
+            Name = "Leather Belt",
+            Prefab = "LeatherBelt",
+            Category = ItemCategory.Misc,
+            CraftedAt = "forge",
+            ReqStationlevel = 1,
+            CraftAmount = 1,
+            Recipe = new RecipeDefinition
+            {
+                RecipeItems = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient { Prefab = "LeatherScraps", Amount = 4 },
+                    new RecipeIngredient { Prefab = "Bronze", Amount = 1 }
+                }
+            }
+        });
+
+        loader.AddDefinition(new ItemDefinition
+        {
+            Name = "Silver Ring",
+            Prefab = "SilverRing",
+            Category = ItemCategory.Misc,
+            CraftedAt = "forge",
+            ReqStationlevel = 1,
+            CraftAmount = 1,
+            Recipe = new RecipeDefinition
+            {
+                RecipeItems = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient { Prefab = "Silver", Amount = 1 }
+                }
+            }
+        });
+
+        loader.AddDefinition(new ItemDefinition
+        {
+            Name = "Gold Ruby Ring",
+            Prefab = "GoldRubyRing",
+            Category = ItemCategory.Misc,
+            CraftedAt = "forge",
+            ReqStationlevel = 1,
+            CraftAmount = 1,
+            Recipe = new RecipeDefinition
+            {
+                RecipeItems = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient { Prefab = "Coins", Amount = 200 },
+                    new RecipeIngredient { Prefab = "Ruby", Amount = 1 }
+                }
+            }
+        });
+
+        loader.BatchSetup();
     }
 
     private static void LoadBountySpawner()
@@ -753,11 +847,7 @@ public sealed class EpicLoot : BaseUnityPlugin
 
     public static AssetBundle LoadAssetBundle(string filename)
     {
-        var assembly = Assembly.GetCallingAssembly();
-        var assetBundle = AssetBundle.LoadFromStream(assembly.GetManifestResourceStream(
-            $"{assembly.GetName().Name}.{filename}"));
-
-        return assetBundle;
+        return AssetBundleLoader.LoadFromResources(filename, typeof(EpicLoot).Assembly);
     }
 
     /// <summary>

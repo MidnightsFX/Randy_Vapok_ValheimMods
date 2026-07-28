@@ -106,7 +106,6 @@ internal class ELConfig {
     private static CustomRPC LootTablesRPC;
     private static CustomRPC MagicEffectsRPC;
     private static CustomRPC ItemConfigRPC;
-    private static CustomRPC RecipesRPC;
     private static CustomRPC EnchantingCostsRPC;
     private static CustomRPC ItemNamesRPC;
     private static CustomRPC AdventureDataRPC;
@@ -181,8 +180,6 @@ internal class ELConfig {
             OnServerRecieveConfigs, OnClientRecieveMagicConfigs);
         ItemConfigRPC = NetworkManager.Instance.AddRPC("epicloot_itemconfig_RPC",
             OnServerRecieveConfigs, OnClientRecieveItemInfoConfigs);
-        RecipesRPC = NetworkManager.Instance.AddRPC("epicloot_recipes_RPC",
-            OnServerRecieveConfigs, OnClientRecieveRecipesConfigs);
         EnchantingCostsRPC = NetworkManager.Instance.AddRPC("epicloot_enchantingcosts_RPC",
             OnServerRecieveConfigs, OnClientRecieveEnchantingCostsConfigs);
         ItemNamesRPC = NetworkManager.Instance.AddRPC("ItemNamesRPC",
@@ -500,7 +497,6 @@ internal class ELConfig {
             AdventureDataRPC, AdventureDataManager.GetCFG);
         SychronizeConfig<ItemInfoConfig>("iteminfo.json", GatedItemTypeHelper.Initialize,
             ItemConfigRPC, GatedItemTypeHelper.GetCFG);
-        SychronizeConfig<RecipesConfig>("recipes.json", RecipesHelper.Initialize, RecipesRPC, RecipesHelper.GetCFG);
         SychronizeConfig<EnchantingCostsConfig>("enchantcosts.json", EnchantCostsHelper.Initialize,
             EnchantingCostsRPC, EnchantCostsHelper.GetCFG);
         SychronizeConfig<ItemNameConfig>("itemnames.json", MagicItemNames.Initialize, ItemNamesRPC, MagicItemNames.GetCFG);
@@ -519,18 +515,12 @@ internal class ELConfig {
     }
 
     /// <summary>
-    /// Recipes cannot be created until the game is launched.
+    /// Recipes cannot be created until the game is launched. Epic Loot no longer ships any recipes of its
+    /// own, so this only applies recipes other mods registered through <see cref="API.AddRecipe"/>.
     /// Watch for issues, this can potentially trigger after client config synchronization and break.
     /// </summary>
     private static void InitializeRecipeOnReady() {
-        string jsonFile = EpicLoot.ReadEmbeddedResourceFile("EpicLoot.config.recipes.json");
-        RecipesConfig result = JsonConvert.DeserializeObject<RecipesConfig>(jsonFile);
-
-        if (RecipesHelper.Config == null) {
-            RecipesHelper.Initialize(result);
-        } else {
-            RecipesHelper.Initialize(RecipesHelper.Config);
-        }
+        RecipesHelper.Initialize(RecipesHelper.Config);
         ItemManager.OnItemsRegistered -= InitializeRecipeOnReady;
     }
 
@@ -733,11 +723,6 @@ internal class ELConfig {
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveRecipesConfigs(long sender, ZPackage package) {
-        RecipesHelper.Initialize(ClientRecieveParseJsonConfig<RecipesConfig>(package.ReadString()));
-        yield return null;
-    }
-
     private static IEnumerator OnClientRecieveEnchantingCostsConfigs(long sender, ZPackage package) {
         EnchantCostsHelper.Initialize(ClientRecieveParseJsonConfig<EnchantingCostsConfig>(package.ReadString()));
         yield return null;
@@ -807,34 +792,22 @@ internal class ELConfig {
     /// Helper to bind configs for <TYPE>
     /// </summary>
     /// IsAdminOnly ensures this is a server authoratative value
+    /// These forward to the shared <see cref="ConfigBinder"/> so every mod in the solution produces the same
+    /// ConfigurationManagerAttributes (and therefore the same server-sync behaviour). The overloads are kept
+    /// so the existing call sites, which rely on the acceptable-value type to pick one, do not have to change.
     /// <returns></returns>
     public static ConfigEntry<T> BindServerConfig<T>(string category, string key, T value, string description,
         AcceptableValueList<string> acceptableValues = null, bool advanced = false) {
-        return cfg.Bind(category, key, value,
-            new ConfigDescription(
-                description,
-                acceptableValues,
-            new ConfigurationManagerAttributes { IsAdminOnly = true, IsAdvanced = advanced })
-        );
+        return ConfigBinder.BindServerConfig(category, key, value, description, acceptableValues, advanced);
     }
 
     public static ConfigEntry<T> BindServerConfig<T>(string category, string key, T value, string description,
         AcceptableValueRange<float> acceptableValues, bool advanced = false) {
-        return cfg.Bind(category, key, value,
-            new ConfigDescription(
-                description,
-                acceptableValues,
-            new ConfigurationManagerAttributes { IsAdminOnly = true, IsAdvanced = advanced })
-        );
+        return ConfigBinder.BindServerConfig(category, key, value, description, acceptableValues, advanced);
     }
 
     public static ConfigEntry<T> BindServerConfig<T>(string category, string key, T value, string description,
         AcceptableValueRange<int> acceptableValues, bool advanced = false) {
-        return cfg.Bind(category, key, value,
-            new ConfigDescription(
-                description,
-                acceptableValues,
-            new ConfigurationManagerAttributes { IsAdminOnly = true, IsAdvanced = advanced })
-        );
+        return ConfigBinder.BindServerConfig(category, key, value, description, acceptableValues, advanced);
     }
 }
