@@ -25,8 +25,7 @@ using static EpicLoot.Magic.AutoAddEnchantableItems;
 
 namespace EpicLoot.Config;
 
-internal class ELConfig
-{
+internal class ELConfig {
     public static ConfigFile cfg;
 
     public static ConfigEntry<string> _setItemColor;
@@ -63,6 +62,10 @@ internal class ELConfig
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
     public static ConfigEntry<bool> AllowShardstoneDuplicateItemEffect;
     public static ConfigEntry<bool> AllowRunestoneDuplicateItemEffect;
+    // Named ...RemovalMode rather than ...SocketMode: a static field sharing its type's name would
+    // shadow the enum inside this class and break `ShardSocketMode.Free` in the bind call below.
+    public static ConfigEntry<ShardSocketMode> ShardSocketRemovalMode;
+    public static ConfigEntry<RuneSocketMode> RuneSocketRemovalMode;
     public static ConfigEntry<float> GlobalDropRateModifier;
     public static ConfigEntry<float> ItemsToMaterialsDropRatio;
     public static ConfigEntry<bool> AlwaysShowWelcomeMessage;
@@ -154,8 +157,7 @@ internal class ELConfig
         "Latvian"
     };
 
-    public ELConfig(ConfigFile Config)
-    {
+    public ELConfig(ConfigFile Config) {
         // ensure all the config values are created
         cfg = Config;
         cfg.SaveOnConfigSet = true;
@@ -172,8 +174,7 @@ internal class ELConfig
         FilePatching.LogAppliedPatchSummary();
     }
 
-    public void SetupConfigRPCs()
-    {
+    public void SetupConfigRPCs() {
         LootTablesRPC = NetworkManager.Instance.AddRPC("epicloot_loottables_RPC",
             OnServerRecieveConfigs, OnClientRecieveLootConfigs);
         MagicEffectsRPC = NetworkManager.Instance.AddRPC("epicloot_magiceffect_RPC",
@@ -202,8 +203,7 @@ internal class ELConfig
             OnServerRecieveConfigs, OnClientRecieveShardStonesConfigs);
     }
 
-    private void CreateConfigValues(ConfigFile Config)
-    {
+    private void CreateConfigValues(ConfigFile Config) {
         // Item Colors
         _magicRarityColor = Config.Bind("Item Colors", "Magic Rarity Color", "Blue",
             "The color of Magic rarity items, the lowest magic item tier. " +
@@ -370,6 +370,24 @@ internal class ELConfig
             "When true, a shardstone may be socketed even when the item already has that same effect from being enchanted/rolled.");
         AllowRunestoneDuplicateItemEffect = BindServerConfig("Sockets", "Allow Runestone On Matching Item Effect", false,
             "When true, a runestone may be socketed even when the item already has that same effect from being enchanted/rolled.");
+        ShardSocketRemovalMode = BindServerConfig("Sockets", "Shard Removal Mode", ShardSocketMode.BreakValueless,
+            "Controls whether a shardstone can be taken back out of a socket once it has been placed. " +
+            "Shards can always be inserted; this only affects removal.\n" +
+            "Free = shards can be freely removed and moved to another item.\n" +
+            "BreakValueless = a shard granting an effect that has no rarity-scaled value (Warmth, for " +
+            "example) must be broken to be removed, destroying it. A shard granting a rarity-scaled " +
+            "value, or granting nothing at all on that item, can still be freely removed.\n" +
+            "BreakAll = every shard must be broken to be removed, destroying it.\n" +
+            "Permanent = every shard is permanent; it can be neither removed nor broken.\n" +
+            "Default: Free.");
+        RuneSocketRemovalMode = BindServerConfig("Sockets", "Rune Removal Mode", RuneSocketMode.Free,
+            "Controls whether a runestone can be taken back out of a socket once it has been placed. " +
+            "Runes can always be inserted; this only affects removal.\n" +
+            "Free = runes can be freely removed and moved to another item.\n" +
+            "Break = a socketed rune must be broken to be removed, destroying it.\n" +
+            "Permanent = a socketed rune is permanent; it can be neither removed nor broken, and no " +
+            "other rune can be swapped into its socket.\n" +
+            "Default: Free.");
         GlobalDropRateModifier = BindServerConfig("Balance", "Global Drop Rate Modifier", 1.0f,
             "A global percentage that modifies how likely loot is to drop.\n" +
             "1 = Exactly what is in the loot tables will drop.\n" +
@@ -456,7 +474,7 @@ internal class ELConfig
             "Toggles limiting bounties. Players unable to purchase if enabled and maximum bounty in-progress count is met");
         MaxInProgressBounties = BindServerConfig("Bounty Management", "Max Bounties Per Player", 5,
             "Max amount of in-progress bounties allowed per player.");
-        
+
         // Tempering
         TemperDestroysItem = BindServerConfig("Tempering", "Fail Destroys Item", false,
             "When tempering fails, the item will be destroyed. If False, the item will be returned intact. Default value: False");
@@ -468,8 +486,7 @@ internal class ELConfig
             "If Fail Destroys Item is enabled, Destroy Chance rolls if item should be destroyed. Default value: 0.5");
     }
 
-    public static void InitializeConfig()
-    {
+    public static void InitializeConfig() {
 
 
         SychronizeConfig<LootConfig>("loottables.json", LootRoller.Initialize,
@@ -505,63 +522,52 @@ internal class ELConfig
     /// Recipes cannot be created until the game is launched.
     /// Watch for issues, this can potentially trigger after client config synchronization and break.
     /// </summary>
-    private static void InitializeRecipeOnReady()
-    {
+    private static void InitializeRecipeOnReady() {
         string jsonFile = EpicLoot.ReadEmbeddedResourceFile("EpicLoot.config.recipes.json");
         RecipesConfig result = JsonConvert.DeserializeObject<RecipesConfig>(jsonFile);
 
-        if (RecipesHelper.Config == null)
-        {
+        if (RecipesHelper.Config == null) {
             RecipesHelper.Initialize(result);
-        }
-        else
-        {
+        } else {
             RecipesHelper.Initialize(RecipesHelper.Config);
         }
         ItemManager.OnItemsRegistered -= InitializeRecipeOnReady;
     }
 
-    public static string GetLocalizationDirectoryPath()
-    {
+    public static string GetLocalizationDirectoryPath() {
         string localizationFolder = Path.Combine(Paths.ConfigPath, "EpicLoot", "localizations");
         DirectoryInfo dirInfo = Directory.CreateDirectory(localizationFolder);
         return dirInfo.FullName;
     }
 
-    public static string GetOverhaulDirectoryPath()
-    {
+    public static string GetOverhaulDirectoryPath() {
         string overhaulfolder = Path.Combine(Paths.ConfigPath, "EpicLoot", "baseconfig");
         DirectoryInfo dirInfo = Directory.CreateDirectory(overhaulfolder);
         return dirInfo.FullName;
     }
 
-    public static string GetDefaultEmbeddedFileLocation(string configName)
-    {
+    public static string GetDefaultEmbeddedFileLocation(string configName) {
         // Callers may pass the config name with or without extension; the embedded resource names
         // (and the magiceffects overhaul check below) require the ".json" suffix.
-        if (!configName.EndsWith(".json"))
-        {
+        if (!configName.EndsWith(".json")) {
             configName += ".json";
         }
 
         string embeddedcfgpath = "EpicLoot.config." + configName;
-        if (configName == "magiceffects.json")
-        {
+        if (configName == "magiceffects.json") {
             embeddedcfgpath = "EpicLoot.config.overhauls." + BalanceConfigurationType.Value + "." + configName;
         }
 
         return embeddedcfgpath;
     }
 
-    public static void CreateBaseConfigurations(string baseCfgLocation, string filename)
-    {
+    public static void CreateBaseConfigurations(string baseCfgLocation, string filename) {
         EpicLoot.Log($"Base config file {baseCfgLocation} being created from embedded default config.");
         string overhaulFileData = EpicLoot.ReadEmbeddedResourceFile(GetDefaultEmbeddedFileLocation(filename));
         File.WriteAllText(baseCfgLocation, overhaulFileData);
     }
 
-    public static void SychronizeConfig<T>(string filename, Action<T> setupMethod, CustomRPC targetRPC, Func<T> getConfig) where T : class
-    {
+    public static void SychronizeConfig<T>(string filename, Action<T> setupMethod, CustomRPC targetRPC, Func<T> getConfig) where T : class {
         string baseCfgLocation = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), filename);
 
         // Ensure the base config file exists and reflects the current patches before we read it.
@@ -569,14 +575,11 @@ internal class ELConfig
         FilePatching.LoadPatchedJSON(filename.Split('.')[0]);
 
         // Attempt to parse the core config, if its not valid use the embedded default config
-        try
-        {
+        try {
             string fileContents = File.ReadAllText(baseCfgLocation);
             T contents = JsonConvert.DeserializeObject<T>(fileContents);
             setupMethod(contents);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             EpicLoot.LogWarningForce($"The existing baseconfig file {filename} is invalid! Defaults will be used." +
                 $"\n{e.Message}");
             string defaultConfig = EpicLoot.ReadEmbeddedResourceFile(GetDefaultEmbeddedFileLocation(filename));
@@ -585,8 +588,7 @@ internal class ELConfig
 
         EpicLoot.Log($"Finished loading and applying patches for baseconfig file {filename}.");
 
-        ZPackage SendInitialConfig()
-        {
+        ZPackage SendInitialConfig() {
             string cfgs = JsonConvert.SerializeObject(getConfig());
             return SendConfig(cfgs);
         }
@@ -595,41 +597,31 @@ internal class ELConfig
         SynchronizationManager.Instance.AddInitialSynchronization(targetRPC, SendInitialConfig);
 
         // Encapsulated file watcher modification method for the config file
-        void FileModified(object sender, FileSystemEventArgs e)
-        {
-            if (e.FullPath != baseCfgLocation || !File.Exists(baseCfgLocation))
-            {
+        void FileModified(object sender, FileSystemEventArgs e) {
+            if (e.FullPath != baseCfgLocation || !File.Exists(baseCfgLocation)) {
                 return;
             }
 
             EpicLoot.Log($"Config file {baseCfgLocation} {e.FullPath} has been modified, attempting to update config.");
 
             bool validUpdate = false;
-            try
-            {
+            try {
                 T contents = JsonConvert.DeserializeObject<T>(File.ReadAllText(baseCfgLocation));
                 EpicLoot.Log($"Config file {baseCfgLocation} has been modified, updating config.");
                 setupMethod(contents);
                 validUpdate = true;
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 EpicLoot.LogWarningForce($"Config file {baseCfgLocation} is invalid and config will not be updated." + ex);
             }
 
-            if (validUpdate == false)
-            {
+            if (validUpdate == false) {
                 return;
             }
 
-            if (GUIManager.IsHeadless())
-            {
-                try
-                {
+            if (GUIManager.IsHeadless()) {
+                try {
                     targetRPC.SendPackage(ZNet.instance.m_peers, SendConfig(JsonConvert.SerializeObject(getConfig())));
-                }
-                catch
-                {
+                } catch {
                     // TODO check
                     EpicLoot.LogError($"Error while server syncing {filename} configs");
                 }
@@ -648,22 +640,18 @@ internal class ELConfig
         fsw.Filter = filename;
     }
 
-    public static void StartupProcessModifiedLocalizations()
-    {
+    public static void StartupProcessModifiedLocalizations() {
         string[] files = Directory.GetFiles(LocalizationDir, "*", SearchOption.AllDirectories);
         EpicLoot.Log($"Processing localization startup file patches: {string.Join(",", files)}");
-        foreach (string file in files)
-        {
-            if (!file.Contains(".json"))
-            {
+        foreach (string file in files) {
+            if (!file.Contains(".json")) {
                 EpicLoot.Log($"File: {file} is not a supported format, ignoring.");
                 continue;
             }
 
             FileInfo fileInfo = new FileInfo(file);
             string language = file.Trim().Split(Path.DirectorySeparatorChar).Last().Split('.').First().Trim();
-            if (!LocalizationLanguages.Contains(language))
-            {
+            if (!LocalizationLanguages.Contains(language)) {
                 EpicLoot.LogWarning($"{language} is not a supported language [{string.Join(", ", LocalizationLanguages.ToArray())}]");
                 continue;
             }
@@ -678,44 +666,37 @@ internal class ELConfig
     }
 
 
-    private static void IngestPatchFilesFromDisk(object s, FileSystemEventArgs e)
-    {
-        if (EnableHotReloadPatches.Value == false)
-        {
+    private static void IngestPatchFilesFromDisk(object s, FileSystemEventArgs e) {
+        if (EnableHotReloadPatches.Value == false) {
             return;
         }
 
-        if (SynchronizationManager.Instance.PlayerIsAdmin == false)
-        {
+        if (SynchronizationManager.Instance.PlayerIsAdmin == false) {
             EpicLoot.Log("Player is not an admin, and not allowed to change local configuration. Local config change will not be loaded.");
             return;
         }
 
         // Do not process directories, setup a new watcher- otherwise they get ingored even with subdirectory watching.
-        if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
-        {
+        if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory)) {
             SetupPatchConfigFileWatch(e.FullPath);
             EpicLoot.Log($"Adding subdirectory filewatcher: {e.FullPath}");
             return;
         }
 
         FileInfo fileInfo = new FileInfo(e.FullPath);
-        if (!fileInfo.FullName.Contains(".json"))
-        {
+        if (!fileInfo.FullName.Contains(".json")) {
             return;
         }
 
         EpicLoot.Log($"Processing patch file update: {fileInfo}");
         FilePatching.ReloadAndApplyAllPatches();
 
-        if (AutoAddEquipment.Value == true || AutoRemoveEquipmentNotFound.Value == true)
-        {
+        if (AutoAddEquipment.Value == true || AutoRemoveEquipmentNotFound.Value == true) {
             AutoAddEnchantableItems.CheckAndAddAllEnchantableItems(false);
         }
     }
 
-    public static void SetupPatchConfigFileWatch(string path)
-    {
+    public static void SetupPatchConfigFileWatch(string path) {
         FileSystemWatcher newPatchWatcher = new FileSystemWatcher(path);
         newPatchWatcher.Created += new FileSystemEventHandler(IngestPatchFilesFromDisk);
         newPatchWatcher.Changed += new FileSystemEventHandler(IngestPatchFilesFromDisk);
@@ -729,116 +710,95 @@ internal class ELConfig
     }
 
 
-    internal static void CheckAndUpdateLocalization(Dictionary<string, string> localizationUpdates, string language)
-    {
-        foreach (KeyValuePair<string, string> localization in localizationUpdates)
-        {
+    internal static void CheckAndUpdateLocalization(Dictionary<string, string> localizationUpdates, string language) {
+        foreach (KeyValuePair<string, string> localization in localizationUpdates) {
             EpicLoot.Log($"Updating localization: {localization.Key} - {localization.Value}");
             LocalizationManager.Instance.GetLocalization().ClearToken(language, localization.Key);
             LocalizationManager.Instance.GetLocalization().AddTranslation(language, localization.Key, localization.Value);
         }
     }
 
-    private static IEnumerator OnClientRecieveLootConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveLootConfigs(long sender, ZPackage package) {
         LootRoller.Initialize(ClientRecieveParseJsonConfig<LootConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveMagicConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveMagicConfigs(long sender, ZPackage package) {
         MagicItemEffectDefinitions.Initialize(ClientRecieveParseJsonConfig<MagicItemEffectsList>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveItemInfoConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveItemInfoConfigs(long sender, ZPackage package) {
         GatedItemTypeHelper.Initialize(ClientRecieveParseJsonConfig<ItemInfoConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveRecipesConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveRecipesConfigs(long sender, ZPackage package) {
         RecipesHelper.Initialize(ClientRecieveParseJsonConfig<RecipesConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveEnchantingCostsConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveEnchantingCostsConfigs(long sender, ZPackage package) {
         EnchantCostsHelper.Initialize(ClientRecieveParseJsonConfig<EnchantingCostsConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveItemNameConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveItemNameConfigs(long sender, ZPackage package) {
         MagicItemNames.Initialize(ClientRecieveParseJsonConfig<ItemNameConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveAdventureDataConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveAdventureDataConfigs(long sender, ZPackage package) {
         AdventureDataManager.UpdateAventureData(ClientRecieveParseJsonConfig<AdventureDataConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveLegendaryItemConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveLegendaryItemConfigs(long sender, ZPackage package) {
         UniqueLegendaryHelper.Initialize(ClientRecieveParseJsonConfig<LegendaryItemConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveAbilityConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveAbilityConfigs(long sender, ZPackage package) {
         AbilityDefinitions.Initialize(ClientRecieveParseJsonConfig<AbilityConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveMaterialConversionConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveMaterialConversionConfigs(long sender, ZPackage package) {
         MaterialConversions.Initialize(ClientRecieveParseJsonConfig<MaterialConversionsConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveEnchantingUpgradesConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveEnchantingUpgradesConfigs(long sender, ZPackage package) {
         EnchantingTableUpgrades.InitializeConfig(ClientRecieveParseJsonConfig<EnchantingUpgradesConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveAutoSorterConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveAutoSorterConfigs(long sender, ZPackage package) {
         AutoAddEnchantableItems.InitializeConfig(ClientRecieveParseJsonConfig<AutoSorterConfiguration>(package.ReadString()));
         yield return null;
     }
 
-    private static IEnumerator OnClientRecieveShardStonesConfigs(long sender, ZPackage package)
-    {
+    private static IEnumerator OnClientRecieveShardStonesConfigs(long sender, ZPackage package) {
         Shards.InitializeShardDefinitions(ClientRecieveParseJsonConfig<ShardStonesConfig>(package.ReadString()));
         yield return null;
     }
 
-    private static T ClientRecieveParseJsonConfig<T>(string json)
-    {
-        try
-        {
+    private static T ClientRecieveParseJsonConfig<T>(string json) {
+        try {
             return JsonConvert.DeserializeObject<T>(json);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             EpicLoot.LogError($"There was an error syncing client configs: {e}");
         }
         return default;
     }
 
-    public static ZPackage SendConfig(string zpackage_content)
-    {
+    public static ZPackage SendConfig(string zpackage_content) {
         ZPackage package = new ZPackage();
         package.Write(zpackage_content);
         return package;
     }
 
-    public static IEnumerator OnServerRecieveConfigs(long sender, ZPackage package)
-    {
+    public static IEnumerator OnServerRecieveConfigs(long sender, ZPackage package) {
         EpicLoot.Log("Server received config from client, rejecting due to being the server.");
         yield return null;
     }
@@ -849,8 +809,7 @@ internal class ELConfig
     /// IsAdminOnly ensures this is a server authoratative value
     /// <returns></returns>
     public static ConfigEntry<T> BindServerConfig<T>(string category, string key, T value, string description,
-        AcceptableValueList<string> acceptableValues = null, bool advanced = false)
-    {
+        AcceptableValueList<string> acceptableValues = null, bool advanced = false) {
         return cfg.Bind(category, key, value,
             new ConfigDescription(
                 description,
@@ -860,8 +819,7 @@ internal class ELConfig
     }
 
     public static ConfigEntry<T> BindServerConfig<T>(string category, string key, T value, string description,
-        AcceptableValueRange<float> acceptableValues, bool advanced = false)
-    {
+        AcceptableValueRange<float> acceptableValues, bool advanced = false) {
         return cfg.Bind(category, key, value,
             new ConfigDescription(
                 description,
@@ -871,8 +829,7 @@ internal class ELConfig
     }
 
     public static ConfigEntry<T> BindServerConfig<T>(string category, string key, T value, string description,
-        AcceptableValueRange<int> acceptableValues, bool advanced = false)
-    {
+        AcceptableValueRange<int> acceptableValues, bool advanced = false) {
         return cfg.Bind(category, key, value,
             new ConfigDescription(
                 description,

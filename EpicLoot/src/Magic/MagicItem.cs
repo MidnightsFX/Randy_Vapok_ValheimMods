@@ -182,9 +182,10 @@ namespace EpicLoot
                     var socketColor = EpicLoot.GetRarityColor(socket.SourceRarity);
                     // Inline the socketed item's own icon, resolved from its source prefab
                     var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab);
+                    var removalTag = GetSocketRemovalTag(socket);
                     if (socket.Effect != null)
                     {
-                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, false)}</color>");
+                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, false)}</color>{removalTag}");
                         if (showRange)
                         {
                             tooltip.Append($"<color=#c0c0c0ff>");
@@ -195,7 +196,7 @@ namespace EpicLoot
                     else if (socket.ShardType != ShardType.None)
                     {
                         // An inert shard: socketed but has no defined effect for this item type.
-                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} $mod_epicloot_shard_noeffect</color>");
+                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} $mod_epicloot_shard_noeffect</color>{removalTag}");
                     }
                 }
                 for (var i = 0; i < GetOpenSocketCount(); i++)
@@ -208,6 +209,23 @@ namespace EpicLoot
                 $"$mod_epicloot_itemtooltip_effects: <color={color}>{Effects.Count}</color>");
 
             return tooltip.ToString();
+        }
+
+        // Marks sockets the current config won't let the player simply empty. Driven by the removal
+        // policy rather than by the kind of line being written: an effect with no rarity-scaled value
+        // (Warmth, say) renders as a perfectly normal effect line yet is break-only under
+        // ShardSocketMode.BreakValueless, so without the marker there would be no cue.
+        private static string GetSocketRemovalTag(SocketedEffect socket)
+        {
+            switch (ShardSocketManager.GetRemovalPolicy(socket))
+            {
+                case SocketRemoval.BreakOnly:
+                    return " <color=#808080>$mod_epicloot_socket_tip_breakonly</color>";
+                case SocketRemoval.Locked:
+                    return " <color=#808080>$mod_epicloot_socket_tip_permanent</color>";
+                default:
+                    return "";
+            }
         }
 
         public string GetCompactTooltip() {

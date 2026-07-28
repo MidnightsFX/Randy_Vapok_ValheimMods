@@ -13,6 +13,7 @@ namespace EpicLoot.ShardStones
         public static ItemDrop.ItemData OpenEquipment;
         public static Inventory OpenInventory;
         private static bool _reconciling;
+        private static SocketBreakPrompt _breakPrompt;
 
         private static bool IsSocketGridOpen => OpenEquipment != null && OpenInventory != null;
 
@@ -124,6 +125,15 @@ namespace EpicLoot.ShardStones
                     return;
                 }
 
+                // The break confirmation owns the interaction until it is answered. Swallow the press
+                // so vanilla doesn't Hide() the inventory -- and cancel the prompt -- underneath it.
+                if (_breakPrompt != null)
+                {
+                    ZInput.ResetButtonStatus("Use");
+                    ZInput.ResetButtonStatus("JoyUse");
+                    return;
+                }
+
                 var pos = Input.mousePosition;
                 var item = __instance.m_playerGrid.GetItem(
                     new Vector2i(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y)));
@@ -209,6 +219,9 @@ namespace EpicLoot.ShardStones
                     return;
                 }
 
+                // An unanswered break confirmation is cancelled rather than carried over.
+                CloseBreakPrompt();
+
                 if (Player.m_localPlayer != null)
                 {
                     SaveSockets();
@@ -236,6 +249,136 @@ namespace EpicLoot.ShardStones
             }
         }
 
+        // Asks the player to confirm destroying a socketed stone. Nothing is mutated until they accept.
+        private static void OpenBreakPrompt(ItemDrop.ItemData item)
+        {
+            if (item == null || InventoryGui.instance == null)
+            {
+                return;
+            }
+
+            var body = string.Format(
+                Localization.instance.Localize("$mod_epicloot_socket_break_body"),
+                Localization.instance.Localize(item.m_shared.m_name));
+
+            _breakPrompt = SocketBreakPrompt.Create(InventoryGui.instance.transform,
+                Localization.instance.Localize("$mod_epicloot_socket_break_title"), body);
+
+            if (_breakPrompt == null)
+            {
+                // No prefab to confirm with -- refuse the removal rather than destroying it unconfirmed.
+                ShowSocketMessage("$mod_epicloot_socket_mustbreak");
+                return;
+            }
+
+            _breakPrompt.OnAccept = () =>
+            {
+                _breakPrompt = null;
+                BreakSocketedItem(item);
+            };
+            _breakPrompt.OnDeny = () => _breakPrompt = null;
+        }
+
+        private static void CloseBreakPrompt()
+        {
+            if (_breakPrompt == null)
+            {
+                return;
+            }
+
+            var prompt = _breakPrompt;
+            _breakPrompt = null;
+            prompt.OnAccept = null;
+            prompt.OnDeny = null;
+            prompt.Close();
+        }
+
+        // Destroys a socketed stone in place. Taking it out of the synthetic inventory fires
+        // m_onChanged, and SaveSockets reconciles the socket away; nothing is returned to the player,
+        // which is why this does not go through ShardSocketManager.RemoveShard.
+        private static void BreakSocketedItem(ItemDrop.ItemData item)
+        {
+            if (item == null || OpenInventory == null || !OpenInventory.ContainsItem(item))
+            {
+                return;
+            }
+
+            OpenInventory.RemoveItem(item);
+        }
+
+        // Nothing may be picked up out of a socket the current config doesn't let the player empty.
+        // OnSelectedItem is the single funnel for every player-initiated pickup -- mouse and gamepad
+        // both route through it, and it dispatches drag-start, Split, Move and Drop -- so blocking
+        // here also covers dragging a stone out of the window onto the ground (which goes through
+        // InventoryGui's own m_dragItem handling, never through InventoryGrid.DropItem).
+        [HarmonyPatch(typeof(InventoryGui), "OnSelectedItem")]
+        public static class InventoryGui_OnSelectedItem_Patch
+        {
+            [UsedImplicitly]
+            private static bool Prefix(InventoryGui __instance, InventoryGrid grid, ItemDrop.ItemData item)
+            {
+                if (!IsSocketGridOpen || grid == null || grid.GetInventory() != OpenInventory)
+                {
+                    return true;
+                }
+
+                // While the confirmation is up it owns the grid, in case the prefab's input blocker
+                // doesn't cover the whole inventory.
+                if (_breakPrompt != null)
+                {
+                    return false;
+                }
+
+                // A drag in progress means we're dropping INTO the grid, which InventoryGrid.DropItem
+                // already gates. Only pickups are our business here.
+                if (__instance.m_dragGo != null)
+                {
+                    return true;
+                }
+
+                var policy = ShardSocketManager.GetRemovalPolicy(OpenEquipment, item);
+                if (policy == SocketRemoval.Free)
+                {
+                    return true;
+                }
+
+                ShowSocketMessage(ShardSocketManager.DescribeRemovalPolicy(policy));
+                return false;
+            }
+        }
+
+        // Right-click a socketed stone that can only be destroyed to open the break confirmation.
+        // Vanilla's handler just calls Player.UseItem, a no-op for shard/runestone materials.
+        [HarmonyPatch(typeof(InventoryGui), "OnRightClickItem")]
+        public static class InventoryGui_OnRightClickItem_Patch
+        {
+            [UsedImplicitly]
+            private static bool Prefix(InventoryGrid grid, ItemDrop.ItemData item)
+            {
+                if (!IsSocketGridOpen || grid == null || grid.GetInventory() != OpenInventory)
+                {
+                    return true;
+                }
+
+                if (_breakPrompt != null)
+                {
+                    return false;
+                }
+
+                switch (ShardSocketManager.GetRemovalPolicy(OpenEquipment, item))
+                {
+                    case SocketRemoval.BreakOnly:
+                        OpenBreakPrompt(item);
+                        return false;
+                    case SocketRemoval.Locked:
+                        ShowSocketMessage("$mod_epicloot_socket_permanent");
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+        }
+
         // Only allow legal Runestones/Shards to be dropped into a socket slot, and never more than one
         // per slot. `amount` is `ref` so we can clamp it to 1 and let vanilla's stack-split logic move a
         // single unit into the slot, leaving the remainder of the dragged stack in the source inventory.
@@ -254,6 +397,21 @@ namespace EpicLoot.ShardStones
                 // Case 1: dropping an item INTO the socket grid. Only legal socketables, one per slot.
                 if (__instance.m_inventory == OpenInventory)
                 {
+                    // Dropping onto an occupied slot makes vanilla swap the occupant out -- a removal
+                    // that never passes through OnSelectedItem -- so a slot the player isn't allowed
+                    // to empty can't be dropped onto either.
+                    var occupant = __instance.m_inventory.GetItemAt(pos.x, pos.y);
+                    if (occupant != null && occupant != item)
+                    {
+                        var occupantPolicy = ShardSocketManager.GetRemovalPolicy(OpenEquipment, occupant);
+                        if (occupantPolicy != SocketRemoval.Free)
+                        {
+                            ShowSocketMessage(ShardSocketManager.DescribeRemovalPolicy(occupantPolicy));
+                            __result = false;
+                            return false;
+                        }
+                    }
+
                     if (!ShardSocketManager.CanSocket(OpenEquipment, item, out var reason))
                     {
                         ShowSocketMessage(reason);

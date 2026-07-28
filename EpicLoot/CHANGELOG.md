@@ -5,7 +5,7 @@ New Content:
     * Thanks Leslie, Warp and Rusty for contributing effects 
     * Interacting with an enchanted item that has a shard socket will pull up a small storage UI, allowing you to socket or remove shards. 
     * Shardstones can be found in the world as loot
-    * 90+ new magic effects have been added and are primarily available through shardstones, some shardstones provide access to lower power existing enchants also
+    * 90+ new magic effects have been added and are primarily available through shardstones
     * The enchanting table's probability panel now lists shard slot odds alongside effect count odds
 * Tempering (Thanks Rusty!)
     * Tempering allows you to pay to increase the value of an existing enchantment (service provided by Hildir)
@@ -44,6 +44,7 @@ Bugfixes:
 * Config patches now honor the `Priority` field reliably and equal-priority patches are now applied in a deterministic order instead of depending on the filesystem's file listing order
 * When any config patches are active, Epic Loot now always logs a one-line summary of how many patches were applied (regardless of your logging settings) to make patched setups obvious in bug reports
 * Adventure data (Treasure hunts, bounties etc) is now compressed and cleaned resulting in massive reductions in stored custom data
+* Transfer Enchantments through crafting now works properly
 
 ## Version 0.12.15
 

@@ -19,10 +19,22 @@ public partial class MagicTooltip
         if (def == null || (def.UniformEffect == null && def.TypeEffects.Count == 0))
         {
             text.AppendLine($"<color={magicColor}>$mod_epicloot_shard_noeffect</color>");
+            // Granting nothing is no protection under the blanket modes -- it would still occupy the
+            // socket for good, so the commitment has to be stated here too.
+            if (color != ShardType.None)
+            {
+                AppendBlanketRemovalWarning(ShardSocketManager.GetRemovalPolicy(color, null, rarity));
+            }
             return;
         }
 
         text.AppendLine("$mod_epicloot_shard_ifsocketed:");
+
+        // Probing the policy with a null effect gives the rule that applies no matter what the shard
+        // ends up granting -- i.e. the BreakAll/Permanent modes. When one of those is on, say so once
+        // up front instead of repeating a marker on every line, and note that it covers the slots not
+        // even listed below (those that grant nothing).
+        var blanket = ShardSocketManager.GetRemovalPolicy(color, null, rarity);
 
         // A uniform shard (e.g. a boss shard) grants one effect on every slot it is allowed into.
         if (def.UniformEffect != null)
@@ -34,7 +46,8 @@ public partial class MagicTooltip
                 {
                     var allSlots = Localization.instance.Localize("$mod_epicloot_shard_allslots");
                     var uniformText = MagicItem.GetEffectText(uniformDef, uniformValue);
-                    text.AppendLine($"  <color={magicColor}>{allSlots}: {uniformText}</color>");
+                    var removalTag = PreviewRemovalTag(blanket, color, uniformDef.Type, uniformValue, rarity);
+                    text.AppendLine($"  <color={magicColor}>{allSlots}: {uniformText}</color>{removalTag}");
                     AppendShardEffectDetails(uniformDef.Type, uniformValue, showDetails);
                 }
             }
@@ -43,6 +56,7 @@ public partial class MagicTooltip
             {
                 text.AppendLine($"<color={magicColor}>$mod_epicloot_shard_bossexclusive</color>");
             }
+            AppendBlanketRemovalWarning(blanket);
             return;
         }
 
@@ -62,8 +76,48 @@ public partial class MagicTooltip
 
             var typeName = Shards.GetCategoryDisplayName(pair.Key);
             var effectText = MagicItem.GetEffectText(effectMagicDef, value);
-            text.AppendLine($"  <color={magicColor}>{typeName}: {effectText}</color>");
+            var removalTag = PreviewRemovalTag(blanket, color, effectMagicDef.Type, value, rarity);
+            text.AppendLine($"  <color={magicColor}>{typeName}: {effectText}</color>{removalTag}");
             AppendShardEffectDetails(effectMagicDef.Type, value, showDetails);
+        }
+
+        AppendBlanketRemovalWarning(blanket);
+    }
+
+    // Per-slot removal marker, used only when the mode is selective (BreakValueless). Under a blanket
+    // mode the single warning line below says it once for the whole shard instead.
+    private static string PreviewRemovalTag(SocketRemoval blanket, ShardType color, string effectType,
+        float value, ItemRarity rarity)
+    {
+        if (blanket != SocketRemoval.Free)
+        {
+            return "";
+        }
+
+        var policy = ShardSocketManager.GetRemovalPolicy(color, new MagicItemEffect(effectType, value), rarity);
+        switch (policy)
+        {
+            case SocketRemoval.BreakOnly:
+                return " <color=#808080>$mod_epicloot_socket_tip_breakonly</color>";
+            case SocketRemoval.Locked:
+                return " <color=#808080>$mod_epicloot_socket_tip_permanent</color>";
+            default:
+                return "";
+        }
+    }
+
+    // States the commitment up front when the mode restricts every slot, including the ones that grant
+    // nothing and so never appear in the list above.
+    private void AppendBlanketRemovalWarning(SocketRemoval blanket)
+    {
+        switch (blanket)
+        {
+            case SocketRemoval.BreakOnly:
+                text.AppendLine("<color=#808080>$mod_epicloot_shard_warn_breakonly</color>");
+                break;
+            case SocketRemoval.Locked:
+                text.AppendLine("<color=#808080>$mod_epicloot_shard_warn_permanent</color>");
+                break;
         }
     }
 
