@@ -78,16 +78,13 @@ namespace EpicLoot
             return AllowedItemTypes.Contains(itemData.m_shared.m_itemType.ToString());
         }
 
+        // Deliberately the CONFIGURED type only, not ItemTypeClassifier.GetItemInfoType: this gates
+        // loot/augment rolls, and letting the raw-field heuristic answer would newly subject every
+        // item missing from iteminfo.json to type requirements it currently escapes.
         public bool AllowedByItemInfoType(ItemDrop.ItemData itemData)
         {
-            var prefabName = string.Empty;
-            if (itemData.m_dropPrefab?.name != null)
-                prefabName = itemData.m_dropPrefab.name;
-
-            var typeName = !string.IsNullOrEmpty(prefabName) && GatedItemTypeHelper.AllItemsWithDetails.TryGetValue(prefabName,
-                out var itemTypeInfo) ? itemTypeInfo.Type : null;
-
-            return !string.IsNullOrEmpty(typeName) && AllowedItemTypes.Contains(typeName);
+            return ItemTypeClassifier.TryGetConfiguredType(itemData, out var typeName) &&
+                AllowedItemTypes.Contains(typeName);
         }
 
         public bool ExcludeByItemType([NotNull] ItemDrop.ItemData itemData)
@@ -109,17 +106,11 @@ namespace EpicLoot
             return ExcludedItemTypes.Contains(itemData.m_shared.m_itemType.ToString());
         }
 
+        // Configured type only, for the same reason as AllowedByItemInfoType above.
         public bool ExcludedByItemInfoType(ItemDrop.ItemData itemData)
         {
-            string prefabName = "";
-            if (itemData.m_dropPrefab?.name != null)
-                prefabName = itemData.m_dropPrefab.name;
-
-            var typeName = !string.IsNullOrEmpty(prefabName) &&
-                GatedItemTypeHelper.AllItemsWithDetails.TryGetValue(prefabName, out var itemTypeInfo) ?
-                itemTypeInfo.Type : null;
-
-            return !string.IsNullOrEmpty(typeName) && ExcludedItemTypes.Contains(typeName);
+            return ItemTypeClassifier.TryGetConfiguredType(itemData, out var typeName) &&
+                ExcludedItemTypes.Contains(typeName);
         }
 
         public bool CheckRequirements([NotNull] ItemDrop.ItemData itemData, [NotNull] MagicItem magicItem, string magicEffectType = null, bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false, bool checkItemTypeGating = true)

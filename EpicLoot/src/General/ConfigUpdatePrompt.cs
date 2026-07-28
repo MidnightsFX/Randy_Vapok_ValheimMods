@@ -3,20 +3,21 @@ using HarmonyLib;
 using Jotunn.Managers;
 using System;
 using System.Linq;
+using UnityEngine;
 
 namespace EpicLoot;
 
 /// <summary>
-/// Offers to refresh base configs that were left behind by an older version of the mod. Uses the
-/// vanilla UnifiedPopup so no new UI assets are needed; FejdStartup itself relies on it, so it is
-/// always present at the main menu.
+/// Offers to refresh base configs the player has edited once an update changes their defaults.
+/// Mirrors the WelcomeMessage patch below it: a Postfix on FejdStartup.Start that instantiates a
+/// prefab under the main menu.
 /// </summary>
 [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
 public static class ConfigUpdatePrompt_FejdStartup_Start_Patch
 {
     private static bool _shownThisSession;
 
-    public static void Postfix()
+    public static void Postfix(FejdStartup __instance)
     {
         if (!ShouldPrompt())
         {
@@ -27,12 +28,7 @@ public static class ConfigUpdatePrompt_FejdStartup_Start_Patch
 
         try
         {
-            UnifiedPopup.Push(new YesNoPopup(
-                Localization.instance.Localize("$el_configupdate_title"),
-                BuildBody(),
-                OnUpdate,
-                OnNotNow,
-                localizeText: false));
+            ShowConfigMessage(__instance.transform);
         }
         catch (Exception e)
         {
@@ -52,13 +48,31 @@ public static class ConfigUpdatePrompt_FejdStartup_Start_Patch
         }
 
         // A dedicated server has no main menu; the detection warning in the log is its only surface.
-        if (GUIManager.IsHeadless() || !UnifiedPopup.IsAvailable())
+        if (GUIManager.IsHeadless())
         {
+            return false;
+        }
+
+        if (EpicAssets.ConfigMessagePrefab == null)
+        {
+            EpicLoot.LogWarningForce("The ConfigMessage prefab is missing from the asset bundle, " +
+                "so outdated configs can only be reported in the log.");
             return false;
         }
 
         // Don't stack on top of the first-run welcome panel.
         return !ConfigVersionManager.WelcomeMessageWillShow;
+    }
+
+    private static void ShowConfigMessage(Transform parentTransform)
+    {
+        GameObject panel = UnityEngine.Object.Instantiate(EpicAssets.ConfigMessagePrefab, parentTransform, false);
+        panel.name = "ConfigMessage";
+
+        ConfigMessage configMessage = panel.AddComponent<ConfigMessage>();
+        configMessage.SetMessage(
+            Localization.instance.Localize("$el_configupdate_title"),
+            BuildBody());
     }
 
     private static string BuildBody()
@@ -69,17 +83,5 @@ public static class ConfigUpdatePrompt_FejdStartup_Start_Patch
 
         return string.Format(Localization.instance.Localize("$el_configupdate_body"),
             EpicLoot.Version, fileList);
-    }
-
-    private static void OnUpdate()
-    {
-        ConfigVersionManager.BackupAndResetOutdatedConfigs();
-        UnifiedPopup.Pop();
-    }
-
-    private static void OnNotNow()
-    {
-        ConfigVersionManager.DeclineOutdatedConfigs();
-        UnifiedPopup.Pop();
     }
 }

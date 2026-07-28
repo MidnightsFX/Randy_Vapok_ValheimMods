@@ -36,6 +36,7 @@ public sealed class EpicAssets
     public static GameObject DebugTextPrefab;
     public static GameObject AbilityBar;
     public static GameObject WelcomMessagePrefab;
+    public static GameObject ConfigMessagePrefab;
 
     public static SE_Stats BulwarkStatusEffect;
     public static SE_Stats BerserkerStatusEffect;

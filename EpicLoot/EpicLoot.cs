@@ -383,6 +383,7 @@ public sealed class EpicLoot : BaseUnityPlugin
         EpicAssets.DebugTextPrefab = assetBundle.LoadAsset<GameObject>("DebugText");
         EpicAssets.AbilityBar = assetBundle.LoadAsset<GameObject>("AbilityBar");
         EpicAssets.WelcomMessagePrefab = assetBundle.LoadAsset<GameObject>("WelcomeMessage");
+        EpicAssets.ConfigMessagePrefab = assetBundle.LoadAsset<GameObject>("ConfigMessage");
 
         // Register the frost-cone AOE effect (Ragnar set / FrostDamageAOE) so its ZNetView networks
         // properly, and route its ripped SFX through the volume mixer once AudioMan exists (below).

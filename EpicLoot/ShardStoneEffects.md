@@ -60,3 +60,8 @@ Slot resolution happens at socket time in [`Shards.GetShardEffect` / `ResolveCat
   group — so, e.g., a sword and a club both pick up the `MeleeWeapon` effect since no fine-type effects are defined.
 - `Shield` and the fine weapon/shield slots exist in the `ShardSlotCategory` enum but currently have no shard
   effects assigned.
+- The fine type itself comes from [`ItemTypeClassifier`](src/GatedItemType/ItemTypeClassifier.cs), the mod-wide
+  answer to "which `iteminfo.json` type is this item?" — the item's configured entry when it has one, else a
+  raw-field heuristic. `ItemInfoTypeToSlot` is only the shard-specific mapping over that shared vocabulary.
+- An item that cannot be classified at all (unlisted *and* unrecognizable) yields **no slot**: the shard sits in
+  the socket inert rather than being handed some other slot's effect.

@@ -7,91 +7,114 @@ namespace EpicLoot.MagicItemEffects.Shards
     // Perfect-dodge shard effects (Pink). Vanilla already fires Player.RPC_HitWhileDodging when the local
     // player is struck inside a dodge's invincibility window (a "perfect dodge"; see Player.HitWhileDodging).
     // The reward effects hang off that vanilla trigger, so they fire exactly when the game considers a dodge
-    // "perfect". PerfectDodge (the trinket proc) makes those perfect dodges reliable by granting a brief
-    // extra damage-immunity window on a successful roll, and DecreaseDodgeCost reuses the existing
+    // "perfect". PerfectDodge (the trinket proc) makes those perfect dodges reliable by keeping the roll's
+    // invincibility alive for the whole animation, and DecreaseDodgeCost reuses the existing
     // dodge-stamina hook (see ModifyDodgeStamina.cs). Shard values are authored as whole-number percents.
+
+    // ---- Shared trigger for the reward effects ------------------------------------------------------
+    // Vanilla latches m_beenHitWhileDodging so only the first avoided hit of a roll counts as the perfect
+    // dodge (Player.RPC_HitWhileDodging); the latch is cleared when the roll ends (Player.UpdateDodge).
+    // A Harmony postfix still runs when the original early-returns on that latch, and the attacker raises
+    // the RPC once per collider per hit (Attack's hit loop and hit-list pass, plus Projectile) -- so a
+    // single roll through a volley or a wide sweep invokes it many times. Gating on the false->true
+    // transition is what keeps the rewards to one per roll, matching vanilla's own stamina/adrenaline.
+    [HarmonyPatch(typeof(Player), nameof(Player.RPC_HitWhileDodging))]
+    internal static class SharedPerfectDodgeRewardPatch
+    {
+        [HarmonyPrefix]
+        [UsedImplicitly]
+        private static void Prefix(Player __instance, out bool __state)
+        {
+            __state = __instance.m_beenHitWhileDodging;
+        }
+
+        [HarmonyPostfix]
+        [UsedImplicitly]
+        private static void Postfix(Player __instance, bool __state)
+        {
+            // Already latched (a later hit in the same roll), or vanilla bailed out on !IsOwner().
+            if (__state || !__instance.m_beenHitWhileDodging)
+            {
+                return;
+            }
+
+            if (__instance != Player.m_localPlayer)
+            {
+                return;
+            }
+
+            PerfectDodgeGivesHealth.OnPerfectDodge(__instance);
+            PerfectDodgeGivesStamina.OnPerfectDodge(__instance);
+            PerfectDodgeGivesEitr.OnPerfectDodge(__instance);
+            PerfectDodgeGivesSpeed.OnPerfectDodge(__instance);
+        }
+    }
 
     // ---- Rewards on a perfect dodge: restore a % of the matching max pool -------------------------
     public static class PerfectDodgeGivesHealth
     {
-        [HarmonyPatch(typeof(Player), "RPC_HitWhileDodging")]
-        private static class RPC_HitWhileDodging_Patch
+        public static void OnPerfectDodge(Player player)
         {
-            [UsedImplicitly]
-            private static void Postfix(Player __instance)
+            var fraction = player.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesHealth, 0.01f);
+            if (fraction > 0f)
             {
-                if (__instance != Player.m_localPlayer)
-                {
-                    return;
-                }
-
-                var fraction = __instance.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesHealth, 0.01f);
-                if (fraction > 0f)
-                {
-                    __instance.Heal(__instance.GetMaxHealth() * fraction);
-                }
+                player.Heal(player.GetMaxHealth() * fraction);
             }
         }
     }
 
     public static class PerfectDodgeGivesStamina
     {
-        [HarmonyPatch(typeof(Player), "RPC_HitWhileDodging")]
-        private static class RPC_HitWhileDodging_Patch
+        public static void OnPerfectDodge(Player player)
         {
-            [UsedImplicitly]
-            private static void Postfix(Player __instance)
+            var fraction = player.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesStamina, 0.01f);
+            if (fraction > 0f)
             {
-                if (__instance != Player.m_localPlayer)
-                {
-                    return;
-                }
-
-                var fraction = __instance.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesStamina, 0.01f);
-                if (fraction > 0f)
-                {
-                    __instance.AddStamina(__instance.GetMaxStamina() * fraction);
-                }
+                player.AddStamina(player.GetMaxStamina() * fraction);
             }
         }
     }
 
     public static class PerfectDodgeGivesEitr
     {
-        [HarmonyPatch(typeof(Player), "RPC_HitWhileDodging")]
-        private static class RPC_HitWhileDodging_Patch
+        public static void OnPerfectDodge(Player player)
         {
-            [UsedImplicitly]
-            private static void Postfix(Player __instance)
+            var fraction = player.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesEitr, 0.01f);
+            if (fraction > 0f && player.GetMaxEitr() > 0f)
             {
-                if (__instance != Player.m_localPlayer)
-                {
-                    return;
-                }
-
-                var fraction = __instance.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesEitr, 0.01f);
-                if (fraction > 0f && __instance.GetMaxEitr() > 0f)
-                {
-                    __instance.AddEitr(__instance.GetMaxEitr() * fraction);
-                }
+                player.AddEitr(player.GetMaxEitr() * fraction);
             }
         }
     }
 
-    // ---- Trinket proc: a chance, on a dodge roll, to open a brief damage-immunity window -----------
-    // so more incoming hits land as perfect dodges. Self-contained (a brief timed-immunity window);
-    // the reward effects above still fire off the vanilla perfect-dodge trigger.
+    // ---- Trinket proc: a chance, on a dodge roll, to keep the roll's invincibility alive -----------
+    // Vanilla's i-frames start when the roll begins and are cut short by the DodgeMortal animation event
+    // (Player.OnDodgeMortal clears m_dodgeInvincible). On a proc we simply re-assert m_dodgeInvincible each
+    // FixedUpdate for the rest of the roll, before vanilla's UpdateDodge recomputes and replicates the
+    // invincibility flag. That means vanilla does everything else for us: it writes ZDOVars.s_dodgeinv so
+    // remote attackers see it too, the attacker-side checks in Attack/Projectile skip the hit outright, and
+    // the perfect-dodge trigger (and therefore the reward effects above) fires. When the dodge animation
+    // ends, vanilla recomputes the flag as false and clears the ZDO on its own -- no manual teardown.
     public static class PerfectDodge
     {
-        private const float ImmunityWindow = 0.5f; // seconds of immunity granted on a successful proc
-
         private static bool _wasInDodge;
-        private static float _immuneUntil;
+        private static bool _procActiveThisRoll;
 
-        // Rising-edge on the dodge animation rolls the proc (mirrors RollCleanse's dodge detection).
         [HarmonyPatch(typeof(Player), nameof(Player.UpdateDodge))]
         private static class UpdateDodge_Patch
         {
+            // Runs before vanilla computes `inDodgeAnim && m_dodgeInvincible`, so re-asserting the flag
+            // here keeps the i-frames (and their replication) alive for the remainder of the roll.
+            [UsedImplicitly]
+            private static void Prefix(Player __instance)
+            {
+                if (__instance == Player.m_localPlayer && _procActiveThisRoll)
+                {
+                    __instance.m_dodgeInvincible = true;
+                }
+            }
+
+            // Rising-edge on the dodge animation rolls the proc (mirrors RollCleanse's dodge detection).
             [UsedImplicitly]
             private static void Postfix(Player __instance)
             {
@@ -104,26 +127,19 @@ namespace EpicLoot.MagicItemEffects.Shards
                 var rollStarted = inDodge && !_wasInDodge;
                 _wasInDodge = inDodge;
 
+                if (!inDodge)
+                {
+                    // The roll is over (or never started) -- never let the proc leak past it.
+                    _procActiveThisRoll = false;
+                }
+
                 if (!rollStarted)
                 {
                     return;
                 }
 
                 var chance = __instance.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodge, 0.01f);
-                if (chance > 0f && Random.value < chance)
-                {
-                    _immuneUntil = Time.time + ImmunityWindow;
-                }
-            }
-        }
-
-        // Prefix handler invoked by CharacterRpcDamageDispatch: while the immunity window is open, negate
-        // incoming damage to the local player.
-        public static void ModifyIncoming(Character __instance, HitData hit)
-        {
-            if (hit != null && __instance == Player.m_localPlayer && Time.time < _immuneUntil)
-            {
-                hit.m_damage.Modify(0f);
+                _procActiveThisRoll = chance > 0f && Random.value < chance;
             }
         }
     }
@@ -157,21 +173,11 @@ namespace EpicLoot.MagicItemEffects.Shards
         private const float SpeedWindow = 1f; // seconds of the speed buff granted on a perfect dodge
         private static float _speedUntil;
 
-        [HarmonyPatch(typeof(Player), "RPC_HitWhileDodging")]
-        private static class RPC_HitWhileDodging_Patch
+        public static void OnPerfectDodge(Player player)
         {
-            [UsedImplicitly]
-            private static void Postfix(Player __instance)
+            if (player.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesSpeed, 0.01f) > 0f)
             {
-                if (__instance != Player.m_localPlayer)
-                {
-                    return;
-                }
-
-                if (__instance.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesSpeed, 0.01f) > 0f)
-                {
-                    _speedUntil = Time.time + SpeedWindow;
-                }
+                _speedUntil = Time.time + SpeedWindow;
             }
         }
 

@@ -949,7 +949,8 @@ namespace EpicLoot
 
         private static void InitializeMagicItem(ItemDrop.ItemData baseItem)
         {
-            Indestructible.MakeItemIndestructible(baseItem);
+            // Callers run SetMagicItem first, which already synced Indestructible -- so an
+            // indestructible drop reads m_useDurability == false here and skips the wear roll.
             if (baseItem.m_shared.m_useDurability)
             {
                 baseItem.m_durability = Random.Range(0.2f, 1.0f) * baseItem.GetMaxDurability();

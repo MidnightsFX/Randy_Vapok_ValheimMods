@@ -11,6 +11,8 @@
     "el_overhaul_balanced": "Balanced",
     "el_overhaul_minimal": "Minimal",
 
+    "el_menu_yes": "Yes",
+    "el_menu_no": "No",
     "el_configupdate_title": "Epic Loot: Outdated Configs",
     "el_configupdate_body": "Epic Loot has updated to version {0}. Configs you have not changed were refreshed automatically, but these have local changes and were left alone:\n\n{1}\n\nThey will not receive new content or balance changes while they differ from the defaults.\n\nReplace them with the new defaults? Your current files will be backed up to <color=#ffd700>BepInEx/config/EpicLoot/baseconfig-backup</color> first.\n\nChoosing No keeps your versions, and you will only be asked again if these configs change in a future update.",
 
@@ -179,7 +181,7 @@
     "mod_epicloot_me_reducearmorincreasedamage_desc": "Reduces your armor by {0}% but increases weapon damage by {0}%.",
     "mod_epicloot_me_blooddrinker_display": "-Max Health, +{0}% Lifesteal",
     "mod_epicloot_me_blooddrinker_desc": "Sacrifices a portion of your maximum health, healing you for {0}% of the damage you deal.",
-    "mod_epicloot_me_poisontotruedamage_display": "{0}% Poison as True Damage",
+    "mod_epicloot_me_poisontotruedamage_display": "{0}% Poison done as targets weakest damage type",
     "mod_epicloot_me_poisontotruedamage_desc": "Converts {0}% of your poison damage into the target's least-resisted damage type.",
     "mod_epicloot_me_icyweight_display": "+Up to {0}% Frost Damage from Heavy Gear",
     "mod_epicloot_me_icyweight_desc": "Adds frost damage scaling with your gear's speed penalty, up to +{0}% of weapon damage.",

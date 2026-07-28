@@ -191,11 +191,19 @@ public partial class MagicTooltip(ItemDrop.ItemData item, MagicItem magicItem, i
     }
 
     private void AddDurability() {
-        if (!item.m_shared.m_useDurability) {
+        // Once Indestructible is live, m_useDurability reads false -- so check the effect first,
+        // otherwise the "Indestructible" line only ever shows while the effect is NOT applied.
+        bool isIndestructible = magicItem.HasEffect(MagicEffectType.Indestructible, false, true);
+
+        // An indestructible item reports m_useDurability == false, so fall back to what it used
+        // before the effect was applied -- items that never had durability still get no line.
+        bool usesDurability = isIndestructible
+            ? MagicItemEffects.Indestructible.OriginallyUsesDurability(item)
+            : item.m_shared.m_useDurability;
+
+        if (!usesDurability) {
             return;
         }
-
-        bool isIndestructible = magicItem.HasEffect(MagicEffectType.Indestructible);
 
         if (isIndestructible) {
             text.Append($"\n$item_durability: <color={magicColor}>$mod_epicloot_me_indestructible_display</color>");
@@ -216,7 +224,7 @@ public partial class MagicTooltip(ItemDrop.ItemData item, MagicItem magicItem, i
                 $"<color={maxDurabilityColor2}>({durabilityValueString}/{durabilityMaxString})</color>");
         }
 
-        if (item.m_shared.m_canBeReparied) {
+        if (!isIndestructible && item.m_shared.m_canBeReparied) {
             Recipe recipe = ObjectDB.instance.GetRecipe(item);
             if (recipe != null) {
                 int minStationLevel = recipe.m_minStationLevel;

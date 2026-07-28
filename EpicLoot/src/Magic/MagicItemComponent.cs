@@ -24,6 +24,10 @@ public class MagicItemComponent : CustomItemData
         Value = Serialize();
         Save();
 
+        // Every magic-data write funnels through here (enchant, augment, socket, rune, temper,
+        // transfer, loot roll), so this is the one place Indestructible needs to be re-derived.
+        Indestructible.Sync(Item);
+
         if (Player.m_localPlayer == null)
         {
             return;
@@ -106,10 +110,18 @@ public class MagicItemComponent : CustomItemData
 
         FixupValuelessEffects();
 
-        //Check Indestructible on Item
-        Indestructible.MakeItemIndestructible(Item);
-
         SetMagicItem(MagicItem);
+
+        // SetMagicItem bails out on a null MagicItem, so sync here too -- a component with no magic
+        // item still needs the flag reverted if this instance was previously made indestructible.
+        Indestructible.Sync(Item);
+    }
+
+    // ItemInfo.Remove<T> calls this after clearing m_customData but before dropping the component,
+    // so HasMagicEffect would still report the effect -- Sync would refuse to revert. Force it.
+    public override void Unload()
+    {
+        Indestructible.Revert(Item);
     }
 
     private void FixupValuelessEffects()

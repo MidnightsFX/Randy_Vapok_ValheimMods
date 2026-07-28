@@ -36,7 +36,6 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             // Victim-side mitigations (each self-guards on __instance == local player).
             // Convert physical -> element first, so the resistance step below reduces the converted damage.
             IncomingPhysicalConversion.ModifyIncoming(__instance, hit);
-            PerfectDodge.ModifyIncoming(__instance, hit);
 
             // Avoidance is decided before eitr is spent; an avoided hit cancels the whole method.
             if (!AvoidDamageTaken_Character_RPC_Damage_Patch.ShouldTakeDamage(__instance, hit, attacker)) {

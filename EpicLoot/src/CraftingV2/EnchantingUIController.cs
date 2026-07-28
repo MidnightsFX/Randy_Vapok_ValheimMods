@@ -538,8 +538,6 @@ namespace EpicLoot.CraftingV2
                 }
             }
 
-            MagicItemEffects.Indestructible.MakeItemIndestructible(item);
-
             Game.instance.GetPlayerProfile().m_playerStats.m_stats[PlayerStatType.Crafts]++;
             Gogan.LogEvent("Game", "Enchanted", item.m_shared.m_name, 1);
 
@@ -1290,17 +1288,6 @@ namespace EpicLoot.CraftingV2
                 return;
             }
 
-            if (magicItem.HasEffect(MagicEffectType.Indestructible))
-            {
-                item.m_shared.m_useDurability =
-                    item.m_dropPrefab?.GetComponent<ItemDrop>().m_itemData.m_shared.m_useDurability ?? false;
-
-                if (item.m_shared.m_useDurability)
-                {
-                    item.m_durability = item.GetMaxDurability();
-                }
-            }
-
             List<MagicItemEffect> oldEffects = magicItem.GetEffects();
             MagicItemEffect oldEffect = (effectIndex >= 0 && effectIndex < oldEffects.Count) ? oldEffects[effectIndex] : null;
 
@@ -1318,8 +1305,6 @@ namespace EpicLoot.CraftingV2
             }
 
             item.SaveMagicItem(magicItem);
-
-            MagicItemEffects.Indestructible.MakeItemIndestructible(item);
 
             Game.instance.GetPlayerProfile().m_playerStats.m_stats[PlayerStatType.Crafts]++;
             Gogan.LogEvent("Game", "Augmented", item.m_shared.m_name, 1);

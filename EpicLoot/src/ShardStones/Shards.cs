@@ -10,7 +10,6 @@ using Jotunn.Managers;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static ItemDrop;
 
 namespace EpicLoot.ShardStones {
     // A Shard's color determines which set of magical effects it has along with its icon
@@ -298,13 +297,20 @@ namespace EpicLoot.ShardStones {
                 return null;
             }
 
+            // An item we cannot classify gets no effect -- the shard still occupies the socket, it just
+            // sits inert (the tooltip says so). Substituting a slot here would hand the item an effect
+            // authored for some other kind of gear.
+            var slot = ResolveCategory(item);
+            if (slot == null) {
+                return null;
+            }
+
             // A fine-type effect (e.g. Swords) overrides its group (MeleeWeapon); a group effect covers
             // every member with no fine effect of its own.
-            var slot = ResolveCategory(item);
-            if (colorEffects.TypeEffects.TryGetValue(slot, out var fineEffect)) {
+            if (colorEffects.TypeEffects.TryGetValue(slot.Value, out var fineEffect)) {
                 return fineEffect;
             }
-            if (GroupOf(slot) is ShardSlotCategory group &&
+            if (GroupOf(slot.Value) is ShardSlotCategory group &&
                 colorEffects.TypeEffects.TryGetValue(group, out var groupEffect)) {
                 return groupEffect;
             }
@@ -378,77 +384,16 @@ namespace EpicLoot.ShardStones {
         }
 
         // Maps a host equipment item to the most specific fine slot a shard uses to pick its effect.
-        // Primary: EpicLoot's own ItemInfo classification (covers vanilla + any item listed in
-        // iteminfo.json, including modded ones). Fallback (items EpicLoot doesn't classify): a
-        // skill/ItemType heuristic, resolved as finely as those raw fields allow.
-        public static ShardSlotCategory ResolveCategory(ItemDrop.ItemData item) {
-            var prefabName = item.m_dropPrefab?.name;
-            if (!string.IsNullOrEmpty(prefabName) &&
-                GatedItemTypeHelper.AllItemsWithDetails.TryGetValue(prefabName, out var details) &&
-                !string.IsNullOrEmpty(details.Type) &&
-                ItemInfoTypeToSlot.TryGetValue(details.Type, out var mapped)) {
-                return mapped;
-            }
-
-            return ResolveCategoryFallback(item);
-        }
-
-        // Best-effort slot from an item's raw combat/type fields, for items not in iteminfo.json. Where a
-        // subtype can't be distinguished (e.g. any shield), returns the broad group; GetShardEffect treats
-        // a group value the same as a fine one, so a group-level shard effect still applies.
-        private static ShardSlotCategory ResolveCategoryFallback(ItemDrop.ItemData item) {
-            var shared = item.m_shared;
-            var skill = shared.m_skillType;
-            var twoHanded = shared.m_itemType == ItemData.ItemType.TwoHandedWeapon ||
-                shared.m_itemType == ItemData.ItemType.TwoHandedWeaponLeft;
-
-            switch (skill) {
-                case Skills.SkillType.ElementalMagic:
-                case Skills.SkillType.BloodMagic:
-                    return ShardSlotCategory.Staffs;
-                case Skills.SkillType.Bows:
-                case Skills.SkillType.Crossbows:
-                    return ShardSlotCategory.Bows;
-                case Skills.SkillType.Swords:
-                    return ShardSlotCategory.Swords;
-                case Skills.SkillType.Knives:
-                    return ShardSlotCategory.Knives;
-                case Skills.SkillType.Spears:
-                    return ShardSlotCategory.Spears;
-                case Skills.SkillType.Polearms:
-                    return ShardSlotCategory.Polearms;
-                case Skills.SkillType.Pickaxes:
-                    return ShardSlotCategory.Pickaxes;
-                case Skills.SkillType.Unarmed:
-                    return ShardSlotCategory.Fists;
-                case Skills.SkillType.Axes:
-                    return twoHanded ? ShardSlotCategory.TwoHandAxes : ShardSlotCategory.Axes;
-                case Skills.SkillType.Clubs:
-                    return twoHanded ? ShardSlotCategory.Sledges : ShardSlotCategory.Clubs;
-            }
-
-            switch (shared.m_itemType) {
-                case ItemData.ItemType.Helmet:
-                    return ShardSlotCategory.Head;
-                case ItemData.ItemType.Chest:
-                    return ShardSlotCategory.Chest;
-                case ItemData.ItemType.Legs:
-                    return ShardSlotCategory.Legs;
-                case ItemData.ItemType.Shoulder:
-                    return ShardSlotCategory.Shoulders;
-                case ItemData.ItemType.Shield:
-                    return ShardSlotCategory.Shield; // subtype indistinguishable -> broad group
-                case ItemData.ItemType.Torch:
-                    return ShardSlotCategory.Torches;
-                case ItemData.ItemType.Tool:
-                    return ShardSlotCategory.Tools;
-                case ItemData.ItemType.OneHandedWeapon:
-                case ItemData.ItemType.TwoHandedWeapon:
-                case ItemData.ItemType.TwoHandedWeaponLeft:
-                    return ShardSlotCategory.MeleeWeapon; // unknown melee weapon -> broad group
-            }
-
-            return ShardSlotCategory.Utility;
+        // ItemTypeClassifier answers "which ItemInfo type is this?" for the whole mod -- the item's
+        // iteminfo.json entry when it has one, else a raw-field heuristic -- and ItemInfoTypeToSlot
+        // is the shard-specific layer on top of that vocabulary.
+        //
+        // Null means the item could not be classified at all. Callers must treat that as "no slot"
+        // rather than substituting one: guessing here is what put weapon effects on armor.
+        public static ShardSlotCategory? ResolveCategory(ItemDrop.ItemData item) {
+            return ItemInfoTypeToSlot.TryGetValue(ItemTypeClassifier.GetItemInfoType(item), out var mapped)
+                ? mapped
+                : (ShardSlotCategory?)null;
         }
 
         // Human-readable label for a slot category, e.g. "$mod_epicloot_shardslot_meleeweapon" ->
