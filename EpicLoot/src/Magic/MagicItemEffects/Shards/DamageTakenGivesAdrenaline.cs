@@ -2,10 +2,10 @@ using EpicLoot.General;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Red trinket shard: gain adrenaline equal to value% of the damage the local player takes. Hooks
-    // RPC_Damage (the local player is the victim), so it reads damage after other on-damage effects.
-    // Uses vanilla's adrenaline pool, so it is inert unless the player has a max-adrenaline source.
-    // Shard values are authored as whole-number percents, hence the 0.01f.
+    // Red trinket shard: gain a flat amount of adrenaline whenever the local player takes damage. Hooks
+    // RPC_Damage (the local player is the victim), so it only fires for hits that survive the other
+    // on-damage effects. Uses vanilla's adrenaline pool, so it is inert unless the player has a
+    // max-adrenaline source. Shard values are the flat adrenaline amount granted per damaging hit.
     public static class DamageTakenGivesAdrenaline
     {
         // Postfix handler invoked by CharacterRpcDamageDispatch (on-damage-taken reaction).
@@ -16,17 +16,18 @@ namespace EpicLoot.MagicItemEffects.Shards
                 return;
             }
 
-            var fraction = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
-                MagicEffectType.DamageTakenGivesAdrenaline, 0.01f);
-            if (fraction <= 0f)
+            var amount = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
+                MagicEffectType.DamageTakenGivesAdrenaline);
+            if (amount <= 0f)
             {
                 return;
             }
 
-            var damage = hit.m_damage.EpicLootGetTotalDamageAgainstPlayer();
-            if (damage > 0f)
+            // Flat grant, but only for hits that actually landed damage -- a fully mitigated or
+            // zero-damage hit shouldn't build adrenaline.
+            if (hit.m_damage.EpicLootGetTotalDamageAgainstPlayer() > 0f)
             {
-                Player.m_localPlayer.AddAdrenaline(damage * fraction);
+                Player.m_localPlayer.AddAdrenaline(amount);
             }
         }
     }

@@ -32,6 +32,7 @@ public static class IncreasePlayerBaseStats
             PercentStamina.Apply(__instance, ref stamina);
             PercentEitr.Apply(__instance, ref eitr);
             HeartyEitr.Apply(__instance, hp, ref eitr);
+            EnergeticEitr.Apply(__instance, stamina, ref eitr);
         }
     }
 

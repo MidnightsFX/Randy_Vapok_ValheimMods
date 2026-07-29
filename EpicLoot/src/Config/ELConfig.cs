@@ -45,6 +45,7 @@ internal class ELConfig {
     public static ConfigEntry<bool> _loggingEnabled;
     public static ConfigEntry<LogLevel> _logLevel;
     public static ConfigEntry<bool> UseGeneratedMagicItemNames;
+    public static ConfigEntry<bool> KeepInventoryOpenOverItems;
     public static ConfigEntry<GatedItemTypeMode> _gatedItemTypeModeConfig;
     public static ConfigEntry<GatedBountyMode> BossBountyMode;
     public static ConfigEntry<GatedPieceTypeMode> GatedFreebuildMode;
@@ -268,6 +269,11 @@ internal class ELConfig {
         // General
         UseGeneratedMagicItemNames = Config.Bind("General", "Use Generated Magic Item Names", true,
             "If true, magic items uses special, randomly generated names based on their rarity, type, and magic effects.");
+        KeepInventoryOpenOverItems = Config.Bind("General", "Keep Inventory Open Over Items", true,
+            "When true, pressing Use while the cursor is over an inventory item never closes the " +
+            "inventory, so a shard slot press that misses its target does nothing instead of " +
+            "shutting everything. Use over an empty slot still closes the inventory as normal.\n" +
+            "Client-side; this is not synced from the server.");
         TraderPanelPositionX = Config.Bind("General", "Trader Panel X Position", -200f,
             "The horizontal on-screen position (RectTransform anchoredPosition X, anchored to the " +
             "top-right of the trader window) of the EpicLoot adventure trader panel. Dragging the " +

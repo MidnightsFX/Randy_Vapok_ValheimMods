@@ -9,9 +9,9 @@ namespace EpicLoot.MagicItemEffects.Shards
     //
     //  * Max-health cost -- subtracted from the food-pool HP the same way IncreaseHealth adds to it
     //    (GetTotalFoodValue drives Player.SetMaxHealth; GetBaseFoodHP keeps the HUD's base segment in
-    //    sync). The shard value is the lifesteal percent; the health cost is MaxHealthPerPercent x that
-    //    (5 -> -15/-30/-45/-60/-75 across Magic..Mythic). Floored so it can never pull max health to a
-    //    lethal value on an unfed player (vanilla base is 25).
+    //    sync). The shard value is the lifesteal percent; the health cost is a percentage of the pool,
+    //    MaxHealthPercentPerValue x that value (2.5 -> -7.5%/-15%/-22.5%/-30%/-37.5% across
+    //    Magic..Mythic), with a flat minimum so it still bites on a low-food character.
     //  * Lifesteal -- OnDamageDealt is invoked attacker-side from SharedCharacterDamagePatch's post-damage
     //    pass, healing value% of the damage dealt. Unlike weapon LifeSteal this is an armor effect, so it
     //    is not gated on the weapon being magical.
@@ -19,13 +19,24 @@ namespace EpicLoot.MagicItemEffects.Shards
     // Shard values are authored as whole-number percents, hence the 0.01f on the lifesteal read.
     public static class BloodDrinker
     {
-        // Max health removed per 1% of lifesteal granted. With the shard's 3/6/9/12/15 values this yields
-        // -15/-30/-45/-60/-75 max health across Magic..Mythic.
-        private const float MaxHealthPerPercent = 5f;
+        // Max health removed, as a percent of the health pool, per 1 point of shard value. With the
+        // shard's 3/6/9/12/15 values this yields -7.5%/-15%/-22.5%/-30%/-37.5% across Magic..Mythic.
+        private const float MaxHealthPercentPerValue = 2.5f;
 
-        // Never let the reduction pull max health below this, so equipping on an unfed character
-        // (vanilla base 25) can't produce a lethal/zero max-health state.
-        private const float MinResultingMaxHealth = 10f;
+        // Floor on the amount removed. A pure percentage is negligible on a low-food character (37.5% of
+        // the vanilla 25 base pool is ~9), so the cost never drops below this.
+        private const float MinHealthReduction = 10f;
+
+        // Absolute backstop so a degenerate pool can't be reduced to a zero/negative max health.
+        private const float MinResultingMaxHealth = 1f;
+
+        // Tooltip: "-{1}% Max Health, +{0}% Lifesteal" -- {1} is derived from the rolled value so the
+        // shown cost stays in sync with the code rather than a baked-in literal.
+        public static void RegisterDisplayValues()
+        {
+            MagicItem.RegisterDisplayValues(MagicEffectType.BloodDrinker,
+                value => new object[] { value, value * MaxHealthPercentPerValue });
+        }
 
         private static void ApplyMaxHealthReduction(Player player, ref float hp)
         {
@@ -34,12 +45,15 @@ namespace EpicLoot.MagicItemEffects.Shards
                 return;
             }
 
-            var reduction = player.GetTotalActiveMagicEffectValue(MagicEffectType.BloodDrinker) * MaxHealthPerPercent;
-            if (reduction <= 0f)
+            // Clamped so stacked sources can't reach a >=100% reduction.
+            var percent = Mathf.Clamp01(player.GetTotalActiveMagicEffectValue(
+                MagicEffectType.BloodDrinker, MaxHealthPercentPerValue * 0.01f));
+            if (percent <= 0f)
             {
                 return;
             }
 
+            var reduction = Mathf.Max(hp * percent, MinHealthReduction);
             hp = Mathf.Max(hp - reduction, MinResultingMaxHealth);
         }
 

@@ -40,6 +40,8 @@ namespace EpicLoot
         public static string PercentStamina = nameof(PercentStamina);
         public static string PercentEitr = nameof(PercentEitr);
         public static string HealthGainPerXDamageDone = nameof(HealthGainPerXDamageDone);
+        public static string HealthOnEitrUse = nameof(HealthOnEitrUse);
+        public static string LifeGainOnHit = nameof(LifeGainOnHit);
 
         // --- Damage-type conversion / eitr-imbue ---
         public static string PhysToFire = nameof(PhysToFire);
@@ -51,6 +53,7 @@ namespace EpicLoot
 
         // --- Resource conversion / sustain ---
         public static string StaminaReturnFromEitr = nameof(StaminaReturnFromEitr);
+        public static string EnergeticEitr = nameof(EnergeticEitr);
         public static string ConvertEitrCostToStaminaCost = nameof(ConvertEitrCostToStaminaCost);
         public static string ConsumeEitrFirstForBloodCosts = nameof(ConsumeEitrFirstForBloodCosts);
         public static string RunningOnEmpty = nameof(RunningOnEmpty);

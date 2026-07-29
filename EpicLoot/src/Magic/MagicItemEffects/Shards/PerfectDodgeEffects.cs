@@ -164,41 +164,79 @@ namespace EpicLoot.MagicItemEffects.Shards
     }
 
     // ---- Shoulder: a perfect dodge grants a brief burst of movement speed ---------------------------
-    // Hangs off the same vanilla perfect-dodge trigger as the reward effects above, opening a short window
-    // during which the local player's move speed is boosted. The boost is applied through
-    // SEMan.ApplyStatusEffectSpeedMods (the hook the game's own speed status effects use). Shard values are
-    // authored as whole-number percents, hence the 0.01f.
+    // Hangs off the same vanilla perfect-dodge trigger as the reward effects above, granting the "Dodge
+    // Agility" buff (SE_DodgeAgility) for BuffDuration seconds. Going through a real status effect rather
+    // than a bare speed patch means the player gets a HUD icon and tooltip, and the speed itself is applied
+    // through vanilla's own StatusEffect.ModifySpeed path. Shard values are authored as whole-number
+    // percents, hence the 0.01f.
     public static class PerfectDodgeGivesSpeed
     {
-        private const float SpeedWindow = 1f; // seconds of the speed buff granted on a perfect dodge
-        private static float _speedUntil;
+        private const float BuffDuration = 1f; // seconds the speed buff lasts after a perfect dodge
+
+        private const string BuffName = "EL_DodgeAgility";
+        private static readonly int BuffHash = BuffName.GetStableHashCode();
+        private static SE_DodgeAgility _buffPrototype;
+        private static bool _iconMissingLogged;
 
         public static void OnPerfectDodge(Player player)
         {
-            if (player.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesSpeed, 0.01f) > 0f)
+            var bonus = player.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodgeGivesSpeed, 0.01f);
+            if (bonus <= 0f)
             {
-                _speedUntil = Time.time + SpeedWindow;
+                return;
             }
+
+            var prototype = GetOrCreatePrototype();
+            if (prototype == null)
+            {
+                return;
+            }
+
+            var seMan = player.GetSEMan();
+
+            // Re-proc while the buff is still up: restamp the bonus (the shard set may have changed) and
+            // refresh the countdown rather than letting the old, shorter timer run out.
+            if (seMan.GetStatusEffect(BuffHash) is SE_DodgeAgility existing)
+            {
+                existing.SpeedBonus = bonus;
+                existing.ResetTime();
+                return;
+            }
+
+            // Seed the prototype so the clone SEMan takes carries the current rarity's bonus.
+            prototype.SpeedBonus = bonus;
+            seMan.AddStatusEffect(prototype);
         }
 
-        [HarmonyPatch(typeof(SEMan), nameof(SEMan.ApplyStatusEffectSpeedMods))]
-        private static class ApplyStatusEffectSpeedMods_Patch
+        // Lazily builds the buff prototype. Runs on a perfect dodge, so the asset bundle is loaded. A null
+        // icon would render as an invisible HUD entry (SEMan only surfaces effects with an icon), so if the
+        // sprite lookup fails we log once and leave the prototype null.
+        private static SE_DodgeAgility GetOrCreatePrototype()
         {
-            [UsedImplicitly]
-            private static void Postfix(SEMan __instance, ref float speed)
+            if (_buffPrototype != null)
             {
-                if (__instance.m_character != Player.m_localPlayer || Time.time >= _speedUntil)
-                {
-                    return;
-                }
-
-                var bonus = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
-                    MagicEffectType.PerfectDodgeGivesSpeed, 0.01f);
-                if (bonus != 0f)
-                {
-                    speed *= 1f + bonus;
-                }
+                return _buffPrototype;
             }
+
+            // The Pink (Dodge) shardstone's own icon -- same sprite the shard items use (see Shards.cs).
+            var icon = EpicAssets.AssetBundle?.LoadAsset<Sprite>("Assets/EpicLoot/Sprites/Shardstones/Pink.png");
+            if (icon == null)
+            {
+                if (!_iconMissingLogged)
+                {
+                    EpicLoot.LogWarning("PerfectDodgeGivesSpeed: could not load the Pink shardstone sprite; Dodge Agility will not display.");
+                    _iconMissingLogged = true;
+                }
+                return null;
+            }
+
+            var se = ScriptableObject.CreateInstance<SE_DodgeAgility>();
+            se.name = BuffName;
+            se.m_name = "$mod_epicloot_se_dodgeagility";
+            se.m_icon = icon;
+            se.m_ttl = BuffDuration;
+            _buffPrototype = se;
+            return _buffPrototype;
         }
     }
 }

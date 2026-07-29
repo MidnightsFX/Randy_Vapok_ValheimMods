@@ -122,8 +122,10 @@ public sealed class EpicLoot : BaseUnityPlugin
         // These are keyed by effect-type constant and don't depend on config load, so register once here.
         MagicItemEffects.BulkupEffect.RegisterDisplayValues();
         MagicItemEffects.Shards.HealthGainPerXDamageDone.RegisterDisplayValues();
+        MagicItemEffects.Shards.HealthOnEitrUse.RegisterDisplayValues();
         MagicItemEffects.Shards.SpendCoinsToIncreaseDamage.RegisterDisplayValues();
         MagicItemEffects.Shards.ChanceToCritOnHit.RegisterDisplayValues();
+        MagicItemEffects.Shards.BloodDrinker.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;

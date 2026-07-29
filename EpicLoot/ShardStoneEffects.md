@@ -9,12 +9,12 @@ Legendary → Mythic).
 
 | Shard | Melee Wpn | Ranged Wpn | Magic Wpn | Head | Chest | Legs | Shoulders | Trinket | Utility |
 |---|---|---|---|---|---|---|---|---|---|
-| **Red** (Vitality) ☑️ | LifeSteal | LifeSteal | LifeSteal | ModifyHealthRegen | IncreaseHealth | PercentHealth | BulkUp | DamageTakenGivesAdrenaline | AddHealthRegen |
-| **Yellow** (Stamina) ☑️ | ModifyAttackStaminaUse | ModifyDrawStaminaUse | StaminaReturnFromEitr | PercentStamina | ModifyStaminaRegen | IncreaseStamina | StaminaOnKill | UseAdrenalineAsStamina | ModifySprintStaminaUse |
-| **Cyan** (Eitr) ☑️ | EitrImbueAttack | EitrImbueAttack | ModifyAttackEitrUse | PercentEitr | IncreaseEitr | ModifyEitrRegen | HeartyEitr | EitrUseGivesAdrenaline | EitrShield |
+| **Red** (Vitality) ☑️ | LifeGainOnHit | LifeGainOnHit | HealthOnEitrUse | ModifyHealthRegen | IncreaseHealth | PercentHealth | BulkUp | DamageTakenGivesAdrenaline | AddHealthRegen |
+| **Yellow** (Stamina) ☑️ | ModifyAttackStaminaUse | ModifyDrawStaminaUse | EnergeticEitr | PercentStamina | ModifyStaminaRegen | IncreaseStamina | StaminaOnKill | UseAdrenalineAsStamina | ModifySprintStaminaUse |
+| **Cyan** (Eitr) | EitrImbueAttack | EitrImbueAttack | ModifyAttackEitrUse | PercentEitr | IncreaseEitr | ModifyEitrRegen | HeartyEitr | EitrUseGivesAdrenaline | EitrShield |
 | **Orange** (Fire) | AddFireDamage | AddFireDamage | AddFireDamage | AddFireResistancePercentage | PhysToFire | Trailblazer | BurningSpeed | BurningAdrenaline | IncreaseHeatResistance |
 | **Pink** (Dodge) | PerfectDodgeGivesHealth | PerfectDodgeGivesStamina | PerfectDodgeGivesEitr | DecreaseDodgeCost | ReduceFallDamage | DodgeBuff | PerfectDodgeGivesSpeed | PerfectDodge | RollCleanse |
-| **Black** (Night) | IncreaseDamageDuringNighttime ☑️ | IncreaseDamageDuringNighttime ☑️ | IncreaseDamageDuringNighttime  ☑️| NightStaminaRegenIncrease | DamageReductionAtNight | AddKnivesSkill ☑️ | NightCarryWeight ☑️ | SummonBatWhenActivatingAdrenaline :x: | ModifyNoise ☑️ |
+| **Black** (Night) | IncreaseDamageDuringNighttime  | IncreaseDamageDuringNighttime | IncreaseDamageDuringNighttime  | NightStaminaRegenIncrease | DamageReductionAtNight | AddKnivesSkill  | NightCarryWeight  | SummonBatWhenActivatingAdrenaline :x: | ModifyNoise  |
 | **White**  (Day) | IncreaseDamageDuringDaytime | IncreaseDamageDuringDaytime | IncreaseDamageDuringDaytime | DayDiscovery | DayArmor | DayStaminaRegen | DaySailingSpeed | DayHealthRegen | AddCrafterSkills |
 | **Green** (Movement) | DamageIncreaseFromMovementPenalty | DamageIncreaseFromMovementPenalty | DamageIncreaseFromMovementPenalty | IncreaseXPGainFromMovementPenalty | CarryWeightForMovementPenalty | StaminaIncreaseForMovementPenalty | ArmorFromMovementPenalty | AddMovementSkills | ModifyJumpStaminaUse |
 | **Purple** (Eitr/Blood) | EitrLeech | EitrLeech | ModifyMagicFireRate | DartingThoughts | ConsumeEitrFirstForBloodCosts | EveryXPointsOfEitrIncreasesStamina | ReduceEitrCost | ConvertEitrCostToStaminaCost | RunningOnEmpty |
@@ -24,19 +24,19 @@ Legendary → Mythic).
 
 | Shard | Melee Wpn | Ranged Wpn | Magic Wpn | Head | Chest | Legs | Shoulders | Trinket | Utility |
 |---|---|---|---|---|---|---|---|---|---|
-| **DarkRed** ☑️ |  IncreaseMeleeSkills | IncreaseRangedSkills | AddBluntDamage | HeadHunter | ChanceToCritOnHit | BloodDrinker | ReduceArmorIncreaseDamage | DecreaseForsakenCooldown | OffSetAttack |
-| **DarkGreen** ☑️ (Poison) | AddPoisonDamage | AddPoisonDamage | AddPoisonDamage | AddPoisonResistancePercentage | PhysToPoison | AddBlockingSkill | PoisonToTrueDamage | GainAdrenalineWhenApplyingPoison | IncreaseAllPoisonDamageDone |
-| **DarkBlue** (Frost) ☑️ | AddFrostDamage | AddFrostDamage | AddFrostDamage | AddFrostResistancePercentage | PhysToFrost | AddElementalMagicSkill | IcyWeight | AdrenalineIncreasesFrostDamage | Warmth |
-| **DarkPurple** (Blood) ☑️ | ModifyAttackHealthUse | ModifyAttackHealthUse | ModifyAttackHealthUse | KillsReduceNextBloodCost | ReflectDamage | BloodMagicLevelIncreasesHealthRegen | GainEitrWhenSacrificingHealth | GainAdrenalineWhenSacrificingHealth | AddBloodMagicSkill |
-| **Golden** (Luck) ☑️| ChanceDoubleDamage | ChanceDoubleDamage | ChanceDoubleDamage | QuickLearner | SpendCoinsToIncreaseDamage | LuckWhileFishing | LuckyCraft | Luck | Riches |
+| **DarkRed** |  IncreaseMeleeSkills | IncreaseRangedSkills | AddBluntDamage | HeadHunter | ChanceToCritOnHit | BloodDrinker | ReduceArmorIncreaseDamage | DecreaseForsakenCooldown | OffSetAttack |
+| **DarkGreen** (Poison) | AddPoisonDamage | AddPoisonDamage | AddPoisonDamage | AddPoisonResistancePercentage | PhysToPoison | AddBlockingSkill | PoisonToTrueDamage | GainAdrenalineWhenApplyingPoison | IncreaseAllPoisonDamageDone |
+| **DarkBlue** (Frost) | AddFrostDamage | AddFrostDamage | AddFrostDamage | AddFrostResistancePercentage | PhysToFrost | AddElementalMagicSkill | IcyWeight | AdrenalineIncreasesFrostDamage | Warmth |
+| **DarkPurple** (Blood) | ModifyAttackHealthUse | ModifyAttackHealthUse | ModifyAttackHealthUse | KillsReduceNextBloodCost | ReflectDamage | BloodMagicLevelIncreasesHealthRegen | GainEitrWhenSacrificingHealth | GainAdrenalineWhenSacrificingHealth | AddBloodMagicSkill |
+| **Golden** (Luck) | ChanceDoubleDamage | ChanceDoubleDamage | ChanceDoubleDamage | QuickLearner | SpendCoinsToIncreaseDamage | LuckWhileFishing | LuckyCraft | Luck | Riches |
 
 ## Light shards
 
 | Shard | Melee Wpn | Ranged Wpn | Magic Wpn | Head | Chest | Legs | Shoulders | Trinket | Utility |
 |---|---|---|---|---|---|---|---|---|---|
-| **LightBlue** (Lightning) ☑️ | AddLightningDamage | AddLightningDamage | AddLightningDamage | AddLightningResistancePercentage | PhysToLightning | StormRider | StrikeCausesLightning | IncreaseAdrenalineGainDuringStorm | ConvertPhysicalDamageToLightning |
-| **LightGreen** ☑️| HealthGainPerXDamageDone | HealthGainPerXDamageDone | HealthGainPerXDamageDone | PotionEfficacy | Comfortable | AddPickaxesSkill | RestingHealthRegen | AdrenalineIncreasesHealthRegen | BountifulHarvest |
-| **Peach** (Weight) ☑️ | DamageBonusFromPlayerWeight | DamageBonusFromPlayerWeight | DamageBonusFromPlayerWeight | GainMaxStaminaBasedOnPlayerMaxHealth | StaminaRegenBonusFromPlayerWeight | GainMaxCarryWeightFromRested | BatteringRam | SailingSpeed | AddCarryWeight |
+| **LightBlue** (Lightning) | AddLightningDamage | AddLightningDamage | AddLightningDamage | AddLightningResistancePercentage | PhysToLightning | StormRider | StrikeCausesLightning | IncreaseAdrenalineGainDuringStorm | ConvertPhysicalDamageToLightning |
+| **LightGreen** | HealthGainPerXDamageDone | HealthGainPerXDamageDone | HealthGainPerXDamageDone | PotionEfficacy | Comfortable | AddPickaxesSkill | RestingHealthRegen | AdrenalineIncreasesHealthRegen | BountifulHarvest |
+| **Peach** (Weight) | DamageBonusFromPlayerWeight | DamageBonusFromPlayerWeight | DamageBonusFromPlayerWeight | GainMaxStaminaBasedOnPlayerMaxHealth | StaminaRegenBonusFromPlayerWeight | GainMaxCarryWeightFromRested | BatteringRam | SailingSpeed | AddCarryWeight |
 
 ## Boss shards (uniform — one effect on any slot)
 

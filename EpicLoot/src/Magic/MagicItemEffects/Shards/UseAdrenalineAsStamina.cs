@@ -4,10 +4,12 @@ using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Yellow trinket shard: when a stamina cost exceeds current stamina, pay up to value% of the
-    // shortfall from the adrenaline pool (1:1) instead, letting the stamina-gated action proceed. Uses
-    // vanilla's adrenaline pool, so it is inert unless the player has a max-adrenaline source. Shard
-    // values are authored as whole-number percents, hence the 0.01f.
+    // Yellow trinket shard: when a stamina cost exceeds current stamina, convert adrenaline into stamina
+    // to cover the shortfall, spending up to the entire adrenaline pool. The shard value is the
+    // conversion efficiency (20/40/60/80/100% by rarity), so 1 adrenaline pays for `efficiency` stamina
+    // and covering S stamina costs S/efficiency adrenaline. Uses vanilla's adrenaline pool, so it is
+    // inert unless the player has a max-adrenaline source. Shard values are authored as whole-number
+    // percents, hence the 0.01f.
     public static class UseAdrenalineAsStamina
     {
         [HarmonyPatch(typeof(Player), nameof(Player.UseStamina))]
@@ -27,17 +29,20 @@ namespace EpicLoot.MagicItemEffects.Shards
                     return; // enough stamina; nothing to cover
                 }
 
-                var fraction = __instance.GetTotalActiveMagicEffectValue(MagicEffectType.UseAdrenalineAsStamina, 0.01f);
-                if (fraction <= 0f)
+                // Capped at 1:1 -- 100% is a perfect conversion, so stacked sources cannot make a point of
+                // adrenaline worth more than a point of stamina.
+                var efficiency = Mathf.Min(
+                    __instance.GetTotalActiveMagicEffectValue(MagicEffectType.UseAdrenalineAsStamina, 0.01f), 1f);
+                if (efficiency <= 0f)
                 {
                     return;
                 }
 
-                var pay = Mathf.Min((v - stamina) * fraction, __instance.GetAdrenaline());
-                if (pay > 0f)
+                var covered = Mathf.Min(v - stamina, __instance.GetAdrenaline() * efficiency);
+                if (covered > 0f)
                 {
-                    __instance.AddAdrenaline(-pay);
-                    v -= pay; // that much of the cost is paid from adrenaline instead of stamina
+                    __instance.AddAdrenaline(-(covered / efficiency));
+                    v -= covered; // that much of the cost is paid from adrenaline instead of stamina
                 }
             }
         }

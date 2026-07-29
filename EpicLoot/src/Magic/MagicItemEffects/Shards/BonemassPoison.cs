@@ -32,10 +32,11 @@ namespace EpicLoot.MagicItemEffects.Shards {
                     return;
                 }
 
+                // Currently no cooldown
                 // The visible cooldown status effect is the gate: while it's present the shard stays inert.
-                if (player.GetSEMan().HaveStatusEffect(CooldownHash)) {
-                    return;
-                }
+                //if (player.GetSEMan().HaveStatusEffect(CooldownHash)) {
+                //    return;
+                //}
 
                 if (!player.HasActiveMagicEffect(MagicEffectType.CorpseRot, out var value) || value <= 0f) {
                     return;
@@ -45,7 +46,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 SpawnExplosionFx(__instance.transform.position);
                 DamageInRadius.DamageEnemiesInRadius(player, center, CorpseRadius,
                     new HitData.DamageTypes { m_poison = value * PoisonPerTier });
-                ShowCooldown(player);
+                //ShowCooldown(player);
             }
         }
 

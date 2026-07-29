@@ -14,8 +14,8 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Kill detection reads the target's health after the hit, which is exact when the player owns the enemy
     // (single-player, or enemies close to the host); against remote-owned enemies it is best-effort.
     public static class QueenEverflow {
-        public const int DefaultMaxStacks = 3;
-        private const float BuffDuration = 20f; // standard duration the buff lasts / is refreshed to on each kill
+        public const int DefaultMaxStacks = 10;
+        private const float BuffDuration = 10f; // standard duration the buff lasts / is refreshed to on each kill
 
         private const string BuffName = "EL_QueenEverflow";
         private static readonly int BuffHash = BuffName.GetStableHashCode();

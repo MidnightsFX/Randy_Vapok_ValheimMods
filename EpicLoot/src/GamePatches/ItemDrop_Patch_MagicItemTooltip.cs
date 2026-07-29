@@ -11,6 +11,23 @@ public static class MagicTooltipPatches
 {
     public static bool TooltipDisable = false;
 
+    // Tells the player how to open an item's shard slots. Appended here, on the inventory grid's own
+    // tooltip, rather than inside MagicItem.GetTooltip: the enchanting panels, tempering panel, craft
+    // dialogs and trader lists all call GetTooltip() directly, and the hint means nothing there.
+    private static string GetSocketOpenHint(ItemDrop.ItemData item)
+    {
+        if (item == null || !item.IsMagic(out MagicItem magicItem) || !magicItem.HasSockets())
+        {
+            return "";
+        }
+
+        // $KEY_RTrigger / $KEY_ButtonX only resolve to pad glyphs while a gamepad is active (Localization
+        // looks up "Joy" + the binding name), which is exactly when this branch is taken.
+        return ZInput.IsGamepadActive()
+            ? "\n$mod_epicloot_press_socket_gamepad"
+            : "\n$mod_epicloot_press_socket";
+    }
+
     // Set the topic of the tooltip with the decorated name
     [HarmonyPatch(typeof(InventoryGrid), nameof(InventoryGrid.CreateItemTooltip),
         typeof(ItemDrop.ItemData), typeof(UITooltip))]
@@ -37,7 +54,7 @@ public static class MagicTooltipPatches
                 PatchOnHoverFix.ComparisonAdded = false;
                 tooltipText = item.GetTooltip();
             }
-            tooltip.Set(item.GetDecoratedName(), tooltipText);
+            tooltip.Set(item.GetDecoratedName(), tooltipText + GetSocketOpenHint(item));
             return false;
         }
     }

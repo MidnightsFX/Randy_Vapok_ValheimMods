@@ -1,5 +1,4 @@
 using System;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.ShardStones
@@ -8,6 +7,11 @@ namespace EpicLoot.ShardStones
     /// Yes/no confirmation shown before a socketed shard or runestone is destroyed to free its socket.
     /// Uses the SocketMessage prefab, which shares its layout with ConfigMessage (see
     /// <see cref="MessagePanelBase"/>) but is sized for use over the inventory rather than the main menu.
+    /// <para>
+    /// Keyboard and gamepad input is driven from <see cref="SocketsUI"/>'s InventoryGui.Update prefix
+    /// rather than from an Update of its own -- see UpdateBreakPrompt there for why the ordering has to
+    /// be pinned to the patch.
+    /// </para>
     /// </summary>
     public sealed class SocketBreakPrompt : MessagePanelBase
     {
@@ -38,17 +42,6 @@ namespace EpicLoot.ShardStones
             var prompt = panel.AddComponent<SocketBreakPrompt>();
             prompt.SetMessage(title, body);
             return prompt;
-        }
-
-        [UsedImplicitly]
-        private void Update()
-        {
-            // Escape / gamepad B cancel. Deliberately not JoyButtonA -- on a confirmation dialog the
-            // accept button must be pressed deliberately, not dismissed into.
-            if (ZInput.GetKeyDown(KeyCode.Escape) || ZInput.GetButtonDown("JoyButtonB"))
-            {
-                OnDenyClick();
-            }
         }
 
         public override void OnAcceptClick()
