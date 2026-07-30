@@ -73,6 +73,12 @@ namespace EpicLoot.Adventure
                 }
             }
 
+            if (placed.Get() == true)
+            {
+                ZNetScene.instance.Destroy(this.gameObject);
+                return;
+            }
+
             if (searchingForSpawn.Get() == true && spawnPoint.Get() == defaultSpawn)
             {
                 return;
@@ -188,6 +194,7 @@ namespace EpicLoot.Adventure
             float radius = AdventureDataManager.Config.TreasureMap.MinimapAreaRadius;
             Vector3 determinedSpawn = startingSpawnPoint;
             int spawnLocationAttempts = 0;
+            bool foundSpawn = false;
 
             // Attempt to find a spawn point, valid height must be selected
             while (spawnLocationAttempts < 100)
@@ -251,7 +258,34 @@ namespace EpicLoot.Adventure
                     continue;
                 }
 
+                if (TryFindNearbyWard(determinedSpawn, radius, out _))
+                {
+                    spawnLocationAttempts += 1;
+                    continue;
+                }
+
+                foundSpawn = true;
                 break;
+            }
+
+            if (!foundSpawn)
+            {
+                if (TryFindNearbyWard(startingSpawnPoint, radius, out PrivateArea ward))
+                {
+                    EpicLoot.LogDebug(
+                        "Could not find a valid adventure spawn point outside ward range. " +
+                        $"Start=({startingSpawnPoint.x:0.##}, {startingSpawnPoint.y:0.##}, {startingSpawnPoint.z:0.##}), " +
+                        $"SearchRadius={radius:0.##}, " +
+                        $"Ward=({ward.transform.position.x:0.##}, {ward.transform.position.y:0.##}, {ward.transform.position.z:0.##}), " +
+                        $"WardRadius={ward.m_radius:0.##}");
+                    placed.ForceSet(true);
+                    yield break;
+                }
+
+                EpicLoot.LogDebug("Could not find a valid adventure spawn point; using the original spawn point.");
+                determinedSpawn = startingSpawnPoint;
+                ZoneSystem.instance.GetGroundData(
+                    ref determinedSpawn, out _, out _, out _, out _);
             }
 
             if (determinedSpawn.y >= StartingHeight - 1f)
@@ -262,6 +296,21 @@ namespace EpicLoot.Adventure
             EpicLoot.Log($"Selected Spawn point X {determinedSpawn.x}, Y {determinedSpawn.y}, Z {determinedSpawn.z}");
             spawnPoint.ForceSet(determinedSpawn);
             yield break;
+        }
+
+        private static bool TryFindNearbyWard(Vector3 location, float radius, out PrivateArea ward)
+        {
+            foreach (PrivateArea privateArea in PrivateArea.m_allAreas)
+            {
+                if (privateArea.IsInside(location, radius))
+                {
+                    ward = privateArea;
+                    return true;
+                }
+            }
+
+            ward = null;
+            return false;
         }
     }
 }

@@ -311,6 +311,14 @@ public sealed class EpicLoot : BaseUnityPlugin
         }
     }
 
+    public static void LogDebug(string message)
+    {
+        if (ELConfig._loggingEnabled.Value)
+        {
+            _instance.Logger.LogDebug(message);
+        }
+    }
+
     public static void LogError(string message)
     {
         if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Error)
