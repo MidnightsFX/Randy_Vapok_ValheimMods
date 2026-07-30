@@ -1,45 +1,116 @@
-using HarmonyLib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Purple utility shard: when a stamina cost exceeds current stamina, pay up to value% of the
-    // shortfall from health (1:1) so the stamina-gated action can still go through. Health is never
-    // driven below 1. Shard values are authored as whole-number percents, hence the 0.01f.
+    // Purple utility shard ("Second Wind"): when stamina runs out, burn up to value% of MAX health and bank
+    // that much stamina in one go, then go on cooldown. Health is never driven below 1. Because the refill
+    // goes into the stamina pool rather than discounting a single cost, the unused remainder stays available
+    // for the next few actions -- it is a buffer, not a per-cost subsidy. Shard values are authored as
+    // whole-number percents, hence the 0.01f.
+    //
+    // No Harmony patches here: SharedCharacterUseStaminaPatch drives the effect. It calls GetCoverable to
+    // widen vanilla's affordability gates (without which this shard is nearly dead -- vanilla refuses the
+    // action before UseStamina is ever reached) and TryRefill to actually fire the charge.
     public static class RunningOnEmpty
     {
-        [HarmonyPatch(typeof(Player), nameof(Player.UseStamina))]
-        private static class UseStamina_Patch
+        private const float Cooldown = 30f;
+
+        // Below this the charge isn't worth burning; firing anyway would spend the whole cooldown on nothing.
+        private const float Epsilon = 0.01f;
+
+        // Cooldown HUD indicator (Leech trophy icon with a radial recharge sweep). Built lazily on the first
+        // proc -- see GetOrCreateCooldownIndicator -- so ObjectDB is loaded when the trophy is queried. Its
+        // presence on the player is also the cooldown gate (checked via CooldownHash below).
+        private const string CooldownName = "EL_RunningOnEmptyCooldown";
+        private static readonly int CooldownHash = CooldownName.GetStableHashCode();
+        private static StatusEffect _cooldownIndicator;
+        private static bool _cooldownMissingLogged;
+
+        // How much stamina the charge would bank if it fired right now; 0 while on cooldown. PURE READ --
+        // never spends. Also the single source of truth for the amount, so TryRefill can't disagree with the
+        // gate about what this shard is worth.
+        public static float GetCoverable(Player player, float fraction)
         {
-            [UsedImplicitly]
-            private static void Prefix(Player __instance, ref float v)
+            if (fraction <= 0f)
             {
-                if (v <= 0f || __instance != Player.m_localPlayer)
-                {
-                    return;
-                }
-
-                var stamina = __instance.GetStamina();
-                if (v <= stamina)
-                {
-                    return; // enough stamina; nothing to cover
-                }
-
-                var fraction = __instance.GetTotalActiveMagicEffectValue(MagicEffectType.RunningOnEmpty, 0.01f);
-                if (fraction <= 0f)
-                {
-                    return;
-                }
-
-                var coverable = (v - stamina) * fraction;
-                var healthPay = Mathf.Min(coverable, __instance.GetHealth() - 1f);
-                if (healthPay > 0f)
-                {
-                    __instance.UseHealth(healthPay);
-                    v -= healthPay; // that much of the cost is paid by health instead of stamina
-                }
+                return 0f;
             }
+
+            // The visible cooldown status effect is the gate: while it's present the shard stays inert.
+            if (player.GetSEMan().HaveStatusEffect(CooldownHash))
+            {
+                return 0f;
+            }
+
+            // Without an indicator there is nothing to hold the cooldown, so the charge would refill for free
+            // every frame. Stay unavailable instead.
+            if (GetOrCreateCooldownIndicator() == null)
+            {
+                return 0f;
+            }
+
+            var lump = Mathf.Min(player.GetMaxHealth() * fraction, player.GetHealth() - 1f);
+            return lump > Epsilon ? lump : 0f;
+        }
+
+        // Burn the health, bank the stamina, start the cooldown. Unlike the adrenaline shard this reports
+        // nothing back: it raises the stamina pool rather than discounting the cost, so vanilla's own
+        // subtraction draws from the refilled pool.
+        public static void TryRefill(Player player, float fraction)
+        {
+            var lump = GetCoverable(player, fraction);
+            if (lump <= 0f)
+            {
+                return;
+            }
+
+            player.UseHealth(lump);
+            player.AddStamina(lump);
+            ShowCooldown(player);
+        }
+
+        // Adds the recharge indicator to the player; its lifetime (m_ttl = Cooldown) is the cooldown.
+        // Activation is gated on the effect's absence, so it's never already present here.
+        private static void ShowCooldown(Player player)
+        {
+            var indicator = GetOrCreateCooldownIndicator();
+            if (indicator != null)
+            {
+                player.GetSEMan().AddStatusEffect(indicator, true);
+            }
+        }
+
+        // Lazily builds the cooldown indicator prototype. Runs on a proc, so ObjectDB is loaded and the Leech
+        // trophy icon is available. A null icon would render as an invisible HUD entry, so if the trophy
+        // lookup fails we log once and leave _cooldownIndicator null -- GetCoverable then keeps the shard
+        // inert rather than granting a cooldown-free refill.
+        private static StatusEffect GetOrCreateCooldownIndicator()
+        {
+            if (_cooldownIndicator != null)
+            {
+                return _cooldownIndicator;
+            }
+
+            var icon = ObjectDB.instance?.GetItemPrefab("TrophyLeech")?
+                .GetComponent<ItemDrop>()?.m_itemData.GetIcon();
+            if (icon == null)
+            {
+                if (!_cooldownMissingLogged)
+                {
+                    EpicLoot.LogWarning("RunningOnEmpty: could not find 'TrophyLeech' icon; cooldown indicator will not display.");
+                    _cooldownMissingLogged = true;
+                }
+                return null;
+            }
+
+            var se = ScriptableObject.CreateInstance<StatusEffect>();
+            se.name = CooldownName;
+            se.m_name = "$mod_epicloot_se_runningonempty";
+            se.m_icon = icon;
+            se.m_ttl = Cooldown;
+            se.m_cooldownIcon = true;
+            _cooldownIndicator = se;
+            return _cooldownIndicator;
         }
     }
 }

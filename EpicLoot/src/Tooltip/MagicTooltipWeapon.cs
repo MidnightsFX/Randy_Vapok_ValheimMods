@@ -1,10 +1,17 @@
 ﻿using EpicLoot.MagicItemEffects;
+using EpicLoot.MagicItemEffects.Shards;
 
 namespace EpicLoot;
 
 public partial class MagicTooltip {
     private void AddDamages() {
         HitData.DamageTypes damages = ModifyDamage.GetDamageWithMagicEffects(item);
+
+        // Eitr Imbue is applied to the hit itself (attacker-side, paid for with eitr) rather than in
+        // GetDamage, so fold its bonus in here -- otherwise a purely physical weapon shows no spirit
+        // damage at all despite dealing it on every affordable swing.
+        float eitrImbueSpirit = EitrImbueAttack.GetSpiritBonus(magicItem, damages);
+        damages.m_spirit += eitrImbueSpirit;
 
         localPlayer.GetSkills().GetRandomSkillRange(out float min, out float max, item.m_shared.m_skillType);
 
@@ -72,7 +79,8 @@ public partial class MagicTooltip {
         }
 
         if (damages.m_spirit != 0f) {
-            bool isMagic = allCheck || elemDamage || magicItem.HasEffect(MagicEffectType.AddSpiritDamage);
+            bool isMagic = allCheck || elemDamage || eitrImbueSpirit > 0f ||
+                magicItem.HasEffect(MagicEffectType.AddSpiritDamage);
             text.AppendFormat("\n{0}: {1}",
                 "$inventory_spirit",
                 DamageRange(damages.m_spirit, min, max, isMagic, magicColor));

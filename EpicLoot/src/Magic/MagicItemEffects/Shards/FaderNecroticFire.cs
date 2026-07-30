@@ -1,13 +1,6 @@
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Fader boss shard: a weapon's physical bite rots away into necrotic fire. On the weapon's OUTGOING
-    // damage, strip ALL physical damage (blunt + slash + pierce) and add a rarity-scaled share of that
-    // pool to BOTH fire and poison -- so the weapon's physical damage is removed and reborn as fire +
-    // poison. The conversion factor comes from the shard's per-rarity value (Mythic == 1.0 = the full
-    // physical amount to each, a net damage gain fitting a Mythic-only boss shard; lower rarities convert
-    // proportionally less). Runs as a GetDamage postfix so the weapon tooltip reflects it too, gated to
-    // the local player's equipped weapon (mirrors ConvertPhysicalDamageToLightning).
     public static class NecroticFire {
         // GetDamage postfix handler invoked by ModifyDamage (per-weapon modifier).
         public static void ModifyWeaponDamage(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result) {

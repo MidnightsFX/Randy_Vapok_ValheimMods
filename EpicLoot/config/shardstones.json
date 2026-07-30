@@ -135,15 +135,15 @@
                 "MagicWeapon": {
                     "EffectType": "EnergeticEitr",
                     "ValuesPerRarity": {
-                        "Magic": 3,
-                        "Rare": 3.5,
-                        "Epic": 4,
-                        "Legendary": 4.5,
-                        "Mythic": 5
+                        "Magic": 6,
+                        "Rare": 8,
+                        "Epic": 10,
+                        "Legendary": 12,
+                        "Mythic": 14
                     }
                 },
                 "Head": {
-                    "EffectType": "PercentStamina",
+                    "EffectType": "ModifyStaminaRegen",
                     "ValuesPerRarity": {
                         "Magic": 2,
                         "Rare": 4,
@@ -153,7 +153,7 @@
                     }
                 },
                 "Chest": {
-                    "EffectType": "ModifyStaminaRegen",
+                    "EffectType": "PercentStamina",
                     "ValuesPerRarity": {
                         "Magic": 2,
                         "Rare": 3,
@@ -195,11 +195,11 @@
                 "Shoulders": {
                     "EffectType": "StaminaOnKill",
                     "ValuesPerRarity": {
-                        "Magic": 4,
-                        "Rare": 6,
-                        "Epic": 8,
-                        "Legendary": 10,
-                        "Mythic": 12
+                        "Magic": 3,
+                        "Rare": 3.5,
+                        "Epic": 4,
+                        "Legendary": 4.5,
+                        "Mythic": 5
                     }
                 }
             }
@@ -217,31 +217,31 @@
                 "MeleeWeapon": {
                     "EffectType": "EitrImbueAttack",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 9,
+                        "Rare": 11,
+                        "Epic": 13,
+                        "Legendary": 15,
+                        "Mythic": 17
                     }
                 },
                 "RangedWeapon": {
                     "EffectType": "EitrImbueAttack",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 15,
+                        "Rare": 20,
+                        "Epic": 25,
+                        "Legendary": 30,
+                        "Mythic": 35
                     }
                 },
                 "MagicWeapon": {
                     "EffectType": "ModifyAttackEitrUse",
                     "ValuesPerRarity": {
                         "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Rare": 4,
+                        "Epic": 6,
+                        "Legendary": 8,
+                        "Mythic": 10
                     }
                 },
                 "Head": {
@@ -287,11 +287,11 @@
                 "Utility": {
                     "EffectType": "EitrShield",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 10,
+                        "Rare": 15,
+                        "Epic": 20,
+                        "Legendary": 25,
+                        "Mythic": 30
                     }
                 },
                 "Shoulders": {
@@ -359,11 +359,11 @@
                 "Chest": {
                     "EffectType": "PhysToFire",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 10,
+                        "Rare": 15,
+                        "Epic": 20,
+                        "Legendary": 25,
+                        "Mythic": 30
                     }
                 },
                 "Legs": {
@@ -523,51 +523,51 @@
                 "MeleeWeapon": {
                     "EffectType": "IncreaseDamageDuringNighttime",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 7,
+                        "Epic": 11,
+                        "Legendary": 15,
+                        "Mythic": 18
                     }
                 },
                 "RangedWeapon": {
                     "EffectType": "IncreaseDamageDuringNighttime",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 7,
+                        "Epic": 11,
+                        "Legendary": 15,
+                        "Mythic": 18
                     }
                 },
                 "MagicWeapon": {
                     "EffectType": "IncreaseDamageDuringNighttime",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 7,
+                        "Epic": 11,
+                        "Legendary": 15,
+                        "Mythic": 18
                     }
                 },
                 "Head": {
                     "EffectType": "NightStaminaRegenIncrease",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 12,
+                        "Rare": 16,
+                        "Epic": 20,
+                        "Legendary": 24,
+                        "Mythic": 28
                     }
                 },
                 "Chest": {
                     "EffectType": "DamageReductionAtNight",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 7,
+                        "Rare": 9,
+                        "Epic": 11,
+                        "Legendary": 13,
+                        "Mythic": 15
                     }
                 },
                 "Legs": {
@@ -593,11 +593,11 @@
                 "Utility": {
                     "EffectType": "ModifyNoise",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "Shoulders": {
@@ -626,40 +626,40 @@
                     "EffectType": "IncreaseDamageDuringDaytime",
                     "ValuesPerRarity": {
                         "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Rare": 4,
+                        "Epic": 6,
+                        "Legendary": 8,
+                        "Mythic": 10
                     }
                 },
                 "RangedWeapon": {
                     "EffectType": "IncreaseDamageDuringDaytime",
                     "ValuesPerRarity": {
                         "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Rare": 4,
+                        "Epic": 6,
+                        "Legendary": 8,
+                        "Mythic": 10
                     }
                 },
                 "MagicWeapon": {
                     "EffectType": "IncreaseDamageDuringDaytime",
                     "ValuesPerRarity": {
                         "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Rare": 4,
+                        "Epic": 6,
+                        "Legendary": 8,
+                        "Mythic": 10
                     }
                 },
                 "Head": {
                     "EffectType": "DayDiscovery",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 10,
+                        "Rare": 15,
+                        "Epic": 20,
+                        "Legendary": 25,
+                        "Mythic": 30
                     }
                 },
                 "Chest": {
@@ -675,21 +675,21 @@
                 "Legs": {
                     "EffectType": "DayStaminaRegen",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 5,
+                        "Epic": 6,
+                        "Legendary": 7,
+                        "Mythic": 8
                     }
                 },
                 "Trinket": {
                     "EffectType": "DayHealthRegen",
                     "ValuesPerRarity": {
                         "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Rare": 2.5,
+                        "Epic": 3,
+                        "Legendary": 3.5,
+                        "Mythic": 4
                     }
                 },
                 "Utility": {

@@ -25,7 +25,11 @@ namespace EpicLoot.MagicItemEffects.Shards
             private static void Finalizer() => _inFishingUpdate = false;
         }
 
+        // Priority.First so this discount lands before SharedCharacterUseStaminaPatch covers the shortfall
+        // from adrenaline/health. The other way round, the discount would apply to the already-reduced
+        // remainder -- under-applying it and over-spending those pools.
         [HarmonyPatch(typeof(Player), nameof(Player.UseStamina))]
+        [HarmonyPriority(Priority.First)]
         private static class Player_UseStamina_Patch
         {
             [UsedImplicitly]
