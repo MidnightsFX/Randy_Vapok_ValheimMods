@@ -1,15 +1,13 @@
 using System.Collections.Generic;
-using HarmonyLib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
     // Black trinket shard: when the local player's adrenaline fills up ("activates"), summon tamed bats to
-    // fight alongside them for a short time. Detected by watching AddAdrenaline reach max -- in vanilla that
-    // either caps the pool at max (gear without a full-adrenaline SE) or "pops" and resets it to 0 (gear with
-    // one); both are caught. Uses vanilla's adrenaline pool, so it is inert unless the player has a
-    // max-adrenaline source (matches the other adrenaline shards). The summon is rate-limited by a cooldown.
+    // fight alongside them for a short time. The fill is detected by SharedPlayerAddAdrenalinePatch, which
+    // also enforces the local-player and has-an-adrenaline-pool guards, so this is inert unless the player
+    // has a max-adrenaline source (matches the other adrenaline shards). The summon is rate-limited by a
+    // cooldown.
     //
     // The bats are instances of our own registered clone of the vanilla 'Bat' (see RegisterTamedBatPrefab):
     // the clone bakes faction = Players and m_tamed = true into the PREFAB, so a summoned bat stays friendly
@@ -39,65 +37,23 @@ namespace EpicLoot.MagicItemEffects.Shards
         // in this list, but TimedDestruction reaps them, so concurrency stays bounded regardless.
         private static readonly List<GameObject> _activeBats = new List<GameObject>();
 
-        // Captured across the AddAdrenaline call: the pool before the change, and whether this call was a gain
-        // (v > 0). Only a gain can fill the pool, so guarding on it rules out the per-frame degen decrements.
-        private struct AdrenalineChange
+        // Called by SharedPlayerAddAdrenalinePatch, which owns the Player.AddAdrenaline patch and the
+        // fill/pop detection (including the local-player and no-adrenaline-source guards).
+        public static void OnAdrenalineActivated(Player player)
         {
-            public float Before;
-            public bool WasGain;
-        }
-
-        [HarmonyPatch(typeof(Player), nameof(Player.AddAdrenaline))]
-        private static class AddAdrenaline_Patch
-        {
-            [UsedImplicitly]
-            private static void Prefix(Player __instance, float v, out AdrenalineChange __state)
+            if (Time.time - _lastSummonTime < SummonCooldown)
             {
-                __state = new AdrenalineChange { Before = __instance.GetAdrenaline(), WasGain = v > 0f };
+                return;
             }
 
-            [UsedImplicitly]
-            private static void Postfix(Player __instance, AdrenalineChange __state)
+            var value = player.GetTotalActiveMagicEffectValue(MagicEffectType.SummonBatWhenActivatingAdrenaline);
+            if (value <= 0f)
             {
-                if (__instance != Player.m_localPlayer)
-                {
-                    return;
-                }
-
-                var max = __instance.GetMaxAdrenaline();
-                if (max <= 0f)
-                {
-                    return; // no adrenaline source -> inert (matches the other adrenaline shards)
-                }
-
-                var after = __instance.GetAdrenaline();
-
-                // Adrenaline "activated" this call if a gain pushed it to full. Two vanilla outcomes:
-                //   - gear WITHOUT a full-adrenaline SE caps the pool at max        -> after >= max
-                //   - gear WITH a full-adrenaline SE pops and resets the pool to 0  -> a substantial pool
-                //     dropped to ~0. Guarding on WasGain rules out the per-frame degen decrements, which are
-                //     the only other way the pool falls.
-                var cappedToMax = __state.Before < max && after >= max;
-                var poppedToZero = __state.WasGain && __state.Before > 1f && after <= 0.01f;
-                if (!cappedToMax && !poppedToZero)
-                {
-                    return;
-                }
-
-                if (Time.time - _lastSummonTime < SummonCooldown)
-                {
-                    return;
-                }
-
-                var value = __instance.GetTotalActiveMagicEffectValue(MagicEffectType.SummonBatWhenActivatingAdrenaline);
-                if (value <= 0f)
-                {
-                    return;
-                }
-
-                _lastSummonTime = Time.time;
-                SummonBats(__instance, value);
+                return;
             }
+
+            _lastSummonTime = Time.time;
+            SummonBats(player, value);
         }
 
         // Registers our tamed-bat clone into the CURRENT ZNetScene. Wired to PrefabManager.OnPrefabsRegistered,

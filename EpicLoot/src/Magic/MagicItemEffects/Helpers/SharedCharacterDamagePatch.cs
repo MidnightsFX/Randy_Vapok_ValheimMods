@@ -65,7 +65,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             StaggerOnDamageTaken_Character_Damage_Patch.OnDamageDealt(__instance, hit, attacker);
             HealthGainPerXDamageDone.OnDamageDealt(hit, attacker);
             LifeGainOnHit.OnDamageDealt(hit, attacker);
-            GainAdrenalineWhenApplyingPoison.OnDamageDealt(hit, attacker);
+            GainAdrenalineWhenApplyingPoison.OnDamageDealt(__instance, hit, attacker);
             BurningAdrenaline.OnDamageDealt(hit, attacker);
             StaminaOnKill.OnDamageDealt(__instance, hit, attacker);
             StrikeCausesLightning.OnDamageDealt(__instance, hit, attacker);

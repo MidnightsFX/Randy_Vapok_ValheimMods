@@ -6,10 +6,10 @@ namespace EpicLoot.MagicItemEffects.Shards
 {
     // Perfect-dodge shard effects (Pink). Vanilla already fires Player.RPC_HitWhileDodging when the local
     // player is struck inside a dodge's invincibility window (a "perfect dodge"; see Player.HitWhileDodging).
-    // The reward effects hang off that vanilla trigger, so they fire exactly when the game considers a dodge
-    // "perfect". PerfectDodge (the trinket proc) makes those perfect dodges reliable by keeping the roll's
-    // invincibility alive for the whole animation, and DecreaseDodgeCost reuses the existing
-    // dodge-stamina hook (see ModifyDodgeStamina.cs). Shard values are authored as whole-number percents.
+    // Every reward effect here hangs off that vanilla trigger, so they fire exactly when the game considers a
+    // dodge "perfect" -- the pool restores, the movement-speed burst, and PerfectDodge (the trinket) with its
+    // stacking damage buff. DecreaseDodgeCost is the odd one out and reuses the existing dodge-stamina hook
+    // (see ModifyDodgeStamina.cs). Shard values are authored as whole-number percents.
 
     // ---- Shared trigger for the reward effects ------------------------------------------------------
     // Vanilla latches m_beenHitWhileDodging so only the first avoided hit of a roll counts as the perfect
@@ -47,6 +47,7 @@ namespace EpicLoot.MagicItemEffects.Shards
             PerfectDodgeGivesStamina.OnPerfectDodge(__instance);
             PerfectDodgeGivesEitr.OnPerfectDodge(__instance);
             PerfectDodgeGivesSpeed.OnPerfectDodge(__instance);
+            PerfectDodge.OnPerfectDodge(__instance);
         }
     }
 
@@ -87,60 +88,109 @@ namespace EpicLoot.MagicItemEffects.Shards
         }
     }
 
-    // ---- Trinket proc: a chance, on a dodge roll, to keep the roll's invincibility alive -----------
-    // Vanilla's i-frames start when the roll begins and are cut short by the DodgeMortal animation event
-    // (Player.OnDodgeMortal clears m_dodgeInvincible). On a proc we simply re-assert m_dodgeInvincible each
-    // FixedUpdate for the rest of the roll, before vanilla's UpdateDodge recomputes and replicates the
-    // invincibility flag. That means vanilla does everything else for us: it writes ZDOVars.s_dodgeinv so
-    // remote attackers see it too, the attacker-side checks in Attack/Projectile skip the hit outright, and
-    // the perfect-dodge trigger (and therefore the reward effects above) fires. When the dodge animation
-    // ends, vanilla recomputes the flag as false and clears the ZDO on its own -- no manual teardown.
+    // ---- Trinket: a perfect dodge builds a stacking stamina-regen buff -----------------------------
+    // Grants "Dodge Momentum" (SE_DodgeMomentum) for BuffDuration seconds. Each perfect dodge adds a stack up
+    // to MaxStacks and refreshes the countdown, so chaining dodges through a fight ramps the regen and holds
+    // it -- paying back the stamina the dodging itself costs. The shard value is the bonus *per stack*, so a
+    // Mythic (12) tops out at +60% stamina regen. The regen is applied by SE_DodgeMomentum's own
+    // ModifyStaminaRegen override, so vanilla drives it every frame off the live stack count.
     public static class PerfectDodge
     {
-        private static bool _wasInDodge;
-        private static bool _procActiveThisRoll;
+        public const int DefaultMaxStacks = 5;
+        private const float BuffDuration = 10f; // seconds the buff lasts / is refreshed to on each perfect dodge
 
-        [HarmonyPatch(typeof(Player), nameof(Player.UpdateDodge))]
-        private static class UpdateDodge_Patch
+        private const string BuffName = "EL_DodgeMomentum";
+        private static readonly int BuffHash = BuffName.GetStableHashCode();
+        private static SE_DodgeMomentum _buffPrototype;
+        private static bool _iconMissingLogged;
+
+        // Tooltip: "+{0}% Stamina Regen per Stack (max {1})" -- {1} surfaces the configured stack cap. Pure,
+        // as the provider contract requires (MagicItem.RegisterDisplayValues): it only reads the effect config.
+        public static void RegisterDisplayValues()
         {
-            // Runs before vanilla computes `inDodgeAnim && m_dodgeInvincible`, so re-asserting the flag
-            // here keeps the i-frames (and their replication) alive for the remainder of the roll.
-            [UsedImplicitly]
-            private static void Prefix(Player __instance)
+            MagicItem.RegisterDisplayValues(MagicEffectType.PerfectDodge,
+                value => new object[] { value, (float)GetMaxStacks() });
+        }
+
+        public static void OnPerfectDodge(Player player)
+        {
+            // Shard value doubles as the per-stack stamina-regen percentage (8 -> +8% per stack at Epic).
+            var regenPerStack = player.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodge, 0.01f);
+            if (regenPerStack <= 0f)
             {
-                if (__instance == Player.m_localPlayer && _procActiveThisRoll)
-                {
-                    __instance.m_dodgeInvincible = true;
-                }
+                return;
             }
 
-            // Rising-edge on the dodge animation rolls the proc (mirrors RollCleanse's dodge detection).
-            [UsedImplicitly]
-            private static void Postfix(Player __instance)
+            var prototype = GetOrCreatePrototype();
+            if (prototype == null)
             {
-                if (__instance != Player.m_localPlayer)
-                {
-                    return;
-                }
-
-                var inDodge = __instance.m_inDodge;
-                var rollStarted = inDodge && !_wasInDodge;
-                _wasInDodge = inDodge;
-
-                if (!inDodge)
-                {
-                    // The roll is over (or never started) -- never let the proc leak past it.
-                    _procActiveThisRoll = false;
-                }
-
-                if (!rollStarted)
-                {
-                    return;
-                }
-
-                var chance = __instance.GetTotalActiveMagicEffectValue(MagicEffectType.PerfectDodge, 0.01f);
-                _procActiveThisRoll = chance > 0f && Random.value < chance;
+                return;
             }
+
+            var maxStacks = GetMaxStacks();
+            var seMan = player.GetSEMan();
+
+            // Re-proc while the buff is still up: add a stack (capped), restamp the per-stack bonus (the shard
+            // set may have changed) and refresh the countdown rather than letting the old timer run out.
+            if (seMan.GetStatusEffect(BuffHash) is SE_DodgeMomentum existing)
+            {
+                existing.Stacks = Mathf.Min(existing.Stacks + 1, maxStacks);
+                existing.MaxStacks = maxStacks;
+                existing.RegenPerStack = regenPerStack;
+                existing.ResetTime();
+                return;
+            }
+
+            // Seed the prototype so the clone SEMan takes carries the first stack and current values.
+            prototype.Stacks = 1;
+            prototype.MaxStacks = maxStacks;
+            prototype.RegenPerStack = regenPerStack;
+            prototype.m_ttl = BuffDuration;
+            seMan.AddStatusEffect(prototype);
+        }
+
+        // Max stacks come from the PerfectDodge magic effect's Config block ("MaxStacks", see
+        // ShardEffectDefinitions), defaulting to DefaultMaxStacks when unset. Clamped to at least 1 so a
+        // misconfiguration can't disable the buff.
+        private static int GetMaxStacks()
+        {
+            var cfg = MagicItemEffectDefinitions.GetEffectConfig(MagicEffectType.PerfectDodge);
+            if (cfg != null && cfg.TryGetValue("MaxStacks", out var raw))
+            {
+                return Mathf.Max(1, Mathf.RoundToInt(raw));
+            }
+            return DefaultMaxStacks;
+        }
+
+        // Lazily builds the buff prototype. Runs on a perfect dodge, so the asset bundle is loaded. A null
+        // icon would render as an invisible HUD entry (SEMan only surfaces effects with an icon), so if the
+        // sprite lookup fails we log once and leave the prototype null.
+        private static SE_DodgeMomentum GetOrCreatePrototype()
+        {
+            if (_buffPrototype != null)
+            {
+                return _buffPrototype;
+            }
+
+            // The Pink (Dodge) shardstone's own icon -- same sprite the shard items use (see Shards.cs).
+            var icon = EpicAssets.AssetBundle?.LoadAsset<Sprite>("Assets/EpicLoot/Sprites/Shardstones/Pink.png");
+            if (icon == null)
+            {
+                if (!_iconMissingLogged)
+                {
+                    EpicLoot.LogWarning("PerfectDodge: could not load the Pink shardstone sprite; Dodge Momentum will not display.");
+                    _iconMissingLogged = true;
+                }
+                return null;
+            }
+
+            var se = ScriptableObject.CreateInstance<SE_DodgeMomentum>();
+            se.name = BuffName;
+            se.m_name = "$mod_epicloot_se_dodgemomentum";
+            se.m_icon = icon;
+            se.m_ttl = BuffDuration;
+            _buffPrototype = se;
+            return _buffPrototype;
         }
     }
 

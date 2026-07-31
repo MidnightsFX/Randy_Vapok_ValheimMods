@@ -25,6 +25,11 @@ namespace EpicLoot.MagicItemEffects.Shards
             {
                 // Queen's Everflow (QueenEverflow): how many times the regen buff may stack.
                 { MagicEffectType.Everflow, new Dictionary<string, float> { { "MaxStacks", QueenEverflow.DefaultMaxStacks } } },
+                // Dodge Momentum (PerfectDodge): how many times the damage buff may stack.
+                { MagicEffectType.PerfectDodge, new Dictionary<string, float> { { "MaxStacks", PerfectDodge.DefaultMaxStacks } } },
+                // Lucky Fishing (LuckWhileFishing): the bonus-treasure table (prefab -> value threshold,
+                // same semantic as the Riches config) plus the triple-catch sub-roll chance.
+                { MagicEffectType.LuckWhileFishing, LuckWhileFishing.DefaultConfig },
             };
 
         public static void RegisterShardEffectDefinitions()

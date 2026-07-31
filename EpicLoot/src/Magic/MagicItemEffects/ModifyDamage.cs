@@ -35,7 +35,6 @@ public static class ModifyDamage
         DamageBonusFromPlayerWeight.ModifyWeaponDamage(item, ref damage);
         DamageIncreaseFromMovementPenalty.ModifyWeaponDamage(item, ref damage);
         IncreaseHarvestDamage.ModifyWeaponDamage(item, ref damage);
-        AdrenalineIncreasesFrostDamage.ModifyWeaponDamage(item, ref damage);
         ConvertPhysicalDamageToLightning.ModifyWeaponDamage(item, ref damage);
         IcyWeight.ModifyWeaponDamage(item, ref damage);
         ReduceArmorIncreaseDamage.ModifyWeaponDamage(item, ref damage);

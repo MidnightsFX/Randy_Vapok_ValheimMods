@@ -6,6 +6,8 @@ New Content:
     * Interacting with an enchanted item that has a shard socket will pull up a small storage UI, allowing you to socket or remove shards. 
     * Shardstones can be found in the world as loot
     * 90+ new magic effects have been added and are primarily available through shardstones
+    * DarkBlue trinket shards now roll Frost Wave: filling your adrenaline bursts an ice nova that chills every enemy within 10m, slowing them for the shard's duration (replaces AdrenalineIncreasesFrostDamage)
+    * Golden legs shards now roll a reworked Lucky Fishing: each rod catch gets a chance at bonus treasure and a separate chance to double (or rarely triple) the catch itself. Bonus fish match the size of the one you landed. The treasure table is a configurable prefab list of value thresholds, like Riches -- higher shard values reach richer finds while dropping the cheap ones out entirely
     * The enchanting table's probability panel now lists shard slot odds alongside effect count odds
 * Tempering (Thanks Rusty!)
     * Tempering allows you to pay to increase the value of an existing enchantment (service provided by Hildir)

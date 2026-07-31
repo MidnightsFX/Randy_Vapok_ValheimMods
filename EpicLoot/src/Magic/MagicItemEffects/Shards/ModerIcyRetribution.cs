@@ -18,13 +18,9 @@ namespace EpicLoot.MagicItemEffects.Shards {
         private const float BaseCooldown = 140f;      // cooldown at Epic (the shard's rarity floor)
         private const float CooldownPerRarity = 20f;  // added per rarity above Epic
 
-        // Visual: our own trimmed copy of the fenring's ice nova (see GetOrCreateNovaTemplate). We clone the
-        // vanilla prefab once and shorten it rather than instantiating the shared prefab, so the fenring's
-        // full-length nova is left untouched.
-        private const string NovaFx = "fx_fenring_icenova";
-        private const float SfxDelayReduction = 1.2f;   // trim from each SFX's trigger delay
-        private static GameObject _novaTemplate;
-        private static bool _novaMissingLogged;
+        // Visual: our own trimmed copy of the fenring's ice nova, built and cached by FrostNovaFx so the
+        // fenring's full-length nova is left untouched. Played at the helper's default speed.
+        private const string NovaTemplateName = "EL_ModerIcyRetributionNova";
 
         // Cooldown HUD indicator (Moder trophy icon with a radial recharge sweep). Built lazily on the first
         // proc -- see GetOrCreateCooldownIndicator -- so ObjectDB is loaded when the trophy is queried. Its
@@ -53,7 +49,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
             // Spawn the nova at visibly above the players feet, but close to the ground
             Vector3 playerNovaPosition = player.transform.position;
             playerNovaPosition.y += 0.6f;
-            SpawnNova(playerNovaPosition);
+            FrostNovaFx.Spawn(NovaTemplateName, playerNovaPosition);
             DamageInRadius.DamageEnemiesInRadius(player, player.GetCenterPoint(), NovaRadius,
                 new HitData.DamageTypes { m_frost = value * FrostPerTier });
             ShowCooldown(player, GetCooldown(player));
@@ -86,92 +82,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 }
             }
             return rarity;
-        }
-
-        // Spawns a fresh copy of the trimmed nova at the player's feet. The template is built inactive, so the
-        // instance starts inactive too and only begins playing once we activate it.
-        private static void SpawnNova(Vector3 position) {
-            var template = GetOrCreateNovaTemplate();
-            if (template == null) {
-                return;
-            }
-
-            var instance = Object.Instantiate(template, position, Quaternion.identity);
-            instance.SetActive(true);
-        }
-
-        // Lazily builds our shortened, standalone copy of the fenring ice nova. Runs on a proc, so ZNetScene is
-        // loaded and the source prefab is available. We clone the vanilla prefab while it is deactivated (so the
-        // clone's components never Awake), trim it, and keep it inactive across scene loads as a reusable
-        // template; a null source is logged once and leaves _novaTemplate null.
-        private static GameObject GetOrCreateNovaTemplate() {
-            if (_novaTemplate != null) {
-                return _novaTemplate;
-            }
-
-            var source = ZNetScene.instance?.GetPrefab(NovaFx);
-            if (source == null) {
-                if (!_novaMissingLogged) {
-                    EpicLoot.LogWarning($"ModerIcyRetribution: could not find '{NovaFx}' prefab; frost nova visual will not display.");
-                    _novaMissingLogged = true;
-                }
-                return null;
-            }
-
-            // Deactivate the source across the clone so no component (particle systems, ZSFX) wakes up on the
-            // template; restore the source afterwards so the shared prefab is left exactly as it was.
-            var wasActive = source.activeSelf;
-            source.SetActive(false);
-            var template = Object.Instantiate(source);
-            source.SetActive(wasActive);
-
-            template.name = "EL_ModerIcyRetributionNova";
-            Object.DontDestroyOnLoad(template);
-
-            TrimParticleSystems(template);
-            TrimSfx(template);
-
-            _novaTemplate = template;
-            return _novaTemplate;
-        }
-
-        // Every particle system on the nova runs its emission bursts three cycles; collapse each to a single
-        // cycle and clear the start delay so our copy fires once, immediately.
-        private static void TrimParticleSystems(GameObject root) {
-            foreach (var ps in root.GetComponentsInChildren<ParticleSystem>(true)) {
-                var main = ps.main;
-                main.startDelay = 0f;
-
-                var emission = ps.emission;
-                var burstCount = emission.burstCount;
-                if (burstCount <= 0) {
-                    continue;
-                }
-
-                var bursts = new ParticleSystem.Burst[burstCount];
-                emission.GetBursts(bursts);
-                for (var i = 0; i < bursts.Length; i++) {
-                    bursts[i].cycleCount = 1;
-                }
-                emission.SetBursts(bursts);
-            }
-        }
-
-        // The nova carries three ZSFX sources, each staggered to line up with the original three-cycle visual.
-        // Pull SfxDelayReduction seconds off every source's trigger delay so the audio tracks the shortened FX
-        // (clamped at 0 so nothing ends up with a negative delay).
-        private static void TrimSfx(GameObject root) {
-            bool found = false;
-            foreach (var sfx in root.GetComponentsInChildren<ZSFX>(true)) {
-                if (found) {
-                    GameObject.Destroy(sfx.gameObject);
-                    continue;
-                }
-                sfx.m_minDelay = Mathf.Max(0f, sfx.m_minDelay - SfxDelayReduction);
-                sfx.m_maxDelay = Mathf.Max(0f, sfx.m_maxDelay - SfxDelayReduction);
-                found = true;
-
-            }
         }
 
         // Adds the recharge indicator to the player with the rarity-scaled cooldown as its lifetime. We set

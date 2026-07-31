@@ -12,11 +12,12 @@ namespace EpicLoot
         public static string BurningAdrenaline = nameof(BurningAdrenaline);
         public static string GainAdrenalineFromHarvesting = nameof(GainAdrenalineFromHarvesting);
         public static string SummonBatWhenActivatingAdrenaline = nameof(SummonBatWhenActivatingAdrenaline);
-        public static string AdrenalineIncreasesFrostDamage = nameof(AdrenalineIncreasesFrostDamage);
+        public static string AdrenalineFrostWave = nameof(AdrenalineFrostWave);
         public static string GainAdrenalineWhenApplyingPoison = nameof(GainAdrenalineWhenApplyingPoison);
         public static string GainAdrenalineWhenSacrificingHealth = nameof(GainAdrenalineWhenSacrificingHealth);
         public static string IncreaseAdrenalineGainDuringStorm = nameof(IncreaseAdrenalineGainDuringStorm);
         public static string AdrenalineIncreasesHealthRegen = nameof(AdrenalineIncreasesHealthRegen);
+        public static string AdrenalineCharge = nameof(AdrenalineCharge);
 
         // --- Perfect-dodge system (Pink) ---
         public static string PerfectDodge = nameof(PerfectDodge);

@@ -419,7 +419,7 @@
             ],
             "TypeEffects": {
                 "MeleeWeapon": {
-                    "EffectType": "PerfectDodgeGivesHealth",
+                    "EffectType": "PerfectDodgeGivesStamina",
                     "ValuesPerRarity": {
                         "Magic": 2,
                         "Rare": 3,
@@ -451,21 +451,21 @@
                 "Head": {
                     "EffectType": "DecreaseDodgeCost",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 15,
+                        "Rare": 20,
+                        "Epic": 25,
+                        "Legendary": 30,
+                        "Mythic": 35
                     }
                 },
                 "Chest": {
                     "EffectType": "ReduceFallDamage",
                     "ValuesPerRarity": {
                         "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Rare": 4,
+                        "Epic": 6,
+                        "Legendary": 8,
+                        "Mythic": 10
                     }
                 },
                 "Legs": {
@@ -481,21 +481,21 @@
                 "Trinket": {
                     "EffectType": "PerfectDodge",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 2,
-                        "Epic": 3,
-                        "Legendary": 4,
-                        "Mythic": 5
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "Utility": {
                     "EffectType": "RollCleanse",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 1,
+                        "Rare": 1.5,
+                        "Epic": 2,
+                        "Legendary": 2.5,
+                        "Mythic": 3
                     }
                 },
                 "Shoulders": {
@@ -563,11 +563,11 @@
                 "Chest": {
                     "EffectType": "DamageReductionAtNight",
                     "ValuesPerRarity": {
-                        "Magic": 7,
-                        "Rare": 9,
-                        "Epic": 11,
-                        "Legendary": 13,
-                        "Mythic": 15
+                        "Magic": 6,
+                        "Rare": 7,
+                        "Epic": 8,
+                        "Legendary": 9,
+                        "Mythic": 10
                     }
                 },
                 "Legs": {
@@ -665,11 +665,11 @@
                 "Chest": {
                     "EffectType": "DayArmor",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "Legs": {
@@ -849,11 +849,11 @@
                 "MagicWeapon": {
                     "EffectType": "ModifyMagicFireRate",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 10,
+                        "Rare": 12,
+                        "Epic": 14,
+                        "Legendary": 16,
+                        "Mythic": 18
                     }
                 },
                 "Head": {
@@ -961,11 +961,11 @@
                 "Head": {
                     "EffectType": "IncreaseMiningDrop",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 1,
+                        "Rare": 1.5,
+                        "Epic": 2,
+                        "Legendary": 2.5,
+                        "Mythic": 3
                     }
                 },
                 "Chest": {
@@ -981,11 +981,11 @@
                 "Legs": {
                     "EffectType": "IncreaseTreeDrop",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 1,
+                        "Rare": 1.5,
+                        "Epic": 2,
+                        "Legendary": 2.5,
+                        "Mythic": 3
                     }
                 },
                 "Trinket": {
@@ -1033,11 +1033,11 @@
                 "MeleeWeapon": {
                     "EffectType": "IncreaseMeleeSkills",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 2,
-                        "Epic": 3,
-                        "Legendary": 4,
-                        "Mythic": 5
+                        "Magic": 3,
+                        "Rare": 4,
+                        "Epic": 5,
+                        "Legendary": 6,
+                        "Mythic": 7
                     }
                 },
                 "RangedWeapon": {
@@ -1091,13 +1091,13 @@
                     }
                 },
                 "Trinket": {
-                    "EffectType": "DecreaseForsakenCooldown",
+                    "EffectType": "AdrenalineCharge",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 3,
+                        "Rare": 4,
+                        "Epic": 5,
+                        "Legendary": 6,
+                        "Mythic": 7
                     }
                 },
                 "Utility": {
@@ -1135,11 +1135,11 @@
                 "MeleeWeapon": {
                     "EffectType": "AddPoisonDamage",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 10,
+                        "Rare": 20,
+                        "Epic": 30,
+                        "Legendary": 40,
+                        "Mythic": 50
                     }
                 },
                 "RangedWeapon": {
@@ -1195,11 +1195,11 @@
                 "Trinket": {
                     "EffectType": "GainAdrenalineWhenApplyingPoison",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 1,
+                        "Rare": 2,
+                        "Epic": 3,
+                        "Legendary": 4,
+                        "Mythic": 5
                     }
                 },
                 "Utility": {
@@ -1295,13 +1295,13 @@
                     }
                 },
                 "Trinket": {
-                    "EffectType": "AdrenalineIncreasesFrostDamage",
+                    "EffectType": "AdrenalineFrostWave",
                     "ValuesPerRarity": {
-                        "Magic": 3,
-                        "Rare": 4,
-                        "Epic": 5,
-                        "Legendary": 6,
-                        "Mythic": 7
+                        "Magic": 1,
+                        "Rare": 1.5,
+                        "Epic": 2,
+                        "Legendary": 2.5,
+                        "Mythic": 3
                     }
                 },
                 "Utility": {
@@ -1339,31 +1339,31 @@
                 "MeleeWeapon": {
                     "EffectType": "ModifyAttackHealthUse",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "RangedWeapon": {
                     "EffectType": "ModifyAttackHealthUse",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "MagicWeapon": {
                     "EffectType": "ModifyAttackHealthUse",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "Head": {
@@ -1389,11 +1389,11 @@
                 "Legs": {
                     "EffectType": "BloodMagicLevelIncreasesHealthRegen",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 5,
+                        "Epic": 6,
+                        "Legendary": 7,
+                        "Mythic": 8
                     }
                 },
                 "Trinket": {

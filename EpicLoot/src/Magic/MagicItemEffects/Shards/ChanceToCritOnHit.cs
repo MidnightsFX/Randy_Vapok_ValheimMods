@@ -1,39 +1,41 @@
+using Jotunn.Managers;
 using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
+namespace EpicLoot.MagicItemEffects.Shards {
     // DarkRed chest shard (Wrath/Berserk): each of the local player's hits has a % chance to "crit",
     // multiplying the whole hit's damage. Rolled in a Character.Damage prefix — the outgoing hit before it is
     // sent to the target (runs once, on the attacker's client; Character.Damage forwards to RPC_Damage on the
     // owner). DoT ticks (fire/poison) go through ApplyDamage with no attacker, so they never roll a crit.
     // Player-wide effect (chest armor), so we read the summed player value. The shard value is the crit chance
     // authored as a whole-number percent, hence the 0.01f.
-    public static class ChanceToCritOnHit
-    {
+    public static class ChanceToCritOnHit {
         // Damage multiplier applied on a successful crit. Tunable; 2 = double damage on crit. This is distinct
         // in intent from ChanceDoubleDamage (a Fortune-shard proc) even though the default multiplier matches.
         private const float CritDamageMultiplier = 2f;
-
+        static GameObject effect;
         // Tooltip: "{0}% Chance to Crit for {1}x Damage" -- {1} surfaces the crit multiplier from the const.
-        public static void RegisterDisplayValues()
-        {
+        public static void RegisterDisplayValues() {
             MagicItem.RegisterDisplayValues(MagicEffectType.ChanceToCritOnHit,
                 value => new object[] { value, CritDamageMultiplier });
         }
 
         // Prefix handler invoked by CharacterDamageDispatch (attacker-side outgoing modifier).
-        public static void ModifyOutgoingHit(HitData hit, Character attacker)
-        {
-            if (hit == null || attacker != Player.m_localPlayer)
-            {
+        public static void ModifyOutgoingHit(HitData hit, Character attacker) {
+            if (hit == null || attacker != Player.m_localPlayer) {
                 return;
             }
 
             var chance = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
                 MagicEffectType.ChanceToCritOnHit, 0.01f);
-            if (chance > 0f && Random.value < chance)
-            {
+            if (chance > 0f && Random.value < chance) {
                 hit.m_damage.Modify(CritDamageMultiplier);
+                if (effect == null) {
+                    effect = PrefabManager.Instance.GetPrefab("sfx_stonegolem_hurt");
+                }
+                if (effect != null) {
+                    GameObject.Instantiate(effect, Player.m_localPlayer.transform.position, Quaternion.identity);
+                }
+
             }
         }
     }

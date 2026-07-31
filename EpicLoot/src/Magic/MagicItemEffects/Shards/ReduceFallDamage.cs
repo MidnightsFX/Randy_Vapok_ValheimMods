@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Pink chest shard: scale down fall damage. Vanilla computes a raw fall damage in
+    // Pink chest shard: subtract a flat amount from fall damage. Vanilla computes a raw fall damage in
     // Character.UpdateGroundContact and passes it through SEMan.ModifyFallDamage before applying it, so a
     // Postfix here is the same hook the game uses for feather-fall / status effects. Only players ever take
     // fall damage (the caller guards IsPlayer()); we further limit to the local player since magic effects
-    // are only meaningful for it. Shard values are authored as whole-number percents, hence the 0.01f, and
-    // the reduction is clamped to 0-100%.
+    // are only meaningful for it. Vanilla fall damage ramps 0-100 over a 4m-20m drop, so shard values are
+    // authored on that same raw scale; the result is floored at 0 (the caller skips Damage() at <= 0).
     public static class ReduceFallDamage
     {
         [HarmonyPatch(typeof(SEMan), nameof(SEMan.ModifyFallDamage))]
@@ -24,10 +24,10 @@ namespace EpicLoot.MagicItemEffects.Shards
                 }
 
                 var reduction = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
-                    MagicEffectType.ReduceFallDamage, 0.01f);
+                    MagicEffectType.ReduceFallDamage);
                 if (reduction > 0f)
                 {
-                    damage *= 1f - Mathf.Clamp01(reduction);
+                    damage = Mathf.Max(0f, damage - reduction);
                 }
             }
         }

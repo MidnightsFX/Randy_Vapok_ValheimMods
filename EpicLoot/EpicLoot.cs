@@ -112,6 +112,9 @@ public sealed class EpicLoot : BaseUnityPlugin
         LootTableLoaded?.Invoke();
         RegisterMagicEffectEvents();
 
+        // Scheduled (non-per-frame) effect drivers, on their own DontDestroyOnLoad objects.
+        MagicItemEffects.Shards.PoisonAdrenalinePulse.Create();
+
         // Main file config watcher
         SetupWatcher();
     }
@@ -126,6 +129,10 @@ public sealed class EpicLoot : BaseUnityPlugin
         MagicItemEffects.Shards.SpendCoinsToIncreaseDamage.RegisterDisplayValues();
         MagicItemEffects.Shards.ChanceToCritOnHit.RegisterDisplayValues();
         MagicItemEffects.Shards.BloodDrinker.RegisterDisplayValues();
+        MagicItemEffects.Shards.PerfectDodge.RegisterDisplayValues();
+        MagicItemEffects.Shards.AdrenalineFrostWave.RegisterDisplayValues();
+        MagicItemEffects.Shards.GainAdrenalineWhenApplyingPoison.RegisterDisplayValues();
+        MagicItemEffects.Shards.LuckWhileFishing.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;

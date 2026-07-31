@@ -24,9 +24,9 @@ Legendary → Mythic).
 
 | Shard | Melee Wpn | Ranged Wpn | Magic Wpn | Head | Chest | Legs | Shoulders | Trinket | Utility |
 |---|---|---|---|---|---|---|---|---|---|
-| **DarkRed** |  IncreaseMeleeSkills | IncreaseRangedSkills | AddBluntDamage | HeadHunter | ChanceToCritOnHit | BloodDrinker | ReduceArmorIncreaseDamage | DecreaseForsakenCooldown | OffSetAttack |
+| **DarkRed** |  IncreaseMeleeSkills | IncreaseRangedSkills | AddBluntDamage | HeadHunter | ChanceToCritOnHit | BloodDrinker | ReduceArmorIncreaseDamage | AdrenalineCharge | OffSetAttack |
 | **DarkGreen** (Poison) | AddPoisonDamage | AddPoisonDamage | AddPoisonDamage | AddPoisonResistancePercentage | PhysToPoison | AddBlockingSkill | PoisonToTrueDamage | GainAdrenalineWhenApplyingPoison | IncreaseAllPoisonDamageDone |
-| **DarkBlue** (Frost) | AddFrostDamage | AddFrostDamage | AddFrostDamage | AddFrostResistancePercentage | PhysToFrost | AddElementalMagicSkill | IcyWeight | AdrenalineIncreasesFrostDamage | Warmth |
+| **DarkBlue** (Frost) | AddFrostDamage | AddFrostDamage | AddFrostDamage | AddFrostResistancePercentage | PhysToFrost | AddElementalMagicSkill | IcyWeight | AdrenalineFrostWave | Warmth |
 | **DarkPurple** (Blood) | ModifyAttackHealthUse | ModifyAttackHealthUse | ModifyAttackHealthUse | KillsReduceNextBloodCost | ReflectDamage | BloodMagicLevelIncreasesHealthRegen | GainEitrWhenSacrificingHealth | GainAdrenalineWhenSacrificingHealth | AddBloodMagicSkill |
 | **Golden** (Luck) | ChanceDoubleDamage | ChanceDoubleDamage | ChanceDoubleDamage | QuickLearner | SpendCoinsToIncreaseDamage | LuckWhileFishing | LuckyCraft | Luck | Riches |
 
