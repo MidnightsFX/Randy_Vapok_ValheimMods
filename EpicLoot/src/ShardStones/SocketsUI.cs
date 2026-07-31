@@ -98,6 +98,9 @@ namespace EpicLoot.ShardStones
                     magicItem.Sockets.Add(new SocketedEffect(
                         effect, ShardSocketManager.GetSourcePrefabName(item), rarity) { ShardType = color });
                 }
+                // Shard values depend on what else shares the item (same-color stacking decay), so they
+                // are settled once the whole set is known rather than per item above.
+                ShardSocketManager.RecomputeSocketValues(OpenEquipment, magicItem);
                 OpenEquipment.SaveMagicItem(magicItem);
 
                 if (Player.m_localPlayer != null)

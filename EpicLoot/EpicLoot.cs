@@ -114,6 +114,7 @@ public sealed class EpicLoot : BaseUnityPlugin
 
         // Scheduled (non-per-frame) effect drivers, on their own DontDestroyOnLoad objects.
         MagicItemEffects.Shards.PoisonAdrenalinePulse.Create();
+        MagicItemEffects.Shards.StormFuryPulse.Create();
 
         // Main file config watcher
         SetupWatcher();
@@ -126,12 +127,16 @@ public sealed class EpicLoot : BaseUnityPlugin
         MagicItemEffects.BulkupEffect.RegisterDisplayValues();
         MagicItemEffects.Shards.HealthGainPerXDamageDone.RegisterDisplayValues();
         MagicItemEffects.Shards.HealthOnEitrUse.RegisterDisplayValues();
-        MagicItemEffects.Shards.SpendCoinsToIncreaseDamage.RegisterDisplayValues();
+        MagicItemEffects.Shards.Mercenary.RegisterDisplayValues();
+        MagicItemEffects.Shards.Coinplated.RegisterDisplayValues();
+        MagicItemEffects.Shards.Wager.RegisterDisplayValues();
         MagicItemEffects.Shards.ChanceToCritOnHit.RegisterDisplayValues();
         MagicItemEffects.Shards.BloodDrinker.RegisterDisplayValues();
         MagicItemEffects.Shards.PerfectDodge.RegisterDisplayValues();
         MagicItemEffects.Shards.AdrenalineFrostWave.RegisterDisplayValues();
+        MagicItemEffects.Shards.AdrenalineIncreasesHealthRegen.RegisterDisplayValues();
         MagicItemEffects.Shards.GainAdrenalineWhenApplyingPoison.RegisterDisplayValues();
+        MagicItemEffects.Shards.StormFury.RegisterDisplayValues();
         MagicItemEffects.Shards.LuckWhileFishing.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
@@ -927,7 +932,7 @@ public sealed class EpicLoot : BaseUnityPlugin
 
     public static string GetMagicEffectPip(bool hasBeenAugmented)
     {
-        return HasAuga ? (hasBeenAugmented ? "▾" : "♦") : (hasBeenAugmented ? "▼" : "◆"); // //🞠🞛 
+        return HasAuga ? (hasBeenAugmented ? "â–¾" : "â™¦") : (hasBeenAugmented ? "â–¼" : "â—†"); // //ðŸž ðŸž› 
     }
 
     private static bool IsNotRestrictedItem(ItemDrop.ItemData item)

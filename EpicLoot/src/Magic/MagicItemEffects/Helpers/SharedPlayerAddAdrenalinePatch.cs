@@ -50,6 +50,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             SummonBatWhenActivatingAdrenaline.OnAdrenalineActivated(__instance);
             AdrenalineCharge.OnAdrenalineActivated(__instance);
             AdrenalineFrostWave.OnAdrenalineActivated(__instance);
+            AdrenalineIncreasesHealthRegen.OnAdrenalineActivated(__instance);
         }
     }
 }

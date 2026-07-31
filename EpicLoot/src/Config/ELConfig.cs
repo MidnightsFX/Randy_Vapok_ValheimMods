@@ -67,6 +67,9 @@ internal class ELConfig {
     // shadow the enum inside this class and break `ShardSocketMode.Free` in the bind call below.
     public static ConfigEntry<ShardSocketMode> ShardSocketRemovalMode;
     public static ConfigEntry<RuneSocketMode> RuneSocketRemovalMode;
+    // Named ...StackingMode for the same shadowing reason as ShardSocketRemovalMode above.
+    public static ConfigEntry<ShardStackMode> ShardStackingMode;
+    public static ConfigEntry<float> ShardStackDecayFactor;
     public static ConfigEntry<float> GlobalDropRateModifier;
     public static ConfigEntry<float> ItemsToMaterialsDropRatio;
     public static ConfigEntry<bool> AlwaysShowWelcomeMessage;
@@ -391,6 +394,26 @@ internal class ELConfig {
             "Permanent = a socketed rune is permanent; it can be neither removed nor broken, and no " +
             "other rune can be swapped into its socket.\n" +
             "Default: Free.");
+        ShardStackingMode = BindServerConfig("Sockets", "Shard Stack Mode", ShardStackMode.Diminishing,
+            "Controls whether more than one shardstone of the same color may sit on a single item. " +
+            "A shard's effect comes from its color and the item's type, so two shards of one color " +
+            "always grant the same effect.\n" +
+            "Blocked = a color already socketed on an item cannot be socketed into it again.\n" +
+            "Diminishing = allowed, with each further shard of that color contributing a decayed " +
+            "fraction of its value (see Shard Stack Decay Factor).\n" +
+            "Full = allowed at full value; every shard of the color contributes its whole effect.\n" +
+            "Shards whose effect has no rarity-scaled value (Warmth, for example) can never be " +
+            "stacked -- halving a yes/no effect would leave a dead socket. Boss and other exclusive " +
+            "shards keep their own one-per-item / one-per-worn-set rule regardless of this setting.\n" +
+            "Default: Blocked.");
+        ShardStackDecayFactor = BindServerConfig("Sockets", "Shard Stack Decay Factor", 0.5f,
+            "Under Shard Stack Mode = Diminishing, the share of its value each further shard of the " +
+            "same color contributes. The shards of a color are ranked strongest first, and the " +
+            "shard at rank R is worth (factor ^ R) of its normal value -- so 0.5 gives full, half, " +
+            "a quarter, an eighth, and so on down the stack.\n" +
+            "0 = additional shards of a color contribute nothing.\n" +
+            "1 = no decay (equivalent to Shard Stack Mode = Full).\n" +
+            "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         GlobalDropRateModifier = BindServerConfig("Balance", "Global Drop Rate Modifier", 1.0f,
             "A global percentage that modifies how likely loot is to drop.\n" +
             "1 = Exactly what is in the loot tables will drop.\n" +

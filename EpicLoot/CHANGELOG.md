@@ -7,8 +7,10 @@ New Content:
     * Shardstones can be found in the world as loot
     * 90+ new magic effects have been added and are primarily available through shardstones
     * DarkBlue trinket shards now roll Frost Wave: filling your adrenaline bursts an ice nova that chills every enemy within 10m, slowing them for the shard's duration (replaces AdrenalineIncreasesFrostDamage)
+    * LightGreen trinket shards now roll a reworked Adrenaline Surge: filling your adrenaline grants a timed health regen buff instead of a permanent bonus that scaled with how full the pool was. Both the bonus and its duration scale with rarity, up to +40% health regen for 20s at Mythic. The buff shows in the HUD with the shardstone's icon and does not stack -- refilling refreshes it
     * Golden legs shards now roll a reworked Lucky Fishing: each rod catch gets a chance at bonus treasure and a separate chance to double (or rarely triple) the catch itself. Bonus fish match the size of the one you landed. The treasure table is a configurable prefab list of value thresholds, like Riches -- higher shard values reach richer finds while dropping the cheap ones out entirely
     * The enchanting table's probability panel now lists shard slot odds alongside effect count odds
+    * New `Shard Stack Mode` option controls whether several shards of the same color may share one item: Blocked (default, as before) / Diminishing / Full. Under Diminishing the shards of a color are ranked strongest first and each one after the leader is worth `Shard Stack Decay Factor` (default 0.5) to the power of its rank -- full, half, a quarter, and so on -- with the tooltip marking each reduced socket. Boss and other exclusive shards keep their one-at-a-time rule, and effects with no scaled value (Warmth, for example) can never be stacked
 * Tempering (Thanks Rusty!)
     * Tempering allows you to pay to increase the value of an existing enchantment (service provided by Hildir)
     * Tempering can be configured to allow upgrading past a tiers normal maximum.

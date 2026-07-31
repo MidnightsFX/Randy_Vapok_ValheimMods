@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using EpicLoot.Config;
 using EpicLoot.Crafting;
@@ -69,7 +70,7 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
-            if (!ResolveSocketedEffect(equipment, input, out var effect, out var color, out _)) {
+            if (!ResolveSocketedEffect(equipment, input, out var effect, out var color, out var rarity)) {
                 reason = "$mod_epicloot_socket_invalidinput";
                 return false;
             }
@@ -110,9 +111,13 @@ namespace EpicLoot.ShardStones {
                 }
             }
 
-            if (!ELConfig.AllowDuplicateSocketedEffects.Value &&
-                equipMagicItem.Sockets.Exists(s => s.Effect != null && s.Effect.EffectType == effect.EffectType)) {
-                reason = "$mod_epicloot_socket_duplicate";
+            var occupants = new List<SocketOccupant>();
+            foreach (var socket in equipMagicItem.Sockets) {
+                if (socket != null) {
+                    occupants.Add(new SocketOccupant(socket.ShardType, socket.Effect));
+                }
+            }
+            if (!CheckDuplicateEffect(color, effect, rarity, occupants, out reason)) {
                 return false;
             }
 
@@ -134,7 +139,7 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
-            if (!ResolveSocketedEffect(equipment, input, out var effect, out var color, out _)) {
+            if (!ResolveSocketedEffect(equipment, input, out var effect, out var color, out var rarity)) {
                 reason = "$mod_epicloot_socket_invalidinput";
                 return false;
             }
@@ -172,14 +177,65 @@ namespace EpicLoot.ShardStones {
                 }
             }
 
-            if (!ELConfig.AllowDuplicateSocketedEffects.Value) {
-                foreach (var other in coResident) {
-                    if (other != null &&
-                        ResolveSocketedEffect(equipment, other, out var otherEffect, out _, out _) &&
-                        otherEffect != null && otherEffect.EffectType == effect.EffectType) {
-                        reason = "$mod_epicloot_socket_duplicate";
-                        return false;
+            var occupants = new List<SocketOccupant>();
+            foreach (var other in coResident) {
+                if (other != null &&
+                    ResolveSocketedEffect(equipment, other, out var otherEffect, out var otherColor, out _)) {
+                    occupants.Add(new SocketOccupant(otherColor, otherEffect));
+                }
+            }
+            if (!CheckDuplicateEffect(color, effect, rarity, occupants, out reason)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        // A socket already in play, reduced to what the duplicate rules care about: what kind of stone
+        // holds it, and what it grants. Serves both a stored socket and a co-resident item mid-swap.
+        private readonly struct SocketOccupant {
+            public readonly ShardType Color;
+            public readonly MagicItemEffect Effect;
+
+            public SocketOccupant(ShardType color, MagicItemEffect effect) {
+                Color = color;
+                Effect = effect;
+            }
+        }
+
+        // Whether an input granting `effect` may join sockets that already grant the same effect type.
+        // Shard-on-shard of the SAME COLOR is governed by the stacking mode; every other collision --
+        // rune vs rune, rune vs shard, two colors landing on one effect -- stays under
+        // AllowDuplicateSocketedEffects, so nothing about those changes when stacking is off.
+        private static bool CheckDuplicateEffect(ShardType inputColor, MagicItemEffect effect,
+            ItemRarity inputRarity, List<SocketOccupant> occupants, out string reason) {
+            reason = null;
+
+            foreach (var occupant in occupants) {
+                if (occupant.Effect == null || occupant.Effect.EffectType != effect.EffectType) {
+                    continue;
+                }
+
+                var sameColorShard = inputColor != ShardType.None && occupant.Color == inputColor;
+                if (!sameColorShard) {
+                    if (ELConfig.AllowDuplicateSocketedEffects.Value) {
+                        continue;
                     }
+                    reason = "$mod_epicloot_socket_duplicate";
+                    return false;
+                }
+
+                if (ELConfig.ShardStackingMode.Value == ShardStackMode.Blocked) {
+                    reason = "$mod_epicloot_socket_duplicate";
+                    return false;
+                }
+
+                // An effect with no rarity-scaled value (Warmth, say) is a yes/no grant: a second one
+                // adds nothing whether it is decayed or not, so stacking it would only cost the player
+                // a socket. Same notion of "valueless" the BreakValueless removal mode uses.
+                if (MagicItemEffectDefinitions.IsValuelessEffect(effect.EffectType, inputRarity)) {
+                    reason = "$mod_epicloot_socket_nostackbinary";
+                    return false;
                 }
             }
 
@@ -197,9 +253,105 @@ namespace EpicLoot.ShardStones {
             var sourcePrefab = GetSourcePrefabName(input);
 
             equipMagicItem.Sockets.Add(new SocketedEffect(effect, sourcePrefab, sourceRarity) { ShardType = color });
+            RecomputeSocketValues(equipment, equipMagicItem);
             equipment.SaveMagicItem(equipMagicItem);
             ResetCache();
             return true;
+        }
+
+        // Rebuilds every shard socket's effect from the shard grid and applies same-color stacking
+        // decay. Idempotent: each value is rebuilt from the config base rather than scaled from whatever
+        // is already stored, so running it after any socket change can never compound decay -- which is
+        // what lets removal promote the survivors back up. Runestone sockets are left alone; their
+        // effect is fixed when the rune goes in rather than derived from the host item.
+        //
+        // Values are baked into the socket (the whole effect pipeline and every tooltip read them from
+        // there), so this must run on every path that adds, removes or re-hosts a socket.
+        public static void RecomputeSocketValues(ItemDrop.ItemData equipment, MagicItem magicItem) {
+            if (equipment == null || magicItem == null || magicItem.Sockets.Count == 0) {
+                return;
+            }
+
+            // Base (undecayed) value per socket; NaN marks a socket this pass does not rank -- a
+            // runestone, an inert shard, or one whose color has no effect on this item type.
+            var baseValues = new float[magicItem.Sockets.Count];
+            for (var i = 0; i < magicItem.Sockets.Count; i++) {
+                baseValues[i] = float.NaN;
+                var socket = magicItem.Sockets[i];
+                if (socket == null) {
+                    continue;
+                }
+
+                socket.StackMultiplier = 1f;
+                if (socket.ShardType == ShardType.None) {
+                    continue;
+                }
+
+                // Same resolution ResolveSocketedEffect performs, but keyed off the stored shard
+                // identity rather than a loose item: a shard with no mapping for this item type sits
+                // inert, it does not keep a value authored for some other kind of gear.
+                var shardEffect = Shards.GetShardEffect(equipment, socket.ShardType);
+                if (shardEffect == null ||
+                    !shardEffect.ValuesPerRarity.TryGetValue(socket.SourceRarity, out var baseValue)) {
+                    socket.Effect = null;
+                    continue;
+                }
+
+                socket.Effect = new MagicItemEffect(shardEffect.EffectType, baseValue);
+                baseValues[i] = baseValue;
+            }
+
+            if (ELConfig.ShardStackingMode.Value != ShardStackMode.Diminishing) {
+                return;
+            }
+
+            var decay = ELConfig.ShardStackDecayFactor.Value;
+            foreach (var group in GroupSocketsByColor(magicItem, baseValues)) {
+                if (group.Count < 2) {
+                    continue;
+                }
+
+                // Strongest first, so the player always gets the best arrangement of what they slotted
+                // regardless of the order they slotted it in. Value leads rather than rarity in case a
+                // config's per-rarity ramp is not monotonic; rarity then socket index break ties, which
+                // keeps the result deterministic.
+                group.Sort((a, b) => {
+                    var byValue = baseValues[b].CompareTo(baseValues[a]);
+                    if (byValue != 0) {
+                        return byValue;
+                    }
+                    var byRarity = magicItem.Sockets[b].SourceRarity.CompareTo(magicItem.Sockets[a].SourceRarity);
+                    return byRarity != 0 ? byRarity : a.CompareTo(b);
+                });
+
+                for (var rank = 1; rank < group.Count; rank++) {
+                    var socket = magicItem.Sockets[group[rank]];
+                    var multiplier = Mathf.Pow(decay, rank);
+                    socket.StackMultiplier = multiplier;
+                    // Two decimals: the raw product runs to 1.5 * 0.125 = 0.1875, which reads as noise
+                    // in a tooltip and buys nothing at these magnitudes.
+                    socket.Effect.EffectValue = (float)Math.Round(baseValues[group[rank]] * multiplier, 2);
+                }
+            }
+        }
+
+        // Socket indices grouped by shard color, covering only the sockets RecomputeSocketValues
+        // resolved to a value (baseValues entry is not NaN).
+        private static List<List<int>> GroupSocketsByColor(MagicItem magicItem, float[] baseValues) {
+            var groups = new Dictionary<ShardType, List<int>>();
+            for (var i = 0; i < magicItem.Sockets.Count; i++) {
+                if (float.IsNaN(baseValues[i])) {
+                    continue;
+                }
+
+                var color = magicItem.Sockets[i].ShardType;
+                if (!groups.TryGetValue(color, out var indices)) {
+                    indices = new List<int>();
+                    groups[color] = indices;
+                }
+                indices.Add(i);
+            }
+            return new List<List<int>>(groups.Values);
         }
 
         // How the given socketed entry is allowed to leave its socket. Derived live from config and the
@@ -280,6 +432,8 @@ namespace EpicLoot.ShardStones {
 
             var socketed = equipMagicItem.Sockets[socketIndex];
             equipMagicItem.Sockets.RemoveAt(socketIndex);
+            // Losing a shard promotes the survivors of its color back up the stacking ranks.
+            RecomputeSocketValues(equipment, equipMagicItem);
             equipment.SaveMagicItem(equipMagicItem);
             ResetCache();
             return ReconstructShardItem(socketed);

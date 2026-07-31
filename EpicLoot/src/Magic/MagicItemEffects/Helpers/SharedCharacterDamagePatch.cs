@@ -30,7 +30,8 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             EitrImbueAttack.ModifyOutgoingHit(hit, attacker);
             IncreaseAllPoisonDamageDone.ModifyOutgoingHit(hit, attacker);
             PoisonToTrueDamage.ModifyOutgoingHit(__instance, hit, attacker);
-            SpendCoinsToIncreaseDamage.ModifyOutgoingHit(hit, attacker);
+            Mercenary.ModifyOutgoingHit(hit, attacker);
+            Wager.ModifyOutgoingHit(__instance, hit, attacker);
             ChanceDoubleDamage.ModifyOutgoingHit(hit, attacker);
             ChanceToCritOnHit.ModifyOutgoingHit(hit, attacker);
             ModifyStaggerDamage_Character_Damage_Patch.ApplyStaggerModifier(__instance, hit, attacker);
@@ -55,6 +56,11 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
                 return;
             }
             Character attacker = hit.GetAttacker();
+            // Wager settles first: it consumes the stake its own prefix parked for THIS hit, and several
+            // handlers below (ChainLightning, StrikeCausesLightning, MeteorSummoner) deal further damage,
+            // which re-enters this patch and would otherwise clear the stake before it could be refunded.
+            Wager.OnDamageDealt(__instance, hit);
+
             // On-hit reactions (attacker side unless the handler guards otherwise).
             AddLifeSteal.CheckAndDoLifeSteal(hit, attacker);
             BloodDrinker.OnDamageDealt(hit, attacker);

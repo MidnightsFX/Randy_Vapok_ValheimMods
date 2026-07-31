@@ -84,7 +84,6 @@ public static class ModifyPlayerRegen
             // Shard health-regen effects that used to declare their own ModifyHealthRegen postfix.
             DayHealthRegen.Apply(__instance, ref regenMultiplier);
             RestingHealthRegen.Apply(__instance, ref regenMultiplier);
-            AdrenalineIncreasesHealthRegen.Apply(__instance, ref regenMultiplier);
             BloodMagicLevelIncreasesHealthRegen.Apply(__instance, ref regenMultiplier);
         }
 

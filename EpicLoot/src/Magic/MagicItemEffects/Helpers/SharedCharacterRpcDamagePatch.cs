@@ -11,7 +11,8 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
     //    (AvoidDamageTaken). The one load-bearing ordering constraint from the old code is preserved by
     //    call order: IncomingPhysicalConversion moves physical damage onto an element BEFORE
     //    ModifyResistance reduces it (previously done with Priority.High). Avoidance is checked before the
-    //    resource-spending mitigations (EitrShield) so a fully-avoided hit never spends eitr.
+    //    resource-spending mitigations (EitrShield, Coinplated) so a fully-avoided hit never spends eitr or
+    //    coins. EitrShield runs first of those two, so eitr is drained before the purse.
     //  * The postfix runs the on-damage-taken reactions (slow, adrenaline, boss retributions). These run
     //    even when the prefix cancels the hit -- matching the old behavior, where these were independent
     //    postfixes that Harmony always executes.
@@ -44,6 +45,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
 
             ModifyResistance.ModifyIncoming(__instance, hit);
             EitrShield.ModifyIncoming(__instance, hit);
+            Coinplated.ModifyIncoming(__instance, hit);
             DamageReductionAtNight.ModifyIncoming(__instance, hit);
 
             // Victim-side reactions moved off Character.Damage so they fire on the victim's own client

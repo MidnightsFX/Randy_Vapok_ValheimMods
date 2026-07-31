@@ -77,15 +77,10 @@ public static class TransferMagicalEffects
                     ShardType = socket.ShardType
                 };
 
-                if (socket.ShardType != ShardType.None)
-                {
-                    // A shard's effect depends on the host item type, so re-resolve it for the crafted
-                    // item. If it has no mapping for this item type it stays inert (Effect == null).
-                    var shardEffect = Shards.GetShardEffect(CraftedItem, socket.ShardType);
-                    if (shardEffect != null && shardEffect.ValuesPerRarity.TryGetValue(socket.SourceRarity, out var value))
-                        carried.Effect = new MagicItemEffect(shardEffect.EffectType, value);
-                }
-                else if (socket.Effect != null)
+                // Shard sockets are left effect-less here: a shard's effect depends on the host item
+                // type AND on what else the crafted item ends up carrying (same-color stacking decay),
+                // so every shard is resolved together once the set is complete, below.
+                if (socket.ShardType == ShardType.None && socket.Effect != null)
                 {
                     // A runestone carries a fixed effect; keep it only if valid on the crafted item.
                     var def = MagicItemEffectDefinitions.Get(socket.Effect.EffectType);
@@ -95,6 +90,8 @@ public static class TransferMagicalEffects
 
                 newMagicItem.Sockets.Add(carried);
             }
+
+            ShardSocketManager.RecomputeSocketValues(CraftedItem, newMagicItem);
         }
 
         if (newMagicItem.Effects.Count == 0 && newMagicItem.SocketCount == 0)

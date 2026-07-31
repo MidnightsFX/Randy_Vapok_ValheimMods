@@ -46,6 +46,12 @@ namespace EpicLoot
         public ItemRarity SourceRarity; // for tooltip range + reconstruction
         public ShardType ShardType = ShardType.None; // set for shard sockets; None for runestones
 
+        // The share of its normal value this socket ended up contributing, < 1 only when same-color
+        // stacking decay was applied (see ShardSocketManager.RecomputeSocketValues). Effect.EffectValue
+        // already has it baked in; this is kept purely so the tooltip can say why the number is low.
+        // Defaults to 1 so items saved before stacking existed deserialize unchanged.
+        public float StackMultiplier = 1f;
+
         public SocketedEffect()
         {
         }
@@ -185,7 +191,7 @@ namespace EpicLoot
                     var removalTag = GetSocketRemovalTag(socket);
                     if (socket.Effect != null)
                     {
-                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, false)}</color>{removalTag}");
+                        tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, false)}</color>{GetSocketStackTag(socket)}{removalTag}");
                         if (showRange)
                         {
                             tooltip.Append($"<color=#c0c0c0ff>");
@@ -226,6 +232,21 @@ namespace EpicLoot
                 default:
                     return "";
             }
+        }
+
+        // Marks a socket whose value was cut by same-color stacking decay, so the reduced number on the
+        // line above reads as the rule working rather than as a bug. Nothing is shown at full strength,
+        // which is every socket unless ShardStackMode.Diminishing is on.
+        private static string GetSocketStackTag(SocketedEffect socket)
+        {
+            if (socket.StackMultiplier >= 1f)
+            {
+                return "";
+            }
+
+            var percent = Mathf.RoundToInt(socket.StackMultiplier * 100f);
+            var label = string.Format(Localization.instance.Localize("$mod_epicloot_socket_tip_stacked"), percent);
+            return $" <color=#808080>{label}</color>";
         }
 
         public string GetCompactTooltip() {

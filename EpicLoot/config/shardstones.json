@@ -1439,53 +1439,53 @@
             ],
             "TypeEffects": {
                 "MeleeWeapon": {
-                    "EffectType": "ChanceDoubleDamage",
+                    "EffectType": "Mercenary",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 2,
-                        "Epic": 3,
-                        "Legendary": 4,
-                        "Mythic": 5
+                        "Magic": 10,
+                        "Rare": 20,
+                        "Epic": 30,
+                        "Legendary": 40,
+                        "Mythic": 50
                     }
                 },
                 "RangedWeapon": {
-                    "EffectType": "ChanceDoubleDamage",
+                    "EffectType": "Mercenary",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 2,
-                        "Epic": 3,
-                        "Legendary": 4,
-                        "Mythic": 5
+                        "Magic": 10,
+                        "Rare": 20,
+                        "Epic": 30,
+                        "Legendary": 40,
+                        "Mythic": 50
                     }
                 },
                 "MagicWeapon": {
-                    "EffectType": "ChanceDoubleDamage",
+                    "EffectType": "Mercenary",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 2,
-                        "Epic": 3,
-                        "Legendary": 4,
-                        "Mythic": 5
+                        "Magic": 10,
+                        "Rare": 20,
+                        "Epic": 30,
+                        "Legendary": 40,
+                        "Mythic": 50
                     }
                 },
                 "Head": {
-                    "EffectType": "QuickLearner",
+                    "EffectType": "Wager",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 20,
+                        "Rare": 40,
+                        "Epic": 60,
+                        "Legendary": 80,
+                        "Mythic": 100
                     }
                 },
                 "Chest": {
-                    "EffectType": "SpendCoinsToIncreaseDamage",
+                    "EffectType": "Coinplated",
                     "ValuesPerRarity": {
-                        "Magic": 4,
-                        "Rare": 8,
-                        "Epic": 12,
-                        "Legendary": 16,
-                        "Mythic": 20
+                        "Magic": 50,
+                        "Rare": 60,
+                        "Epic": 70,
+                        "Legendary": 80,
+                        "Mythic": 90
                     }
                 },
                 "Legs": {
@@ -1593,21 +1593,21 @@
                 "Legs": {
                     "EffectType": "StormRider",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 10,
+                        "Rare": 14,
+                        "Epic": 18,
+                        "Legendary": 22,
+                        "Mythic": 26
                     }
                 },
                 "Trinket": {
-                    "EffectType": "IncreaseAdrenalineGainDuringStorm",
+                    "EffectType": "StormFury",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 1,
+                        "Rare": 1.5,
+                        "Epic": 2,
+                        "Legendary": 2.5,
+                        "Mythic": 3
                     }
                 },
                 "Utility": {
@@ -1645,31 +1645,31 @@
                 "MeleeWeapon": {
                     "EffectType": "HealthGainPerXDamageDone",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "RangedWeapon": {
                     "EffectType": "HealthGainPerXDamageDone",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 3,
+                        "Rare": 4,
+                        "Epic": 5,
+                        "Legendary": 6,
+                        "Mythic": 7
                     }
                 },
                 "MagicWeapon": {
                     "EffectType": "HealthGainPerXDamageDone",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 1,
+                        "Rare": 2,
+                        "Epic": 3,
+                        "Legendary": 4,
+                        "Mythic": 5
                     }
                 },
                 "Head": {
@@ -1705,11 +1705,11 @@
                 "Trinket": {
                     "EffectType": "AdrenalineIncreasesHealthRegen",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 16,
+                        "Rare": 20,
+                        "Epic": 26,
+                        "Legendary": 32,
+                        "Mythic": 40
                     }
                 },
                 "Utility": {

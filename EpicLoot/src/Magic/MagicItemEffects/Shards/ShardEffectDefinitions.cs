@@ -30,7 +30,26 @@ namespace EpicLoot.MagicItemEffects.Shards
                 // Lucky Fishing (LuckWhileFishing): the bonus-treasure table (prefab -> value threshold,
                 // same semantic as the Riches config) plus the triple-catch sub-roll chance.
                 { MagicEffectType.LuckWhileFishing, LuckWhileFishing.DefaultConfig },
+                // Mercenary (Golden weapons): the per-hit coin cost, the flat damage bonus, and the
+                // soft-cap curve applied to the converted coins.
+                { MagicEffectType.Mercenary, Mercenary.DefaultConfig },
+                // Coinplated (Golden chest): what share of the purse is committed to absorbing each hit.
+                { MagicEffectType.Coinplated, Coinplated.DefaultConfig },
+                // Wager (Golden head): how much damage each wagered coin buys.
+                { MagicEffectType.Wager, Wager.DefaultConfig },
+                // Adrenaline Surge (AdrenalineIncreasesHealthRegen): seconds of buff granted per point of
+                // shard value, which is what turns the single rarity ramp into both a regen % and a duration.
+                { MagicEffectType.AdrenalineIncreasesHealthRegen,
+                    new Dictionary<string, float>
+                        { { "SecondsPerPercent", AdrenalineIncreasesHealthRegen.DefaultSecondsPerPercent } } },
             };
+
+        // Effects that need an adrenaline pool but whose type name does not contain "Adrenaline", which is
+        // how BuildDefinition infers the ItemHasAdrenaline requirement for the rest of them.
+        private static readonly HashSet<string> AdrenalinePoolEffects = new HashSet<string>
+        {
+            MagicEffectType.StormFury,
+        };
 
         public static void RegisterShardEffectDefinitions()
         {
@@ -84,7 +103,7 @@ namespace EpicLoot.MagicItemEffects.Shards
             // Adrenaline effects only function alongside an adrenaline pool, so keep them legal only on
             // items that supply one (m_maxAdrenaline > 0, i.e. adrenaline trinkets) -- the shard grid
             // already assigns them only to the trinket slot.
-            if (type.Contains("Adrenaline"))
+            if (type.Contains("Adrenaline") || AdrenalinePoolEffects.Contains(type))
             {
                 requirements.ItemHasAdrenaline = true;
             }

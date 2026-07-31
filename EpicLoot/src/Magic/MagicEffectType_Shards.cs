@@ -15,7 +15,9 @@ namespace EpicLoot
         public static string AdrenalineFrostWave = nameof(AdrenalineFrostWave);
         public static string GainAdrenalineWhenApplyingPoison = nameof(GainAdrenalineWhenApplyingPoison);
         public static string GainAdrenalineWhenSacrificingHealth = nameof(GainAdrenalineWhenSacrificingHealth);
-        public static string IncreaseAdrenalineGainDuringStorm = nameof(IncreaseAdrenalineGainDuringStorm);
+        // Flat adrenaline pulse plus decay suppression while a storm rages. The name deliberately does not
+        // contain "Adrenaline", so ShardEffectDefinitions lists it explicitly to keep ItemHasAdrenaline.
+        public static string StormFury = nameof(StormFury);
         public static string AdrenalineIncreasesHealthRegen = nameof(AdrenalineIncreasesHealthRegen);
         public static string AdrenalineCharge = nameof(AdrenalineCharge);
 
@@ -75,8 +77,12 @@ namespace EpicLoot
         public static string IncreaseHarvestDamage = nameof(IncreaseHarvestDamage);
         public static string IncreaseHarvestXPGain = nameof(IncreaseHarvestXPGain);
         public static string BountifulHarvest = nameof(BountifulHarvest);
-        public static string SpendCoinsToIncreaseDamage = nameof(SpendCoinsToIncreaseDamage);
+        public static string Mercenary = nameof(Mercenary); // Golden weapons: spend coins for bonus hit damage
+        public static string Coinplated = nameof(Coinplated); // Golden chest: spend coins to absorb incoming damage
+        public static string Wager = nameof(Wager); // Golden head: stake coins on a hit, refunded on a kill
         public static string LuckWhileFishing = nameof(LuckWhileFishing);
+        // ChanceDoubleDamage is currently unused by the shard grid (Golden's weapon slots moved to
+        // Mercenary); kept live so it can be reassigned to a shard slot later.
         public static string ChanceDoubleDamage = nameof(ChanceDoubleDamage);
         public static string SailingSpeed = nameof(SailingSpeed);
         public static string PotionEfficacy = nameof(PotionEfficacy);
