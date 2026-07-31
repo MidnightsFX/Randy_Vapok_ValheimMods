@@ -930,9 +930,12 @@ public sealed class EpicLoot : BaseUnityPlugin
         return HasAuga ? EpicAssets.AugaSetItemSprite : EpicAssets.GenericSetItemSprite;
     }
 
+    // Escapes rather than literal glyphs: this file has no BOM and a CP1252 round-trip once
+    // corrupted these characters into mojibake. \u25BE = small down triangle, \u2666 = diamond suit
+    // (Auga); \u25BC = down triangle, \u25C6 = black diamond (default). Alt ideas: U+1F7A0, U+1F79B.
     public static string GetMagicEffectPip(bool hasBeenAugmented)
     {
-        return HasAuga ? (hasBeenAugmented ? "â–¾" : "â™¦") : (hasBeenAugmented ? "â–¼" : "â—†"); // //ðŸž ðŸž› 
+        return HasAuga ? (hasBeenAugmented ? "\u25BE" : "\u2666") : (hasBeenAugmented ? "\u25BC" : "\u25C6");
     }
 
     private static bool IsNotRestrictedItem(ItemDrop.ItemData item)

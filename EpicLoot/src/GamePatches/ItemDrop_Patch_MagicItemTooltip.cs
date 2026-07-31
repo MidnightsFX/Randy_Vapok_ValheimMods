@@ -21,11 +21,13 @@ public static class MagicTooltipPatches
             return "";
         }
 
-        // $KEY_RTrigger / $KEY_ButtonX only resolve to pad glyphs while a gamepad is active (Localization
-        // looks up "Joy" + the binding name), which is exactly when this branch is taken.
-        return ZInput.IsGamepadActive()
-            ? "\n$mod_epicloot_press_socket_gamepad"
-            : "\n$mod_epicloot_press_socket";
+        // The $KEY_ tokens must sit in this source string, never inside a translation value:
+        // Localization.Localize is single-pass and never re-scans what Translate() emitted, so a nested
+        // $KEY_Use would reach the screen literally. $KEY_RTrigger / $KEY_ButtonX only resolve to pad
+        // glyphs while a gamepad is active (Localization looks up "Joy" + the binding name), which is
+        // exactly when this branch is taken.
+        var keys = ZInput.IsGamepadActive() ? "$KEY_RTrigger + $KEY_ButtonX" : "$KEY_Use";
+        return $"\n[<color=yellow><b>{keys}</b></color>] $mod_epicloot_press_socket";
     }
 
     // Set the topic of the tooltip with the decorated name

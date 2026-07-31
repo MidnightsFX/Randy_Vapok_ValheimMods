@@ -104,35 +104,38 @@ namespace EpicLoot
                 Localization.instance.Localize(baseItem.m_shared.m_name).ToLowerInvariant() : TypeNameOverride;
         }
 
+        // Glyphs are written as escapes, not literals: a CP1252 round-trip corrupted the equivalent
+        // characters in EpicLoot.GetMagicEffectPip once already. \u25BE/\u25BC = augmented,
+        // \u25B2 = tempered, \u2666/\u25C6 = plain (Auga uses the first of each pair).
         public string GetMagicEffectPip(int effectIndex)
         {
             if (EpicLoot.HasAuga)
             {
                 if (HasBeenAugmented(effectIndex))
                 {
-                    return "▾";
+                    return "\u25BE";
                 }
 
                 if (HasBeenTempered(effectIndex))
                 {
-                    return "▲";
+                    return "\u25B2";
                 }
 
-                return "♦";
+                return "\u2666";
             }
             else
             {
                 if (HasBeenAugmented(effectIndex))
                 {
-                    return "▼";
+                    return "\u25BC";
                 }
 
                 if (HasBeenTempered(effectIndex))
                 {
-                    return "▲";
+                    return "\u25B2";
                 }
 
-                return "◆";
+                return "\u25C6";
             }
 
         }
@@ -158,7 +161,7 @@ namespace EpicLoot
             for (var index = 0; index < Effects.Count; index++)
             {
                 var effect = Effects[index];
-                var pip = EpicLoot.GetMagicEffectPip(IsEffectAugmented(index));
+                var pip = GetMagicEffectPip(index);
                 if (showRange)
                 {
                     // Header without the inline range; the range and other details go in the block below.
@@ -207,7 +210,7 @@ namespace EpicLoot
                 }
                 for (var i = 0; i < GetOpenSocketCount(); i++)
                 {
-                    tooltip.AppendLine("  ◊<color=#808080> $mod_epicloot_empty_socket</color>");
+                    tooltip.AppendLine("  \u25CA<color=#808080> $mod_epicloot_empty_socket</color>");
                 }
             }
 

@@ -48,7 +48,7 @@ namespace EpicLoot.MagicItemEffects.Shards
         }
     }
 
-    // LightGreen head shard: consumed potions/meads last longer â€” extend the duration of the status effect a
+    // LightGreen head shard: consumed potions/meads last longer  --  extend the duration of the status effect a
     // consumable applies by value%. Player.ConsumeItem adds the item's m_consumeStatusEffect on a successful
     // consume, so a postfix lengthens the just-added effect's time-to-live. Shard value is authored as a
     // whole-number percent, hence the 0.01f.

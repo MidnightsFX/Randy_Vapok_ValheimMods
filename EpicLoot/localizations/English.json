@@ -66,8 +66,7 @@
     "mod_epicloot_me_doublemagicshot_config_chance": "Extra Shot Chance",
     "mod_epicloot_me_triplebowshot_config_chance": "Triple Shot Chance",
 
-    "mod_epicloot_press_socket": "[<color=yellow><b>$KEY_Use</b></color>] Open shard slots",
-    "mod_epicloot_press_socket_gamepad": "[<color=yellow><b>$KEY_RTrigger + $KEY_ButtonX</b></color>] Open shard slots",
+    "mod_epicloot_press_socket": "Open shard slots",
     "mod_epicloot_socket_notmagic": "This item cannot be slotted",
     "mod_epicloot_socket_unavailable": "This item's slots can't be opened right now",
     "mod_epicloot_socket_nofreeslot": "No open sockets",

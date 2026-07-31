@@ -10,6 +10,11 @@ guidelines = 180
 indent_size = 4
 tab_width = 4
 
+# A BOM is what stops an editor from misreading a UTF-8 file as CP1252 and silently
+# round-tripping non-ASCII characters into mojibake (it happened to the tooltip pip
+# glyphs in EpicLoot.cs). Prefer \uXXXX escapes for glyphs in string literals anyway.
+charset = utf-8-bom
+
 # --- One True Brace Style (1TBS) ---
 csharp_new_line_before_open_brace = none
 csharp_new_line_before_else = false
@@ -41,6 +46,11 @@ dotnet_diagnostic.IDE0074.severity = none  # Use compound assignment
 dotnet_diagnostic.IDE0090.severity = none  # 'new' expression can be simplified
 dotnet_diagnostic.IDE0130.severity = none  # Namespace doesn't match folder
 dotnet_diagnostic.IDE0270.severity = none  # Use coalesce expression
+
+# Localization files are read with BOM detection but must never carry one for
+# other tooling; plain UTF-8 is the contract.
+[*.{json,md}]
+charset = utf-8
 
 # --- Generated / third-party Unity code: skip style analysis ---
 [ValheimUnity/**.cs]
