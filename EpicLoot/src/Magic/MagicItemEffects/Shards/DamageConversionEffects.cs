@@ -15,7 +15,7 @@ namespace EpicLoot.MagicItemEffects.Shards
         // dispatcher calls this before ModifyResistance so the converted element is then reduced by the
         // player's matching percentage resistance -- the intended shard synergy (e.g. Orange head = fire
         // resist, Orange chest = PhysToFire).
-        public static void ModifyIncoming(Character __instance, HitData hit)
+        public static void ModifyIncoming(Character __instance, HitData hit, bool IsBlocked = false, bool IsParry = false)
         {
             if (__instance != Player.m_localPlayer)
             {
@@ -27,6 +27,14 @@ namespace EpicLoot.MagicItemEffects.Shards
             float toFrost = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToFrost, 0.01f);
             float toPoison = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToPoison, 0.01f);
             float toLightning = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToLightning, 0.01f);
+            
+            if (IsBlocked) 
+            {
+                toFire += player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToFireOnBlock, 0.01f);
+                toFrost += player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToFrostOnBlock, 0.01f);
+                toPoison += player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToPoisonOnBlock, 0.01f);
+                toLightning += player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToLightningOnBlock, 0.01f);
+            }
 
             float total = toFire + toFrost + toPoison + toLightning;
             if (total <= 0f)

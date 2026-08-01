@@ -40,6 +40,16 @@
                         "Mythic": 15
                     }
                 },
+                "Shield": {
+                    "EffectType": "LifeGainOnBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 1,
+                        "Rare": 1.5,
+                        "Epic": 2,
+                        "Legendary": 2.5,
+                        "Mythic":  3
+                    }
+                },
                 "Head": {
                     "EffectType": "ModifyHealthRegen",
                     "ValuesPerRarity": {
@@ -140,6 +150,16 @@
                         "Epic": 10,
                         "Legendary": 12,
                         "Mythic": 14
+                    }
+                },
+                "Shield": {
+                    "EffectType": "StaminaGainOnBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 1,
+                        "Rare": 1.5,
+                        "Epic": 2,
+                        "Legendary": 2.5,
+                        "Mythic": 3
                     }
                 },
                 "Head": {
@@ -244,6 +264,16 @@
                         "Mythic": 10
                     }
                 },
+                "Shield": {
+                    "EffectType": "EitrGainOnBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 1,
+                        "Rare": 1.5,
+                        "Epic": 2,
+                        "Legendary": 2.5,
+                        "Mythic": 3
+                    }
+                },
                 "Head": {
                     "EffectType": "PercentEitr",
                     "ValuesPerRarity": {
@@ -344,6 +374,16 @@
                         "Epic": 4,
                         "Legendary": 5,
                         "Mythic": 6
+                    }
+                },
+                "Shield": {
+                    "EffectType": "PhysToFireOnBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "Head": {
@@ -550,6 +590,16 @@
                         "Mythic": 18
                     }
                 },
+                "Shield": {
+                    "EffectType": "NightBlocker",
+                    "ValuesPerRarity": {
+                        "Magic": 10,
+                        "Rare": 15,
+                        "Epic": 20,
+                        "Legendary": 25,
+                        "Mythic": 30
+                    }
+                },
                 "Head": {
                     "EffectType": "NightStaminaRegenIncrease",
                     "ValuesPerRarity": {
@@ -563,11 +613,11 @@
                 "Chest": {
                     "EffectType": "DamageReductionAtNight",
                     "ValuesPerRarity": {
-                        "Magic": 6,
-                        "Rare": 7,
-                        "Epic": 8,
-                        "Legendary": 9,
-                        "Mythic": 10
+                        "Magic": 7,
+                        "Rare": 9,
+                        "Epic": 11,
+                        "Legendary": 13,
+                        "Mythic": 15
                     }
                 },
                 "Legs": {
@@ -644,6 +694,16 @@
                 },
                 "MagicWeapon": {
                     "EffectType": "IncreaseDamageDuringDaytime",
+                    "ValuesPerRarity": {
+                        "Magic": 2,
+                        "Rare": 4,
+                        "Epic": 6,
+                        "Legendary": 8,
+                        "Mythic": 10
+                    }
+                },
+                "Shield": {
+                    "EffectType": "DayBlocker",
                     "ValuesPerRarity": {
                         "Magic": 2,
                         "Rare": 4,
@@ -1162,6 +1222,16 @@
                         "Mythic": 6
                     }
                 },
+                "Shield": {
+                    "EffectType": "PhysToPoisonOnBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
+                    }
+                },
                 "Head": {
                     "EffectType": "AddPoisonResistancePercentage",
                     "ValuesPerRarity": {
@@ -1262,6 +1332,16 @@
                         "Epic": 4,
                         "Legendary": 5,
                         "Mythic": 6
+                    }
+                },
+                "Shield": {
+                    "EffectType": "PhysToFrostOnBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "Head": {
@@ -1568,6 +1648,16 @@
                         "Epic": 4,
                         "Legendary": 5,
                         "Mythic": 6
+                    }
+                },
+                "Shield": {
+                    "EffectType": "PhysToLightningOnBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 },
                 "Head": {

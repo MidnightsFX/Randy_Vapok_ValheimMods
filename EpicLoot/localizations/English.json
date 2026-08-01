@@ -266,6 +266,28 @@
     "mod_epicloot_me_phystopoison_desc": "Move {0}% of incoming physical damage to poison before resistances.",
     "mod_epicloot_me_phystolightning_display": "Convert {0}% Incoming Physical to Lightning",
     "mod_epicloot_me_phystolightning_desc": "Move {0}% of incoming physical damage to lightning before resistances.",
+
+    "mod_epicloot_me_phystofireonblock_display": "Convert {0}% Incoming Physical to Fire on block",
+    "mod_epicloot_me_phystofireonblock_desc": "Move {0}% of incoming physical damage to fire before resistances on block",
+    "mod_epicloot_me_phystofrostonblock_display": "Convert {0}% Incoming Physical to Frost on block",
+    "mod_epicloot_me_phystofrostonblock_desc": "Move {0}% of incoming physical damage to frost before resistances on block.",
+    "mod_epicloot_me_phystopoisononblock_display": "Convert {0}% Incoming Physical to Poison on block",
+    "mod_epicloot_me_phystopoisononblock_desc": "Move {0}% of incoming physical damage to poison before resistances on block.",
+    "mod_epicloot_me_phystolightningonblock_display": "Convert {0}% Incoming Physical to Lightning on block",
+    "mod_epicloot_me_phystolightningonblock_desc": "Move {0}% of incoming physical damage to lightning before resistances on block.",
+
+    "mod_epicloot_me_lifegainonblock_display": "Heal {0} hp on block",
+    "mod_epicloot_me_lifegainonblock_desc": "Heal {0} health on block",
+    "mod_epicloot_me_staminagainonblock_display": "Gain {0} stamina on block",
+    "mod_epicloot_me_staminagainonblock_desc": "Gain {0} stamina on block.",
+    "mod_epicloot_me_eitrgainonblock_display": "Gain {0} eitr on block",
+    "mod_epicloot_me_eitrgainonblock_desc": "Gain {0} eitr on block.",
+
+    "mod_epicloot_me_dayblocker_display": "Gain {0}% Block XP during Daytime",
+    "mod_epicloot_me_dayblocker_desc": "Gain {0}% increased block experience during Daytime on block",
+    "mod_epicloot_me_nightblocker_display": "Gain {0}% Block XP during Nighttime ",
+    "mod_epicloot_me_nightblocker_desc": "Gain {0}% increased block experience during Nighttime on block.",
+
     "mod_epicloot_me_convertphysicaldamagetolightning_display": "Convert {0}% Weapon Physical to Lightning",
     "mod_epicloot_me_convertphysicaldamagetolightning_desc": "Move {0}% of this weapon's physical damage to lightning.",
     "mod_epicloot_me_eitrimbueattack_display": "Eitr Imbue: +{0}% Physical as Spirit",
