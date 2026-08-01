@@ -1,5 +1,6 @@
 ﻿using EpicLoot.MagicItemEffects;
 using EpicLoot.MagicItemEffects.Shards;
+using EpicLoot.src.Magic.MagicItemEffects.Shards;
 using HarmonyLib;
 using Mono.Cecil;
 
@@ -32,8 +33,6 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
 
             IncomingPhysicalConversion.ModifyIncoming(__instance, hit, IsBlocked: true); // orange, dark blue, light blue, dark green
             GainOnBlockResource.GainOnBlock(IsBlocked: true); // red / yellow / cyan
-
-
             //EitrImbueAttack.ModifyOutgoingHit(hit, attacker);
             //Class.HelperMethod(__result
             //ModifyStaggerDamage_Character_Damage_Patch.ApplyStaggerModifier(__instance, hit, attacker);
