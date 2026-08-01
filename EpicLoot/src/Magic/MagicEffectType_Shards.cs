@@ -37,6 +37,8 @@ namespace EpicLoot
         public static string DayArmor = nameof(DayArmor);
         public static string DayStaminaRegen = nameof(DayStaminaRegen);
         public static string DayHealthRegen = nameof(DayHealthRegen);
+        public static string DayBlocker = nameof(DayBlocker);
+        public static string NightBlocker = nameof(NightBlocker);
 
         // --- Percent pools / regen ---
         public static string PercentHealth = nameof(PercentHealth);
@@ -51,6 +53,10 @@ namespace EpicLoot
         public static string PhysToFrost = nameof(PhysToFrost);
         public static string PhysToPoison = nameof(PhysToPoison);
         public static string PhysToLightning = nameof(PhysToLightning);
+        public static string PhysToFireOnBlock = nameof(PhysToFireOnBlock);
+        public static string PhysToFrostOnBlock = nameof(PhysToFrostOnBlock);
+        public static string PhysToPoisonOnBlock = nameof(PhysToPoisonOnBlock);
+        public static string PhysToLightningOnBlock = nameof(PhysToLightningOnBlock);
         public static string ConvertPhysicalDamageToLightning = nameof(ConvertPhysicalDamageToLightning);
         public static string EitrImbueAttack = nameof(EitrImbueAttack);
 
@@ -62,6 +68,9 @@ namespace EpicLoot
         public static string RunningOnEmpty = nameof(RunningOnEmpty);
         public static string EveryXPointsOfEitrIncreasesStamina = nameof(EveryXPointsOfEitrIncreasesStamina);
         public static string EitrShield = nameof(EitrShield);
+        public static string LifeGainOnBlock = nameof(LifeGainOnBlock);
+        public static string StaminaGainOnBlock = nameof(StaminaGainOnBlock);
+        public static string EitrGainOnBlock = nameof(EitrGainOnBlock);
 
         // --- Weight / movement-penalty scaling ---
         public static string DamageBonusFromPlayerWeight = nameof(DamageBonusFromPlayerWeight);
