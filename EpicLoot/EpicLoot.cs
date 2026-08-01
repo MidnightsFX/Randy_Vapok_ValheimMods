@@ -132,12 +132,15 @@ public sealed class EpicLoot : BaseUnityPlugin
         MagicItemEffects.Shards.Wager.RegisterDisplayValues();
         MagicItemEffects.Shards.ChanceToCritOnHit.RegisterDisplayValues();
         MagicItemEffects.Shards.BloodDrinker.RegisterDisplayValues();
+        MagicItemEffects.Shards.TravelLight.RegisterDisplayValues();
         MagicItemEffects.Shards.PerfectDodge.RegisterDisplayValues();
         MagicItemEffects.Shards.AdrenalineFrostWave.RegisterDisplayValues();
         MagicItemEffects.Shards.AdrenalineIncreasesHealthRegen.RegisterDisplayValues();
         MagicItemEffects.Shards.GainAdrenalineWhenApplyingPoison.RegisterDisplayValues();
         MagicItemEffects.Shards.StormFury.RegisterDisplayValues();
         MagicItemEffects.Shards.LuckWhileFishing.RegisterDisplayValues();
+        MagicItemEffects.Shards.Kindling.RegisterDisplayValues();
+        MagicItemEffects.Shards.Conduit.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;
@@ -441,17 +444,13 @@ public sealed class EpicLoot : BaseUnityPlugin
         // Runs during ZNetScene setup (after IceSpikes is registered, while AudioMan exists) so the
         // frost-cone SFX is routed through the volume mixer instead of playing at full volume.
         PrefabManager.OnPrefabsRegistered += FrostAOE.HookUpIceSpikesAudio;
-        // Registers the networked, damage-free 'lightningAOE' strike-visual clone into ZNetScene on every
-        // client each world load (fires as a ZNetScene.Awake postfix), so remote clients can resolve a synced
-        // strike ZDO. Idempotent -- the clone is built once and re-injected into each fresh ZNetScene.
-        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.StrikeCausesLightning.RegisterVisualPrefab;
         // Registers our player-faction, tamed clone of the vanilla 'Bat' into ZNetScene on every client each
-        // world load (same manual injection as the strike visual above), so the SummonBat trinket shard can
-        // spawn a reload-safe pet that stays friendly. Idempotent -- built once and re-injected each ZNetScene.
+        // world load (fires as a ZNetScene.Awake postfix), so the SummonBat trinket shard can spawn a
+        // reload-safe pet that stays friendly. Idempotent -- built once and re-injected each ZNetScene.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.SummonBatWhenActivatingAdrenaline.RegisterTamedBatPrefab;
-        // Registers the local-only 'vfx_FireAddFuel' fire-patch clone the Trailblazer shard drops behind the
-        // running player (same manual injection as above). Idempotent -- built once and re-injected each ZNetScene.
-        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.Trailblazer.RegisterVfxPrefab;
+        // NOTE: StrikeCausesLightning.RegisterVisualPrefab and Trailblazer.RegisterVfxPrefab used to be
+        // registered here. Both effects are unassigned in the shard grid (see MagicEffectType_Shards.cs), so
+        // their prefab clones are no longer built. Re-add these lines if either effect takes a slot again.
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
         ShardStones.Shards.CreateAndLoadShardItems();

@@ -71,6 +71,7 @@ namespace EpicLoot
         public static string LifeGainOnBlock = nameof(LifeGainOnBlock);
         public static string StaminaGainOnBlock = nameof(StaminaGainOnBlock);
         public static string EitrGainOnBlock = nameof(EitrGainOnBlock);
+        public static string Kindling = nameof(Kindling);                                       // Orange
 
         // --- Weight / movement-penalty scaling ---
         public static string DamageBonusFromPlayerWeight = nameof(DamageBonusFromPlayerWeight);
@@ -106,6 +107,9 @@ namespace EpicLoot
         public static string BloodDrinker = nameof(BloodDrinker); // DarkRed legs: max-health-for-lifesteal tradeoff
 
         // --- Movement / misc ---
+        // Trailblazer is no longer assigned to a shard slot (Orange's legs slot moved to Kindling); kept
+        // live, like ChanceDoubleDamage above, so it can be reassigned later. Unassigned effects get no
+        // definition from ShardEffectDefinitions, so nothing can roll or grant them until a shard uses them.
         public static string Trailblazer = nameof(Trailblazer);
         public static string ReduceFallDamage = nameof(ReduceFallDamage);
         public static string RollCleanse = nameof(RollCleanse);
@@ -126,9 +130,16 @@ namespace EpicLoot
         public static string IcyWeight = nameof(IcyWeight);                                     // DarkBlue
         public static string GainEitrWhenSacrificingHealth = nameof(GainEitrWhenSacrificingHealth); // DarkPurple
         public static string LuckyCraft = nameof(LuckyCraft);                                   // Golden
-        public static string StrikeCausesLightning = nameof(StrikeCausesLightning);             // LightBlue
+        public static string Conduit = nameof(Conduit);                                         // LightBlue
         public static string RestingHealthRegen = nameof(RestingHealthRegen);                   // LightGreen
-        public static string BatteringRam = nameof(BatteringRam);                               // Peach
+        public static string TravelLight = nameof(TravelLight);                                 // Peach
+        // StrikeCausesLightning is no longer assigned to a shard slot (LightBlue's shoulder slot moved to
+        // Conduit); kept live, like BatteringRam below, so it can be reassigned later.
+        public static string StrikeCausesLightning = nameof(StrikeCausesLightning);
+        // BatteringRam is no longer assigned to a shard slot (Peach's shoulder slot moved to TravelLight);
+        // kept live, like ChanceDoubleDamage above, so it can be reassigned later. Unassigned effects get no
+        // definition from ShardEffectDefinitions, so nothing can roll or grant them until a shard uses them.
+        public static string BatteringRam = nameof(BatteringRam);
 
         // --- Boss signature effects (boss-tier power) ---
         public static string ShockingCharge = nameof(ShockingCharge);
