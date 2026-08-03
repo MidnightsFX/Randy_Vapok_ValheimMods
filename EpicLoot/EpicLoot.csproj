@@ -75,4 +75,8 @@
   </Target>
 
   <Import Project="..\Common\Common.projitems" Label="Shared" />
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /Y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;$(AppData)\r2modmanPlus-local\Valheim\profiles\testa\BepInEx\plugins\&quot;" />
+  </Target>
 </Project>
