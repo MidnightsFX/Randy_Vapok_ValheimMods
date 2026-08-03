@@ -20,13 +20,13 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Shards
                 {
                     var dayEffectBonus = 1f + player.GetTotalActiveMagicEffectValue(MagicEffectType.DayBlocker, .01f);
                     factor *= dayEffectBonus;
-                    Jotunn.Logger.LogWarning($"[Dayblocker] Base {dayEffectBonus}, total {skill.m_accumulator:F3}");
+                    //Jotunn.Logger.LogWarning($"[Dayblocker] Base {dayEffectBonus}, total {skill.m_accumulator:F3}");
                 }
                 if (skillType == Skills.SkillType.Blocking && EnvMan.IsNight()) 
                 {
                     var nightEffectBonus = 1f + player.GetTotalActiveMagicEffectValue(MagicEffectType.NightBlocker, .01f);
                     factor *= nightEffectBonus;
-                    Jotunn.Logger.LogWarning($"[Nightblocker] {nightEffectBonus}, total {skill.m_accumulator:F3}");
+                    //Jotunn.Logger.LogWarning($"[Nightblocker] {nightEffectBonus}, total {skill.m_accumulator:F3}");
                 }
             }
         }

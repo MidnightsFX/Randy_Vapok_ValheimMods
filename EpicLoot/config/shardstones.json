@@ -488,6 +488,16 @@
                         "Mythic": 6
                     }
                 },
+                "Shield": {
+                    "EffectType": "BlockAsDodgeAsBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 3,
+                        "Rare": 6,
+                        "Epic": 9,
+                        "Legendary": 12,
+                        "Mythic": 15
+                    }
+                },
                 "Head": {
                     "EffectType": "DecreaseDodgeCost",
                     "ValuesPerRarity": {
@@ -814,6 +824,16 @@
                         "Mythic": 6
                     }
                 },
+                "Shield": {
+                    "EffectType": "BlockFromMovementPenalty",
+                    "ValuesPerRarity": {
+                        "Magic": 20,
+                        "Rare": 40,
+                        "Epic": 60,
+                        "Legendary": 80,
+                        "Mythic": 100
+                    }
+                },
                 "Head": {
                     "EffectType": "IncreaseXPGainFromMovementPenalty",
                     "ValuesPerRarity": {
@@ -1118,6 +1138,16 @@
                         "Epic": 4,
                         "Legendary": 5,
                         "Mythic": 6
+                    }
+                },
+                "Shield": {
+                    "EffectType": "BloodBaseBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 3,
+                        "Rare": 6,
+                        "Epic": 9,
+                        "Legendary": 12,
+                        "Mythic": 15
                     }
                 },
                 "Head": {
@@ -1446,6 +1476,16 @@
                         "Mythic": 12
                     }
                 },
+                "Shield": {
+                    "EffectType": "BloodStaggerBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 3,
+                        "Rare": 6,
+                        "Epic": 9,
+                        "Legendary": 12,
+                        "Mythic": 15
+                    }
+                },
                 "Head": {
                     "EffectType": "KillsReduceNextBloodCost",
                     "ValuesPerRarity": {
@@ -1762,6 +1802,16 @@
                         "Mythic": 5
                     }
                 },
+                "Shield": {
+                    "EffectType": "UseMoreStaminaOnBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 4,
+                        "Rare": 8,
+                        "Epic": 12,
+                        "Legendary": 16,
+                        "Mythic": 20
+                    }
+                },
                 "Head": {
                     "EffectType": "PotionEfficacy",
                     "ValuesPerRarity": {
@@ -1862,6 +1912,16 @@
                         "Epic": 4,
                         "Legendary": 5,
                         "Mythic": 6
+                    }
+                },
+                "Shield": {
+                    "EffectType": "BurdenedBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 10,
+                        "Rare": 15,
+                        "Epic": 20,
+                        "Legendary": 25,
+                        "Mythic": 30
                     }
                 },
                 "Head": {

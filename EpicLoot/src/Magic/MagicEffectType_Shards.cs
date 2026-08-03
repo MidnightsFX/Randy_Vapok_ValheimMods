@@ -1,4 +1,4 @@
-namespace EpicLoot
+﻿namespace EpicLoot
 {
     // New magic-effect identifiers introduced by the Shardstone system. These are declared here so
     // ShardDefinitions (src/ShardStones/Shards.cs) can reference them; the behaviors are stubs (see
@@ -81,6 +81,8 @@ namespace EpicLoot
         public static string IncreaseXPGainFromMovementPenalty = nameof(IncreaseXPGainFromMovementPenalty);
         public static string CarryWeightForMovementPenalty = nameof(CarryWeightForMovementPenalty);
         public static string StaminaIncreaseForMovementPenalty = nameof(StaminaIncreaseForMovementPenalty);
+        public static string BurdenedBlock = nameof(BurdenedBlock);
+        public static string BlockFromMovementPenalty = nameof(BlockFromMovementPenalty);
 
         // --- Harvest / gather / economy ---
         public static string IncreaseHarvestDamage = nameof(IncreaseHarvestDamage);
@@ -97,6 +99,10 @@ namespace EpicLoot
         public static string PotionEfficacy = nameof(PotionEfficacy);
         public static string IncreaseMeleeSkills = nameof(IncreaseMeleeSkills); // new melee-skill bundle
         public static string IncreaseRangedSkills = nameof(IncreaseRangedSkills); // new ranged-skill bundle
+        public static string BlockAsDodgeAsBlock = nameof(BlockAsDodgeAsBlock); // block and dodge bundle BADAB
+        public static string BloodStaggerBlock = nameof(BloodStaggerBlock); // name TBD reduced stagger dmg reduction while bloock
+        public static string BloodBaseBlock = nameof(BloodBaseBlock); // consume hp add base block 
+        public static string UseMoreStaminaOnBlock = nameof(UseMoreStaminaOnBlock);
 
         // --- Element / status mechanics ---
         public static string IncreaseAllPoisonDamageDone = nameof(IncreaseAllPoisonDamageDone);

@@ -33,9 +33,6 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
 
             IncomingPhysicalConversion.ModifyIncoming(__instance, hit, IsBlocked: true); // orange, dark blue, light blue, dark green
             GainOnBlockResource.GainOnBlock(IsBlocked: true); // red / yellow / cyan
-            //EitrImbueAttack.ModifyOutgoingHit(hit, attacker);
-            //Class.HelperMethod(__result
-            //ModifyStaggerDamage_Character_Damage_Patch.ApplyStaggerModifier(__instance, hit, attacker);
         }
 
         
@@ -44,8 +41,11 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
     [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetBaseBlockPower), typeof(int))]
     internal static class BlockBASEPowerPatch {
         [HarmonyPostfix]
-        private static void BlockBasePower(ItemDrop.ItemData __instance, ref float __result) {
-
+        private static void BlockBasePower(ItemDrop.ItemData __instance, ref float __result) 
+        {
+            BurdenedBlock.Apply(ref __result); 
+            BlockFromMovementPenalty.Apply(ref __result);
+            AddBloodBaseBlock.Apply(ref __result);
         }
     }
 
