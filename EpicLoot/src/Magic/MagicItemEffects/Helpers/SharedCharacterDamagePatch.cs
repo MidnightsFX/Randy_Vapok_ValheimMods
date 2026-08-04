@@ -57,8 +57,8 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             }
             Character attacker = hit.GetAttacker();
             // Wager settles first: it consumes the stake its own prefix parked for THIS hit, and several
-            // handlers below (ChainLightning, StrikeCausesLightning, MeteorSummoner) deal further damage,
-            // which re-enters this patch and would otherwise clear the stake before it could be refunded.
+            // handlers below (ChainLightning, MeteorSummoner) deal further damage, which re-enters this
+            // patch and would otherwise clear the stake before it could be refunded.
             Wager.OnDamageDealt(__instance, hit);
 
             // On-hit reactions (attacker side unless the handler guards otherwise).
@@ -74,7 +74,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             GainAdrenalineWhenApplyingPoison.OnDamageDealt(__instance, hit, attacker);
             BurningAdrenaline.OnDamageDealt(hit, attacker);
             StaminaOnKill.OnDamageDealt(__instance, hit, attacker);
-            StrikeCausesLightning.OnDamageDealt(__instance, hit, attacker);
+            Conduit.OnDamageDealt(__instance, hit, attacker);
             EikthyrShockingCharge.OnDamageDealt(hit, attacker);
             MeteorSummoner.OnDamageDealt(__instance, hit, attacker);
             QueenEverflow.OnDamageDealt(__instance, hit, attacker);
