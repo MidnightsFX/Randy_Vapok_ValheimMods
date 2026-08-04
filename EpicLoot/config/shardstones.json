@@ -825,13 +825,13 @@
                     }
                 },
                 "Shield": {
-                    "EffectType": "BlockFromMovementPenalty",
+                    "EffectType": "AnchoredBlock",
                     "ValuesPerRarity": {
-                        "Magic": 20,
-                        "Rare": 40,
-                        "Epic": 60,
-                        "Legendary": 80,
-                        "Mythic": 100
+                        "Magic": 0.25,
+                        "Rare": 0.50,
+                        "Epic": 0.75,
+                        "Legendary": 1,
+                        "Mythic": 1.25
                     }
                 },
                 "Head": {
@@ -934,6 +934,16 @@
                         "Epic": 14,
                         "Legendary": 16,
                         "Mythic": 18
+                    }
+                },
+                "Shield": {
+                    "EffectType": "ElementalWarding",
+                    "ValuesPerRarity": {
+                        "Magic": 4,
+                        "Rare": 8,
+                        "Epic": 12,
+                        "Legendary": 16,
+                        "Mythic": 20
                     }
                 },
                 "Head": {
@@ -1479,11 +1489,11 @@
                 "Shield": {
                     "EffectType": "BloodStaggerBlock",
                     "ValuesPerRarity": {
-                        "Magic": 3,
-                        "Rare": 6,
-                        "Epic": 9,
-                        "Legendary": 12,
-                        "Mythic": 15
+                        "Magic": 5,
+                        "Rare": 10,
+                        "Epic": 15,
+                        "Legendary": 20,
+                        "Mythic": 25
                     }
                 },
                 "Head": {
@@ -1803,7 +1813,7 @@
                     }
                 },
                 "Shield": {
-                    "EffectType": "UseMoreStaminaOnBlock",
+                    "EffectType": "Warding",
                     "ValuesPerRarity": {
                         "Magic": 4,
                         "Rare": 8,
@@ -1917,11 +1927,11 @@
                 "Shield": {
                     "EffectType": "BurdenedBlock",
                     "ValuesPerRarity": {
-                        "Magic": 10,
-                        "Rare": 15,
-                        "Epic": 20,
-                        "Legendary": 25,
-                        "Mythic": 30
+                        "Magic": 0.25,
+                        "Rare": 0.50,
+                        "Epic": 0.75,
+                        "Legendary": 1,
+                        "Mythic": 1.25
                     }
                 },
                 "Head": {

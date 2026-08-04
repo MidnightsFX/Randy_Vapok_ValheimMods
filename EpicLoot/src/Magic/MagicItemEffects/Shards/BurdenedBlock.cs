@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 namespace EpicLoot.MagicItemEffects.Shards {
     public class BurdenedBlock 
     {
-        public static void Apply(ref float baseBlock) 
+        public static void Apply(ItemDrop.ItemData __instance, ref float baseBlock) 
         {
             var player = Player.m_localPlayer;
             float carriedWeight = player.GetInventory().GetTotalWeight();
-            float burdenedBlockIncrement = player.GetTotalActiveMagicEffectValue(MagicEffectType.BurdenedBlock, 1f); // whole numbers flat block
-
-            float burdenedBlockBonus = (int)((carriedWeight - 300f) / 50f);
+            float burdenedBlockBonus = player.GetTotalActiveMagicEffectValue(MagicEffectType.BurdenedBlock, 1f);
+            float burdenedBlockIncrement = Math.Max(0, (int)((carriedWeight - 300f) / 50f));
 
             baseBlock += (burdenedBlockIncrement * burdenedBlockBonus);
+
         }
     }
 }

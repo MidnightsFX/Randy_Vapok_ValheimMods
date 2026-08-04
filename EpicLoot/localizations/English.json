@@ -192,8 +192,8 @@
     "mod_epicloot_me_daysailingspeed_desc": "Increases your ship's sailing speed by {0}% during the day.",
     "mod_epicloot_me_armorfrommovementpenalty_display": "+Up to {0}% Armor from Heavy Gear",
     "mod_epicloot_me_armorfrommovementpenalty_desc": "Armor scaling with your gear's speed penalty, up to +{0}%.",
-    "mod_epicloot_me_blockfrommovementpenalty_display": "+Adds {0}% of net movement speed penalty as base block",
-    "mod_epicloot_me_blockfrommovementpenalty_desc": "Adds {0}% of net movement speed penalty(negative movement speed) as additional base block",
+    "mod_epicloot_me_anchoredblock_display": "+Adds {0} base block per negative movement speed penalty from equipment",
+    "mod_epicloot_me_anchoredblock_desc": "+Adds {0} base block per negative movement speed penalty from equipment. Base block added is not effected by explicit sources of movement speed such as potions, status effects, and magic effects.",
     "mod_epicloot_me_reduceeitrcost_display": "-{0}% Eitr Costs",
     "mod_epicloot_me_reduceeitrcost_desc": "Reduces all Eitr costs by {0}%.",
     "mod_epicloot_me_reducefishingstaminacost_display": "-{0}% Fishing Stamina",
@@ -350,14 +350,20 @@
     "mod_epicloot_me_blockasdodgeasblock_display": "Adds skill equal to {0}% of block as dodge and {0}% of dodge as block",
     "mod_epicloot_me_blockasdodgeasblock_desc": "Adds +{0}% of blocking skill as dodge skill and +{0}% of dodge skill as blocking skill",
 
-    "mod_epicloot_me_usemorestaminaonblock_display": "Uses {0}% of maximum stamina as damage mitigation on block. Consumes stamina equal to damage mitigated",
-    "mod_epicloot_me_usemorestaminaonblock_desc": "Allows for {0}% of maximum stamina to be used on block to mitigate any damage taken from blocked attack. Consumes stamina equal damage mitigated",
+    "mod_epicloot_me_burdenedblock_display": "Adds +{0} base block per 50 Pack Weight over 300",
+    "mod_epicloot_me_burdenedblock_desc": "Adds +{0} base block per 50 Pack Weight over 300",
 
-    "mod_epicloot_me_bloodstaggerblock_display": "Consumes 5% of max HP to reduce stagger damage by {0}% while blocking",
-    "mod_epicloot_me_bloodstaggerblock_desc": "Consumes 5% of max HP as true damage to reduce stagger damage taken by {0}% while blocking. This effect is effective for the duration of the entire block",
+    "mod_epicloot_me_warding_display": "Uses {0}% of maximum stamina as physical damage mitigation on block. Consumes stamina equal to damage mitigated",
+    "mod_epicloot_me_warding_desc": "Allows for {0}% of maximum stamina to be used on block to mitigate any physical (pierce, blunt, slash) damage taken from blocked attacks. This mitigation is calculated after the block and before resistances and armor calculations take place. Consumes stamina equal to damage mitigated",
 
-    "mod_epicloot_me_bloodbaseblock_display": "Consumes 5% of max HP to add {0} base block to your next block",
-    "mod_epicloot_me_bloodbaseblock_desc": "Consumes 5% of max HP as true damage adding {0} to your next block. This effect is effective for the duration of the entire block",
+    "mod_epicloot_me_elementalwarding_display": "Uses {0}% of maximum eitr as elemental damage mitigation on block. Consumes eitr equal to damage mitigated",
+    "mod_epicloot_me_elementalwarding_desc": "Allows for {0}% of maximum eitr to be used on block to mitigate any elemental (fire, frost, lightning) damage taken from blocked attacks. This mitigation is calculated after the block and before resistances and armor calculations take place. Consumes eitr equal to damage mitigated",
+
+    "mod_epicloot_me_bloodstaggerblock_display": "Consumes 5% of max HP to block. Reduce stagger damage from blocked hits by {0}%",
+    "mod_epicloot_me_bloodstaggerblock_desc": "Consumes 5% of max HP to block. Reduce stagger damage from blocked hits by {0}%. This effect is active for the entire duration of any block",
+
+    "mod_epicloot_me_bloodbaseblock_display": "Consumes 5% of max HP to block. Adds {0} to your base block",
+    "mod_epicloot_me_bloodbaseblock_desc": "Damages self for 5% of max HP as true damage to block. This damages is inflicted for every attempt to block, not the block or parry itself. Adds {0} to your base block.",
 
     "mod_epicloot_me_increaseallpoisondamagedone_display": "+{0}% Poison Damage",
     "mod_epicloot_me_increaseallpoisondamagedone_desc": "+{0}% to all poison damage you deal.",
