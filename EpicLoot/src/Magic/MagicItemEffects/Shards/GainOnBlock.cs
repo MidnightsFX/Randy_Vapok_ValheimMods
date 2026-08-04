@@ -3,7 +3,7 @@
     public static class GainOnBlockResource {
         public static void GainOnBlock(bool IsBlocked) 
         {
-            Player player = Player.m_localPlayer;
+            var player = Player.m_localPlayer;
             
             if (!IsBlocked || player.IsDead()) return;
 
