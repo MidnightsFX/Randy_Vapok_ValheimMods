@@ -1,13 +1,11 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Golden (Fortune) legs shard effect. On every rod catch the local player gets two independent
-    // rolls, each at the shard's value% -- one for bonus treasure pulled up alongside the fish, one to
-    // double (or rarely triple) the catch itself.
+    // Provides a chance to increase the number of fish caught and to pull up bonus treasure while fishing
     //
     // Hooked on FishingFloat.Catch rather than Fish.Pickup: Fish.Pickup returns true as soon as it has
     // *fired* the RequestPickup RPC, and RPC_RequestPickup drops requests within 2s of each other, so a

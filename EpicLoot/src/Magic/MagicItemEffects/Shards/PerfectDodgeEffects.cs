@@ -1,15 +1,11 @@
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Perfect-dodge shard effects (Pink). Vanilla already fires Player.RPC_HitWhileDodging when the local
-    // player is struck inside a dodge's invincibility window (a "perfect dodge"; see Player.HitWhileDodging).
-    // Every reward effect here hangs off that vanilla trigger, so they fire exactly when the game considers a
-    // dodge "perfect" -- the pool restores, the movement-speed burst, and PerfectDodge (the trinket) with its
-    // stacking damage buff. DecreaseDodgeCost is the odd one out and reuses the existing dodge-stamina hook
-    // (see ModifyDodgeStamina.cs). Shard values are authored as whole-number percents.
+    // Perfect dodge specific rewards
 
     // ---- Shared trigger for the reward effects ------------------------------------------------------
     // Vanilla latches m_beenHitWhileDodging so only the first avoided hit of a roll counts as the perfect

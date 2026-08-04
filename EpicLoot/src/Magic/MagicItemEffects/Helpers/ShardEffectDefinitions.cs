@@ -1,6 +1,7 @@
+﻿using EpicLoot.MagicItemEffects.Shards;
 using System.Collections.Generic;
 
-namespace EpicLoot.MagicItemEffects.Shards
+namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
     // Registers a MagicItemEffectDefinition for every shard effect type that the loaded overhaul config does
     // not already define -- i.e. the new Shardstone-only effects declared in MagicEffectType_Shards.cs.
@@ -70,7 +71,7 @@ namespace EpicLoot.MagicItemEffects.Shards
         {
             var result = new Dictionary<string, Dictionary<ItemRarity, float>>();
 
-            void Consider(global::EpicLoot.ShardStones.ShardEffectDefinition effect)
+            void Consider(ShardStones.ShardEffectDefinition effect)
             {
                 if (effect != null && !string.IsNullOrEmpty(effect.EffectType) &&
                     !result.ContainsKey(effect.EffectType))

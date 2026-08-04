@@ -1,30 +1,13 @@
-using EpicLoot.src.Magic.MagicItemEffects.Helpers;
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // DarkBlue trinket shard: when the local player's adrenaline fills ("activates"), an ice nova bursts off
-    // the player and every enemy within Radius is chilled -- a frost slow whose length is the shard's value in
-    // seconds. The fill is detected by SharedPlayerAddAdrenalinePatch, which also enforces the local-player and
-    // has-an-adrenaline-pool guards, so this is inert unless the player has a max-adrenaline source (matches the
-    // other adrenaline shards). No cooldown: refilling the pool is the rate limit.
-    //
-    // The chill is a CLONE of the vanilla Frost status effect rather than a subclass, so it carries vanilla's
-    // frost visuals, icon and freeze times, and inherits SE_Frost.ModifySpeed -- the slow bites hardest on
-    // application and decays to nothing across its TTL, and frost-resistant/immune creatures shrug it off. The
-    // clone is a fresh ScriptableObject with our own name, so it never collides with the real Frost effect (a
-    // chilled enemy can carry both) -- see GetOrCreatePrototype.
-    //
-    // Applying it goes through a routed RPC (mirroring Paralyze): the status effect must land on the target's
-    // OWNER, which is what drives its movement, and only an RPC can carry this cast's duration there.
-    public static class AdrenalineFrostWave
-    {
+namespace EpicLoot.MagicItemEffects.Shards {
+    // On adrenaline activation, applies a frost wave to nearby enemies. The wave slows movement by 60% at application and eases back to normal over the duration, following vanilla's frost curve.
+    public static class AdrenalineFrostWave {
         private const float Radius = 10f;
-
-        // Routed RPC key used to apply the chill on the target's OWNER. Mirrors Paralyze.RpcKey.
-        private const string RpcKey = "epic loot frost wave";
+        private const string RpcKey = "EL_FrostWave";
 
         // Unity object name of the SE prototype -- NameHash() hashes this (GetStableHashCode), so it must be
         // identical on every client for the add/refresh lookup to line up.
@@ -33,11 +16,7 @@ namespace EpicLoot.MagicItemEffects.Shards
         // Speed floor while chilled: movement drops to 40% (a 60% slow) at application and eases back to
         // normal over the duration, following vanilla's frost curve.
         private const float SpeedFloor = 0.4f;
-
-        // Prototype fallback lifetime; every application overwrites it with the shard's rolled duration.
         private const float DefaultDuration = 2f;
-
-        // The wave visual: the same trimmed fenring ice nova ModerIcyRetribution uses, played 50% faster.
         private const string NovaTemplateName = "EL_FrostWaveNova";
         private const float NovaSpeed = 1.5f;
 
@@ -45,31 +24,25 @@ namespace EpicLoot.MagicItemEffects.Shards
         private static bool _prototypeMissingLogged;
 
         // Tooltip: "Frost Wave: Slow Enemies within {1}m for {0}s" -- {1} surfaces the radius from the const.
-        public static void RegisterDisplayValues()
-        {
+        public static void RegisterDisplayValues() {
             MagicItem.RegisterDisplayValues(MagicEffectType.AdrenalineFrostWave,
                 value => new object[] { value, Radius });
         }
 
         // Registers the chill RPC on every character so a remote-owned target can receive it. Mirrors
-        // Paralyze.AddRpc_Character_Awake_Patch.
         [HarmonyPatch(typeof(Character), nameof(Character.Awake))]
-        private static class AddRpc_Character_Awake_Patch
-        {
+        private static class AddRpc_Character_Awake_Patch {
             [UsedImplicitly]
-            private static void Postfix(Character __instance)
-            {
+            private static void Postfix(Character __instance) {
                 __instance.m_nview?.Register<float>(RpcKey, (sender, duration) => RPC_FrostWave(__instance, duration));
             }
         }
 
         // Called by SharedPlayerAddAdrenalinePatch, which owns the Player.AddAdrenaline patch and the
         // fill/pop detection (including the local-player and no-adrenaline-source guards).
-        public static void OnAdrenalineActivated(Player player)
-        {
+        public static void OnAdrenalineActivated(Player player) {
             var duration = player.GetTotalActiveMagicEffectValue(MagicEffectType.AdrenalineFrostWave);
-            if (duration <= 0f)
-            {
+            if (duration <= 0f) {
                 return;
             }
 
@@ -81,20 +54,16 @@ namespace EpicLoot.MagicItemEffects.Shards
             var center = player.transform.position;
             var radiusSqr = Radius * Radius;
 
-            foreach (var character in Character.GetAllCharacters())
-            {
-                if (character == null || character.IsPlayer() || character.IsTamed() || character.IsDead())
-                {
+            foreach (var character in Character.GetAllCharacters()) {
+                if (character == null || character.IsPlayer() || character.IsTamed() || character.IsDead()) {
                     continue;
                 }
 
-                if ((character.transform.position - center).sqrMagnitude > radiusSqr)
-                {
+                if ((character.transform.position - center).sqrMagnitude > radiusSqr) {
                     continue;
                 }
 
-                if (character.m_nview == null || !character.m_nview.IsValid())
-                {
+                if (character.m_nview == null || !character.m_nview.IsValid()) {
                     continue;
                 }
 
@@ -105,22 +74,18 @@ namespace EpicLoot.MagicItemEffects.Shards
 
         // Adds or refreshes the chill on the character. Runs on every client; only the owner's copy drives
         // movement, so this is what actually slows a remote-owned target.
-        private static void RPC_FrostWave(Character character, float duration)
-        {
-            if (character == null || character.m_seman == null || duration <= 0f)
-            {
+        private static void RPC_FrostWave(Character character, float duration) {
+            if (character == null || character.m_seman == null || duration <= 0f) {
                 return;
             }
 
             var prototype = GetOrCreatePrototype();
-            if (prototype == null)
-            {
+            if (prototype == null) {
                 return;
             }
 
             // Already chilled: extend to the longer of the two and restart the decay curve.
-            if (character.m_seman.GetStatusEffect(prototype.NameHash()) is SE_Frost existing)
-            {
+            if (character.m_seman.GetStatusEffect(prototype.NameHash()) is SE_Frost existing) {
                 existing.m_ttl = Mathf.Max(duration, existing.GetRemaningTime());
                 existing.ResetTime();
                 return;
@@ -128,8 +93,7 @@ namespace EpicLoot.MagicItemEffects.Shards
 
             // AddStatusEffect(prototype) clones via MemberwiseClone (keeps NameHash) and triggers the frost
             // start effects, then we stamp this cast's duration onto the added instance.
-            if (character.m_seman.AddStatusEffect(prototype) is SE_Frost added)
-            {
+            if (character.m_seman.AddStatusEffect(prototype) is SE_Frost added) {
                 added.m_ttl = duration;
                 added.ResetTime();
             }
@@ -139,18 +103,14 @@ namespace EpicLoot.MagicItemEffects.Shards
         // public fields off the vanilla prototype brings its start/stop effects, icon and freeze times across;
         // the private cached name hash is NOT copied (CopyFields binds public instance fields only), so this
         // fresh ScriptableObject hashes its own name and stays a distinct effect from vanilla Frost.
-        private static SE_Frost GetOrCreatePrototype()
-        {
-            if (_prototype != null)
-            {
+        private static SE_Frost GetOrCreatePrototype() {
+            if (_prototype != null) {
                 return _prototype;
             }
 
             var frost = ObjectDB.instance?.GetStatusEffect(SEMan.s_statusEffectFrost) as SE_Frost;
-            if (frost == null)
-            {
-                if (!_prototypeMissingLogged)
-                {
+            if (frost == null) {
+                if (!_prototypeMissingLogged) {
                     EpicLoot.LogWarning("AdrenalineFrostWave: could not find the vanilla 'Frost' status effect; enemies will not be chilled.");
                     _prototypeMissingLogged = true;
                 }

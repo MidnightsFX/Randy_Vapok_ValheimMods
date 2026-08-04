@@ -1,4 +1,6 @@
-namespace EpicLoot.MagicItemEffects.Shards
+﻿using EpicLoot.MagicItemEffects.Shards;
+
+namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
     // HUD indicator for the Eikthyr shard's ShockingCharge counter. It carries no gameplay of its own --
     // it reads the live charge count straight from ShockingCharge so the small icon text (e.g. "3/5")

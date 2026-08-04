@@ -5,16 +5,9 @@ using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Former Peach shoulder shard (that slot is now TravelLight); no shard grants this effect today, so the
-    // patch below is inert -- it is kept intact and functional so the effect can be reassigned to a slot.
-    //
-    // Charging into enemies deals blunt damage based on how fast you are moving and
-    // how much you are carrying -- a loaded, sprinting player is a wrecking ball. Checked each frame on the
-    // local player (mirrors Trailblazer's Player.Update approach): while moving above a threshold on the
-    // ground, nearby enemies take a blunt hit scaled by carried weight, throttled per target. The shard
-    // value is a small flat coefficient.
 
     //Battering Ram is commented out due to it not being used, and the patch being mildly expensive
+    // This effect allows the player to deal blunt damage to enemies by running into them. The damage is based on the player's weight and speed, and has a cooldown per target.
 
     //public static class BatteringRam
     //{

@@ -1,4 +1,4 @@
-using EpicLoot.Crafting;
+﻿using EpicLoot.Crafting;
 using EpicLoot.Data;
 using EpicLoot.GatedItemType;
 using EpicLoot.General;
@@ -25,27 +25,26 @@ namespace EpicLoot.ShardStones {
         Pink = 6, // Dodge
         Purple = 7, // Eitr
         White = 8, // Daytime
-        Grey = 9,
-        // not shift the shards below it -- ShardType is serialized by ordinal on socketed gear.
+        Grey = 9, // harvesting
         // Dark shards
         DarkGreen = 30,
         DarkPurple = 31,
-        DarkRed = 32,
+        DarkRed = 32, // berserker
         DarkBlue = 33, // cold resistances
-        Golden = 34,
+        Golden = 34, // luck
         // Light shards
         LightBlue = 40,
         LightGreen = 41,
         Peach = 42,
         //LightRed = 43,
         // Boss shards
-        Eikthyr = 90, // Stamina as eitr
-        Elder = 91, // Summon roots occasionally to fight for you
-        Bonemass = 92, // Applies poison to enemies on hit (chance)
-        Moder = 93, // Chance to cause a frost nova when you are hit
-        Yagluth = 94, // Chance to summon a meteor on hit
-        Queen = 95, // Gain a small amount of eitr from stamina usage
-        Fader = 96, // Chance to cause an aoe fire explosion on hit
+        Eikthyr = 90,
+        Elder = 91,
+        Bonemass = 92,
+        Moder = 93,
+        Yagluth = 94,
+        Queen = 95,
+        Fader = 96,
 
         // This is the error path
         None
@@ -434,7 +433,7 @@ namespace EpicLoot.ShardStones {
 
                 Enum.TryParse(shardColor, true, out ShardType color);
 
-                foreach(ItemRarity rarity in ShardDefinitions.Get(color).Rarities) {
+                foreach (ItemRarity rarity in ShardDefinitions.Get(color).Rarities) {
                     var prefab = UnityEngine.Object.Instantiate(genericPrefab);
                     string PrefabName = $"{shardColor}_{rarity}_ShardStone";
                     prefab.name = PrefabName;

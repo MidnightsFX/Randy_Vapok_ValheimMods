@@ -1,11 +1,9 @@
-using EpicLoot.General;
+﻿using EpicLoot.General;
 using Jotunn.Managers;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Cyan utility shard: absorb value% of an incoming hit by spending eitr (1 eitr per point absorbed),
-    // capped by the eitr available. Mirrors ModifyResistance by scaling the pre-armour hit on the local
-    // player. Shard values are authored as whole-number percents, hence the 0.01f.
+    // Absorbs a portion of incoming damage by spending Eitr
     public static class EitrShield {
         static GameObject effect = null;
         // Prefix handler invoked by CharacterRpcDamageDispatch (victim-side incoming modifier; runs after

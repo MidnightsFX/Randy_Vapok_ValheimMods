@@ -2,24 +2,21 @@
 using UnityEngine;
 using Jotunn.Managers;
 
-namespace EpicLoot.MagicItemEffects.Shards 
-{
-    public static class BloodBaseBlock 
-    {
+namespace EpicLoot.MagicItemEffects.Shards {
+    // Provides a bonus to base block based on the player's current health. Also applies a self-damage effect when blocking.
+    public static class BloodBaseBlock {
         [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UpdateBlock))]
-        private class BlockState_Patch 
-        {
+        private class BlockState_Patch {
             static GameObject sfx = null;
             static GameObject vfx = null;
-            private static void Postfix(Humanoid __instance) 
-            {
+            private static void Postfix(Humanoid __instance) {
                 var player = Player.m_localPlayer;
                 if (!player.HasActiveMagicEffect("BloodBaseBlock")) return;
                 if (!__instance.IsBlocking() || __instance.m_blockTimer != 0f) return; // bundle this into the helper later to do start block effects
 
                 HitData hit = new HitData();
                 hit.SetAttacker(player); // self dmg as player. I want to trigger on hit effects.
-                                            // Can scrap if its too powerful or jank. I expect this effect to go under utilized.
+                                         // Can scrap if its too powerful or jank. I expect this effect to go under utilized.
 
                 hit.m_damage.m_damage = (player.GetMaxHealth() / 20f); // 5% hardcoded as true damage untyped dmg doesnt run through armor or known resistances
                 hit.m_staggerMultiplier = 0f;
@@ -49,8 +46,7 @@ namespace EpicLoot.MagicItemEffects.Shards
             }
         }
 
-        public static void Apply(ItemDrop.ItemData __instance, ref float baseBlock) 
-        {
+        public static void Apply(ItemDrop.ItemData __instance, ref float baseBlock) {
             var player = Player.m_localPlayer;
             float bloodBaseBlock = player.GetTotalActiveMagicEffectValue(MagicEffectType.BloodBaseBlock, 1f);
 

@@ -1,15 +1,8 @@
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Eikthyr boss shard: the local player's combat hits build "charges" and also bank the damage they deal.
-    // At max charge the next hit discharges a forward lightning shockwave (fx_eikthyr_forwardshockwave) fired
-    // along the direction of that final attack, dealing the banked damage to everything inside a short cone.
-    // Charges are counted in a Character.Damage postfix (attacker == local player). Pure pickaxe/chop hits
-    // (mining, chopping) are ignored -- they neither build a charge nor add to the banked damage.
-    //
-    // Feedback guard: the shockwave's own hits are owned by the player, so they route back through
-    // Character.Damage as player hits. A short ignore window after each discharge prevents those hits from
-    // re-building charges or re-banking damage and cascading.
+    // Provides a charge that builds on combat hits and discharges as a forward lightning shockwave when full.
     public static class EikthyrShockingCharge {
         // Hits required to trigger a discharge.
         private const int MaxCharges = 15;
@@ -28,14 +21,10 @@ namespace EpicLoot.MagicItemEffects.Shards {
         private static float _bankedDamage;
         private static float _ignoreUntil;
         private static bool _fxMissingLogged;
-
-        // HUD indicator (Eikthyr-trophy icon showing "n/15"). Built lazily on first hit -- see
-        // GetOrCreateIndicator -- and read live by SE_ShockingChargeIndicator via the accessors below.
         private const string IndicatorName = "EL_ShockingChargeIndicator";
         private static readonly int IndicatorHash = IndicatorName.GetStableHashCode();
         private static StatusEffect _indicator;
         private static bool _indicatorMissingLogged;
-
         // Live charge state, read by SE_ShockingChargeIndicator for its icon text and removal check.
         public static int CurrentCharges => _charges;
         public static int MaxChargeCount => MaxCharges;

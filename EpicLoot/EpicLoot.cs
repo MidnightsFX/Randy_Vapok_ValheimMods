@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using Common;
 using EpicLoot.Adventure;
 using EpicLoot.Config;
@@ -148,10 +148,10 @@ public sealed class EpicLoot : BaseUnityPlugin
         // Register definitions for the Shardstone-only effect types (blank tooltips + warnings otherwise).
         // Re-runs on every config (re)load; the defensive call covers the case where the effect config was
         // already loaded (during ELConfig construction) before this subscription was added.
-        MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += MagicItemEffects.Shards.ShardEffectDefinitions.RegisterShardEffectDefinitions;
+        MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += EpicLoot.src.Magic.MagicItemEffects.Helpers.ShardEffectDefinitions.RegisterShardEffectDefinitions;
         if (MagicItemEffectDefinitions.AllDefinitions.Count > 0)
         {
-            MagicItemEffects.Shards.ShardEffectDefinitions.RegisterShardEffectDefinitions();
+            EpicLoot.src.Magic.MagicItemEffects.Helpers.ShardEffectDefinitions.RegisterShardEffectDefinitions();
         }
 
         // Generate the ShardStone rarity-upgrade recipes (enchanting "Upgrade" tab). Same event/defensive

@@ -3,12 +3,10 @@ using System;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    public static class Warding 
-    {
+    public static class Warding {
         static GameObject sfx = null;
         static GameObject vfx = null;
-        public static void UseMoreStaminaOnBlock(Humanoid __instance, HitData hit) 
-        {
+        public static void UseMoreStaminaOnBlock(Humanoid __instance, HitData hit) {
             var player = Player.m_localPlayer;
             if (!player.HasActiveMagicEffect("Warding")) return;
             float magicEffectValue = player.GetTotalActiveMagicEffectValue(MagicEffectType.Warding, .01f);

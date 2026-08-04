@@ -1,15 +1,9 @@
-using EpicLoot.CraftingV2;
+﻿using EpicLoot.CraftingV2;
 using System;
 using System.Collections.Generic;
 
 namespace EpicLoot.ShardStones {
     // Generates the ShardStone rarity-upgrade recipes shown in the enchanting table's "Upgrade" tab.
-    //
-    // Each (color, rarity) is now a distinct prefab ({color}_{rarity}_ShardStone) whose baked metadata
-    // carries its rarity. So each step is a prefab-to-prefab conversion that:
-    //   - REQUIRES 1 {color}_{From}_ShardStone plus N of that step's enchanting Shard, and
-    //   - PRODUCES 1 {color}_{To}_ShardStone.
-    // No quality stamping is needed -- cloning the correct per-rarity prefab already yields the right rarity.
     //
     // Only steps whose From and To are BOTH in the color's declared rarity set are emitted, so single-rarity
     // shards (e.g. boss shards) get no upgrade path. There is one recipe per color per valid step, built from

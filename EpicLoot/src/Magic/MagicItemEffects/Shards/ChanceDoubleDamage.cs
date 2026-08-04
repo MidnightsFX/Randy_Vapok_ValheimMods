@@ -1,10 +1,9 @@
-using EpicLoot.General;
+﻿using EpicLoot.General;
 using Jotunn.Managers;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Golden (Fortune) weapon shard effect: a per-hit chance to deal double damage. The chance is read
-    // from the attacking weapon (the shard is socketed there), so it only fires for that weapon.
+    // Provides a chance to double the damage of an attack.
     public static class ChanceDoubleDamage {
         // Prefix handler invoked by CharacterDamageDispatch (attacker-side outgoing modifier).
         static GameObject effect = null;

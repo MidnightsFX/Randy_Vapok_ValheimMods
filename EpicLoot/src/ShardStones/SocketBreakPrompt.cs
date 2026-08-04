@@ -1,20 +1,9 @@
-using System;
+﻿using System;
 using UnityEngine;
 
-namespace EpicLoot.ShardStones
-{
-    /// <summary>
-    /// Yes/no confirmation shown before a socketed shard or runestone is destroyed to free its socket.
-    /// Uses the SocketMessage prefab, which shares its layout with ConfigMessage (see
-    /// <see cref="MessagePanelBase"/>) but is sized for use over the inventory rather than the main menu.
-    /// <para>
-    /// Keyboard and gamepad input is driven from <see cref="SocketsUI"/>'s InventoryGui.Update prefix
-    /// rather than from an Update of its own -- see UpdateBreakPrompt there for why the ordering has to
-    /// be pinned to the patch.
-    /// </para>
-    /// </summary>
-    public sealed class SocketBreakPrompt : MessagePanelBase
-    {
+namespace EpicLoot.ShardStones {
+    // A prompt that asks the player to confirm breaking a socketed stone, when breaking shards is enabled for removal.
+    public sealed class SocketBreakPrompt : MessagePanelBase {
         public Action OnAccept;
         public Action OnDeny;
 
@@ -23,10 +12,8 @@ namespace EpicLoot.ShardStones
         /// Returns null when the prefab is missing from the bundle, in which case the caller must
         /// refuse the removal rather than destroying anything unconfirmed.
         /// </summary>
-        public static SocketBreakPrompt Create(Transform parent, string title, string body)
-        {
-            if (EpicAssets.SocketMessagePrefab == null)
-            {
+        public static SocketBreakPrompt Create(Transform parent, string title, string body) {
+            if (EpicAssets.SocketMessagePrefab == null) {
                 EpicLoot.LogWarningForce("The SocketMessage prefab is missing from the asset bundle, " +
                     "so socketed stones cannot be broken.");
                 return null;
@@ -44,8 +31,7 @@ namespace EpicLoot.ShardStones
             return prompt;
         }
 
-        public override void OnAcceptClick()
-        {
+        public override void OnAcceptClick() {
             // Clear both callbacks first: Close() only destroys at the end of the frame, so a stray
             // second click before then must not run the break twice.
             var accepted = OnAccept;
@@ -56,8 +42,7 @@ namespace EpicLoot.ShardStones
             accepted?.Invoke();
         }
 
-        public override void OnDenyClick()
-        {
+        public override void OnDenyClick() {
             var denied = OnDeny;
             OnAccept = null;
             OnDeny = null;

@@ -1,6 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
+    // Provides a conversion of physical damage to fire and poison damage based on the player's Necrotic Fire effect value.
     public static class NecroticFire {
         // GetDamage postfix handler invoked by ModifyDamage (per-weapon modifier).
         public static void ModifyWeaponDamage(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result) {

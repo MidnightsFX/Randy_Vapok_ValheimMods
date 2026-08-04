@@ -1,14 +1,8 @@
-using EpicLoot.src.Magic.MagicItemEffects.Helpers;
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // LightBlue shoulder shard: the local player's hits have a value% chance to call a lightning strike on
-    // the struck target -- a lightning AOE
-    // On a successful proc we also drop a networked, purely-visual lightning bolt at the target: a clone of the
-    // vanilla 'lightningAOE' prefab (see GetOrBuildTemplate) with its damage-dealing Aoe scripts (AOE_ROD,
-    // AOE_AREA) removed. Its ZNetView is kept so the strike is synced to every nearby client, and a
-    // TimedDestruction tears it down after VisualLifetime. The ChainLightning prefab above stays the sole
-    // damage source; the clone only plays the strike FX.
+    // Provides a chance for the player to cause lightning strikes on enemies they hit
     public static class StrikeCausesLightning {
         private const float DamagePerValue = 6f; // lightning damage per shard-value point
         private static bool _prefabMissingLogged;
@@ -24,12 +18,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
         private static bool _sourceMissingLogged;
         private static bool _visualMissingLogged;
 
-        // Registers the strike visual into the CURRENT ZNetScene. Wired to PrefabManager.OnPrefabsRegistered,
-        // which fires as a ZNetScene.Awake postfix on every client each world load -- so every client has the
-        // prefab registered before it can receive a synced strike ZDO. We inject straight into
-        // ZNetScene.m_namedPrefabs (publicized) rather than relying on Jotunn's registration pass, whose
-        // ordering left the clone out of ZNetScene entirely. Idempotent: the clone is built once (cached across
-        // worlds) and re-injected into each fresh ZNetScene.
         public static void RegisterVisualPrefab() {
             var zns = ZNetScene.instance;
             if (zns == null || zns.GetPrefab(VisualClonePrefab) != null) {
@@ -48,12 +36,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
             EpicLoot.Log($"StrikeCausesLightning: registered '{VisualClonePrefab}' with ZNetScene.");
         }
 
-        // Builds our damage-free, networked clone of the vanilla lightning-rod AOE once and caches it. The clone
-        // is instantiated under a DISABLED container so none of its components (ZNetView, particle systems, the
-        // Aoe scripts) Awake on the template, yet the template keeps activeSelf == true -- required because
-        // remote clients spawn it via ZNetScene.CreateObject, which never calls SetActive, so an inactive
-        // template would render nothing on their side. The damage Aoe scripts (AOE_ROD, AOE_AREA) are removed
-        // and a TimedDestruction drives cleanup; the ZNetView is kept so the strike networks.
         private static GameObject GetOrBuildTemplate(ZNetScene zns) {
             if (_visualTemplate != null) {
                 return _visualTemplate;
@@ -115,9 +97,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
             SpawnVisual(__instance.transform.position);
         }
 
-        // Spawns the registered visual clone at the strike point. It carries a ZNetView, so instantiating it
-        // creates a fresh ZDO owned by us that syncs the strike to nearby clients; the template is active
-        // (activeSelf) so remote CreateObject spawns a live instance, and its TimedDestruction cleans up.
+        // Spawns the registered visual clone at the strike point.
         private static void SpawnVisual(Vector3 position) {
             var prefab = ZNetScene.instance?.GetPrefab(VisualClonePrefab);
             if (prefab == null) {

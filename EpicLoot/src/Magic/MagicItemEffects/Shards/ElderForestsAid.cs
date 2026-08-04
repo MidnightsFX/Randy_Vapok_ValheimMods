@@ -1,6 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
+
+    // When the player takes damage, immobilizes nearby enemies for a short duration. The radius and cooldown scale with the shard value.
     public static class ElderForestsAid {
         private const float Cooldown = 30f; // Base cooldown
         private const float BaseRadius = 6f;    // ensnare radius before the shard value widens it

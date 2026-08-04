@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Skills;
+﻿using static Skills;
 
 namespace EpicLoot.src.Magic.MagicItemEffects.Shards {
+    // Provides a bonus to ranged skills (bows and crossbows).
     public static class IncreaseRangedSkills {
         public static readonly SkillType[] RangedSkills =
         {

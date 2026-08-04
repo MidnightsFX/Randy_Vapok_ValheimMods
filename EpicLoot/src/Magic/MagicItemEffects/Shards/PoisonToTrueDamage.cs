@@ -1,31 +1,21 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // DarkGreen shoulder shard: converts a share of the local player's poison damage into "true damage" --
-    // realized as the struck target's least-resisted damage type, so it slips past whatever the enemy
-    // shrugs off. Runs as an attacker-side outgoing-hit modifier (SharedCharacterDamagePatch.EarlyPreDamage);
-    // __instance is the victim, whose resistances we read to pick the best type. Shard values are authored
-    // as whole-number percents, hence the 0.01f.
-    public static class PoisonToTrueDamage
-    {
+namespace EpicLoot.MagicItemEffects.Shards {
+    // Converts a portion of outgoing poison damage into the least resisted other damage type.
+    public static class PoisonToTrueDamage {
         // Prefix handler invoked by CharacterDamageDispatch (attacker-side outgoing modifier).
-        public static void ModifyOutgoingHit(Character __instance, HitData hit, Character attacker)
-        {
-            if (hit == null || __instance == null || attacker != Player.m_localPlayer)
-            {
+        public static void ModifyOutgoingHit(Character __instance, HitData hit, Character attacker) {
+            if (hit == null || __instance == null || attacker != Player.m_localPlayer) {
                 return;
             }
 
             var poison = hit.m_damage.m_poison;
-            if (poison <= 0f)
-            {
+            if (poison <= 0f) {
                 return;
             }
 
             var fraction = Player.m_localPlayer.GetTotalActiveMagicEffectValue(MagicEffectType.PoisonToTrueDamage, 0.01f);
-            if (fraction <= 0f)
-            {
+            if (fraction <= 0f) {
                 return;
             }
 
@@ -37,16 +27,13 @@ namespace EpicLoot.MagicItemEffects.Shards
 
         // Adds `amount` to whichever damage type the target resists least (highest effective multiplier),
         // considering every combat type except poison (the source) and the non-combat chop/pickaxe types.
-        private static void AddToLeastResisted(ref HitData.DamageTypes damage, HitData.DamageModifiers mods, float amount)
-        {
+        private static void AddToLeastResisted(ref HitData.DamageTypes damage, HitData.DamageModifiers mods, float amount) {
             var bestType = HitData.DamageType.Blunt;
             var bestScore = float.MinValue;
 
-            void Consider(HitData.DamageType type)
-            {
+            void Consider(HitData.DamageType type) {
                 var score = Effectiveness(mods.GetModifier(type));
-                if (score > bestScore)
-                {
+                if (score > bestScore) {
                     bestScore = score;
                     bestType = type;
                 }
@@ -60,8 +47,7 @@ namespace EpicLoot.MagicItemEffects.Shards
             Consider(HitData.DamageType.Lightning);
             Consider(HitData.DamageType.Spirit);
 
-            switch (bestType)
-            {
+            switch (bestType) {
                 case HitData.DamageType.Blunt: damage.m_blunt += amount; break;
                 case HitData.DamageType.Slash: damage.m_slash += amount; break;
                 case HitData.DamageType.Pierce: damage.m_pierce += amount; break;
@@ -74,10 +60,8 @@ namespace EpicLoot.MagicItemEffects.Shards
 
         // Relative damage-through for each resistance tier (higher = takes more). Immune/Ignore rank lowest
         // so we never funnel the converted damage into a type the enemy shrugs off entirely.
-        private static float Effectiveness(HitData.DamageModifier modifier)
-        {
-            switch (modifier)
-            {
+        private static float Effectiveness(HitData.DamageModifier modifier) {
+            switch (modifier) {
                 case HitData.DamageModifier.Immune:
                 case HitData.DamageModifier.Ignore:
                     return 0f;

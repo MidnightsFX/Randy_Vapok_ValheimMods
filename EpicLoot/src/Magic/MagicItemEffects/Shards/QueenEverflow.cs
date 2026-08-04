@@ -1,15 +1,10 @@
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
     // The Queen boss shard ("Queen's Everflow"): every creature the local player kills grants a stacking buff
     // (SE_QueenEverflow) that boosts health, stamina AND eitr regeneration. Stacks build up to a configurable
-    // cap and each kill refreshes the buff's duration, so sustained combat keeps the regen flowing. Hooked on
-    // Character.Damage (attacker == local player), which always runs on the attacker's machine; the buff is
-    // applied when the hit drops the target to 0 health.
-    //
-    // Per-stack regen scales with the shard value (from shardstones.json): a Legendary shard (value 10) gives
-    // +10% regen per stack and a Mythic (11) gives +11%, with lower rarities below. The max stack count comes
-    // from the Everflow magic effect's Config block ("MaxStacks"), defaulting to DefaultMaxStacks.
+    // cap and each kill refreshes the buff's duration
     //
     // Kill detection reads the target's health after the hit, which is exact when the player owns the enemy
     // (single-player, or enemies close to the host); against remote-owned enemies it is best-effort.

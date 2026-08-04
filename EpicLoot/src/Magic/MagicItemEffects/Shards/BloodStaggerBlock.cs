@@ -2,10 +2,9 @@
 using Jotunn.Managers;
 using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards 
-{
-    public static class BloodStaggerBlock 
-    {
+namespace EpicLoot.MagicItemEffects.Shards {
+    // Reduces stagger damage taken while blocking, and applies a small self-damage when blocking.
+    public static class BloodStaggerBlock {
         [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UpdateBlock))]
         private class BlockState_Patch {
             static GameObject sfx = null;
@@ -48,12 +47,9 @@ namespace EpicLoot.MagicItemEffects.Shards
         }
 
         [HarmonyPatch(typeof(Character), nameof(Character.AddStaggerDamage))]
-        public class BloodStaggerBlock_StaggerReduction_Patch 
-        {
-            private static void Prefix(Character __instance, ref float damage) 
-            {
-                if (Player.m_localPlayer.IsBlocking()) 
-                {
+        public class BloodStaggerBlock_StaggerReduction_Patch {
+            private static void Prefix(Character __instance, ref float damage) {
+                if (Player.m_localPlayer.IsBlocking()) {
                     damage *= (1f - Player.m_localPlayer.GetTotalActiveMagicEffectValue(MagicEffectType.BloodStaggerBlock, .01f));
                 }
             }

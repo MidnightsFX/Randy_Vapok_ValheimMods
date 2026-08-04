@@ -1,22 +1,16 @@
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
 using JetBrains.Annotations;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // Green (Movement) head shard: +% skill XP (every skill) scaled by the movement-speed penalty of the
-    // player's gear -- a heavy, slow loadout learns faster. Mirrors QuickLearner but gated on the penalty.
-    // Shard values are authored as whole-number percents, hence the 0.01f.
-    public static class IncreaseXPGainFromMovementPenalty
-    {
+namespace EpicLoot.MagicItemEffects.Shards {
+    // Provides a bonus to XP gain based on the player's movement penalty
+    public static class IncreaseXPGainFromMovementPenalty {
         [HarmonyPatch(typeof(Skills), nameof(Skills.RaiseSkill))]
-        private static class RaiseSkill_Patch
-        {
+        private static class RaiseSkill_Patch {
             [UsedImplicitly]
-            private static void Prefix(Skills __instance, ref float factor)
-            {
+            private static void Prefix(Skills __instance, ref float factor) {
                 var player = __instance.m_player;
-                if (player == null)
-                {
+                if (player == null) {
                     return;
                 }
 

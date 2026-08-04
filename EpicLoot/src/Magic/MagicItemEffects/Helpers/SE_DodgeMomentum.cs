@@ -1,6 +1,7 @@
+﻿using EpicLoot.MagicItemEffects.Shards;
 using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
+namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
     // "Dodge Momentum" -- the stacking stamina-regen buff a perfect dodge grants (see PerfectDodge). Each
     // stack adds RegenPerStack (a fraction, e.g. 0.08 at Epic) to the player's stamina regen multiplier;

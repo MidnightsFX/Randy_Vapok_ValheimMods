@@ -1,4 +1,6 @@
-namespace EpicLoot.MagicItemEffects.Shards
+﻿using EpicLoot.MagicItemEffects.Shards;
+
+namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
     // HUD indicator for the Yagluth shard's MeteorSummoner counter. It carries no gameplay of its own --
     // it reads the live charge count straight from MeteorSummoner so the small icon text (e.g. "3/25")
