@@ -285,6 +285,9 @@
     "mod_epicloot_me_eitrgainonblock_display": "Gain {0} eitr on block",
     "mod_epicloot_me_eitrgainonblock_desc": "Gain {0} eitr on block.",
 
+    "mod_epicloot_me_staggeronblock_display": "{0}% chance to stagger enemy on block",
+    "mod_epicloot_me_staggeronblock_desc": "{0}% chance to stagger enemy on block",
+
     "mod_epicloot_me_dayblocker_display": "Gain {0}% Block XP during Daytime",
     "mod_epicloot_me_dayblocker_desc": "Gain {0}% increased block experience during Daytime on block",
     "mod_epicloot_me_nightblocker_display": "Gain {0}% Block XP during Nighttime ",

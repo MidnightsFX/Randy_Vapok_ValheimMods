@@ -33,6 +33,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             GainOnBlockResource.GainOnBlock(IsBlocked: true); // red / yellow / cyan
             Warding.UseMoreStaminaOnBlock(__instance, hit);
             ElementalWarding.UseEitrOnBlock(__instance, hit);
+            ChanceToStaggerOnBlock.StaggerOnBlock(attacker);
         }
 
         
