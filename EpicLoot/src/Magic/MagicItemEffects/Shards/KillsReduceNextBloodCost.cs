@@ -52,7 +52,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 }
 
                 hp *= 1f - Mathf.Clamp01(_bankedReduction);
-                _bankedReduction = 0f;
+                ClearBank();
                 // The buff notices the empty bank on the next SEMan tick (SE_BloodRite.IsDone) and removes
                 // itself; nothing to do here.
             }

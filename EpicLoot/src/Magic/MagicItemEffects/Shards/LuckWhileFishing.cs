@@ -255,8 +255,10 @@ namespace EpicLoot.MagicItemEffects.Shards
             int amount, int quality, int variant)
         {
             var remaining = amount;
+            bool _full = false;
+
             while (remaining > 0
-                && player.GetInventory().AddItem(prefabName, 1, quality, variant, 0L, "", pickedUp: true) != null)
+                && player.GetInventory().AddItem(prefabName, 1, quality, variant, 0L, "", pickedUp: true) == null)
             {
                 remaining--;
             }
@@ -266,7 +268,7 @@ namespace EpicLoot.MagicItemEffects.Shards
                 return;
             }
 
-            player.Message(MessageHud.MessageType.TopLeft, Localization.instance.Localize("$inventory_full"));
+            _full = true;
 
             while (remaining > 0)
             {
@@ -287,6 +289,10 @@ namespace EpicLoot.MagicItemEffects.Shards
                 var placed = Mathf.Max(1, Mathf.Min(remaining, spilled.m_itemData.m_shared.m_maxStackSize));
                 spilled.SetStack(placed);
                 remaining -= placed;
+            }
+
+            if (_full) {
+                player.Message(MessageHud.MessageType.TopLeft, Localization.instance.Localize("$inventory_full"));
             }
         }
     }

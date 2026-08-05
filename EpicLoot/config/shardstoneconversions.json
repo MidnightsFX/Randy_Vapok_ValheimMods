@@ -1,0 +1,52 @@
+{
+  "UpgradeSteps": [
+    {
+      "From": "Magic",
+      "To": "Rare",
+      "SourceAmount": 1,
+      "ProductAmount": 1,
+      "Resources": [
+        { "Item": "ShardMagic", "Amount": 4 }
+      ]
+    },
+    {
+      "From": "Rare",
+      "To": "Epic",
+      "SourceAmount": 1,
+      "ProductAmount": 1,
+      "Resources": [
+        { "Item": "ShardRare", "Amount": 5 }
+      ]
+    },
+    {
+      "From": "Epic",
+      "To": "Legendary",
+      "SourceAmount": 1,
+      "ProductAmount": 1,
+      "Resources": [
+        { "Item": "ShardEpic", "Amount": 6 }
+      ]
+    },
+    {
+      "From": "Legendary",
+      "To": "Mythic",
+      "SourceAmount": 1,
+      "ProductAmount": 1,
+      "Resources": [
+        { "Item": "ShardLegendary", "Amount": 7 }
+      ]
+    }
+  ],
+
+  "CategoryExtraResources": {},
+
+  "ShardExtraResources": {
+    "Eikthyr":  [ { "Item": "TrophyEikthyr",     "Amount": 1 } ],
+    "Elder":    [ { "Item": "TrophyTheElder",    "Amount": 1 } ],
+    "Bonemass": [ { "Item": "TrophyBonemass",    "Amount": 1 } ],
+    "Moder":    [ { "Item": "TrophyDragonQueen", "Amount": 1 } ],
+    "Yagluth":  [ { "Item": "TrophyGoblinKing",  "Amount": 1 } ],
+    "Queen":    [ { "Item": "TrophySeekerQueen", "Amount": 1 } ],
+    "Fader":    [ { "Item": "TrophyFader",       "Amount": 1 } ]
+  }
+}

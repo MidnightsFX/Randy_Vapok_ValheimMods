@@ -45,9 +45,11 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 return;
             }
 
-            prototype.RegenBonus = bonus;
-            prototype.m_ttl = duration;
-            seMan.AddStatusEffect(prototype);
+            if (seMan.AddStatusEffect(prototype) is SE_AdrenalineSurge added) {
+                added.RegenBonus = bonus;
+                added.m_ttl = duration;
+                added.ResetTime();
+            }
         }
 
         private static float GetSecondsPerPercent() {

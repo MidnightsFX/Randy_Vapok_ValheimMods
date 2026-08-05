@@ -59,12 +59,13 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 return;
             }
 
-            // Seed the prototype so the clone SEMan takes carries the first stack and current values.
-            prototype.Stacks = 1;
-            prototype.MaxStacks = maxStacks;
-            prototype.RegenPerStack = regenPerStack;
-            prototype.m_ttl = BuffDuration;
-            seMan.AddStatusEffect(prototype);
+            if (seMan.AddStatusEffect(prototype) is SE_QueenEverflow added) {
+                added.Stacks = 1;
+                added.MaxStacks = maxStacks;
+                added.RegenPerStack = regenPerStack;
+                added.m_ttl = BuffDuration;
+                added.ResetTime();
+            }
         }
 
         // Max stacks come from the Everflow magic effect's Config block ("MaxStacks"), defaulting to

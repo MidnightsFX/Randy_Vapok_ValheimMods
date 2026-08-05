@@ -119,6 +119,7 @@ internal class ELConfig {
     private static CustomRPC EnchantingUpgradesRPC;
     private static CustomRPC AutoSorterConfigurationRPC;
     private static CustomRPC ShardStonesRPC;
+    private static CustomRPC ShardStoneConversionsRPC;
 
     private static string LocalizationDir = GetLocalizationDirectoryPath();
     private static readonly List<string> LocalizationLanguages = new List<string>() {
@@ -202,6 +203,8 @@ internal class ELConfig {
             OnServerRecieveConfigs, OnClientRecieveAutoSorterConfigs);
         ShardStonesRPC = NetworkManager.Instance.AddRPC("epicloot_shardstones_RPC",
             OnServerRecieveConfigs, OnClientRecieveShardStonesConfigs);
+        ShardStoneConversionsRPC = NetworkManager.Instance.AddRPC("epicloot_shardstoneconversions_RPC",
+            OnServerRecieveConfigs, OnClientRecieveShardStoneConversionsConfigs);
     }
 
     private void CreateConfigValues(ConfigFile Config) {
@@ -521,6 +524,10 @@ internal class ELConfig {
             MagicEffectsRPC, MagicItemEffectDefinitions.GetMagicItemEffectDefinitions);
         SychronizeConfig<ShardStonesConfig>("shardstones.json", Shards.InitializeShardDefinitions,
             ShardStonesRPC, Shards.GetCFG);
+        // Must sit between shardstones (the generator reads each color's rarity set) and materialconversions
+        // (whose Initialize fires the event that runs the generator).
+        SychronizeConfig<ShardStoneConversionsConfig>("shardstoneconversions.json", ShardStoneConversions.Initialize,
+            ShardStoneConversionsRPC, ShardStoneConversions.GetCFG);
         // Adventure data has to be loaded before iteminfo, as iteminfo uses the adventure data to determine what items can drop
         SychronizeConfig<AdventureDataConfig>("adventuredata.json", AdventureDataManager.Initialize,
             AdventureDataRPC, AdventureDataManager.GetCFG);
@@ -794,6 +801,11 @@ internal class ELConfig {
 
     private static IEnumerator OnClientRecieveShardStonesConfigs(long sender, ZPackage package) {
         Shards.InitializeShardDefinitions(ClientRecieveParseJsonConfig<ShardStonesConfig>(package.ReadString()));
+        yield return null;
+    }
+
+    private static IEnumerator OnClientRecieveShardStoneConversionsConfigs(long sender, ZPackage package) {
+        ShardStoneConversions.Initialize(ClientRecieveParseJsonConfig<ShardStoneConversionsConfig>(package.ReadString()));
         yield return null;
     }
 
