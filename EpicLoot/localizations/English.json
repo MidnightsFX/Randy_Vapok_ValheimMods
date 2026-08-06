@@ -297,6 +297,9 @@
     "mod_epicloot_me_eitrgainonblock_display": "Gain {0} eitr on block",
     "mod_epicloot_me_eitrgainonblock_desc": "Gain {0} eitr on block.",
 
+    "mod_epicloot_me_staggeronblock_display": "{0}% chance to stagger enemy on block",
+    "mod_epicloot_me_staggeronblock_desc": "{0}% chance to stagger enemy on block",
+
     "mod_epicloot_me_dayblocker_display": "Gain {0}% Block XP during Daytime",
     "mod_epicloot_me_dayblocker_desc": "Gain {0}% increased block experience during Daytime on block",
     "mod_epicloot_me_nightblocker_display": "Gain {0}% Block XP during Nighttime ",
@@ -368,6 +371,26 @@
     "mod_epicloot_me_increaserangedskills_desc": "+{0} to all ranged weapon skills.",
     "mod_epicloot_me_blockasdodgeasblock_display": "Adds skill equal to {0}% of block as dodge and {0}% of dodge as block",
     "mod_epicloot_me_blockasdodgeasblock_desc": "Adds +{0}% of blocking skill as dodge skill and +{0}% of dodge skill as blocking skill",
+
+    "mod_epicloot_me_burdenedblock_display": "Adds +{0} base block per 50 Pack Weight over 300",
+    "mod_epicloot_me_burdenedblock_desc": "Adds +{0} base block per 50 Pack Weight over 300",
+
+    "mod_epicloot_me_warding_display": "Uses {0}% of maximum stamina as physical damage mitigation on block. Consumes stamina equal to damage mitigated",
+    "mod_epicloot_me_warding_desc": "Allows for {0}% of maximum stamina to be used on block to mitigate any physical (pierce, blunt, slash) damage taken from blocked attacks. This mitigation is calculated after the block and before resistances and armor calculations take place. Consumes stamina equal to damage mitigated",
+
+    "mod_epicloot_me_elementalwarding_display": "Uses {0}% of maximum eitr as elemental damage mitigation on block. Consumes eitr equal to damage mitigated",
+    "mod_epicloot_me_elementalwarding_desc": "Allows for {0}% of maximum eitr to be used on block to mitigate any elemental (fire, frost, lightning) damage taken from blocked attacks. This mitigation is calculated after the block and before resistances and armor calculations take place. Consumes eitr equal to damage mitigated",
+
+    "mod_epicloot_me_bloodstaggerblock_display": "Consumes 5% of max HP to block. Reduce stagger damage from blocked hits by {0}%",
+    "mod_epicloot_me_bloodstaggerblock_desc": "Consumes 5% of max HP to block. Reduce stagger damage from blocked hits by {0}%. This effect is active for the entire duration of any block",
+
+    "mod_epicloot_me_bloodbaseblock_display": "Consumes 5% of max HP to block. Adds {0} to your base block",
+    "mod_epicloot_me_bloodbaseblock_desc": "Damages self for 5% of max HP as true damage to block. This damages is inflicted for every attempt to block, not the block or parry itself. Adds {0} to your base block.",
+    "mod_epicloot_me_blockasdodgeasblock_display": "Adds +{1} block skill and +{2} dodge skill",
+    "mod_epicloot_me_blockasdodgeasblock_desc": "Adds +{0}% of blocking skill as dodge skill and +{0}% of dodge skill as blocking skill. This bonus is rounded down to whole values",
+
+    "mod_epicloot_me_blockaswoodcuttingandpickaxes_display": "Adds +{1} block skill",
+    "mod_epicloot_me_blockaswoodcuttingandpickaxes_desc": "Adds +{0}% of woodcutting and pickaxes skills after all modifiers as block skill. This bonus is rounded down to whole values",
 
     "mod_epicloot_me_burdenedblock_display": "Adds +{0} base block per 50 Pack Weight over 300",
     "mod_epicloot_me_burdenedblock_desc": "Adds +{0} base block per 50 Pack Weight over 300",

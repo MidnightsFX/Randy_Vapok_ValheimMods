@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
     public static class DamageInRadius {

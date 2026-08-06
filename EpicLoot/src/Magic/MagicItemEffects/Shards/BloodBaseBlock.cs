@@ -2,14 +2,18 @@
 using UnityEngine;
 using Jotunn.Managers;
 
-namespace EpicLoot.MagicItemEffects.Shards {
+namespace EpicLoot.MagicItemEffects.Shards 
+{
     // Provides a bonus to base block based on the player's current health. Also applies a self-damage effect when blocking.
-    public static class BloodBaseBlock {
+    public static class BloodBaseBlock 
+    {
         [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UpdateBlock))]
-        private class BlockState_Patch {
+        private class BlockState_Patch 
+        {
             static GameObject sfx = null;
             static GameObject vfx = null;
-            private static void Postfix(Humanoid __instance) {
+            private static void Postfix(Humanoid __instance) 
+            {
                 var player = Player.m_localPlayer;
                 if (!player.HasActiveMagicEffect("BloodBaseBlock")) return;
                 if (!__instance.IsBlocking() || __instance.m_blockTimer != 0f) return; // bundle this into the helper later to do start block effects
@@ -46,7 +50,8 @@ namespace EpicLoot.MagicItemEffects.Shards {
             }
         }
 
-        public static void Apply(ItemDrop.ItemData __instance, ref float baseBlock) {
+        public static void Apply(ItemDrop.ItemData __instance, ref float baseBlock) 
+        {
             var player = Player.m_localPlayer;
             float bloodBaseBlock = player.GetTotalActiveMagicEffectValue(MagicEffectType.BloodBaseBlock, 1f);
 

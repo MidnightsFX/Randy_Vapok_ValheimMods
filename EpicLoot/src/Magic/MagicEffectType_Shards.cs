@@ -85,6 +85,7 @@
         public static string BurdenedBlock = nameof(BurdenedBlock);
         public static string AnchoredBlock = nameof(AnchoredBlock);
 
+
         // --- Harvest / gather / economy ---
         public static string IncreaseHarvestDamage = nameof(IncreaseHarvestDamage);
         public static string IncreaseHarvestXPGain = nameof(IncreaseHarvestXPGain);
@@ -105,7 +106,7 @@
         public static string PotionEfficacy = nameof(PotionEfficacy);
         public static string IncreaseMeleeSkills = nameof(IncreaseMeleeSkills); // new melee-skill bundle
         public static string IncreaseRangedSkills = nameof(IncreaseRangedSkills); // new ranged-skill bundle
-        public static string BlockAsDodgeAsBlock = nameof(BlockAsDodgeAsBlock); // block and dodge bundle BADAB
+        
 
         // --- Block
         public static string BloodStaggerBlock = nameof(BloodStaggerBlock); // consume hp reduced stagger dmg reduction while bloock
@@ -113,6 +114,9 @@
         public static string Warding = nameof(Warding);
         public static string ElementalWarding = nameof(ElementalWarding);
         public static string LuckyBlock = nameof(LuckyBlock); // Golden shield: chance to stagger the attacker on a block
+        public static string BlockAsDodgeAsBlock = nameof(BlockAsDodgeAsBlock); // block and dodge bundle BADAB
+        public static string BlockAsWoodCuttingAndPickaxes = nameof(BlockAsWoodCuttingAndPickaxes);
+        public static string StaggerOnBlock = nameof(StaggerOnBlock);
 
         // --- Element / status mechanics ---
         public static string IncreaseAllPoisonDamageDone = nameof(IncreaseAllPoisonDamageDone);
