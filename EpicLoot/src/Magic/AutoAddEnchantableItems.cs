@@ -2,7 +2,6 @@
 using EpicLoot.Config;
 using EpicLoot.Crafting;
 using EpicLoot.GatedItemType;
-using EpicLoot.ShardStones;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -182,12 +181,9 @@ namespace EpicLoot.Magic
                 EpicLoot.Log($"Checking LootSet entry: {lis.Name}");
                 foreach (LootDrop loot in lis.Loot)
                 {
-                    if (validItems.Contains(loot.Item) ||
-                        metaItemSetNames.Contains(loot.Item) ||
-                        magicMats.Contains(loot.Item) ||
-                        Shards.IsRarityTokenShardName(loot.Item) ||
-                        ObjectDB.instance.GetItemPrefab(loot.Item) != null)
+                    if (IsValidLootEntryName(loot.Item, metaItemSetNames, null, validItems, magicMats))
                     {
+                        PruneRarityItems(loot, lis.Name, metaItemSetNames, null, validItems, magicMats);
                         entries.Add(loot);
                         addedItems.Add(loot.Item);
                         continue;
@@ -257,7 +253,7 @@ namespace EpicLoot.Magic
                 // not already cover, so validating it only adds ways to delete working loot.
                 if (lt.Loot != null)
                 {
-                    updatedLootDrop.AddRange(ValidateLootList(lt, metaLootTables, metaItemSetNames, validItems));
+                    updatedLootDrop.AddRange(ValidateLootList(lt, metaLootTables, metaItemSetNames, validItems, magicMats));
                 }
 
                 LootTable ltc = lt;
@@ -596,31 +592,93 @@ namespace EpicLoot.Magic
         }
 
         private static List<LootDrop> ValidateLootList(LootTable lt,
-            List<string> metaLootTables, List<string> metaItemSetNames, List<string> validItems)
+            List<string> metaLootTables, List<string> metaItemSetNames, List<string> validItems,
+            List<string> magicMats)
         {
             List<LootDrop> updatedLootDrop = new List<LootDrop>();
             foreach (LootDrop loot in lt.Loot)
             {
-                if (loot.Item.Contains("."))
-                {
-                    string[] referenceAndIndex = loot.Item.Split('.');
-                    EpicLoot.Log($"Validating meta reference {loot.Item} {referenceAndIndex[0]}");
-                    if (metaItemSetNames.Contains(referenceAndIndex[0]) || metaLootTables.Contains(referenceAndIndex[0]))
-                    {
-                        updatedLootDrop.Add(loot);
-                        continue;
-                    }
-                }
-
-                if (!validItems.Contains(loot.Item) && !metaItemSetNames.Contains(loot.Item) &&
-                    !Shards.IsRarityTokenShardName(loot.Item))
+                if (!IsValidLootEntryName(loot.Item, metaItemSetNames, metaLootTables, validItems, magicMats))
                 {
                     EpicLoot.Log($"REMOVING: Loot table ({lt.Object}) Item {loot.Item} not found.");
                     continue;
                 }
+
+                PruneRarityItems(loot, lt.Object, metaItemSetNames, metaLootTables, validItems, magicMats);
                 updatedLootDrop.Add(loot);
             }
             return updatedLootDrop;
+        }
+
+        // The single answer to "may a loot entry name this?", shared by the ItemSet pass and the loot
+        // table pass so the two cannot drift. Anything this rejects is deleted from the rewritten
+        // loottables.json permanently, so every legitimate shape has to be represented here:
+        // a gated equipment item, an ItemSet or loot table name, a magic crafting material, an
+        // "Object.Level" reference to another table, or any other real prefab -- which is what covers
+        // shard stones and every non-equipment item a table may drop.
+        //
+        // metaLootTables is null for the ItemSet pass, where table references are not a valid target.
+        private static bool IsValidLootEntryName(string name, List<string> metaItemSetNames,
+            List<string> metaLootTables, List<string> validItems, List<string> magicMats)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+
+            if (metaLootTables != null && name.Contains("."))
+            {
+                string reference = name.Split('.')[0];
+                EpicLoot.Log($"Validating meta reference {name} {reference}");
+                if (metaItemSetNames.Contains(reference) || metaLootTables.Contains(reference))
+                {
+                    return true;
+                }
+            }
+
+            return validItems.Contains(name)
+                || metaItemSetNames.Contains(name)
+                || magicMats.Contains(name)
+                || ObjectDB.instance.GetItemPrefab(name) != null;
+        }
+
+        // Drops only the unresolvable rarities from an entry's per-rarity map, leaving the entry itself
+        // alone -- its Item already validated, and it stays a working drop at every rarity that remains.
+        // An emptied map is removed outright so the rewritten config does not carry a dead "RarityItems".
+        private static void PruneRarityItems(LootDrop loot, string owner, List<string> metaItemSetNames,
+            List<string> metaLootTables, List<string> validItems, List<string> magicMats)
+        {
+            if (loot.RarityItems == null || loot.RarityItems.Count == 0)
+            {
+                return;
+            }
+
+            List<ItemRarity> invalid = null;
+            foreach (KeyValuePair<ItemRarity, string> entry in loot.RarityItems)
+            {
+                if (IsValidLootEntryName(entry.Value, metaItemSetNames, metaLootTables, validItems, magicMats))
+                {
+                    continue;
+                }
+
+                EpicLoot.Log($"REMOVING: ({owner}) {loot.Item} rarity {entry.Key} item {entry.Value} not found.");
+                (invalid ??= new List<ItemRarity>()).Add(entry.Key);
+            }
+
+            if (invalid == null)
+            {
+                return;
+            }
+
+            foreach (ItemRarity rarity in invalid)
+            {
+                loot.RarityItems.Remove(rarity);
+            }
+
+            if (loot.RarityItems.Count == 0)
+            {
+                loot.RarityItems = null;
+            }
         }
 
         private static int DetermineCoinsCostForItem(string bosskey)

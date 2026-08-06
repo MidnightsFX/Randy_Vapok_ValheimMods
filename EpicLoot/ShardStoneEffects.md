@@ -62,12 +62,13 @@ via the `ShardUnique` item set in [`config/loottables.json`](config/loottables.j
 better. The early-game chests are deliberately excluded — an Epic unique out of a Meadows chest is a
 bigger power spike than the drop rate suggests.
 
-Because they have no per-color gate, their upgrade surcharge is per-**category** instead: the `Unique`
-entry in `CategoryExtraResources` ([`config/shardstoneconversions.json`](config/shardstoneconversions.json))
-adds two blank runestones of the rarity being upgraded *from* — `RunestoneEpic` on Epic → Legendary,
-`RunestoneLegendary` on Legendary → Mythic. That per-rarity scaling comes from a `{Rarity}` token in the
-cost item name, expanded by `ShardStoneConversions.ExpandRarityToken`, so a single flat entry covers
-every step.
+Because they have no per-color gate, their upgrade surcharge scales with the ladder instead: each
+`ShardStoneUpgrade_{Firewalker,Stormcaller}_*` recipe in
+[`config/shardstoneconversions.json`](config/shardstoneconversions.json) charges two blank runestones of
+the rarity being upgraded *from* — `RunestoneEpic` on Epic → Legendary, `RunestoneLegendary` on
+Legendary → Mythic — on top of the classic shards the step itself costs. Boss shards carry the
+equivalent surcharge per-color as their own trophy, which is what makes leveling one gate on having
+beaten that boss.
 
 `ShardCategory.Unique` is exclusive, but exclusivity is enforced **per category**
 ([`ShardSocketManager.CheckExclusiveCategory`](src/ShardStones/ShardSocketManager.cs)) — so a unique shard

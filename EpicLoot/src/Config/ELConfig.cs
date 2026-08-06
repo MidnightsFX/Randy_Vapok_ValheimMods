@@ -692,9 +692,8 @@ internal class ELConfig {
             MagicEffectsRPC, MagicItemEffectDefinitions.GetMagicItemEffectDefinitions);
         SychronizeConfig<ShardStonesConfig>("shardstones.json", Shards.InitializeShardDefinitions,
             ShardStonesRPC, Shards.GetCFG);
-        // Must sit between shardstones (the generator reads each color's rarity set) and materialconversions
-        // (whose Initialize fires the event that runs the generator).
-        SychronizeConfig<ShardStoneConversionsConfig>("shardstoneconversions.json", ShardStoneConversions.Initialize,
+        // Must precede materialconversions, whose Initialize fires the event that merges these in.
+        SychronizeConfig<MaterialConversionsConfig>("shardstoneconversions.json", ShardStoneConversions.Initialize,
             ShardStoneConversionsRPC, ShardStoneConversions.GetCFG);
         // Adventure data has to be loaded before iteminfo, as iteminfo uses the adventure data to determine what items can drop
         SychronizeConfig<AdventureDataConfig>("adventuredata.json", AdventureDataManager.Initialize,
@@ -973,7 +972,7 @@ internal class ELConfig {
     }
 
     private static IEnumerator OnClientRecieveShardStoneConversionsConfigs(long sender, ZPackage package) {
-        ShardStoneConversions.Initialize(ClientRecieveParseJsonConfig<ShardStoneConversionsConfig>(package.ReadString()));
+        ShardStoneConversions.Initialize(ClientRecieveParseJsonConfig<MaterialConversionsConfig>(package.ReadString()));
         yield return null;
     }
 

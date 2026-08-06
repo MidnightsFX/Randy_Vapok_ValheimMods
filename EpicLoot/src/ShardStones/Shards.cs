@@ -148,10 +148,6 @@ namespace EpicLoot.ShardStones {
     public static class Shards {
         public static readonly String ShardIndicator = "ShardStone";
 
-        // Placeholder a loot table writes in place of a concrete rarity: "Yellow_{Rarity}_ShardStone".
-        // LootRoller.ExpandRarityToken replaces it with the rolled rarity at drop time.
-        public const string RarityToken = "{Rarity}";
-
         // Per-(color, rarity) prefab stack cap. Each (color, rarity) is a distinct prefab with a distinct
         // display name, so only identical-rarity shards of the same color merge -- up to this many.
         private const int ShardStackSize = 100;
@@ -235,32 +231,6 @@ namespace EpicLoot.ShardStones {
                 return ItemRarity.Magic;
             }
             return set[UnityEngine.Random.Range(0, set.Count)];
-        }
-
-        // True when a loot table's item name is a "{Color}_{Rarity}_ShardStone" token that will expand
-        // into a real shard prefab at drop time. Loot list validation needs this: the token names no
-        // prefab as written, so a plain ObjectDB lookup rejects every shard entry and deletes it.
-        //
-        // Answered from the shard grid rather than ObjectDB on purpose. CreateAndLoadShardItems builds
-        // exactly one prefab per declared (color, rarity) straight out of ShardDefinitions, so the
-        // config is the same authority -- and going through it keeps this free of any assumption about
-        // when shard prefabs land in ObjectDB relative to the caller.
-        public static bool IsRarityTokenShardName(string name) {
-            if (string.IsNullOrEmpty(name) || !name.EndsWith("_" + ShardIndicator, StringComparison.Ordinal)) {
-                return false;
-            }
-
-            int sep = name.IndexOf("_" + RarityToken + "_", StringComparison.Ordinal);
-            if (sep <= 0) {
-                return false;
-            }
-
-            if (!Enum.TryParse(name.Substring(0, sep), true, out ShardType color) || color == ShardType.None) {
-                return false;
-            }
-
-            var rarities = ShardDefinitions.Get(color)?.Rarities;
-            return rarities != null && rarities.Count > 0;
         }
 
         // Accessors kept under the ShardDefinitions name for existing call sites (MagicTooltipShard,

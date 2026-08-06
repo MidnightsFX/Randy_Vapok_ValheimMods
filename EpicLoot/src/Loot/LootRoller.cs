@@ -498,12 +498,10 @@ namespace EpicLoot
                     continue;
                 }
 
-                var lootDrop = ResolveLootDrop(ld);
-
-                // Expand a "{Rarity}" placeholder into a concrete per-rarity prefab name before any of the
-                // branches below look the prefab up. The rolled rarity needs no plumbing from here: it is
-                // part of the expanded prefab name, and that prefab carries it in its own shared data.
-                ExpandRarityToken(lootDrop, luckFactor);
+                // Resolution consumes any per-rarity map on the entry, so by the time the branches below
+                // look a prefab up the name is concrete and the drop's Rarity has been pinned to the
+                // rarity that chose it.
+                var lootDrop = ResolveLootDrop(ld, luckFactor);
 
                 var itemName = !string.IsNullOrEmpty(lootDrop?.Item) ? lootDrop.Item : "Invalid Item Name";
                 var rarityLength = lootDrop?.Rarity?.Length != null ? lootDrop.Rarity.Length : -1;
@@ -634,8 +632,7 @@ namespace EpicLoot
             // Seed a fresh LootDrop with no Rarity: ResolveLootDrop only inherits the resolved set's own
             // Rarity[] when the incoming one is empty, so reusing lootDrop here would leak the gear entry's
             // rarity weights and defeat the per-tier rarity the ShardT sets encode.
-            var shardDrop = ResolveLootDrop(new LootDrop { Item = shardSetName, Weight = 1 });
-            ExpandRarityToken(shardDrop, luckFactor);
+            var shardDrop = ResolveLootDrop(new LootDrop { Item = shardSetName, Weight = 1 }, luckFactor);
 
             GameObject shardPrefab = null;
             if (!shardDrop.Item.IsNullOrWhiteSpace())
@@ -840,12 +837,36 @@ namespace EpicLoot
             return item;
         }
 
-        public static LootDrop ResolveLootDrop(LootDrop lootDrop)
+        // Resolves a loot entry down to a name that ObjectDB can look up, following per-rarity maps,
+        // ItemSets and "Object.Level" table references for as long as any of them apply. Returns a fresh
+        // copy, so callers are free to mutate the result.
+        //
+        // luckFactor only matters for entries carrying a RarityItems map, which is why it defaults: the
+        // console commands resolve entries outside of any drop and have no luck to apply.
+        //
+        // consumeRarityItems: false stops resolution at the first entry carrying a per-rarity map, leaving
+        // its authored Rarity spread intact. Only the luck-test command wants that -- rolling a rarity is
+        // exactly what it is trying to report on rather than perform.
+        public static LootDrop ResolveLootDrop(LootDrop lootDrop, float luckFactor = 0f, bool consumeRarityItems = true)
         {
-            var result = new LootDrop { Item = lootDrop.Item, Rarity = ArrayUtils.Copy(lootDrop.Rarity), Weight = lootDrop.Weight };
+            var result = new LootDrop
+            {
+                Item = lootDrop.Item,
+                Rarity = ArrayUtils.Copy(lootDrop.Rarity),
+                Weight = lootDrop.Weight,
+                RarityItems = lootDrop.RarityItems
+            };
             var needsResolve = true;
             while (needsResolve)
             {
+                // Checked first, and before any name lookup: the map is what decides which name this entry
+                // even has. Whatever it names is then resolved by the branches below, so a rarity may point
+                // at an ItemSet or another table just as Item may.
+                if (consumeRarityItems && ResolveRarityItem(result, luckFactor))
+                {
+                    continue;
+                }
+
                 if (ItemSets.TryGetValue(result.Item, out var itemSet))
                 {
                     // Rolling an empty list returns null, so stop here rather than dereference it. The
@@ -860,6 +881,9 @@ namespace EpicLoot
                     var itemSetResult = _weightedLootTable.Roll();
                     result.Item = itemSetResult.Item;
                     result.Weight = itemSetResult.Weight;
+                    // A rarity map belongs to the name it was authored next to, so unlike Rarity it always
+                    // replaces what came in -- the entry we just rolled is the one that knows its prefabs.
+                    result.RarityItems = itemSetResult.RarityItems;
                     if (ArrayUtils.IsNullOrEmpty(result.Rarity))
                     {
                         result.Rarity = ArrayUtils.Copy(itemSetResult.Rarity);
@@ -876,6 +900,7 @@ namespace EpicLoot
                     var referenceResult = _weightedLootTable.Roll();
                     result.Item = referenceResult.Item;
                     result.Weight = referenceResult.Weight;
+                    result.RarityItems = referenceResult.RarityItems;
                     if (ArrayUtils.IsNullOrEmpty(result.Rarity))
                     {
                         result.Rarity = ArrayUtils.Copy(referenceResult.Rarity);
@@ -1239,32 +1264,77 @@ namespace EpicLoot
             return results;
         }
 
-        // Expands a "{Rarity}" placeholder in a resolved loot entry's Item name into a concrete per-rarity
-        // prefab name (e.g. "Red_{Rarity}_ShardStone" -> "Red_Rare_ShardStone"). The rarity is rolled from
-        // the entry's Rarity[] weights; when the name is "{Color}_{Rarity}_..." the roll is clamped to that
-        // shard color's declared rarity set, so a weight aimed at a rarity the color lacks snaps to the
-        // nearest valid one rather than naming a missing prefab. Mutates lootDrop.Item in place -- safe
-        // because ResolveLootDrop returns a fresh copy. Nothing is returned: the rolled rarity is carried
-        // by the named prefab itself, which bakes it into its shared data.
-        private static void ExpandRarityToken(LootDrop lootDrop, float luckFactor)
+        // Consumes a resolved entry's RarityItems map: rolls the rarity from its Rarity[] weights, swaps
+        // the matching name into Item, and pins Rarity to exactly that rarity. Returns false (touching
+        // nothing) when the entry carries no map, which is the common case.
+        //
+        // Pinning is what makes the feature safe to use for anything other than shards. Every later stage
+        // -- the magic item roll in SpawnNormalItem, and the Unidentified and Materials substitutions --
+        // re-reads Rarity, so leaving the original spread in place would let a drop be selected as one
+        // rarity and then rolled as another. Shards do not care (they are Materials and carry their rarity
+        // in their own prefab's shared data), but a rarity map pointing at gear would.
+        //
+        // The map is cleared as it is consumed so the caller's while-loop can keep resolving whatever was
+        // substituted -- an ItemSet or an "Object.Level" reference -- without re-entering here.
+        private static bool ResolveRarityItem(LootDrop lootDrop, float luckFactor)
         {
-            const string token = global::EpicLoot.ShardStones.Shards.RarityToken;
-            if (lootDrop?.Item == null || !lootDrop.Item.Contains(token))
+            if (lootDrop?.RarityItems == null || lootDrop.RarityItems.Count == 0)
             {
-                return;
+                return false;
             }
 
             var rarity = RollItemRarity(lootDrop, luckFactor);
+            var item = SelectRarityItem(lootDrop.RarityItems, rarity, out var usedRarity);
 
-            int sep = lootDrop.Item.IndexOf("_" + token, StringComparison.Ordinal);
-            if (sep > 0 &&
-                Enum.TryParse(lootDrop.Item.Substring(0, sep), true, out global::EpicLoot.ShardStones.ShardType color) &&
-                color != global::EpicLoot.ShardStones.ShardType.None)
+            lootDrop.RarityItems = null;
+            lootDrop.Rarity = GetSingleRarityWeights(usedRarity);
+
+            // An empty pick means every key in the map was blank; keep the entry's own Item as the default
+            // rather than resolving to nothing.
+            if (!item.IsNullOrWhiteSpace())
             {
-                rarity = global::EpicLoot.ShardStones.Shards.ClampToRaritySet(color, rarity);
+                lootDrop.Item = item;
             }
 
-            lootDrop.Item = lootDrop.Item.Replace(token, rarity.ToString());
+            return true;
+        }
+
+        // Picks the entry for a rolled rarity, falling back to the nearest rarity the map does define.
+        // Snapping rather than failing is deliberate: a config patch is free to re-weight an entry's
+        // Rarity[] without knowing which rarities that particular item exists at (shard colors each
+        // declare their own set), and the nearest neighbour is always a better answer than a name that
+        // resolves to no prefab. Ties go to the lower rarity.
+        private static string SelectRarityItem(Dictionary<ItemRarity, string> rarityItems, ItemRarity rarity,
+            out ItemRarity usedRarity)
+        {
+            usedRarity = rarity;
+            if (rarityItems.TryGetValue(rarity, out var exact))
+            {
+                return exact;
+            }
+
+            var bestDiff = int.MaxValue;
+            string best = null;
+            foreach (var entry in rarityItems)
+            {
+                var diff = Math.Abs((int)entry.Key - (int)rarity);
+                if (diff < bestDiff || (diff == bestDiff && entry.Key < usedRarity))
+                {
+                    bestDiff = diff;
+                    best = entry.Value;
+                    usedRarity = entry.Key;
+                }
+            }
+
+            EpicLoot.Log($"Rarity {rarity} has no entry in a RarityItems map; using {usedRarity} ({best}).");
+            return best;
+        }
+
+        private static float[] GetSingleRarityWeights(ItemRarity rarity)
+        {
+            var weights = new float[5];
+            weights[(int)rarity] = 1;
+            return weights;
         }
 
         public static ItemRarity RollItemRarity(LootDrop lootDrop, float luckFactor)
@@ -1580,7 +1650,9 @@ namespace EpicLoot
         {
             KeyValuePair<string, List<LootTable>> loot_info =  GetLootTableOrDefault(lootTableName);
             LootDrop lootDrop = GetLootForLevel(loot_info.Value[0], 1)[0];
-            lootDrop = ResolveLootDrop(lootDrop);
+            // Stop short of consuming a per-rarity map: doing so would pin Rarity to the single rarity it
+            // rolled, which is the very spread this test exists to report.
+            lootDrop = ResolveLootDrop(lootDrop, 0, consumeRarityItems: false);
             if (lootDrop.Rarity == null)
             {
                 lootDrop.Rarity = [100, 0, 0, 0, 0];

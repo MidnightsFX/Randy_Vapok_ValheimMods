@@ -156,12 +156,13 @@ public sealed class EpicLoot : BaseUnityPlugin {
             ShardEffectDefinitions.RegisterShardEffectDefinitions();
         }
 
-        // Generate the ShardStone rarity-upgrade recipes (enchanting "Upgrade" tab). Same event/defensive
-        // pattern as the shard effect definitions above: re-runs on every material-conversions (re)load,
-        // with a defensive call if that config was already loaded before this subscription was added.
-        CraftingV2.MaterialConversions.OnSetupMaterialConversions += ShardStones.ShardStoneConversions.RegisterShardStoneUpgradeConversions;
+        // Fold the ShardStone recipes into the material conversions (enchanting "Convert Materials" tab).
+        // Same event/defensive pattern as the shard effect definitions above: re-runs on every
+        // material-conversions (re)load, with a defensive call if that config was already loaded before
+        // this subscription was added.
+        CraftingV2.MaterialConversions.OnSetupMaterialConversions += ShardStones.ShardStoneConversions.Merge;
         if (CraftingV2.MaterialConversions.Config != null) {
-            ShardStones.ShardStoneConversions.RegisterShardStoneUpgradeConversions();
+            ShardStones.ShardStoneConversions.Merge();
         }
     }
 
