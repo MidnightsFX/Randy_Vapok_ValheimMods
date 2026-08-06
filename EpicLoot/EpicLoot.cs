@@ -142,6 +142,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
         MagicItemEffects.Shards.Inspiration.RegisterDisplayValues();
         MagicItemEffects.Shards.LuckyLoot.RegisterDisplayValues();
         MagicItemEffects.Shards.Bloodrage.RegisterDisplayValues();
+        MagicItemEffects.Shards.BlockAsDodgeAsBlock.RegisterDisplayValues();
+        MagicItemEffects.Shards.BlockAsWoodCuttingAndPickaxes.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;

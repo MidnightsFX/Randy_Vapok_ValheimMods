@@ -36,6 +36,8 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             // Golden. Order-independent: unlike the three above it never touches `hit`, so it cannot
             // perturb the conversion -> warding sequence.
             LuckyBlock.OnBlock(__instance, hit, attacker);
+
+            ChanceToStaggerOnBlock.StaggerOnBlock(attacker);
         }
 
         
