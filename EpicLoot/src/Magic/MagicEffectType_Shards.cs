@@ -83,6 +83,7 @@
         public static string StaminaIncreaseForMovementPenalty = nameof(StaminaIncreaseForMovementPenalty);
         public static string BurdenedBlock = nameof(BurdenedBlock);
         public static string AnchoredBlock = nameof(AnchoredBlock);
+        public static string StaggerOnBlock = nameof(StaggerOnBlock);
 
         // --- Harvest / gather / economy ---
         public static string IncreaseHarvestDamage = nameof(IncreaseHarvestDamage);
@@ -100,6 +101,7 @@
         public static string IncreaseMeleeSkills = nameof(IncreaseMeleeSkills); // new melee-skill bundle
         public static string IncreaseRangedSkills = nameof(IncreaseRangedSkills); // new ranged-skill bundle
         public static string BlockAsDodgeAsBlock = nameof(BlockAsDodgeAsBlock); // block and dodge bundle BADAB
+        public static string BlockAsWoodCuttingAndPickaxes = nameof(BlockAsWoodCuttingAndPickaxes);
 
         // --- Block
         public static string BloodStaggerBlock = nameof(BloodStaggerBlock); // consume hp reduced stagger dmg reduction while bloock

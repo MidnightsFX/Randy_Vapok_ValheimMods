@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using Common;
 using EpicLoot.Adventure;
 using EpicLoot.Config;
@@ -138,6 +138,8 @@ public sealed class EpicLoot : BaseUnityPlugin
         MagicItemEffects.Shards.GainAdrenalineWhenApplyingPoison.RegisterDisplayValues();
         MagicItemEffects.Shards.StormFury.RegisterDisplayValues();
         MagicItemEffects.Shards.LuckWhileFishing.RegisterDisplayValues();
+        MagicItemEffects.Shards.BlockAsDodgeAsBlock.RegisterDisplayValues();
+        MagicItemEffects.Shards.BlockAsWoodCuttingAndPickaxes.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;

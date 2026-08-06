@@ -350,8 +350,11 @@
     "mod_epicloot_me_increasemeleeskills_desc": "+{0} to all melee weapon skills.",
     "mod_epicloot_me_increaserangedskills_display": "+{0} Ranged Skills",
     "mod_epicloot_me_increaserangedskills_desc": "+{0} to all ranged weapon skills.",
-    "mod_epicloot_me_blockasdodgeasblock_display": "Adds skill equal to {0}% of block as dodge and {0}% of dodge as block",
-    "mod_epicloot_me_blockasdodgeasblock_desc": "Adds +{0}% of blocking skill as dodge skill and +{0}% of dodge skill as blocking skill",
+    "mod_epicloot_me_blockasdodgeasblock_display": "Adds +{1} block skill and +{2} dodge skill",
+    "mod_epicloot_me_blockasdodgeasblock_desc": "Adds +{0}% of blocking skill as dodge skill and +{0}% of dodge skill as blocking skill. This bonus is rounded down to whole values",
+
+    "mod_epicloot_me_blockaswoodcuttingandpickaxes_display": "Adds +{1} block skill",
+    "mod_epicloot_me_blockaswoodcuttingandpickaxes_desc": "Adds +{0}% of woodcutting and pickaxes skills after all modifiers as block skill. This bonus is rounded down to whole values",
 
     "mod_epicloot_me_burdenedblock_display": "Adds +{0} base block per 50 Pack Weight over 300",
     "mod_epicloot_me_burdenedblock_desc": "Adds +{0} base block per 50 Pack Weight over 300",

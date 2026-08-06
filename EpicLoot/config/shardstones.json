@@ -1048,6 +1048,16 @@
                         "Mythic": 6
                     }
                 },
+                "Shield": {
+                    "EffectType": "BlockAsWoodCuttingAndPickaxes",
+                    "ValuesPerRarity": {
+                        "Magic": 2,
+                        "Rare": 4,
+                        "Epic": 6,
+                        "Legendary": 8,
+                        "Mythic": 10
+                    }
+                },
                 "Head": {
                     "EffectType": "IncreaseMiningDrop",
                     "ValuesPerRarity": {
