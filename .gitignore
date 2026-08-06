@@ -102,6 +102,3 @@ ValheimMods.sln
 /EpicLoot/EpicLoot.csproj
 /EpicLoot/EpicLoot.sln
 /EpicLoot/shardstone_testing_matrix.csv
-/EpicLoot/src/Magic/MagicItemEffects/Helpers/DamageInRadius.cs
-/EpicLoot/src/Magic/MagicItemEffects/ModifyBlock.cs
-/.gitignore
