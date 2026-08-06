@@ -1,40 +1,42 @@
 # Epic Loot
 
 Author: [RandyKnapp](https://discord.gg/ZNhYeavv3C)
-Source: [Github](https://github.com/OrianaVenture/Randy_Vapok_ValheimMods/tree/main/EpicLoot)
+Source: [Github](https://github.com/RandyKnapp/ValheimMods/tree/main/EpicLoot)
 Patreon: [patreon.com/randyknapp](https://www.patreon.com/randyknapp)
 Discord: [RandyKnapp's Mod Community](https://discord.gg/ZNhYeavv3C)
-Patch notes: [Github Patchnotes](https://github.com/OrianaVenture/Randy_Vapok_ValheimMods/blob/main/EpicLoot/CHANGELOG.md)
+Patch notes: [Github Patchnotes](https://github.com/RandyKnapp/ValheimMods/blob/main/EpicLoot/CHANGELOG.md)
 
-This mod aims to add a loot drop experience to Valheim similar to Diablo or other RPGs. Monsters and chests can now drop Magic, Rare, Epic, Legendary, or Mythic magic items. Each magic item has a number of magic effects on it, that give bonuses to the item or your character when that magic item is equipped.
+This mod aims to add a loot drop experience to Valheim similar to Diablo or other RPGs. Monsters and chests can now drop Magic, Rare, Epic, Legendary, or Mythic magic items. Each magic item has a number of magic effects on it, that give bonuses to the item or your character when that magic item is equipped, and may also come with shard slots you fill yourself.
 
 The mod is currently in ***Early Access***! That means it's **not done**! Be patient as the author adds new features, fixes bugs, and finishes things up. If you want to help, please provide feedback on the [Nexus mod page](https://www.nexusmods.com/valheim/mods/387) or on the [github](https://github.com/RandyKnapp/ValheimMods/tree/main/EpicLoot) for the following:
 
   * **Bugs** *(check to make sure your bug is new and not already reported)*
   * **Balance Issues** *(drops too strong? Too weak? Ruin the crafting progression?)*
-  * **Missing content** *(check the TODO list below to make sure the author isn't already planning to do it)*
+  * **Missing content** *(check the [TODO list](https://github.com/RandyKnapp/ValheimMods/blob/main/EpicLoot/todo.md) to make sure the author isn't already planning to do it)*
   * **Suggestions** for new magic item effects
   * **Suggestions** for something else like UI or art improvements
 
 ***EpicLoot works in multiplayer and on dedicated servers!*** The server and all players should have the mod and its dependencies installed.
 
-## Version 0.12!
+## Version 0.13!
 
-Introducing a large new feature: **Runes!**
+Introducing a large new feature: **Shardstones!**
 
-* New unidentified items can drop which can be brought to the enchantment table to reveal their effects.
-* Sacrifice an existing magic item to extract a magic effect into a Runestone.
-* Use a Rune on an existing magic item to augment an effect.
+Shardstones grant a variety of small buffs to allow much greater control over your build.
+  * Press Interact (E) on a socketed item in your inventory to open its shard slots, then drag in a shardstone or an Etched Runestone.
+  * Enchanted items can now drop with shard slots, and the rarer the item the more slots it is likely to have.
+  * Shardstones drop all over the world, each biome and boss has their own drops. Maybe you can find a unique shardstone also?
+  * Shardstones can be upgraded to a higher rarity, or converted into ordinary enchanting materials if you don't want them, at the enchanting table's Convert Materials tab.
 
-You may need to enable this feature in your existing configuration file on a version upgrade. Check the randyknapp.mods.epicloot.cfg file "Enchanting Table - Table Features Active" has "Rune" in the list.
+Shard drops come from the loot tables, so if you have customized your loottables.json you will need to accept the config update prompt (or refresh BepInEx/config/EpicLoot/baseconfig/loottables.json) before any shardstones will drop.
+
+Also new in 0.13: **Tempering**, a service from Hildir that rerolls the value of an existing enchantment. Tired of augmenting and hoping? Well now you can focus entirely on upgrading specific enchants!
+
+Other notable changes:
+- Expanded tooltips that reveal the full details of an effect when you hold Shift
+- Config upgrade system can automatically upgrade your configs or just let you know when an upgrade includes changes to your configs
 
 See the wiki on thunderstore for more information! Link below!
-
-## Ashlands Update Notice!
-
-The Ashlands update introduced the addition of the Mythic tier rarity, as well as a huge rebalance of the mod to be more vanilla friendly. If you are upgrading from a previous version you may wish to restore the old values. There is now an add-on with patches to restore the old Epic values: [thunderstore link](https://thunderstore.io/c/valheim/p/RandyKnapp/EpicPatches_EpicLoot/).
-
-Mythic sets have not been created for the base mod, but the feature is available if you wish to create your own sets and add them with the patching system.
 
 ## Documentation
 
@@ -48,9 +50,10 @@ Epic Loot Team Members:
   * [Warp](https://github.com/jneb802) - Joined in Oct 2024, helped design new magic effects.
   * [MidnightFX](https://github.com/MidnightsFX) - Joined in Oct 2024, helping with maintenance and improvements.
   * [Rusty](https://github.com/RustyMods) - Joined in Oct 2025, helped create the API.
+  * [Leslie](https://github.com/Lesliechan201) - Joined in Jan 2026, Helped create effects and improve balance.
 
 Contibutions from the following modders were invaluable and appreciated: 
-  * [blaxxun (CLLC)](https://www.nexusmods.com/valheim/mods/495) - bugfixes, config sync, various magic item effects
+  * Blaxxun (CLLC) - bugfixes, various magic item effects
   * [M3TO](https://github.com/M3TO) - bugfixes
   * [jsza](https://github.com/jsza) - bugfixes
   * [maxrd2](https://github.com/maxrd2) - bugfixes

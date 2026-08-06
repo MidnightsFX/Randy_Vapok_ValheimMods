@@ -4,10 +4,13 @@ New Content:
 * Shardstones Added! Shardstones are a new item that can be attached to weapons with available shardsockets
     * Thanks Leslie, Warp and Rusty for contributing effects 
     * Interacting with an enchanted item that has a shard socket will pull up a small storage UI, allowing you to socket or remove shards. 
-    * Shardstones can be found in the world as loot
+    * Shardstones can be found in the world as loot, different shards in each biome
+    * Every boss drops a shardstone of its own (Eikthyr, The Elder, Bonemass, Moder, Yagluth, The Queen and Fader), and two unique shardstones drop rarely from elite creatures and treasure chests
     * 90+ new magic effects have been added and are primarily available through shardstones
-    * The enchanting table's probability panel now lists shard slot odds alongside effect count odds (configurable)
+    * The enchanting table's probability panel now lists shard slot odds alongside effect count odds
     * `Shard Stack Mode` option controls whether several shards of the same color may be socketed into the same item
+    * `Shard Removal Mode` option controls whether a socketed shard can be freely removed, must be broken out (destroying it), or is permanent
+    * `Shard Stone Drop Ratio` balance option weighs shardstone drops against normal item, unidentified and material drops
 * Tempering (Thanks Rusty!)
     * Tempering allows you to pay to increase the value of an existing enchantment (service provided by Hildir)
     * Tempering can be configured to allow upgrading past a tiers normal maximum.
@@ -31,15 +34,16 @@ New Content:
     * Enabling `Always Refresh Core Configs` activates the patch system and prevents config file prompts (configs are rebuilt every restart, and only changes defined in patches will be applied)
 
 Changes:
-* Shards are now crafted at the enchanting table instead of the forge
+* Enchanting shards (Shard Magic, Shard Rare, and so on -- not the new Shardstones) are now crafted at the enchanting table instead of the forge
 * The Leather Belt, Silver Ring and Gold Ruby Ring are now configurable
 * Enchanting table building resources are now easily configurable
     * Resources to build the enchanting table has been changed to 10 wood, 2 greydwarf eyes
 * The Epic Loot config file has been regrouped and now reads in a deliberate order instead of alphabetically, in both the file and the configuration manager
-    * Sections are numbered in the order they are meant to be read (`1 - General`, `2 - Balance`, `3 - Shardstones`, `4 - Enchanting Table`, `5 - Adventure`, `6 - Interface`, `7 - Item Colors`, `8 - Abilities`, `9 - Debug`) and the settings inside each one keep the order they were written in
-    * The bounty and adventure settings gathered into Adventure, the crafting UI / tooltip / panel position settings into Interface, `Rune Extract Mode` into Sockets, and logging into Debug
+    * Sections are numbered in the order they are meant to be read (`1 - General`, `2 - Balance`, `3 - Shardstones & Runes`, `4 - Enchanting Table`, `5 - Adventure`, `6 - Interface`, `7 - Item Colors`, `8 - Abilities`, `9 - Debug`) and the settings inside each one keep the order they were written in
+    * The bounty and adventure settings gathered into Adventure, the crafting UI / tooltip / panel position settings into Interface, `Rune Extract Mode` into Shardstones & Runes, and logging into Debug
     * Every setting you had customized is carried over to its new home automatically; nothing resets to defaults
     * Each setting's description now states whether it is synced from the server
+* New cheat commands `magicshards` and `cheatsockets`
 
 Bugfixes:
 * Fixes tooltip display for enchanted items health use percentage

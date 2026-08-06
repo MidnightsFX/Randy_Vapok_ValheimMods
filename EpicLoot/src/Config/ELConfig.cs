@@ -408,7 +408,7 @@ internal class ELConfig {
             "value, or granting nothing at all on that item, can still be freely removed.\n" +
             "BreakAll = every shard must be broken to be removed, destroying it.\n" +
             "Permanent = every shard is permanent; it can be neither removed nor broken.\n" +
-            "Default: Free.");
+            "Default: BreakValueless.");
         RuneSocketRemovalMode = BindServer(SectionSockets, "Rune Removal Mode", RuneSocketMode.Free,
             "Controls whether a runestone can be taken back out of a socket once it has been placed. " +
             "Runes can always be inserted; this only affects removal.\n" +
@@ -428,7 +428,7 @@ internal class ELConfig {
             "Shards whose effect has no rarity-scaled value (Warmth, for example) can never be " +
             "stacked -- halving a yes/no effect would leave a dead socket. Boss and other exclusive " +
             "shards keep their own one-per-item / one-per-worn-set rule regardless of this setting.\n" +
-            "Default: Blocked.");
+            "Default: Diminishing.");
         ShardStackDecayFactor = BindServer(SectionSockets, "Shard Stack Decay Factor", 0.5f,
             "Under Shard Stack Mode = Diminishing, the share of its value each further shard of the " +
             "same color contributes. The shards of a color are ranked strongest first, and the " +
