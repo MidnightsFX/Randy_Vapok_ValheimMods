@@ -407,13 +407,13 @@
                     }
                 },
                 "Legs": {
-                    "EffectType": "Trailblazer",
+                    "EffectType": "Kindling",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 6,
+                        "Rare": 9,
+                        "Epic": 12,
+                        "Legendary": 15,
+                        "Mythic": 18
                     }
                 },
                 "Trinket": {
@@ -1781,13 +1781,13 @@
                     }
                 },
                 "Shoulders": {
-                    "EffectType": "StrikeCausesLightning",
+                    "EffectType": "Conduit",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 4,
-                        "Epic": 6,
-                        "Legendary": 8,
-                        "Mythic": 10
+                        "Magic": 4,
+                        "Rare": 6,
+                        "Epic": 8,
+                        "Legendary": 10,
+                        "Mythic": 12
                     }
                 }
             }
@@ -2005,13 +2005,13 @@
                     }
                 },
                 "Shoulders": {
-                    "EffectType": "BatteringRam",
+                    "EffectType": "TravelLight",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6
+                        "Magic": 3,
+                        "Rare": 6,
+                        "Epic": 9,
+                        "Legendary": 12,
+                        "Mythic": 15
                     }
                 }
             }
