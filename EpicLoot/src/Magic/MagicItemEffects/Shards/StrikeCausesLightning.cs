@@ -5,7 +5,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a chance for the player to cause lightning strikes on enemies they hit
     public static class StrikeCausesLightning {
         private const float DamagePerValue = 6f; // lightning damage per shard-value point
-        private static bool _prefabMissingLogged;
 
         // Visual: our networked, damage-free clone of the vanilla lightning-rod AOE. Built once and registered
         // into ZNetScene on every client each world load (RegisterVisualPrefab), then instantiated at each proc;

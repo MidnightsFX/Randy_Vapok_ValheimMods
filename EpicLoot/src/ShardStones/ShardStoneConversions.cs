@@ -28,7 +28,8 @@ namespace EpicLoot.ShardStones {
         // both its From and its To rarity (see ShardDefinition.Rarities).
         public List<ShardStoneUpgradeStep> UpgradeSteps;
 
-        // Extra cost added to every step of every shard in the category. Empty by default.
+        // Extra cost added to every step of every shard in the category. Defaults to two blank runestones
+        // of the step's source rarity on Unique shards, which have no per-color gate of their own.
         public Dictionary<ShardCategory, List<MaterialConversionRequirement>> CategoryExtraResources;
 
         // Extra cost added to every step of one specific color. Defaults to one matching trophy per boss
@@ -48,6 +49,13 @@ namespace EpicLoot.ShardStones {
     public static class ShardStoneConversions {
         private const string NamePrefix = "ShardStoneUpgrade_";
 
+        // "{Rarity}" anywhere in a cost item name resolves to the rarity the step upgrades FROM, matching
+        // the shipped ladder where each step is paid for in its own source rarity (Magic -> Rare costs
+        // ShardMagic). Same token convention as loottables.json. It is what lets a single flat extras
+        // entry express a per-rarity cost: "Runestone{Rarity}" charges RunestoneEpic on the Epic step and
+        // RunestoneLegendary on the Legendary one, without needing a per-step config shape.
+        private const string RarityToken = "{Rarity}";
+
         public static ShardStoneConversionsConfig Config;
 
         // Config setup hook (SychronizeConfig<ShardStoneConversionsConfig>). Backfills and sanitizes so the
@@ -56,7 +64,7 @@ namespace EpicLoot.ShardStones {
             Config = config ?? new ShardStoneConversionsConfig();
 
             Config.UpgradeSteps ??= DefaultUpgradeSteps();
-            Config.CategoryExtraResources ??= new Dictionary<ShardCategory, List<MaterialConversionRequirement>>();
+            Config.CategoryExtraResources ??= DefaultCategoryExtraResources();
             Config.ShardExtraResources ??= DefaultShardExtraResources();
 
             Config.UpgradeSteps.RemoveAll(step => {
@@ -114,6 +122,19 @@ namespace EpicLoot.ShardStones {
                 Resources = new List<MaterialConversionRequirement> {
                     new MaterialConversionRequirement { Item = currency, Amount = amount }
                 }
+            };
+        }
+
+        // Unique shards have no boss to gate them the way ShardExtraResources gates the boss shards, so
+        // their surcharge is per-category and scales with the ladder instead: two blank runestones of the
+        // rarity being upgraded from, on top of whatever the step itself charges.
+        private static Dictionary<ShardCategory, List<MaterialConversionRequirement>> DefaultCategoryExtraResources() {
+            return new Dictionary<ShardCategory, List<MaterialConversionRequirement>> {
+                {
+                    ShardCategory.Unique, new List<MaterialConversionRequirement> {
+                        new MaterialConversionRequirement { Item = $"Runestone{RarityToken}", Amount = 2 }
+                    }
+                },
             };
         }
 
@@ -182,9 +203,9 @@ namespace EpicLoot.ShardStones {
 
                     var resources = new List<MaterialConversionRequirement>();
                     AddResource(resources, $"{colorName}_{step.From}_ShardStone", step.SourceAmount);
-                    AddResources(resources, step.Resources);
-                    AddResources(resources, categoryExtras);
-                    AddResources(resources, shardExtras);
+                    AddResources(resources, step.Resources, step.From);
+                    AddResources(resources, categoryExtras, step.From);
+                    AddResources(resources, shardExtras, step.From);
 
                     config.MaterialConversions.Add(new MaterialConversion {
                         // The From rarity is part of the name because nothing stops a player authoring two
@@ -207,15 +228,19 @@ namespace EpicLoot.ShardStones {
         }
 
         private static void AddResources(List<MaterialConversionRequirement> target,
-            List<MaterialConversionRequirement> source) {
+            List<MaterialConversionRequirement> source, ItemRarity stepRarity) {
             if (source == null) {
                 return;
             }
             foreach (var requirement in source) {
                 if (requirement != null) {
-                    AddResource(target, requirement.Item, requirement.Amount);
+                    AddResource(target, ExpandRarityToken(requirement.Item, stepRarity), requirement.Amount);
                 }
             }
+        }
+
+        private static string ExpandRarityToken(string item, ItemRarity rarity) {
+            return string.IsNullOrEmpty(item) ? item : item.Replace(RarityToken, rarity.ToString());
         }
 
         // The step cost, the category extra and the shard extra are independent tables and may well name the

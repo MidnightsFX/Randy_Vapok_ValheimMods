@@ -38,7 +38,9 @@
     }
   ],
 
-  "CategoryExtraResources": {},
+  "CategoryExtraResources": {
+    "Unique": [ { "Item": "Runestone{Rarity}", "Amount": 2 } ]
+  },
 
   "ShardExtraResources": {
     "Eikthyr":  [ { "Item": "TrophyEikthyr",     "Amount": 1 } ],

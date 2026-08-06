@@ -6,11 +6,8 @@ New Content:
     * Interacting with an enchanted item that has a shard socket will pull up a small storage UI, allowing you to socket or remove shards. 
     * Shardstones can be found in the world as loot
     * 90+ new magic effects have been added and are primarily available through shardstones
-    * DarkBlue trinket shards now roll Frost Wave: filling your adrenaline bursts an ice nova that chills every enemy within 10m, slowing them for the shard's duration (replaces AdrenalineIncreasesFrostDamage)
-    * LightGreen trinket shards now roll a reworked Adrenaline Surge: filling your adrenaline grants a timed health regen buff instead of a permanent bonus that scaled with how full the pool was. Both the bonus and its duration scale with rarity, up to +40% health regen for 20s at Mythic. The buff shows in the HUD with the shardstone's icon and does not stack -- refilling refreshes it
-    * Golden legs shards now roll a reworked Lucky Fishing: each rod catch gets a chance at bonus treasure and a separate chance to double (or rarely triple) the catch itself. Bonus fish match the size of the one you landed. The treasure table is a configurable prefab list of value thresholds, like Riches -- higher shard values reach richer finds while dropping the cheap ones out entirely
-    * The enchanting table's probability panel now lists shard slot odds alongside effect count odds
-    * New `Shard Stack Mode` option controls whether several shards of the same color may share one item: Blocked (default, as before) / Diminishing / Full. Under Diminishing the shards of a color are ranked strongest first and each one after the leader is worth `Shard Stack Decay Factor` (default 0.5) to the power of its rank -- full, half, a quarter, and so on -- with the tooltip marking each reduced socket. Boss and other exclusive shards keep their one-at-a-time rule, and effects with no scaled value (Warmth, for example) can never be stacked
+    * The enchanting table's probability panel now lists shard slot odds alongside effect count odds (configurable)
+    * `Shard Stack Mode` option controls whether several shards of the same color may be socketed into the same item
 * Tempering (Thanks Rusty!)
     * Tempering allows you to pay to increase the value of an existing enchantment (service provided by Hildir)
     * Tempering can be configured to allow upgrading past a tiers normal maximum.
@@ -24,7 +21,8 @@ New Content:
 * Terminal Commands upgraded (Thanks Rusty!)
     * Terminal commands now have better completion and more options
     * Color based formatting for rarity loot table rolls!
-* Config option to show computed roll chance for all effects when enchanting an item
+* Config option to show computed roll chance for all effects when enchanting an item (disabled by default)
+* Client side config options to personalize how large item tooltips are
 * Base configs now keep themselves up to date
     * Epic Loot now tracks config file versions and will prompt you to update configs which have been customized
     * Configs you *have* edited are never overwritten on their own. If an update changes one of them, a prompt at the main menu offers to replace it, copying your version to `BepInEx\config\EpicLoot\baseconfig-backup` first. Declining is remembered per file, and you are only asked again if that config changes in a future update
@@ -35,8 +33,13 @@ New Content:
 Changes:
 * Shards are now crafted at the enchanting table instead of the forge
 * The Leather Belt, Silver Ring and Gold Ruby Ring are now configurable
-* Enchanting table required resources are now easily configurable
+* Enchanting table building resources are now easily configurable
     * Resources to build the enchanting table has been changed to 10 wood, 2 greydwarf eyes
+* The Epic Loot config file has been regrouped and now reads in a deliberate order instead of alphabetically, in both the file and the configuration manager
+    * Sections are numbered in the order they are meant to be read (`1 - General`, `2 - Balance`, `3 - Shardstones`, `4 - Enchanting Table`, `5 - Adventure`, `6 - Interface`, `7 - Item Colors`, `8 - Abilities`, `9 - Debug`) and the settings inside each one keep the order they were written in
+    * The bounty and adventure settings gathered into Adventure, the crafting UI / tooltip / panel position settings into Interface, `Rune Extract Mode` into Sockets, and logging into Debug
+    * Every setting you had customized is carried over to its new home automatically; nothing resets to defaults
+    * Each setting's description now states whether it is synced from the server
 
 Bugfixes:
 * Fixes tooltip display for enchanted items health use percentage
@@ -44,9 +47,10 @@ Bugfixes:
 * Attack speed compatibility: when another mod already provides AnimationSpeedManager (embedded as a binary), Epic Loot now routes its attack-speed changes into that shared instance instead of running its own copy, so the two mods' attack-speed modifiers stack correctly instead of overwriting each other
 * Merchant panels are now draggable, and save their position client side
 * Config patches now honor the `Priority` field reliably and equal-priority patches are now applied in a deterministic order instead of depending on the filesystem's file listing order
-* When any config patches are active, Epic Loot now always logs a one-line summary of how many patches were applied (regardless of your logging settings) to make patched setups obvious in bug reports
+    * When any config patches are active, Epic Loot now always logs a one-line summary of how many patches were applied (regardless of your logging settings) to make patched setups obvious in bug reports
 * Adventure data (Treasure hunts, bounties etc) is now compressed and cleaned resulting in massive reductions in stored custom data
 * Transfer Enchantments through crafting now works properly
+* Chest loot is now rolled when it is opened, not when it is spawned, so that the loot is always appropriate for the player opening it. This primarily fixes mountain & swamp loot which would be loaded very early, but actually opened later.
 
 API:
 * New magic effect requirement flags: `ItemGivesAdrenaline` (item's attack grants above-default adrenaline) and `ItemHasAdrenaline` (item provides a max adrenaline pool)

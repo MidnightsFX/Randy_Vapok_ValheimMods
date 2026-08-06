@@ -71,7 +71,8 @@ internal class ELConfig {
     public static ConfigEntry<ShardStackMode> ShardStackingMode;
     public static ConfigEntry<float> ShardStackDecayFactor;
     public static ConfigEntry<float> GlobalDropRateModifier;
-    public static ConfigEntry<float> ItemsToMaterialsDropRatio;
+    public static ConfigEntry<bool> DeferChestLootRoll;
+
     public static ConfigEntry<bool> AlwaysShowWelcomeMessage;
     public static ConfigEntry<bool> OutputPatchedConfigFiles;
     public static ConfigEntry<bool> EnchantingTableUpgradesActive;
@@ -86,6 +87,8 @@ internal class ELConfig {
     public static ConfigEntry<bool> AutoAddEquipment;
     public static ConfigEntry<bool> AutoRemoveEquipmentNotFound;
     public static ConfigEntry<bool> OnlyAddEquipmentWithRecipes;
+    public static ConfigEntry<float> ItemDropRatio;
+    public static ConfigEntry<float> MaterialsDropRatio;
     public static ConfigEntry<float> ItemsUnidentifiedDropRatio;
     public static ConfigEntry<float> ShardStoneDropRatio;
     public static ConfigEntry<float> UIAudioVolumeAdjustment;
@@ -161,11 +164,77 @@ internal class ELConfig {
         "Latvian"
     };
 
+    // Sections, in the order they are bound and therefore the order the player sees them. The ordered
+    // binder numbers each section as it is first bound ("2 - Balance"), and that number is part of the
+    // name on disk, so:
+    //  - there can be at most nine sections; a tenth sorts as "10 - " between "1 - " and "2 - ".
+    //  - moving a section renames it, which orphans the player's values. RelocatedSettings below carries
+    //    them across, and StripOrderPrefix makes a pure renumbering (a section inserted in the middle)
+    //    survive on its own.
+    private const string SectionGeneral = "General";
+    private const string SectionBalance = "Balance";
+    private const string SectionSockets = "Shardstones & Runes";
+    private const string SectionEnchanting = "Enchanting Table";
+    private const string SectionAdventure = "Adventure";
+    private const string SectionInterface = "Interface";
+    private const string SectionItemColors = "Item Colors";
+    private const string SectionAbilities = "Abilities";
+    private const string SectionDebug = "Debug";
+
+    // Migration dictionary for historic settings
+    // TODO: Delete after a few releases, once the player base has had time to migrate their configs.
+    private static readonly Dictionary<string, string> RelocatedSettings = new Dictionary<string, string> {
+        // Rune extraction is a socket operation, not a drop-rate one.
+        { $"{SectionSockets}::Rune Extract Mode", "Balance::Rune Extract Mode" },
+        // Tempering folded into the enchanting table section; its keys were only unambiguous while they
+        // had a section of their own.
+        { $"{SectionEnchanting}::Temper Base Chance", "Tempering::Base Chance" },
+        { $"{SectionEnchanting}::Temper Decrement Amount", "Tempering::Decrement Amount" },
+        { $"{SectionEnchanting}::Temper Fail Destroys Item", "Tempering::Fail Destroys Item" },
+        { $"{SectionEnchanting}::Temper Destroy Chance", "Tempering::Destroy Chance" },
+        // Adventure mode gathered out of Balance and the old Bounty Management section.
+        { $"{SectionAdventure}::Adventure Mode Enabled", "Balance::Adventure Mode Enabled" },
+        { $"{SectionAdventure}::Andvaranaut Range", "Balance::Andvaranaut Range" },
+        { $"{SectionAdventure}::Gated Bounty Mode", "Balance::Gated Bounty Mode" },
+        { $"{SectionAdventure}::Enable Bounty Limit", "Bounty Management::Enable Bounty Limit" },
+        { $"{SectionAdventure}::Max Bounties Per Player", "Bounty Management::Max Bounties Per Player" },
+        // Interface absorbed Crafting UI, Tooltips and the panel positions that sat under General.
+        { $"{SectionInterface}::Use Scrolling Craft Description", "Crafting UI::Use Scrolling Craft Description" },
+        { $"{SectionInterface}::Show Enchant Selection Chance", "Crafting UI::Show Enchant Selection Chance" },
+        { $"{SectionInterface}::ShowEquippedAndHotbarItemsInSacrificeTab", "Crafting UI::ShowEquippedAndHotbarItemsInSacrificeTab" },
+        { $"{SectionInterface}::AudioVolumeAdjustment", "Crafting UI::AudioVolumeAdjustment" },
+        { $"{SectionInterface}::Tooltip Max Width", "Tooltips::Max Width" },
+        { $"{SectionInterface}::Tooltip Max Height", "Tooltips::Max Height" },
+        { $"{SectionInterface}::Trader Panel X Position", "General::Trader Panel X Position" },
+        { $"{SectionInterface}::Trader Panel Y Position", "General::Trader Panel Y Position" },
+        { $"{SectionInterface}::Temper Panel X Position", "General::Temper Panel X Position" },
+        { $"{SectionInterface}::Temper Panel Y Position", "General::Temper Panel Y Position" },
+        // Logging is diagnostics; it belongs with the rest of them.
+        { $"{SectionDebug}::Logging Enabled", "Logging::Logging Enabled" },
+        { $"{SectionDebug}::Log Level", "Logging::Log Level" }
+    };
+
+    /// <summary>Raw values of the config file as it was before this run bound anything, keyed "Section::Key".</summary>
+    private static readonly Dictionary<string, string> PreviousConfigValues = new Dictionary<string, string>();
+
+    /// <summary>Everything bound this run, with the section name minus its order prefix.</summary>
+    private static readonly List<(ConfigEntryBase Entry, string Location)> BoundEntries =
+        new List<(ConfigEntryBase, string)>();
+
     public ELConfig(ConfigFile Config) {
         // ensure all the config values are created
         cfg = Config;
+        // Bind first, save once. Every Set with SaveOnConfigSet on rewrites the whole file, and the
+        // migration below sets a good fraction of the entries.
+        cfg.SaveOnConfigSet = false;
+        ReadPreviousConfigValues();
+        CreateConfigValues();
+        ApplyPreviousConfigValues();
+        // After the migration, so restoring a saved value does not fire a handler into a UI that Awake
+        // has not built yet.
+        RegisterSettingChangedHandlers();
         cfg.SaveOnConfigSet = true;
-        CreateConfigValues(Config);
+        cfg.Save();
         SetupConfigRPCs();
         FilePatching.LoadAllPatches();
         // Bring any config the player has not edited up to date first, so InitializeConfig reads the
@@ -207,126 +276,36 @@ internal class ELConfig {
             OnServerRecieveConfigs, OnClientRecieveShardStoneConversionsConfigs);
     }
 
-    private void CreateConfigValues(ConfigFile Config) {
-        // Item Colors
-        _magicRarityColor = Config.Bind("Item Colors", "Magic Rarity Color", "Blue",
-            "The color of Magic rarity items, the lowest magic item tier. " +
-            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
-            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
-        _magicMaterialIconColor = Config.Bind("Item Colors", "Magic Crafting Material Icon Index", 5,
-            "Indicates the color of the icon used for magic crafting materials. A number between 0 and 9.\n" +
-            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
-        _rareRarityColor = Config.Bind("Item Colors", "Rare Rarity Color", "Yellow",
-            "The color of Rare rarity items, the second magic item tier. " +
-            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
-            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
-        _rareMaterialIconColor = Config.Bind("Item Colors", "Rare Crafting Material Icon Index", 2,
-            "Indicates the color of the icon used for rare crafting materials. A number between 0 and 9.\n" +
-            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
-        _epicRarityColor = Config.Bind("Item Colors", "Epic Rarity Color", "Purple",
-            "The color of Epic rarity items, the third magic item tier. " +
-            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
-            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
-        _epicMaterialIconColor = Config.Bind("Item Colors", "Epic Crafting Material Icon Index", 7,
-            "Indicates the color of the icon used for epic crafting materials. A number between 0 and 9.\n" +
-            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
-        _legendaryRarityColor = Config.Bind("Item Colors", "Legendary Rarity Color", "Teal",
-            "The color of Legendary rarity items, the fourth magic item tier. " +
-            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
-            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
-        _legendaryMaterialIconColor = Config.Bind("Item Colors", "Legendary Crafting Material Icon Index", 4,
-            "Indicates the color of the icon used for legendary crafting materials. A number between 0 and 9.\n" +
-            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
-        _mythicRarityColor = Config.Bind("Item Colors", "Mythic Rarity Color", "Orange",
-            "The color of Mythic rarity items, the highest magic item tier. " +
-            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
-            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
-        _mythicMaterialIconColor = Config.Bind("Item Colors", "Mythic Crafting Material Icon Index", 1,
-            "Indicates the color of the icon used for legendary crafting materials. A number between 0 and 9.\n" +
-            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
-        _setItemColor = Config.Bind("Item Colors", "Set Item Color", "#26ffff",
-            "The color of set item text and the set item icon. Use a hex color, default is cyan");
-
-        // Crafting UI
-        UseScrollingCraftDescription = Config.Bind("Crafting UI", "Use Scrolling Craft Description", true,
-            "Changes the item description in the crafting panel to scroll instead of scale when it gets too " +
-            "long for the space.");
-        ShowEnchantSelectionChance = BindServerConfig("Crafting UI", "Show Enchant Selection Chance", false,
-            "When true, the Enchant and Augment panels show the weighted chance that each available effect " +
-            "is selected on a single roll, displayed right after the bullet for each effect.");
-        ShowEquippedAndHotbarItemsInSacrificeTab = Config.Bind("Crafting UI",
-            "ShowEquippedAndHotbarItemsInSacrificeTab", false,
-            "If set to false, hides the items that are equipped or on your hotbar in the Sacrifice items list.");
-        UIAudioVolumeAdjustment = Config.Bind("Crafting UI", "AudioVolumeAdjustment", 1.0f,
-            new ConfigDescription("Multiplies the crafting UI sound volume by this percentage [0.0-1.0].\n" +
-            "1 = full UI sounds\n" +
-            "0 = no UI sounds",
-            new AcceptableValueRange<float>(0, 1)));
-
-        // Tooltips
-        TooltipMaxWidth = Config.Bind("Tooltips", "Max Width", 350, new ConfigDescription("Maximum width of the item tooltip box, in pixels.", new AcceptableValueRange<int>(150, 1200)));
-        TooltipMaxHeight = Config.Bind("Tooltips", "Max Height", 650, new ConfigDescription("Maximum height of the item tooltip box, in pixels. Content taller than this scrolls.", new AcceptableValueRange<int>(350, 4000)));
-
-        // Logging
-        _loggingEnabled = Config.Bind("Logging", "Logging Enabled", true, "Enable logging");
-        _logLevel = Config.Bind("Logging", "Log Level", LogLevel.Error,
-            "Only log messages of the selected level or higher");
-
-        // General
-        UseGeneratedMagicItemNames = Config.Bind("General", "Use Generated Magic Item Names", true,
+    private static void CreateConfigValues() {
+        // 1 - General
+        UseGeneratedMagicItemNames = BindClient(SectionGeneral, "Use Generated Magic Item Names", true,
             "If true, magic items uses special, randomly generated names based on their rarity, type, and magic effects.");
-        KeepInventoryOpenOverItems = Config.Bind("General", "Keep Inventory Open Over Items", true,
+        KeepInventoryOpenOverItems = BindClient(SectionGeneral, "Keep Inventory Open Over Items", true,
             "When true, pressing Use while the cursor is over an inventory item never closes the " +
             "inventory, so a shard slot press that misses its target does nothing instead of " +
-            "shutting everything. Use over an empty slot still closes the inventory as normal.\n" +
-            "Client-side; this is not synced from the server.");
-        TraderPanelPositionX = Config.Bind("General", "Trader Panel X Position", -200f,
-            "The horizontal on-screen position (RectTransform anchoredPosition X, anchored to the " +
-            "top-right of the trader window) of the EpicLoot adventure trader panel. Dragging the " +
-            "panel in-game updates this automatically. Default: -200. More negative moves it left, " +
-            "toward 0 (and positive) moves it right.");
-        TraderPanelPositionX.SettingChanged += (_, _) =>
-            MerchantPanel.Instance?.ApplyConfiguredPosition();
-        TraderPanelPositionY = Config.Bind("General", "Trader Panel Y Position", -155f,
-            "The vertical on-screen position (RectTransform anchoredPosition Y, anchored to the " +
-            "top-right of the trader window) of the EpicLoot adventure trader panel. Dragging the " +
-            "panel in-game updates this automatically. Default: -155.");
-        TraderPanelPositionY.SettingChanged += (_, _) =>
-            MerchantPanel.Instance?.ApplyConfiguredPosition();
-        TemperPanelPositionX = Config.Bind("General", "Temper Panel X Position", -200f,
-            "The horizontal on-screen position (RectTransform anchoredPosition X, anchored to the " +
-            "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
-            "in-game updates this automatically. Default: -200.");
-        TemperPanelPositionY = Config.Bind("General", "Temper Panel Y Position", -155f,
-            "The vertical on-screen position (RectTransform anchoredPosition Y, anchored to the " +
-            "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
-            "in-game updates this automatically. Default: -155.");
-        TemperPanelPositionX.SettingChanged += (_, _) =>
-            global::EpicLoot.TemperPanel.Instance?.ApplyConfiguredPosition();
-        TemperPanelPositionY.SettingChanged += (_, _) =>
-            global::EpicLoot.TemperPanel.Instance?.ApplyConfiguredPosition();
-        AutoAddEquipment = BindServerConfig("General", "Auto Add Equipment", true,
+            "shutting everything. Use over an empty slot still closes the inventory as normal.");
+        AutoAddEquipment = BindServer(SectionGeneral, "Auto Add Equipment", true,
             "Automatically adds equipment types that can be enchanted to possible drops and gates them" +
             "behind their respective bosses. Disabling this also disables automatic removal of items not found.");
-        AutoRemoveEquipmentNotFound = BindServerConfig("General", "Auto Remove Equipment Not Found", true,
+        AutoRemoveEquipmentNotFound = BindServer(SectionGeneral, "Auto Remove Equipment Not Found", true,
             "Automatically removes equipment types that is not found when loading the game.");
-        OnlyAddEquipmentWithRecipes = BindServerConfig("General", "Only Add Equipment With Recipes", true,
+        OnlyAddEquipmentWithRecipes = BindServer(SectionGeneral, "Only Add Equipment With Recipes", true,
             "Equipment must be able to be created by a recipe in order to automatically get selected. " +
             "If this is disabled enemy weapons can be added to drops, they are not always valid.");
-        AutoAddRemoveEquipmentFromVendor = BindServerConfig("General", "Auto Add Remove Equipment From Vendor", true,
+        AutoAddRemoveEquipmentFromVendor = BindServer(SectionGeneral, "Auto Add Remove Equipment From Vendor", true,
             "Automatically adds/removes equipment from the vendor when it is added/removed from the game. ");
-        AutoAddRemoveEquipmentFromLootLists = BindServerConfig("General", "Auto Add Remove Equipment From Loot Lists", true,
+        AutoAddRemoveEquipmentFromLootLists = BindServer(SectionGeneral, "Auto Add Remove Equipment From Loot Lists", true,
             "Automatically adds/removes equipment from the tier based loot lists, and validates other loot lists only contain valid items.");
 
-        // Balance
-        BalanceConfigurationType = BindServerConfig("Balance", "Balance Template", "Default",
+        // 2 - Balance
+        BalanceConfigurationType = BindServer(SectionBalance, "Balance Template", "Default",
             "Sets the type of balance configuration to use. " +
             "When initially set can change the value of other configurations in this file.\n" +
             "balanced: the recommended balancing, enchantments are powerful but stronger enemies can be a threat.\n" +
             "minimal: reduced enchantment power to be used with vanilla difficulty options.\n" +
             "legendary: legacy balancing that can make players godlike.",
             new AcceptableValueList<string>("balanced", "legendary", "minimal"));
-        _gatedItemTypeModeConfig = BindServerConfig("Balance", "Item Drop Limits",
+        _gatedItemTypeModeConfig = BindServer(SectionBalance, "Item Drop Limits",
             GatedItemTypeMode.BossKillUnlocksCurrentBiomeItems,
             "Sets how the drop system limits what item types can drop. " +
             "Unlimited: no limits, exactly what's in the loot table will drop.\n" +
@@ -338,48 +317,89 @@ internal class ELConfig {
             "PlayerMustHaveCraftedItem: (local world only) the item can drop if the player has already crafted it " +
             "or otherwise picked it up. If an item type cannot drop, it will downgrade to an item of the same type and " +
             "skill that the player has unlocked (i.e. swords will stay swords) according to iteminfo.json.");
-        BossBountyMode = BindServerConfig("Balance", "Gated Bounty Mode", GatedBountyMode.Unlimited,
-            "Sets whether available bounties are ungated or gated by boss kills.");
-        GatedFreebuildMode = Config.Bind("Balance", "Gated Freebuild Mode", GatedPieceTypeMode.BossKillUnlocksCurrentBiomePieces,
+        GatedFreebuildMode = BindServer(SectionBalance, "Gated Freebuild Mode", GatedPieceTypeMode.BossKillUnlocksCurrentBiomePieces,
             "Sets whether available pieces for the Freebuild effect are ungated or gated by boss kills.");
-        _bossTrophyDropMode = BindServerConfig("Balance", "Boss Trophy Drop Mode", BossDropMode.OnePerPlayerNearBoss,
-            "Sets bosses to drop a number of trophies equal to the number of players. " +
-            "Optionally set it to only include players within a certain distance, " +
-            "use 'Boss Trophy Drop Player Range' to set the range.");
-        _bossTrophyDropPlayerRange = BindServerConfig("Balance", "Boss Trophy Drop Player Range", 100.0f,
-            "Sets the range that bosses check when dropping multiple trophies using the OnePerPlayerNearBoss drop mode.");
-        _bossCryptKeyDropMode = BindServerConfig("Balance", "Crypt Key Drop Mode", BossDropMode.OnePerPlayerNearBoss,
-            "Sets bosses to drop a number of crypt keys equal to the number of players. " +
-            "Optionally set it to only include players within a certain distance, " +
-            "use 'Crypt Key Drop Player Range' to set the range.");
-        _bossCryptKeyDropPlayerRange = BindServerConfig("Balance", "Crypt Key Drop Player Range", 100.0f,
-            "Sets the range that bosses check when dropping multiple crypt keys using the OnePerPlayerNearBoss drop mode.");
-        _bossWishboneDropMode = BindServerConfig("Balance", "Wishbone Drop Mode", BossDropMode.OnePerPlayerNearBoss,
-            "Sets bosses to drop a number of wishbones equal to the number of players. " +
-            "Optionally set it to only include players within a certain distance, " +
-            "use 'Crypt Key Drop Player Range' to set the range.");
-        _bossWishboneDropPlayerRange = BindServerConfig("Balance", "Wishbone Drop Player Range", 100.0f,
-            "Sets the range that bosses check when dropping multiple wishbones using the OnePerPlayerNearBoss drop mode.");
-
-        _adventureModeEnabled = BindServerConfig("Balance", "Adventure Mode Enabled", true,
-            "Set to true to enable all the adventure mode features: secret stash, gambling, treasure maps, and bounties. " +
-            "Set to false to disable. This will not actually remove active treasure maps or bounties from your save.");
-        _adventureModeEnabled.SettingChanged += (_, _) => MinimapController.RefreshAdventureToggleContainer();
-
-        _andvaranautRange = BindServerConfig("Balance", "Andvaranaut Range", 20,
-            "Sets the range that Andvaranaut will activate to locate a treasure chest.");
-        SetItemDropChance = BindServerConfig("Balance", "Set Item Drop Chance", 0.15f,
+        GlobalDropRateModifier = BindServer(SectionBalance, "Global Drop Rate Modifier", 1.0f,
+            "A global percentage that modifies how likely loot is to drop.\n" +
+            "1 = Exactly what is in the loot tables will drop.\n" +
+            "0 = Nothing will drop.\n" +
+            "2 = The number of items in the drop table are twice as likely to drop " +
+            "(note, this doesn't double the number of loot dropped, just doubles the relative chance for it to drop).\n" +
+            "Min = 0, Max = 4", new AcceptableValueRange<float>(minValue: 0, maxValue: 4));
+        // The four ratios below are RELATIVE WEIGHTS, not independent chances. Every drop the loot
+        // tables produce rolls exactly one of these four categories, weighted against each other, so
+        // they need not sum to 1 -- only their proportions matter. Setting one to 0 removes that
+        // category. A drop no other category is eligible for (and the case where every weight is 0)
+        // falls back to a normal item, so loot never silently vanishes.
+        ItemDropRatio = BindServer(SectionBalance, "Item Drop Ratio", 0.7f,
+            "Relative weight for a loot drop being a normal (possibly enchanted) item.\n" +
+            "Weighed against Shard Stone Drop Ratio, Items Unidentified Drop Ratio and Materials " +
+            "Drop Ratio; the four need not add up to 1, only their proportions matter.\n" +
+            "0 = never drop plain items, except where no other category is possible for that drop.\n" +
+            "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
+        ShardStoneDropRatio = BindServer(SectionBalance, "Shard Stone Drop Ratio", 0.2f,
+            "Relative weight for a loot drop being a shard stone, chosen from the shard set assigned " +
+            "to the biome at the drop point (the ShardStone_{Biome} item sets in loottables.json).\n" +
+            "Weighed against Item Drop Ratio, Items Unidentified Drop Ratio and Materials Drop Ratio.\n" +
+            "0 = no shard stones drop from normal loot. Elite creature and boss shard drops come " +
+            "from the loot tables directly and are not affected by this setting.\n" +
+            "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
+        ItemsUnidentifiedDropRatio = BindServer(SectionBalance, "Items Unidentified Drop Ratio", 0.1f,
+            "Relative weight for a loot drop being an unidentified item.\n" +
+            "Weighed against Item Drop Ratio, Shard Stone Drop Ratio and Materials Drop Ratio.\n" +
+            "Only equippable loot can become unidentified, so drops of materials and other " +
+            "non-equipment ignore this weight.\n" +
+            "0 = no unidentified items drop.\n" +
+            "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
+        MaterialsDropRatio = BindServer(SectionBalance, "Materials Drop Ratio", 0.1f,
+            "Relative weight for a loot drop being magic crafting materials instead of the item " +
+            "itself, as though that item had been sacrificed.\n" +
+            "Weighed against Item Drop Ratio, Shard Stone Drop Ratio and Items Unidentified Drop Ratio.\n" +
+            "0 = no materials drop.\n" +
+            "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
+        SetItemDropChance = BindServer(SectionBalance, "Set Item Drop Chance", 0.15f,
             "The percent chance that a legendary or mythic special item will be dropped, enchanted, " +
             "or identified as a set item from the legendaries configuration file.\n" +
             "Min = 0, Max = 1",
             new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
-        AllowDuplicateSocketedEffects = BindServerConfig("Sockets", "Allow Duplicate Socketed Effects", false,
+        TransferMagicItemToCrafts = BindServer(SectionBalance, "Transfer Enchants to Crafted Items", true,
+            "When enchanted items are used as ingredients in recipes, transfer every enchantment from the " +
+            "consumed items that is valid on the newly crafted item, along with the highest socket count. " +
+            "Default: True.");
+        DeferChestLootRoll = BindServer(SectionBalance, "Defer Chest Loot Roll", true,
+            "When true, a loot chest's EpicLoot contents are rolled the first time a player reads them " +
+            "(hovers it, opens it, quick-loots it, or breaks it) rather than when the chest spawns.\n" +
+            "This matters because a dungeon's interior is created as soon as a player enters the zone " +
+            "above it, so with this off a crypt passed by early in a playthrough keeps low-tier fallback " +
+            "loot forever. Deferring means the roll sees the boss keys and Item Drop Limits in effect " +
+            "when the chest is actually reached.\n" +
+            "Only applies to chests generated from now on; chests that already rolled keep their contents.");
+        _bossTrophyDropMode = BindServer(SectionBalance, "Boss Trophy Drop Mode", BossDropMode.OnePerPlayerNearBoss,
+            "Sets bosses to drop a number of trophies equal to the number of players. " +
+            "Optionally set it to only include players within a certain distance, " +
+            "use 'Boss Trophy Drop Player Range' to set the range.");
+        _bossTrophyDropPlayerRange = BindServer(SectionBalance, "Boss Trophy Drop Player Range", 100.0f,
+            "Sets the range that bosses check when dropping multiple trophies using the OnePerPlayerNearBoss drop mode.");
+        _bossCryptKeyDropMode = BindServer(SectionBalance, "Crypt Key Drop Mode", BossDropMode.OnePerPlayerNearBoss,
+            "Sets bosses to drop a number of crypt keys equal to the number of players. " +
+            "Optionally set it to only include players within a certain distance, " +
+            "use 'Crypt Key Drop Player Range' to set the range.");
+        _bossCryptKeyDropPlayerRange = BindServer(SectionBalance, "Crypt Key Drop Player Range", 100.0f,
+            "Sets the range that bosses check when dropping multiple crypt keys using the OnePerPlayerNearBoss drop mode.");
+        _bossWishboneDropMode = BindServer(SectionBalance, "Wishbone Drop Mode", BossDropMode.OnePerPlayerNearBoss,
+            "Sets bosses to drop a number of wishbones equal to the number of players. " +
+            "Optionally set it to only include players within a certain distance, " +
+            "use 'Crypt Key Drop Player Range' to set the range.");
+        _bossWishboneDropPlayerRange = BindServer(SectionBalance, "Wishbone Drop Player Range", 100.0f,
+            "Sets the range that bosses check when dropping multiple wishbones using the OnePerPlayerNearBoss drop mode.");
+        // 3 - Sockets
+        AllowDuplicateSocketedEffects = BindServer(SectionSockets, "Allow Duplicate Socketed Effects", false,
             "When false, an effect that is already socketed on an item cannot be socketed again.");
-        AllowShardstoneDuplicateItemEffect = BindServerConfig("Sockets", "Allow Shardstone On Matching Item Effect", false,
+        AllowShardstoneDuplicateItemEffect = BindServer(SectionSockets, "Allow Shardstone On Matching Item Effect", false,
             "When true, a shardstone may be socketed even when the item already has that same effect from being enchanted/rolled.");
-        AllowRunestoneDuplicateItemEffect = BindServerConfig("Sockets", "Allow Runestone On Matching Item Effect", false,
+        AllowRunestoneDuplicateItemEffect = BindServer(SectionSockets, "Allow Runestone On Matching Item Effect", false,
             "When true, a runestone may be socketed even when the item already has that same effect from being enchanted/rolled.");
-        ShardSocketRemovalMode = BindServerConfig("Sockets", "Shard Removal Mode", ShardSocketMode.BreakValueless,
+        ShardSocketRemovalMode = BindServer(SectionSockets, "Shard Removal Mode", ShardSocketMode.BreakValueless,
             "Controls whether a shardstone can be taken back out of a socket once it has been placed. " +
             "Shards can always be inserted; this only affects removal.\n" +
             "Free = shards can be freely removed and moved to another item.\n" +
@@ -389,7 +409,7 @@ internal class ELConfig {
             "BreakAll = every shard must be broken to be removed, destroying it.\n" +
             "Permanent = every shard is permanent; it can be neither removed nor broken.\n" +
             "Default: Free.");
-        RuneSocketRemovalMode = BindServerConfig("Sockets", "Rune Removal Mode", RuneSocketMode.Free,
+        RuneSocketRemovalMode = BindServer(SectionSockets, "Rune Removal Mode", RuneSocketMode.Free,
             "Controls whether a runestone can be taken back out of a socket once it has been placed. " +
             "Runes can always be inserted; this only affects removal.\n" +
             "Free = runes can be freely removed and moved to another item.\n" +
@@ -397,7 +417,7 @@ internal class ELConfig {
             "Permanent = a socketed rune is permanent; it can be neither removed nor broken, and no " +
             "other rune can be swapped into its socket.\n" +
             "Default: Free.");
-        ShardStackingMode = BindServerConfig("Sockets", "Shard Stack Mode", ShardStackMode.Diminishing,
+        ShardStackingMode = BindServer(SectionSockets, "Shard Stack Mode", ShardStackMode.Diminishing,
             "Controls whether more than one shardstone of the same color may sit on a single item. " +
             "A shard's effect comes from its color and the item's type, so two shards of one color " +
             "always grant the same effect.\n" +
@@ -409,7 +429,7 @@ internal class ELConfig {
             "stacked -- halving a yes/no effect would leave a dead socket. Boss and other exclusive " +
             "shards keep their own one-per-item / one-per-worn-set rule regardless of this setting.\n" +
             "Default: Blocked.");
-        ShardStackDecayFactor = BindServerConfig("Sockets", "Shard Stack Decay Factor", 0.5f,
+        ShardStackDecayFactor = BindServer(SectionSockets, "Shard Stack Decay Factor", 0.5f,
             "Under Shard Stack Mode = Diminishing, the share of its value each further shard of the " +
             "same color contributes. The shards of a color are ranked strongest first, and the " +
             "shard at rank R is worth (factor ^ R) of its normal value -- so 0.5 gives full, half, " +
@@ -417,42 +437,7 @@ internal class ELConfig {
             "0 = additional shards of a color contribute nothing.\n" +
             "1 = no decay (equivalent to Shard Stack Mode = Full).\n" +
             "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
-        GlobalDropRateModifier = BindServerConfig("Balance", "Global Drop Rate Modifier", 1.0f,
-            "A global percentage that modifies how likely loot is to drop.\n" +
-            "1 = Exactly what is in the loot tables will drop.\n" +
-            "0 = Nothing will drop.\n" +
-            "2 = The number of items in the drop table are twice as likely to drop " +
-            "(note, this doesn't double the number of loot dropped, just doubles the relative chance for it to drop).\n" +
-            "Min = 0, Max = 4", new AcceptableValueRange<float>(minValue: 0, maxValue: 4));
-        ShardStoneDropRatio = BindServerConfig("Balance", "Shard Stone Drop Ratio", 0.1f,
-            "Sets the chance that a rolled loot drop is replaced by a shard stone, chosen from the " +
-            "shard set assigned to the biome at the drop point (the ShardStone_{Biome} item sets in " +
-            "loottables.json).\n" +
-            "This value is evaluated first, Items Unidentified Drop Ratio and Items To Materials " +
-            "Drop Ratio then use the remaining value for their ratio calculations.\n" +
-            "0 = no shard stones drop from normal loot. Elite creature and boss shard drops come " +
-            "from the loot tables directly and are not affected by this setting.\n" +
-            "1 = every loot drop becomes a shard stone.",
-            new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
-        ItemsUnidentifiedDropRatio = BindServerConfig("Balance", "Items Unidentified Drop Ratio", 0.0f,
-            "Sets the chance that loot is dropped as unidentified items. " +
-            "This value is set first, " +
-            "Items To Materials Drop Ratio uses the remaining value from this configuration for ratio calculation.\n" +
-            "0 = no unidentified items drop, uses only the Items To Materials Drop Ratio.\n" +
-            "1 = only unidentified items drop.",
-            new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
-        ItemsToMaterialsDropRatio = BindServerConfig("Balance", "Items To Materials Drop Ratio", 0.0f,
-            "Sets the chance, using the remaining value from Items Unidentified Drop Ratio, " +
-            "that loot drops are instead dropped as magic crafting materials.\n" +
-            "0 = all items, no materials.\n" +
-            "1 = all materials, no items. Values between 0 and 1 change the ratio of items to materials that drop.\n" +
-            "At 0.5, half of everything that drops would be items and the other half would be materials.\n" +
-            "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
-        TransferMagicItemToCrafts = BindServerConfig("Balance", "Transfer Enchants to Crafted Items", true,
-            "When enchanted items are used as ingredients in recipes, transfer every enchantment from the " +
-            "consumed items that is valid on the newly crafted item, along with the highest socket count. " +
-            "Default: True.");
-        RuneExtractItemMode = BindServerConfig("Balance", "Rune Extract Mode", RuneExtractMode.ReduceEnchants,
+        RuneExtractItemMode = BindServer(SectionSockets, "Rune Extract Mode", RuneExtractMode.ReduceEnchants,
             "Controls what happens to the source item when a rune is extracted from it.\n" +
             "KeepItem = the item is returned untouched.\n" +
             "ReduceEnchants = the extracted enchantment is removed from the item (item kept).\n" +
@@ -462,57 +447,240 @@ internal class ELConfig {
             "If the extracted enchantment is the item's only enchantment, the item reverts to a normal item.\n" +
             "Default: ReduceEnchants.");
 
-        // Debug
-        AlwaysShowWelcomeMessage = Config.Bind("Debug", "Show Welcome Message, automatically set to false once config is viewed.", true,
-            "Sets whether or not the welcome message is displayed on startup, this is automatically set to false once the player has viewed the message.");
-        OutputPatchedConfigFiles = Config.Bind("Debug", "OutputPatchedConfigFiles", false,
-            "Just a debug flag for testing the patching system, do not use.");
-        EnableHotReloadPatches = BindServerConfig("Debug", "Enable Hot Reloading Patches", true,
-            "Controls whether or not patch edits can be live-reloaded. Can cause lag when recompiling patches.");
-        AlwaysRefreshCoreConfigs = BindServerConfig("Debug", "Always Refresh Core Configs", false,
-            "Overwrites your core configuration with the mod default values on startup. THIS WILL DELETE ANY MODIFICATIONS TO THE CORE CONFIG.");
+        // 4 - Enchanting Table
+        EnchantingTableUpgradesActive = BindServer(SectionEnchanting, "Upgrades Active", true,
+            "Toggles Enchanting Table Upgrade Capabilities. If false, enchanting table features will be unlocked set to Level 1");
+        EnchantingTableActivatedTabs = BindServer(SectionEnchanting, "Table Features Active",
+            EnchantingTabs.Sacrifice | EnchantingTabs.Augment | EnchantingTabs.Enchant | EnchantingTabs.Disenchant |
+            EnchantingTabs.Upgrade | EnchantingTabs.ConvertMaterials | EnchantingTabs.Rune,
+            "Toggles Enchanting Table Feature on and off completely.");
+        TemperBaseChance = BindServer(SectionEnchanting, "Temper Base Chance", 0.5f,
+            "Base chance to temper item when below max value. When effect value is at max, the chance is at the base. If value is above max value, the chance is reduces by the decrement chance. Default value: 0.5");
+        TemperDecrement = BindServer(SectionEnchanting, "Temper Decrement Amount", 0.15f,
+            "Decrement amount when effect value is above max value. Does not apply if value is below max value. Decrement amount is multiplied by the increment amount the value is above max value. Default value: 0.15");
+        TemperDestroysItem = BindServer(SectionEnchanting, "Temper Fail Destroys Item", false,
+            "When tempering fails, the item will be destroyed. If False, the item will be returned intact. Default value: False");
+        TemperChanceToDestroy = BindServer(SectionEnchanting, "Temper Destroy Chance", 0.5f,
+            "If Fail Destroys Item is enabled, Destroy Chance rolls if item should be destroyed. Default value: 0.5");
 
-        // Abilities
-        AbilityKeyCodes[0] = Config.Bind("Abilities", "Ability Hotkey 1", "g", "Hotkey for Ability Slot 1.");
-        AbilityKeyCodes[1] = Config.Bind("Abilities", "Ability Hotkey 2", "h", "Hotkey for Ability Slot 2.");
-        AbilityKeyCodes[2] = Config.Bind("Abilities", "Ability Hotkey 3", "j", "Hotkey for Ability Slot 3.");
-        AbilityBarAnchor = Config.Bind("Abilities", "Ability Bar Anchor", TextAnchor.LowerLeft,
+        // 5 - Adventure
+        _adventureModeEnabled = BindServer(SectionAdventure, "Adventure Mode Enabled", true,
+            "Set to true to enable all the adventure mode features: secret stash, gambling, treasure maps, and bounties. " +
+            "Set to false to disable. This will not actually remove active treasure maps or bounties from your save.");
+        _andvaranautRange = BindServer(SectionAdventure, "Andvaranaut Range", 20,
+            "Sets the range that Andvaranaut will activate to locate a treasure chest.");
+        BossBountyMode = BindServer(SectionAdventure, "Gated Bounty Mode", GatedBountyMode.Unlimited,
+            "Sets whether available bounties are ungated or gated by boss kills.");
+        EnableLimitedBountiesInProgress = BindServer(SectionAdventure, "Enable Bounty Limit", false,
+            "Toggles limiting bounties. Players unable to purchase if enabled and maximum bounty in-progress count is met");
+        MaxInProgressBounties = BindServer(SectionAdventure, "Max Bounties Per Player", 5,
+            "Max amount of in-progress bounties allowed per player.");
+
+        // 6 - Interface
+        UseScrollingCraftDescription = BindClient(SectionInterface, "Use Scrolling Craft Description", true,
+            "Changes the item description in the crafting panel to scroll instead of scale when it gets too " +
+            "long for the space.");
+        ShowEnchantSelectionChance = BindServer(SectionInterface, "Show Enchant Selection Chance", false,
+            "When true, the Enchant and Augment panels show the weighted chance that each available effect " +
+            "is selected on a single roll, displayed right after the bullet for each effect.");
+        ShowEquippedAndHotbarItemsInSacrificeTab = BindClient(SectionInterface,
+            "ShowEquippedAndHotbarItemsInSacrificeTab", false,
+            "If set to false, hides the items that are equipped or on your hotbar in the Sacrifice items list.");
+        UIAudioVolumeAdjustment = BindClient(SectionInterface, "AudioVolumeAdjustment", 1.0f,
+            "Multiplies the crafting UI sound volume by this percentage [0.0-1.0].\n" +
+            "1 = full UI sounds\n" +
+            "0 = no UI sounds",
+            new AcceptableValueRange<float>(0, 1));
+        TooltipMaxWidth = BindClient(SectionInterface, "Tooltip Max Width", 350,
+            "Maximum width of the item tooltip box, in pixels.", new AcceptableValueRange<int>(150, 1200));
+        TooltipMaxHeight = BindClient(SectionInterface, "Tooltip Max Height", 650,
+            "Maximum height of the item tooltip box, in pixels. Content taller than this scrolls.",
+            new AcceptableValueRange<int>(350, 4000));
+        TraderPanelPositionX = BindClient(SectionInterface, "Trader Panel X Position", -200f,
+            "The horizontal on-screen position (RectTransform anchoredPosition X, anchored to the " +
+            "top-right of the trader window) of the EpicLoot adventure trader panel. Dragging the " +
+            "panel in-game updates this automatically. Default: -200. More negative moves it left, " +
+            "toward 0 (and positive) moves it right.");
+        TraderPanelPositionY = BindClient(SectionInterface, "Trader Panel Y Position", -155f,
+            "The vertical on-screen position (RectTransform anchoredPosition Y, anchored to the " +
+            "top-right of the trader window) of the EpicLoot adventure trader panel. Dragging the " +
+            "panel in-game updates this automatically. Default: -155.");
+        TemperPanelPositionX = BindClient(SectionInterface, "Temper Panel X Position", -200f,
+            "The horizontal on-screen position (RectTransform anchoredPosition X, anchored to the " +
+            "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
+            "in-game updates this automatically. Default: -200.");
+        TemperPanelPositionY = BindClient(SectionInterface, "Temper Panel Y Position", -155f,
+            "The vertical on-screen position (RectTransform anchoredPosition Y, anchored to the " +
+            "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
+            "in-game updates this automatically. Default: -155.");
+
+        // 7 - Item Colors
+        _magicRarityColor = BindClient(SectionItemColors, "Magic Rarity Color", "Blue",
+            "The color of Magic rarity items, the lowest magic item tier. " +
+            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
+            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
+        _magicMaterialIconColor = BindClient(SectionItemColors, "Magic Crafting Material Icon Index", 5,
+            "Indicates the color of the icon used for magic crafting materials. A number between 0 and 9.\n" +
+            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
+        _rareRarityColor = BindClient(SectionItemColors, "Rare Rarity Color", "Yellow",
+            "The color of Rare rarity items, the second magic item tier. " +
+            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
+            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
+        _rareMaterialIconColor = BindClient(SectionItemColors, "Rare Crafting Material Icon Index", 2,
+            "Indicates the color of the icon used for rare crafting materials. A number between 0 and 9.\n" +
+            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
+        _epicRarityColor = BindClient(SectionItemColors, "Epic Rarity Color", "Purple",
+            "The color of Epic rarity items, the third magic item tier. " +
+            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
+            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
+        _epicMaterialIconColor = BindClient(SectionItemColors, "Epic Crafting Material Icon Index", 7,
+            "Indicates the color of the icon used for epic crafting materials. A number between 0 and 9.\n" +
+            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
+        _legendaryRarityColor = BindClient(SectionItemColors, "Legendary Rarity Color", "Teal",
+            "The color of Legendary rarity items, the fourth magic item tier. " +
+            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
+            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
+        _legendaryMaterialIconColor = BindClient(SectionItemColors, "Legendary Crafting Material Icon Index", 4,
+            "Indicates the color of the icon used for legendary crafting materials. A number between 0 and 9.\n" +
+            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
+        _mythicRarityColor = BindClient(SectionItemColors, "Mythic Rarity Color", "Orange",
+            "The color of Mythic rarity items, the highest magic item tier. " +
+            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
+            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
+        _mythicMaterialIconColor = BindClient(SectionItemColors, "Mythic Crafting Material Icon Index", 1,
+            "Indicates the color of the icon used for legendary crafting materials. A number between 0 and 9.\n" +
+            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
+        _setItemColor = BindClient(SectionItemColors, "Set Item Color", "#26ffff",
+            "The color of set item text and the set item icon. Use a hex color, default is cyan");
+
+        // 8 - Abilities
+        AbilityKeyCodes[0] = BindClient(SectionAbilities, "Ability Hotkey 1", "g", "Hotkey for Ability Slot 1.");
+        AbilityKeyCodes[1] = BindClient(SectionAbilities, "Ability Hotkey 2", "h", "Hotkey for Ability Slot 2.");
+        AbilityKeyCodes[2] = BindClient(SectionAbilities, "Ability Hotkey 3", "j", "Hotkey for Ability Slot 3.");
+        AbilityBarAnchor = BindClient(SectionAbilities, "Ability Bar Anchor", TextAnchor.LowerLeft,
             "The point on the HUD to anchor the ability bar. Changing this also changes the pivot of the ability bar to that corner. " +
             "For reference: the ability bar size is 208 by 64.");
-        AbilityBarPosition = Config.Bind("Abilities", "Ability Bar Position", new Vector2(150, 170),
+        AbilityBarPosition = BindClient(SectionAbilities, "Ability Bar Position", new Vector2(150, 170),
             "The position offset from the Ability Bar Anchor at which to place the ability bar.");
-        AbilityBarLayoutAlignment = Config.Bind("Abilities", "Ability Bar Layout Alignment", TextAnchor.LowerLeft,
+        AbilityBarLayoutAlignment = BindClient(SectionAbilities, "Ability Bar Layout Alignment", TextAnchor.LowerLeft,
             "The Ability Bar is a Horizontal Layout Group. This value indicates how the elements inside are aligned. " +
             "Choices with 'Center' in them will keep the items centered on the bar, even if there are fewer than the maximum allowed. " +
             "'Left' will be left aligned, and similar for 'Right'.");
-        AbilityBarIconSpacing = Config.Bind("Abilities", "Ability Bar Icon Spacing", 8.0f,
+        AbilityBarIconSpacing = BindClient(SectionAbilities, "Ability Bar Icon Spacing", 8.0f,
             "The number of units between the icons on the ability bar.");
 
-        // Enchanting Table
-        EnchantingTableUpgradesActive = BindServerConfig("Enchanting Table", "Upgrades Active", true,
-            "Toggles Enchanting Table Upgrade Capabilities. If false, enchanting table features will be unlocked set to Level 1");
-        EnchantingTableActivatedTabs = BindServerConfig("Enchanting Table", $"Table Features Active",
-            EnchantingTabs.Sacrifice | EnchantingTabs.Augment | EnchantingTabs.Enchant | EnchantingTabs.Disenchant |
-            EnchantingTabs.Upgrade | EnchantingTabs.ConvertMaterials | EnchantingTabs.Rune,
-            $"Toggles Enchanting Table Feature on and off completely.");
+        // 9 - Debug
+        _loggingEnabled = BindClient(SectionDebug, "Logging Enabled", true, "Enable logging");
+        _logLevel = BindClient(SectionDebug, "Log Level", LogLevel.Error,
+            "Only log messages of the selected level or higher");
+        AlwaysShowWelcomeMessage = BindClient(SectionDebug, "Show Welcome Message, automatically set to false once config is viewed.", true,
+            "Sets whether or not the welcome message is displayed on startup, this is automatically set to false once the player has viewed the message.");
+        OutputPatchedConfigFiles = BindClient(SectionDebug, "OutputPatchedConfigFiles", false,
+            "Just a debug flag for testing the patching system, do not use.");
+        EnableHotReloadPatches = BindServer(SectionDebug, "Enable Hot Reloading Patches", true,
+            "Controls whether or not patch edits can be live-reloaded. Can cause lag when recompiling patches.");
+        AlwaysRefreshCoreConfigs = BindServer(SectionDebug, "Always Refresh Core Configs", false,
+            "Overwrites your core configuration with the mod default values on startup. THIS WILL DELETE ANY MODIFICATIONS TO THE CORE CONFIG.");
+    }
+
+    /// <summary>
+    /// Subscribed after <see cref="ApplyPreviousConfigValues"/> so restoring a migrated value cannot push
+    /// a UI refresh through before Awake has built the UI.
+    /// </summary>
+    private static void RegisterSettingChangedHandlers() {
+        TraderPanelPositionX.SettingChanged += (_, _) =>
+            MerchantPanel.Instance?.ApplyConfiguredPosition();
+        TraderPanelPositionY.SettingChanged += (_, _) =>
+            MerchantPanel.Instance?.ApplyConfiguredPosition();
+        TemperPanelPositionX.SettingChanged += (_, _) =>
+            global::EpicLoot.TemperPanel.Instance?.ApplyConfiguredPosition();
+        TemperPanelPositionY.SettingChanged += (_, _) =>
+            global::EpicLoot.TemperPanel.Instance?.ApplyConfiguredPosition();
+        _adventureModeEnabled.SettingChanged += (_, _) => MinimapController.RefreshAdventureToggleContainer();
         EnchantingTableUpgradesActive.SettingChanged += (_, _) => EnchantingTableUI.UpdateUpgradeActivation();
         EnchantingTableActivatedTabs.SettingChanged += (_, _) => EnchantingTableUI.UpdateTabActivation();
+    }
 
-        // Bounty Management
-        EnableLimitedBountiesInProgress = BindServerConfig("Bounty Management", "Enable Bounty Limit", false,
-            "Toggles limiting bounties. Players unable to purchase if enabled and maximum bounty in-progress count is met");
-        MaxInProgressBounties = BindServerConfig("Bounty Management", "Max Bounties Per Player", 5,
-            "Max amount of in-progress bounties allowed per player.");
+    /// <summary>Binds a client-local entry in declaration order, recording where it landed for the migration.</summary>
+    private static ConfigEntry<T> BindClient<T>(string section, string key, T value, string description,
+                                               AcceptableValueBase acceptableValues = null) {
+        return Track(ConfigBinder.BindClientConfigInOrder(section, key, value, description, acceptableValues), section, key);
+    }
 
-        // Tempering
-        TemperDestroysItem = BindServerConfig("Tempering", "Fail Destroys Item", false,
-            "When tempering fails, the item will be destroyed. If False, the item will be returned intact. Default value: False");
-        TemperBaseChance = BindServerConfig("Tempering", "Base Chance", 0.5f,
-            "Base chance to temper item when below max value. When effect value is at max, the chance is at the base. If value is above max value, the chance is reduces by the decrement chance. Default value: 0.5");
-        TemperDecrement = BindServerConfig("Tempering", "Decrement Amount", 0.15f,
-            "Decrement amount when effect value is above max value. Does not apply if value is below max value. Decrement amount is multiplied by the increment amount the value is above max value. Default value: 0.15");
-        TemperChanceToDestroy = BindServerConfig("Tempering", "Destroy Chance", 0.5f,
-            "If Fail Destroys Item is enabled, Destroy Chance rolls if item should be destroyed. Default value: 0.5");
+    /// <summary>Binds a server-authoritative (admin only) entry in declaration order.</summary>
+    private static ConfigEntry<T> BindServer<T>(string section, string key, T value, string description,
+                                               AcceptableValueBase acceptableValues = null) {
+        return Track(ConfigBinder.BindServerConfigInOrder(section, key, value, description, acceptableValues), section, key);
+    }
+
+    private static ConfigEntry<T> Track<T>(ConfigEntry<T> entry, string section, string key) {
+        BoundEntries.Add((entry, $"{section}::{key}"));
+        return entry;
+    }
+
+    /// <summary>
+    /// Snapshots the config file as it stands on disk, keyed by section-without-its-order-prefix. Reading
+    /// the file rather than the bound entries is what lets a setting be found under a name BepInEx no
+    /// longer binds; unbound entries survive in the file (BepInEx writes its orphans back out) but are
+    /// not reachable through the ConfigFile API.
+    /// </summary>
+    private static void ReadPreviousConfigValues() {
+        PreviousConfigValues.Clear();
+        if (!File.Exists(cfg.ConfigFilePath)) {
+            return;
+        }
+
+        string section = string.Empty;
+        bool sectionIsOrdered = false;
+        foreach (string rawLine in File.ReadAllLines(cfg.ConfigFilePath)) {
+            string line = rawLine.Trim();
+            if (line.Length == 0 || line[0] == '#') {
+                continue;
+            }
+
+            if (line[0] == '[' && line[line.Length - 1] == ']') {
+                section = line.Substring(1, line.Length - 2).Trim();
+                Match orderPrefix = Regex.Match(section, @"^\d+\s*-\s*");
+                sectionIsOrdered = orderPrefix.Success;
+                section = sectionIsOrdered ? section.Substring(orderPrefix.Length) : section;
+                continue;
+            }
+
+            int separator = line.IndexOf('=');
+            if (separator <= 0) {
+                continue;
+            }
+
+            // Other binders write sections this file does not own - PieceLoader names one after each
+            // piece, so "[Enchanting Table]" holds the table's build cost while "[4 - Enchanting Table]"
+            // holds its features. Stripping the prefix makes those two collide, so an ordered section
+            // always wins; anything else only fills a gap.
+            string location = $"{section}::{line.Substring(0, separator).Trim()}";
+            if (sectionIsOrdered || !PreviousConfigValues.ContainsKey(location)) {
+                PreviousConfigValues[location] = line.Substring(separator + 1).Trim();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Restores values the player had set before this run, for entries BepInEx could not match itself.
+    /// That covers two cases: a section whose order prefix changed (handled by the stripped keys), and a
+    /// setting that moved or was renamed (handled by <see cref="RelocatedSettings"/>).
+    /// </summary>
+    private static void ApplyPreviousConfigValues() {
+        foreach ((ConfigEntryBase entry, string location) in BoundEntries) {
+            if (!PreviousConfigValues.TryGetValue(location, out string previousValue)
+                && (!RelocatedSettings.TryGetValue(location, out string previousLocation)
+                    || !PreviousConfigValues.TryGetValue(previousLocation, out previousValue))) {
+                continue;
+            }
+
+            // Setting the value it already holds is a no-op, so this only bites when something moved.
+            entry.SetSerializedValue(previousValue);
+        }
+
+        BoundEntries.Clear();
+        PreviousConfigValues.Clear();
     }
 
     public static void InitializeConfig() {
@@ -829,26 +997,4 @@ internal class ELConfig {
         yield return null;
     }
 
-    /// <summary>
-    /// Helper to bind configs for <TYPE>
-    /// </summary>
-    /// IsAdminOnly ensures this is a server authoratative value
-    /// These forward to the shared <see cref="ConfigBinder"/> so every mod in the solution produces the same
-    /// ConfigurationManagerAttributes (and therefore the same server-sync behaviour). The overloads are kept
-    /// so the existing call sites, which rely on the acceptable-value type to pick one, do not have to change.
-    /// <returns></returns>
-    public static ConfigEntry<T> BindServerConfig<T>(string category, string key, T value, string description,
-        AcceptableValueList<string> acceptableValues = null, bool advanced = false) {
-        return ConfigBinder.BindServerConfig(category, key, value, description, acceptableValues, advanced);
-    }
-
-    public static ConfigEntry<T> BindServerConfig<T>(string category, string key, T value, string description,
-        AcceptableValueRange<float> acceptableValues, bool advanced = false) {
-        return ConfigBinder.BindServerConfig(category, key, value, description, acceptableValues, advanced);
-    }
-
-    public static ConfigEntry<T> BindServerConfig<T>(string category, string key, T value, string description,
-        AcceptableValueRange<int> acceptableValues, bool advanced = false) {
-        return ConfigBinder.BindServerConfig(category, key, value, description, acceptableValues, advanced);
-    }
 }

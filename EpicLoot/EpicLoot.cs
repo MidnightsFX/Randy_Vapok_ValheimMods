@@ -139,6 +139,9 @@ public sealed class EpicLoot : BaseUnityPlugin {
         MagicItemEffects.Shards.LuckWhileFishing.RegisterDisplayValues();
         MagicItemEffects.Shards.Kindling.RegisterDisplayValues();
         MagicItemEffects.Shards.Conduit.RegisterDisplayValues();
+        MagicItemEffects.Shards.Inspiration.RegisterDisplayValues();
+        MagicItemEffects.Shards.LuckyLoot.RegisterDisplayValues();
+        MagicItemEffects.Shards.Bloodrage.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;
@@ -430,9 +433,12 @@ public sealed class EpicLoot : BaseUnityPlugin {
         // world load (fires as a ZNetScene.Awake postfix), so the SummonBat trinket shard can spawn a
         // reload-safe pet that stays friendly. Idempotent -- built once and re-injected each ZNetScene.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.SummonBatWhenActivatingAdrenaline.RegisterTamedBatPrefab;
-        // NOTE: StrikeCausesLightning.RegisterVisualPrefab and Trailblazer.RegisterVfxPrefab used to be
-        // registered here. Both effects are unassigned in the shard grid (see MagicEffectType_Shards.cs), so
-        // their prefab clones are no longer built. Re-add these lines if either effect takes a slot again.
+        // The Stormcaller and Firewalker unique shards carry their whole effect in a prefab clone built at
+        // ZNetScene setup: a damage-free copy of the vanilla lightning AOE, and the burning patch the fire
+        // trail drops. Without these two lines each effect logs a missing-prefab warning once and then does
+        // nothing at all, so they are load-bearing, not cosmetic.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.StrikeCausesLightning.RegisterVisualPrefab;
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.Trailblazer.RegisterVfxPrefab;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
         ShardStones.Shards.CreateAndLoadShardItems();

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using EpicLoot.MagicItemEffects.Helpers;
+using HarmonyLib;
 using JetBrains.Annotations;
 using SkillType = Skills.SkillType;
 
@@ -9,6 +10,12 @@ namespace EpicLoot.MagicItemEffects.Shards {
         private static class RaiseSkill_Patch {
             [UsedImplicitly]
             private static void Prefix(Skills __instance, SkillType skillType, ref float factor) {
+                // Inspiration grants an exact number of accumulator points; multiplying them would
+                // overshoot each level boundary and vanilla would discard the excess. See SkillXpGrant.
+                if (SkillXpGrant.InProgress) {
+                    return;
+                }
+
                 if (skillType != SkillType.WoodCutting && skillType != SkillType.Pickaxes) {
                     return;
                 }

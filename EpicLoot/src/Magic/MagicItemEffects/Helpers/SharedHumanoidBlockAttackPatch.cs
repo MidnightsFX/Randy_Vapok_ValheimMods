@@ -33,6 +33,9 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             GainOnBlockResource.GainOnBlock(IsBlocked: true); // red / yellow / cyan
             Warding.UseMoreStaminaOnBlock(__instance, hit);
             ElementalWarding.UseEitrOnBlock(__instance, hit);
+            // Golden. Order-independent: unlike the three above it never touches `hit`, so it cannot
+            // perturb the conversion -> warding sequence.
+            LuckyBlock.OnBlock(__instance, hit, attacker);
         }
 
         

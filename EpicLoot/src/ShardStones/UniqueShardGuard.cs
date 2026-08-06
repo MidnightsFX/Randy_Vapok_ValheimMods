@@ -30,7 +30,8 @@ namespace EpicLoot.ShardStones {
                 // The item being equipped is not yet worn, so this scans the currently-worn set.
                 if (ShardSocketManager.IsExclusiveCategoryEquipped(Player.m_localPlayer, category, item)) {
                     Player.m_localPlayer.Message(MessageHud.MessageType.Center,
-                        Localization.instance.Localize("$mod_epicloot_equip_bosslimit"));
+                        Localization.instance.Localize(
+                            $"$mod_epicloot_equip_{Shards.ExclusiveCategorySlug(category)}limit"));
                     __result = false;
                     return false;
                 }

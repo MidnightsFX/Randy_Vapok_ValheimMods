@@ -2,6 +2,7 @@
 using EpicLoot.Config;
 using EpicLoot.Crafting;
 using EpicLoot.GatedItemType;
+using EpicLoot.ShardStones;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -184,6 +185,7 @@ namespace EpicLoot.Magic
                     if (validItems.Contains(loot.Item) ||
                         metaItemSetNames.Contains(loot.Item) ||
                         magicMats.Contains(loot.Item) ||
+                        Shards.IsRarityTokenShardName(loot.Item) ||
                         ObjectDB.instance.GetItemPrefab(loot.Item) != null)
                     {
                         entries.Add(loot);
@@ -227,10 +229,19 @@ namespace EpicLoot.Magic
                     }
                 }
 
-                if (entries.Count > 0)
+                // Keep the set even when validation emptied it. Dropping it here used to turn one bad
+                // entry check into a chain of dead references: metaItemSetNames is snapshotted above,
+                // before any pruning, so every reference to the set survives while the set itself
+                // vanishes -- and a reference that resolves to nothing is reported as a missing item
+                // prefab, miles from the real cause. An empty set is a config problem worth saying out
+                // loud; ResolveLootDrop reports it again if anything actually rolls on it.
+                if (entries.Count == 0)
                 {
-                    updatedItemSets.Add(new LootItemSet { Name = lis.Name, Loot = entries.ToArray() });
+                    EpicLoot.LogWarning($"LootSet {lis.Name} has no valid entries left after validation. " +
+                        $"Keeping it so references to it stay resolvable, but it will drop nothing.");
                 }
+
+                updatedItemSets.Add(new LootItemSet { Name = lis.Name, Loot = entries.ToArray() });
             }
 
             EpicLoot.Log($"Checking loot tables for invalid entries.");
@@ -239,31 +250,14 @@ namespace EpicLoot.Magic
             foreach (LootTable lt in LootRoller.Config.LootTables)
             {
                 List<LootDrop> updatedLootDrop = new List<LootDrop>();
-                List<LeveledLootDef> levelListDef = new List<LeveledLootDef>();
 
-                // Valid existing entries
+                // Valid existing entries. Only lt.Loot is validated -- LeveledLoot is deliberately left
+                // untouched. Boss drops live there (Eikthyr_{Rarity}_ShardStone and friends), and a
+                // level-gated entry has no independent existence to check that ValidateLootList would
+                // not already cover, so validating it only adds ways to delete working loot.
                 if (lt.Loot != null)
                 {
                     updatedLootDrop.AddRange(ValidateLootList(lt, metaLootTables, metaItemSetNames, validItems));
-                }
-
-                // Validate existing entries in the leveled loot drops
-                if (lt.LeveledLoot != null)
-                {
-                    foreach (LeveledLootDef lloot in lt.LeveledLoot)
-                    {
-                        List<LootDrop> updatedLootTableLL = new List<LootDrop>();
-                        foreach (LootDrop ld in lloot.Loot)
-                        {
-                            if (validItems.Contains(ld.Item) || metaItemSetNames.Contains(ld.Item))
-                            {
-                                updatedLootTableLL.Add(ld);
-                            }
-                        }
-                        LeveledLootDef lld = new LeveledLootDef();
-                        lld.Loot = updatedLootTableLL.ToArray();
-                        levelListDef.Add(lld);
-                    }
                 }
 
                 LootTable ltc = lt;
@@ -618,7 +612,8 @@ namespace EpicLoot.Magic
                     }
                 }
 
-                if (!validItems.Contains(loot.Item) && !metaItemSetNames.Contains(loot.Item))
+                if (!validItems.Contains(loot.Item) && !metaItemSetNames.Contains(loot.Item) &&
+                    !Shards.IsRarityTokenShardName(loot.Item))
                 {
                     EpicLoot.Log($"REMOVING: Loot table ({lt.Object}) Item {loot.Item} not found.");
                     continue;

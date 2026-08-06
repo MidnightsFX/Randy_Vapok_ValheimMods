@@ -29,13 +29,24 @@ namespace EpicLoot.Magic.MagicItemEffects.Helpers {
                 // Lucky Fishing (LuckWhileFishing): the bonus-treasure table (prefab -> value threshold,
                 // same semantic as the Riches config) plus the triple-catch sub-roll chance.
                 { MagicEffectType.LuckWhileFishing, LuckWhileFishing.DefaultConfig },
-                // Mercenary (Golden weapons): the per-hit coin cost, the flat damage bonus, and the
+                // The three coin-economy effects below are no longer assigned to any shard slot (Golden was
+                // re-themed from coins to luck). BuildDefinition is only reached for effects the grid
+                // actually uses, so these entries are dormant rather than harmful -- and keeping them is
+                // what makes any of the three revivable with a single config edit.
+                //
+                // Mercenary (was Golden weapons): the per-hit coin cost, the flat damage bonus, and the
                 // soft-cap curve applied to the converted coins.
                 { MagicEffectType.Mercenary, Mercenary.DefaultConfig },
-                // Coinplated (Golden chest): what share of the purse is committed to absorbing each hit.
+                // Coinplated (was Golden chest): what share of the purse is committed to absorbing each hit.
                 { MagicEffectType.Coinplated, Coinplated.DefaultConfig },
-                // Wager (Golden head): how much damage each wagered coin buys.
+                // Wager (was Golden head): how much damage each wagered coin buys.
                 { MagicEffectType.Wager, Wager.DefaultConfig },
+                // Inspiration (Golden head): the percent chance that any single skill-XP gain inspires.
+                { MagicEffectType.Inspiration, Inspiration.DefaultConfig },
+                // Lucky Loot (Golden chest): the range of extra magic-item table rolls a proc earns.
+                { MagicEffectType.LuckyLoot, LuckyLoot.DefaultConfig },
+                // Bloodrage (DarkRed chest): how many times the damage buff may stack.
+                { MagicEffectType.Bloodrage, new Dictionary<string, float> { { "MaxStacks", Bloodrage.DefaultMaxStacks } } },
                 // Adrenaline Surge (AdrenalineIncreasesHealthRegen): seconds of buff granted per point of
                 // shard value, which is what turns the single rarity ramp into both a regen % and a duration.
                 { MagicEffectType.AdrenalineIncreasesHealthRegen,
