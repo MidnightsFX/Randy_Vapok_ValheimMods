@@ -1,4 +1,4 @@
-using EpicLoot.Crafting;
+﻿using EpicLoot.Crafting;
 using EpicLoot.Data;
 using EpicLoot.GatedItemType;
 using EpicLoot.General;
@@ -25,27 +25,29 @@ namespace EpicLoot.ShardStones {
         Pink = 6, // Dodge
         Purple = 7, // Eitr
         White = 8, // Daytime
-        Grey = 9,
-        // not shift the shards below it -- ShardType is serialized by ordinal on socketed gear.
+        Grey = 9, // harvesting
         // Dark shards
         DarkGreen = 30,
         DarkPurple = 31,
-        DarkRed = 32,
+        DarkRed = 32, // berserker
         DarkBlue = 33, // cold resistances
-        Golden = 34,
+        Golden = 34, // luck
         // Light shards
         LightBlue = 40,
         LightGreen = 41,
         Peach = 42,
         //LightRed = 43,
+        // Unique shards -- one signature effect granted on every slot, one worn at a time
+        Firewalker = 70,
+        Stormcaller = 71,
         // Boss shards
-        Eikthyr = 90, // Stamina as eitr
-        Elder = 91, // Summon roots occasionally to fight for you
-        Bonemass = 92, // Applies poison to enemies on hit (chance)
-        Moder = 93, // Chance to cause a frost nova when you are hit
-        Yagluth = 94, // Chance to summon a meteor on hit
-        Queen = 95, // Gain a small amount of eitr from stamina usage
-        Fader = 96, // Chance to cause an aoe fire explosion on hit
+        Eikthyr = 90,
+        Elder = 91,
+        Bonemass = 92,
+        Moder = 93,
+        Yagluth = 94,
+        Queen = 95,
+        Fader = 96,
 
         // This is the error path
         None
@@ -146,6 +148,10 @@ namespace EpicLoot.ShardStones {
     public static class Shards {
         public static readonly String ShardIndicator = "ShardStone";
 
+        // Placeholder a loot table writes in place of a concrete rarity: "Yellow_{Rarity}_ShardStone".
+        // LootRoller.ExpandRarityToken replaces it with the rolled rarity at drop time.
+        public const string RarityToken = "{Rarity}";
+
         // Per-(color, rarity) prefab stack cap. Each (color, rarity) is a distinct prefab with a distinct
         // display name, so only identical-rarity shards of the same color merge -- up to this many.
         private const int ShardStackSize = 100;
@@ -229,6 +235,32 @@ namespace EpicLoot.ShardStones {
                 return ItemRarity.Magic;
             }
             return set[UnityEngine.Random.Range(0, set.Count)];
+        }
+
+        // True when a loot table's item name is a "{Color}_{Rarity}_ShardStone" token that will expand
+        // into a real shard prefab at drop time. Loot list validation needs this: the token names no
+        // prefab as written, so a plain ObjectDB lookup rejects every shard entry and deletes it.
+        //
+        // Answered from the shard grid rather than ObjectDB on purpose. CreateAndLoadShardItems builds
+        // exactly one prefab per declared (color, rarity) straight out of ShardDefinitions, so the
+        // config is the same authority -- and going through it keeps this free of any assumption about
+        // when shard prefabs land in ObjectDB relative to the caller.
+        public static bool IsRarityTokenShardName(string name) {
+            if (string.IsNullOrEmpty(name) || !name.EndsWith("_" + ShardIndicator, StringComparison.Ordinal)) {
+                return false;
+            }
+
+            int sep = name.IndexOf("_" + RarityToken + "_", StringComparison.Ordinal);
+            if (sep <= 0) {
+                return false;
+            }
+
+            if (!Enum.TryParse(name.Substring(0, sep), true, out ShardType color) || color == ShardType.None) {
+                return false;
+            }
+
+            var rarities = ShardDefinitions.Get(color)?.Rarities;
+            return rarities != null && rarities.Count > 0;
         }
 
         // Accessors kept under the ShardDefinitions name for existing call sites (MagicTooltipShard,
@@ -414,6 +446,14 @@ namespace EpicLoot.ShardStones {
 
         public static bool IsExclusive(ShardCategory category) => ExclusiveCategories.Contains(category);
 
+        // Exclusivity is enforced per category, so a Boss shard and a Unique shard may be worn at the
+        // same time -- one of each, not one in total. The player-facing messages therefore have to name
+        // the category that actually blocked instead of always saying "boss". Callers build
+        // $mod_epicloot_shard_{slug}exclusive, $mod_epicloot_socket_{slug}limit and
+        // $mod_epicloot_equip_{slug}limit from this.
+        public static string ExclusiveCategorySlug(ShardCategory category) =>
+            category == ShardCategory.Unique ? "unique" : "boss";
+
         public static ShardCategory GetCategory(ShardType color) {
             var def = ShardDefinitions.Get(color);
             return def != null ? def.Category : ShardCategory.Core;
@@ -434,13 +474,22 @@ namespace EpicLoot.ShardStones {
 
                 Enum.TryParse(shardColor, true, out ShardType color);
 
-                foreach(ItemRarity rarity in ShardDefinitions.Get(color).Rarities) {
+                foreach (ItemRarity rarity in ShardDefinitions.Get(color).Rarities) {
                     var prefab = UnityEngine.Object.Instantiate(genericPrefab);
                     string PrefabName = $"{shardColor}_{rarity}_ShardStone";
                     prefab.name = PrefabName;
                     ItemDrop pid = prefab.GetComponent<ItemDrop>();
                     pid.m_itemData.m_dropPrefab = prefab;
-                    pid.m_itemData.m_shared.m_icons = new Sprite[] { EpicAssets.AssetBundle.LoadAsset<Sprite>($"Assets/EpicLoot/Sprites/Shardstones/{shardColor}.png") };
+                    // One sprite per color, by convention. A color added to ShardType before its art
+                    // exists in the bundle still produces a working shard -- Unity renders a null sprite
+                    // as an empty slot rather than throwing -- so say so once instead of leaving a blank
+                    // icon to be diagnosed by eye.
+                    var icon = EpicAssets.AssetBundle.LoadAsset<Sprite>($"Assets/EpicLoot/Sprites/Shardstones/{shardColor}.png");
+                    if (icon == null) {
+                        EpicLoot.LogWarning($"No shardstone sprite found for '{shardColor}' " +
+                            $"(Assets/EpicLoot/Sprites/Shardstones/{shardColor}.png); it will have no icon.");
+                    }
+                    pid.m_itemData.m_shared.m_icons = new Sprite[] { icon };
                     // The ammoType is this shard's identity: color and rarity both live here, in shared
                     // data that survives Instantiate. Everything downstream reads it rather than the
                     // prefab name or any baked custom data.

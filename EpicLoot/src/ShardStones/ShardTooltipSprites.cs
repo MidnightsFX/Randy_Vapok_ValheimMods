@@ -1,21 +1,13 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Jotunn.Managers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore;
 
-namespace EpicLoot.ShardStones
-{
-    // Builds lightweight TMP sprite assets (one per socketed source prefab) so a socketed item's tooltip
-    // line can show that item's own icon inline via a <sprite="..."> tag. Each asset points at the item
-    // icon's own GPU texture directly -- no atlas, no ReadPixels -- so it works even for non-readable
-    // AssetBundle textures. Assets are built lazily on first use, per prefab, and cached; everything is
-    // wrapped in try/catch: if anything fails we hand back an empty tag and the tooltip renders exactly
-    // as before (glyph only). Keying on the source prefab (rather than the shard color) means runestones and
-    // any unique/new shard show their real icon without needing a matching enum value or sprite file.
-    public static class ShardTooltipSprites
-    {
+namespace EpicLoot.ShardStones {
+    // Dynamically builds a sprite icon for any socketed item prefab
+    public static class ShardTooltipSprites {
         private const string AssetNamePrefix = "EpicLoot_Socket_";
 
         private static bool _initialized;
@@ -28,15 +20,12 @@ namespace EpicLoot.ShardStones
         // Inline sprite tag for the icon of the socketed item identified by sourcePrefab, or "" when
         // unavailable (empty prefab, prefab/icon not found, no shader, or build failed). The "" result is
         // cached too so a missing prefab isn't retried every tooltip frame.
-        public static string GetSpriteTag(string sourcePrefab)
-        {
-            if (string.IsNullOrEmpty(sourcePrefab))
-            {
+        public static string GetSpriteTag(string sourcePrefab) {
+            if (string.IsNullOrEmpty(sourcePrefab)) {
                 return string.Empty;
             }
 
-            if (_tagByPrefab.TryGetValue(sourcePrefab, out var cached))
-            {
+            if (_tagByPrefab.TryGetValue(sourcePrefab, out var cached)) {
                 return cached;
             }
 
@@ -45,54 +34,43 @@ namespace EpicLoot.ShardStones
             return tag;
         }
 
-        private static string BuildTag(string sourcePrefab)
-        {
+        private static string BuildTag(string sourcePrefab) {
             EnsureInitialized();
-            if (_shader == null)
-            {
+            if (_shader == null) {
                 return string.Empty;
             }
 
-            try
-            {
+            try {
                 var sprite = PrefabManager.Instance.GetPrefab(sourcePrefab)
                     ?.GetComponent<ItemDrop>()?.m_itemData.GetIcon();
-                if (sprite == null)
-                {
+                if (sprite == null) {
                     return string.Empty;
                 }
 
                 return BuildSpriteAsset(sourcePrefab, sprite, _shader)
                     ? $"<sprite=\"{AssetNamePrefix}{sourcePrefab}\" index=0>"
                     : string.Empty;
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 EpicLoot.LogWarning($"Failed to build socket tooltip icon for '{sourcePrefab}': {e.Message}");
                 return string.Empty;
             }
         }
 
-        private static void EnsureInitialized()
-        {
-            if (_initialized)
-            {
+        private static void EnsureInitialized() {
+            if (_initialized) {
                 return;
             }
             _initialized = true;
 
             _shader = ResolveSpriteShader();
-            if (_shader == null)
-            {
+            if (_shader == null) {
                 EpicLoot.LogWarning("Socket tooltip icons disabled: TextMeshPro/Sprite shader not found.");
             }
         }
 
-        private static Shader ResolveSpriteShader()
-        {
+        private static Shader ResolveSpriteShader() {
             var shader = Shader.Find("TextMeshPro/Sprite");
-            if (shader != null)
-            {
+            if (shader != null) {
                 return shader;
             }
 
@@ -105,19 +83,16 @@ namespace EpicLoot.ShardStones
         // that prefab name. Returns true on success. Referencing the sprite's own texture as the sprite
         // sheet (with the sprite's textureRect as the glyph rect) keeps the icon on the GPU -- no pixels
         // are ever read back.
-        private static bool BuildSpriteAsset(string key, Sprite sprite, Shader shader)
-        {
+        private static bool BuildSpriteAsset(string key, Sprite sprite, Shader shader) {
             var texture = sprite.texture;
-            if (texture == null)
-            {
+            if (texture == null) {
                 return false;
             }
 
             var rect = sprite.textureRect;
             int w = Mathf.RoundToInt(rect.width);
             int h = Mathf.RoundToInt(rect.height);
-            if (w <= 0 || h <= 0)
-            {
+            if (w <= 0 || h <= 0) {
                 return false;
             }
 
@@ -137,8 +112,7 @@ namespace EpicLoot.ShardStones
             spriteAsset.materialHashCode = TMP_TextUtilities.GetSimpleHashCode(material.name);
             // A minimal, self-consistent face: pointSize == glyph height keeps the sprite rendering at
             // roughly the surrounding font size, sitting on the text baseline.
-            spriteAsset.faceInfo = new FaceInfo
-            {
+            spriteAsset.faceInfo = new FaceInfo {
                 familyName = assetName,
                 pointSize = h,
                 scale = 1f,
@@ -154,8 +128,7 @@ namespace EpicLoot.ShardStones
             // field with no [SerializeField], unlike the glyph/character tables), and TMP's one-time
             // UpgradeSpriteAsset() dereferences spriteInfoList.Count -- so initialize it first or the call
             // below throws a NullReferenceException.
-            if (spriteAsset.spriteInfoList == null)
-            {
+            if (spriteAsset.spriteInfoList == null) {
                 spriteAsset.spriteInfoList = new List<TMP_Sprite>();
             }
 
@@ -172,8 +145,7 @@ namespace EpicLoot.ShardStones
             // backing lists, so we just add to them -- no reflection needed.
             var glyphTable = spriteAsset.spriteGlyphTable;
             var characterTable = spriteAsset.spriteCharacterTable;
-            if (glyphTable == null || characterTable == null)
-            {
+            if (glyphTable == null || characterTable == null) {
                 return false;
             }
 
@@ -182,14 +154,12 @@ namespace EpicLoot.ShardStones
                 new GlyphMetrics(w, h, 0f, h, w),
                 new GlyphRect(Mathf.RoundToInt(rect.x), Mathf.RoundToInt(rect.y), w, h),
                 1f,
-                0)
-            {
+                0) {
                 sprite = sprite
             };
             glyphTable.Add(glyph);
 
-            characterTable.Add(new TMP_SpriteCharacter(0xE000, spriteAsset, glyph)
-            {
+            characterTable.Add(new TMP_SpriteCharacter(0xE000, spriteAsset, glyph) {
                 name = key,
                 glyphIndex = 0,
                 scale = 1f

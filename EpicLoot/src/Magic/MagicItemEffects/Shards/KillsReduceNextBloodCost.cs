@@ -1,25 +1,11 @@
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // DarkPurple head shard (Blood Magic): kills bank a discount on the health ("blood") cost of the local
-    // player's next attack. Each kill by the local player adds the shard value to a running reduction (capped
-    // at MaxReduction); the reduction is applied and consumed the next time an attack pays health.
-    //
-    // The bank is surfaced as the "Blood Rite" buff (SE_BloodRite), whose icon text shows the current
-    // discount and the time left before it lapses. That buff owns the expiry: it self-removes when the bank
-    // is spent, when the shard comes off, or when BuffDuration elapses, and its Stop() clears the bank -- so
-    // a banked discount that goes unused for BuffDuration seconds is forfeited rather than held forever.
-    //
-    // Kill detection mirrors vanilla's own last-hit attribution in Character.OnDeath
-    // (m_lastHit.GetAttacker() == localPlayer). Consumption hooks Character.UseHealth, which vanilla only ever
-    // calls to pay an attack's health cost (Attack.GetAttackHealth), so it stacks with ModifyAttackHealthUse
-    // (which has already reduced the amount passed in) and fires exactly once per blood attack. Shard values
-    // are authored as whole-number percents, hence the 0.01f.
-    public static class KillsReduceNextBloodCost
-    {
+namespace EpicLoot.MagicItemEffects.Shards {
+    // Provides a status effect on kill which reduces the health cost of the next blood attack. The reduction is banked and can be stacked up to a cap, and expires after a duration.
+    public static class KillsReduceNextBloodCost {
         // Cap on the banked reduction. 1 = kills can bank up to a fully-free next blood attack. Tunable.
         private const float MaxReduction = 1f;
 
@@ -40,21 +26,17 @@ namespace EpicLoot.MagicItemEffects.Shards
         public static void ClearBank() => _bankedReduction = 0f;
 
         [HarmonyPatch(typeof(Character), nameof(Character.OnDeath))]
-        private static class OnDeath_Patch
-        {
+        private static class OnDeath_Patch {
             [UsedImplicitly]
-            private static void Postfix(Character __instance)
-            {
+            private static void Postfix(Character __instance) {
                 if (Player.m_localPlayer == null || __instance == Player.m_localPlayer
-                    || __instance.m_lastHit?.GetAttacker() != Player.m_localPlayer)
-                {
+                    || __instance.m_lastHit?.GetAttacker() != Player.m_localPlayer) {
                     return;
                 }
 
                 var perKill = Player.m_localPlayer.GetTotalActiveMagicEffectValue(
                     MagicEffectType.KillsReduceNextBloodCost, 0.01f);
-                if (perKill > 0f)
-                {
+                if (perKill > 0f) {
                     _bankedReduction = Mathf.Min(MaxReduction, _bankedReduction + perKill);
                     ApplyOrRefreshBuff(Player.m_localPlayer);
                 }
@@ -62,18 +44,15 @@ namespace EpicLoot.MagicItemEffects.Shards
         }
 
         [HarmonyPatch(typeof(Character), nameof(Character.UseHealth))]
-        private static class UseHealth_Patch
-        {
+        private static class UseHealth_Patch {
             [UsedImplicitly]
-            private static void Prefix(Character __instance, ref float hp)
-            {
-                if (__instance != Player.m_localPlayer || hp <= 0f || _bankedReduction <= 0f)
-                {
+            private static void Prefix(Character __instance, ref float hp) {
+                if (__instance != Player.m_localPlayer || hp <= 0f || _bankedReduction <= 0f) {
                     return;
                 }
 
                 hp *= 1f - Mathf.Clamp01(_bankedReduction);
-                _bankedReduction = 0f;
+                ClearBank();
                 // The buff notices the empty bank on the next SEMan tick (SE_BloodRite.IsDone) and removes
                 // itself; nothing to do here.
             }
@@ -81,18 +60,15 @@ namespace EpicLoot.MagicItemEffects.Shards
 
         // Shows the buff on the first banked kill, or just refreshes its countdown while it is already up.
         // The discount itself is read live from the bank, so there is no per-instance state to restamp.
-        private static void ApplyOrRefreshBuff(Player player)
-        {
+        private static void ApplyOrRefreshBuff(Player player) {
             var seMan = player.GetSEMan();
-            if (seMan.GetStatusEffect(BuffHash) is SE_BloodRite existing)
-            {
+            if (seMan.GetStatusEffect(BuffHash) is SE_BloodRite existing) {
                 existing.ResetTime();
                 return;
             }
 
             var prototype = GetOrCreatePrototype();
-            if (prototype != null)
-            {
+            if (prototype != null) {
                 seMan.AddStatusEffect(prototype);
             }
         }
@@ -101,20 +77,16 @@ namespace EpicLoot.MagicItemEffects.Shards
         // render as an invisible HUD entry (SEMan only surfaces effects with an icon), so if the sprite
         // lookup fails we log once and leave the prototype null -- the discount still works, it just has no
         // icon, and with it the 30s expiry (owned by the buff) simply doesn't apply.
-        private static SE_BloodRite GetOrCreatePrototype()
-        {
-            if (_buffPrototype != null)
-            {
+        private static SE_BloodRite GetOrCreatePrototype() {
+            if (_buffPrototype != null) {
                 return _buffPrototype;
             }
 
             // The DarkPurple (Blood Magic) shardstone's own icon -- same sprite the shard items use
             // (see Shards.cs).
             var icon = EpicAssets.AssetBundle?.LoadAsset<Sprite>("Assets/EpicLoot/Sprites/Shardstones/DarkPurple.png");
-            if (icon == null)
-            {
-                if (!_iconMissingLogged)
-                {
+            if (icon == null) {
+                if (!_iconMissingLogged) {
                     EpicLoot.LogWarning("KillsReduceNextBloodCost: could not load the DarkPurple shardstone sprite; Blood Rite will not display.");
                     _iconMissingLogged = true;
                 }

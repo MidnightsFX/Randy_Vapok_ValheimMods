@@ -1,5 +1,5 @@
-﻿namespace EpicLoot.MagicItemEffects.Shards 
-{
+﻿namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
+    // Helper class to handle gaining resources (health, stamina, eitr) when the player successfully blocks an attack.
     public static class GainOnBlockResource {
         public static void GainOnBlock(bool IsBlocked) 
         {

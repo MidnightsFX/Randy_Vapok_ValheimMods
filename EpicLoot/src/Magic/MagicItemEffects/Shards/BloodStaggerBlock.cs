@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards 
 {
+    // Reduces stagger damage taken while blocking, and applies a small self-damage when blocking.
     public static class BloodStaggerBlock 
     {
         [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UpdateBlock))]

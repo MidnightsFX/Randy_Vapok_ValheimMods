@@ -4,6 +4,7 @@ using Jotunn.Managers;
 
 namespace EpicLoot.MagicItemEffects.Shards 
 {
+    // Provides a bonus to base block based on the player's current health. Also applies a self-damage effect when blocking.
     public static class BloodBaseBlock 
     {
         [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UpdateBlock))]
@@ -19,7 +20,7 @@ namespace EpicLoot.MagicItemEffects.Shards
 
                 HitData hit = new HitData();
                 hit.SetAttacker(player); // self dmg as player. I want to trigger on hit effects.
-                                            // Can scrap if its too powerful or jank. I expect this effect to go under utilized.
+                                         // Can scrap if its too powerful or jank. I expect this effect to go under utilized.
 
                 hit.m_damage.m_damage = (player.GetMaxHealth() / 20f); // 5% hardcoded as true damage untyped dmg doesnt run through armor or known resistances
                 hit.m_staggerMultiplier = 0f;

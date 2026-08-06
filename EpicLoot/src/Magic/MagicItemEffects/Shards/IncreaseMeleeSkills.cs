@@ -1,16 +1,9 @@
-using SkillType = Skills.SkillType;
+﻿using SkillType = Skills.SkillType;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // Melee-skill bundle shard effect (DarkRed melee slot). The actual bonus is applied by the
-    // centralized skill patch in AddSkillLevel.cs (Skills.GetSkillFactor), which also drives the
-    // skills-dialog "+X" display -- this class just declares which skills the bundle covers.
-    public static class IncreaseMeleeSkills
-    {
-        // Offensive melee weapon skills. Blocking is intentionally excluded (it has its own
-        // AddBlockingSkill effect), as are gathering skills like WoodCutting.
-        public static readonly SkillType[] MeleeSkills =
-        {
+namespace EpicLoot.MagicItemEffects.Shards {
+    // Provides a bonus to all offensive melee weapon skills (Swords, Knives, Clubs, Polearms, Spears, Axes, Unarmed)
+    public static class IncreaseMeleeSkills {
+        public static readonly SkillType[] MeleeSkills = {
             SkillType.Swords,
             SkillType.Knives,
             SkillType.Clubs,

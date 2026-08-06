@@ -1,6 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
+namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
     // "Dodge Agility" -- the brief movement-speed burst a perfect dodge grants (see PerfectDodgeGivesSpeed).
     // SpeedBonus is a fraction (e.g. 0.60 at Epic) stamped on the live instance by that effect, so the buff

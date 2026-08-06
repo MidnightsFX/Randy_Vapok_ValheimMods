@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace EpicLoot.MagicItemEffects.Shards {
+    // Provides a bonus to block based on the player's carried weight
     public class BurdenedBlock 
     {
         public static void Apply(ItemDrop.ItemData __instance, ref float baseBlock) 

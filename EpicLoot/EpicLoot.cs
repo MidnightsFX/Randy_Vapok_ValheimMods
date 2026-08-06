@@ -8,6 +8,7 @@ using EpicLoot.Data;
 using EpicLoot.GatedItemType;
 using EpicLoot.General;
 using EpicLoot.Magic;
+using EpicLoot.Magic.MagicItemEffects.Helpers;
 using EpicLoot.MagicItemEffects;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -33,8 +34,7 @@ namespace EpicLoot;
 [BepInDependency("vapok.mods.adventurebackpacks", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("kg.ValheimEnchantmentSystem", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("org.bepinex.plugins.steadyregeneration", BepInDependency.DependencyFlags.SoftDependency)]
-public sealed class EpicLoot : BaseUnityPlugin
-{
+public sealed class EpicLoot : BaseUnityPlugin {
     public const string PluginId = "randyknapp.mods.epicloot";
     public const string DisplayName = "Epic Loot";
     public const string Version = "0.13.0";
@@ -78,8 +78,8 @@ public sealed class EpicLoot : BaseUnityPlugin
     };
 
     public static bool AlwaysDropCheat = false;
-    public const Minimap.PinType BountyPinType = (Minimap.PinType) 800;
-    public const Minimap.PinType TreasureMapPinType = (Minimap.PinType) 801;
+    public const Minimap.PinType BountyPinType = (Minimap.PinType)800;
+    public const Minimap.PinType TreasureMapPinType = (Minimap.PinType)801;
     public static bool HasAuga;
     public static bool AugaTooltipNoTextBoxes;
 
@@ -92,8 +92,7 @@ public sealed class EpicLoot : BaseUnityPlugin
     internal ELConfig cfg;
 
     [UsedImplicitly]
-    void Awake()
-    {
+    void Awake() {
         _instance = this;
 
         // Wire the shared Common support layer (config binder, piece loader, drawers) to this plugin before
@@ -120,8 +119,7 @@ public sealed class EpicLoot : BaseUnityPlugin
         SetupWatcher();
     }
 
-    private static void RegisterMagicEffectEvents()
-    {
+    private static void RegisterMagicEffectEvents() {
         // Register per-effect tooltip display-value providers (effects that show more than one number).
         // These are keyed by effect-type constant and don't depend on config load, so register once here.
         MagicItemEffects.BulkupEffect.RegisterDisplayValues();
@@ -141,6 +139,9 @@ public sealed class EpicLoot : BaseUnityPlugin
         MagicItemEffects.Shards.LuckWhileFishing.RegisterDisplayValues();
         MagicItemEffects.Shards.Kindling.RegisterDisplayValues();
         MagicItemEffects.Shards.Conduit.RegisterDisplayValues();
+        MagicItemEffects.Shards.Inspiration.RegisterDisplayValues();
+        MagicItemEffects.Shards.LuckyLoot.RegisterDisplayValues();
+        MagicItemEffects.Shards.Bloodrage.RegisterDisplayValues();
         MagicItemEffects.Shards.BlockAsDodgeAsBlock.RegisterDisplayValues();
         MagicItemEffects.Shards.BlockAsWoodCuttingAndPickaxes.RegisterDisplayValues();
 
@@ -150,18 +151,16 @@ public sealed class EpicLoot : BaseUnityPlugin
         // Register definitions for the Shardstone-only effect types (blank tooltips + warnings otherwise).
         // Re-runs on every config (re)load; the defensive call covers the case where the effect config was
         // already loaded (during ELConfig construction) before this subscription was added.
-        MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += MagicItemEffects.Shards.ShardEffectDefinitions.RegisterShardEffectDefinitions;
-        if (MagicItemEffectDefinitions.AllDefinitions.Count > 0)
-        {
-            MagicItemEffects.Shards.ShardEffectDefinitions.RegisterShardEffectDefinitions();
+        MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += ShardEffectDefinitions.RegisterShardEffectDefinitions;
+        if (MagicItemEffectDefinitions.AllDefinitions.Count > 0) {
+            ShardEffectDefinitions.RegisterShardEffectDefinitions();
         }
 
         // Generate the ShardStone rarity-upgrade recipes (enchanting "Upgrade" tab). Same event/defensive
         // pattern as the shard effect definitions above: re-runs on every material-conversions (re)load,
         // with a defensive call if that config was already loaded before this subscription was added.
         CraftingV2.MaterialConversions.OnSetupMaterialConversions += ShardStones.ShardStoneConversions.RegisterShardStoneUpgradeConversions;
-        if (CraftingV2.MaterialConversions.Config != null)
-        {
+        if (CraftingV2.MaterialConversions.Config != null) {
             ShardStones.ShardStoneConversions.RegisterShardStoneUpgradeConversions();
         }
     }
@@ -263,10 +262,10 @@ public sealed class EpicLoot : BaseUnityPlugin
     //        {
     //            //Auga.API.ComplexTooltip_SetSubtitle(complexTooltip, localizedSubtitle);
     //        }
-            
+
     //        if (AugaTooltipNoTextBoxes)
     //            return;
-            
+
     //        //Don't need to process the InventoryTooltip Information.
     //        if (complexTooltip.name.Contains("InventoryTooltip"))
     //            return;
@@ -278,13 +277,13 @@ public sealed class EpicLoot : BaseUnityPlugin
     //        var textBox = Auga.API.ComplexTooltip_AddTwoColumnTextBox(complexTooltip);
     //        magicItemText = magicItemText.Replace("\n\n", "");
     //        Auga.API.TooltipTextBox_AddLine(textBox, magicItemText);
-            
+
     //        if (magicItem.IsLegendarySetItem())
     //        {
     //            var textBox2 = Auga.API.ComplexTooltip_AddTwoColumnTextBox(complexTooltip);
     //            Auga.API.TooltipTextBox_AddLine(textBox2, item.GetSetTooltip());
     //        }
-            
+
     //        try
     //        {
     //            Auga.API.ComplexTooltip_SetDescription(complexTooltip,
@@ -297,13 +296,11 @@ public sealed class EpicLoot : BaseUnityPlugin
     //    }
     //}
 
-    private void AddLocalizations()
-    {
+    private void AddLocalizations() {
         CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
         // load all localization files within the localizations directory
         Log("Loading Localizations.");
-        foreach (string embeddedResouce in typeof(EpicLoot).Assembly.GetManifestResourceNames())
-        {
+        foreach (string embeddedResouce in typeof(EpicLoot).Assembly.GetManifestResourceNames()) {
             if (!embeddedResouce.Contains("localizations")) { continue; }
             string localization = ReadEmbeddedResourceFile(embeddedResouce);
             // This will clean comments out of the localization files
@@ -317,58 +314,46 @@ public sealed class EpicLoot : BaseUnityPlugin
         ELConfig.StartupProcessModifiedLocalizations();
     }
 
-    private static void InitializeAbilities()
-    {
+    private static void InitializeAbilities() {
         MagicEffectType.Initialize();
         AbilitiesInitialized?.Invoke();
     }
 
-    public static void Log(string message)
-    {
-        if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Info)
-        {
+    public static void Log(string message) {
+        if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Info) {
             _instance.Logger.LogInfo(message);
         }
     }
 
-    public static void LogWarning(string message)
-    {
-        if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Warning)
-        {
+    public static void LogWarning(string message) {
+        if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Warning) {
             _instance.Logger.LogWarning(message);
         }
     }
 
-    public static void LogError(string message)
-    {
-        if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Error)
-        {
+    public static void LogError(string message) {
+        if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Error) {
             _instance.Logger.LogError(message);
         }
     }
 
-    public static void LogForce(string message)
-    {
+    public static void LogForce(string message) {
         // Intentionally NOT gated by _loggingEnabled/_logLevel: some diagnostics must always be visible.
         _instance.Logger.LogInfo(message);
     }
 
-    public static void LogWarningForce(string message)
-    {
+    public static void LogWarningForce(string message) {
         _instance.Logger.LogWarning(message);
     }
 
-    public static void LogErrorForce(string message)
-    {
+    public static void LogErrorForce(string message) {
         _instance.Logger.LogError(message);
     }
 
-    private static void LoadAssets()
-    {
+    private static void LoadAssets() {
         var assetBundle = LoadAssetBundle("epicloot");
 
-        if (assetBundle == null)
-        {
+        if (assetBundle == null) {
             LogErrorForce("Unable to load asset bundle! This mod will not behave as expected!");
             return;
         }
@@ -400,7 +385,7 @@ public sealed class EpicLoot : BaseUnityPlugin
 
         EpicAssets.MerchantPanel = assetBundle.LoadAsset<GameObject>("MerchantPanel");
         EpicAssets.TemperPanel = assetBundle.LoadAsset<GameObject>("TemperPanel");
-        
+
         EpicAssets.MapIconTreasureMap = assetBundle.LoadAsset<Sprite>("TreasureMapIcon");
         EpicAssets.MapIconBounty = assetBundle.LoadAsset<Sprite>("MapIconBounty");
         EpicAssets.AbandonBountySFX = assetBundle.LoadAsset<AudioClip>("AbandonBounty");
@@ -427,7 +412,7 @@ public sealed class EpicLoot : BaseUnityPlugin
 
         EpicAssets.BerserkerStatusEffect = assetBundle.LoadAsset<SE_Stats>(EpicAssets.Berserker_SE_Name);
         EpicAssets.BerserkerVFX = assetBundle.LoadAsset<GameObject>("Berserker");
-        EpicAssets.BerserkerSFX =  assetBundle.LoadAsset<GameObject>("sfx_berserker");
+        EpicAssets.BerserkerSFX = assetBundle.LoadAsset<GameObject>("sfx_berserker");
 
         EpicAssets.DodgeBuffStatusEffect = assetBundle.LoadAsset<SE_Stats>(EpicAssets.DodgeBuff_SE_Name);
         EpicAssets.DodgeBuffSFX = assetBundle.LoadAsset<GameObject>("sfx_dodgebuff");
@@ -450,9 +435,12 @@ public sealed class EpicLoot : BaseUnityPlugin
         // world load (fires as a ZNetScene.Awake postfix), so the SummonBat trinket shard can spawn a
         // reload-safe pet that stays friendly. Idempotent -- built once and re-injected each ZNetScene.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.SummonBatWhenActivatingAdrenaline.RegisterTamedBatPrefab;
-        // NOTE: StrikeCausesLightning.RegisterVisualPrefab and Trailblazer.RegisterVfxPrefab used to be
-        // registered here. Both effects are unassigned in the shard grid (see MagicEffectType_Shards.cs), so
-        // their prefab clones are no longer built. Re-add these lines if either effect takes a slot again.
+        // The Stormcaller and Firewalker unique shards carry their whole effect in a prefab clone built at
+        // ZNetScene setup: a damage-free copy of the vanilla lightning AOE, and the burning patch the fire
+        // trail drops. Without these two lines each effect logs a missing-prefab warning once and then does
+        // nothing at all, so they are load-bearing, not cosmetic.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.StrikeCausesLightning.RegisterVisualPrefab;
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.Trailblazer.RegisterVfxPrefab;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
         ShardStones.Shards.CreateAndLoadShardItems();
@@ -462,21 +450,16 @@ public sealed class EpicLoot : BaseUnityPlugin
         EpicAssets.AssertAssetIntegrety();
     }
 
-    public static T LoadAsset<T>(string assetName) where T : Object
-    {
-        try
-        {
-            if (EpicAssets.AssetCache.ContainsKey(assetName))
-            {
+    public static T LoadAsset<T>(string assetName) where T : Object {
+        try {
+            if (EpicAssets.AssetCache.ContainsKey(assetName)) {
                 return (T)EpicAssets.AssetCache[assetName];
             }
 
             var asset = EpicAssets.AssetBundle.LoadAsset<T>(assetName);
             EpicAssets.AssetCache.Add(assetName, asset);
             return asset;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             LogErrorForce($"Error loading asset ({assetName}): {e.Message}");
             return null;
         }
@@ -487,10 +470,8 @@ public sealed class EpicLoot : BaseUnityPlugin
     /// build cost, category and workbench requirement as server-synced config entries that apply live.
     /// None of these pieces required a crafting station before, hence RequiresWorkbench = false.
     /// </summary>
-    private static void LoadPieces()
-    {
-        PieceLoader.Register(new PieceLoader.BuildPiece
-        {
+    private static void LoadPieces() {
+        PieceLoader.Register(new PieceLoader.BuildPiece {
             Name = "Enchanter",
             Prefab = "piece_enchanter",
             Category = PieceCategories.Misc,
@@ -506,8 +487,7 @@ public sealed class EpicLoot : BaseUnityPlugin
             }
         });
 
-        PieceLoader.Register(new PieceLoader.BuildPiece
-        {
+        PieceLoader.Register(new PieceLoader.BuildPiece {
             Name = "Augmenter",
             Prefab = "piece_augmenter",
             Category = PieceCategories.Misc,
@@ -523,8 +503,7 @@ public sealed class EpicLoot : BaseUnityPlugin
             }
         });
 
-        PieceLoader.Register(new PieceLoader.BuildPiece
-        {
+        PieceLoader.Register(new PieceLoader.BuildPiece {
             Name = "Enchanting Table",
             Prefab = "piece_enchantingtable",
             Category = PieceCategories.Crafting,
@@ -538,10 +517,8 @@ public sealed class EpicLoot : BaseUnityPlugin
         });
     }
 
-    private static void LoadItems()
-    {
-        foreach (var item in ItemNames)
-        {
+    private static void LoadItems() {
+        foreach (var item in ItemNames) {
             var go = EpicAssets.AssetBundle.LoadAsset<GameObject>(item);
             var customItem = new CustomItem(go, false);
             ItemManager.Instance.AddItem(customItem);
@@ -563,8 +540,7 @@ public sealed class EpicLoot : BaseUnityPlugin
     /// server-synced config entries for its recipe, crafting station, station level and craft amount, all
     /// applying live without a restart.
     /// </summary>
-    private static void LoadCraftableItems()
-    {
+    private static void LoadCraftableItems() {
         // EpicLoot's bundle stores assets under bare names, and these prefabs are authored against the real
         // game assets (no JVLmock_ references to resolve) and carry their own icons.
         ItemBatchLoader.PrefabPathFormat = null;
@@ -573,16 +549,14 @@ public sealed class EpicLoot : BaseUnityPlugin
 
         var loader = new ItemBatchLoader();
 
-        loader.AddDefinition(new ItemDefinition
-        {
+        loader.AddDefinition(new ItemDefinition {
             Name = "Leather Belt",
             Prefab = "LeatherBelt",
             Category = ItemCategory.Misc,
             CraftedAt = "forge",
             ReqStationlevel = 1,
             CraftAmount = 1,
-            Recipe = new RecipeDefinition
-            {
+            Recipe = new RecipeDefinition {
                 RecipeItems = new List<RecipeIngredient>
                 {
                     new RecipeIngredient { Prefab = "LeatherScraps", Amount = 4 },
@@ -591,16 +565,14 @@ public sealed class EpicLoot : BaseUnityPlugin
             }
         });
 
-        loader.AddDefinition(new ItemDefinition
-        {
+        loader.AddDefinition(new ItemDefinition {
             Name = "Silver Ring",
             Prefab = "SilverRing",
             Category = ItemCategory.Misc,
             CraftedAt = "forge",
             ReqStationlevel = 1,
             CraftAmount = 1,
-            Recipe = new RecipeDefinition
-            {
+            Recipe = new RecipeDefinition {
                 RecipeItems = new List<RecipeIngredient>
                 {
                     new RecipeIngredient { Prefab = "Silver", Amount = 1 }
@@ -608,16 +580,14 @@ public sealed class EpicLoot : BaseUnityPlugin
             }
         });
 
-        loader.AddDefinition(new ItemDefinition
-        {
+        loader.AddDefinition(new ItemDefinition {
             Name = "Gold Ruby Ring",
             Prefab = "GoldRubyRing",
             Category = ItemCategory.Misc,
             CraftedAt = "forge",
             ReqStationlevel = 1,
             CraftAmount = 1,
-            Recipe = new RecipeDefinition
-            {
+            Recipe = new RecipeDefinition {
                 RecipeItems = new List<RecipeIngredient>
                 {
                     new RecipeIngredient { Prefab = "Coins", Amount = 200 },
@@ -629,41 +599,31 @@ public sealed class EpicLoot : BaseUnityPlugin
         loader.BatchSetup();
     }
 
-    private static void LoadBountySpawner()
-    {
+    private static void LoadBountySpawner() {
         GameObject bounty_spawner = EpicAssets.AssetBundle.LoadAsset<GameObject>("EL_SpawnController");
 
-        if (bounty_spawner == null)
-        {
+        if (bounty_spawner == null) {
             LogErrorForce("Unable to find bounty spawner asset! This mod will not behave as expected!");
-        }
-        else
-        {
+        } else {
             bounty_spawner.AddComponent<AdventureSpawnController>();
             CustomPrefab prefab_obj = new CustomPrefab(bounty_spawner, false);
             PrefabManager.Instance.AddPrefab(prefab_obj);
         }
     }
 
-    private static void LoadCraftingMaterialAssets()
-    {
-        foreach (string type in MagicMaterials)
-        {
-            foreach (ItemRarity rarity in Enum.GetValues(typeof(ItemRarity)))
-            {
+    private static void LoadCraftingMaterialAssets() {
+        foreach (string type in MagicMaterials) {
+            foreach (ItemRarity rarity in Enum.GetValues(typeof(ItemRarity))) {
                 string assetName = $"{type}{rarity}";
                 GameObject prefab = EpicAssets.AssetBundle.LoadAsset<GameObject>(assetName);
 
-                if (!prefab)
-                {
+                if (!prefab) {
                     LogErrorForce($"Tried to load asset {assetName} but it does not exist in the asset bundle!");
                     continue;
                 }
 
-                if (prefab.TryGetComponent(out ItemDrop itemDrop))
-                {
-                    if (itemDrop.m_itemData.IsMagicCraftingMaterial())
-                    {
+                if (prefab.TryGetComponent(out ItemDrop itemDrop)) {
+                    if (itemDrop.m_itemData.IsMagicCraftingMaterial()) {
                         // Set icons for crafting materials.
                         itemDrop.m_itemData.m_variant = GetRarityIconIndex(rarity);
                     }
@@ -678,8 +638,7 @@ public sealed class EpicLoot : BaseUnityPlugin
         }
     }
 
-    private static void LoadUnidentifiedItems()
-    {
+    private static void LoadUnidentifiedItems() {
         // TODO: Add support for biomes added by other mods as needed.
         GameObject genericPrefab = EpicAssets.AssetBundle.LoadAsset<GameObject>("_Unidentified");
         CustomItem genericUnidentified = new CustomItem(genericPrefab, false);
@@ -688,31 +647,26 @@ public sealed class EpicLoot : BaseUnityPlugin
 
         var unidentifiedPrefabNames = new List<string>();
 
-        foreach (string biome in Enum.GetNames(typeof(Heightmap.Biome)))
-        {
-            if (biome == "None" || biome == "All")
-            {
+        foreach (string biome in Enum.GetNames(typeof(Heightmap.Biome))) {
+            if (biome == "None" || biome == "All") {
                 continue;
             }
 
-            foreach (ItemRarity rarity in Enum.GetValues(typeof(ItemRarity)))
-            {
+            foreach (ItemRarity rarity in Enum.GetValues(typeof(ItemRarity))) {
                 var prefab = Object.Instantiate(genericPrefab);
                 string prefabName = $"{biome}_{rarity}_Unidentified";
                 prefab.name = prefabName;
                 ItemDrop pid = prefab.GetComponent<ItemDrop>();
                 var magicItemComponent = pid.m_itemData.Data().GetOrCreate<MagicItemComponent>();
                 pid.m_itemData.m_dropPrefab = prefab;
-                magicItemComponent.SetMagicItem(new MagicItem
-                {
+                magicItemComponent.SetMagicItem(new MagicItem {
                     Rarity = rarity,
                     IsUnidentified = true,
                 });
                 magicItemComponent.Save();
                 pid.Save();
-                
-                ItemConfig unidentifiedIC = new ItemConfig()
-                {
+
+                ItemConfig unidentifiedIC = new ItemConfig() {
                     Name = $"$mod_epicloot_{rarity} $mod_epicloot_unidentified_{biome}",
                     Description = "$mod_epicloot_unidentified_introduce",
                 };
@@ -727,13 +681,10 @@ public sealed class EpicLoot : BaseUnityPlugin
         // Enable items once things are working so that ZNet issues don't happen.
         // A single idempotent handler activates every registered prefab; a null
         // lookup logs and continues so one missing prefab can't leave the rest inactive.
-        void EnableUnidentifiedItems()
-        {
-            foreach (string prefabName in unidentifiedPrefabNames)
-            {
+        void EnableUnidentifiedItems() {
+            foreach (string prefabName in unidentifiedPrefabNames) {
                 GameObject prefab = PrefabManager.Instance.GetPrefab(prefabName);
-                if (prefab == null)
-                {
+                if (prefab == null) {
                     LogError($"Could not find unidentified prefab '{prefabName}' to activate.");
                     continue;
                 }
@@ -746,57 +697,49 @@ public sealed class EpicLoot : BaseUnityPlugin
         ItemManager.OnItemsRegistered += EnableUnidentifiedItems;
     }
 
-    private static void RegisterStatusEffects()
-    {
+    private static void RegisterStatusEffects() {
         RegisterBulwark();
         RegisterUndying();
         RegisterBerserker();
         RegisterAdrenalineRush();
     }
 
-    private static void RegisterBulwark()
-    {
+    private static void RegisterBulwark() {
         PrefabManager.Instance.AddPrefab(EpicAssets.BulwarkMagicShieldVFX);
         PrefabManager.Instance.AddPrefab(EpicAssets.BulwarkMagicShieldSFX);
         ItemManager.OnItemsRegistered += () => ObjectDB.instance.m_StatusEffects.Add(EpicAssets.BulwarkStatusEffect);
     }
 
-    private static void RegisterBerserker()
-    {
+    private static void RegisterBerserker() {
         PrefabManager.Instance.AddPrefab(EpicAssets.BerserkerVFX);
         PrefabManager.Instance.AddPrefab(EpicAssets.BerserkerSFX);
         ItemManager.OnItemsRegistered += () => ObjectDB.instance.m_StatusEffects.Add(EpicAssets.BerserkerStatusEffect);
     }
 
-    private static void RegisterUndying()
-    {
+    private static void RegisterUndying() {
         PrefabManager.Instance.AddPrefab(EpicAssets.UndyingVFX);
         PrefabManager.Instance.AddPrefab(EpicAssets.UndyingSFX);
         ItemManager.OnItemsRegistered += () => ObjectDB.instance.m_StatusEffects.Add(EpicAssets.UndyingStatusEffect);
     }
 
-    private static void RegisterAdrenalineRush()
-    {
+    private static void RegisterAdrenalineRush() {
         PrefabManager.Instance.AddPrefab(EpicAssets.DodgeBuffSFX);
         ItemManager.OnItemsRegistered += () => ObjectDB.instance.m_StatusEffects.Add(EpicAssets.DodgeBuffStatusEffect);
     }
 
     [UsedImplicitly]
-    void OnDestroy()
-    {
+    void OnDestroy() {
         Config.Save();
         _instance = null;
     }
 
-    public static bool IsObjectDBReady()
-    {
+    public static bool IsObjectDBReady() {
         // Hack, just making sure the built-in items and prefabs have loaded
         return ObjectDB.instance != null && ObjectDB.instance.m_items.Count != 0 &&
             ObjectDB.instance.GetItemPrefab("Amber") != null;
     }
 
-    private static void SetupAndvaranaut()
-    {
+    private static void SetupAndvaranaut() {
         var go = EpicAssets.AssetBundle.LoadAsset<GameObject>("Andvaranaut");
         ItemDrop prefab = go.GetComponent<ItemDrop>();
 
@@ -833,8 +776,7 @@ public sealed class EpicLoot : BaseUnityPlugin
         wishbone.m_shared.m_equipStatusEffect = wishboneFinder;
 
         // Setup magic item
-        var magicItem = new MagicItem
-        {
+        var magicItem = new MagicItem {
             Rarity = ItemRarity.Epic,
             TypeNameOverride = "$mod_epicloot_item_andvaranaut_type"
         };
@@ -848,8 +790,7 @@ public sealed class EpicLoot : BaseUnityPlugin
         PrefabManager.OnPrefabsRegistered -= SetupAndvaranaut;
     }
 
-    private static void SetupStatusEffects()
-    {
+    private static void SetupStatusEffects() {
         var lightning = ObjectDB.instance.GetStatusEffect("Lightning".GetHashCode());
         var paralyzed = ScriptableObject.CreateInstance<SE_Paralyzed>();
         Common.Utils.CopyFields(lightning, paralyzed, typeof(StatusEffect));
@@ -860,8 +801,7 @@ public sealed class EpicLoot : BaseUnityPlugin
         ItemManager.OnItemsRegistered -= SetupStatusEffects;
     }
 
-    public static AssetBundle LoadAssetBundle(string filename)
-    {
+    public static AssetBundle LoadAssetBundle(string filename) {
         return AssetBundleLoader.LoadFromResources(filename, typeof(EpicLoot).Assembly);
     }
 
@@ -870,24 +810,18 @@ public sealed class EpicLoot : BaseUnityPlugin
     /// </summary>
     /// <param name="filename"></param>
     /// <returns></returns>
-    internal static string ReadEmbeddedResourceFile(string filename)
-    {
-        using (var stream = typeof(EpicLoot).Assembly.GetManifestResourceStream(filename))
-        {
-            using (var reader = new StreamReader(stream))
-            {
+    internal static string ReadEmbeddedResourceFile(string filename) {
+        using (var stream = typeof(EpicLoot).Assembly.GetManifestResourceStream(filename)) {
+            using (var reader = new StreamReader(stream)) {
                 return reader.ReadToEnd();
             }
         }
     }
 
-    internal static List<string> GetEmbeddedResourceNamesFromDirectory(string embedded_location = "EpicLoot.config.")
-    {
+    internal static List<string> GetEmbeddedResourceNamesFromDirectory(string embedded_location = "EpicLoot.config.") {
         List<string> resourcenames = new List<string>();
-        foreach (string embeddedResouce in typeof(EpicLoot).Assembly.GetManifestResourceNames())
-        {
-            if (embeddedResouce.Contains(embedded_location))
-            {
+        foreach (string embeddedResouce in typeof(EpicLoot).Assembly.GetManifestResourceNames()) {
+            if (embeddedResouce.Contains(embedded_location)) {
                 // Got to strip the starting 'EpicLoot.config.' off, so we just take the ending substring
                 resourcenames.Add(embeddedResouce.Substring(16));
             }
@@ -895,8 +829,7 @@ public sealed class EpicLoot : BaseUnityPlugin
         return resourcenames;
     }
 
-    public static bool CanBeMagicItem(ItemDrop.ItemData item)
-    {
+    public static bool CanBeMagicItem(ItemDrop.ItemData item) {
         return item != null
                && IsPlayerItem(item)
                && Nonstackable(item)
@@ -904,76 +837,62 @@ public sealed class EpicLoot : BaseUnityPlugin
                && IsAllowedMagicItemType(item);
     }
 
-    public static bool IsAllowedMagicItemType(ItemDrop.ItemData item)
-    {
-        switch (item.m_shared.m_itemType)
-        {
+    public static bool IsAllowedMagicItemType(ItemDrop.ItemData item) {
+        switch (item.m_shared.m_itemType) {
             case ItemDrop.ItemData.ItemType.Ammo:
             case ItemDrop.ItemData.ItemType.AmmoNonEquipable:
-                    return false;
+                return false;
             default:
                 return item.IsEquipable();
         }
     }
 
-    public static Sprite GetMagicItemBgSprite()
-    {
+    public static Sprite GetMagicItemBgSprite() {
         return HasAuga ? EpicAssets.AugaItemBgSprite : EpicAssets.GenericItemBgSprite;
     }
 
-    public static Sprite GetEquippedSprite()
-    {
+    public static Sprite GetEquippedSprite() {
         return HasAuga ? EpicAssets.AugaEquippedSprite : EpicAssets.EquippedSprite;
     }
 
-    public static Sprite GetSetItemSprite()
-    {
+    public static Sprite GetSetItemSprite() {
         return HasAuga ? EpicAssets.AugaSetItemSprite : EpicAssets.GenericSetItemSprite;
     }
 
     // Escapes rather than literal glyphs: this file has no BOM and a CP1252 round-trip once
     // corrupted these characters into mojibake. \u25BE = small down triangle, \u2666 = diamond suit
     // (Auga); \u25BC = down triangle, \u25C6 = black diamond (default). Alt ideas: U+1F7A0, U+1F79B.
-    public static string GetMagicEffectPip(bool hasBeenAugmented)
-    {
+    public static string GetMagicEffectPip(bool hasBeenAugmented) {
         return HasAuga ? (hasBeenAugmented ? "\u25BE" : "\u2666") : (hasBeenAugmented ? "\u25BC" : "\u25C6");
     }
 
-    private static bool IsNotRestrictedItem(ItemDrop.ItemData item)
-    {
-        if (item.m_dropPrefab != null && LootRoller.Config.RestrictedItems.Contains(item.m_dropPrefab.name))
-        {
+    private static bool IsNotRestrictedItem(ItemDrop.ItemData item) {
+        if (item.m_dropPrefab != null && LootRoller.Config.RestrictedItems.Contains(item.m_dropPrefab.name)) {
             return false;
         }
 
         return !LootRoller.Config.RestrictedItems.Contains(item.m_shared.m_name);
     }
 
-    private static bool Nonstackable(ItemDrop.ItemData item)
-    {
+    private static bool Nonstackable(ItemDrop.ItemData item) {
         return item.m_shared.m_maxStackSize == 1;
     }
 
-    private static bool IsPlayerItem(ItemDrop.ItemData item)
-    {
+    private static bool IsPlayerItem(ItemDrop.ItemData item) {
         // WTF, this is the only thing I found different between player usable items and items that are only for enemies
         return item.m_shared.m_icons.Length > 0;
     }
 
-    public static string GetCharacterCleanName(Character character)
-    {
+    public static string GetCharacterCleanName(Character character) {
         return character.name.Replace("(Clone)", "").Trim();
     }
 
-    public static string GetSetItemColor()
-    {
+    public static string GetSetItemColor() {
         return ELConfig._setItemColor.Value;
     }
 
-    public static string GetRarityDisplayName(ItemRarity rarity)
-    {
-        switch (rarity)
-        {
+    public static string GetRarityDisplayName(ItemRarity rarity) {
+        switch (rarity) {
             case ItemRarity.Magic:
                 return "$mod_epicloot_Magic";
             case ItemRarity.Rare:
@@ -989,10 +908,8 @@ public sealed class EpicLoot : BaseUnityPlugin
         }
     }
 
-    public static string GetRarityColor(ItemRarity rarity)
-    {
-        switch (rarity)
-        {
+    public static string GetRarityColor(ItemRarity rarity) {
+        switch (rarity) {
             case ItemRarity.Magic:
                 return GetColor(ELConfig._magicRarityColor.Value);
             case ItemRarity.Rare:
@@ -1008,21 +925,15 @@ public sealed class EpicLoot : BaseUnityPlugin
         }
     }
 
-    public static Color GetRarityColorARGB(ItemRarity rarity)
-    {
+    public static Color GetRarityColorARGB(ItemRarity rarity) {
         return ColorUtility.TryParseHtmlString(GetRarityColor(rarity), out var color) ? color : Color.white;
     }
 
-    private static string GetColor(string configValue)
-    {
-        if (configValue.StartsWith("#"))
-        {
+    private static string GetColor(string configValue) {
+        if (configValue.StartsWith("#")) {
             return configValue;
-        }
-        else
-        {
-            if (MagicItemColors.TryGetValue(configValue, out var color))
-            {
+        } else {
+            if (MagicItemColors.TryGetValue(configValue, out var color)) {
                 return color;
             }
         }
@@ -1030,10 +941,8 @@ public sealed class EpicLoot : BaseUnityPlugin
         return "#000000";
     }
 
-    public static int GetRarityIconIndex(ItemRarity rarity)
-    {
-        switch (rarity)
-        {
+    public static int GetRarityIconIndex(ItemRarity rarity) {
+        switch (rarity) {
             case ItemRarity.Magic:
                 return Mathf.Clamp(ELConfig._magicMaterialIconColor.Value, 0, 9);
             case ItemRarity.Rare:
@@ -1049,69 +958,56 @@ public sealed class EpicLoot : BaseUnityPlugin
         }
     }
 
-    public static AudioClip GetMagicItemDropSFX(ItemRarity rarity)
-    {
-        return EpicAssets.MagicItemDropSFX[(int) rarity];
+    public static AudioClip GetMagicItemDropSFX(ItemRarity rarity) {
+        return EpicAssets.MagicItemDropSFX[(int)rarity];
     }
 
-    public static GatedItemTypeMode GetGatedItemTypeMode()
-    {
+    public static GatedItemTypeMode GetGatedItemTypeMode() {
         return ELConfig._gatedItemTypeModeConfig.Value;
     }
 
-    public static BossDropMode GetBossTrophyDropMode()
-    {
+    public static BossDropMode GetBossTrophyDropMode() {
         return ELConfig._bossTrophyDropMode.Value;
     }
 
-    public static float GetBossTrophyDropPlayerRange()
-    {
+    public static float GetBossTrophyDropPlayerRange() {
         return ELConfig._bossTrophyDropPlayerRange.Value;
     }
 
-    public static float GetBossCryptKeyPlayerRange()
-    {
+    public static float GetBossCryptKeyPlayerRange() {
         return ELConfig._bossCryptKeyDropPlayerRange.Value;
     }
 
-    public static BossDropMode GetBossCryptKeyDropMode()
-    {
+    public static BossDropMode GetBossCryptKeyDropMode() {
         return ELConfig._bossCryptKeyDropMode.Value;
     }
 
-    public static BossDropMode GetBossWishboneDropMode()
-    {
+    public static BossDropMode GetBossWishboneDropMode() {
         return ELConfig._bossWishboneDropMode.Value;
     }
 
-    public static float GetBossWishboneDropPlayerRange()
-    {
+    public static float GetBossWishboneDropPlayerRange() {
         return ELConfig._bossWishboneDropPlayerRange.Value;
     }
 
-    public static int GetAndvaranautRange()
-    {
-      return ELConfig._andvaranautRange.Value;
+    public static int GetAndvaranautRange() {
+        return ELConfig._andvaranautRange.Value;
     }
 
-    public static bool IsAdventureModeEnabled()
-    {
+    public static bool IsAdventureModeEnabled() {
         return ELConfig._adventureModeEnabled.Value;
     }
 
-    public static float GetWorldLuckFactor()
-    {
+    public static float GetWorldLuckFactor() {
         return _instance._worldLuckFactor;
     }
 
     // TODO, why isn't this used?
-    public static void SetWorldLuckFactor(float luckFactor)
-    {
+    public static void SetWorldLuckFactor(float luckFactor) {
         _instance._worldLuckFactor = luckFactor;
     }
 
-    private void SetupWatcher()
-    {
+    private void SetupWatcher() {
         FileSystemWatcher watcher = new(BepInEx.Paths.ConfigPath, ConfigFileName);
         watcher.Changed += ReadConfigValues;
         watcher.Created += ReadConfigValues;
@@ -1124,19 +1020,15 @@ public sealed class EpicLoot : BaseUnityPlugin
     private DateTime _lastReloadTime;
     private const long RELOAD_DELAY = 10000000; // One second
 
-    private void ReadConfigValues(object sender, FileSystemEventArgs e)
-    {
+    private void ReadConfigValues(object sender, FileSystemEventArgs e) {
         var now = DateTime.Now;
         var time = now.Ticks - _lastReloadTime.Ticks;
         if (!File.Exists(ConfigFileFullPath) || time < RELOAD_DELAY) return;
 
-        try
-        {
+        try {
             Log("Attempting to reload configuration...");
             Config.Reload();
-        }
-        catch
-        {
+        } catch {
             Log($"There was an issue loading {ConfigFileName}");
             return;
         }

@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Jotunn.Extensions;
 
 namespace Common {
     /// <summary>
@@ -6,6 +7,9 @@ namespace Common {
     ///
     /// BindServerConfig marks entries IsAdminOnly, which is what makes Jotunn's SynchronizationManager
     /// treat them as server-authoritative; BindClientConfig leaves them local to each player.
+    ///
+    /// Prefer the ...InOrder variants for new config files: they keep the settings grouped the way the
+    /// code declares them instead of alphabetised. See the remarks on <see cref="BindServerConfigInOrder{T}"/>.
     /// </summary>
     public static class ConfigBinder {
         private static ConfigFile Cfg => ModContext.Cfg;
@@ -55,6 +59,39 @@ namespace Common {
             return Cfg.Bind(category, key, value,
                 new ConfigDescription(description, acceptableValues,
                     new ConfigurationManagerAttributes { IsAdminOnly = false, IsAdvanced = advanced }));
+        }
+
+        // -- Ordered ---------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Server-synced entry bound through Jotunn's ordered binder.
+        /// </summary>
+        /// <remarks>
+        /// ConfigurationManager sorts sections alphabetically and, within a section, by the Order
+        /// attribute. Jotunn's BindConfigInOrder exploits both: it prefixes the section with the position
+        /// it was first bound in ("2 - Balance") and hands each entry a descending Order, so what the
+        /// player sees matches the grouping the code declares rather than an alphabetical jumble.
+        ///
+        /// Two consequences to plan for:
+        /// - Keep a config file to **nine sections or fewer**. The prefix is not zero padded, so a tenth
+        ///   section sorts as "10 - ..." between "1 - ..." and "2 - ...".
+        /// - The prefix is part of the section name written to disk, so inserting a section renames every
+        ///   section after it and orphans the player's saved values. Add new sections at the end, or
+        ///   migrate the old names (EpicLoot's ELConfig does the latter).
+        /// </remarks>
+        public static ConfigEntry<T> BindServerConfigInOrder<T>(string category, string key, T value, string description,
+                                                               AcceptableValueBase acceptableValues = null, bool advanced = false) {
+            return Cfg.BindConfigInOrder(category, key, value, description, synced: true,
+                acceptableValues: acceptableValues,
+                configAttributes: new ConfigurationManagerAttributes { IsAdvanced = advanced });
+        }
+
+        /// <summary>Client-local counterpart of <see cref="BindServerConfigInOrder{T}"/>.</summary>
+        public static ConfigEntry<T> BindClientConfigInOrder<T>(string category, string key, T value, string description,
+                                                               AcceptableValueBase acceptableValues = null, bool advanced = false) {
+            return Cfg.BindConfigInOrder(category, key, value, description, synced: false,
+                acceptableValues: acceptableValues,
+                configAttributes: new ConfigurationManagerAttributes { IsAdvanced = advanced });
         }
     }
 }

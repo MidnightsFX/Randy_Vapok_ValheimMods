@@ -1,27 +1,19 @@
-using EpicLoot.src.Magic.MagicItemEffects.Helpers;
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // Peach (Logistics) weapon shard: +% weapon damage that scales with how loaded the player's pack is
-    // (empty pack = nothing, at the carry cap = the full shard value). Applied per-weapon (mirrors
-    // ModifyDamage / IncreaseDamageDuringDaytime) so an off-hand shard does not leak onto the main hand
-    // when dual-wielding. Shard values are authored as whole-number percents, hence the 0.01f.
-    public static class DamageBonusFromPlayerWeight
-    {
+namespace EpicLoot.MagicItemEffects.Shards {
+    // Provides a bonus to weapon damage based on the player's weight.
+    public static class DamageBonusFromPlayerWeight {
         // GetDamage postfix handler invoked by ModifyDamage (per-weapon modifier).
-        public static void ModifyWeaponDamage(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result)
-        {
+        public static void ModifyWeaponDamage(ItemDrop.ItemData __instance, ref HitData.DamageTypes __result) {
             var player = Player.m_localPlayer;
-            if (player == null || !player.IsItemEquiped(__instance))
-            {
+            if (player == null || !player.IsItemEquiped(__instance)) {
                 return;
             }
 
             var pct = MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
                 player, __instance, MagicEffectType.DamageBonusFromPlayerWeight, 0.01f);
             var bonus = pct * PenaltyScaling.WeightFactor(player);
-            if (bonus != 0f)
-            {
+            if (bonus != 0f) {
                 __result.Modify(1f + bonus);
             }
         }

@@ -17,7 +17,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
 
             if (player.GetEitr() < reduction) return;
 
-            player.UseEitr(reduction); 
+            player.UseEitr(reduction);
 
             if (reduction > 5f) { // arbitrary amount to trigger fx. Its too flashy otherwise. Still might proc everytime
                 if (fx == null) {
@@ -29,15 +29,15 @@ namespace EpicLoot.MagicItemEffects.Shards {
             }
 
             float elementalDamageToMitigate = Math.Min(hit.m_damage.m_fire, reduction);
-            hit.m_damage.m_fire-= elementalDamageToMitigate;
+            hit.m_damage.m_fire -= elementalDamageToMitigate;
             reduction -= elementalDamageToMitigate;
 
             elementalDamageToMitigate = Math.Min(hit.m_damage.m_frost, reduction);
-            hit.m_damage.m_frost-= elementalDamageToMitigate;
+            hit.m_damage.m_frost -= elementalDamageToMitigate;
             reduction -= elementalDamageToMitigate;
 
             elementalDamageToMitigate = Math.Min(hit.m_damage.m_lightning, reduction);
-            hit.m_damage.m_lightning-= elementalDamageToMitigate;
+            hit.m_damage.m_lightning -= elementalDamageToMitigate;
             reduction -= elementalDamageToMitigate;
         }
     }

@@ -1,24 +1,11 @@
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // Damage-type conversion shard effects. This file holds the defensive incoming-conversion effect and
-    // the DamageConversionHelper shared across the conversion group; the offensive conversions live in
-    // their own files (ConvertPhysicalDamageToLightning.cs, EitrImbueAttack.cs).
-    //
-    //  * Defensive (chest slots) -- PhysTo{Fire,Frost,Poison,Lightning}: move a share of INCOMING
-    //    physical damage onto an element before resistances apply, so pairing one with the matching
-    //    resistance shard turns raw physical into damage the player resists.
-
-    // ---- Defensive: incoming physical -> element (PhysToFire/Frost/Poison/Lightning) -------------
-    public static class IncomingPhysicalConversion
-    {
+﻿namespace EpicLoot.MagicItemEffects.Shards {
+    // Provides a conversion of incoming physical damage into elemental damage based on the player's active magic effects.
+    public static class IncomingPhysicalConversion {
         // Prefix handler invoked by CharacterRpcDamageDispatch (victim-side incoming modifier). The
         // dispatcher calls this before ModifyResistance so the converted element is then reduced by the
-        // player's matching percentage resistance -- the intended shard synergy (e.g. Orange head = fire
-        // resist, Orange chest = PhysToFire).
-        public static void ModifyIncoming(Character __instance, HitData hit, bool IsBlocked = false, bool IsParry = false)
-        {
-            if (__instance != Player.m_localPlayer)
-            {
+        // player's matching percentage resistance
+        public static void ModifyIncoming(Character __instance, HitData hit, bool IsBlocked = false, bool IsParry = false) {
+            if (__instance != Player.m_localPlayer) {
                 return;
             }
 
@@ -27,9 +14,8 @@ namespace EpicLoot.MagicItemEffects.Shards
             float toFrost = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToFrost, 0.01f);
             float toPoison = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToPoison, 0.01f);
             float toLightning = player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToLightning, 0.01f);
-            
-            if (IsBlocked) 
-            {
+
+            if (IsBlocked) {
                 toFire += player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToFireOnBlock, 0.01f);
                 toFrost += player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToFrostOnBlock, 0.01f);
                 toPoison += player.GetTotalActiveMagicEffectValue(MagicEffectType.PhysToPoisonOnBlock, 0.01f);
@@ -37,20 +23,17 @@ namespace EpicLoot.MagicItemEffects.Shards
             }
 
             float total = toFire + toFrost + toPoison + toLightning;
-            if (total <= 0f)
-            {
+            if (total <= 0f) {
                 return;
             }
 
             float physical = hit.m_damage.m_blunt + hit.m_damage.m_slash + hit.m_damage.m_pierce;
-            if (physical <= 0f)
-            {
+            if (physical <= 0f) {
                 return;
             }
 
             // Never convert more physical than the hit actually has.
-            if (total > 1f)
-            {
+            if (total > 1f) {
                 float scale = 1f / total;
                 toFire *= scale;
                 toFrost *= scale;
@@ -68,12 +51,10 @@ namespace EpicLoot.MagicItemEffects.Shards
         }
     }
 
-    internal static class DamageConversionHelper
-    {
+    internal static class DamageConversionHelper {
         // Scales the three physical damage components down so `fraction` of the physical pool is
         // removed -- its magnitude having already been redistributed onto elements by the caller.
-        internal static void RemovePhysicalShare(ref HitData.DamageTypes damage, float fraction)
-        {
+        internal static void RemovePhysicalShare(ref HitData.DamageTypes damage, float fraction) {
             float remaining = 1f - fraction;
             damage.m_blunt *= remaining;
             damage.m_slash *= remaining;

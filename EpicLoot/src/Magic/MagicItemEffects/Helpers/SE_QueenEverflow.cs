@@ -1,7 +1,8 @@
+﻿using EpicLoot.MagicItemEffects.Shards;
 using System.Text;
 using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
+namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
     // The stacking regen buff granted by the Queen boss shard (see QueenEverflow). Each stack adds
     // RegenPerStack (a fraction, e.g. 0.10 at Legendary) to the player's health, stamina AND eitr regen

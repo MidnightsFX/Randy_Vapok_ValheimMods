@@ -1,10 +1,10 @@
-using EpicLoot.General;
+﻿using EpicLoot.General;
+using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using Jotunn.Managers;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Golden (Fortune) weapon shard effect: a per-hit chance to deal double damage. The chance is read
-    // from the attacking weapon (the shard is socketed there), so it only fires for that weapon.
+    // Provides a chance to double the damage of an attack.
     public static class ChanceDoubleDamage {
         // Prefix handler invoked by CharacterDamageDispatch (attacker-side outgoing modifier).
         static GameObject effect = null;
@@ -13,7 +13,10 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 return;
             }
 
-            var magicItem = player.GetCurrentWeapon()?.GetMagicItem();
+            // The shard is socketed into the weapon, so only that weapon procs. GetActiveWeapon prefers
+            // the weapon of the attack actually in flight and only falls back to GetCurrentWeapon, which
+            // returns the right hand first -- without it a shard in the off-hand weapon never fires.
+            var magicItem = MagicEffectsHelper.GetActiveWeapon(player)?.GetMagicItem();
             if (magicItem == null ||
                 !magicItem.HasEffect(MagicEffectType.ChanceDoubleDamage, includeSocketed: true)) {
                 return;

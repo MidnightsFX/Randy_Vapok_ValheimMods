@@ -1,15 +1,11 @@
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Perfect-dodge shard effects (Pink). Vanilla already fires Player.RPC_HitWhileDodging when the local
-    // player is struck inside a dodge's invincibility window (a "perfect dodge"; see Player.HitWhileDodging).
-    // Every reward effect here hangs off that vanilla trigger, so they fire exactly when the game considers a
-    // dodge "perfect" -- the pool restores, the movement-speed burst, and PerfectDodge (the trinket) with its
-    // stacking damage buff. DecreaseDodgeCost is the odd one out and reuses the existing dodge-stamina hook
-    // (see ModifyDodgeStamina.cs). Shard values are authored as whole-number percents.
+    // Perfect dodge specific rewards
 
     // ---- Shared trigger for the reward effects ------------------------------------------------------
     // Vanilla latches m_beenHitWhileDodging so only the first avoided hit of a roll counts as the perfect
@@ -141,12 +137,13 @@ namespace EpicLoot.MagicItemEffects.Shards
                 return;
             }
 
-            // Seed the prototype so the clone SEMan takes carries the first stack and current values.
-            prototype.Stacks = 1;
-            prototype.MaxStacks = maxStacks;
-            prototype.RegenPerStack = regenPerStack;
-            prototype.m_ttl = BuffDuration;
-            seMan.AddStatusEffect(prototype);
+            if (seMan.AddStatusEffect(GetOrCreatePrototype()) is SE_DodgeMomentum added) {
+                added.Stacks = 1;
+                added.MaxStacks = maxStacks;
+                added.RegenPerStack = regenPerStack;
+                added.m_ttl = BuffDuration;
+                added.ResetTime();
+            }
         }
 
         // Max stacks come from the PerfectDodge magic effect's Config block ("MaxStacks", see
@@ -203,7 +200,7 @@ namespace EpicLoot.MagicItemEffects.Shards
             [UsedImplicitly]
             private static void Postfix(Player __instance, ref float __result)
             {
-                if (__instance == null)
+                if (__instance != Player.m_localPlayer)
                 {
                     return;
                 }
@@ -253,9 +250,10 @@ namespace EpicLoot.MagicItemEffects.Shards
                 return;
             }
 
-            // Seed the prototype so the clone SEMan takes carries the current rarity's bonus.
-            prototype.SpeedBonus = bonus;
-            seMan.AddStatusEffect(prototype);
+            if (seMan.AddStatusEffect(prototype) is SE_DodgeAgility added) {
+                added.SpeedBonus = bonus;
+                added.ResetTime();
+            }
         }
 
         // Lazily builds the buff prototype. Runs on a perfect dodge, so the asset bundle is loaded. A null

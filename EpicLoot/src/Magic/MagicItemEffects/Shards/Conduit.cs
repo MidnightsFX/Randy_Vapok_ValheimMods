@@ -1,25 +1,12 @@
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // LightBlue shoulder shard ("Conduit", took the slot over from StrikeCausesLightning): the lightning you
-    // channel feeds back as eitr -- restore a flat amount each time the cumulative lightning damage the local
-    // player has dealt crosses a threshold. Same accumulator shape as HealthGainPerXDamageDone, but filtered
-    // to one element and read player-wide (the shard sits in an armor slot, not the weapon).
-    //
-    // Hooks Character.Damage via SharedCharacterDamagePatch.PostDamagePatch, which runs on the attacker's
-    // client, so hit.m_damage.m_lightning is still the intact outgoing value (pre-mitigation, matching the
-    // sibling BurningAdrenaline and HealthGainPerXDamageDone). Lightning dealt by ChainLightning and
-    // EikthyrShockingCharge re-enters that patch attributed to the player, so it feeds this accumulator too.
-    //
-    // Shard values are the flat eitr granted per trigger, so there is no percent scale on the read.
-    public static class Conduit
-    {
+﻿namespace EpicLoot.MagicItemEffects.Shards {
+    // Lightning damage done by the player restores eitr to the player, at damage thresholds.
+    public static class Conduit {
         // Lightning damage dealt per eitr trigger. Tunable; higher = a slower trickle.
         private const float LightningDamagePerTrigger = 200f;
 
         // Tooltip: "Restore {0} Eitr per {1} Lightning Damage Dealt" -- {1} is the LightningDamagePerTrigger
         // const so the shown threshold stays in sync with the code rather than a baked-in literal.
-        public static void RegisterDisplayValues()
-        {
+        public static void RegisterDisplayValues() {
             MagicItem.RegisterDisplayValues(MagicEffectType.Conduit,
                 value => new object[] { value, LightningDamagePerTrigger });
         }
@@ -29,24 +16,20 @@ namespace EpicLoot.MagicItemEffects.Shards
         private static float _accumulatedLightningDamage;
 
         // Postfix handler invoked by CharacterDamageDispatch (on-hit reaction).
-        public static void OnDamageDealt(Character __instance, HitData hit, Character attacker)
-        {
+        public static void OnDamageDealt(Character __instance, HitData hit, Character attacker) {
             var player = Player.m_localPlayer;
             if (hit == null || player == null || hit.m_damage.m_lightning <= 0f || attacker != player
-                || __instance == player || __instance.IsPlayer() || __instance.IsTamed())
-            {
+                || __instance == player || __instance.IsPlayer() || __instance.IsTamed()) {
                 return;
             }
 
             var eitrPerTrigger = player.GetTotalActiveMagicEffectValue(MagicEffectType.Conduit);
-            if (eitrPerTrigger <= 0f)
-            {
+            if (eitrPerTrigger <= 0f) {
                 return;
             }
 
             _accumulatedLightningDamage += hit.m_damage.m_lightning;
-            if (_accumulatedLightningDamage < LightningDamagePerTrigger)
-            {
+            if (_accumulatedLightningDamage < LightningDamagePerTrigger) {
                 return;
             }
 

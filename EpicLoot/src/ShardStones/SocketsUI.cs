@@ -1,18 +1,13 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using EpicLoot.Config;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace EpicLoot.ShardStones
-{
-    // Press Use (gamepad: RT + X) over a socketed magic item in the inventory to toggle a synthetic
-    // container whose slots are the item's sockets. Drag Runestones and Shards in and out. The synthetic
-    // inventory holds reconstructed runestone/shard items; whenever it changes, we reconcile the
-    // equipment's MagicItem.Sockets to match.
-    public static class SocketsUI
-    {
+namespace EpicLoot.ShardStones {
+    // Builds and manages the synthetic inventory that represents a MagicItem's sockets.
+    public static class SocketsUI {
         public static ItemDrop.ItemData OpenEquipment;
         public static Inventory OpenInventory;
         private static bool _reconciling;
@@ -25,8 +20,7 @@ namespace EpicLoot.ShardStones
         // and shards stack to 100 with one shared name per colour+rarity -- so two sockets holding
         // identical shards would collapse into a single slot, and SaveSockets would then reconcile them
         // back down to one socket, destroying a shard.
-        private static void PlaceInSocketSlot(Inventory inv, ItemDrop.ItemData item, Vector2i pos)
-        {
+        private static void PlaceInSocketSlot(Inventory inv, ItemDrop.ItemData item, Vector2i pos) {
             item.m_gridPos = pos;
             item.m_stack = 1;
             inv.GetAllItems().Add(item);
@@ -34,12 +28,9 @@ namespace EpicLoot.ShardStones
         }
 
         // The leftmost empty socket slot, or (-1, -1) when every socket is filled.
-        private static Vector2i FindEmptySocketSlot()
-        {
-            for (var x = 0; x < OpenInventory.GetWidth(); x++)
-            {
-                if (OpenInventory.GetItemAt(x, 0) == null)
-                {
+        private static Vector2i FindEmptySocketSlot() {
+            for (var x = 0; x < OpenInventory.GetWidth(); x++) {
+                if (OpenInventory.GetItemAt(x, 0) == null) {
                     return new Vector2i(x, 0);
                 }
             }
@@ -50,16 +41,13 @@ namespace EpicLoot.ShardStones
         // One grid column per socket, in socket order. Returns null when a socket's source prefab has
         // gone missing: opening anyway would leave that slot empty, and SaveSockets would then reconcile
         // the socket away on close -- silently destroying it. Better to refuse to open.
-        private static Inventory BuildSocketInventory(MagicItem magicItem)
-        {
+        private static Inventory BuildSocketInventory(MagicItem magicItem) {
             var width = Mathf.Max(1, magicItem.SocketCount);
             var inv = new Inventory("Sockets", null, width, 1);
 
-            for (var i = 0; i < magicItem.Sockets.Count && i < width; i++)
-            {
+            for (var i = 0; i < magicItem.Sockets.Count && i < width; i++) {
                 var item = ShardSocketManager.ReconstructShardItem(magicItem.Sockets[i]);
-                if (item == null)
-                {
+                if (item == null) {
                     return null;
                 }
 
@@ -70,46 +58,39 @@ namespace EpicLoot.ShardStones
         }
 
         // Reconcile MagicItem.Sockets to mirror the synthetic inventory's current contents.
-        private static void SaveSockets()
-        {
-            if (_reconciling || OpenEquipment == null || OpenInventory == null)
-            {
+        private static void SaveSockets() {
+            if (_reconciling || OpenEquipment == null || OpenInventory == null) {
                 return;
             }
 
-            if (!OpenEquipment.IsMagic(out var magicItem))
-            {
+            if (!OpenEquipment.IsMagic(out var magicItem)) {
                 return;
             }
 
             _reconciling = true;
-            try
-            {
+            try {
                 magicItem.Sockets.Clear();
                 // Grid order, not list order: drags and swaps append to the end of the backing list, and
                 // the stored order is what tooltips render.
-                foreach (var item in OpenInventory.GetAllItems().OrderBy(x => x.m_gridPos.x))
-                {
+                foreach (var item in OpenInventory.GetAllItems().OrderBy(x => x.m_gridPos.x)) {
                     // effect may be null for an inert shard; it still occupies the socket.
-                    if (!ShardSocketManager.ResolveSocketedEffect(OpenEquipment, item, out var effect, out var color, out var rarity))
-                    {
+                    if (!ShardSocketManager.ResolveSocketedEffect(OpenEquipment, item, out var effect, out var color, out var rarity)) {
                         continue;
                     }
                     magicItem.Sockets.Add(new SocketedEffect(
-                        effect, ShardSocketManager.GetSourcePrefabName(item), rarity) { ShardType = color });
+                        effect, ShardSocketManager.GetSourcePrefabName(item), rarity) {
+                        ShardType = color
+                    });
                 }
                 // Shard values depend on what else shares the item (same-color stacking decay), so they
                 // are settled once the whole set is known rather than per item above.
                 ShardSocketManager.RecomputeSocketValues(OpenEquipment, magicItem);
                 OpenEquipment.SaveMagicItem(magicItem);
 
-                if (Player.m_localPlayer != null)
-                {
+                if (Player.m_localPlayer != null) {
                     EquipmentEffectCache.Reset(Player.m_localPlayer);
                 }
-            }
-            finally
-            {
+            } finally {
                 _reconciling = false;
             }
         }
@@ -117,10 +98,8 @@ namespace EpicLoot.ShardStones
         // Builds and shows the socket overlay for the given equipment. The overlay reuses the
         // InventoryGui container panel; it stays open (keyed off OpenEquipment/OpenInventory) until
         // CloseContainer/Hide reconciles and clears it.
-        private static void OpenSocketOverlay(InventoryGui invGui, ItemDrop.ItemData item)
-        {
-            if (item == null || !item.IsMagic(out var magicItem) || !magicItem.HasSockets())
-            {
+        private static void OpenSocketOverlay(InventoryGui invGui, ItemDrop.ItemData item) {
+            if (item == null || !item.IsMagic(out var magicItem) || !magicItem.HasSockets()) {
                 return;
             }
 
@@ -129,26 +108,22 @@ namespace EpicLoot.ShardStones
             // reconciles the OLD equipment before the statics move on, and vanilla CloseContainer cancels
             // a drag whose source is that old socket inventory. Without it, a stone picked up from item A
             // and dropped into item B is added to B while staying on A.
-            if (invGui.IsContainerOpen() || IsSocketGridOpen)
-            {
+            if (invGui.IsContainerOpen() || IsSocketGridOpen) {
                 invGui.CloseContainer();
             }
 
             var inv = BuildSocketInventory(magicItem);
-            if (inv == null)
-            {
+            if (inv == null) {
                 ShowSocketMessage("$mod_epicloot_socket_unavailable");
                 return;
             }
 
             inv.m_onChanged += SaveSockets;
 
-            if (invGui.m_takeAllButton != null)
-            {
+            if (invGui.m_takeAllButton != null) {
                 invGui.m_takeAllButton.gameObject.SetActive(false);
             }
-            if (invGui.m_stackAllButton != null)
-            {
+            if (invGui.m_stackAllButton != null) {
                 invGui.m_stackAllButton.gameObject.SetActive(false);
             }
 
@@ -158,8 +133,7 @@ namespace EpicLoot.ShardStones
 
             // Gamepad: park the cursor on the first socket and hand it focus, the way opening a real
             // container does. Harmless to skip on mouse, where focus follows the pointer.
-            if (ZInput.IsGamepadActive())
-            {
+            if (ZInput.IsGamepadActive()) {
                 invGui.m_containerGrid.SetSelection(new Vector2i(0, 0));
                 invGui.SetActiveGroup(0);
             }
@@ -174,25 +148,20 @@ namespace EpicLoot.ShardStones
         // Only the keyboard "Use" binding is read here. The gamepad equivalent lives in
         // InventoryGui_OnRightClickItem_Patch; see the note there for why "JoyUse" cannot be used.
         [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.Update))]
-        public static class InventoryGui_Update_Patch
-        {
+        public static class InventoryGui_Update_Patch {
             [UsedImplicitly]
-            private static void Prefix(InventoryGui __instance)
-            {
-                if (!InventoryGui.IsVisible())
-                {
+            private static void Prefix(InventoryGui __instance) {
+                if (!InventoryGui.IsVisible()) {
                     return;
                 }
 
                 // The break confirmation owns the interaction until it is answered.
-                if (_breakPrompt != null)
-                {
+                if (_breakPrompt != null) {
                     UpdateBreakPrompt();
                     return;
                 }
 
-                if (!ZInput.GetButtonDown("Use"))
-                {
+                if (!ZInput.GetButtonDown("Use")) {
                     return;
                 }
 
@@ -201,18 +170,15 @@ namespace EpicLoot.ShardStones
                     new Vector2i(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y)));
 
                 // Over empty space: leave the press for vanilla, so Use still closes the inventory.
-                if (item == null)
-                {
+                if (item == null) {
                     return;
                 }
 
-                if (!item.IsMagic(out var magicItem) || !magicItem.HasSockets())
-                {
+                if (!item.IsMagic(out var magicItem) || !magicItem.HasSockets()) {
                     // Aiming at an item and hitting one without sockets is a miss, not a request to shut
                     // the whole inventory. Swallow the press: Player doesn't read Use while the inventory
                     // is visible, so nothing else wants it.
-                    if (ELConfig.KeepInventoryOpenOverItems.Value)
-                    {
+                    if (ELConfig.KeepInventoryOpenOverItems.Value) {
                         ZInput.ResetButtonStatus("Use");
                     }
                     return;
@@ -223,12 +189,9 @@ namespace EpicLoot.ShardStones
                 ZInput.ResetButtonStatus("Use");
 
                 // Toggle: pressing Use again on the already-open item closes the overlay.
-                if (IsSocketGridOpen && item == OpenEquipment)
-                {
+                if (IsSocketGridOpen && item == OpenEquipment) {
                     __instance.CloseContainer();
-                }
-                else
-                {
+                } else {
                     OpenSocketOverlay(__instance, item);
                 }
             }
@@ -237,13 +200,10 @@ namespace EpicLoot.ShardStones
         // Render path only. Opening/toggling is handled by InventoryGui_Update_Patch; here we just draw
         // the open overlay into the container panel and take over UpdateContainer while it is up.
         [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.UpdateContainer))]
-        public static class InventoryGui_UpdateContainer_Patch
-        {
+        public static class InventoryGui_UpdateContainer_Patch {
             [UsedImplicitly]
-            private static bool Prefix(InventoryGui __instance)
-            {
-                if (!IsSocketGridOpen)
-                {
+            private static bool Prefix(InventoryGui __instance) {
+                if (!IsSocketGridOpen) {
                     return true;
                 }
 
@@ -252,8 +212,7 @@ namespace EpicLoot.ShardStones
                 // If the equipment moved out of its slot or was consumed, close the overlay.
                 var stillThere = __instance.m_playerGrid.GetInventory()
                     .GetItemAt(OpenEquipment.m_gridPos.x, OpenEquipment.m_gridPos.y);
-                if (stillThere != OpenEquipment)
-                {
+                if (stillThere != OpenEquipment) {
                     __instance.CloseContainer();
                     return true;
                 }
@@ -264,8 +223,7 @@ namespace EpicLoot.ShardStones
                     Localization.instance.Localize("$mod_epicloot_sockets") + ": " +
                     Localization.instance.Localize(OpenEquipment.m_shared.m_name);
 
-                if (__instance.m_firstContainerUpdate)
-                {
+                if (__instance.m_firstContainerUpdate) {
                     __instance.m_containerGrid.ResetView();
                     __instance.m_firstContainerUpdate = false;
                 }
@@ -280,50 +238,40 @@ namespace EpicLoot.ShardStones
         // cycling skips it, and MoveToLowerInventoryGrid refuses to move focus down into it. It also
         // picks which KeyHints set is shown, and the with-container set is the right one here.
         [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.IsContainerOpen))]
-        public static class InventoryGui_IsContainerOpen_Patch
-        {
+        public static class InventoryGui_IsContainerOpen_Patch {
             [UsedImplicitly]
-            private static void Postfix(ref bool __result)
-            {
-                if (IsSocketGridOpen)
-                {
+            private static void Postfix(ref bool __result) {
+                if (IsSocketGridOpen) {
                     __result = true;
                 }
             }
         }
 
         [HarmonyPatch]
-        public static class InventoryGui_Close_Patch
-        {
+        public static class InventoryGui_Close_Patch {
             [UsedImplicitly]
-            private static IEnumerable<System.Reflection.MethodBase> TargetMethods()
-            {
+            private static IEnumerable<System.Reflection.MethodBase> TargetMethods() {
                 yield return AccessTools.DeclaredMethod(typeof(InventoryGui), nameof(InventoryGui.Hide));
                 yield return AccessTools.DeclaredMethod(typeof(InventoryGui), nameof(InventoryGui.CloseContainer));
             }
 
             [UsedImplicitly]
-            private static void Prefix(InventoryGui __instance)
-            {
-                if (!IsSocketGridOpen)
-                {
+            private static void Prefix(InventoryGui __instance) {
+                if (!IsSocketGridOpen) {
                     return;
                 }
 
                 // An unanswered break confirmation is cancelled rather than carried over.
                 CloseBreakPrompt();
 
-                if (Player.m_localPlayer != null)
-                {
+                if (Player.m_localPlayer != null) {
                     SaveSockets();
                 }
 
-                if (__instance.m_takeAllButton != null)
-                {
+                if (__instance.m_takeAllButton != null) {
                     __instance.m_takeAllButton.gameObject.SetActive(true);
                 }
-                if (__instance.m_stackAllButton != null)
-                {
+                if (__instance.m_stackAllButton != null) {
                     __instance.m_stackAllButton.gameObject.SetActive(true);
                 }
 
@@ -336,19 +284,15 @@ namespace EpicLoot.ShardStones
             }
         }
 
-        private static void ShowSocketMessage(string reason)
-        {
-            if (Player.m_localPlayer != null && !string.IsNullOrEmpty(reason))
-            {
+        private static void ShowSocketMessage(string reason) {
+            if (Player.m_localPlayer != null && !string.IsNullOrEmpty(reason)) {
                 Player.m_localPlayer.Message(MessageHud.MessageType.Center, Localization.instance.Localize(reason));
             }
         }
 
         // Asks the player to confirm destroying a socketed stone. Nothing is mutated until they accept.
-        private static void OpenBreakPrompt(ItemDrop.ItemData item)
-        {
-            if (item == null || InventoryGui.instance == null)
-            {
+        private static void OpenBreakPrompt(ItemDrop.ItemData item) {
+            if (item == null || InventoryGui.instance == null) {
                 return;
             }
 
@@ -359,15 +303,13 @@ namespace EpicLoot.ShardStones
             _breakPrompt = SocketBreakPrompt.Create(InventoryGui.instance.transform,
                 Localization.instance.Localize("$mod_epicloot_socket_break_title"), body);
 
-            if (_breakPrompt == null)
-            {
+            if (_breakPrompt == null) {
                 // No prefab to confirm with -- refuse the removal rather than destroying it unconfirmed.
                 ShowSocketMessage("$mod_epicloot_socket_mustbreak");
                 return;
             }
 
-            _breakPrompt.OnAccept = () =>
-            {
+            _breakPrompt.OnAccept = () => {
                 _breakPrompt = null;
                 BreakSocketedItem(item);
             };
@@ -382,8 +324,7 @@ namespace EpicLoot.ShardStones
         //
         // Gamepad A accepts and B denies -- the panel's buttons cannot be clicked without a mouse, so A is
         // the only way to confirm.
-        private static void UpdateBreakPrompt()
-        {
+        private static void UpdateBreakPrompt() {
             var accept = ZInput.GetButtonDown("JoyButtonA");
             var deny = ZInput.GetButtonDown("JoyButtonB") || ZInput.GetKeyDown(KeyCode.Escape);
 
@@ -396,20 +337,15 @@ namespace EpicLoot.ShardStones
             ZInput.ResetButtonStatus("Inventory");
 
             var prompt = _breakPrompt;
-            if (accept)
-            {
+            if (accept) {
                 prompt.OnAcceptClick();
-            }
-            else if (deny)
-            {
+            } else if (deny) {
                 prompt.OnDenyClick();
             }
         }
 
-        private static void CloseBreakPrompt()
-        {
-            if (_breakPrompt == null)
-            {
+        private static void CloseBreakPrompt() {
+            if (_breakPrompt == null) {
                 return;
             }
 
@@ -423,10 +359,8 @@ namespace EpicLoot.ShardStones
         // Destroys a socketed stone in place. Taking it out of the synthetic inventory fires
         // m_onChanged, and SaveSockets reconciles the socket away; nothing is returned to the player,
         // which is why this does not go through ShardSocketManager.RemoveShard.
-        private static void BreakSocketedItem(ItemDrop.ItemData item)
-        {
-            if (item == null || OpenInventory == null || !OpenInventory.ContainsItem(item))
-            {
+        private static void BreakSocketedItem(ItemDrop.ItemData item) {
+            if (item == null || OpenInventory == null || !OpenInventory.ContainsItem(item)) {
                 return;
             }
 
@@ -435,23 +369,19 @@ namespace EpicLoot.ShardStones
 
         // Ctrl+click (gamepad LT + X) a socketable in the player inventory: put one unit of it into the
         // first free socket.
-        private static void QuickSocket(InventoryGui invGui, ItemDrop.ItemData item)
-        {
+        private static void QuickSocket(InventoryGui invGui, ItemDrop.ItemData item) {
             var player = Player.m_localPlayer;
-            if (player == null)
-            {
+            if (player == null) {
                 return;
             }
 
-            if (!ShardSocketManager.CanSocket(OpenEquipment, item, out var reason))
-            {
+            if (!ShardSocketManager.CanSocket(OpenEquipment, item, out var reason)) {
                 ShowSocketMessage(reason);
                 return;
             }
 
             var slot = FindEmptySocketSlot();
-            if (slot.x < 0)
-            {
+            if (slot.x < 0) {
                 ShowSocketMessage("$mod_epicloot_socket_nofreeslot");
                 return;
             }
@@ -461,24 +391,20 @@ namespace EpicLoot.ShardStones
         }
 
         // Ctrl+click (gamepad LT + X) a socketed stone: hand it back to the player's inventory.
-        private static void QuickRemoveFromSocket(InventoryGui invGui, ItemDrop.ItemData item)
-        {
+        private static void QuickRemoveFromSocket(InventoryGui invGui, ItemDrop.ItemData item) {
             var player = Player.m_localPlayer;
-            if (player == null)
-            {
+            if (player == null) {
                 return;
             }
 
             var policy = ShardSocketManager.GetRemovalPolicy(OpenEquipment, item);
-            if (policy != SocketRemoval.Free)
-            {
+            if (policy != SocketRemoval.Free) {
                 ShowSocketMessage(ShardSocketManager.DescribeRemovalPolicy(policy));
                 return;
             }
 
             var playerInventory = player.GetInventory();
-            if (!playerInventory.CanAddItem(item))
-            {
+            if (!playerInventory.CanAddItem(item)) {
                 ShowSocketMessage("$inventory_full");
                 return;
             }
@@ -495,33 +421,27 @@ namespace EpicLoot.ShardStones
         // m_dragItem handling and never InventoryGrid.DropItem), and quick-transfer, which vanilla
         // cannot do for us.
         [HarmonyPatch(typeof(InventoryGui), "OnSelectedItem")]
-        public static class InventoryGui_OnSelectedItem_Patch
-        {
+        public static class InventoryGui_OnSelectedItem_Patch {
             [UsedImplicitly]
             private static bool Prefix(InventoryGui __instance, InventoryGrid grid, ItemDrop.ItemData item,
-                InventoryGrid.Modifier mod)
-            {
-                if (!IsSocketGridOpen || grid == null)
-                {
+                InventoryGrid.Modifier mod) {
+                if (!IsSocketGridOpen || grid == null) {
                     return true;
                 }
 
                 // While the confirmation is up it owns the whole window: the prefab's input blocker only
                 // stops pointer events, so a gamepad A press would still reach the grid underneath.
-                if (_breakPrompt != null)
-                {
+                if (_breakPrompt != null) {
                     return false;
                 }
 
                 // A drag in progress means we're dropping INTO a grid, which InventoryGrid.DropItem
                 // already gates. Only pickups are our business here.
-                if (__instance.m_dragGo != null)
-                {
+                if (__instance.m_dragGo != null) {
                     return true;
                 }
 
-                if (item == null)
-                {
+                if (item == null) {
                     return true;
                 }
 
@@ -530,16 +450,13 @@ namespace EpicLoot.ShardStones
                 // Quick-transfer. Vanilla's Move branch keys off m_currentContainer, which the overlay
                 // never sets, so left to itself it falls through to Player.DropItem and throws the stone
                 // on the ground -- for socketed stones and bag items alike.
-                if (mod == InventoryGrid.Modifier.Move)
-                {
-                    if (socketGrid)
-                    {
+                if (mod == InventoryGrid.Modifier.Move) {
+                    if (socketGrid) {
                         QuickRemoveFromSocket(__instance, item);
                         return false;
                     }
 
-                    if (grid == __instance.m_playerGrid)
-                    {
+                    if (grid == __instance.m_playerGrid) {
                         QuickSocket(__instance, item);
                         return false;
                     }
@@ -547,14 +464,12 @@ namespace EpicLoot.ShardStones
                     return true;
                 }
 
-                if (!socketGrid)
-                {
+                if (!socketGrid) {
                     return true;
                 }
 
                 var policy = ShardSocketManager.GetRemovalPolicy(OpenEquipment, item);
-                if (policy == SocketRemoval.Free)
-                {
+                if (policy == SocketRemoval.Free) {
                     return true;
                 }
 
@@ -574,42 +489,32 @@ namespace EpicLoot.ShardStones
         // lands here, and both buttons are bound identically on all three layouts
         // (ZInput.ResetGamepadButtonsGeneric).
         [HarmonyPatch(typeof(InventoryGui), "OnRightClickItem")]
-        public static class InventoryGui_OnRightClickItem_Patch
-        {
+        public static class InventoryGui_OnRightClickItem_Patch {
             [UsedImplicitly]
-            private static bool Prefix(InventoryGui __instance, InventoryGrid grid, ItemDrop.ItemData item)
-            {
-                if (grid == null)
-                {
+            private static bool Prefix(InventoryGui __instance, InventoryGrid grid, ItemDrop.ItemData item) {
+                if (grid == null) {
                     return true;
                 }
 
-                if (_breakPrompt != null)
-                {
+                if (_breakPrompt != null) {
                     return false;
                 }
 
                 if (grid == __instance.m_playerGrid && ZInput.GetButton("JoyRTrigger") &&
-                    item != null && item.IsMagic(out var magicItem) && magicItem.HasSockets())
-                {
-                    if (IsSocketGridOpen && item == OpenEquipment)
-                    {
+                    item != null && item.IsMagic(out var magicItem) && magicItem.HasSockets()) {
+                    if (IsSocketGridOpen && item == OpenEquipment) {
                         __instance.CloseContainer();
-                    }
-                    else
-                    {
+                    } else {
                         OpenSocketOverlay(__instance, item);
                     }
                     return false;
                 }
 
-                if (!IsSocketGridOpen || grid.GetInventory() != OpenInventory)
-                {
+                if (!IsSocketGridOpen || grid.GetInventory() != OpenInventory) {
                     return true;
                 }
 
-                switch (ShardSocketManager.GetRemovalPolicy(OpenEquipment, item))
-                {
+                switch (ShardSocketManager.GetRemovalPolicy(OpenEquipment, item)) {
                     case SocketRemoval.BreakOnly:
                         OpenBreakPrompt(item);
                         return false;
@@ -627,13 +532,11 @@ namespace EpicLoot.ShardStones
         // shard -- so with a stack in hand vanilla instead tries to merge into an occupied slot and either
         // fails silently or, for a same-named shard, stacks two stones into a single socket.
         private static bool SwapIntoSocket(Inventory source, ItemDrop.ItemData input, Vector2i pos,
-            ItemDrop.ItemData occupant)
-        {
+            ItemDrop.ItemData occupant) {
             // Empty the slot first, so the insert below cannot merge onto the occupant's stack.
             OpenInventory.RemoveItem(occupant);
 
-            if (!source.AddItem(occupant))
-            {
+            if (!source.AddItem(occupant)) {
                 // Nowhere to put the displaced stone: undo and leave the socket as it was.
                 PlaceInSocketSlot(OpenInventory, occupant, pos);
                 ShowSocketMessage("$inventory_full");
@@ -648,35 +551,28 @@ namespace EpicLoot.ShardStones
         // per slot. `amount` is `ref` so we can clamp it to 1 and let vanilla's stack-split logic move a
         // single unit into the slot, leaving the remainder of the dragged stack in the source inventory.
         [HarmonyPatch(typeof(InventoryGrid), nameof(InventoryGrid.DropItem))]
-        public static class InventoryGrid_DropItem_Patch
-        {
+        public static class InventoryGrid_DropItem_Patch {
             [UsedImplicitly]
             private static bool Prefix(InventoryGrid __instance, Inventory fromInventory, ItemDrop.ItemData item,
-                ref int amount, Vector2i pos, ref bool __result)
-            {
-                if (OpenInventory == null)
-                {
+                ref int amount, Vector2i pos, ref bool __result) {
+                if (OpenInventory == null) {
                     return true;
                 }
 
                 // Case 1: dropping an item INTO the socket grid. Only legal socketables, one per slot.
-                if (__instance.m_inventory == OpenInventory)
-                {
+                if (__instance.m_inventory == OpenInventory) {
                     var occupant = __instance.m_inventory.GetItemAt(pos.x, pos.y);
-                    if (occupant == item)
-                    {
+                    if (occupant == item) {
                         return true; // dropped back onto itself; vanilla no-ops this
                     }
 
                     // 1a. Rearranging within the socket row. Nothing enters or leaves the item, so there
                     // is nothing to validate -- and vanilla's path would merge two identical shards into
                     // one slot and destroy one. Move them by grid position instead.
-                    if (fromInventory == OpenInventory)
-                    {
+                    if (fromInventory == OpenInventory) {
                         var vacated = item.m_gridPos;
                         item.m_gridPos = pos;
-                        if (occupant != null)
-                        {
+                        if (occupant != null) {
                             occupant.m_gridPos = vacated;
                         }
                         OpenInventory.Changed();
@@ -685,10 +581,8 @@ namespace EpicLoot.ShardStones
                     }
 
                     // 1b. Filling an empty socket.
-                    if (occupant == null)
-                    {
-                        if (!ShardSocketManager.CanSocket(OpenEquipment, item, out var reason))
-                        {
+                    if (occupant == null) {
+                        if (!ShardSocketManager.CanSocket(OpenEquipment, item, out var reason)) {
                             ShowSocketMessage(reason);
                             __result = false;
                             return false;
@@ -706,16 +600,14 @@ namespace EpicLoot.ShardStones
                     // allowed to take out, and the incoming stone still has to be legal alongside the
                     // sockets that survive the exchange.
                     var occupantPolicy = ShardSocketManager.GetRemovalPolicy(OpenEquipment, occupant);
-                    if (occupantPolicy != SocketRemoval.Free)
-                    {
+                    if (occupantPolicy != SocketRemoval.Free) {
                         ShowSocketMessage(ShardSocketManager.DescribeRemovalPolicy(occupantPolicy));
                         __result = false;
                         return false;
                     }
 
                     var survivors = OpenInventory.GetAllItems().FindAll(i => i != occupant);
-                    if (!ShardSocketManager.CanCoexist(OpenEquipment, item, survivors, out var swapReason))
-                    {
+                    if (!ShardSocketManager.CanCoexist(OpenEquipment, item, survivors, out var swapReason)) {
                         ShowSocketMessage(swapReason);
                         __result = false;
                         return false;
@@ -731,14 +623,11 @@ namespace EpicLoot.ShardStones
                 // otherwise a same-effect shard could be smuggled in past the duplicate check by swapping it
                 // for an unrelated socketed shard. Measure duplicates against the sockets that remain after
                 // the dragged item leaves.
-                if (fromInventory == OpenInventory)
-                {
+                if (fromInventory == OpenInventory) {
                     var itemAt = __instance.m_inventory.GetItemAt(pos.x, pos.y);
-                    if (itemAt != null && itemAt != item)
-                    {
+                    if (itemAt != null && itemAt != item) {
                         var remaining = OpenInventory.GetAllItems().FindAll(i => i != item);
-                        if (!ShardSocketManager.CanCoexist(OpenEquipment, itemAt, remaining, out var reason))
-                        {
+                        if (!ShardSocketManager.CanCoexist(OpenEquipment, itemAt, remaining, out var reason)) {
                             ShowSocketMessage(reason);
                             __result = false;
                             return false;
@@ -748,8 +637,7 @@ namespace EpicLoot.ShardStones
                         // holds one shard and reconstruction hands back a stack of 1 -- the remainder would be
                         // lost. Only a different-named item takes that swap path (a same-named one merges back
                         // onto the stack harmlessly), so reject the lossy case and ask the player to split first.
-                        if (itemAt.m_stack > 1 && itemAt.m_shared.m_name != item.m_shared.m_name)
-                        {
+                        if (itemAt.m_stack > 1 && itemAt.m_shared.m_name != item.m_shared.m_name) {
                             ShowSocketMessage("$mod_epicloot_socket_singlestackonly");
                             __result = false;
                             return false;

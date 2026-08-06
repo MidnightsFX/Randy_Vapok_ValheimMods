@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using static Skills;
 
 namespace EpicLoot.MagicItemEffects.Shards 
-{
+        {
     // uses SkillsAsSkills in AddSkillLevel
     public static class BlockAsDodgeAsBlock 
     {

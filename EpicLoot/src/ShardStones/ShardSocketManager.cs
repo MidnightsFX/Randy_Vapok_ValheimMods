@@ -554,7 +554,7 @@ namespace EpicLoot.ShardStones {
 
             foreach (var color in itemLocalColors) {
                 if (color != ShardType.None && Shards.GetCategory(color) == category) {
-                    reason = "$mod_epicloot_socket_bosslimit";
+                    reason = $"$mod_epicloot_socket_{Shards.ExclusiveCategorySlug(category)}limit";
                     return false;
                 }
             }
@@ -562,7 +562,7 @@ namespace EpicLoot.ShardStones {
             var player = Player.m_localPlayer;
             if (player != null && player.IsItemEquiped(equipment) &&
                 IsExclusiveCategoryEquipped(player, category, equipment)) {
-                reason = "$mod_epicloot_socket_bosslimit";
+                reason = $"$mod_epicloot_socket_{Shards.ExclusiveCategorySlug(category)}limit";
                 return false;
             }
 

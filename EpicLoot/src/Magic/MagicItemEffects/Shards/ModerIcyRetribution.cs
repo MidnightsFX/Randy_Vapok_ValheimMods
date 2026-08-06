@@ -1,17 +1,8 @@
-using EpicLoot.src.Magic.MagicItemEffects.Helpers;
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Moder boss shard: when the local player is struck the cold answers back — a frost nova detonates
-    // around the player, dealing frost damage (and its usual chilling slow via AddFrostDamage) to every
-    // nearby enemy. Hooked on the player's RPC_Damage (damage taken, owner-side = local). The boss-tier
-    // shard value (15..25) scales the nova's frost damage.
-    //
-    // The effect is purely cooldown-based (no proc chance): every hit that lands while the cooldown is off
-    // triggers a nova, then starts a cooldown shown as the "Moder's Chill" HUD status effect. While that
-    // status effect is present the shard stays inert. The cooldown scales with the shard's rarity (140s at
-    // Epic, +20s per rarity above it). Damage-over-time (poison/burning) ticks through Character.ApplyDamage
-    // rather than RPC_Damage, so it can't trigger this.
+    // Provides a reactive frost nova when the player takes damage, with a scaling damage and cooldown based on rarity.
     public static class ModerIcyRetribution {
         private const float NovaRadius = 8f;
         private const float FrostPerTier = 8f;   // frost damage per point of value (15..25 -> 120..200)

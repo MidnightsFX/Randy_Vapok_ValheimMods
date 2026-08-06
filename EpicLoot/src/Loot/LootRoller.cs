@@ -21,6 +21,17 @@ using Random = UnityEngine.Random;
 
 namespace EpicLoot
 {
+    // What a single rolled loot drop actually becomes. Every drop the loot tables produce picks exactly
+    // one of these, weighted by the four Balance drop ratios (see LootRoller.SelectDropType), so the
+    // categories compete for the same drop slot rather than each getting an independent coin flip.
+    public enum LootDropType
+    {
+        Item,
+        ShardStone,
+        Unidentified,
+        Materials
+    }
+
     public static class LootRoller
     {
         public static LootConfig Config;
@@ -55,6 +66,9 @@ namespace EpicLoot
 
         private static WeightedRandomCollection<KeyValuePair<int, float>> _weightedDropCountTable;
         private static WeightedRandomCollection<LootDrop> _weightedLootTable;
+        // Deliberately its own collection rather than a reuse of _weightedLootTable: SelectDropType runs
+        // inside the same per-drop loop that ResolveLootDrop re-Setup()s _weightedLootTable in.
+        private static WeightedRandomCollection<KeyValuePair<LootDropType, float>> _weightedDropTypeTable;
         private static WeightedRandomCollection<MagicItemEffectDefinition> _weightedEffectTable;
         private static WeightedRandomCollection<KeyValuePair<int, float>> _weightedEffectCountTable;
         private static WeightedRandomCollection<KeyValuePair<int, float>> _weightedSocketCountTable;
@@ -76,6 +90,7 @@ namespace EpicLoot
 
             _weightedDropCountTable = new WeightedRandomCollection<KeyValuePair<int, float>>();
             _weightedLootTable = new WeightedRandomCollection<LootDrop>();
+            _weightedDropTypeTable = new WeightedRandomCollection<KeyValuePair<LootDropType, float>>();
             _weightedEffectTable = new WeightedRandomCollection<MagicItemEffectDefinition>();
             _weightedEffectCountTable = new WeightedRandomCollection<KeyValuePair<int, float>>();
             _weightedSocketCountTable = new WeightedRandomCollection<KeyValuePair<int, float>>();
@@ -495,252 +510,325 @@ namespace EpicLoot
                 EpicLoot.Log($"Item: {itemName} - Rarity Count: {rarityLength} - Weight: {lootDrop.Weight}");
 
                 // A drop that is already a shard -- rolled from an elite creature's bonus shard set or from a
-                // boss's shard table -- must not be re-rolled into a biome shard, nor sacrificed for materials
-                // below. The unidentified branch needs no such guard: IsAllowedMagicItemType rejects a Material.
+                // boss's shard table -- must not be re-rolled into a biome shard, nor sacrificed for
+                // materials. The unidentified category needs no such guard: IsAllowedMagicItemType rejects
+                // a Material.
                 var isShardDrop = lootDrop.Item != null &&
                     lootDrop.Item.EndsWith(global::EpicLoot.ShardStones.Shards.ShardIndicator, StringComparison.Ordinal);
 
-                // Set the drop as a shard stone drawn from the biome the loot is dropping in. The biome
-                // names its item set (ShardStone_{Biome} in loottables.json), which resolves to one of the
-                // ShardT1..ShardT7 tier sets, so the whole biome preset stays config-patchable.
-                if (!cheatsActive && !isShardDrop && ELConfig.ShardStoneDropRatio.Value > 0)
+                var dropType = SelectDropType(lootDrop, isShardDrop, cheatsActive);
+                EpicLoot.Log($"Drop type for {lootDrop.Item}: {dropType}");
+
+                var spawned = false;
+                switch (dropType)
                 {
-                    var clampedShardRate = Mathf.Clamp(ELConfig.ShardStoneDropRatio.Value, 0.0f, 1.0f);
-                    var setShardStone = Random.Range(0.0f, 1.0f) < clampedShardRate;
-                    EpicLoot.Log($"Checking if item should be a shard stone for {lootDrop.Item} ({clampedShardRate} {setShardStone})");
-
-                    if (setShardStone)
-                    {
-                        ZoneSystem.instance.GetGroundData(ref dropPoint, out var _, out var shardBiome, out var _, out var _);
-
-                        var shardSetName = $"ShardStone_{shardBiome}";
-                        if (!ItemSets.ContainsKey(shardSetName))
-                        {
-                            EpicLoot.LogWarning($"No shard stone item set found for biome {shardBiome} " +
-                                $"({shardSetName}), falling back to {DefaultShardStoneSet}.");
-                            shardSetName = DefaultShardStoneSet;
-                        }
-
-                        if (!ItemSets.ContainsKey(shardSetName))
-                        {
-                            EpicLoot.LogWarning($"Tried to spawn a shard stone but no item set named " +
-                                $"{DefaultShardStoneSet} exists! Dropping {lootDrop.Item} instead.");
-                        }
-                        else
-                        {
-                            // Seed a fresh LootDrop with no Rarity: ResolveLootDrop only inherits the resolved
-                            // set's own Rarity[] when the incoming one is empty, so reusing lootDrop here would
-                            // leak the gear entry's rarity weights and defeat the per-tier rarity the ShardT
-                            // sets encode.
-                            var shardDrop = ResolveLootDrop(new LootDrop { Item = shardSetName, Weight = 1 });
-                            ExpandRarityToken(shardDrop, luckFactor);
-
-                            GameObject shardPrefab = null;
-                            if (!shardDrop.Item.IsNullOrWhiteSpace())
-                            {
-                                shardPrefab = ObjectDB.instance.GetItemPrefab(shardDrop.Item);
-                            }
-
-                            if (shardPrefab == null)
-                            {
-                                EpicLoot.LogWarning($"Tried to spawn shard stone ({shardDrop.Item}) for biome " +
-                                    $"{shardBiome} but the item prefab was not found! Dropping {lootDrop.Item} instead.");
-                            }
-                            else
-                            {
-                                EpicLoot.Log($"Adding {shardDrop.Item} shard stone for biome {shardBiome}");
-                                var shardObject = SpawnLootForDrop(shardPrefab, dropPoint, initializeObject);
-                                var shardItemDrop = shardObject.GetComponent<ItemDrop>();
-
-                                // Identity already rides on the prefab's shared data and Awake restores the
-                                // cosmetic MagicItem, but stamping and saving here keeps the intent explicit and
-                                // matches the unidentified branch below. Both calls are idempotent.
-                                global::EpicLoot.ShardStones.Shards.EnsureShardMetadata(shardItemDrop.m_itemData);
-                                shardItemDrop.Save();
-
-                                results.Add(shardObject);
-                                continue;
-                            }
-                        }
-                    }
+                    case LootDropType.ShardStone:
+                        spawned = TrySpawnBiomeShard(lootDrop, ref dropPoint, luckFactor, initializeObject, results);
+                        break;
+                    case LootDropType.Unidentified:
+                        spawned = TrySpawnUnidentified(lootDrop, ref dropPoint, luckFactor, initializeObject, results);
+                        break;
+                    case LootDropType.Materials:
+                        spawned = TrySpawnMaterials(lootDrop, dropPoint, luckFactor, results);
+                        break;
                 }
 
-                // Check if lootDrop.Item is not an equipment piece- which means its a material or other, so we let it drop instead of replacing it with an unidentified item
-
-                // Set the drop as an unidentified item of the selected rarity
-                if (!cheatsActive && ELConfig.ItemsUnidentifiedDropRatio.Value > 0)
+                // Every substitute category can still fail late -- a missing prefab, a rarity with no
+                // sacrifice products -- and each one warns before it does. Falling back to the item the
+                // loot table actually named is what keeps a failure from silently eating the drop.
+                if (!spawned)
                 {
-                    var clampedUnidentifiedRate = Mathf.Clamp(ELConfig.ItemsUnidentifiedDropRatio.Value, 0.0f, 1.0f);
-                    var setUnidentified = Random.Range(0.0f, 1.0f) < clampedUnidentifiedRate;
-                    EpicLoot.Log($"Checking if item should be unidentified for {lootDrop.Item} ({clampedUnidentifiedRate} {setUnidentified})");
-                    
-                    if (setUnidentified)
-                    {
-                        // If the item is rolled to be unidentified, we need to check if it is a valid item type, if its not we don't make it unidentified
-                        GameObject lootTableDrop = ObjectDB.instance.GetItemPrefab(lootDrop.Item);
-                        if (lootTableDrop != null)
-                        {
-                            // If loot table drop is null, or has no item drop component, or is not equippable, then we don't make it unidentified
-                            ItemDrop lootItemDrop = lootTableDrop.GetComponent<ItemDrop>();
-                            if (lootItemDrop != null && EpicLoot.IsAllowedMagicItemType(lootItemDrop.m_itemData))
-                            {
-                                var rarity = RollItemRarity(lootDrop, luckFactor);
-
-                                // Determine which biome this item is a part of, and set the drop biome to that tier
-                                GatedItemTypeHelper.AllItemsWithDetails.TryGetValue(lootDrop.Item, out var itemDetails);
-                                List<Heightmap.Biome> biomes = new List<Heightmap.Biome>();
-                                if (itemDetails != null)
-                                {
-                                    foreach(string bosskey in itemDetails.RequiredBosses)
-                                    {
-                                        foreach (BountyBossConfig bossEntry in AdventureDataManager.Config.Bounties.Bosses)
-                                        {
-                                            if (bossEntry.BossDefeatedKey != bosskey)
-                                            {
-                                                continue;
-                                            }
-                                            biomes.Add(bossEntry.Biome);
-                                        }
-                                    }
-                                }
-
-                                if (biomes.Count <= 0)
-                                {
-                                    ZoneSystem.instance.GetGroundData(ref dropPoint, out var _, out var biome, out var _, out var _);
-                                    biomes.Add(biome);
-                                }
-
-                                string selectBiome = biomes.First().ToString();
-                                GameObject prefab = ObjectDB.instance.GetItemPrefab($"{selectBiome}_{rarity}_Unidentified");
-                                if (prefab == null)
-                                {
-                                    // Warn and drop the normal item instead
-                                    EpicLoot.LogWarning($"Tried to spawn unidentified item for {selectBiome}_{rarity}_Unidentified " +
-                                        $"but prefab was not found! Dropping {lootDrop.Item} instead.");
-                                }
-                                else
-                                {
-                                    EpicLoot.Log($"Adding {rarity} unidentified item");
-                                    Quaternion randomRotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
-                                    ZNetView.m_forceDisableInit = !initializeObject;
-                                    GameObject lootdrop = Object.Instantiate(prefab, dropPoint, randomRotation);
-                                    // Ensure that the unidentified item has the correct magic item data for the rarity
-                                    var id = lootdrop.GetComponent<ItemDrop>();
-                                    var mic = id.m_itemData.Data().GetOrCreate<MagicItemComponent>();
-                                    mic.SetMagicItem(new MagicItem
-                                    {
-                                        Rarity = rarity,
-                                        IsUnidentified = true,
-                                    });
-                                    // Persist the rarity/unidentified state into the ZDO so a real
-                                    // world drop survives reload. No-op for the container path where
-                                    // the ZNetView was disabled (Save early-returns on invalid nview).
-                                    id.Save();
-                                    ZNetView.m_forceDisableInit = false;
-                                    results.Add(lootdrop);
-                                    continue;
-                                }
-                            }
-                        }
-                    }
+                    SpawnNormalItem(lootDrop, objectName, dropPoint, luckFactor, initializeObject, results);
                 }
-
-                if (!cheatsActive && !isShardDrop && ELConfig.ItemsToMaterialsDropRatio.Value > 0)
-                {
-                    var clampedConvertRate = Mathf.Clamp(ELConfig.ItemsToMaterialsDropRatio.Value, 0.0f, 1.0f);
-                    var replaceWithMats = Random.Range(0.0f, 1.0f) < clampedConvertRate;
-                    if (replaceWithMats)
-                    {
-                        GameObject prefab = null;
-
-                        if (!lootDrop.Item.IsNullOrWhiteSpace())
-                        {
-                            prefab = ObjectDB.instance.GetItemPrefab(lootDrop.Item);
-                        }
-
-                        if (prefab == null)
-                        {
-                            continue;
-                        }
-
-                        var rarity = RollItemRarity(lootDrop, luckFactor);
-                        var itemType = prefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_itemType;
-                        var disenchantProducts = EnchantCostsHelper.GetSacrificeProducts(true, itemType, rarity);
-                        if (disenchantProducts != null)
-                        {
-                            foreach (var itemAmountConfig in disenchantProducts)
-                            {
-                                GameObject materialPrefab = null;
-
-                                if (itemAmountConfig != null && !itemAmountConfig.Item.IsNullOrWhiteSpace())
-                                {
-                                    materialPrefab = ObjectDB.instance.GetItemPrefab(itemAmountConfig.Item);
-                                }
-
-                                if (materialPrefab == null)
-                                {
-                                    continue;
-                                }
-
-                                var materialItem = SpawnLootForDrop(materialPrefab, dropPoint, true);
-                                var materialItemDrop = materialItem.GetComponent<ItemDrop>();
-                                materialItemDrop.m_itemData.m_stack = itemAmountConfig.Amount;
-
-                                if (materialItemDrop.m_itemData.IsMagicCraftingMaterial())
-                                {
-                                    materialItemDrop.m_itemData.m_variant = EpicLoot.GetRarityIconIndex(rarity);
-                                }
-
-                                results.Add(materialItem);
-                            }
-                        }
-
-                        continue;
-                    }
-                }
-
-                var gatedItemName = (CheatDisableGating) ?
-                    GatedItemTypeHelper.GetGatedItemNameFromItemOrType(lootDrop.Item, GatedItemTypeMode.Unlimited) :
-                    GatedItemTypeHelper.GetGatedItemNameFromItemOrType(lootDrop.Item, EpicLoot.GetGatedItemTypeMode());
-
-                GameObject itemPrefab = null;
-
-                if (!gatedItemName.IsNullOrWhiteSpace())
-                {
-                    itemPrefab = ObjectDB.instance.GetItemPrefab(gatedItemName);
-                }
-
-                if (itemPrefab == null)
-                {
-                    EpicLoot.LogError($"Tried to spawn loot ({gatedItemName}) for ({objectName}), " +
-                        $"but the item prefab was not found!");
-                    continue;
-                }
-
-                var item = SpawnLootForDrop(itemPrefab, dropPoint, initializeObject);
-                var itemDrop = item.GetComponent<ItemDrop>();
-
-                if (itemDrop != null && EpicLoot.CanBeMagicItem(itemDrop.m_itemData) && !ArrayUtils.IsNullOrEmpty(lootDrop.Rarity))
-                {
-                    var itemData = itemDrop.m_itemData;
-                    var magicItemComponent = itemData.Data().GetOrCreate<MagicItemComponent>();
-                    var magicItem = RollMagicItem(lootDrop, itemData, luckFactor);
-
-                    if (CheatForceMagicEffect)
-                    {
-                        AddDebugMagicEffects(magicItem);
-                    }
-
-                    magicItemComponent.SetMagicItem(magicItem);
-                    itemDrop.m_itemData = itemData;
-                    itemDrop.Save();
-                    InitializeMagicItem(itemData);
-                }
-
-                results.Add(item);
             }
 
             return results;
+        }
+
+        // Rolls what a single drop becomes. The four Balance drop ratios are relative weights, not
+        // independent chances, so only their proportions matter and any of them may be zeroed to remove
+        // that category. Categories this particular drop cannot become are left out of the roll entirely
+        // rather than rolled and then rejected -- an ineligible category in the pool would silently eat
+        // the drop's chance of becoming any of the others.
+        private static LootDropType SelectDropType(LootDrop lootDrop, bool isShardDrop, bool cheatsActive)
+        {
+            // Item spawn cheats asked for a specific thing; never substitute anything for it.
+            if (cheatsActive)
+            {
+                return LootDropType.Item;
+            }
+
+            var candidates = new List<KeyValuePair<LootDropType, float>>();
+            AddDropTypeCandidate(candidates, LootDropType.Item, ELConfig.ItemDropRatio.Value);
+
+            if (!isShardDrop)
+            {
+                AddDropTypeCandidate(candidates, LootDropType.ShardStone, ELConfig.ShardStoneDropRatio.Value);
+                AddDropTypeCandidate(candidates, LootDropType.Materials, ELConfig.MaterialsDropRatio.Value);
+            }
+
+            // Only equippable loot has an unidentified counterpart; materials and everything else stay as
+            // they are. This is why the check lives here rather than inside TrySpawnUnidentified.
+            if (IsAllowedUnidentifiedDrop(lootDrop))
+            {
+                AddDropTypeCandidate(candidates, LootDropType.Unidentified, ELConfig.ItemsUnidentifiedDropRatio.Value);
+            }
+
+            // No category is possible, or every weight is zero: drop the item the loot table named.
+            if (candidates.Count == 0)
+            {
+                return LootDropType.Item;
+            }
+
+            _weightedDropTypeTable.Setup(candidates, x => x.Value);
+            return _weightedDropTypeTable.Roll().Key;
+        }
+
+        // Zero-weight categories are omitted rather than added with weight 0, so a roll can never land on
+        // a disabled category through float rounding at the bottom of the weight range.
+        private static void AddDropTypeCandidate(List<KeyValuePair<LootDropType, float>> candidates,
+            LootDropType dropType, float weight)
+        {
+            if (weight > 0)
+            {
+                candidates.Add(new KeyValuePair<LootDropType, float>(dropType, weight));
+            }
+        }
+
+        // True when the drop names an equippable item, i.e. one an unidentified item could stand in for.
+        private static bool IsAllowedUnidentifiedDrop(LootDrop lootDrop)
+        {
+            if (lootDrop.Item.IsNullOrWhiteSpace() || ObjectDB.instance == null)
+            {
+                return false;
+            }
+
+            var prefab = ObjectDB.instance.GetItemPrefab(lootDrop.Item);
+            var itemDrop = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
+            return itemDrop != null && EpicLoot.IsAllowedMagicItemType(itemDrop.m_itemData);
+        }
+
+        // Spawns a shard stone drawn from the biome the loot is dropping in. The biome names its item set
+        // (ShardStone_{Biome} in loottables.json), which resolves to one of the ShardT1..ShardT7 tier sets,
+        // so the whole biome preset stays config-patchable.
+        private static bool TrySpawnBiomeShard(LootDrop lootDrop, ref Vector3 dropPoint, float luckFactor,
+            bool initializeObject, List<GameObject> results)
+        {
+            ZoneSystem.instance.GetGroundData(ref dropPoint, out var _, out var shardBiome, out var _, out var _);
+
+            var shardSetName = $"ShardStone_{shardBiome}";
+            if (!ItemSets.ContainsKey(shardSetName))
+            {
+                EpicLoot.LogWarning($"No shard stone item set found for biome {shardBiome} " +
+                    $"({shardSetName}), falling back to {DefaultShardStoneSet}.");
+                shardSetName = DefaultShardStoneSet;
+            }
+
+            if (!ItemSets.ContainsKey(shardSetName))
+            {
+                EpicLoot.LogWarning($"Tried to spawn a shard stone but no item set named " +
+                    $"{DefaultShardStoneSet} exists! Dropping {lootDrop.Item} instead.");
+                return false;
+            }
+
+            // Seed a fresh LootDrop with no Rarity: ResolveLootDrop only inherits the resolved set's own
+            // Rarity[] when the incoming one is empty, so reusing lootDrop here would leak the gear entry's
+            // rarity weights and defeat the per-tier rarity the ShardT sets encode.
+            var shardDrop = ResolveLootDrop(new LootDrop { Item = shardSetName, Weight = 1 });
+            ExpandRarityToken(shardDrop, luckFactor);
+
+            GameObject shardPrefab = null;
+            if (!shardDrop.Item.IsNullOrWhiteSpace())
+            {
+                shardPrefab = ObjectDB.instance.GetItemPrefab(shardDrop.Item);
+            }
+
+            if (shardPrefab == null)
+            {
+                EpicLoot.LogWarning($"Tried to spawn shard stone ({shardDrop.Item}) for biome " +
+                    $"{shardBiome} but the item prefab was not found! Dropping {lootDrop.Item} instead.");
+                return false;
+            }
+
+            EpicLoot.Log($"Adding {shardDrop.Item} shard stone for biome {shardBiome}");
+            var shardObject = SpawnLootForDrop(shardPrefab, dropPoint, initializeObject);
+            var shardItemDrop = shardObject.GetComponent<ItemDrop>();
+
+            // Identity already rides on the prefab's shared data and Awake restores the cosmetic MagicItem,
+            // but stamping and saving here keeps the intent explicit and matches the unidentified path.
+            // Both calls are idempotent.
+            global::EpicLoot.ShardStones.Shards.EnsureShardMetadata(shardItemDrop.m_itemData);
+            shardItemDrop.Save();
+
+            results.Add(shardObject);
+            return true;
+        }
+
+        // Spawns an unidentified item of the rolled rarity in place of the drop. The biome is the one
+        // gating the item's own progression where that is known, falling back to the biome at the drop
+        // point.
+        private static bool TrySpawnUnidentified(LootDrop lootDrop, ref Vector3 dropPoint, float luckFactor,
+            bool initializeObject, List<GameObject> results)
+        {
+            var rarity = RollItemRarity(lootDrop, luckFactor);
+
+            // Determine which biome this item is a part of, and set the drop biome to that tier
+            GatedItemTypeHelper.AllItemsWithDetails.TryGetValue(lootDrop.Item, out var itemDetails);
+            var biomes = new List<Heightmap.Biome>();
+            if (itemDetails != null)
+            {
+                foreach (string bosskey in itemDetails.RequiredBosses)
+                {
+                    foreach (BountyBossConfig bossEntry in AdventureDataManager.Config.Bounties.Bosses)
+                    {
+                        if (bossEntry.BossDefeatedKey != bosskey)
+                        {
+                            continue;
+                        }
+                        biomes.Add(bossEntry.Biome);
+                    }
+                }
+            }
+
+            if (biomes.Count <= 0)
+            {
+                ZoneSystem.instance.GetGroundData(ref dropPoint, out var _, out var biome, out var _, out var _);
+                biomes.Add(biome);
+            }
+
+            var selectBiome = biomes.First().ToString();
+            var prefab = ObjectDB.instance.GetItemPrefab($"{selectBiome}_{rarity}_Unidentified");
+            if (prefab == null)
+            {
+                // Warn and drop the normal item instead
+                EpicLoot.LogWarning($"Tried to spawn unidentified item for {selectBiome}_{rarity}_Unidentified " +
+                    $"but prefab was not found! Dropping {lootDrop.Item} instead.");
+                return false;
+            }
+
+            EpicLoot.Log($"Adding {rarity} unidentified item");
+            var randomRotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
+            ZNetView.m_forceDisableInit = !initializeObject;
+            var lootdrop = Object.Instantiate(prefab, dropPoint, randomRotation);
+            // Ensure that the unidentified item has the correct magic item data for the rarity
+            var id = lootdrop.GetComponent<ItemDrop>();
+            var mic = id.m_itemData.Data().GetOrCreate<MagicItemComponent>();
+            mic.SetMagicItem(new MagicItem
+            {
+                Rarity = rarity,
+                IsUnidentified = true,
+            });
+            // Persist the rarity/unidentified state into the ZDO so a real world drop survives reload.
+            // No-op for the container path where the ZNetView was disabled (Save early-returns on
+            // invalid nview).
+            id.Save();
+            ZNetView.m_forceDisableInit = false;
+            results.Add(lootdrop);
+            return true;
+        }
+
+        // Replaces the drop with the magic crafting materials that item would yield if sacrificed. Returns
+        // false when nothing could be spawned -- an item with no sacrifice products for the rolled rarity
+        // drops as itself rather than as nothing at all.
+        private static bool TrySpawnMaterials(LootDrop lootDrop, Vector3 dropPoint, float luckFactor,
+            List<GameObject> results)
+        {
+            GameObject prefab = null;
+
+            if (!lootDrop.Item.IsNullOrWhiteSpace())
+            {
+                prefab = ObjectDB.instance.GetItemPrefab(lootDrop.Item);
+            }
+
+            var sourceItemDrop = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
+            if (sourceItemDrop == null)
+            {
+                return false;
+            }
+
+            var rarity = RollItemRarity(lootDrop, luckFactor);
+            var itemType = sourceItemDrop.m_itemData.m_shared.m_itemType;
+            var disenchantProducts = EnchantCostsHelper.GetSacrificeProducts(true, itemType, rarity);
+            if (disenchantProducts == null)
+            {
+                return false;
+            }
+
+            var spawnedAny = false;
+            foreach (var itemAmountConfig in disenchantProducts)
+            {
+                GameObject materialPrefab = null;
+
+                if (itemAmountConfig != null && !itemAmountConfig.Item.IsNullOrWhiteSpace())
+                {
+                    materialPrefab = ObjectDB.instance.GetItemPrefab(itemAmountConfig.Item);
+                }
+
+                if (materialPrefab == null)
+                {
+                    continue;
+                }
+
+                var materialItem = SpawnLootForDrop(materialPrefab, dropPoint, true);
+                var materialItemDrop = materialItem.GetComponent<ItemDrop>();
+                materialItemDrop.m_itemData.m_stack = itemAmountConfig.Amount;
+
+                if (materialItemDrop.m_itemData.IsMagicCraftingMaterial())
+                {
+                    materialItemDrop.m_itemData.m_variant = EpicLoot.GetRarityIconIndex(rarity);
+                }
+
+                results.Add(materialItem);
+                spawnedAny = true;
+            }
+
+            return spawnedAny;
+        }
+
+        // The default path: spawn the item the loot table named, gated by boss progression, and roll its
+        // magic item data when the item is eligible for one.
+        private static void SpawnNormalItem(LootDrop lootDrop, string objectName, Vector3 dropPoint,
+            float luckFactor, bool initializeObject, List<GameObject> results)
+        {
+            var gatedItemName = (CheatDisableGating) ?
+                GatedItemTypeHelper.GetGatedItemNameFromItemOrType(lootDrop.Item, GatedItemTypeMode.Unlimited) :
+                GatedItemTypeHelper.GetGatedItemNameFromItemOrType(lootDrop.Item, EpicLoot.GetGatedItemTypeMode());
+
+            GameObject itemPrefab = null;
+
+            if (!gatedItemName.IsNullOrWhiteSpace())
+            {
+                itemPrefab = ObjectDB.instance.GetItemPrefab(gatedItemName);
+            }
+
+            if (itemPrefab == null)
+            {
+                EpicLoot.LogError($"Tried to spawn loot ({gatedItemName}) for ({objectName}), " +
+                    $"but the item prefab was not found!");
+                return;
+            }
+
+            var item = SpawnLootForDrop(itemPrefab, dropPoint, initializeObject);
+            var itemDrop = item.GetComponent<ItemDrop>();
+
+            if (itemDrop != null && EpicLoot.CanBeMagicItem(itemDrop.m_itemData) && !ArrayUtils.IsNullOrEmpty(lootDrop.Rarity))
+            {
+                var itemData = itemDrop.m_itemData;
+                var magicItemComponent = itemData.Data().GetOrCreate<MagicItemComponent>();
+                var magicItem = RollMagicItem(lootDrop, itemData, luckFactor);
+
+                if (CheatForceMagicEffect)
+                {
+                    AddDebugMagicEffects(magicItem);
+                }
+
+                magicItemComponent.SetMagicItem(magicItem);
+                itemDrop.m_itemData = itemData;
+                itemDrop.Save();
+                InitializeMagicItem(itemData);
+            }
+
+            results.Add(item);
         }
 
         public static GameObject SpawnLootForDrop(GameObject itemPrefab, Vector3 dropPoint, bool initializeObject)
@@ -760,9 +848,13 @@ namespace EpicLoot
             {
                 if (ItemSets.TryGetValue(result.Item, out var itemSet))
                 {
+                    // Rolling an empty list returns null, so stop here rather than dereference it. The
+                    // result keeps naming the set; the caller's prefab lookup then fails with its own
+                    // message, right after this one names the actual cause.
                     if (itemSet.Loot.Length == 0)
                     {
                         EpicLoot.LogError($"Tried to roll using ItemSet ({itemSet.Name}) but its loot list was empty!");
+                        break;
                     }
                     _weightedLootTable.Setup(itemSet.Loot, x => x.Weight);
                     var itemSetResult = _weightedLootTable.Roll();
@@ -778,6 +870,7 @@ namespace EpicLoot
                     if (lootList.Length == 0)
                     {
                         EpicLoot.LogError($"Tried to roll using loot table reference ({result.Item}) but its loot list was empty!");
+                        break;
                     }
                     _weightedLootTable.Setup(lootList, x => x.Weight);
                     var referenceResult = _weightedLootTable.Roll();
@@ -1155,7 +1248,7 @@ namespace EpicLoot
         // by the named prefab itself, which bakes it into its shared data.
         private static void ExpandRarityToken(LootDrop lootDrop, float luckFactor)
         {
-            const string token = "{Rarity}";
+            const string token = global::EpicLoot.ShardStones.Shards.RarityToken;
             if (lootDrop?.Item == null || !lootDrop.Item.Contains(token))
             {
                 return;

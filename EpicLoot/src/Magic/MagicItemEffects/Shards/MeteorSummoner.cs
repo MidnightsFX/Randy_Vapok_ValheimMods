@@ -1,21 +1,8 @@
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Yagluth boss shard: the local player's weapon hits build "charges". At max charge the next hit calls a
-    // meteor down on the enemy it struck -- the vanilla 'projectile_meteor' is launched from 20 m up and a
-    // random 5..15 m to the side of the target, then flown straight into it at a fixed speed. Charges are
-    // counted in a Character.Damage postfix (attacker == local player), which always runs on the attacker's
-    // machine, and the running count is shown on a Yagluth-trophy HUD indicator ("n/25", mirroring
-    // EikthyrShockingCharge).
-    //
-    // The shard value is a rarity-scaled damage multiplier (Magic 4x -> Mythic 12x); the meteor carries that
-    // multiple of the blockable damage of the hit that discharged it as fire damage. Yagluth shards only roll
-    // Legendary (10x) and Mythic (12x) today, so those are the effective tunings.
-    //
-    // Feedback guard: the meteor's own hits are owned by the player, so they route back through
-    // Character.Damage as player hits about a second later. Only hits carrying a weapon skill build charges --
-    // that admits every real attack (melee, bow, staff, unarmed and tools all set HitData.m_skill) while
-    // excluding the meteor's skill-less hit, so the meteor can never feed its own counter.
+    // Summons a meteor on hit after 25 direct weapon hits. Meteor damage scales with the sum of damage done over those hits.
     public static class MeteorSummoner {
         private const string MeteorPrefab = "projectile_meteor";
         private const int MaxCharges = 25;           // weapon hits required to charge the meteor

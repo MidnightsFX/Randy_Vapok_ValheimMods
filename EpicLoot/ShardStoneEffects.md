@@ -13,30 +13,30 @@ Legendary → Mythic).
 | **Yellow** (Stamina) ☑️ | ModifyAttackStaminaUse | ModifyDrawStaminaUse | EnergeticEitr | StaminaGainOnBlock | ModifyStaminaRegen | PercentStamina | IncreaseStamina | StaminaOnKill | UseAdrenalineAsStamina | ModifySprintStaminaUse |
 | **Cyan** (Eitr) | EitrImbueAttack | EitrImbueAttack | ModifyAttackEitrUse | EitrGainOnBlock | PercentEitr | IncreaseEitr | ModifyEitrRegen | HeartyEitr | EitrUseGivesAdrenaline | EitrShield |
 | **Orange** (Fire) | AddFireDamage | AddFireDamage | AddFireDamage | PhysToFireOnBlock | AddFireResistancePercentage | PhysToFire | Kindling | BurningSpeed | BurningAdrenaline | IncreaseHeatResistance |
-| **Pink** (Dodge) | PerfectDodgeGivesStamina | PerfectDodgeGivesStamina | PerfectDodgeGivesEitr | — :x: | DecreaseDodgeCost | ReduceFallDamage | DodgeBuff | PerfectDodgeGivesSpeed | PerfectDodge | RollCleanse |
-| **Black** (Night) | IncreaseDamageDuringNighttime  | IncreaseDamageDuringNighttime | IncreaseDamageDuringNighttime  | NightBlocker | NightStaminaRegenIncrease | DamageReductionAtNight | AddKnivesSkill  | NightCarryWeight  | SummonBatWhenActivatingAdrenaline :x: | ModifyNoise  |
+| **Pink** (Dodge) | PerfectDodgeGivesStamina | PerfectDodgeGivesStamina | PerfectDodgeGivesEitr | BlockAsDodgeAsBlock | DecreaseDodgeCost | ReduceFallDamage | DodgeBuff | PerfectDodgeGivesSpeed | PerfectDodge | RollCleanse |
+| **Black** (Night) | IncreaseDamageDuringNighttime  | IncreaseDamageDuringNighttime | IncreaseDamageDuringNighttime  | NightBlocker | NightStaminaRegenIncrease | DamageReductionAtNight | AddKnivesSkill  | NightCarryWeight  | SummonBatWhenActivatingAdrenaline ☑️ | ModifyNoise  |
 | **White**  (Day) | IncreaseDamageDuringDaytime | IncreaseDamageDuringDaytime | IncreaseDamageDuringDaytime | DayBlocker | DayDiscovery | DayArmor | DayStaminaRegen | DaySailingSpeed | DayHealthRegen | AddCrafterSkills |
-| **Green** (Movement) | DamageIncreaseFromMovementPenalty | DamageIncreaseFromMovementPenalty | DamageIncreaseFromMovementPenalty | — :x: | IncreaseXPGainFromMovementPenalty | CarryWeightForMovementPenalty | StaminaIncreaseForMovementPenalty | ArmorFromMovementPenalty | AddMovementSkills | ModifyJumpStaminaUse |
-| **Purple** (Eitr/Blood) | EitrLeech | EitrLeech | ModifyMagicFireRate | — :x: | DartingThoughts | ConsumeEitrFirstForBloodCosts | EveryXPointsOfEitrIncreasesStamina | ReduceEitrCost | ConvertEitrCostToStaminaCost | RunningOnEmpty |
+| **Green** (Movement) | DamageIncreaseFromMovementPenalty | DamageIncreaseFromMovementPenalty | DamageIncreaseFromMovementPenalty | AnchoredBlock | IncreaseXPGainFromMovementPenalty | CarryWeightForMovementPenalty | StaminaIncreaseForMovementPenalty | ArmorFromMovementPenalty | AddMovementSkills | ModifyJumpStaminaUse |
+| **Purple** (Eitr/Blood) | EitrLeech | EitrLeech | ModifyMagicFireRate | ElementalWarding | DartingThoughts | ConsumeEitrFirstForBloodCosts | EveryXPointsOfEitrIncreasesStamina | ReduceEitrCost | ConvertEitrCostToStaminaCost | RunningOnEmpty |
 | **Grey** (Harvest) | IncreaseHarvestDamage | IncreaseHarvestDamage | IncreaseHarvestDamage | — :x: | IncreaseMiningDrop | AddFishingSkill | IncreaseTreeDrop | ReduceFishingStaminaCost | GainAdrenalineFromHarvesting | IncreaseHarvestXPGain |
 
 ## Dark shards
 
 | Shard | Melee Wpn | Ranged Wpn | Magic Wpn | Shield | Head | Chest | Legs | Shoulders | Trinket | Utility |
 |---|---|---|---|---|---|---|---|---|---|---|
-| **DarkRed** |  IncreaseMeleeSkills | IncreaseRangedSkills | AddBluntDamage | — :x: | HeadHunter | ChanceToCritOnHit | BloodDrinker | ReduceArmorIncreaseDamage | AdrenalineCharge | OffSetAttack |
+| **DarkRed** |  IncreaseMeleeSkills | IncreaseRangedSkills | AddBluntDamage | BloodBaseBlock | HeadHunter | Bloodrage | BloodDrinker | ReduceArmorIncreaseDamage | AdrenalineCharge | OffSetAttack |
 | **DarkGreen** (Poison) | AddPoisonDamage | AddPoisonDamage | AddPoisonDamage | PhysToPoisonOnBlock | AddPoisonResistancePercentage | PhysToPoison | AddBlockingSkill | PoisonToTrueDamage | GainAdrenalineWhenApplyingPoison | IncreaseAllPoisonDamageDone |
 | **DarkBlue** (Frost) | AddFrostDamage | AddFrostDamage | AddFrostDamage | PhysToFrostOnBlock | AddFrostResistancePercentage | PhysToFrost | AddElementalMagicSkill | IcyWeight | AdrenalineFrostWave | Warmth |
-| **DarkPurple** (Blood) | ModifyAttackHealthUse | ModifyAttackHealthUse | ModifyAttackHealthUse | — :x: | KillsReduceNextBloodCost | ReflectDamage | BloodMagicLevelIncreasesHealthRegen | GainEitrWhenSacrificingHealth | GainAdrenalineWhenSacrificingHealth | AddBloodMagicSkill |
-| **Golden** (Luck) | Mercenary | Mercenary | Mercenary | — :x: | Wager | Coinplated | LuckWhileFishing | LuckyCraft | Luck | Riches |
+| **DarkPurple** (Blood) | ModifyAttackHealthUse | ModifyAttackHealthUse | ModifyAttackHealthUse | BloodStaggerBlock | KillsReduceNextBloodCost | ReflectDamage | BloodMagicLevelIncreasesHealthRegen | GainEitrWhenSacrificingHealth | GainAdrenalineWhenSacrificingHealth | AddBloodMagicSkill |
+| **Golden** (Luck) | ChanceDoubleDamage | ChanceDoubleDamage | ChanceDoubleDamage | LuckyBlock | Inspiration | LuckyLoot | LuckWhileFishing | LuckyCraft | Luck | Riches |
 
 ## Light shards
 
 | Shard | Melee Wpn | Ranged Wpn | Magic Wpn | Shield | Head | Chest | Legs | Shoulders | Trinket | Utility |
 |---|---|---|---|---|---|---|---|---|---|---|
 | **LightBlue** (Lightning) | AddLightningDamage | AddLightningDamage | AddLightningDamage | PhysToLightningOnBlock | AddLightningResistancePercentage | PhysToLightning | StormRider | Conduit | StormFury | ConvertPhysicalDamageToLightning |
-| **LightGreen** | HealthGainPerXDamageDone | HealthGainPerXDamageDone | HealthGainPerXDamageDone | — :x: | PotionEfficacy | Comfortable | AddPickaxesSkill | RestingHealthRegen | AdrenalineIncreasesHealthRegen | BountifulHarvest |
-| **Peach** (Weight) | DamageBonusFromPlayerWeight | DamageBonusFromPlayerWeight | DamageBonusFromPlayerWeight | — :x: | GainMaxStaminaBasedOnPlayerMaxHealth | StaminaRegenBonusFromPlayerWeight | GainMaxCarryWeightFromRested | TravelLight | SailingSpeed | AddCarryWeight |
+| **LightGreen** | HealthGainPerXDamageDone | HealthGainPerXDamageDone | HealthGainPerXDamageDone | Warding | PotionEfficacy | Comfortable | AddPickaxesSkill | RestingHealthRegen | AdrenalineIncreasesHealthRegen | BountifulHarvest |
+| **Peach** (Weight) | DamageBonusFromPlayerWeight | DamageBonusFromPlayerWeight | DamageBonusFromPlayerWeight | BurdenedBlock | GainMaxStaminaBasedOnPlayerMaxHealth | StaminaRegenBonusFromPlayerWeight | GainMaxCarryWeightFromRested | TravelLight | SailingSpeed | AddCarryWeight |
 
 ## Boss shards (uniform — one effect on any slot)
 
@@ -53,10 +53,42 @@ effect rather than anything shield-specific. They are not part of the shield gap
 | **Queen** | Legendary | Everflow ☑️ |
 | **Fader** | Mythic | NecroticFire ☑️|
 
+## Unique shards (uniform — one effect on any slot)
+
+Same `UniformEffect` shape as the boss shards, and likewise outside the shield gap below. They differ in
+where they come from and how they stack: uniques have no boss to kill for them, dropping instead from
+elite creatures (`Tier3EliteMob`…`Tier8EliteMob`) and from Swamp-tier-and-above treasure/dungeon chests
+via the `ShardUnique` item set in [`config/loottables.json`](config/loottables.json), always at Epic or
+better. The early-game chests are deliberately excluded — an Epic unique out of a Meadows chest is a
+bigger power spike than the drop rate suggests.
+
+Because they have no per-color gate, their upgrade surcharge is per-**category** instead: the `Unique`
+entry in `CategoryExtraResources` ([`config/shardstoneconversions.json`](config/shardstoneconversions.json))
+adds two blank runestones of the rarity being upgraded *from* — `RunestoneEpic` on Epic → Legendary,
+`RunestoneLegendary` on Legendary → Mythic. That per-rarity scaling comes from a `{Rarity}` token in the
+cost item name, expanded by `ShardStoneConversions.ExpandRarityToken`, so a single flat entry covers
+every step.
+
+`ShardCategory.Unique` is exclusive, but exclusivity is enforced **per category**
+([`ShardSocketManager.CheckExclusiveCategory`](src/ShardStones/ShardSocketManager.cs)) — so a unique shard
+and a boss shard may be worn together, one of each, and never two uniques.
+
+| Shard | Rarity | Effect (all slots) |
+|---|---|---|
+| **Firewalker** | Epic | Trailblazer ☑️ |
+| **Stormcaller** | Epic | StrikeCausesLightning ☑️ |
+
+Both effects carry their behaviour in a prefab clone built during `ZNetScene` setup — `EL_TrailblazerFire`
+(the burning patch that does the damage) and `EL_StrikeCausesLightningVisual` (a damage-free copy of the
+vanilla lightning AOE). Their `PrefabManager.OnPrefabsRegistered` subscriptions in
+[EpicLoot.cs](EpicLoot.cs) are load-bearing, not cosmetic: without them each effect logs a missing-prefab
+warning once and then does nothing.
+
 ## Shield effects
 
-Nine of the eighteen non-boss shards define a `Shield` effect. They fall into three implementation
-families, and — importantly — **two different trigger mechanisms**.
+Seventeen of the eighteen non-boss shards define a `Shield` effect. They fall into seven implementation
+families across **five different trigger mechanisms** — only the first four families fire on the block
+itself.
 
 ### On-block resource gain
 
@@ -87,6 +119,93 @@ Implemented in [`IncomingPhysicalConversion.ModifyIncoming`](src/Magic/MagicItem
 gated behind the `IsBlocked` flag — these stack additively on top of the always-on `PhysTo*` Chest effects,
 and the combined total is clamped so never more physical is converted than the hit actually contains.
 
+### On-block resource spend for mitigation
+
+Also fires from the `Humanoid.BlockAttack` postfix, but *spends* a resource instead of gaining one: the
+value is a percentage of the player's **max** pool, and up to that much damage is paid off the hit at a
+1:1 rate. Nothing is spent (and nothing mitigated) if the current pool can't cover the whole reduction.
+Each drains its damage type in a fixed order and plays an FX only when the reduction exceeds 5.
+
+| Shard | EffectType | Pool spent | Damage removed | Magic | Rare | Epic | Legendary | Mythic |
+|---|---|---|---|---|---|---|---|---|
+| **LightGreen** | Warding | Stamina | Physical (pierce → blunt → slash) | 4% | 8% | 12% | 16% | 20% |
+| **Purple** | ElementalWarding | Eitr | Elemental (fire → frost → lightning) | 4% | 8% | 12% | 16% | 20% |
+
+Implemented in [`Warding.UseMoreStaminaOnBlock`](src/Magic/MagicItemEffects/Shards/Warding.cs) and
+[`ElementalWarding.UseEitrOnBlock`](src/Magic/MagicItemEffects/Shards/ElementalWarding.cs). They run
+*after* the conversion family in the postfix, so a `PhysTo*OnBlock` shard on the same shield moves damage
+onto an element first — which `ElementalWarding` can then pay off and `Warding` no longer sees.
+
+### On-block attacker stagger
+
+The newest on-block family, and the only one that reaches back out and acts on the **attacker** rather
+than on the blocker or on the hit. Fires from the same `Humanoid.BlockAttack` postfix on *any*
+successful block — not just a timed one — and on a proc staggers the attacker outright, exactly as
+vanilla does for a parry.
+
+| Shard | EffectType | Magic | Rare | Epic | Legendary | Mythic |
+|---|---|---|---|---|---|---|
+| **Golden** | LuckyBlock | 1% | 2% | 3% | 4% | 5% |
+
+Implemented in [`LuckyBlock.OnBlock`](src/Magic/MagicItemEffects/Shards/LuckyBlock.cs). Two vanilla
+gates are reused rather than reinvented: `Character.m_staggerWhenBlocked`, so creatures immune to
+parry stagger are immune to this too, and `IsStaggering()`, which both saves a pointless network
+round trip and silently de-duplicates a proc that lands on a perfect block vanilla has already
+staggered.
+
+Multiplayer-wise this is the mirror image of the other families. `Humanoid.BlockAttack` is called from
+inside `Character.RPC_Damage` *after* its `IsOwner()` gate, so the handler already runs on the
+blocking player's own client and the local-player guard is correct regardless of who owns the
+attacker. Acting on that attacker then goes through `Character.Stagger`, which calls `RPC_Stagger`
+directly when we own them and routes an RPC to their owner otherwise — so the effect never writes to
+a ZDO it does not own.
+
+### Base block power bonuses
+
+**Not** an on-block trigger. These are a postfix on `ItemDrop.ItemData.GetBaseBlockPower`, so the bonus is
+folded into the shield's block power *before* skill factor scales it and shows up in the tooltip total.
+Each is a flat block-power grant per unit of some other resource, so the value is a per-increment rate
+rather than a percentage.
+
+| Shard | EffectType | Scales with | Magic | Rare | Epic | Legendary | Mythic |
+|---|---|---|---|---|---|---|---|
+| **Green** | AnchoredBlock | Movement penalty (per 1% of speed lost) | 0.25 | 0.5 | 0.75 | 1 | 1.25 |
+| **Peach** | BurdenedBlock | Carried weight (per 50 over 300) | 0.25 | 0.5 | 0.75 | 1 | 1.25 |
+| **DarkRed** | BloodBaseBlock | Nothing — flat grant, paid for in health | 3 | 6 | 9 | 12 | 15 |
+
+Implemented in [`AnchoredBlock`](src/Magic/MagicItemEffects/Shards/AnchoredBlock.cs),
+[`BurdenedBlock`](src/Magic/MagicItemEffects/Shards/BurdenedBlock.cs) and
+[`BloodBaseBlock`](src/Magic/MagicItemEffects/Shards/BloodBaseBlock.cs), all called from the
+`BlockBASEPowerPatch` postfix in the same helpers file as the block patch. `AnchoredBlock` reads
+`PenaltyScaling.MovementPenalty`, which returns 0.01 per 1% of movement speed lost.
+
+### Blood-cost blocking
+
+The two `Blood*Block` shards charge health for their benefit: a `Humanoid.UpdateBlock` postfix fires once
+at the *start* of each block (`m_blockTimer == 0`) and deals **5% of max health** as untyped true damage —
+hard-coded, not rarity-scaled — routed through `player.Damage` as a `HitType.Self` hit so on-hit effects
+still trigger. The DarkRed half buys the flat block power in the table above; the DarkPurple half buys
+stagger mitigation, applied as a `Character.AddStaggerDamage` prefix that only bites while blocking.
+
+| Shard | EffectType | Benefit | Magic | Rare | Epic | Legendary | Mythic |
+|---|---|---|---|---|---|---|---|
+| **DarkPurple** | BloodStaggerBlock | Stagger damage taken while blocking | -5% | -10% | -15% | -20% | -25% |
+
+See [`BloodStaggerBlock`](src/Magic/MagicItemEffects/Shards/BloodStaggerBlock.cs). The self-damage block is
+duplicated verbatim in both files, so socketing both shards charges the health cost **twice** per block.
+
+### Skill-level grant
+
+**Not** an on-block trigger. `BlockAsDodgeAsBlock` adds flat skill *levels* (not XP) to both Blocking and
+Dodge, through the shared `Skills.GetSkillFactor` postfix in
+[`AddSkillLevel`](src/Magic/MagicItemEffects/AddSkillLevel.cs) — the skill pair lives in
+[`BlockAsDodgeAsBlock.BADAB`](src/Magic/MagicItemEffects/Shards/BlockAsDodgeAsBlock.cs). Because
+`SkillIncrease` casts to `int`, only whole values count.
+
+| Shard | EffectType | Magic | Rare | Epic | Legendary | Mythic |
+|---|---|---|---|---|---|---|
+| **Pink** | BlockAsDodgeAsBlock | +3 | +6 | +9 | +12 | +15 |
+
 ### Blocking-skill XP
 
 **Not** an on-block trigger. These are a `Skills.RaiseSkill` prefix filtered to `SkillType.Blocking` — a
@@ -103,25 +222,127 @@ interactions call for it.
 
 ### Where the on-block effects are hooked
 
-Both live-block families hang off one consolidated postfix on `Humanoid.BlockAttack` in
+All four live-block families hang off one consolidated postfix on `Humanoid.BlockAttack` in
 [`SharedHumanoidBlockAttackPatch`](src/Magic/MagicItemEffects/Helpers/SharedHumanoidBlockAttackPatch.cs),
-which returns early unless the block actually succeeded, then calls each family's handler in a fixed order.
-Effects keep their own guards inside their handlers, so ordering there is not load-bearing.
+which returns early unless the block actually succeeded, then calls each family's handler in a fixed order:
+`IncomingPhysicalConversion` → `GainOnBlockResource` → `Warding` → `ElementalWarding` → `LuckyBlock`.
+Effects keep their own guards inside their handlers, so ordering is mostly not load-bearing — the one
+exception is that `IncomingPhysicalConversion` runs first, which changes what damage types the two
+`*Warding` handlers find left on the hit. `LuckyBlock` sits last and is genuinely order-independent,
+since unlike the other three it never touches `hit`.
+
+The same file also owns `BlockBASEPowerPatch` (the `GetBaseBlockPower` postfix the three base-block-power
+effects share). The remaining shield effects patch elsewhere: `Humanoid.UpdateBlock` and
+`Character.AddStaggerDamage` for the blood costs, `Skills.GetSkillFactor` for `BlockAsDodgeAsBlock`, and
+`Skills.RaiseSkill` for the day/night blocking-XP pair.
 
 ### Shards still needing a Shield effect
 
-Nine shards define all their other slots but omit `Shield`:
+One shard defines all its other slots but omits `Shield`: **Grey**.
 
-**Pink**, **Green**, **Purple**, **Grey**, **DarkRed**, **DarkPurple**, **Golden**, **LightGreen**, **Peach**
-
-Socketing one of these into a shield is *permitted* but **inert** — the shard occupies the socket and the
+Socketing a Grey shard into a shield is *permitted* but **inert** — the shard occupies the socket and the
 tooltip says so, but grants nothing. See `ResolveCategory` / `GetShardEffect` in
 [`Shards.cs`](src/ShardStones/Shards.cs), which intentionally returns no effect rather than substituting
 one authored for a different kind of gear.
 
-Block-adjacent effects already exist on *other* slots of some of these shards and are worth keeping in mind
-when filling the gaps, to avoid overlap: DarkGreen Legs `AddBlockingSkill`, Cyan Utility `EitrShield`, and
-DarkPurple Chest `ReflectDamage`.
+Grey has nothing block-adjacent elsewhere in its own row to build on — it is harvest-themed throughout.
+Block-adjacent effects that already exist on *other* shards are worth keeping in mind when filling the
+gap, to avoid overlap: DarkGreen Legs `AddBlockingSkill`, Cyan Utility `EitrShield`, and DarkPurple
+Chest `ReflectDamage`.
+
+> Golden previously sat in this gap and now fills it with `LuckyBlock`. Because
+> `ShardSocketManager.RecomputeSocketValues` rebuilds every socket's value from config, Golden shards
+> already sitting inert in shield sockets on existing saves will *start* granting Lucky Block on the
+> next socket touch. That is a buff rather than a break, but it is a live-save behaviour change worth
+> a release note.
+
+## Implemented but unassigned effects
+
+Seven effect ids are declared in [`MagicEffectType_Shards.cs`](src/Magic/MagicEffectType_Shards.cs) and have
+behavior code checked in, but occupy **no slot in any shard above** and have no entry in any
+[`config/overhauls/*/magiceffects.json`](config/overhauls/) either. That combination makes them completely
+inert: [`ShardEffectDefinitions`](src/Magic/MagicItemEffects/Helpers/ShardEffectDefinitions.cs) builds its
+definition list by walking the shard grid, so an unassigned id gets no `MagicItemEffectDefinition` at all —
+nothing can roll it, no shard can grant it, and `GetTotalActiveMagicEffectValue` returns 0 for every player.
+All seven still have their `_display`/`_desc` strings in
+[`localizations/English.json`](localizations/English.json), so assigning one to a grid slot is enough to
+make it show up correctly in tooltips.
+
+They are **not** equally close to working. Six are one config edit away; one also needs code restored.
+
+| EffectType | Code | Hook status | To re-enable |
+|---|---|---|---|
+| **Wager** | [Wager.cs](src/Magic/MagicItemEffects/Shards/Wager.cs) | Live | Assign a slot |
+| **Mercenary** | [Mercenary.cs](src/Magic/MagicItemEffects/Shards/Mercenary.cs) | Live | Assign a slot |
+| **Coinplated** | [Coinplated.cs](src/Magic/MagicItemEffects/Shards/Coinplated.cs) | Live | Assign a slot |
+| **ChanceToCritOnHit** | [ChanceToCritOnHit.cs](src/Magic/MagicItemEffects/Shards/ChanceToCritOnHit.cs) | Live | Assign a slot |
+| **PerfectDodgeGivesHealth** | [PerfectDodgeEffects.cs:51](src/Magic/MagicItemEffects/Shards/PerfectDodgeEffects.cs#L51) | Live | Assign a slot |
+| **StaminaReturnFromEitr** | [StaminaReturnFromEitr.cs](src/Magic/MagicItemEffects/Shards/StaminaReturnFromEitr.cs) | Live | Assign a slot |
+| **BatteringRam** | [BatteringRam.cs](src/Magic/MagicItemEffects/Shards/BatteringRam.cs) | **Whole file commented out** | Uncomment, then assign a slot |
+
+### Ready to assign — config only
+
+The first four were vacated together when Golden's kit was re-themed from coins to luck and DarkRed's
+Chest moved to `Bloodrage`. All four are cheaper to revive than the rest of this list: besides keeping
+their code and their dispatcher call sites, they keep their per-effect `Config` blocks in
+[`ShardEffectDefinitions.EffectConfigs`](src/Magic/MagicItemEffects/Helpers/ShardEffectDefinitions.cs),
+which sit dormant (`BuildDefinition` is only reached for effects the grid actually uses) until a slot
+assignment brings them back with their tuning intact.
+
+- **Wager** — stakes coins on each hit for flat bonus damage, refunded on a kill. Called from the
+  `Character.Damage` dispatcher, both as an outgoing modifier and as the on-kill refund
+  ([SharedCharacterDamagePatch.cs:34, :62](src/Magic/MagicItemEffects/Helpers/SharedCharacterDamagePatch.cs#L34)).
+  Vacated when Golden's Head slot moved to `Inspiration`.
+- **Mercenary** — spends coins per hit for a percentage damage bonus on a soft-capped curve. Called from
+  [SharedCharacterDamagePatch.cs:33](src/Magic/MagicItemEffects/Helpers/SharedCharacterDamagePatch.cs#L33).
+  Vacated when Golden's three weapon slots moved to `ChanceDoubleDamage`.
+- **Coinplated** — commits a share of the purse to absorbing each incoming hit. Called from
+  [SharedCharacterRpcDamagePatch.cs:48](src/Magic/MagicItemEffects/Helpers/SharedCharacterRpcDamagePatch.cs#L48).
+  Vacated when Golden's Chest slot moved to `LuckyLoot`.
+- **ChanceToCritOnHit** — flat proc chance to crit for 2x. Called from
+  [SharedCharacterDamagePatch.cs:36](src/Magic/MagicItemEffects/Helpers/SharedCharacterDamagePatch.cs#L36).
+  Vacated when DarkRed's Chest slot moved to `Bloodrage`. Note it is the same shape as
+  `ChanceDoubleDamage` (Golden weapons) with a different intent, so reassigning it to a weapon slot
+  risks a near-duplicate.
+- **PerfectDodgeGivesHealth** — restores a % of max health on a perfect dodge. Already called from
+  `SharedPerfectDodgeRewardPatch`, alongside its Stamina/Eitr/Speed siblings which *are* assigned (Pink's
+  weapon and Shoulders slots). It is the only member of that family without a home.
+- **StaminaReturnFromEitr** — refunds a % of spent eitr as stamina. Self-contained `Player.UseEitr` postfix,
+  no dispatcher involvement. Never assigned to a slot at any point.
+
+### Needs code restored as well
+
+- **BatteringRam** — blunt damage from running into enemies, scaled by carried weight and speed. The file's
+  own comment records why it was disabled: the per-frame `Player.Update` patch it needs was "mildly
+  expensive" for an effect nothing granted. Peach's Shoulders slot moved to `TravelLight`.
+
+## Known quirks, accepted deliberately
+
+Recorded here so they read as decisions rather than oversights.
+
+- **`ChanceDoubleDamage` and projectiles.** The effect is weapon-scoped — it reads the `MagicItem` of the
+  weapon the shard is socketed into, via `MagicEffectsHelper.GetActiveWeapon`, so only that weapon procs.
+  For bows and staves the hit resolves when the projectile lands, so the weapon is re-read at that
+  moment; firing and then swapping weapons mid-flight reads the wrong one. `Executioner` solves this by
+  stamping its multiplier onto the projectile's ZDO, which is the fix if it ever matters here.
+- **`Bloodrage` scales chop and pickaxe damage.** `SE_Bloodrage.ModifyAttack` applies the bonus with
+  `HitData.DamageTypes.Modify(float)`, which also scales `m_chop` and `m_pickaxe` — so raging speeds up
+  tree-felling and mining slightly. Vanilla's own `SE_Stats.ModifyAttack` behaves identically and the
+  ceiling is +25%, so a per-damage-type multiplier is more code than the quirk is worth.
+- **`Bloodrage` can proc on an avoided hit.** It hangs off the `Character.RPC_Damage` postfix, and Harmony
+  runs postfixes even when the dispatcher prefix cancels the method for `AvoidDamageTaken`.
+  `DamageTakenGivesAdrenaline` has the identical behaviour today, so this matches its sibling rather than
+  special-casing.
+- **`LuckyLoot` needs a `CharacterDrop`.** The proc is rolled inside the `CharacterDrop.GenerateDropList`
+  postfix, so a creature with no `CharacterDrop` component (or with `Ragdoll.m_dropItems` off) can never
+  proc it — including the bonus magic-item half. See the header comment in
+  [`LuckyLoot.cs`](src/Magic/MagicItemEffects/Shards/LuckyLoot.cs) for the full two-path timing diagram
+  and why the decision has to travel through the ragdoll's ZDO.
+- **`Inspiration` is the one effect whose grid value is not a percent.** Its 10/15/20/25/30 ramp is a count
+  of raw skill-accumulator points, read with no `0.01f` scale. "Fixing" that for consistency would nerf
+  the effect 100x; the warning is repeated at the top of
+  [`Inspiration.cs`](src/Magic/MagicItemEffects/Shards/Inspiration.cs). Its proc chance is the percent,
+  and lives in the effect's `Config` block so it can be retuned without a rebuild.
 
 ## Notes on slot resolution
 

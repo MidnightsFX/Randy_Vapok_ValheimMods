@@ -1,6 +1,7 @@
+﻿using EpicLoot.MagicItemEffects.Shards;
 using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
+namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
     // "Blood Rite" -- the HUD buff for the DarkPurple head shard's banked blood discount (see
     // KillsReduceNextBloodCost). It carries no gameplay of its own: the discount itself is applied by that

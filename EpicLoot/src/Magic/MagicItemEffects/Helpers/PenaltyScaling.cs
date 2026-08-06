@@ -1,23 +1,16 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // Shared 0..1 scaling inputs for the weight / movement-penalty shards (Peach "Logistics" and Green
-    // "Movement"). Both families turn a normally-undesirable stat -- a full pack, or a slow heavy loadout
-    // -- into a reward, so each effect multiplies its shard value by one of these factors. Values are low
-    // power / tunable; the reference constant below is the only knob for the movement-penalty curve.
-    public static class PenaltyScaling
-    {
+namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
+    // Helpers for scaling shard effects by how heavy the player's loadout is, as measured by their net movement penalty.
+    public static class PenaltyScaling {
         // Net movement penalty (as a positive fraction of base speed) treated as "fully committed" to a
         // heavy loadout, i.e. where MovementPenaltyFactor reaches 1. ~20% speed loss is roughly a full set
         // of the heaviest armor.
         public const float MovementPenaltyReference = 0.40f;
 
         // How loaded the player's pack is: 0 (empty) .. 1 (at or over the carry cap).
-        public static float WeightFactor(Player player)
-        {
-            if (player == null)
-            {
+        public static float WeightFactor(Player player) {
+            if (player == null) {
                 return 0f;
             }
 
@@ -32,8 +25,7 @@ namespace EpicLoot.MagicItemEffects.Shards
 
         // The player's reference movement speed: the unmodified base jog speed off the Player prefab, before
         // any gear, enchant or status-effect modifier. Character.UpdateWalking starts from this same value.
-        public static float ReferenceSpeed(Player player)
-        {
+        public static float ReferenceSpeed(Player player) {
             return player == null ? 0f : player.m_speed;
         }
 
@@ -47,16 +39,13 @@ namespace EpicLoot.MagicItemEffects.Shards
         // status effect. Offset your armor's penalty with speed bonuses and the penalty shards stop paying.
         // The situational terms UpdateWalking layers on (walk/run/crouch, attack slowdown, liquid, lava) are
         // deliberately left out -- those describe what the player is doing, not how heavy their loadout is.
-        public static float CurrentSpeed(Player player)
-        {
-            if (player == null)
-            {
+        public static float CurrentSpeed(Player player) {
+            if (player == null) {
                 return 0f;
             }
 
             var speed = player.m_speed * (1f + player.GetEquipmentMovementModifier());
-            if (player.m_seman != null)
-            {
+            if (player.m_seman != null) {
                 player.m_seman.ApplyStatusEffectSpeedMods(ref speed, player.m_currentVel);
             }
 
@@ -65,29 +54,23 @@ namespace EpicLoot.MagicItemEffects.Shards
 
         // The player's net movement-speed penalty as a positive fraction of their reference speed
         // (e.g. 0.15 == moving at 85% of base jog speed). A net speed gain reads as 0, not a negative.
-        public static float MovementPenalty(Player player)
-        {
+        public static float MovementPenalty(Player player) {
             var reference = ReferenceSpeed(player);
-            if (reference <= 0f || _measuringSpeed)
-            {
+            if (reference <= 0f || _measuringSpeed) {
                 return 0f;
             }
 
             _measuringSpeed = true;
-            try
-            {
+            try {
                 return Mathf.Clamp01(1f - CurrentSpeed(player) / reference);
-            }
-            finally
-            {
+            } finally {
                 _measuringSpeed = false;
             }
         }
 
         // MovementPenalty normalized to 0..1 against MovementPenaltyReference, for effects that scale a
         // shard value by "how heavy" the loadout is.
-        public static float MovementPenaltyFactor(Player player)
-        {
+        public static float MovementPenaltyFactor(Player player) {
             return Mathf.Clamp01(MovementPenalty(player) / MovementPenaltyReference);
         }
     }

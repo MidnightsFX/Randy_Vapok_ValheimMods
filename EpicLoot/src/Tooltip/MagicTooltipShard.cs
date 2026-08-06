@@ -54,7 +54,8 @@ public partial class MagicTooltip
 
             if (Shards.IsExclusive(def.Category))
             {
-                text.AppendLine($"<color={magicColor}>$mod_epicloot_shard_bossexclusive</color>");
+                text.AppendLine($"<color={magicColor}>" +
+                    $"$mod_epicloot_shard_{Shards.ExclusiveCategorySlug(def.Category)}exclusive</color>");
             }
             AppendBlanketRemovalWarning(blanket);
             return;

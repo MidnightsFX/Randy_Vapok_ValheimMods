@@ -1,20 +1,11 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // LightBlue trinket shard: a storm keeps the blood pumping. While one of the game's storm environments is
-    // running, the shard pulses a flat amount of adrenaline every TickInterval seconds AND holds the pool
-    // where it is -- vanilla's per-frame degen is suppressed for the duration of the storm, so a storm banks
-    // adrenaline rather than merely topping up a draining meter.
-    //
-    // The storm test is StormRider.IsStorm() (environment name), shared with the sibling shard on this same
-    // stone. Uses vanilla's adrenaline pool, so it is inert unless the player has a max-adrenaline source --
-    // the definition carries ItemHasAdrenaline, granted for this type by
-    // ShardEffectDefinitions.AdrenalinePoolEffects because the type name says nothing about adrenaline.
-    public static class StormFury
-    {
+namespace EpicLoot.MagicItemEffects.Shards {
+
+    // Storm based adrenaline pulse. Grants a flat amount of adrenaline every 10 seconds while in a storm and suppresses adrenaline decay
+    public static class StormFury {
         internal const float TickInterval = 10f;  // seconds between adrenaline pulses
 
         // What m_adrenalineDegenTimer is held at while suppression is active. Anything above a frame's dt
@@ -24,18 +15,15 @@ namespace EpicLoot.MagicItemEffects.Shards
 
         // Tooltip: "+{0} Adrenaline every {1}s in Storms, No Adrenaline Decay" -- {1} is the interval const
         // so the shown number stays in sync with the code rather than a baked-in literal.
-        public static void RegisterDisplayValues()
-        {
+        public static void RegisterDisplayValues() {
             MagicItem.RegisterDisplayValues(MagicEffectType.StormFury,
                 value => new object[] { value, TickInterval });
         }
 
         // One payout tick. Called by StormFuryPulse only after it has confirmed a storm and that the local
         // player has the effect, so value is the gating call's out-value and is not re-read here.
-        internal static void Pulse(Player player, float value)
-        {
-            if (player.IsDead() || player.GetMaxAdrenaline() <= 0f)
-            {
+        internal static void Pulse(Player player, float value) {
+            if (player.IsDead() || player.GetMaxAdrenaline() <= 0f) {
                 return; // no adrenaline pool -> AddAdrenaline is inert (matches the other adrenaline shards)
             }
 
@@ -51,23 +39,18 @@ namespace EpicLoot.MagicItemEffects.Shards
         // option: that path is indistinguishable from UseAdrenalineAsStamina deliberately spending the pool.
         // Patched by string name because Player has two private UpdateStats overloads.
         [HarmonyPatch(typeof(Player), "UpdateStats", new[] { typeof(float) })]
-        private static class UpdateStats_Patch
-        {
+        private static class UpdateStats_Patch {
             [UsedImplicitly]
-            private static void Prefix(Player __instance)
-            {
-                if (__instance != Player.m_localPlayer || !StormRider.IsStorm())
-                {
+            private static void Prefix(Player __instance) {
+                if (__instance != Player.m_localPlayer || !StormRider.IsStorm()) {
                     return;
                 }
 
-                if (!__instance.HasActiveMagicEffect(MagicEffectType.StormFury))
-                {
+                if (!__instance.HasActiveMagicEffect(MagicEffectType.StormFury)) {
                     return;
                 }
 
-                if (__instance.m_adrenalineDegenTimer < DegenPin)
-                {
+                if (__instance.m_adrenalineDegenTimer < DegenPin) {
                     __instance.m_adrenalineDegenTimer = DegenPin;
                 }
             }
@@ -78,14 +61,11 @@ namespace EpicLoot.MagicItemEffects.Shards
     // player to exist yet, and costs one scheduled call every ten seconds instead of a per-frame patch.
     // Created once from the plugin Awake. Holds no cross-tick state, so there is nothing to reset when the
     // local player changes.
-    internal class StormFuryPulse : MonoBehaviour
-    {
+    internal class StormFuryPulse : MonoBehaviour {
         internal static StormFuryPulse instance;
 
-        internal static void Create()
-        {
-            if (instance != null)
-            {
+        internal static void Create() {
+            if (instance != null) {
                 return;
             }
 
@@ -95,25 +75,21 @@ namespace EpicLoot.MagicItemEffects.Shards
         }
 
         [UsedImplicitly]
-        private void Awake()
-        {
+        private void Awake() {
             instance = this;
             InvokeRepeating(nameof(Pulse), StormFury.TickInterval, StormFury.TickInterval);
         }
 
         [UsedImplicitly]
-        private void Pulse()
-        {
+        private void Pulse() {
             var player = Player.m_localPlayer;
-            if (player == null || !StormRider.IsStorm())
-            {
+            if (player == null || !StormRider.IsStorm()) {
                 return;
             }
 
             // Gate on the effect before doing any work: without the shard socketed this pulse is a couple of
             // checks and a return.
-            if (!player.HasActiveMagicEffect(MagicEffectType.StormFury, out var value) || value <= 0f)
-            {
+            if (!player.HasActiveMagicEffect(MagicEffectType.StormFury, out var value) || value <= 0f) {
                 return;
             }
 

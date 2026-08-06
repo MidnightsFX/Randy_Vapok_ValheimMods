@@ -1,0 +1,36 @@
+{
+  "TargetFile": "shardstoneconversions.json",
+  "Author": "EpicLoot",
+  "Priority": 2000,
+  "RequireAll": true,
+  "Patches": [
+    {
+      "Path": "$.UpgradeSteps[?(@.From == 'Magic')].Resources",
+      "Action": "Overwrite",
+      "Value": [
+        { "Item": "ShardMagic", "Amount": 3 },
+        { "Item": "Coins",      "Amount": 10 }
+      ]
+    },
+    {
+      "Path": "$.UpgradeSteps[?(@.From == 'Legendary')].SourceAmount",
+      "Action": "Overwrite",
+      "Value": 2
+    },
+    {
+      "Path": "$.CategoryExtraResources",
+      "Action": "Merge",
+      "Value": {
+        "Dark": [ { "Item": "Coins", "Amount": 25 } ]
+      }
+    },
+    {
+      "Path": "$.ShardExtraResources.Fader",
+      "Action": "Overwrite",
+      "Value": [
+        { "Item": "TrophyFader", "Amount": 1 },
+        { "Item": "FaderDrop",   "Amount": 2 }
+      ]
+    }
+  ]
+}

@@ -1,13 +1,11 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Golden (Fortune) legs shard effect. On every rod catch the local player gets two independent
-    // rolls, each at the shard's value% -- one for bonus treasure pulled up alongside the fish, one to
-    // double (or rarely triple) the catch itself.
+    // Provides a chance to increase the number of fish caught and to pull up bonus treasure while fishing
     //
     // Hooked on FishingFloat.Catch rather than Fish.Pickup: Fish.Pickup returns true as soon as it has
     // *fired* the RequestPickup RPC, and RPC_RequestPickup drops requests within 2s of each other, so a
@@ -257,8 +255,10 @@ namespace EpicLoot.MagicItemEffects.Shards
             int amount, int quality, int variant)
         {
             var remaining = amount;
+            bool _full = false;
+
             while (remaining > 0
-                && player.GetInventory().AddItem(prefabName, 1, quality, variant, 0L, "", pickedUp: true) != null)
+                && player.GetInventory().AddItem(prefabName, 1, quality, variant, 0L, "", pickedUp: true) == null)
             {
                 remaining--;
             }
@@ -268,7 +268,7 @@ namespace EpicLoot.MagicItemEffects.Shards
                 return;
             }
 
-            player.Message(MessageHud.MessageType.TopLeft, Localization.instance.Localize("$inventory_full"));
+            _full = true;
 
             while (remaining > 0)
             {
@@ -289,6 +289,10 @@ namespace EpicLoot.MagicItemEffects.Shards
                 var placed = Mathf.Max(1, Mathf.Min(remaining, spilled.m_itemData.m_shared.m_maxStackSize));
                 spilled.SetStack(placed);
                 remaining -= placed;
+            }
+
+            if (_full) {
+                player.Message(MessageHud.MessageType.TopLeft, Localization.instance.Localize("$inventory_full"));
             }
         }
     }

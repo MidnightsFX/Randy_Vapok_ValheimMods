@@ -1,18 +1,10 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Orange (Fire) legs shard: while the player runs, they leave a trail of burning ground behind them.
-    // Each patch of the trail scorches nearby enemies with fire (which also sets them alight via the
-    // vanilla SE_Burning path) for a few seconds before it burns out. The shard value is the fire damage
-    // one patch deals per tick, read at the default (flat) scale.
-    //
-    // Damage is applied locally by the trail's owner through the normal Character.Damage path (like
-    // FrostAOE), so it networks correctly. The visual is EL_TrailblazerFire, a modified clone of the vanilla
-    // 'vfx_FireAddFuel' flame burst (see GetOrBuildTemplate); it carries no ZNetView, so like the old
-    // point-light placeholder it is only visible to its owner.
+    // Lays a trail of burning behind the player while moving, damage scaled by the effect value
     public static class Trailblazer {
         // Tuning knobs (placeholders; balance later).
         private const float MinMoveSpeed = 1.5f;      // horizontal speed required to lay a trail
@@ -20,11 +12,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
         private const float PatchRadius = 2.5f;       // burn radius of each patch
         private const float PatchLifetime = 3f;       // how long a patch lingers
         private const float PatchTickInterval = 0.5f; // seconds between burn ticks within a patch
-
-        // Visual: our local-only clone of the vanilla fuel-added flame burst, with the smoke stripped and a
-        // steady trickle of flame particles added so the patch burns for its whole lifetime. Built once and
-        // registered into ZNetScene on every world load (RegisterVfxPrefab), then instantiated per patch;
-        // its TimedDestruction handles cleanup after PatchLifetime.
         private const string VfxSourcePrefab = "vfx_FireAddFuel"; // vanilla prefab we clone
         private const string VfxClonePrefab = "EL_TrailblazerFire";  // our registered clone
         private static GameObject _vfxContainer; // disabled parent that keeps the template from Awaking
@@ -34,11 +21,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
 
         private static float _spawnTimer;
 
-        // Registers the patch vfx into the CURRENT ZNetScene. Wired to PrefabManager.OnPrefabsRegistered,
-        // which fires as a ZNetScene.Awake postfix each world load (same pattern as StrikeCausesLightning).
-        // The prefab has no ZNetView, so it goes in m_nonNetViewPrefabs; registration keeps the pattern
-        // uniform and makes 'spawn EL_TrailblazerFire' work for testing. Idempotent: the clone is built once
-        // (cached across worlds) and re-injected into each fresh ZNetScene.
         public static void RegisterVfxPrefab() {
             var zns = ZNetScene.instance;
             if (zns == null || zns.GetPrefab(VfxClonePrefab) != null) {
@@ -57,11 +39,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
             EpicLoot.Log($"Trailblazer: registered '{VfxClonePrefab}' with ZNetScene.");
         }
 
-        // Builds our modified clone of the vanilla fuel-added flame burst once and caches it. The clone is
-        // instantiated under a DISABLED container so none of its components Awake on the template, yet the
-        // template keeps activeSelf == true for the eventual instances. Modifications: the smoke child is
-        // removed, the fire particles gain a continuous emission so they burn for the full patch lifetime,
-        // a TrailblazerFire (inert until Init) is attached, and TimedDestruction drives cleanup.
         private static GameObject GetOrBuildTemplate(ZNetScene zns) {
             if (_vfxTemplate != null) {
                 return _vfxTemplate;

@@ -84,44 +84,52 @@
         public static string StaminaIncreaseForMovementPenalty = nameof(StaminaIncreaseForMovementPenalty);
         public static string BurdenedBlock = nameof(BurdenedBlock);
         public static string AnchoredBlock = nameof(AnchoredBlock);
-        public static string StaggerOnBlock = nameof(StaggerOnBlock);
+
 
         // --- Harvest / gather / economy ---
         public static string IncreaseHarvestDamage = nameof(IncreaseHarvestDamage);
         public static string IncreaseHarvestXPGain = nameof(IncreaseHarvestXPGain);
         public static string BountifulHarvest = nameof(BountifulHarvest);
-        public static string Mercenary = nameof(Mercenary); // Golden weapons: spend coins for bonus hit damage
-        public static string Coinplated = nameof(Coinplated); // Golden chest: spend coins to absorb incoming damage
-        public static string Wager = nameof(Wager); // Golden head: stake coins on a hit, refunded on a kill
+        // The three coin-economy effects below are no longer assigned by the shard grid -- Golden's kit was
+        // re-themed from coins to luck (weapons -> ChanceDoubleDamage, head -> Inspiration, chest ->
+        // LuckyLoot). They are kept live, and keep their Config blocks in ShardEffectDefinitions, so a slot
+        // assignment alone brings any of them back. Unassigned effects get no definition, so nothing can
+        // roll or grant them in the meantime.
+        public static string Mercenary = nameof(Mercenary); // was Golden weapons: spend coins for bonus hit damage
+        public static string Coinplated = nameof(Coinplated); // was Golden chest: spend coins to absorb incoming damage
+        public static string Wager = nameof(Wager); // was Golden head: stake coins on a hit, refunded on a kill
         public static string LuckWhileFishing = nameof(LuckWhileFishing);
-        // ChanceDoubleDamage is currently unused by the shard grid (Golden's weapon slots moved to
-        // Mercenary); kept live so it can be reassigned to a shard slot later.
-        public static string ChanceDoubleDamage = nameof(ChanceDoubleDamage);
+        public static string ChanceDoubleDamage = nameof(ChanceDoubleDamage); // Golden weapons
+        public static string Inspiration = nameof(Inspiration); // Golden head: chance of bonus skill XP on any XP gain
+        public static string LuckyLoot = nameof(LuckyLoot); // Golden chest: chance to multiply a creature's drops
         public static string SailingSpeed = nameof(SailingSpeed);
         public static string PotionEfficacy = nameof(PotionEfficacy);
         public static string IncreaseMeleeSkills = nameof(IncreaseMeleeSkills); // new melee-skill bundle
         public static string IncreaseRangedSkills = nameof(IncreaseRangedSkills); // new ranged-skill bundle
-        public static string BlockAsDodgeAsBlock = nameof(BlockAsDodgeAsBlock); // block and dodge bundle BADAB
-        public static string BlockAsWoodCuttingAndPickaxes = nameof(BlockAsWoodCuttingAndPickaxes);
+        
 
         // --- Block
         public static string BloodStaggerBlock = nameof(BloodStaggerBlock); // consume hp reduced stagger dmg reduction while bloock
         public static string BloodBaseBlock = nameof(BloodBaseBlock); // consume hp add base block 
         public static string Warding = nameof(Warding);
         public static string ElementalWarding = nameof(ElementalWarding);
+        public static string LuckyBlock = nameof(LuckyBlock); // Golden shield: chance to stagger the attacker on a block
+        public static string BlockAsDodgeAsBlock = nameof(BlockAsDodgeAsBlock); // block and dodge bundle BADAB
+        public static string BlockAsWoodCuttingAndPickaxes = nameof(BlockAsWoodCuttingAndPickaxes);
+        public static string StaggerOnBlock = nameof(StaggerOnBlock);
 
         // --- Element / status mechanics ---
         public static string IncreaseAllPoisonDamageDone = nameof(IncreaseAllPoisonDamageDone);
         public static string KillsReduceNextBloodCost = nameof(KillsReduceNextBloodCost);
         public static string BloodMagicLevelIncreasesHealthRegen = nameof(BloodMagicLevelIncreasesHealthRegen);
+        // ChanceToCritOnHit is no longer assigned by the shard grid (DarkRed's chest slot moved to
+        // Bloodrage); kept live, like the coin-economy trio above, so it can be reassigned later.
         public static string ChanceToCritOnHit = nameof(ChanceToCritOnHit);
+        public static string Bloodrage = nameof(Bloodrage); // DarkRed chest: stacking damage buff on damage taken
         public static string BloodDrinker = nameof(BloodDrinker); // DarkRed legs: max-health-for-lifesteal tradeoff
 
         // --- Movement / misc ---
-        // Trailblazer is no longer assigned to a shard slot (Orange's legs slot moved to Kindling); kept
-        // live, like ChanceDoubleDamage above, so it can be reassigned later. Unassigned effects get no
-        // definition from ShardEffectDefinitions, so nothing can roll or grant them until a shard uses them.
-        public static string Trailblazer = nameof(Trailblazer);
+        public static string Trailblazer = nameof(Trailblazer);                                 // Firewalker (unique)
         public static string ReduceFallDamage = nameof(ReduceFallDamage);
         public static string RollCleanse = nameof(RollCleanse);
         public static string StormRider = nameof(StormRider);
@@ -144,9 +152,7 @@
         public static string Conduit = nameof(Conduit);                                         // LightBlue
         public static string RestingHealthRegen = nameof(RestingHealthRegen);                   // LightGreen
         public static string TravelLight = nameof(TravelLight);                                 // Peach
-        // StrikeCausesLightning is no longer assigned to a shard slot (LightBlue's shoulder slot moved to
-        // Conduit); kept live, like BatteringRam below, so it can be reassigned later.
-        public static string StrikeCausesLightning = nameof(StrikeCausesLightning);
+        public static string StrikeCausesLightning = nameof(StrikeCausesLightning);       // Stormcaller (unique)
         // BatteringRam is no longer assigned to a shard slot (Peach's shoulder slot moved to TravelLight);
         // kept live, like ChanceDoubleDamage above, so it can be reassigned later. Unassigned effects get no
         // definition from ShardEffectDefinitions, so nothing can roll or grant them until a shard uses them.

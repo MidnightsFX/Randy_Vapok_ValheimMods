@@ -65,6 +65,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             }
             // On-damage-taken reactions.
             DamageTakenGivesAdrenaline.OnDamageTaken(__instance, hit);
+            Bloodrage.OnDamageTaken(__instance, hit);
             ElderForestsAid.OnDamageTaken(__instance, hit);
             ModerIcyRetribution.OnDamageTaken(__instance, hit);
         }

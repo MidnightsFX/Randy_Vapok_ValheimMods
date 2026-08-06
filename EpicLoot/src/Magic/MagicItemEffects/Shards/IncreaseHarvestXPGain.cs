@@ -1,23 +1,22 @@
+﻿using EpicLoot.MagicItemEffects.Helpers;
 using HarmonyLib;
 using JetBrains.Annotations;
 using SkillType = Skills.SkillType;
 
-namespace EpicLoot.MagicItemEffects.Shards
-{
-    // Gather shard (utility slot): +% skill XP from the two gathering skills — WoodCutting (chopping)
-    // and Pickaxes (mining) — the counterparts to IncreaseHarvestDamage's chop/pickaxe boost. Mirrors
-    // QuickLearner but only scales those skills. Shard values are authored as whole-number percents,
-    // hence the 0.01f.
-    public static class IncreaseHarvestXPGain
-    {
+namespace EpicLoot.MagicItemEffects.Shards {
+    // Provides a bonus to harvesting XP gain for woodcutting and pickaxes
+    public static class IncreaseHarvestXPGain {
         [HarmonyPatch(typeof(Skills), nameof(Skills.RaiseSkill))]
-        private static class RaiseSkill_Patch
-        {
+        private static class RaiseSkill_Patch {
             [UsedImplicitly]
-            private static void Prefix(Skills __instance, SkillType skillType, ref float factor)
-            {
-                if (skillType != SkillType.WoodCutting && skillType != SkillType.Pickaxes)
-                {
+            private static void Prefix(Skills __instance, SkillType skillType, ref float factor) {
+                // Inspiration grants an exact number of accumulator points; multiplying them would
+                // overshoot each level boundary and vanilla would discard the excess. See SkillXpGrant.
+                if (SkillXpGrant.InProgress) {
+                    return;
+                }
+
+                if (skillType != SkillType.WoodCutting && skillType != SkillType.Pickaxes) {
                     return;
                 }
 

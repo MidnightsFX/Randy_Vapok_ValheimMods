@@ -68,7 +68,8 @@ namespace EpicLoot.Patching
             "abilities",
             "materialconversions",
             "enchantingupgrades",
-            "shardstones"
+            "shardstones",
+            "shardstoneconversions"
         ];
         public static MultiValueDictionary<string, Patch> PatchesPerFile = new MultiValueDictionary<string, Patch>();
 

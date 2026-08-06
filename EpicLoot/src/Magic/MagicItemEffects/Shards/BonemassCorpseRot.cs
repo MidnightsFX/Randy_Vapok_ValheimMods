@@ -1,10 +1,11 @@
-using EpicLoot.src.Magic.MagicItemEffects.Helpers;
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    public static class BonemassPoison {
+    // Detonates a poison cloud on enemies the local player kills
+    public static class BonemassCorpseRot {
         private const float Cooldown = 15f;
         private const float CorpseRadius = 2f;
         private const float PoisonPerTier = 20f; // 20 poison damage per point of shard value (5..25 -> 100..500)
@@ -12,9 +13,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
 
         private static bool _fxMissingLogged;
 
-        // Cooldown HUD indicator (Bonemass trophy icon with a radial recharge sweep). Built lazily on the first
-        // proc -- see GetOrCreateCooldownIndicator -- so ObjectDB is loaded when the trophy is queried. Its
-        // presence on the player is also the cooldown gate (checked via CooldownHash below).
+        // Cooldown indicator
         private const string CooldownName = "EL_BonemassPoisonCooldown";
         private static readonly int CooldownHash = CooldownName.GetStableHashCode();
         private static StatusEffect _cooldownIndicator;
@@ -31,12 +30,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
                     || __instance.m_lastHit?.GetAttacker() != player) {
                     return;
                 }
-
-                // Currently no cooldown
-                // The visible cooldown status effect is the gate: while it's present the shard stays inert.
-                //if (player.GetSEMan().HaveStatusEffect(CooldownHash)) {
-                //    return;
-                //}
 
                 if (!player.HasActiveMagicEffect(MagicEffectType.CorpseRot, out var value) || value <= 0f) {
                     return;
@@ -63,8 +56,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
             Object.Instantiate(prefab, position, Quaternion.identity);
         }
 
-        // Adds the recharge indicator to the player; its lifetime (m_ttl = Cooldown) is the cooldown.
-        // Activation is gated on the effect's absence, so it's never already present here.
         private static void ShowCooldown(Player player) {
             var indicator = GetOrCreateCooldownIndicator();
             if (indicator != null) {
@@ -72,9 +63,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
             }
         }
 
-        // Lazily builds the cooldown indicator prototype. Runs on a proc, so ObjectDB is loaded and the Bonemass
-        // trophy icon is available. A null icon would render as an invisible HUD entry, so if the trophy lookup
-        // fails we log once and leave _cooldownIndicator null.
         private static StatusEffect GetOrCreateCooldownIndicator() {
             if (_cooldownIndicator != null) {
                 return _cooldownIndicator;

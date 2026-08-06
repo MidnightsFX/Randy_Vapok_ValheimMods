@@ -66,6 +66,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             BloodDrinker.OnDamageDealt(hit, attacker);
             AddEitrLeech.OnDamageDealt(hit, attacker);
             ChainLightning.OnDamageDealt(__instance, hit, attacker);
+            StrikeCausesLightning.OnDamageDealt(__instance, hit, attacker);
             ApplySlow_Character_Damage_Patch.OnDamageDealt(__instance, hit, attacker);
             Paralyze.OnDamaged(__instance, hit, attacker);
             StaggerOnDamageTaken_Character_Damage_Patch.OnDamageDealt(__instance, hit, attacker);

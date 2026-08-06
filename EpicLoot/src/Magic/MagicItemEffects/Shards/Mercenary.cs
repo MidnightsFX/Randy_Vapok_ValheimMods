@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using EpicLoot.General;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards
 {
-    // Mercenary -- Golden (Fortune) weapon shard effect: spend coins on each hit to boost that hit's damage.
+    // Mercenary -- Spend coins on each hit to boost that hit's damage.
     // The cost is a flat fee plus a percentage of the whole purse, so it scales with wealth; the shard value is
     // the rate at which those spent coins convert into bonus damage. Read from the attacking weapon (the
     // shard is socketed there), so it only fires for that weapon. If the player can't cover the cost, no

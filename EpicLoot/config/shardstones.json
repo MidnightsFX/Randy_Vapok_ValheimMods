@@ -1181,7 +1181,7 @@
                     }
                 },
                 "Chest": {
-                    "EffectType": "ChanceToCritOnHit",
+                    "EffectType": "Bloodrage",
                     "ValuesPerRarity": {
                         "Magic": 1,
                         "Rare": 2,
@@ -1579,33 +1579,43 @@
             ],
             "TypeEffects": {
                 "MeleeWeapon": {
-                    "EffectType": "Mercenary",
+                    "EffectType": "ChanceDoubleDamage",
                     "ValuesPerRarity": {
-                        "Magic": 10,
-                        "Rare": 20,
-                        "Epic": 30,
-                        "Legendary": 40,
-                        "Mythic": 50
+                        "Magic": 3,
+                        "Rare": 5,
+                        "Epic": 7,
+                        "Legendary": 9,
+                        "Mythic": 11
                     }
                 },
                 "RangedWeapon": {
-                    "EffectType": "Mercenary",
+                    "EffectType": "ChanceDoubleDamage",
                     "ValuesPerRarity": {
-                        "Magic": 10,
-                        "Rare": 20,
-                        "Epic": 30,
-                        "Legendary": 40,
-                        "Mythic": 50
+                        "Magic": 3,
+                        "Rare": 5,
+                        "Epic": 7,
+                        "Legendary": 9,
+                        "Mythic": 11
                     }
                 },
                 "MagicWeapon": {
-                    "EffectType": "Mercenary",
+                    "EffectType": "ChanceDoubleDamage",
                     "ValuesPerRarity": {
-                        "Magic": 10,
-                        "Rare": 20,
-                        "Epic": 30,
-                        "Legendary": 40,
-                        "Mythic": 50
+                        "Magic": 3,
+                        "Rare": 5,
+                        "Epic": 7,
+                        "Legendary": 9,
+                        "Mythic": 11
+                    }
+                },
+                "Shield": {
+                    "EffectType": "LuckyBlock",
+                    "ValuesPerRarity": {
+                        "Magic": 1,
+                        "Rare": 2,
+                        "Epic": 3,
+                        "Legendary": 4,
+                        "Mythic": 5
                     }
                 },
                 "Shield": {
@@ -1619,23 +1629,23 @@
                     }
                 },
                 "Head": {
-                    "EffectType": "Wager",
+                    "EffectType": "Inspiration",
                     "ValuesPerRarity": {
-                        "Magic": 20,
-                        "Rare": 40,
-                        "Epic": 60,
-                        "Legendary": 80,
-                        "Mythic": 100
+                        "Magic": 10,
+                        "Rare": 15,
+                        "Epic": 20,
+                        "Legendary": 25,
+                        "Mythic": 30
                     }
                 },
                 "Chest": {
-                    "EffectType": "Coinplated",
+                    "EffectType": "LuckyLoot",
                     "ValuesPerRarity": {
-                        "Magic": 50,
-                        "Rare": 60,
-                        "Epic": 70,
-                        "Legendary": 80,
-                        "Mythic": 90
+                        "Magic": 2,
+                        "Rare": 4,
+                        "Epic": 6,
+                        "Legendary": 8,
+                        "Mythic": 10
                     }
                 },
                 "Legs": {
@@ -2015,6 +2025,40 @@
                     }
                 }
             }
+        },
+        "Firewalker": {
+            "Category": "Unique",
+            "Rarities": [
+                "Epic",
+                "Legendary",
+                "Mythic"
+            ],
+            "UniformEffect": {
+                "EffectType": "Trailblazer",
+                "ValuesPerRarity": {
+                    "Epic": 8,
+                    "Legendary": 12,
+                    "Mythic": 16
+                }
+            },
+            "TypeEffects": {}
+        },
+        "Stormcaller": {
+            "Category": "Unique",
+            "Rarities": [
+                "Epic",
+                "Legendary",
+                "Mythic"
+            ],
+            "UniformEffect": {
+                "EffectType": "StrikeCausesLightning",
+                "ValuesPerRarity": {
+                    "Epic": 5,
+                    "Legendary": 8,
+                    "Mythic": 12
+                }
+            },
+            "TypeEffects": {}
         },
         "Eikthyr": {
             "Category": "Boss",

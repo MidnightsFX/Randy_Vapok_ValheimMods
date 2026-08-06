@@ -1,3 +1,5 @@
+﻿using EpicLoot.src.Magic.MagicItemEffects.Helpers;
+
 namespace EpicLoot.MagicItemEffects.Shards
 {
     // Green (Movement) legs shard: +% max stamina scaled by the movement-speed penalty of the player's
