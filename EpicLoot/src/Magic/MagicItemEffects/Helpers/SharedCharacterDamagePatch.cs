@@ -76,7 +76,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             BurningAdrenaline.OnDamageDealt(hit, attacker);
             StaminaOnKill.OnDamageDealt(__instance, hit, attacker);
             Conduit.OnDamageDealt(__instance, hit, attacker);
-            EikthyrShockingCharge.OnDamageDealt(hit, attacker);
+            EikthyrShockingCharge.OnDamageDealt(__instance, hit, attacker);
             MeteorSummoner.OnDamageDealt(__instance, hit, attacker);
             QueenEverflow.OnDamageDealt(__instance, hit, attacker);
         }

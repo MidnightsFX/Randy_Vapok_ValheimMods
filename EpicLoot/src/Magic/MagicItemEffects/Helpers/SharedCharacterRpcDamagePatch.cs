@@ -20,15 +20,15 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
     // Each effect keeps its own guard (is-local-victim / has-effect / attacker checks) inside its handler.
     [HarmonyPatch(typeof(Character), nameof(Character.RPC_Damage))]
     internal static class SharedCharacterRpcDamagePatch {
-        static Character attacker = null;
         // Returns false to cancel RPC_Damage (AvoidDamageTaken rolled an avoid).
         [HarmonyPrefix]
         private static bool Prefix(Character __instance, HitData hit) {
             if (hit == null) {
                 return true;
             }
-            // Update this instances attacker, avoid duplicate lookups.
-            attacker = hit.GetAttacker();
+            // Resolved once per hit; a local (not a static) so a re-entrant RPC_Damage from a handler
+            // below (e.g. ReflectDamage) can never clobber an outer invocation's attacker.
+            Character attacker = hit.GetAttacker();
 
             // Attacker-side / universal: these tag or bonus the hit regardless of who the victim is.
             Opportunist_Character_RPC_Damage_Patch.ModifyIncoming(__instance, hit, attacker);

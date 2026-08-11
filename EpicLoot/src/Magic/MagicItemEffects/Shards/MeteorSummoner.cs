@@ -2,7 +2,8 @@
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Summons a meteor on hit after 25 direct weapon hits. Meteor damage scales with the sum of damage done over those hits.
+    // Summons a meteor on hit after 25 direct weapon hits. Meteor damage is the triggering (final) hit's
+    // blockable damage times the shard's multiplier.
     public static class MeteorSummoner {
         private const string MeteorPrefab = "projectile_meteor";
         private const int MaxCharges = 25;           // weapon hits required to charge the meteor
@@ -25,6 +26,13 @@ namespace EpicLoot.MagicItemEffects.Shards {
 
         public static int CurrentCharges => _charges;
         public static int MaxChargeCount => MaxCharges;
+
+        // Tooltip: "Every {1} weapon hits ... deals {0}x that hit's damage" -- {1} is the charge-count
+        // const so the shown number stays in sync with the code rather than a baked-in literal.
+        public static void RegisterDisplayValues() {
+            MagicItem.RegisterDisplayValues(MagicEffectType.MeteorSummoner,
+                value => new object[] { value, (float)MaxCharges });
+        }
 
         // Postfix handler invoked by CharacterDamageDispatch (on-hit reaction).
         public static void OnDamageDealt(Character __instance, HitData hit, Character attacker) {

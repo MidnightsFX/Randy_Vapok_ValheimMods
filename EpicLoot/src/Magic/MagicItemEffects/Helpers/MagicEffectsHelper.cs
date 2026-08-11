@@ -102,7 +102,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 
         public static float GetTotalActiveSetEffectValue(Player player, string effectType, float scale = 1.0f)
         {
-            var setEffects = player.GetAllActiveSetMagicEffects(MagicEffectType.ModifyArmor);
+            var setEffects = player.GetAllActiveSetMagicEffects(effectType);
             return setEffects.Count > 0 ? scale * setEffects.Sum(x => x.EffectValue) : 0;
         }
 

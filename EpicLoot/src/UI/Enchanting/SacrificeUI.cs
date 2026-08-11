@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using EpicLoot;
 using EpicLoot.CraftingV2;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -151,7 +152,16 @@ namespace EpicLoot_UnityLib
 
             foreach (Tuple<IListElement, int> selectedItem in selectedItems)
             {
-                InventoryManagement.Instance.RemoveExactItem(selectedItem.Item1.GetItem(), selectedItem.Item2);
+                // Socketed stones are the player's property, not part of the sacrifice yield: hand the
+                // non-Locked ones back before the item is destroyed, the same policy disenchanting uses.
+                // Given separately from sacrificeProducts so the double-yield bonus never doubles them.
+                ItemDrop.ItemData sacrificed = selectedItem.Item1.GetItem();
+                if (sacrificed.IsMagic(out MagicItem sacrificedMagicItem) && sacrificedMagicItem.Sockets.Count > 0)
+                {
+                    GiveItemsToPlayer(EnchantingUIController.ReclaimSockets(sacrificedMagicItem));
+                }
+
+                InventoryManagement.Instance.RemoveExactItem(sacrificed, selectedItem.Item2);
             }
 
             GiveItemsToPlayer(sacrificeProducts);

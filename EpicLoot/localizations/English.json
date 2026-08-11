@@ -3,8 +3,8 @@
     "el_welcome_version": "Epic Loot ",
     "el_welcome_content_pt1": "We hope you enjoy Epic loot! Epic loot is maintained by a community of modders and dedicated players, thank you to everyone that has contributed!",
     "el_welcome_content_pt2": "There are some big changes since the last time you played Epic Loot: <color=#4fd6ff>Shardstones</color> and <color=#ff8c3a>Tempering</color>.",
-    "el_welcome_content_pt3": "<color=#4fd6ff>Shardstones</color> drop across every biome and from bosses. Can be slotted into socketed items.\n<color=#ff8c3a>Tempering</color> is a service Hildir provides, and allows rerolls the value of an enchantment you already have.",
-    "el_welcome_content_pt4": "To improve your experience, its recommended to pick an overhaul configuration now (default balanced). Each provides a different level of power and a different mix of what drops. Next to each is the expected damage and hp bonus you may find:\n - Minimal    hp +(1 - 10), dmg +(1-6)% \n - Balanced    hp +(1-18), dmg +(1-12)% \n - Legendary    hp +(1-28), dmg +(1-20)%\nAll of it can be changed later in the config.",
+    "el_welcome_content_pt3": "<color=#4fd6ff>Shardstones</color> drop across every biome and from bosses. They can be slotted into items with shard slots.\n<color=#ff8c3a>Tempering</color> is a service Hildir provides, and lets you reroll the value of an enchantment you already have.",
+    "el_welcome_content_pt4": "To improve your experience, it's recommended to pick an overhaul configuration now (default balanced). Each provides a different level of power and a different mix of what drops. Next to each is the expected damage and hp bonus you may find:\n - Minimal    hp +(1 - 10), dmg +(1-6)% \n - Balanced    hp +(1-18), dmg +(1-12)% \n - Legendary    hp +(1-28), dmg +(1-20)%\nAll of it can be changed later in the config.",
     "el_join_discord_button": "Join the discord!",
     "el_patch_notes_button": "View Patch Notes",
     "el_overhaul_legendary": "Legendary",
@@ -33,9 +33,9 @@
     "mod_epicloot_craftingmaterial": "crafting material",
 
     "mod_epicloot_assets_shardstone": "Shardstone",
-    "mod_epicloot_assets_shardstone_introduce": "This shardstone looks like it would fit into a slot. Press Interact (E) to open a slotted weapon and insert the shard.",
+    "mod_epicloot_assets_shardstone_introduce": "This shardstone looks like it would fit into a slot. Use Interact to insert shards.",
 
-    "mod_epicloot_sockets": "Shard Slot",
+    "mod_epicloot_sockets": "Shard Slots",
     "mod_epicloot_empty_socket": "Empty Shard Slot",
 
     "mod_epicloot_detail_range": "Roll range",
@@ -72,7 +72,7 @@
     "mod_epicloot_press_socket": "Open shard slots",
     "mod_epicloot_socket_notmagic": "This item cannot be slotted",
     "mod_epicloot_socket_unavailable": "This item's slots can't be opened right now",
-    "mod_epicloot_socket_nofreeslot": "No open sockets",
+    "mod_epicloot_socket_nofreeslot": "No open slots",
     "mod_epicloot_socket_invalidinput": "Only runestones or shards with an effect can be slotted",
     "mod_epicloot_socket_notallowed": "This shard's effect can't be applied to this type of item",
     "mod_epicloot_socket_conflict": "Conflicts with an existing enchantment",
@@ -200,8 +200,8 @@
     "mod_epicloot_me_daysailingspeed_desc": "Increases your ship's sailing speed by {0}% during the day.",
     "mod_epicloot_me_armorfrommovementpenalty_display": "+Up to {0}% Armor from Heavy Gear",
     "mod_epicloot_me_armorfrommovementpenalty_desc": "Armor scaling with your gear's speed penalty, up to +{0}%.",
-    "mod_epicloot_me_anchoredblock_display": "+Adds {0} base block per negative movement speed penalty from equipment",
-    "mod_epicloot_me_anchoredblock_desc": "+Adds {0} base block per negative movement speed penalty from equipment. Base block added is not effected by explicit sources of movement speed such as potions, status effects, and magic effects.",
+    "mod_epicloot_me_anchoredblock_display": "+{0} Base Block per 1% Equipment Speed Penalty",
+    "mod_epicloot_me_anchoredblock_desc": "Adds {0} base block for every 1% of movement speed penalty from your equipment. The bonus is not affected by explicit sources of movement speed such as potions, status effects, and magic effects.",
     "mod_epicloot_me_reduceeitrcost_display": "-{0}% Eitr Costs",
     "mod_epicloot_me_reduceeitrcost_desc": "Reduces all Eitr costs by {0}%.",
     "mod_epicloot_me_reducefishingstaminacost_display": "-{0}% Fishing Stamina",
@@ -210,7 +210,7 @@
     "mod_epicloot_me_reducearmorincreasedamage_desc": "Reduces your armor by {0}% but increases weapon damage by {0}%.",
     "mod_epicloot_me_blooddrinker_display": "-{1}% Max Health, +{0}% Lifesteal",
     "mod_epicloot_me_blooddrinker_desc": "Reduces your maximum health by {1}% (at least 10), healing you for {0}% of the damage you deal.",
-    "mod_epicloot_me_poisontotruedamage_display": "{0}% Poison done as targets weakest damage type",
+    "mod_epicloot_me_poisontotruedamage_display": "{0}% Poison done as target's weakest damage type",
     "mod_epicloot_me_poisontotruedamage_desc": "Converts {0}% of your poison damage into the target's least-resisted damage type.",
     "mod_epicloot_me_icyweight_display": "+Up to {0}% Frost Damage from Heavy Gear",
     "mod_epicloot_me_icyweight_desc": "Adds frost damage scaling with your gear's speed penalty, up to +{0}% of weapon damage.",
@@ -266,9 +266,9 @@
     "mod_epicloot_me_percenteitr_display": "+{0}% Max Eitr",
     "mod_epicloot_me_percenteitr_desc": "Increase max eitr by {0}%.",
     "mod_epicloot_me_healthgainperxdamagedone_display": "Heal {0} per {1} Damage Dealt",
-    "mod_epicloot_me_healthgainperxdamagedone_desc": "Heal {0} health for every 200 damage you deal with this weapon.",
+    "mod_epicloot_me_healthgainperxdamagedone_desc": "Heal {0} health for every {1} damage you deal with this weapon.",
     "mod_epicloot_me_healthoneitruse_display": "Heal {0} per {1} Eitr Spent",
-    "mod_epicloot_me_healthoneitruse_desc": "Heal {0} health for every 100 eitr you spend with this weapon.",
+    "mod_epicloot_me_healthoneitruse_desc": "Heal {0} health for every {1} eitr you spend with this weapon.",
     "mod_epicloot_me_lifegainonhit_display": "Heal {0:0.#} on Hit",
     "mod_epicloot_me_lifegainonhit_desc": "Heal {0:0.#} health each time you hit an enemy with this weapon.",
 
@@ -301,9 +301,9 @@
     "mod_epicloot_me_staggeronblock_desc": "{0}% chance to stagger enemy on block",
 
     "mod_epicloot_me_dayblocker_display": "Gain {0}% Block XP during Daytime",
-    "mod_epicloot_me_dayblocker_desc": "Gain {0}% increased block experience during Daytime on block",
-    "mod_epicloot_me_nightblocker_display": "Gain {0}% Block XP during Nighttime ",
-    "mod_epicloot_me_nightblocker_desc": "Gain {0}% increased block experience during Nighttime on block.",
+    "mod_epicloot_me_dayblocker_desc": "Gain {0}% increased block experience during Daytime.",
+    "mod_epicloot_me_nightblocker_display": "Gain {0}% Block XP during Nighttime",
+    "mod_epicloot_me_nightblocker_desc": "Gain {0}% increased block experience during Nighttime.",
 
     "mod_epicloot_me_convertphysicaldamagetolightning_display": "Convert {0}% Weapon Physical to Lightning",
     "mod_epicloot_me_convertphysicaldamagetolightning_desc": "Move {0}% of this weapon's physical damage to lightning.",
@@ -369,43 +369,26 @@
     "mod_epicloot_me_increasemeleeskills_desc": "+{0} to all melee weapon skills.",
     "mod_epicloot_me_increaserangedskills_display": "+{0} Ranged Skills",
     "mod_epicloot_me_increaserangedskills_desc": "+{0} to all ranged weapon skills.",
-    "mod_epicloot_me_blockasdodgeasblock_display": "Adds skill equal to {0}% of block as dodge and {0}% of dodge as block",
-    "mod_epicloot_me_blockasdodgeasblock_desc": "Adds +{0}% of blocking skill as dodge skill and +{0}% of dodge skill as blocking skill",
-
-    "mod_epicloot_me_burdenedblock_display": "Adds +{0} base block per 50 Pack Weight over 300",
-    "mod_epicloot_me_burdenedblock_desc": "Adds +{0} base block per 50 Pack Weight over 300",
-
-    "mod_epicloot_me_warding_display": "Uses {0}% of maximum stamina as physical damage mitigation on block. Consumes stamina equal to damage mitigated",
-    "mod_epicloot_me_warding_desc": "Allows for {0}% of maximum stamina to be used on block to mitigate any physical (pierce, blunt, slash) damage taken from blocked attacks. This mitigation is calculated after the block and before resistances and armor calculations take place. Consumes stamina equal to damage mitigated",
-
-    "mod_epicloot_me_elementalwarding_display": "Uses {0}% of maximum eitr as elemental damage mitigation on block. Consumes eitr equal to damage mitigated",
-    "mod_epicloot_me_elementalwarding_desc": "Allows for {0}% of maximum eitr to be used on block to mitigate any elemental (fire, frost, lightning) damage taken from blocked attacks. This mitigation is calculated after the block and before resistances and armor calculations take place. Consumes eitr equal to damage mitigated",
-
-    "mod_epicloot_me_bloodstaggerblock_display": "Consumes 5% of max HP to block. Reduce stagger damage from blocked hits by {0}%",
-    "mod_epicloot_me_bloodstaggerblock_desc": "Consumes 5% of max HP to block. Reduce stagger damage from blocked hits by {0}%. This effect is active for the entire duration of any block",
-
-    "mod_epicloot_me_bloodbaseblock_display": "Consumes 5% of max HP to block. Adds {0} to your base block",
-    "mod_epicloot_me_bloodbaseblock_desc": "Damages self for 5% of max HP as true damage to block. This damages is inflicted for every attempt to block, not the block or parry itself. Adds {0} to your base block.",
     "mod_epicloot_me_blockasdodgeasblock_display": "Adds +{1} block skill and +{2} dodge skill",
     "mod_epicloot_me_blockasdodgeasblock_desc": "Adds +{0}% of blocking skill as dodge skill and +{0}% of dodge skill as blocking skill. This bonus is rounded down to whole values",
 
-    "mod_epicloot_me_blockaswoodcuttingandpickaxes_display": "Adds +{1} block skill",
-    "mod_epicloot_me_blockaswoodcuttingandpickaxes_desc": "Adds +{0}% of woodcutting and pickaxes skills after all modifiers as block skill. This bonus is rounded down to whole values",
-
     "mod_epicloot_me_burdenedblock_display": "Adds +{0} base block per 50 Pack Weight over 300",
     "mod_epicloot_me_burdenedblock_desc": "Adds +{0} base block per 50 Pack Weight over 300",
 
-    "mod_epicloot_me_warding_display": "Uses {0}% of maximum stamina as physical damage mitigation on block. Consumes stamina equal to damage mitigated",
+    "mod_epicloot_me_warding_display": "Block: Absorb Physical with Stamina, up to {0}% of max",
     "mod_epicloot_me_warding_desc": "Allows for {0}% of maximum stamina to be used on block to mitigate any physical (pierce, blunt, slash) damage taken from blocked attacks. This mitigation is calculated after the block and before resistances and armor calculations take place. Consumes stamina equal to damage mitigated",
 
-    "mod_epicloot_me_elementalwarding_display": "Uses {0}% of maximum eitr as elemental damage mitigation on block. Consumes eitr equal to damage mitigated",
+    "mod_epicloot_me_elementalwarding_display": "Block: Absorb Elemental with Eitr, up to {0}% of max",
     "mod_epicloot_me_elementalwarding_desc": "Allows for {0}% of maximum eitr to be used on block to mitigate any elemental (fire, frost, lightning) damage taken from blocked attacks. This mitigation is calculated after the block and before resistances and armor calculations take place. Consumes eitr equal to damage mitigated",
 
     "mod_epicloot_me_bloodstaggerblock_display": "Consumes 5% of max HP to block. Reduce stagger damage from blocked hits by {0}%",
     "mod_epicloot_me_bloodstaggerblock_desc": "Consumes 5% of max HP to block. Reduce stagger damage from blocked hits by {0}%. This effect is active for the entire duration of any block",
 
-    "mod_epicloot_me_bloodbaseblock_display": "Consumes 5% of max HP to block. Adds {0} to your base block",
-    "mod_epicloot_me_bloodbaseblock_desc": "Damages self for 5% of max HP as true damage to block. This damages is inflicted for every attempt to block, not the block or parry itself. Adds {0} to your base block.",
+    "mod_epicloot_me_bloodbaseblock_display": "Raising your guard costs 5% of max HP. Adds {0} to your base block",
+    "mod_epicloot_me_bloodbaseblock_desc": "Damages self for 5% of max HP as true damage each time you raise your guard. This is charged once per block, not per blocked hit. Adds {0} to your base block.",
+
+    "mod_epicloot_me_blockaswoodcuttingandpickaxes_display": "Adds +{1} block skill",
+    "mod_epicloot_me_blockaswoodcuttingandpickaxes_desc": "Adds +{0}% of woodcutting and pickaxes skills after all modifiers as block skill. This bonus is rounded down to whole values",
 
     "mod_epicloot_me_increaseallpoisondamagedone_display": "+{0}% Poison Damage",
     "mod_epicloot_me_increaseallpoisondamagedone_desc": "+{0}% to all poison damage you deal.",
@@ -430,7 +413,7 @@
     "mod_epicloot_me_stormrider_desc": "+{0}% movement speed while a storm rages.",
 
     "mod_epicloot_me_shockingcharge_display": "Shocking Charge",
-    "mod_epicloot_me_shockingcharge_desc": "Your combat hits build charges. At max charge, the next hit unleashes a forward lightning shockwave that deals a portion of your previous hits damage.",
+    "mod_epicloot_me_shockingcharge_desc": "Your combat hits build charges. At max charge, the next hit unleashes a forward lightning shockwave that deals a portion of your previous hits' damage.",
     "mod_epicloot_me_forestsaid_display": "Forest's Aid",
     "mod_epicloot_me_forestsaid_desc": "When you are struck, ensnaring roots erupt and immobilize nearby enemies.",
     "mod_epicloot_me_corpserot_display": "Corpse Rot",
@@ -438,7 +421,7 @@
     "mod_epicloot_me_icyretribution_display": "Icy Retribution",
     "mod_epicloot_me_icyretribution_desc": "When you are struck, detonate a frost nova around you. Cooldown scales with rarity.",
     "mod_epicloot_me_meteorsummoner_display": "Meteor Summoner: {0}x Hit Damage",
-    "mod_epicloot_me_meteorsummoner_desc": "Every 25 weapon hits, your next hit calls down a fiery meteor on the target that deals {0}x that hit's damage as fire.",
+    "mod_epicloot_me_meteorsummoner_desc": "Every {1} weapon hits, your next hit calls down a fiery meteor on the target that deals {0}x that hit's damage as fire.",
     "mod_epicloot_me_everflow_display": "Queen's Everflow",
     "mod_epicloot_me_everflow_desc": "Killing a creature grants a stacking buff that boosts your health, stamina and eitr regeneration.",
     "mod_epicloot_me_necroticfire_display": "Necrotic Fire",
@@ -592,7 +575,7 @@
     "mod_epicloot_bonus": "Bonus!",
 
     "mod_epicloot_featureinfo_none": "Select a feature from the list to the left to view upgrade options.",
-    "mod_epicloot_featureinfo_sacrifice": "Sacrifice magic items and trophies, destroying them to produce enchanting materials.\n\nWhen upgraded, gain a chance to recieve double the items normally gained from the sacrifice.",
+    "mod_epicloot_featureinfo_sacrifice": "Sacrifice magic items and trophies, destroying them to produce enchanting materials.\n\nWhen upgraded, gain a chance to receive double the items normally gained from the sacrifice.",
     "mod_epicloot_featureinfo_convertmaterials": "Upgrade enchanting materials to higher rarity, convert shards to enchanting materials of equal rarity, and salvage other materials from junk.\n\nWhen upgraded, improve the item ratio when upgrading runestones and other crafting materials.",
     "mod_epicloot_featureinfo_enchant": "Spend enchanting materials to add magic effects to non-magic gear. Requires runestones.\n\nWhen upgraded, gain an improved chance to roll more magic effects on an enchanted item.",
     "mod_epicloot_featureinfo_augment": "Spend enchanting materials to re-roll individual magic effects on magic gear.\n\nWhen upgraded, gain additional choices when augmenting, and have a reduced cost for multiple augments.",

@@ -124,43 +124,6 @@ public partial class MagicTooltip {
         }
     }
 
-    private void AddDodge() {
-        bool hasDodgeBuff = magicItem.HasEffect(MagicEffectType.DodgeBuff);
-        if (hasDodgeBuff) {
-            float dodgeBuffValue = magicItem.GetTotalEffectValue(MagicEffectType.DodgeBuff, 1f);
-            // TODO: if using this tooltip, localize this
-            text.Append($"\n$mod_epicloot_dodge: <color={magicColor}>{dodgeBuffValue:0.#}</color>");
-        }
-    }
-
-    private void AddOffset() {
-        bool hasOffSetAttack = magicItem.HasEffect(MagicEffectType.OffSetAttack);
-        if (hasOffSetAttack) {
-            float offSetAttackValue = magicItem.GetTotalEffectValue(MagicEffectType.OffSetAttack, 1f);
-            // TODO: if using this tooltip, localize this
-            text.Append($"\n$mod_epicloot_offset: <color={magicColor}>{offSetAttackValue:0.#}</color>");
-        }
-    }
-
-    private void AddChainLightning() {
-        bool hasChainLightning = magicItem.HasEffect(MagicEffectType.ChainLightning);
-        if (hasChainLightning) {
-            float ChainLightningValue = magicItem.GetTotalEffectValue(MagicEffectType.ChainLightning, 1f);
-            // TODO: if using this tooltip, localize this
-            text.Append(
-                $"\n$mod_epicloot_chainlightning: <color={magicColor}>{ChainLightningValue:0.#}</color>");
-        }
-    }
-
-    private void AddApportation() {
-        bool hasApportation = magicItem.HasEffect(MagicEffectType.Apportation);
-        if (hasApportation) {
-            float ApportationValue = magicItem.GetTotalEffectValue(MagicEffectType.Apportation, 1f);
-            // TODO: if adding this tooltip, localize this
-            text.Append($"\n$mod_epicloot_apportation: <color={magicColor}>{ApportationValue:0.#}</color>");
-        }
-    }
-
     private void AddEitrUse() {
         // TODO: place logic into helper method
         bool hasSpellSword = magicItem.HasEffect(MagicEffectType.SpellSword);

@@ -49,13 +49,6 @@ public partial class MagicTooltip(ItemDrop.ItemData item, MagicItem magicItem, i
                 AddDamageMultiplierByTotalHealthMissing();
                 AddDamageMultiplierPerMissingHP();
                 AddAttackStaminaUse();
-
-                // TODO: finish if needed
-                // AddDodge();
-                // AddOffset();
-                // AddChainLightning();
-                // AddApportation();
-
                 AddEitrUse();
                 AddHealthUse();
                 AddHealthHitReturn();

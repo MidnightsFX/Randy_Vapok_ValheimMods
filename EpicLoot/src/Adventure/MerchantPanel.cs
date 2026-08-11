@@ -60,7 +60,6 @@ namespace EpicLoot.Adventure
         private AudioSource _audioSource;
 
         private RectTransform _rt;
-        private Vector2 _defaultPosition;
         private Vector2 _dragOffset;
 
         public void Awake()
@@ -230,7 +229,6 @@ namespace EpicLoot.Adventure
             // configured horizontal position. Done at the end of Awake so the root Graphic
             // (which may be swapped by the Auga background replacement above) is final.
             _rt = (RectTransform)transform;
-            _defaultPosition = _rt.anchoredPosition;
             var backgroundImage = GetComponent<Image>();
             if (backgroundImage != null)
             {

@@ -29,8 +29,15 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
         private static void PostBlockPatch(Humanoid __instance, Character attacker, HitData hit, bool __result) {
             if (!__result) { return; }
 
+            // BlockAttack runs on the victim's owner for EVERY humanoid -- blocking enemies included --
+            // and on a dedicated server there is no local player at all. Every handler below acts on the
+            // local player's own block (gain resources, spend the player's pools, stagger the player's
+            // attacker), so gate once here: without this, a locally-owned enemy raising its shield would
+            // pay out of / into the local player's pools, and each NPC block on a server would throw.
+            if (Player.m_localPlayer == null || __instance != Player.m_localPlayer) { return; }
+
             IncomingPhysicalConversion.ModifyIncoming(__instance, hit, IsBlocked: true); // orange, dark blue, light blue, dark green
-            GainOnBlockResource.GainOnBlock(IsBlocked: true); // red / yellow / cyan
+            GainOnBlockResource.GainOnBlock(__instance, IsBlocked: true); // red / yellow / cyan
             Warding.UseMoreStaminaOnBlock(__instance, hit);
             ElementalWarding.UseEitrOnBlock(__instance, hit);
             // Golden. Order-independent: unlike the three above it never touches `hit`, so it cannot

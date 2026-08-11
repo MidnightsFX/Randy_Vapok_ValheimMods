@@ -30,8 +30,14 @@ namespace EpicLoot.MagicItemEffects.Shards {
         public static int MaxChargeCount => MaxCharges;
 
         // Postfix handler invoked by CharacterDamageDispatch (on-hit reaction).
-        public static void OnDamageDealt(HitData hit, Character attacker) {
+        public static void OnDamageDealt(Character __instance, HitData hit, Character attacker) {
             if (hit == null || attacker != Player.m_localPlayer || Time.time < _ignoreUntil) {
+                return;
+            }
+
+            // Only hits on hostile targets build a charge -- the same friendly filter the discharge cone
+            // applies, so whacking your own boar (or a player) can't wind up the shockwave.
+            if (__instance == null || __instance.IsPlayer() || __instance.IsTamed()) {
                 return;
             }
 

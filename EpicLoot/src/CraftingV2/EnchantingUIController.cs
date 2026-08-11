@@ -1413,7 +1413,8 @@ namespace EpicLoot.CraftingV2
                     bonusItemChance = (int)featureValues.Item1;
                 }
 
-                if (Random.Range(0, 99) < bonusItemChance)
+                // Range(0, 100) rolls 0-99, so a chance of N is exactly N-in-100.
+                if (Random.Range(0, 100) < bonusItemChance)
                 {
                     List<InventoryItemListElement> bonusItems =
                         GetSacrificeProducts(new List<Tuple<ItemDrop.ItemData, int>>() { new(item, 1) });
@@ -1435,7 +1436,7 @@ namespace EpicLoot.CraftingV2
         // not Locked. Break-only sockets come back intact -- disenchanting already costs materials and
         // every rolled effect on the item, which stands in for breaking them out one at a time.
         // Permanently bound sockets (Locked) are destroyed along with the enchantment.
-        private static List<InventoryItemListElement> ReclaimSockets(MagicItem magicItem)
+        internal static List<InventoryItemListElement> ReclaimSockets(MagicItem magicItem)
         {
             List<InventoryItemListElement> result = new List<InventoryItemListElement>();
             foreach (SocketedEffect socketed in magicItem.Sockets)

@@ -356,6 +356,12 @@ namespace EpicLoot_UnityLib
                         EnchantingUIController.ReduceItemAfterRuneExtract(item, _selectedEnchantmentIndex, reduceRarity: true);
                         break;
                     case RuneExtractMode.DestroyItem:
+                        // Socketed stones are the player's property: hand the non-Locked ones back
+                        // before the item is destroyed, the same policy disenchanting uses.
+                        if (item.IsMagic(out MagicItem extractedMagicItem) && extractedMagicItem.Sockets.Count > 0)
+                        {
+                            GiveItemsToPlayer(EnchantingUIController.ReclaimSockets(extractedMagicItem));
+                        }
                         InventoryManagement.Instance.RemoveExactItem(item, 1);
                         break;
                 }

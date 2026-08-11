@@ -229,21 +229,8 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
     }
     private void SetSundialTooltip() {
-        return;
-        StringBuilder sb = new StringBuilder();
-        sb.AppendLine("Temper items to improve their effects.\n");
-        sb.AppendLine("A successful temper increases the effect by its increment;\n");
-        sb.AppendLine("Success chance is determined by the effect value compared to its max value;\n");
-        sb.AppendLine("Critical success can increase the effect by double the increment;\n");
-        sb.AppendLine("A failed temper decreases a random effect by its increment;\n");
-        if (TemperData.CAN_DESTROY_ITEM) {
-            sb.AppendLine(
-                $"If a temper fails, there is a {TemperData.DESTROY_CHANCE * 100.0f:F0}% chance that item will be destroyed.\n");
-        }
-        sb.AppendLine("Over-tempering is possible, but will become increasingly difficult as the value exceeds the max.");
-
-
-        sundialTooltip.Set("Tempering", sb.ToString());
+        // Intentionally empty for now: the tooltip copy needs proper localization before it ships.
+        // See the git history for the draft English text this replaced.
     }
     private void LoadButtonSfx() {
         ButtonSfx sfx = InventoryGui.instance.GetComponentInChildren<ButtonSfx>(true);
@@ -407,7 +394,9 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     }
 
     private bool CanTemper() {
-        if (!Player.m_localPlayer || temperData == null) {
+        // selectedValues is null only when a config reload removed the effect's value range after it
+        // was listed; keep the button disabled rather than running a temper that can only fail.
+        if (!Player.m_localPlayer || temperData == null || temperData.selectedValues == null) {
             return false;
         }
         return HaveRequirements(Player.m_localPlayer);
@@ -543,6 +532,11 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         for (int i = 0; i < effects.Count; ++i) {
             MagicItemEffect effect = effects[i];
+            // A valueless effect (Warmth, Indestructible) has no roll range to temper against --
+            // selecting one used to NRE in TemperData. Leave them out of the list entirely.
+            if (!TemperData.IsTemperable(selectedItemElement._magicItem, effect)) {
+                continue;
+            }
             GameObject instance = Instantiate(enchantmentListPrefab, enchantmentsListRoot);
             instance.SetActive(true);
             if (instance.TryGetComponent(out EnchantmentElement element)) {
@@ -650,11 +644,19 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             EpicLoot.LogWarning("Tried to temper, but failed to consume requirements");
             return;
         }
+        // The outcome is decided here, at execution -- not at selection -- so re-selecting an
+        // enchantment in the panel can never silently reroll a pending temper.
+        temperData.RollOutcome();
         if (temperData.success) {
             temperData.OnSuccess();
         } else {
             if (TemperData.CAN_DESTROY_ITEM && Random.value <= TemperData.DESTROY_CHANCE) {
                 ItemDrop.ItemData itemToRemove = selectedItemElement._item;
+                // Vanilla never auto-unequips a removed item: destroying an equipped piece without
+                // this leaves Humanoid.m_*Item pointing at it (ghost stats and visuals).
+                if (Player.m_localPlayer.IsItemEquiped(itemToRemove)) {
+                    Player.m_localPlayer.UnequipItem(itemToRemove, false);
+                }
                 Player.m_localPlayer.GetInventory().RemoveOneItem(itemToRemove);
                 ItemElement.elements.Remove(selectedItemElement);
                 Destroy(selectedItemElement.gameObject);
