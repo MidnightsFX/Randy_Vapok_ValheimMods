@@ -57,12 +57,30 @@ Bugfixes:
 * Chest loot is now rolled when it is opened, not when it is spawned, so that the loot is always appropriate for the player opening it. This primarily fixes mountain & swamp loot which would be loaded very early, but actually opened later.
 
 API:
+* The API now covers integration, not just content registration. Full reference and a migration table in `EpicLoot/docs/API.md`
+    * `API.ApiVersion` / `GetApiVersion()` / `HasEndpoint(name)` let a mod check what the installed Epic Loot supports and degrade gracefully instead of throwing
+    * The `EpicLootAPI` shim provides typed wrappers for everything below and can be bundled into your plugin with ILRepack
+* Inventory providers — `API.RegisterInventoryProvider` lets container, backpack and stash mods feed the enchanting table
+    * Epic Loot spends the player's own inventory first and only charges the shortfall to providers
+    * Removal by item instance matches on reference, so magic data on the consumed item is preserved
+* Equipment providers — `API.RegisterEquipmentProvider` lets extra-slot mods contribute equipped items
+    * Contributed items count toward effect totals, legendary set bonuses, tooltips and shard socketing
+    * `API.InvalidatePlayerEffectCache(player)` discards memoized effect totals when your slot contents change outside vanilla equip/unequip
+* Sacrifice filters — `API.RegisterSacrificeFilter` lets a mod veto sacrificing an item, so gear equipped in slots Epic Loot cannot see is not destroyed by accident
+* Lifecycle events — `API.AddMagicItemChangedListener`, `AddLootGeneratedListener` and `AddBountyCompletedListener`
+    * The change event fires on every magic-data write with a reason token: `Enchant`, `Augment`, `Disenchant`, `Rune`, `Temper`, `Socket`, `Unsocket`, `LootRoll`, `Transfer`, or `Unspecified`. Item loading does not raise it
+* Queries — `IsMagicItem`, `TryGetRarity` (non-throwing), rarity colors and display names, `IsEpicLootItem`, `IsShardStone`, `IsRunestone`, `IsMagicCraftingMaterial`, `IsUnidentified`, `CanBeMagicItem`, `ItemHasMagicEffect`, `GetAllMagicEffectTypes`, `GetEnchantCostsJson`, `GetSacrificeProductsJson`
+* Loot generation — `TryMakeMagicItem` rolls and applies a magic item exactly the way a drop does, plus `RollMagicItemJson` / `ApplyMagicItemJson` to inspect before applying, `GetLuckFactor`, `RollEffectCountForRarity`, `GetLegendaryIDs` and `GetLegendaryInfoJson`
+    * `API.AddLootTables` / `UpdateLootTables` register loot tables at runtime, and they are re-applied on config reload and on a dedicated server's config push
+* New `magicapi` console command (`version`, `query`, `providers`, `events`, `roll`) for testing an integration in game
+* Mod authors patching `PlayerExtensions.GetEquipment` should switch to an equipment provider: that method is a deprecated alias and nothing inside Epic Loot calls it
+* `EpicLootAPI`'s `MagicItem` was updated to account for tempering, shardstones and unidentified items
 * New magic effect requirement flags: `ItemGivesAdrenaline` (item's attack grants above-default adrenaline) and `ItemHasAdrenaline` (item provides a max adrenaline pool)
   * Note: `ItemGivesAdrenaline` requires that the item gives more than 1 adrenaline. This is due to all items by default adding 1 adrenaline.
 * New magic effect requirements allowed from the API
     * API magic effect requirements when defined for an effect will be evaluated for all items, allowing only items which fit the filter (Thanks Warp!)
 * `recipes.json` has been removed (its contained recipes are now handled and directly exposed in the Bepinex config file [Randyknapp.epicloot.cfg])
-    * Mod authors: `API.AddRecipe`, `API.AddRecipes` and `API.UpdateRecipes` are now deprecated
+    * Mod authors: `API.AddRecipe`, `API.AddRecipes`, `API.UpdateRecipes` and the shim's `CustomRecipe` are now deprecated.
 
 
 ## Version 0.12.15
