@@ -25,8 +25,12 @@ public class MagicItemComponent : CustomItemData
         Save();
 
         // Every magic-data write funnels through here (enchant, augment, socket, rune, temper,
-        // transfer, loot roll), so this is the one place Indestructible needs to be re-derived.
+        // transfer, loot roll), so this is the one place Indestructible needs to be re-derived and the
+        // one place the API's change event can be raised with guaranteed coverage. Callers that know
+        // *why* they are writing wrap themselves in API.WithChangeReason, which only labels the event
+        // raised here -- it still fires exactly once per write.
         Indestructible.Sync(Item);
+        API.RaiseMagicItemChanged(Item);
 
         if (Player.m_localPlayer == null)
         {
@@ -98,7 +102,7 @@ public class MagicItemComponent : CustomItemData
         }
 
         FixupValuelessEffects();
-        SetMagicItem(MagicItem);
+        SetMagicItemQuietly();
     }
 
     public override void Load()
@@ -110,11 +114,29 @@ public class MagicItemComponent : CustomItemData
 
         FixupValuelessEffects();
 
-        SetMagicItem(MagicItem);
+        SetMagicItemQuietly();
 
         // SetMagicItem bails out on a null MagicItem, so sync here too -- a component with no magic
         // item still needs the flag reverted if this instance was previously made indestructible.
         Indestructible.Sync(Item);
+    }
+
+    /// <summary>
+    /// Normalizing writes done while an item is loading are not changes -- every item entering the world
+    /// passes through here, so raising the API change event would flood listeners at world load.
+    /// </summary>
+    private void SetMagicItemQuietly()
+    {
+        bool previous = API.SuppressChangeEvents;
+        API.SuppressChangeEvents = true;
+        try
+        {
+            SetMagicItem(MagicItem);
+        }
+        finally
+        {
+            API.SuppressChangeEvents = previous;
+        }
     }
 
     // ItemInfo.Remove<T> calls this after clearing m_customData but before dropping the component,

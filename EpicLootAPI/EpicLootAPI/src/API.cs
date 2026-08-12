@@ -5,7 +5,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace EpicLootAPI;
-public static class EpicLoot
+
+/// <summary>
+/// Typed wrappers over Epic Loot's <c>EpicLoot.API</c> façade. Split across several files by topic:
+/// this one plus Query.cs, Providers.cs, Events.cs and LootGen.cs.
+/// </summary>
+public static partial class EpicLoot
 {
     public static readonly Logger logger = new Logger();
     
@@ -33,7 +38,14 @@ public static class EpicLoot
         MaterialConversion.RegisterAll();
         MagicItemEffectDefinition.RegisterAll();
         AbilityDefinition.RegisterAll();
+
+        // Still called so a consumer that built recipes against an older version keeps its existing
+        // behavior rather than changing silently -- the deprecation warning belongs on their
+        // `new CustomRecipe(...)`, not here.
+#pragma warning disable CS0618 // Type or member is obsolete
         CustomRecipe.RegisterAll();
+#pragma warning restore CS0618
+
         Sacrifice.RegisterAll();
         TreasureMap.RegisterAll();
         SecretStashItem.RegisterAll();

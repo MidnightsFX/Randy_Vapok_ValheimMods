@@ -59,6 +59,7 @@ public static partial class TerminalManager
             _ = new Command("lucktest", "rolls an example loot table with the sepcified luck eg: lucktest Greydwarf 1.0", TestLuck, GetTestLuckOptions, isCheat: true);
             _ = new Command("fishlucktest", "samples the lucky fishing treasure roll: [effectValue] [samples]", TestFishingLuck, isCheat: true);
             _ = new Command("printconfig", "prints out the Epic Loot current configuration of the specified type", PrintConfig, GetPrintConfigOptions);
+            _ = new Command("magicapi", "exercise the public API: version | query | providers | events | roll [rarity]", ApiDiagnostics, GetApiDiagnosticsOptions, isCheat: true);
             _ = new Command("el-help", "print available epic loot commands", Help, hideFromHelp: true);
         }
     }

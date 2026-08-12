@@ -144,7 +144,7 @@ public class TemperData
             _tempUpdatedValue = _tempEffect.EffectValue;
         }
         _tempItem.TemperedEffectIndices.Add(indexOfEffect);
-        itemData.SaveMagicItem(_tempItem);
+        API.WithChangeReason(API.ChangeReason.Temper, () => itemData.SaveMagicItem(_tempItem));
         UpdateLog(critical ? CRIT_SUCCESS_GOLD : SUCCESS_GREEN);
 
     }
@@ -188,7 +188,7 @@ public class TemperData
             _tempItem.Effects.Add(newValue);
         }
 
-        itemData.SaveMagicItem(_tempItem);
+        API.WithChangeReason(API.ChangeReason.Temper, () => itemData.SaveMagicItem(_tempItem));
         UpdateLog(FAIL_RED);
     }
     private void UpdateLog(string color)

@@ -105,7 +105,14 @@ namespace EpicLoot
           
             AddItemSets(lootConfig.ItemSets);
             AddLootTables(lootConfig.LootTables);
+
+            // Initialize clears LootTables, so anything an external plugin registered through
+            // API.AddLootTables has just been wiped. Same contract as the other config subsystems'
+            // OnSetup* events: subscribers re-apply their own additions.
+            OnSetupLootTables?.Invoke();
         }
+
+        public static event Action OnSetupLootTables;
 
         public static LootConfig GetCFG()
         {
@@ -141,6 +148,23 @@ namespace EpicLoot
             foreach (var lootTable in lootTables.Where(x => x.RefObject != null && x.RefObject != ""))
             {
                 AddLootTable(lootTable);
+            }
+        }
+
+        /// <summary>
+        /// Drops previously added tables by reference. AddLootTable appends rather than replaces, so
+        /// re-registering an updated table without this would leave the old one rolling alongside it.
+        /// </summary>
+        public static void RemoveLootTables([NotNull] IEnumerable<LootTable> lootTables)
+        {
+            foreach (var lootTable in lootTables)
+            {
+                if (lootTable?.Object == null || !LootTables.TryGetValue(lootTable.Object, out var tables))
+                {
+                    continue;
+                }
+
+                tables.Remove(lootTable);
             }
         }
 
@@ -399,9 +423,10 @@ namespace EpicLoot
                             AddDebugMagicEffects(magicItem);
                         }
 
-                        magicItemComponent.SetMagicItem(magicItem);
+                        API.WithChangeReason(API.ChangeReason.LootRoll, () => magicItemComponent.SetMagicItem(magicItem));
                         itemDrop.Save();
                         InitializeMagicItem(itemDrop.m_itemData);
+                        API.RaiseLootGenerated(itemDrop.m_itemData);
                         results.Add(itemDrop.m_itemData);
                         ZNetScene.instance.Destroy(droppedItem); // Destroy the object, we just needed the itemdata
                     }
@@ -819,10 +844,11 @@ namespace EpicLoot
                     AddDebugMagicEffects(magicItem);
                 }
 
-                magicItemComponent.SetMagicItem(magicItem);
+                API.WithChangeReason(API.ChangeReason.LootRoll, () => magicItemComponent.SetMagicItem(magicItem));
                 itemDrop.m_itemData = itemData;
                 itemDrop.Save();
                 InitializeMagicItem(itemData);
+                API.RaiseLootGenerated(itemData);
             }
 
             results.Add(item);
@@ -1065,7 +1091,9 @@ namespace EpicLoot
             return magicItem;
         }
 
-        private static void InitializeMagicItem(ItemDrop.ItemData baseItem)
+        // internal rather than private: API.TryMakeMagicItem reproduces the full drop flow for external
+        // plugins, and randomized wear is part of that flow.
+        internal static void InitializeMagicItem(ItemDrop.ItemData baseItem)
         {
             // Callers run SetMagicItem first, which already synced Indestructible -- so an
             // indestructible drop reads m_useDurability == false here and skips the wear roll.

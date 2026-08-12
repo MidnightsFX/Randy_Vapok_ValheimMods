@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EpicLoot;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace EpicLoot_UnityLib;
@@ -32,26 +33,34 @@ public class InventoryManagement
         return null;
     }
 
+    // The four read paths below all consult external inventory providers registered through
+    // EpicLoot.API.RegisterInventoryProvider (nearby containers, backpacks, remote stashes). With none
+    // registered the provider calls short-circuit on a bool and behavior is identical to the player's
+    // own inventory.
     public List<ItemDrop.ItemData> GetAllItems()
-    {
-        Inventory inventory = GetInventory();
-        if (inventory != null)
-        {
-            return inventory.GetAllItems();
-        }
-
-        return null;
-    }
-
-    public bool HasItem(ItemDrop.ItemData item)
     {
         Inventory inventory = GetInventory();
         if (inventory == null)
         {
-            return false;
+            return null;
         }
 
-        return inventory.CountItems(item.m_shared.m_name) >= item.m_stack;
+        List<ItemDrop.ItemData> items = inventory.GetAllItems();
+        if (!API.AnyInventoryProviders)
+        {
+            return items;
+        }
+
+        // Inventory.GetAllItems hands back the live m_inventory list, so appending to it would inject
+        // container items into the player's actual inventory. Copy first.
+        List<ItemDrop.ItemData> combined = new List<ItemDrop.ItemData>(items);
+        API.AppendProviderItems(combined);
+        return combined;
+    }
+
+    public bool HasItem(ItemDrop.ItemData item)
+    {
+        return CountItem(item.m_shared.m_name) >= item.m_stack;
     }
 
     public int CountItem(ItemDrop.ItemData item)
@@ -63,12 +72,8 @@ public class InventoryManagement
     {
         Inventory inventory = GetInventory();
 
-        if (inventory == null)
-        {
-            return 0;
-        }
-
-        return inventory.CountItems(item);
+        int count = inventory == null ? 0 : inventory.CountItems(item);
+        return count + API.CountProviderItems(item);
     }
 
     public void GiveItem(string item, int amount)
@@ -165,11 +170,25 @@ public class InventoryManagement
             itemDrop.m_itemData.m_stack, itemDrop.m_itemData.GetIcon());
     }
 
+    // Both removal paths spend the player's own inventory first and only charge the shortfall to
+    // external providers, matching how the read paths above report availability.
     public void RemoveExactItem(ItemDrop.ItemData item, int amount)
     {
         Inventory inventory = GetInventory();
 
-        inventory.RemoveItem(item, amount);
+        int taken = 0;
+        if (inventory != null && inventory.ContainsItem(item))
+        {
+            int before = item.m_stack;
+            inventory.RemoveItem(item, amount);
+            taken = before - (inventory.ContainsItem(item) ? item.m_stack : 0);
+        }
+
+        int shortfall = amount - taken;
+        if (shortfall > 0)
+        {
+            API.RemoveExactProviderItem(item, shortfall);
+        }
     }
 
     public void RemoveItem(ItemDrop.ItemData item)
@@ -181,7 +200,19 @@ public class InventoryManagement
     {
         Inventory inventory = GetInventory();
 
-        inventory.RemoveItem(item, amount);
+        int taken = 0;
+        if (inventory != null)
+        {
+            int before = inventory.CountItems(item);
+            inventory.RemoveItem(item, amount);
+            taken = before - inventory.CountItems(item);
+        }
+
+        int shortfall = amount - taken;
+        if (shortfall > 0)
+        {
+            API.RemoveProviderItems(item, shortfall);
+        }
     }
 
     public List<ItemDrop.ItemData> GetBoundItems()

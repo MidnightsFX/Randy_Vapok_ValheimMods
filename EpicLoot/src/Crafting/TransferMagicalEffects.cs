@@ -98,7 +98,7 @@ public static class TransferMagicalEffects
             return; // nothing valid carried over; leave the crafted item mundane
 
         newMagicItem.DisplayName = MagicItemNames.GetNameForItem(CraftedItem, newMagicItem);
-        CraftedItem.SaveMagicItem(newMagicItem);
+        API.WithChangeReason(API.ChangeReason.Transfer, () => CraftedItem.SaveMagicItem(newMagicItem));
     }
     
     [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.DoCrafting))]

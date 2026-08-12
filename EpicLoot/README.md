@@ -42,6 +42,17 @@ See the wiki on thunderstore for more information! Link below!
 
 For more information please see the [wiki on thunderstore](https://thunderstore.io/c/valheim/p/RandyKnapp/EpicLoot/wiki/).
 
+## For mod authors
+
+Epic Loot has a supported integration API — no assembly reference and no Harmony patches on its internals
+required. It covers registering new content (magic effects, legendaries, abilities, bounties, ...) and
+hooking into behaviour: contributing items from your own containers or equipment slots, vetoing sacrifices,
+subscribing to enchant/socket/loot events, and generating magic items.
+
+See [docs/API.md](docs/API.md) for the reference and a migration table from the internals mods patch today.
+The [`EpicLootAPI`](../EpicLootAPI/EpicLootAPI/README.md) shim gives you typed wrappers you can bundle into
+your plugin with ILRepack.
+
 ## Credits
 
 Epic Loot Team Members:

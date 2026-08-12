@@ -6,15 +6,24 @@ namespace EpicLoot;
 
 public static class PlayerExtensions
 {
+    /// <summary>
+    /// Every magic item the player currently has equipped. This is the single source of equipped magic
+    /// gear for effect totals, set bonuses, tooltips and shard socketing, so it is also where external
+    /// equipment providers (extra slots, quick slots, equipped backpacks) are merged in --
+    /// see <see cref="API.RegisterEquipmentProvider"/>.
+    /// </summary>
     public static List<ItemDrop.ItemData> GetMagicEquipment(this Player player)
     {
         List<ItemDrop.ItemData> items = player.GetInventory().GetEquippedItems()
             .Where(x => x.IsMagic()).ToList();
+        API.AppendProviderEquipment(player, items);
         return items;
     }
 
     /// <summary>
-    /// DEPRECATED, DO NOT USE
+    /// DEPRECATED, DO NOT USE. Kept only because external mods patch it; nothing inside Epic Loot calls
+    /// it, so patching this does not affect effect resolution -- use
+    /// <see cref="API.RegisterEquipmentProvider"/> instead.
     /// </summary>
     public static List<ItemDrop.ItemData> GetEquipment(this Player player)
     {

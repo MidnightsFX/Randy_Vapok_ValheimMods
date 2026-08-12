@@ -37,6 +37,7 @@ public static partial class API
     /// </summary>
     static API()
     {
+        LootRoller.OnSetupLootTables += ReloadExternalLootTables;
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += ReloadExternalMagicEffects;
         UniqueLegendaryHelper.OnSetupLegendaryItemConfig += ReloadExternalLegendary;
         AbilityDefinitions.OnSetupAbilityDefinitions += ReloadExternalAbilities;

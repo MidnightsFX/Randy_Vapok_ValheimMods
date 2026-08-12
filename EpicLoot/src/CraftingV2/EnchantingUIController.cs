@@ -493,7 +493,7 @@ namespace EpicLoot.CraftingV2
             MagicItem magicItem = LootRoller.RollMagicItem(rarity, item, luckFactor);
 
             MagicItemComponent magicItemComponent = item.Data().GetOrCreate<MagicItemComponent>();
-            magicItemComponent.SetMagicItem(magicItem);
+            API.WithChangeReason(API.ChangeReason.Enchant, () => magicItemComponent.SetMagicItem(magicItem));
 
             EquipmentEffectCache.Reset(player);
 
@@ -994,7 +994,7 @@ namespace EpicLoot.CraftingV2
                 Rarity = selectedItem.GetRarity(),
                 Effects = new List<MagicItemEffect> { runeEffect }
             };
-            magicItemComponent.SetMagicItem(enchantmentsToRune);
+            API.WithChangeReason(API.ChangeReason.Rune, () => magicItemComponent.SetMagicItem(enchantmentsToRune));
 
             return newItem;
         }
@@ -1048,10 +1048,12 @@ namespace EpicLoot.CraftingV2
             magicItem.AugmentedEffectIndex = -1;
             magicItem.AugmentedEffectIndices?.Clear();
 
-            // No rolled effects left -> revert to a plain, non-magic item.
+            // No rolled effects left -> revert to a plain, non-magic item. Dropping the component does
+            // not write through SetMagicItem, so raise the change event by hand.
             if (magicItem.Effects.Count == 0)
             {
                 item.Data().Remove<MagicItemComponent>();
+                API.RaiseMagicItemChanged(item, API.ChangeReason.Rune);
                 return;
             }
 
@@ -1071,7 +1073,7 @@ namespace EpicLoot.CraftingV2
                 }
             }
 
-            item.SaveMagicItem(magicItem);
+            API.WithChangeReason(API.ChangeReason.Rune, () => item.SaveMagicItem(magicItem));
         }
 
         internal static GameObject RuneEnhanceItemAndReturnSuccess(ItemDrop.ItemData item, ItemDrop.ItemData rune, int enchantment)
@@ -1113,7 +1115,7 @@ namespace EpicLoot.CraftingV2
             }
 
             MagicItem magicItem = item.GetMagicItem();
-            item.SaveMagicItem(magicItem);
+            API.WithChangeReason(API.ChangeReason.Rune, () => item.SaveMagicItem(magicItem));
 
             CraftSuccessDialog successDialog;
             //if (EpicLoot.HasAuga)
@@ -1247,7 +1249,7 @@ namespace EpicLoot.CraftingV2
             }
 
             magicItem.SetEffectAsAugmented(augmentindex);
-            item.SaveMagicItem(magicItem);
+            API.WithChangeReason(API.ChangeReason.Augment, () => item.SaveMagicItem(magicItem));
 
             AugmentChoiceDialog choiceDialog = AugmentHelper.CreateAugmentChoiceDialog(true);
             choiceDialog.transform.SetParent(EnchantingTableUI.instance.transform);
@@ -1305,7 +1307,7 @@ namespace EpicLoot.CraftingV2
                 magicItem.DisplayName = MagicItemNames.GetNameForItem(item, magicItem);
             }
 
-            item.SaveMagicItem(magicItem);
+            API.WithChangeReason(API.ChangeReason.Augment, () => item.SaveMagicItem(magicItem));
 
             Game.instance.GetPlayerProfile().m_playerStats.m_stats[PlayerStatType.Crafts]++;
             Gogan.LogEvent("Game", "Augmented", item.m_shared.m_name, 1);
@@ -1427,6 +1429,10 @@ namespace EpicLoot.CraftingV2
                 returnedItems.AddRange(ReclaimSockets(magicItem));
 
                 item.Data().Remove<MagicItemComponent>();
+
+                // Dropping the component does not write through SetMagicItem, so the change event has to
+                // be raised by hand here.
+                API.RaiseMagicItemChanged(item, API.ChangeReason.Disenchant);
             }
 
             return returnedItems;

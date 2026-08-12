@@ -254,7 +254,7 @@ namespace EpicLoot.ShardStones {
 
             equipMagicItem.Sockets.Add(new SocketedEffect(effect, sourcePrefab, sourceRarity) { ShardType = color });
             RecomputeSocketValues(equipment, equipMagicItem);
-            equipment.SaveMagicItem(equipMagicItem);
+            API.WithChangeReason(API.ChangeReason.Socket, () => equipment.SaveMagicItem(equipMagicItem));
             ResetCache();
             return true;
         }
@@ -434,7 +434,7 @@ namespace EpicLoot.ShardStones {
             equipMagicItem.Sockets.RemoveAt(socketIndex);
             // Losing a shard promotes the survivors of its color back up the stacking ranks.
             RecomputeSocketValues(equipment, equipMagicItem);
-            equipment.SaveMagicItem(equipMagicItem);
+            API.WithChangeReason(API.ChangeReason.Unsocket, () => equipment.SaveMagicItem(equipMagicItem));
             ResetCache();
             return ReconstructShardItem(socketed);
         }

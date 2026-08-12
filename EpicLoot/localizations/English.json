@@ -642,6 +642,8 @@
     "mod_epicloot_itemtooltip_rarity": "Rarity",
     "mod_epicloot_itemtooltip_effects": "Effects",
 
+    "mod_epicloot_adventure_spawnrelocated": "Your map has been redrawn - the marked area was occupied.",
+
     "mod_epicloot_bounties_claimedmsg": "Bounty Claimed!",
     "mod_epicloot_bounties_completemsg": "Bounty Vanquished!",
     "mod_epicloot_bounties_locatingmsg": "Locating Bounty Target...",

@@ -321,35 +321,59 @@ public sealed class EpicLoot : BaseUnityPlugin {
         AbilitiesInitialized?.Invoke();
     }
 
+    private static BepInEx.Logging.ManualLogSource _fallbackLogSink;
+
+    /// <summary>
+    /// Where every Log* below writes. Falls back to a standalone log source when <see cref="_instance"/>
+    /// is null or has been destroyed, so logging survives outside the plugin's own lifetime.
+    /// </summary>
+    private static BepInEx.Logging.ManualLogSource LogSink =>
+        _instance != null
+            ? _instance.Logger
+            : _fallbackLogSink ??= BepInEx.Logging.Logger.CreateLogSource(DisplayName);
+
+    /// <summary>
+    /// Gate for the level-filtered Log* helpers. Both config entries are bound in
+    /// ELConfig.CreateConfigValues, but these helpers run from Harmony prefixes on hot vanilla methods
+    /// (Inventory.AddItem among them), so an unguarded deref here does not merely lose a log line - it
+    /// throws out of the vanilla method that was running. An unbound config logs rather than staying
+    /// silent, since that state is itself worth seeing.
+    /// </summary>
+    private static bool ShouldLog(LogLevel level) {
+        BepInEx.Configuration.ConfigEntry<bool> enabled = ELConfig._loggingEnabled;
+        BepInEx.Configuration.ConfigEntry<LogLevel> threshold = ELConfig._logLevel;
+        return enabled == null || threshold == null || (enabled.Value && threshold.Value <= level);
+    }
+
     public static void Log(string message) {
-        if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Info) {
-            _instance.Logger.LogInfo(message);
+        if (ShouldLog(LogLevel.Info)) {
+            LogSink.LogInfo(message);
         }
     }
 
     public static void LogWarning(string message) {
-        if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Warning) {
-            _instance.Logger.LogWarning(message);
+        if (ShouldLog(LogLevel.Warning)) {
+            LogSink.LogWarning(message);
         }
     }
 
     public static void LogError(string message) {
-        if (ELConfig._loggingEnabled.Value && ELConfig._logLevel.Value <= LogLevel.Error) {
-            _instance.Logger.LogError(message);
+        if (ShouldLog(LogLevel.Error)) {
+            LogSink.LogError(message);
         }
     }
 
     public static void LogForce(string message) {
         // Intentionally NOT gated by _loggingEnabled/_logLevel: some diagnostics must always be visible.
-        _instance.Logger.LogInfo(message);
+        LogSink.LogInfo(message);
     }
 
     public static void LogWarningForce(string message) {
-        _instance.Logger.LogWarning(message);
+        LogSink.LogWarning(message);
     }
 
     public static void LogErrorForce(string message) {
-        _instance.Logger.LogError(message);
+        LogSink.LogError(message);
     }
 
     private static void LoadAssets() {

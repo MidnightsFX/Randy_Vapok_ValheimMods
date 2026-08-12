@@ -70,23 +70,13 @@ namespace EpicLoot.Data
     {
         public static HashSet<Type> ForceLoadTypes = new();
 
-        internal static string _modGuid;
-
-        internal static string modGuid => _modGuid ??= ((Func<string>)(() =>
-        {
-            IEnumerable<TypeInfo> types;
-            try
-            {
-                types = Assembly.GetExecutingAssembly().DefinedTypes.ToList();
-            }
-            catch (ReflectionTypeLoadException e)
-            {
-                types = e.Types.Where(t => t != null).Select(t => t.GetTypeInfo());
-            }
-            BaseUnityPlugin plugin = (BaseUnityPlugin)Chainloader.ManagerObject.GetComponent(
-                types.First(t => t.IsClass && typeof(BaseUnityPlugin).IsAssignableFrom(t)));
-            return plugin.Info.Metadata.GUID;
-        }))();
+        // The prefix on every m_customData key this mod writes. This used to be discovered reflectively
+        // (first BaseUnityPlugin type in this assembly -> Chainloader.ManagerObject.GetComponent(...) ->
+        // Info.Metadata.GUID). That dereferenced two things it never null-checked, and because the
+        // memoizing `??=` never caches a failure, a single miss threw on every item-data access for the
+        // rest of the session. The value it produced was always the [BepInPlugin] GUID, so name it
+        // directly - same string, so existing m_customData keys still resolve.
+        internal const string modGuid = global::EpicLoot.EpicLoot.PluginId;
 
         private static Dictionary<Type, HashSet<Type>> typeInheritorsCache = new();
         private static HashSet<string> knownTypes = new();
