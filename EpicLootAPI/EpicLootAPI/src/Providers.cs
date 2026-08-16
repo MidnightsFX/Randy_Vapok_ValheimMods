@@ -77,6 +77,8 @@ public static partial class EpicLoot
     /// bonuses, tooltips and shard socketing alike.
     /// </summary>
     /// <remarks>
+    /// Contributed items also receive their equip effect visuals (auras worn on the player), reconciled
+    /// after every equipment change -- you do not attach or remove those yourself.
     /// Epic Loot memoizes effect totals per player and only invalidates on vanilla
     /// <c>Humanoid.EquipItem</c>/<c>UnequipItem</c>. If your slots change outside those, call
     /// <see cref="InvalidatePlayerEffectCache"/> or stale values keep being served.
@@ -102,8 +104,8 @@ public static partial class EpicLoot
     }
 
     /// <summary>
-    /// Discards the memoized magic effect totals for a player. Call after changing the contents of slots
-    /// you provide.
+    /// Discards the memoized magic effect totals for a player and refreshes the equip effect visuals
+    /// worn on them. Call after changing the contents of slots you provide.
     /// </summary>
     [PublicAPI]
     public static void InvalidatePlayerEffectCache(this Player player)

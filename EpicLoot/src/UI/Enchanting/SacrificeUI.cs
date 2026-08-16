@@ -67,6 +67,7 @@ namespace EpicLoot_UnityLib
             IdentifyStylePanel.SetActive(false);
             IdentifyToggle.isOn = false;
             SacrificeToggle.isOn = true;
+            AvailableItems.ClearFilter();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
         }
@@ -179,6 +180,9 @@ namespace EpicLoot_UnityLib
 
             _sacrificeMode = SacrificeMode.Sacrifice;
             List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems();
+            // The two modes list disjoint item sets, so a filter carried across the toggle would hide
+            // nearly everything and read as a bug.
+            AvailableItems.ClearFilter();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
             Warning.text = Localization.instance.Localize("$mod_epicloot_sacrifice_warning");
@@ -199,6 +203,7 @@ namespace EpicLoot_UnityLib
 
             _sacrificeMode = SacrificeMode.Identify;
             List<InventoryItemListElement> items = EnchantingUIController.GetUnidentifiedItems();
+            AvailableItems.ClearFilter();
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
             OnSelectedItemsChanged();

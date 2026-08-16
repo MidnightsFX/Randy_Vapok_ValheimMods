@@ -40,6 +40,7 @@ internal class ELConfig {
     public static ConfigEntry<int> _legendaryMaterialIconColor;
     public static ConfigEntry<int> _mythicMaterialIconColor;
     public static ConfigEntry<bool> UseScrollingCraftDescription;
+    public static ConfigEntry<bool> ShowRarityInRecipeList;
     public static ConfigEntry<bool> ShowEnchantSelectionChance;
     public static ConfigEntry<bool> TransferMagicItemToCrafts;
     public static ConfigEntry<bool> _loggingEnabled;
@@ -480,6 +481,9 @@ internal class ELConfig {
         UseScrollingCraftDescription = BindClient(SectionInterface, "Use Scrolling Craft Description", true,
             "Changes the item description in the crafting panel to scroll instead of scale when it gets too " +
             "long for the space.");
+        ShowRarityInRecipeList = BindClient(SectionInterface, "Show Rarity In Recipe List", true,
+            "Shows the magic item rarity background behind item icons in the crafting panel's recipe " +
+            "list and detail panel, the same way it is shown in your inventory.");
         ShowEnchantSelectionChance = BindServer(SectionInterface, "Show Enchant Selection Chance", false,
             "When true, the Enchant and Augment panels show the weighted chance that each available effect " +
             "is selected on a single roll, displayed right after the bullet for each effect.");

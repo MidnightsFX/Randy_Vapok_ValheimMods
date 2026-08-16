@@ -100,6 +100,21 @@ Stopping items from being sacrificed
 EpicLoot.RegisterSacrificeFilter("my.plugin.guid", item => !IsInMyQuickSlot(item));
 ```
 
+### Custom item slots — rarity backgrounds on slots you draw yourself
+
+Epic Loot decorates the vanilla inventory grid and hotkey bar with Harmony *transpilers*. If your mod
+reimplements `InventoryGrid.UpdateGui` or `HotkeyBar.UpdateIcons` (a prefix returning `false`, say), the
+original body never runs and your slots end up with no rarity background. Call this per element instead,
+wherever you fill the slot in:
+
+```c#
+EpicLoot.ApplyMagicItemBackground(element.m_go, element.m_equiped, item, inventoryGrid: false);
+```
+
+Pass `null` for `item` to clear a slot. `inventoryGrid: true` also draws the legendary set marker. Child
+images are created only when a slot first needs one, so calling this every frame — and for empty slots —
+is cheap.
+
 ### Events
 Event listeners provide hooks to common interaction points. The most frequently fired of these will be `OnMagicItemChanged`
 which provides a number of different reasons that equipment changes, you will likely need to filter to the specific reason you need to take action on.

@@ -63,6 +63,34 @@ public static partial class API
         return true;
     }
 
+    /// <summary>
+    /// The name Epic Loot shows for an item -- the generated magic name ("Sturdy Rag Trousers of the
+    /// Bear") where it has one, the vanilla <c>m_shared.m_name</c> otherwise. Any parenthesised suffix
+    /// on the vanilla name, such as a variant's stat text, is carried over.
+    /// </summary>
+    /// <param name="item">may be null</param>
+    /// <returns>The unlocalized display name, or "" for a null item</returns>
+    [PublicAPI]
+    public static string GetItemDisplayName(ItemDrop.ItemData item)
+    {
+        return item == null ? "" : item.GetDisplayName();
+    }
+
+    /// <summary>
+    /// <see cref="GetItemDisplayName"/> wrapped in a color tag, which is how Epic Loot's own UI renders
+    /// item names. Note the tag overrides whatever color the text component is set to.
+    /// </summary>
+    /// <param name="item">may be null</param>
+    /// <param name="colorOverride">A color to use instead of the item's rarity color, either a hex
+    /// string ("#808080ff") or a name ("white") -- pass this to dim a name that would otherwise ignore
+    /// your own tinting. May be null.</param>
+    /// <returns>The decorated display name, or "" for a null item</returns>
+    [PublicAPI]
+    public static string GetItemDecoratedName(ItemDrop.ItemData item, string colorOverride = null)
+    {
+        return item == null ? "" : item.GetDecoratedName(colorOverride);
+    }
+
     /// <returns>The number of rarity tiers, so a consumer can enumerate 0..n-1 without hard-coding 5.</returns>
     [PublicAPI]
     public static int GetRarityCount()

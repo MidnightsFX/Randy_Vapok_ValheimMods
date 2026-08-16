@@ -35,6 +35,8 @@ namespace EpicLoot_UnityLib
     {
         public enum SortMode { Rarity, Name, Quantity }
 
+        private static readonly Regex RichTextRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
+
         public bool Multiselect = true;
         public bool Filterable = true;
         public bool Sortable = true;
@@ -215,7 +217,7 @@ namespace EpicLoot_UnityLib
                 FilterByText.gameObject.SetActive(false);
             }
 
-            if (!Filterable || FilterByText == null)
+            if (!Filterable || FilterByText == null || ListContainer == null)
                 return;
 
             string filterText = FilterByText.text;
@@ -227,26 +229,45 @@ namespace EpicLoot_UnityLib
 
             for (int i = 0; i < elementCount; ++i)
             {
-                Transform childToCache = ListContainer.GetChild(i);
-                MultiSelectItemListElement element = childToCache.GetComponent<MultiSelectItemListElement>();
-
-                // Strip rich text tags from item name
-                string itemName = element.ItemName.text;
-                Regex richTextRegex = new Regex(@"<[^>]*>");
-                itemName = richTextRegex.Replace(itemName, string.Empty);
-
-                bool nameMatches = filterIsEmpty;
-                foreach (string part in filterParts)
+                MultiSelectItemListElement element = GetElement(i);
+                if (element == null)
                 {
-                    if (itemName.IndexOf(part, StringComparison.OrdinalIgnoreCase) >= 0)
+                    continue;
+                }
+
+                // A row with no name label can't be matched against, so never hide it.
+                bool nameMatches = filterIsEmpty || element.ItemName == null;
+                if (!nameMatches)
+                {
+                    // Strip rich text tags from item name
+                    string itemName = RichTextRegex.Replace(element.ItemName.text ?? string.Empty, string.Empty);
+
+                    foreach (string part in filterParts)
                     {
-                        nameMatches = true;
-                        break;
+                        if (itemName.IndexOf(part, StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            nameMatches = true;
+                            break;
+                        }
                     }
                 }
 
                 element.gameObject.SetActive(nameMatches);
             }
+        }
+
+        /// <summary>
+        /// Clears the filter text, revealing every element again. Does nothing on an unfilterable list.
+        /// </summary>
+        public void ClearFilter()
+        {
+            if (FilterByText == null || string.IsNullOrEmpty(FilterByText.text))
+            {
+                return;
+            }
+
+            // Fires OnFilterChanged, which refreshes the visibility mask.
+            FilterByText.text = string.Empty;
         }
 
         public void RefreshSelectAllToggle()
@@ -259,19 +280,20 @@ namespace EpicLoot_UnityLib
                     return;
                 }
 
-                bool allAreSelected = true;
-                int elementCount = ListContainer.childCount;
-                for (int i = 0; i < elementCount; ++i)
+                // Only the visible rows count: Select All acts on what the filter is showing, so its
+                // checked state has to describe that same set. An empty list is never "all selected".
+                int visibleCount = 0;
+                int maxSelectedCount = 0;
+                ForeachVisibleElement((_, element) =>
                 {
-                    Transform childToCache = ListContainer.GetChild(i);
-                    MultiSelectItemListElement element = childToCache.GetComponent<MultiSelectItemListElement>();
-                    if (!element.IsMaxSelected())
+                    ++visibleCount;
+                    if (element.IsMaxSelected())
                     {
-                        allAreSelected = false;
+                        ++maxSelectedCount;
                     }
-                }
+                });
 
-                SelectAllToggle.SetIsOnWithoutNotify(allAreSelected);
+                SelectAllToggle.SetIsOnWithoutNotify(visibleCount > 0 && maxSelectedCount == visibleCount);
             }
         }
 
@@ -282,13 +304,15 @@ namespace EpicLoot_UnityLib
                 return;
             }
 
+            // Visible only. Rows the filter has hidden keep whatever selection they already had, but
+            // the player can only ever select or clear what they can actually see.
             if (SelectAllToggle.isOn)
             {
-                ForeachElement((_, x) => x.SelectMaxQuantity(true));
+                ForeachVisibleElement((_, x) => x.SelectMaxQuantity(true));
             }
             else
             {
-                ForeachElement((_, x) => x.Deselect(true));
+                ForeachVisibleElement((_, x) => x.Deselect(true));
             }
 
             RefreshSelectAllToggle();
@@ -322,9 +346,12 @@ namespace EpicLoot_UnityLib
                 element.SuppressEvents = false;
             }
 
-            RefreshSelectAllToggle();
+            // Rows were just reassigned by index, so the old show/hide mask now describes the wrong items.
+            Refresh();
         }
 
+        // Unlike the selection getters, this walks every row including filtered-out ones. It exists to
+        // carry selection across a re-population, and hidden rows keep their selection by design.
         public Dictionary<IListElement, int> GetCurrentSelectionAmounts()
         {
             Dictionary<IListElement, int> selectionAmounts = new Dictionary<IListElement, int>();
@@ -416,6 +443,11 @@ namespace EpicLoot_UnityLib
                 CenterOnItem(GetElement(0));
             }
 
+            // Reapply the filter before the events fire: elements were reused and reassigned by index, so
+            // the previous mask hides the wrong rows, and OnSelectedItemsChanged reads through
+            // GetSelectedItems, which now depends on that mask being correct.
+            RefreshFilter();
+
             OnItemsChanged?.Invoke();
             OnSelectedItemsChanged?.Invoke();
             RefreshSelectAllToggle();
@@ -456,14 +488,21 @@ namespace EpicLoot_UnityLib
             }
         }
 
+        // The three selection getters below all skip filtered-out rows. Whatever they return is what
+        // the panel previews and then acts on, so a row the player cannot see must never be in it -
+        // otherwise filtering to one item and hitting Select All sacrifices the whole inventory.
         public List<Tuple<T, int>> GetSelectedItems<T>()
         {
             List<Tuple<T, int>> result = new List<Tuple<T, int>>();
             int elementCount = ListContainer.childCount;
             for (int i = 0; i < elementCount; ++i)
             {
-                Transform childToCache = ListContainer.GetChild(i);
-                MultiSelectItemListElement element = childToCache.GetComponent<MultiSelectItemListElement>();
+                MultiSelectItemListElement element = GetElement(i);
+                if (!IsVisible(element))
+                {
+                    continue;
+                }
+
                 int quantity = element.GetSelectedQuantity();
                 if (quantity > 0)
                 {
@@ -479,8 +518,12 @@ namespace EpicLoot_UnityLib
             int elementCount = ListContainer.childCount;
             for (int i = 0; i < elementCount; ++i)
             {
-                Transform childToCache = ListContainer.GetChild(i);
-                MultiSelectItemListElement element = childToCache.GetComponent<MultiSelectItemListElement>();
+                MultiSelectItemListElement element = GetElement(i);
+                if (!IsVisible(element))
+                {
+                    continue;
+                }
+
                 int quantity = element.GetSelectedQuantity();
                 if (quantity > 0)
                 {
@@ -496,10 +539,13 @@ namespace EpicLoot_UnityLib
             int elementCount = ListContainer.childCount;
             for (int i = 0; i < elementCount; ++i)
             {
-                Transform childToCache = ListContainer.GetChild(i);
-                MultiSelectItemListElement element = childToCache.GetComponent<MultiSelectItemListElement>();
-                int quantity = element.GetSelectedQuantity();
-                if (quantity > 0)
+                MultiSelectItemListElement element = GetElement(i);
+                if (!IsVisible(element))
+                {
+                    continue;
+                }
+
+                if (element.GetSelectedQuantity() > 0)
                 {
                     return i;
                 }
@@ -538,6 +584,16 @@ namespace EpicLoot_UnityLib
             return child == null ? null : child.GetComponent<MultiSelectItemListElement>();
         }
 
+        /// <summary>
+        /// False for a row the filter has hidden. RefreshFilter only calls SetActive(false) on
+        /// non-matching rows - they stay in ListContainer and keep their selected quantity - so this is
+        /// what separates "in the list" from "on screen".
+        /// </summary>
+        private static bool IsVisible(MultiSelectItemListElement element)
+        {
+            return element != null && element.gameObject.activeSelf;
+        }
+
         public void ForeachElement(Action<int, MultiSelectItemListElement> func)
         {
             if (ListContainer == null)
@@ -554,6 +610,23 @@ namespace EpicLoot_UnityLib
                     func(i, element);
                 }
             }
+        }
+
+        /// <summary>
+        /// Like <see cref="ForeachElement"/>, but skips rows hidden by the filter. Use this for anything
+        /// the player perceives as acting on "the list"; use ForeachElement for bookkeeping that must
+        /// cover every row regardless of the filter (Lock/Unlock, SuppressEvents, DeselectAll).
+        /// The index passed to <paramref name="func"/> is the sibling index, not a visible-only counter.
+        /// </summary>
+        public void ForeachVisibleElement(Action<int, MultiSelectItemListElement> func)
+        {
+            ForeachElement((i, element) =>
+            {
+                if (IsVisible(element))
+                {
+                    func(i, element);
+                }
+            });
         }
 
         public void DeselectAll()
@@ -657,6 +730,8 @@ namespace EpicLoot_UnityLib
             }
 
             DeselectAll();
+
+            RefreshFilter();
 
             OnItemsChanged?.Invoke();
             OnSelectedItemsChanged?.Invoke();

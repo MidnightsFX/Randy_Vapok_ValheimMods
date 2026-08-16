@@ -168,6 +168,11 @@ you, so returning everything is fine.
 API.RegisterEquipmentProvider("my.plugin.guid", player => MyExtraSlots(player));
 ```
 
+Contributed items also get their equip effect visuals — the auras and particle effects worn on the
+player, such as `Glowing`. Those are reconciled against `GetMagicEquipment` after every equipment
+change, so an item in your slot lights up exactly like one in a vanilla slot; you do not need to attach
+or remove anything yourself.
+
 Epic Loot memoizes effect totals per player and invalidates only on vanilla `Humanoid.EquipItem` /
 `UnequipItem`. If your slots change outside those methods, tell it:
 
@@ -175,7 +180,8 @@ Epic Loot memoizes effect totals per player and invalidates only on vanilla `Hum
 API.InvalidatePlayerEffectCache(player);
 ```
 
-Without that call, stale totals keep being served after a slot change.
+Without that call, stale totals keep being served after a slot change. The same call also refreshes the
+worn equip effect visuals, so it is the one signal to send whenever your slot contents move.
 
 ### Sacrifice filters
 
@@ -190,6 +196,27 @@ API.RegisterSacrificeFilter("my.plugin.guid", item => !IsInMyQuickSlot(item));
 Called for every item the tab evaluates, so keep it cheap.
 
 `API.GetRegisteredProviders()` returns the registered ids grouped by family, for diagnostics.
+
+---
+
+## Drawing your own item slots
+
+Epic Loot decorates the vanilla inventory grid and hotkey bar with **transpilers**. If your plugin
+reimplements `InventoryGrid.UpdateGui` or `HotkeyBar.UpdateIcons` — a prefix returning `false`, say —
+the original body never runs, so neither does the decoration, and your slots show no rarity background.
+A postfix on those methods cannot fix it for you: Epic Loot has no way to tell which of your elements
+holds which item.
+
+Call this once per element instead, from wherever you fill it in:
+
+```csharp
+API.ApplyMagicItemBackground(element.m_go, element.m_equiped, item, inventoryGrid: false);
+```
+
+- Pass `null` for `item` to clear a slot you are emptying.
+- `inventoryGrid: true` also draws the legendary set marker; `false` is the hotbar treatment.
+- Child images are created the first time a slot actually needs one, so it is safe to call every frame
+  and calling it for empty slots costs nothing.
 
 ---
 

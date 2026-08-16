@@ -55,6 +55,17 @@ Bugfixes:
 * Adventure data (Treasure hunts, bounties etc) is now compressed and cleaned resulting in massive reductions in stored custom data
 * Transfer Enchantments through crafting now works properly
 * Chest loot is now rolled when it is opened, not when it is spawned, so that the loot is always appropriate for the player opening it. This primarily fixes mountain & swamp loot which would be loaded very early, but actually opened later.
+* Filtering an enchanting table list no longer hides items from you while still acting on them. Previously, typing in the Sacrifice tab's filter and pressing Select All would sacrifice every sacrificeable item in your inventory, not just the filtered ones
+    * Select All, the products preview and the action itself now only ever cover the rows the filter is showing
+    * Items you selected before filtering keep their selection, so you can filter and select several times over and then clear the filter to act on everything you picked
+    * The filter is also reapplied after each action and when switching between Sacrifice and Identify, so the list no longer shows a stale set of rows
+* Equip effect visuals (auras such as `Glowing`) are now reconciled against your equipped magic gear after every equipment change, instead of being attached from the model-building path and removed from the unequip path
+    * Items worn in slots added by other mods now get their aura, which previously never appeared at all
+    * The spurious `Unequipped item (...) from player that had fx, but could not find fx (...)!` error is gone — a missing effect is now simply nothing to remove
+    * An aura shared by two worn items survives unequipping either one, and is removed when the last one comes off
+* Fixed the reset for helmet attachment never running, which let the helmet's texture overrides and item effects be applied to a beard, hair or back-slung weapon model instead
+* Fixed legendary texture overrides on armor being resolved by item type rather than by the item actually being attached, which picked the wrong item when two worn items shared a type
+    * This also makes legendary armor texture overrides render for other players, which previously never happened
 
 API:
 * The API now covers integration, not just content registration. Full reference and a migration table in `EpicLoot/docs/API.md`
@@ -64,9 +75,11 @@ API:
     * Epic Loot spends the player's own inventory first and only charges the shortfall to providers
     * Removal by item instance matches on reference, so magic data on the consumed item is preserved
 * Equipment providers — `API.RegisterEquipmentProvider` lets extra-slot mods contribute equipped items
-    * Contributed items count toward effect totals, legendary set bonuses, tooltips and shard socketing
-    * `API.InvalidatePlayerEffectCache(player)` discards memoized effect totals when your slot contents change outside vanilla equip/unequip
+    * Contributed items count toward effect totals, legendary set bonuses, tooltips and shard socketing, and receive their equip effect visuals
+    * `API.InvalidatePlayerEffectCache(player)` discards memoized effect totals and refreshes worn equip effect visuals when your slot contents change outside vanilla equip/unequip
 * Sacrifice filters — `API.RegisterSacrificeFilter` lets a mod veto sacrificing an item, so gear equipped in slots Epic Loot cannot see is not destroyed by accident
+* Custom item slots — `API.ApplyMagicItemBackground` draws the rarity background, set marker and equipped overlay on a slot your own mod renders
+    * Epic Loot decorates the vanilla grid and hotkey bar with transpilers, so a mod that reimplements `InventoryGrid.UpdateGui` or `HotkeyBar.UpdateIcons` previously lost the background entirely; this is the supported way to put it back
 * Lifecycle events — `API.AddMagicItemChangedListener`, `AddLootGeneratedListener` and `AddBountyCompletedListener`
     * The change event fires on every magic-data write with a reason token: `Enchant`, `Augment`, `Disenchant`, `Rune`, `Temper`, `Socket`, `Unsocket`, `LootRoll`, `Transfer`, or `Unspecified`. Item loading does not raise it
 * Queries — `IsMagicItem`, `TryGetRarity` (non-throwing), rarity colors and display names, `IsEpicLootItem`, `IsShardStone`, `IsRunestone`, `IsMagicCraftingMaterial`, `IsUnidentified`, `CanBeMagicItem`, `ItemHasMagicEffect`, `GetAllMagicEffectTypes`, `GetEnchantCostsJson`, `GetSacrificeProductsJson`

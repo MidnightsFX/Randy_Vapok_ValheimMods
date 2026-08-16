@@ -12,7 +12,8 @@ public static partial class API
     /// Bump this on every additive change; a consumer compares it to decide which endpoints exist.
     /// </summary>
     /// <remarks>
-    /// 1 - Queries, providers (inventory / equipment / sacrifice), lifecycle events, loot generation.
+    /// 1 - Queries, providers (inventory / equipment / sacrifice), lifecycle events, loot generation,
+    ///     item slot and icon decoration.
     /// </remarks>
     [PublicAPI]
     public const int ApiVersion = 1;

@@ -306,8 +306,9 @@ public static partial class API
     }
 
     /// <summary>
-    /// Discards the memoized magic effect totals for a player, forcing the next read to recompute.
-    /// Call after changing the contents of slots you provide.
+    /// Discards the memoized magic effect totals for a player, forcing the next read to recompute, and
+    /// refreshes the equip effect visuals worn on the player. Call after changing the contents of slots
+    /// you provide.
     /// </summary>
     /// <param name="player">may be null</param>
     [PublicAPI]
@@ -316,6 +317,7 @@ public static partial class API
         if (player != null)
         {
             EquipmentEffectCache.Reset(player);
+            VisEquipment_Patch.RefreshPlayerFx(player);
         }
     }
 

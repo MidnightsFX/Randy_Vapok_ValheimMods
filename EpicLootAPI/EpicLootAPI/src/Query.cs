@@ -25,6 +25,11 @@ public static partial class EpicLoot
     private static readonly Method API_GetAllMagicEffectTypes = new("GetAllMagicEffectTypes");
     private static readonly Method API_GetEnchantCostsJson = new("GetEnchantCostsJson");
     private static readonly Method API_GetSacrificeProductsJson = new("GetSacrificeProductsJson");
+    private static readonly Method API_GetItemDisplayName = new("GetItemDisplayName");
+    private static readonly Method API_GetItemDecoratedName = new(
+        "GetItemDecoratedName",
+        typeof(ItemDrop.ItemData),
+        typeof(string));
 
     /// <summary>
     /// The version of the API contract the installed Epic Loot exposes, or 0 if Epic Loot is not
@@ -84,6 +89,29 @@ public static partial class EpicLoot
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// The name Epic Loot shows for an item -- the generated magic name ("Sturdy Rag Trousers of the
+    /// Bear") where it has one, the vanilla <c>m_shared.m_name</c> otherwise. Still needs localizing.
+    /// </summary>
+    [PublicAPI]
+    public static string GetDisplayName(this ItemDrop.ItemData item)
+    {
+        return (string)(API_GetItemDisplayName.Invoke(item)[0] ?? "");
+    }
+
+    /// <summary>
+    /// <see cref="GetDisplayName"/> wrapped in a color tag, the way Epic Loot's own UI renders item
+    /// names. The tag overrides whatever color your text component is set to, so pass
+    /// <paramref name="colorOverride"/> when you need the name dimmed.
+    /// </summary>
+    /// <param name="colorOverride">A color replacing the rarity color -- hex ("#808080ff") or a name
+    /// ("white"). Null keeps the rarity color.</param>
+    [PublicAPI]
+    public static string GetDecoratedName(this ItemDrop.ItemData item, string colorOverride = null)
+    {
+        return (string)(API_GetItemDecoratedName.Invoke(item, colorOverride)[0] ?? "");
     }
 
     /// <returns>How many rarity tiers exist, so you can enumerate without hard-coding 5.</returns>
