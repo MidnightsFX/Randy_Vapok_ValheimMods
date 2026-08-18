@@ -67,6 +67,9 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
+# Releases
+EpicLoot/Releases/
+
 # Crashlytics generated file
 crashlytics-build.properties
 
