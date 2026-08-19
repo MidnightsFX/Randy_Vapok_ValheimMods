@@ -1,36 +1,36 @@
-## Release 2.1.14
+**2.1.14**
 * Updated for Valheim 0.219.13 Patch (Bog Witch)
 
 <details>
 <summary><b>Changelog History</b> (<i>click to expand</i>)</summary>
 
-## Release 2.1.13
+**2.1.13**
 * Updated for Valheim 0.217.38 Patch
-## Release 2.1.12
+**2.1.12**
 * Updated for Valheim 0.217.27
 * Updated Auga and CLLC API's
 * If Auga is loaded, set the default position of Quick Slot Bar accordingly
 * Updated for World Modifiers and Hard/Hardcore Settings
-## Release 2.1.11
+**2.1.11**
 * Adjusting InventoryGrid Initialization to prevent Awake from happening before variables are set.
   * This has fixed a compatibility issue that was found with Jewelcrafting allowing EAQS to now be used with Smoothbrain's Jewelcrafting
-## Release 2.1.10
+**2.1.10**
 * Fixing Hotkey Bar Binding Texts
 ## Release 2.1.8 & 2.1.9
 * Hildir's Request Updates 0.217.24
 * Updated version from 2.1.7 to 2.1.9 because I forgot to change it.
-## Release 2.1.7
+**2.1.7**
 * Hildir's Request Updates 0.217.14
-## Release 2.1.6
+**2.1.6**
 * Updates needed for Valheim 0.216.7
-## Release 2.1.5
+**2.1.5**
 * Fixing Keybinds to defaults if config is messed up and showing None.
   * This was caused by a change in how keybinds are stored.
 * Tooltips when using Controllers are now visible and not hiding behind the Equipment Slots
-## Release 2.1.4
+**2.1.4**
 * DLL packaged with 2.1.3 was incorrectly built as 2.1.2 and might not have had all the changes in it.
 * Bumping version by 1 and reuploading correct version.
-## Release 2.1.3
+**2.1.3**
   * Improved Controller Support Between Hotbars/Inventories
     * Known Bug: The weight calculation is still not working when using controller to transfer items.
   * Updated Keybindings to Support Controllers
@@ -38,11 +38,11 @@
     * No longer a Prefix that blocks UpdateIcons
     * Allows other mods to affect item icons in the Hotkeybar (like EpicLoot)
     * Potential for Performance Improvement
-## Release 2.1.2
+**2.1.2**
   * Updated for Valheim 0.214.2 Patch
-## Release 2.1.1
+**2.1.1**
   * Fixed compatibility issues with JewelCrafting and MultiUserChest
-## Release 2.1.0
+**2.1.0**
   * Updated for Mistlands!
   * Now uses player.m_customData instead of knownTexts
   * On death, drops equipment in second gravestone

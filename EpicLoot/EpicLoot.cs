@@ -37,16 +37,6 @@ namespace EpicLoot;
 public sealed class EpicLoot : BaseUnityPlugin {
     public const string PluginId = "randyknapp.mods.epicloot";
     public const string DisplayName = "Epic Loot";
-
-    /// <summary>
-    /// The running plugin version.
-    ///
-    /// <para><b>Do not rename this.</b> The other mods in this repo call the equivalent constant
-    /// <c>PluginVersion</c>, and matching that convention here is not worth what it costs: this one is
-    /// part of the published API surface. <see cref="API.GetPluginVersion"/> reads it, and that method
-    /// is meant to be copied verbatim into consumer projects — copies we cannot reach and edit. Renaming
-    /// the constant breaks every copy already out there.</para>
-    /// </summary>
     public const string Version = "0.13.2";
 
     private static string ConfigFileName = PluginId + ".cfg";
