@@ -1,4 +1,8 @@
 **0.13.1**
+* Fixes Loot generation recursively happening with certain mods
+* Fixes terrain generation memory leak, noticable with excessive bounties
+
+**0.13.1**
 * Fix uploaded version
 
 **0.13.0**
