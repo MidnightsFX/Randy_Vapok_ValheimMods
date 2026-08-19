@@ -1,4 +1,4 @@
-using EpicLoot.Config;
+﻿using EpicLoot.Config;
 using HarmonyLib;
 using Jotunn.Managers;
 using System;
@@ -82,6 +82,6 @@ public static class ConfigUpdatePrompt_FejdStartup_Start_Patch
             .Select(x => $" - {x}.json"));
 
         return string.Format(Localization.instance.Localize("$el_configupdate_body"),
-            EpicLoot.PluginVersion, fileList);
+            EpicLoot.Version, fileList);
     }
 }

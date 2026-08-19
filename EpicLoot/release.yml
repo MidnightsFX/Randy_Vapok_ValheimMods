@@ -7,6 +7,9 @@
 extends:  jotunn-mono
 assembly: EpicLoot
 
+# This repository predates the tool and spells the version constant its own way.
+version_const: Version
+
 # The Thunderstore/Hexium team these publish under.
 author_name: RandyKnapp
 

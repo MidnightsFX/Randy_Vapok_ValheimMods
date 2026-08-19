@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -8,7 +8,7 @@ namespace EpicLoot;
 public static partial class API
 {
     /// <summary>
-    /// The version of the public API contract, independent of <see cref="EpicLoot.PluginVersion"/>.
+    /// The version of the public API contract, independent of <see cref="EpicLoot.Version"/>.
     /// Bump this on every additive change; a consumer compares it to decide which endpoints exist.
     /// </summary>
     /// <remarks>
@@ -30,7 +30,7 @@ public static partial class API
     [PublicAPI]
     public static string GetPluginVersion()
     {
-        return EpicLoot.PluginVersion;
+        return EpicLoot.Version;
     }
 
     /// <returns>The Epic Loot plugin GUID, for BepInEx soft-dependency checks.</returns>

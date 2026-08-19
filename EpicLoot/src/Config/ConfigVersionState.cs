@@ -1,4 +1,4 @@
-using BepInEx;
+﻿using BepInEx;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace EpicLoot.Config;
 [Serializable]
 public class ConfigVersionEntry
 {
-    /// <summary>The EpicLoot.PluginVersion that last wrote or validated this file.</summary>
+    /// <summary>The EpicLoot.Version that last wrote or validated this file.</summary>
     public string Version = "";
 
     /// <summary>
@@ -106,7 +106,7 @@ public class ConfigVersionState
     {
         Files[configName] = new ConfigVersionEntry
         {
-            Version = EpicLoot.PluginVersion,
+            Version = EpicLoot.Version,
             SourceHash = sourceHash,
             WrittenHash = writtenHash ?? "",
             Variant = variant ?? ""
@@ -121,7 +121,7 @@ public class ConfigVersionState
     {
         if (Files.TryGetValue(configName, out ConfigVersionEntry entry))
         {
-            entry.Version = EpicLoot.PluginVersion;
+            entry.Version = EpicLoot.Version;
         }
     }
 
@@ -134,7 +134,7 @@ public class ConfigVersionState
         }
 
         entry.DeclinedSourceHash = sourceHash ?? "";
-        entry.DeclinedVersion = EpicLoot.PluginVersion;
+        entry.DeclinedVersion = EpicLoot.Version;
     }
 
     /// <summary>
