@@ -115,7 +115,7 @@ public static class ConfigVersionManager
             {
                 // The shipped default has not changed since this file was written, so there is
                 // nothing to apply no matter what the player has done to it.
-                if (entry.Version != EpicLoot.Version)
+                if (entry.Version != EpicLoot.PluginVersion)
                 {
                     _state.TouchVersion(name);
                     stateChanged = true;
@@ -145,7 +145,7 @@ public static class ConfigVersionManager
                 {
                     _state.Stamp(name, embeddedHash, embeddedHash, variant);
                     stateChanged = true;
-                    EpicLoot.Log($"Refreshed unmodified config {name}.json to version {EpicLoot.Version}.");
+                    EpicLoot.Log($"Refreshed unmodified config {name}.json to version {EpicLoot.PluginVersion}.");
                 }
 
                 continue;
@@ -217,7 +217,7 @@ public static class ConfigVersionManager
         if (HasOutdatedConfigs)
         {
             EpicLoot.LogWarningForce($"{OutdatedConfigs.Count} Epic Loot config file(s) have local changes and " +
-                $"were not written by version {EpicLoot.Version}: {string.Join(", ", OutdatedConfigs)}. " +
+                $"were not written by version {EpicLoot.PluginVersion}: {string.Join(", ", OutdatedConfigs)}. " +
                 $"They will not pick up new content or balance changes until they are updated.");
         }
     }
@@ -286,7 +286,7 @@ public static class ConfigVersionManager
 
         // Named for the version being upgraded *to*: the files inside predate it, and they may not
         // all have come from the same older version, so naming it after one of them would mislead.
-        string backupDir = Path.Combine(BackupDirPath, $"pre-{EpicLoot.Version}_{DateTime.Now:yyyyMMdd-HHmmss}");
+        string backupDir = Path.Combine(BackupDirPath, $"pre-{EpicLoot.PluginVersion}_{DateTime.Now:yyyyMMdd-HHmmss}");
         string baseConfigDir = ELConfig.GetOverhaulDirectoryPath();
         List<string> updated = new List<string>();
 
@@ -321,7 +321,7 @@ public static class ConfigVersionManager
         }
 
         _state.Save();
-        EpicLoot.LogForce($"Updated {updated.Count} Epic Loot config file(s) to version {EpicLoot.Version}. " +
+        EpicLoot.LogForce($"Updated {updated.Count} Epic Loot config file(s) to version {EpicLoot.PluginVersion}. " +
             $"The previous files were backed up to {backupDir}");
     }
 

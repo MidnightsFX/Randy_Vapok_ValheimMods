@@ -8,7 +8,7 @@ namespace EpicLoot;
 public static partial class API
 {
     /// <summary>
-    /// The version of the public API contract, independent of <see cref="EpicLoot.Version"/>.
+    /// The version of the public API contract, independent of <see cref="EpicLoot.PluginVersion"/>.
     /// Bump this on every additive change; a consumer compares it to decide which endpoints exist.
     /// </summary>
     /// <remarks>
@@ -30,7 +30,7 @@ public static partial class API
     [PublicAPI]
     public static string GetPluginVersion()
     {
-        return EpicLoot.Version;
+        return EpicLoot.PluginVersion;
     }
 
     /// <returns>The Epic Loot plugin GUID, for BepInEx soft-dependency checks.</returns>

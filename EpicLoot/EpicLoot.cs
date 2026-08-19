@@ -26,7 +26,7 @@ using Object = UnityEngine.Object;
 
 namespace EpicLoot;
 
-[BepInPlugin(PluginId, DisplayName, Version)]
+[BepInPlugin(PluginId, DisplayName, PluginVersion)]
 [BepInDependency(Jotunn.Main.ModGuid)]
 [BepInDependency("com.ValheimModding.NewtonsoftJsonDetector")]
 [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Patch)]
@@ -37,7 +37,7 @@ namespace EpicLoot;
 public sealed class EpicLoot : BaseUnityPlugin {
     public const string PluginId = "randyknapp.mods.epicloot";
     public const string DisplayName = "Epic Loot";
-    public const string Version = "0.13.0";
+    public const string PluginVersion = "0.13.1";
 
     private static string ConfigFileName = PluginId + ".cfg";
     private static string ConfigFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar + ConfigFileName;

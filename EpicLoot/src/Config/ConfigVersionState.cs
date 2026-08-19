@@ -15,7 +15,7 @@ namespace EpicLoot.Config;
 [Serializable]
 public class ConfigVersionEntry
 {
-    /// <summary>The EpicLoot.Version that last wrote or validated this file.</summary>
+    /// <summary>The EpicLoot.PluginVersion that last wrote or validated this file.</summary>
     public string Version = "";
 
     /// <summary>
@@ -106,7 +106,7 @@ public class ConfigVersionState
     {
         Files[configName] = new ConfigVersionEntry
         {
-            Version = EpicLoot.Version,
+            Version = EpicLoot.PluginVersion,
             SourceHash = sourceHash,
             WrittenHash = writtenHash ?? "",
             Variant = variant ?? ""
@@ -121,7 +121,7 @@ public class ConfigVersionState
     {
         if (Files.TryGetValue(configName, out ConfigVersionEntry entry))
         {
-            entry.Version = EpicLoot.Version;
+            entry.Version = EpicLoot.PluginVersion;
         }
     }
 
@@ -134,7 +134,7 @@ public class ConfigVersionState
         }
 
         entry.DeclinedSourceHash = sourceHash ?? "";
-        entry.DeclinedVersion = EpicLoot.Version;
+        entry.DeclinedVersion = EpicLoot.PluginVersion;
     }
 
     /// <summary>
