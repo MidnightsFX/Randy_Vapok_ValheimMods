@@ -26,9 +26,27 @@ namespace EquipmentAndQuickSlots {
         private static class Player_Awake_SetInventoryHeight {
             [HarmonyPriority(Priority.Last)]
             private static void Postfix(Player __instance) {
-                CaptureVisibleRows(__instance.m_inventory);
+                // Base rows come from the prefab (or a rows mod); the slot positions depend on
+                // them, so recompute before the first Load places items.
+                CaptureBaseRows(__instance.m_inventory);
+                UpdateSlotsGridPosition();
                 __instance.m_inventory.m_height = FullHeight;
+
+                ApplyBaseCarryWeight(__instance);
             }
+        }
+
+        // Vanilla's 300 is the sentinel "don't touch": at that value other mods' carry-weight
+        // changes are left alone; any other value is applied as the player's base capacity.
+        internal static void ApplyBaseCarryWeight(Player player) {
+            if (player == null)
+                return;
+
+            float baseCarryWeight = ValConfig.BaseCarryWeight.Value;
+            if (Mathf.Approximately(baseCarryWeight, ValConfig.VanillaCarryWeight))
+                return;
+
+            player.m_maxCarryWeight = baseCarryWeight;
         }
 
         [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
@@ -190,15 +208,18 @@ namespace EquipmentAndQuickSlots {
             return true;
         }
 
+        // Equip and unequip by drag & drop go through vanilla's minor-action queue (animated,
+        // interruptible, gated by the item's equip duration) — never the instant EquipItem.
+        // Vanilla's OnSelectedItem body calls RemoveEquipAction on both items before it moves
+        // them, so anything that must outlive the move is queued from the postfix.
         [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.OnSelectedItem))]
         public static class InventoryGui_OnSelectedItem_DragRules {
-            // An item dragged in from another inventory straight onto its equipment cell: vanilla
-            // has to move it first (EquipItem needs it in the player inventory), so it is equipped
-            // in the postfix once the move has happened.
             private static ItemDrop.ItemData _equipAfterDrop;
+            private static ItemDrop.ItemData _unequipAfterDrop;
 
             public static bool Prefix(InventoryGui __instance, InventoryGrid grid, Vector2i pos) {
                 _equipAfterDrop = null;
+                _unequipAfterDrop = null;
 
                 Player player = Player.m_localPlayer;
                 if (player == null || player.IsTeleporting() || !__instance.m_dragGo || __instance.m_dragItem == null || __instance.m_dragInventory == null)
@@ -212,14 +233,17 @@ namespace EquipmentAndQuickSlots {
                 bool dragItemEquipped = player.IsItemEquiped(dragItem);
 
                 // Drag-to-equip: an unequipped equippable dropped on its matching equipment cell
-                // equips it; the validation sweep then moves it into the cell.
+                // queues its equip; the item shows the equip progress where it sits and the
+                // validation sweep moves it into the cell once it is worn.
                 if (targetSlot != null && WouldFitEquipmentSlot(targetSlot, dragItem) && !dragItemEquipped) {
                     if (dragFromPlayerGrid) {
                         __instance.SetupDragItem(null, null, 1);
-                        player.EquipItem(dragItem);
+                        QueueEquip(player, dragItem);
                         return false;
                     }
 
+                    // From a container: vanilla moves it into the cell first, the postfix queues
+                    // the equip; ItemBelongs keeps it in the cell while the equip is pending.
                     _equipAfterDrop = dragItem;
                 }
 
@@ -227,34 +251,42 @@ namespace EquipmentAndQuickSlots {
                     ItemDrop.ItemData targetItem = grid.m_inventory.GetItemAt(pos.x, pos.y);
 
                     // Swap-equip: the worn item dragged onto an unequipped item of the same type
-                    // in the grid means "wear that one instead" — equip it, let vanilla unequip
-                    // the dragged one, and let the sweep swap the positions.
+                    // in the grid means "wear that one instead" — queue its equip; the equip
+                    // unequips the dragged one and the sweep swaps the positions.
                     if (targetIsPlayerGrid && targetItem != null && targetItem != dragItem
                         && WouldFitEquipmentSlot(sourceSlot, targetItem) && !player.IsItemEquiped(targetItem)) {
                         __instance.SetupDragItem(null, null, 1);
-                        player.EquipItem(targetItem);
+                        QueueEquip(player, targetItem);
                         return false;
                     }
 
-                    // Drag-to-unequip: the worn item dragged onto an empty cell (regular grid or a
-                    // container) is unequipped first, then vanilla moves it.
-                    if ((!targetIsPlayerGrid || targetSlot == null) && targetItem == null)
-                        player.UnequipItem(dragItem, false);
+                    // Drag-to-unequip: the worn item dragged onto an empty regular or quick slot
+                    // cell. Vanilla moves it (and keeps it worn); the postfix queues the animated
+                    // unequip, and the sweep leaves it alone while that is pending. Into a
+                    // container vanilla unequips on its own — an item can't stay worn outside the
+                    // inventory.
+                    if (targetIsPlayerGrid && (targetSlot == null || !targetSlot.IsEquipmentSlot) && targetItem == null)
+                        _unequipAfterDrop = dragItem;
                 }
 
                 return PassDropItem("InventoryGui.OnSelectedItem", grid, __instance.m_dragInventory, dragItem, pos);
             }
 
             public static void Postfix() {
-                ItemDrop.ItemData item = _equipAfterDrop;
+                ItemDrop.ItemData equip = _equipAfterDrop;
+                ItemDrop.ItemData unequip = _unequipAfterDrop;
                 _equipAfterDrop = null;
+                _unequipAfterDrop = null;
 
                 Player player = Player.m_localPlayer;
-                if (item == null || player == null || PlayerInventory == null)
+                if (player == null || PlayerInventory == null)
                     return;
 
-                if (PlayerInventory.ContainsItem(item) && !player.IsItemEquiped(item))
-                    player.EquipItem(item);
+                if (equip != null && PlayerInventory.ContainsItem(equip))
+                    QueueEquip(player, equip);
+
+                if (unequip != null && PlayerInventory.ContainsItem(unequip) && (GetItemSlot(unequip) is not Slot landed || !landed.IsEquipmentSlot))
+                    QueueUnequip(player, unequip);
             }
         }
 

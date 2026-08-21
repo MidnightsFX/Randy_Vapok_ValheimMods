@@ -60,6 +60,9 @@ namespace EquipmentAndQuickSlots {
 
         private static RectTransform inventoryBackground;
         private static Image inventoryBackgroundImage;
+        private static RectTransform inventoryDarken;
+        private static RectTransform inventorySelectedFrame;
+        private static Vector2? containerOriginalPivot;
         private static RectTransform equipmentBackground;
         private static RectTransform quickBackground;
         private static RectTransform customBackground;
@@ -99,9 +102,13 @@ namespace EquipmentAndQuickSlots {
             if (inventoryBackground == null) {
                 inventoryBackground = InventoryGui.instance.m_player.Find("Bkg")?.GetComponent<RectTransform>();
                 inventoryBackgroundImage = inventoryBackground?.GetComponent<Image>();
+                inventoryDarken = InventoryGui.instance.m_player.Find("Darken")?.GetComponent<RectTransform>();
+                inventorySelectedFrame = InventoryGui.instance.m_player.GetComponent<UIGroupHandler>()?.m_enableWhenActiveAndGamepad?.transform.GetChild(0) as RectTransform;
             }
             if (inventoryBackground == null)
                 return;
+
+            UpdateInventoryPanelForExtraRows();
 
             if (!equipmentBackground)
                 equipmentBackground = CreateBackground("EaqsEquipmentBkg");
@@ -157,6 +164,27 @@ namespace EquipmentAndQuickSlots {
             bool female = player != null && player.m_visEquipment != null && player.m_visEquipment.GetModelIndex() == 1;
             paperdoll.transform.Find("Male")?.gameObject.SetActive(!female);
             paperdoll.transform.Find("Female")?.gameObject.SetActive(female);
+        }
+
+        // Extra visible rows: the player panel's stretch-anchored background (and its darken /
+        // gamepad selection frame) is extended downward by one base-row-fraction per extra row,
+        // and the container panel is nudged down so it doesn't sit under the taller inventory.
+        private static void UpdateInventoryPanelForExtraRows() {
+            int extraRows = ExtraRows;
+            float anchorY = -1f * (extraRows / (float)BaseRows - 0.01f * Math.Max(extraRows - 1, 0));
+
+            inventoryBackground.anchorMin = new Vector2(0f, anchorY);
+            if (inventoryDarken)
+                inventoryDarken.anchorMin = inventoryBackground.anchorMin;
+            if (inventorySelectedFrame)
+                inventorySelectedFrame.anchorMin = inventoryBackground.anchorMin;
+
+            RectTransform container = InventoryGui.instance.m_container;
+            if (container) {
+                if (containerOriginalPivot == null)
+                    containerOriginalPivot = container.pivot;
+                container.pivot = new Vector2(containerOriginalPivot.Value.x, containerOriginalPivot.Value.y + extraRows * 0.2f);
+            }
         }
 
         private static Vector2 RowBackgroundSize(int slotCount) => new Vector2(rowBackgroundPitch * slotCount + 10f, rowBackgroundHeight);
@@ -361,6 +389,9 @@ namespace EquipmentAndQuickSlots {
         private static void ClearPanel() {
             inventoryBackground = null;
             inventoryBackgroundImage = null;
+            inventoryDarken = null;
+            inventorySelectedFrame = null;
+            containerOriginalPivot = null;
             equipmentBackground = null;
             quickBackground = null;
             customBackground = null;

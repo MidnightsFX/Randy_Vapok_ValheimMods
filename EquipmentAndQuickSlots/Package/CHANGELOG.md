@@ -9,8 +9,14 @@
 * New **Trinket** equipment slot.
 * **Quick slot count is configurable** (0–6, default 3); hotkeys 4–6 are unbound by default.
 * **Server-synced balance settings** (requires Jotunn; new hard dependency): slot toggles, quick
-  slot count and the keep-on-death options are admin-controlled when the server runs the mod.
-  The mod remains fully client-side installable — settings just stay local then.
+  slot count, every Gravestone option, extra inventory rows and base carry weight are
+  admin-controlled when the server runs the mod. The mod remains fully client-side installable —
+  settings just stay local then.
+* **Extra inventory rows** (`Inventory / Extra Inventory Rows`, 0–5): more visible rows; the
+  equipment and quick slots move down with the grid and items are re-homed safely when the value
+  changes.
+* **Base carry weight** (`Inventory / Base Carry Weight`): the player's carry capacity before
+  belts; 300 (vanilla) leaves other mods' carry-weight changes untouched.
 * **Death fixes**: the "Dont drop … on death" options now actually work (they were inverted),
   kept gear can no longer be deleted by the Hammer/Hardcore world modifiers, the single enlarged
   tombstone can never destroy items when full, and grave items return to their exact slots on

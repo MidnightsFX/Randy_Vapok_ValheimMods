@@ -10,9 +10,6 @@ namespace EquipmentAndQuickSlots {
         public static ConfigEntry<bool> ViewDebugSaveData;
         public static ConfigEntry<TextAnchor> QuickSlotsAnchor;
         public static ConfigEntry<Vector2> QuickSlotsPosition;
-        public static ConfigEntry<bool> InstantlyReequipArmorOnPickup;
-        public static ConfigEntry<bool> AutoEquipCarryWeightItems;
-        public static ConfigEntry<bool> AutoEquipWeaponShield;
         public static ConfigEntry<bool> PreventStackAll;
         public static ConfigEntry<bool> PreventAutoPickup;
         public static ConfigEntry<bool> BackupEnabled;
@@ -29,6 +26,13 @@ namespace EquipmentAndQuickSlots {
         public static ConfigEntry<int> QuickSlotCount;
         public static ConfigEntry<bool> DontDropEquipmentOnDeath;
         public static ConfigEntry<bool> DontDropQuickslotsOnDeath;
+        public static ConfigEntry<bool> InstantlyReequipArmorOnPickup;
+        public static ConfigEntry<bool> AutoEquipCarryWeightItems;
+        public static ConfigEntry<bool> AutoEquipWeaponShield;
+        public static ConfigEntry<int> ExtraInventoryRows;
+        public static ConfigEntry<float> BaseCarryWeight;
+
+        public const float VanillaCarryWeight = 300f;
 
         public const int MaxQuickSlots = 6;
 
@@ -88,12 +92,6 @@ namespace EquipmentAndQuickSlots {
             ShowPaperdoll = Config.Bind("Equipment Panel", "Show Paperdoll", false,
                 new ConfigDescription("Draw the character paperdoll image behind the equipment slots.", null, new ConfigurationManagerAttributes { }));
 
-            InstantlyReequipArmorOnPickup = Config.Bind("Gravestone", "Instantly re-equip armor on pickup", true,
-                new ConfigDescription("If set to true, when you pickup your gravestone the armor that was in your equipment slots is instantly re-equipped, if possible. Only valid when Equipment Slots are enabled.", null, new ConfigurationManagerAttributes { }));
-            AutoEquipCarryWeightItems = Config.Bind("Gravestone", "Auto-equip carry weight items on pickup", true,
-                new ConfigDescription("If set to true, belts and other carry-weight gear from your gravestone are equipped immediately on pickup so the rest of the loot stays carryable.", null, new ConfigurationManagerAttributes { }));
-            AutoEquipWeaponShield = Config.Bind("Gravestone", "Auto-equip weapon and shield on pickup", true,
-                new ConfigDescription("If set to true, the weapon and shield you were holding when you died are re-equipped when you pick up your gravestone.", null, new ConfigurationManagerAttributes { }));
 
             PreventStackAll = Config.Bind("Protections", "Prevent Stack All", true,
                 new ConfigDescription("Items in equipment and quick slots are not moved by the container Stack All button.", null, new ConfigurationManagerAttributes { }));
@@ -106,7 +104,17 @@ namespace EquipmentAndQuickSlots {
             EquipmentSlotsEnabled = BindServerConfig("Toggles", "Enable Equipment Slots", true, "Enable the equipment slots. Disabling this while items are equipped will attempt to move them to your inventory.");
             QuickSlotsEnabled = BindServerConfig("Toggles", "Enable Quick Slots", true, "Enable the quick slots. Disabling this while items are in the slots will attempt to move them to your inventory.");
             QuickSlotCount = BindServerConfig("Quick Slots", "Quick Slot Count", 3, "Number of quick slots available.", false, 0, MaxQuickSlots);
+            ExtraInventoryRows = BindServerConfig("Inventory", "Extra Inventory Rows", 0, "Additional visible inventory rows on top of the game's four. The equipment and quick slots move down with the grid.", false, 0, Slots.MaxExtraRows);
+            ExtraInventoryRows.SettingChanged += (_, _) => Slots.OnExtraRowsChanged();
+            BaseCarryWeight = BindServerConfig("Inventory", "Base Carry Weight", VanillaCarryWeight, "The player's base carry weight before belts and other modifiers. 300 is the game default and leaves other mods' carry-weight changes untouched.", false, 50f, 5000f);
+            BaseCarryWeight.SettingChanged += (_, _) => InventoryPatches.ApplyBaseCarryWeight(Player.m_localPlayer);
+
+            // Everything under Gravestone is balance: what survives death and what the player
+            // gets back for free on pickup.
             DontDropEquipmentOnDeath = BindServerConfig("Gravestone", "Dont drop equipment on death", false, "If set to true, your equipped items stay with you when you die instead of dropping into the gravestone.");
+            InstantlyReequipArmorOnPickup = BindServerConfig("Gravestone", "Instantly re-equip armor on pickup", true, "If set to true, when you pickup your gravestone the armor that was in your equipment slots is instantly re-equipped, if possible. Only valid when Equipment Slots are enabled.");
+            AutoEquipCarryWeightItems = BindServerConfig("Gravestone", "Auto-equip carry weight items on pickup", true, "If set to true, belts and other carry-weight gear from your gravestone are equipped immediately on pickup so the rest of the loot stays carryable.");
+            AutoEquipWeaponShield = BindServerConfig("Gravestone", "Auto-equip weapon and shield on pickup", true, "If set to true, the weapon and shield you were holding when you died are re-equipped when you pick up your gravestone.");
             DontDropQuickslotsOnDeath = BindServerConfig("Gravestone", "Dont drop quickslot items on death", false, "If set to true, the items in the quickslots stay with you when you die instead of dropping into the gravestone.");
         }
 

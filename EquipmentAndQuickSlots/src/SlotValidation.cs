@@ -166,8 +166,9 @@ namespace EquipmentAndQuickSlots
                     if (item == null)
                         continue;
 
-                    // An equipped paperdoll-type item outside its equipment cell moves in
-                    if (Player.m_localPlayer.IsItemEquiped(item) && IsEquipmentSlotItem(item)
+                    // An equipped paperdoll-type item outside its equipment cell moves in — unless
+                    // its unequip is already queued and animating (it was dragged out of the cell)
+                    if (Player.m_localPlayer.IsItemEquiped(item) && !IsUnequipQueued(item) && IsEquipmentSlotItem(item)
                         && (GetItemSlot(item) is not Slot slotItem || !slotItem.IsEquipmentSlot))
                     {
                         if (TryFindFreeEquipmentSlotForItem(item, out Slot slot))

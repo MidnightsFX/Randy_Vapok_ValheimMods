@@ -114,9 +114,10 @@ namespace EquipmentAndQuickSlots
             // the equipped state must not gate placement.
             public bool ItemFits(ItemDrop.ItemData item) => item != null && IsActive && (_itemIsValid == null || _itemIsValid(item));
 
-            // Residence rule: may this item stay in this cell. Equipment cells are equipped-only;
-            // the validation sweep relocates anything that fits but doesn't belong.
-            public bool ItemBelongs(ItemDrop.ItemData item) => ItemFits(item) && (!IsEquipmentSlot || IsEquippedByPlayer(item));
+            // Residence rule: may this item stay in this cell. Equipment cells are equipped-only
+            // (an item whose equip is queued and animating counts — it is about to be worn); the
+            // validation sweep relocates anything that fits but doesn't belong.
+            public bool ItemBelongs(ItemDrop.ItemData item) => ItemFits(item) && (!IsEquipmentSlot || IsEquippedByPlayer(item) || IsEquipQueued(item));
 
             public bool IsFreeQuickSlot() => IsQuickSlot && IsActive && IsFree;
 
@@ -158,8 +159,12 @@ namespace EquipmentAndQuickSlots
         public const int EquipmentSlotCount = 6;
 
         // The visible rows are whatever the vanilla inventory (or a rows mod like moreslots)
-        // established before we appended the hidden slot rows. Captured once at Player.Awake.
-        public static int VisibleRows { get; private set; } = VanillaInventoryHeight;
+        // established before we appended the hidden slot rows — captured once at Player.Awake —
+        // plus the server-synced extra rows. The hidden slot rows always sit directly below.
+        public static int BaseRows { get; private set; } = VanillaInventoryHeight;
+        public const int MaxExtraRows = 5;
+        public static int ExtraRows => Mathf.Clamp(ValConfig.ExtraInventoryRows?.Value ?? 0, 0, MaxExtraRows);
+        public static int VisibleRows => BaseRows + ExtraRows;
 
         public static Player loadedPlayer;
 
@@ -174,17 +179,67 @@ namespace EquipmentAndQuickSlots
 
         public static bool IsValidPlayer(Character character) => character != null && character.IsPlayer() && Player.m_localPlayer == character && character.m_nview && character.m_nview.IsValid() && character.m_nview.IsOwner();
 
-        private static bool _visibleRowsCaptured;
+        private static bool _baseRowsCaptured;
 
-        internal static void CaptureVisibleRows(Inventory inventory)
+        internal static void CaptureBaseRows(Inventory inventory)
         {
             // Captured exactly once, from the first Player.Awake before we ever extend a height —
-            // after that any larger height we observe is our own FullHeight, not new visible rows.
-            if (_visibleRowsCaptured)
+            // after that any larger height we observe is our own FullHeight, not new base rows.
+            if (_baseRowsCaptured)
                 return;
 
-            _visibleRowsCaptured = true;
-            VisibleRows = Mathf.Max(1, inventory.m_height);
+            _baseRowsCaptured = true;
+            BaseRows = Mathf.Max(1, inventory.m_height);
+        }
+
+        // The extra-row count changed (config edit, or the server's value arriving on join): the
+        // slot region moves with the visible rows. Slot residents move with their slots; anything
+        // from the visible grid that now finds itself on a slot cell it doesn't belong in is moved
+        // back into the visible grid (or a free slot) — never dropped, never lost.
+        internal static void OnExtraRowsChanged()
+        {
+            Inventory inventory = PlayerInventory;
+            if (inventory == null)
+            {
+                UpdateSlotsGridPosition();
+                return;
+            }
+
+            ClearCachedItems();
+            Dictionary<Slot, ItemDrop.ItemData> residents = slots.ToDictionary(slot => slot, slot => slot.Item);
+
+            UpdateSlotsGridPosition();
+
+            bool changed = false;
+            foreach (ItemDrop.ItemData item in inventory.m_inventory.ToList())
+            {
+                if (!IsGridPositionASlot(item.m_gridPos))
+                    continue;
+
+                Slot slot = GetSlotInGrid(item.m_gridPos);
+                residents.TryGetValue(slot ?? slots[0], out ItemDrop.ItemData resident);
+                bool intruder = slot == null
+                                || (resident != null && resident != item)
+                                || (resident == null && !slot.ItemBelongs(item));
+                if (!intruder)
+                    continue;
+
+                Vector2i free = inventory.FindEmptySlot(true);
+                if (free.x >= 0)
+                    item.m_gridPos = free;
+                else if (TryFindFreeSlotForItem(item, out Slot freeSlot))
+                    item.m_gridPos = freeSlot.GridPosition;
+                // else: leave it; the overlap sweep keeps trying to find it a home
+
+                ClearCachedItems();
+                changed = true;
+            }
+
+            if (changed)
+                inventory.Changed();
+
+            SlotValidation.ValidateItems();
+            SlotValidation.ValidateSlots();
         }
 
         public static Slot[] GetEquipmentSlots(bool onlyActive = true) => slots.Where(slot => slot.IsEquipmentSlot && (!onlyActive || slot.IsActive)).ToArray();
@@ -242,7 +297,8 @@ namespace EquipmentAndQuickSlots
             if (item == null)
                 return false;
 
-            slot = GetEquipmentSlots().FirstOrDefault(s => !s.IsFree && s.ItemFits(item) && !CurrentPlayer.IsItemEquiped(s.Item));
+            // An occupant with a queued equip is about to be worn — don't swap it out
+            slot = GetEquipmentSlots().FirstOrDefault(s => !s.IsFree && s.ItemFits(item) && !CurrentPlayer.IsItemEquiped(s.Item) && !IsEquipQueued(s.Item));
             return slot != null;
         }
 
@@ -385,6 +441,58 @@ namespace EquipmentAndQuickSlots
             item != null && slot.IsEquipmentSlot && slot.IsActive && item.m_shared.m_itemType == GetEquipmentSlotType(slot);
 
         internal static bool IsEquippedByPlayer(ItemDrop.ItemData item) => item != null && (item.m_equipped || CurrentPlayer?.IsItemEquiped(item) == true);
+
+        // ---------------------------------------------------------------------------------------
+        // Equip queue. Drag & drop equips go through vanilla's minor-action queue — the same
+        // animated, interruptible path right-click uses — so the equip duration gate can't be
+        // bypassed by dragging. Vanilla's QueueEquipAction/QueueUnequipAction toggle (queuing an
+        // item that already has an action removes it), hence the explicit state checks here.
+
+        private static bool IsActionQueued(ItemDrop.ItemData item, Player.MinorActionData.ActionType type)
+        {
+            Player player = CurrentPlayer;
+            if (item == null || player == null || player.m_actionQueue == null)
+                return false;
+
+            foreach (Player.MinorActionData action in player.m_actionQueue)
+                if (action.m_item == item && action.m_type == type)
+                    return true;
+
+            return false;
+        }
+
+        internal static bool IsEquipQueued(ItemDrop.ItemData item) => IsActionQueued(item, Player.MinorActionData.ActionType.Equip);
+
+        internal static bool IsUnequipQueued(ItemDrop.ItemData item) => IsActionQueued(item, Player.MinorActionData.ActionType.Unequip);
+
+        internal static void QueueEquip(Player player, ItemDrop.ItemData item)
+        {
+            if (player == null || item == null || player.IsItemEquiped(item) || IsEquipQueued(item))
+                return;
+
+            // A pending unequip is simply cancelled: the item stays worn
+            if (IsUnequipQueued(item))
+            {
+                player.RemoveEquipAction(item);
+                return;
+            }
+
+            player.QueueEquipAction(item);
+        }
+
+        internal static void QueueUnequip(Player player, ItemDrop.ItemData item)
+        {
+            if (player == null || item == null || !player.IsItemEquiped(item) || IsUnequipQueued(item))
+                return;
+
+            if (IsEquipQueued(item))
+            {
+                player.RemoveEquipAction(item);
+                return;
+            }
+
+            player.QueueUnequipAction(item);
+        }
 
         private static Func<ItemDrop.ItemData, bool> EquipmentSlotValidator(ItemDrop.ItemData.ItemType itemType)
         {
