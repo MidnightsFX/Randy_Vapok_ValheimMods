@@ -8,7 +8,7 @@ namespace EquipmentAndQuickSlots {
     [BepInDependency(Jotunn.Main.ModGuid)]
     [BepInDependency("moreslots", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("randyknapp.mods.auga", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency(EpicLootCompat.EpicLootGUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("randyknapp.mods.epicloot", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInIncompatibility("Azumatt.AzuExtendedPlayerInventory")]
     [BepInIncompatibility("aedenthorn.ExtendedPlayerInventory")]
     [BepInIncompatibility("shudnal.ExtraSlots")]
