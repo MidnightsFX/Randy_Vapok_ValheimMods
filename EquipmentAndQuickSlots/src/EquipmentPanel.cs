@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using HarmonyLib;
 using TMPro;
@@ -7,130 +7,140 @@ using UnityEngine.UI;
 using static EquipmentAndQuickSlots.Slots;
 
 namespace EquipmentAndQuickSlots {
-    // The floating panel next to the inventory. The grid elements for the hidden slot rows already
+    // The floating panel next to the inventory, in the classic 2.x EAQS arrangement: the equipment
+    // cells form the paperdoll-style two-column cluster (Head/Chest/Legs down the left, Shoulders/
+    // Utility/Trinket half a row lower on the right) on their own background, with the quick slots
+    // on a separate background row below it. The grid elements for the hidden slot rows already
     // exist (the player grid renders the full-height inventory); this class only shrinks the
-    // visible grid and physically relocates the slot elements onto a cloned background panel.
-    // All vanilla behavior — drag/drop, tooltips, gamepad selection, other mods' icon overlays —
-    // keeps working because these are real InventoryGrid elements.
+    // visible grid and physically relocates those elements. All vanilla behavior — drag/drop,
+    // tooltips, gamepad selection, other mods' icon overlays — keeps working because these are
+    // real InventoryGrid elements.
     public static class EquipmentPanel {
-        private const string BackgroundName = "EaqsEquipmentPanel";
+        // --- 2.x geometry, in player-grid-root space. The panel used to be an empty 255x352 rect
+        // at (752,-166) holding two center-anchored InventoryGrids; these values are that layout
+        // flattened into absolute element positions (grid center + 100x100 root offset + the old
+        // (-20,79) element offset table). Tune panelBase if the grid root inset differs. ---
+        private static readonly Vector2 panelBase = new Vector2(752f, -166f);
 
-        private const float tileSpace = 6f;
-        private const float tileSize = 64f + tileSpace;
-        private const float interslotSpaceInTiles = 0.25f;
-        private const float inventoryPanelOffset = 100f;
-        private const int equipmentColumns = 3;
-        private const int equipmentRows = 2;
+        private const float elementSpace = 70f;                 // vanilla InventoryGrid.m_elementSpace
+        private const float slotSpacing = elementSpace + 10f;   // 2.x equipment grid spacing
+        private static readonly Vector2 equipmentOrigin = new Vector2(60.5f, -27f);
+        private static readonly Vector2[] equipmentOffsets = {
+            new Vector2(0f, 0f),                                // Head
+            new Vector2(0f, -slotSpacing),                      // Chest
+            new Vector2(0f, -2f * slotSpacing),                 // Legs
+            new Vector2(slotSpacing, -0.5f * slotSpacing),      // Shoulders
+            new Vector2(slotSpacing, -1.5f * slotSpacing),      // Utility
+            new Vector2(slotSpacing, -2.5f * slotSpacing),      // Trinket
+        };
+        private static readonly Vector2 equipmentBackgroundCenter = new Vector2(132.5f, -159f);
+        private static readonly Vector2 equipmentBackgroundSize = new Vector2(210f, 300f);
+        private static readonly Vector2 equipmentLabelPosition = new Vector2(32f, 5f);
 
-        private static RectTransform inventoryDarken;
+        private const float rowLeft = 25.5f;                    // first cell of a slot row
+        private const float quickRowTop = -304f;
+        private const float rowBackgroundLeft = 14.5f;
+        private const float rowBackgroundHeight = 90f;
+        private const float rowBackgroundPitch = 74f;           // 2.x: background width = 74 per slot + 10
+        private const float customRowTop = quickRowTop - rowBackgroundHeight;
+
         private static RectTransform inventoryBackground;
         private static Image inventoryBackgroundImage;
         private static RectTransform equipmentBackground;
-        private static Image equipmentBackgroundImage;
-        private static RectTransform selectedFrame;
-        private static RectTransform inventorySelectedFrame;
+        private static RectTransform quickBackground;
+        private static RectTransform customBackground;
 
         private static Color normalColor = Color.clear;
         private static Color highlightedColor = Color.clear;
 
         private static int ActiveQuickSlots => ValConfig.QuickSlotsEnabled.Value ? ValConfig.QuickSlotCount.Value : 0;
         private static bool EquipmentVisible => ValConfig.EquipmentSlotsEnabled.Value;
-        private static int ActiveCustomSlots => GetCustomSlots().Count(slot => slot.IsActive);
-        private static int CustomColumns => (ActiveCustomSlots + equipmentRows - 1) / equipmentRows;
-
-        private static float InventoryPanelWidth => InventoryGui.instance ? InventoryGui.instance.m_player.rect.width : 0;
-        private static float PanelWidthInTiles => Math.Max((EquipmentVisible ? equipmentColumns : 0) + CustomColumns, ActiveQuickSlots);
-        private static float PanelHeightInTiles => (EquipmentVisible ? equipmentRows : 0) + (ActiveQuickSlots > 0 ? 1f + interslotSpaceInTiles : 0f);
-        private static float PanelWidth => PanelWidthInTiles * tileSize + tileSpace / 2;
-        private static float PanelHeight => PanelHeightInTiles * tileSize + tileSpace / 2;
-        private static Vector2 PanelPosition => new Vector2(InventoryPanelWidth + inventoryPanelOffset, 0f);
+        private static Slot[] ActiveCustomSlots => GetCustomSlots().Where(slot => slot.IsActive).OrderBy(slot => slot.Index).ToArray();
 
         internal static Vector2 GetSlotPosition(Slot slot) {
-            if (slot.IsEquipmentSlot) {
-                int i = slot.Index - EquipmentSlotStartIndex;
-                return PanelPosition + new Vector2(i % equipmentColumns * tileSize, -(i / equipmentColumns * tileSize));
-            }
+            if (slot.IsEquipmentSlot)
+                return panelBase + equipmentOrigin + equipmentOffsets[slot.Index - EquipmentSlotStartIndex];
 
-            if (slot.IsQuickSlot) {
-                float y = (EquipmentVisible ? equipmentRows + interslotSpaceInTiles : 0f) * tileSize;
-                return PanelPosition + new Vector2(slot.Index * tileSize, -y);
-            }
+            if (slot.IsQuickSlot)
+                return panelBase + new Vector2(rowLeft + slot.Index * elementSpace, quickRowTop);
 
             if (slot.IsCustomSlot) {
-                // Extra columns to the right of the equipment block, two per column
-                int ordinal = System.Array.IndexOf(ReservedIndices, slot.Index);
-                int col = (EquipmentVisible ? equipmentColumns : 0) + ordinal / equipmentRows;
-                int row = ordinal % equipmentRows;
-                return PanelPosition + new Vector2(col * tileSize, -(row * tileSize));
+                // API slots form a second row under the quick slots, packed left without gaps
+                int ordinal = Array.IndexOf(ActiveCustomSlots, slot);
+                return panelBase + new Vector2(rowLeft + Math.Max(0, ordinal) * elementSpace, customRowTop);
             }
 
-            return PanelPosition;
+            return panelBase;
         }
 
-        // Runs from InventoryGui.Update while visible: builds the cloned background once, keeps
-        // its size and skin in sync afterwards.
+        // Runs from InventoryGui.Update while visible: clones the inventory background once per
+        // slot group, then keeps size, position and skin in sync.
         internal static void UpdateEquipmentBackground() {
-            if (!InventoryGui.instance)
+            if (!InventoryGui.instance || !InventoryGui.instance.m_player)
                 return;
 
-            if (inventoryBackground == null)
-                inventoryBackground = InventoryGui.instance.m_player?.Find("Bkg")?.GetComponent<RectTransform>();
+            if (inventoryBackground == null) {
+                inventoryBackground = InventoryGui.instance.m_player.Find("Bkg")?.GetComponent<RectTransform>();
+                inventoryBackgroundImage = inventoryBackground?.GetComponent<Image>();
+            }
             if (inventoryBackground == null)
                 return;
 
-            if (!equipmentBackground && InventoryGui.instance.m_player) {
-                Transform selectedFrames = InventoryGui.instance.m_player.GetComponent<UIGroupHandler>()?.m_enableWhenActiveAndGamepad.transform;
-                inventoryDarken = InventoryGui.instance.m_player.Find("Darken").GetComponent<RectTransform>();
+            if (!equipmentBackground)
+                equipmentBackground = CreateBackground("EaqsEquipmentBkg");
+            if (!quickBackground)
+                quickBackground = CreateBackground("EaqsQuickSlotBkg");
+            if (!customBackground)
+                customBackground = CreateBackground("EaqsCustomSlotBkg");
 
-                equipmentBackground = new GameObject(BackgroundName, typeof(RectTransform)).GetComponent<RectTransform>();
-                equipmentBackground.gameObject.layer = inventoryBackground.gameObject.layer;
-                equipmentBackground.SetParent(InventoryGui.instance.m_player, worldPositionStays: false);
-                equipmentBackground.SetSiblingIndex(1 + (selectedFrames == null ? inventoryDarken.GetSiblingIndex() : selectedFrames.GetSiblingIndex()));
-                equipmentBackground.offsetMin = Vector2.zero;
-                equipmentBackground.offsetMax = Vector2.zero;
-                equipmentBackground.sizeDelta = Vector2.zero;
-                equipmentBackground.anchoredPosition = Vector2.zero;
-                equipmentBackground.anchorMin = new Vector2(0f, 1f);
-                equipmentBackground.anchorMax = new Vector2(0f, 1f);
+            SyncBackground(equipmentBackground, EquipmentVisible, panelBase + equipmentBackgroundCenter, equipmentBackgroundSize);
 
-                RectTransform equipmentDarken = UnityEngine.Object.Instantiate(inventoryDarken, equipmentBackground);
-                equipmentDarken.name = "Darken";
-                equipmentDarken.sizeDelta = Vector2.one * 70f;
+            int quickCount = ActiveQuickSlots;
+            SyncBackground(quickBackground, quickCount > 0, RowBackgroundCenter(quickCount, quickRowTop), RowBackgroundSize(quickCount));
 
-                Transform equipmentBkg = UnityEngine.Object.Instantiate(inventoryBackground.transform, equipmentBackground);
-                equipmentBkg.name = "Bkg";
+            int customCount = ActiveCustomSlots.Length;
+            SyncBackground(customBackground, customCount > 0, RowBackgroundCenter(customCount, customRowTop), RowBackgroundSize(customCount));
+        }
 
-                equipmentBackgroundImage = equipmentBkg.GetComponent<Image>();
-                inventoryBackgroundImage = inventoryBackground.transform.GetComponent<Image>();
+        private static Vector2 RowBackgroundSize(int slotCount) => new Vector2(rowBackgroundPitch * slotCount + 10f, rowBackgroundHeight);
 
-                if (selectedFrames != null) {
-                    inventorySelectedFrame = selectedFrames.GetChild(0) as RectTransform;
-                    selectedFrame = UnityEngine.Object.Instantiate(inventorySelectedFrame, selectedFrames);
-                    selectedFrame.name = "selected (EAQS)";
+        // Row backgrounds are centered on their cells: the 64-tall cell sits mid-way in the 90-tall strip
+        private static Vector2 RowBackgroundCenter(int slotCount, float rowTop) =>
+            panelBase + new Vector2(rowBackgroundLeft + RowBackgroundSize(slotCount).x / 2f, rowTop - (elementSpace - 6f) / 2f);
 
-                    selectedFrame.offsetMin = equipmentBackground.offsetMin;
-                    selectedFrame.offsetMax = equipmentBackground.offsetMax;
-                    selectedFrame.anchorMin = equipmentBackground.anchorMin;
-                    selectedFrame.anchorMax = equipmentBackground.anchorMax;
-                }
-            }
+        private static RectTransform CreateBackground(string name) {
+            Transform player = InventoryGui.instance.m_player;
+            Transform selectedFrames = player.GetComponent<UIGroupHandler>()?.m_enableWhenActiveAndGamepad?.transform;
+            Transform darken = player.Find("Darken");
 
-            if (equipmentBackgroundImage && inventoryBackgroundImage) {
-                equipmentBackgroundImage.sprite = inventoryBackgroundImage.sprite;
-                equipmentBackgroundImage.overrideSprite = inventoryBackgroundImage.overrideSprite;
-                equipmentBackgroundImage.color = inventoryBackgroundImage.color;
-            }
+            RectTransform background = UnityEngine.Object.Instantiate(inventoryBackground, player, worldPositionStays: false);
+            background.name = name;
+            // Drawn behind the grid: right after the panel's own Darken / selection frames
+            int anchorIndex = selectedFrames != null ? selectedFrames.GetSiblingIndex() : darken != null ? darken.GetSiblingIndex() : inventoryBackground.GetSiblingIndex();
+            background.SetSiblingIndex(anchorIndex + 1);
+            background.anchorMin = new Vector2(0f, 1f);
+            background.anchorMax = new Vector2(0f, 1f);
+            background.pivot = new Vector2(0.5f, 0.5f);
+            background.localScale = Vector3.one;
+            return background;
+        }
 
-            if (equipmentBackground) {
-                bool anySlots = PanelHeightInTiles > 0;
-                equipmentBackground.gameObject.SetActive(anySlots);
-                equipmentBackground.sizeDelta = new Vector2(PanelWidth, PanelHeight);
-                equipmentBackground.anchoredPosition = PanelPosition + new Vector2(PanelWidth / 2, -PanelHeight / 2);
+        private static void SyncBackground(RectTransform background, bool visible, Vector2 center, Vector2 size) {
+            if (!background)
+                return;
 
-                if (selectedFrame) {
-                    selectedFrame.sizeDelta = equipmentBackground.sizeDelta + Vector2.one * 26f;
-                    selectedFrame.anchoredPosition = equipmentBackground.anchoredPosition;
-                }
+            background.gameObject.SetActive(visible);
+            if (!visible)
+                return;
+
+            background.sizeDelta = size;
+            background.anchoredPosition = center;
+
+            Image image = background.GetComponent<Image>();
+            if (image && inventoryBackgroundImage) {
+                image.sprite = inventoryBackgroundImage.sprite;
+                image.overrideSprite = inventoryBackgroundImage.overrideSprite;
+                image.color = inventoryBackgroundImage.color;
             }
         }
 
@@ -190,10 +200,14 @@ namespace EquipmentAndQuickSlots {
 
             binding.gameObject.SetActive(true);
             text.enabled = true;
+            text.overflowMode = TextOverflowModes.Overflow;
+            text.textWrappingMode = TextWrappingModes.NoWrap;
             text.text = slot.IsHotkeySlot ? slot.GetShortcutText() : slot.Name;
-            RectTransform rect = binding.GetComponent<RectTransform>();
-            rect.anchoredPosition = new Vector2(30f, 10f);
-            rect.sizeDelta = new Vector2(64f, 20f);
+
+            // Equipment labels sit inside the cell like 2.x did; hotkey labels keep the vanilla
+            // hotbar-number placement.
+            if (slot.IsEquipmentSlot)
+                text.rectTransform.anchoredPosition = equipmentLabelPosition;
         }
 
         private static void SetSlotColor(Button button, bool unfit) {
@@ -212,13 +226,11 @@ namespace EquipmentAndQuickSlots {
         }
 
         private static void ClearPanel() {
-            inventoryDarken = null;
             inventoryBackground = null;
             inventoryBackgroundImage = null;
             equipmentBackground = null;
-            equipmentBackgroundImage = null;
-            selectedFrame = null;
-            inventorySelectedFrame = null;
+            quickBackground = null;
+            customBackground = null;
             normalColor = Color.clear;
             highlightedColor = Color.clear;
         }

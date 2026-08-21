@@ -437,7 +437,7 @@ namespace EquipmentAndQuickSlots
             AddSlot(helmetSlotID, () => "Head", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Helmet), EquipmentSlotsAvailable);
             AddSlot(chestSlotID, () => "Chest", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Chest), EquipmentSlotsAvailable);
             AddSlot(legsSlotID, () => "Legs", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Legs), EquipmentSlotsAvailable);
-            AddSlot(shoulderSlotID, () => "Shoulder", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Shoulder), EquipmentSlotsAvailable);
+            AddSlot(shoulderSlotID, () => "Shoulders", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Shoulder), EquipmentSlotsAvailable);
             AddSlot(utilitySlotID, () => "Utility", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Utility), EquipmentSlotsAvailable);
             AddSlot(trinketSlotID, () => "Trinket", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Trinket), EquipmentSlotsAvailable);
 
