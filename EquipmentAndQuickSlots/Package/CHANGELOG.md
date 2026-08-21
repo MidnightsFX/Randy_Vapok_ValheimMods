@@ -30,7 +30,7 @@
   for quick slots.
 * **Public API for other mods** — add custom slots, query slot contents, subscribe to changes.
   See `docs/API.md`; an embeddable typed shim (`EquipmentAndQuickSlotsAPI.dll`) is available
-  from the repository.
+  from the repository or follow the doc example to use reflection to access the API.
 * Console commands reworked: `eaqs_validate` repairs misplaced items (replaces the broken
   `fixinventory`); destructive commands now require cheats.
 * Removed the Creature Level and Loot Control integration remnants and the second death

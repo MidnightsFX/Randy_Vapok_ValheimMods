@@ -1,12 +1,10 @@
 # Equipment and Quick Slots
-##### by RandyKnapp and Vapok
+##### by RandyKnapp, rewritten by MidnightsFX
+
+Version 3.0 is a complete rewrite.
 
 Give equipped items their own dedicated inventory slots — Head, Chest, Legs, Shoulder, Utility
 and Trinket — plus up to six hotkeyable quick slots.
-
-Version 3.0 is a complete rewrite: the slots are real cells of your inventory (hidden rows below
-the visible grid), which makes the historical item-loss bugs structurally impossible and keeps
-every vanilla behavior — drag & drop, tooltips, containers, gamepad — working natively.
 
 * Client-side installable; does not need to be on servers.
 * When the server *does* run the mod (requires [Jotunn](https://valheim.thunderstore.io/package/ValheimModding/Jotunn/)),

@@ -72,6 +72,11 @@ bool RemoveSlot(string slotId);
   persisted, only their contents are.
 - Every consumer delegate runs inside a try/catch; one that throws is logged with your id —
   always, not gated by EAQS's logging config, because it is your bug — and treated as `false`.
+- **Epic Loot**: when Epic Loot is installed, items in custom slots are reported to it as
+  equipped (EAQS registers an equipment provider and invalidates Epic Loot's effect cache when a
+  custom slot's content changes). Magic effects, set bonuses, tooltips and equip visuals of an
+  item in your slot count exactly like gear in a vanilla slot, and items in equipment or custom
+  cells are excluded from the sacrifice tab. You do not need to register anything yourself.
 
 ## Queries
 
