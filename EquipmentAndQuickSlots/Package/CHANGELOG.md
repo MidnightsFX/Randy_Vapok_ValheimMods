@@ -1,3 +1,37 @@
+**3.0.0**
+* **Complete rewrite of the slot system.** Equipment and quick slots are now real cells of your
+  inventory in hidden rows below the visible grid — one inventory, no wrapper layer. Most of the
+  historical item-loss and duplication bugs are impossible by construction in this model.
+* **Your items are migrated automatically.** On first login per character, items from the old
+  2.x slot storage (including pre-Mistlands saves) move into the new slots. **There is no
+  downgrade path** — after a character has saved under 3.0.0, going back to 2.x will not restore
+  the old format (the automatic backup still protects the items themselves).
+* New **Trinket** equipment slot.
+* **Quick slot count is configurable** (0–6, default 3); hotkeys 4–6 are unbound by default.
+* **Server-synced balance settings** (requires Jotunn; new hard dependency): slot toggles, quick
+  slot count and the keep-on-death options are admin-controlled when the server runs the mod.
+  The mod remains fully client-side installable — settings just stay local then.
+* **Death fixes**: the "Dont drop … on death" options now actually work (they were inverted),
+  kept gear can no longer be deleted by the Hammer/Hardcore world modifiers, the single enlarged
+  tombstone can never destroy items when full, and grave items return to their exact slots on
+  pickup. New auto-equip-on-pickup options for armor, carry-weight belts and the weapon/shield
+  you died holding.
+* **Hotkey conflict prevention**: quick slot hotkeys no longer trigger vanilla actions bound to
+  the same key (Z no longer makes you sit).
+* **Automatic slot backup** to the character save, restored when the slots load empty (e.g.
+  after the mod was temporarily removed). `eaqs_restorebackup` console command (cheat).
+* **Protections**: container "Stack All" never grabs slot items; optional auto-pickup blocking
+  for quick slots.
+* **Public API for other mods** — add custom slots, query slot contents, subscribe to changes.
+  See `docs/API.md`; an embeddable typed shim (`EquipmentAndQuickSlotsAPI.dll`) is available
+  from the repository.
+* Console commands reworked: `eaqs_validate` repairs misplaced items (replaces the broken
+  `fixinventory`); destructive commands now require cheats.
+* Removed the Creature Level and Loot Control integration remnants and the second death
+  tombstone (one grave now holds everything, sized to fit).
+* Crafting, upgrade and stat tracking paths now run pure vanilla code (fixes missing skill gain
+  on upgrades, wrong stat counters, `NoCraftCost` handling and a multi-craft ingredient exploit).
+
 **2.1.14**
 * Updated for Valheim 0.219.13 Patch (Bog Witch)
 
