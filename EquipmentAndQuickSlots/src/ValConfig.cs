@@ -19,6 +19,7 @@ namespace EquipmentAndQuickSlots {
         public static ConfigEntry<Vector2> EquipmentPanelPosition;
         public static ConfigEntry<bool> EquipmentPanelDraggable;
         public static ConfigEntry<KeyboardShortcut> EquipmentPanelDragKey;
+        public static ConfigEntry<bool> ShowPaperdoll;
         public static readonly ConfigEntry<KeyboardShortcut>[] QuickSlotKeys = new ConfigEntry<KeyboardShortcut>[MaxQuickSlots];
         public static readonly ConfigEntry<string>[] QuickSlotLabels = new ConfigEntry<string>[MaxQuickSlots];
 
@@ -84,6 +85,8 @@ namespace EquipmentAndQuickSlots {
                 new ConfigDescription("Allow dragging the panel by its background at any time, without holding the drag key.", null, new ConfigurationManagerAttributes { }));
             EquipmentPanelDragKey = Config.Bind("Equipment Panel", "Equipment Panel Drag Key", new KeyboardShortcut(KeyCode.LeftAlt),
                 new ConfigDescription("Hold this key while dragging the panel background to move the panel.", null, new ConfigurationManagerAttributes { }));
+            ShowPaperdoll = Config.Bind("Equipment Panel", "Show Paperdoll", false,
+                new ConfigDescription("Draw the character paperdoll image behind the equipment slots.", null, new ConfigurationManagerAttributes { }));
 
             InstantlyReequipArmorOnPickup = Config.Bind("Gravestone", "Instantly re-equip armor on pickup", true,
                 new ConfigDescription("If set to true, when you pickup your gravestone the armor that was in your equipment slots is instantly re-equipped, if possible. Only valid when Equipment Slots are enabled.", null, new ConfigurationManagerAttributes { }));

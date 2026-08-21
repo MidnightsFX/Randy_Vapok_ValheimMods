@@ -44,12 +44,17 @@ namespace EquipmentAndQuickSlots {
         private static readonly Vector2 equipmentLabelPosition = new Vector2(32f, 5f);
 
         private const float rowLeft = 25.5f;                    // first cell of a slot row
-        private const float quickRowTop = -304f;
+        private const float rowGap = 20f;                       // breathing room between the background strips
+        private const float quickRowTop = -342f;                // quick strip starts rowGap below the equipment background
         private const float rowBackgroundLeft = 14.5f;
         private const float rowBackgroundHeight = 90f;
         private const float rowBackgroundPitch = 74f;           // 2.x: background width = 74 per slot + 10
-        private const float customRowTop = quickRowTop - rowBackgroundHeight;
+        private const float customRowTop = quickRowTop - rowBackgroundHeight - rowGap;
         private const int customSlotsPerRow = 3;                // API slots wrap to a new row past this
+
+        // The doll images are center-anchored in their prefab; nudge them under the Head/Chest/Legs
+        // column of the equipment background.
+        private static readonly Vector2 paperdollOffset = new Vector2(-35f, 0f);
 
         private static float originalLabelFontSize;
 
@@ -58,6 +63,7 @@ namespace EquipmentAndQuickSlots {
         private static RectTransform equipmentBackground;
         private static RectTransform quickBackground;
         private static RectTransform customBackground;
+        private static GameObject paperdoll;
 
         private static Color normalColor = Color.clear;
         private static Color highlightedColor = Color.clear;
@@ -105,6 +111,7 @@ namespace EquipmentAndQuickSlots {
                 customBackground = CreateBackground("EaqsCustomSlotBkg");
 
             SyncBackground(equipmentBackground, EquipmentVisible, PanelBase + equipmentBackgroundCenter, equipmentBackgroundSize);
+            UpdatePaperdoll();
 
             int quickCount = ActiveQuickSlots;
             SyncBackground(quickBackground, quickCount > 0, RowBackgroundCenter(quickCount, quickRowTop), RowBackgroundSize(quickCount));
@@ -112,6 +119,44 @@ namespace EquipmentAndQuickSlots {
             int customCount = ActiveCustomSlots.Length;
             int customRows = (customCount + customSlotsPerRow - 1) / customSlotsPerRow;
             SyncBackground(customBackground, customCount > 0, CustomBackgroundCenter(customCount, customRows), CustomBackgroundSize(customCount, customRows));
+        }
+
+        // Optional character paperdoll behind the equipment cells: the same prefab the Auga panel
+        // uses, stretched over the equipment background with the doll re-centered under the body
+        // column, gender following the player model.
+        private static void UpdatePaperdoll() {
+            bool show = ValConfig.ShowPaperdoll.Value && EquipmentVisible && EquipmentAndQuickSlots.Paperdolls != null && equipmentBackground;
+            if (!show) {
+                if (paperdoll)
+                    paperdoll.SetActive(false);
+                return;
+            }
+
+            if (!paperdoll) {
+                paperdoll = UnityEngine.Object.Instantiate(EquipmentAndQuickSlots.Paperdolls, equipmentBackground, false);
+                paperdoll.name = "Paperdolls";
+
+                RectTransform rect = paperdoll.GetComponent<RectTransform>();
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+                rect.SetAsFirstSibling();
+
+                foreach (Image image in paperdoll.GetComponentsInChildren<Image>(true)) {
+                    image.raycastTarget = false;
+                    image.preserveAspect = true;
+                    image.rectTransform.anchoredPosition = paperdollOffset;
+                }
+            }
+
+            paperdoll.SetActive(true);
+
+            Player player = Player.m_localPlayer;
+            bool female = player != null && player.m_visEquipment != null && player.m_visEquipment.GetModelIndex() == 1;
+            paperdoll.transform.Find("Male")?.gameObject.SetActive(!female);
+            paperdoll.transform.Find("Female")?.gameObject.SetActive(female);
         }
 
         private static Vector2 RowBackgroundSize(int slotCount) => new Vector2(rowBackgroundPitch * slotCount + 10f, rowBackgroundHeight);
@@ -319,6 +364,7 @@ namespace EquipmentAndQuickSlots {
             equipmentBackground = null;
             quickBackground = null;
             customBackground = null;
+            paperdoll = null;
             _dragPosition = null;
             normalColor = Color.clear;
             highlightedColor = Color.clear;
