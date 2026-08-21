@@ -62,13 +62,16 @@ namespace EquipmentAndQuickSlots {
                 for (int i = clone.childCount - 1; i >= 0; i--)
                     Object.Destroy(clone.GetChild(i).gameObject);
 
+                // Reset first: it clears _quickBar, and a stale (null) quick bar would leave the
+                // clone running vanilla Update — a second copy of the vanilla hotbar.
+                ResetBars();
+
                 _quickBar = clone.GetComponent<HotkeyBar>();
 
                 var positioned = clone.gameObject.AddComponent<Common.ConfigPositionedElement>();
                 positioned.AnchorConfig = ValConfig.QuickSlotsAnchor;
                 positioned.PositionConfig = ValConfig.QuickSlotsPosition;
 
-                ResetBars();
                 bars.Add(vanillaBar.GetComponent<HotkeyBar>());
                 bars.Add(_quickBar);
                 _currentBarIndex = 0;

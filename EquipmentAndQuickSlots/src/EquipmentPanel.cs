@@ -49,6 +49,9 @@ namespace EquipmentAndQuickSlots {
         private const float rowBackgroundHeight = 90f;
         private const float rowBackgroundPitch = 74f;           // 2.x: background width = 74 per slot + 10
         private const float customRowTop = quickRowTop - rowBackgroundHeight;
+        private const int customSlotsPerRow = 3;                // API slots wrap to a new row past this
+
+        private static float originalLabelFontSize;
 
         private static RectTransform inventoryBackground;
         private static Image inventoryBackgroundImage;
@@ -71,9 +74,11 @@ namespace EquipmentAndQuickSlots {
                 return PanelBase + new Vector2(rowLeft + slot.Index * elementSpace, quickRowTop);
 
             if (slot.IsCustomSlot) {
-                // API slots form a second row under the quick slots, packed left without gaps
-                int ordinal = Array.IndexOf(ActiveCustomSlots, slot);
-                return PanelBase + new Vector2(rowLeft + Math.Max(0, ordinal) * elementSpace, customRowTop);
+                // API slots fill rows of three under the quick slots, packed left without gaps
+                int ordinal = Math.Max(0, Array.IndexOf(ActiveCustomSlots, slot));
+                int col = ordinal % customSlotsPerRow;
+                int row = ordinal / customSlotsPerRow;
+                return PanelBase + new Vector2(rowLeft + col * elementSpace, customRowTop - row * elementSpace);
             }
 
             return PanelBase;
@@ -105,10 +110,20 @@ namespace EquipmentAndQuickSlots {
             SyncBackground(quickBackground, quickCount > 0, RowBackgroundCenter(quickCount, quickRowTop), RowBackgroundSize(quickCount));
 
             int customCount = ActiveCustomSlots.Length;
-            SyncBackground(customBackground, customCount > 0, RowBackgroundCenter(customCount, customRowTop), RowBackgroundSize(customCount));
+            int customRows = (customCount + customSlotsPerRow - 1) / customSlotsPerRow;
+            SyncBackground(customBackground, customCount > 0, CustomBackgroundCenter(customCount, customRows), CustomBackgroundSize(customCount, customRows));
         }
 
         private static Vector2 RowBackgroundSize(int slotCount) => new Vector2(rowBackgroundPitch * slotCount + 10f, rowBackgroundHeight);
+
+        // One background behind all API-slot rows: as wide as the fullest row, one cell pitch
+        // taller per extra row.
+        private static Vector2 CustomBackgroundSize(int slotCount, int rows) =>
+            new Vector2(rowBackgroundPitch * Math.Min(slotCount, customSlotsPerRow) + 10f, rowBackgroundHeight + Math.Max(0, rows - 1) * elementSpace);
+
+        private static Vector2 CustomBackgroundCenter(int slotCount, int rows) =>
+            PanelBase + new Vector2(rowBackgroundLeft + CustomBackgroundSize(slotCount, rows).x / 2f,
+                                    customRowTop - (elementSpace - 6f) / 2f - Math.Max(0, rows - 1) * elementSpace / 2f);
 
         // Row backgrounds are centered on their cells: the 64-tall cell sits mid-way in the 90-tall strip
         private static Vector2 RowBackgroundCenter(int slotCount, float rowTop) =>
@@ -254,6 +269,10 @@ namespace EquipmentAndQuickSlots {
                 return;
             }
 
+            // Remember the vanilla label size before any auto-sizing touches a label
+            if (originalLabelFontSize <= 0f && !text.enableAutoSizing)
+                originalLabelFontSize = text.fontSize;
+
             binding.gameObject.SetActive(true);
             text.enabled = true;
             text.overflowMode = TextOverflowModes.Overflow;
@@ -264,6 +283,19 @@ namespace EquipmentAndQuickSlots {
             // hotbar-number placement.
             if (slot.IsEquipmentSlot)
                 text.rectTransform.anchoredPosition = equipmentLabelPosition;
+
+            // API slot names are arbitrary length: pin the label to the cell width, shrink to fit
+            // and ellipsize instead of spilling over the neighbouring cell.
+            if (slot.IsCustomSlot) {
+                text.rectTransform.anchoredPosition = equipmentLabelPosition;
+                text.rectTransform.sizeDelta = new Vector2(elementSpace - 6f, text.rectTransform.sizeDelta.y);
+                text.overflowMode = TextOverflowModes.Ellipsis;
+                if (originalLabelFontSize > 0f) {
+                    text.fontSizeMax = originalLabelFontSize;
+                    text.fontSizeMin = Mathf.Min(10f, originalLabelFontSize);
+                    text.enableAutoSizing = true;
+                }
+            }
         }
 
         private static void SetSlotColor(Button button, bool unfit) {
