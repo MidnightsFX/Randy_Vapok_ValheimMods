@@ -1,22 +1,20 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
 using UnityEngine;
 
-namespace EquipmentAndQuickSlots
-{
-    // The slot region is two hidden inventory rows below the visible grid. Every slot is a real
+namespace EquipmentAndQuickSlots {
+    // The slot region is three hidden inventory rows below the visible grid. Every slot is a real
     // cell of the player's single Inventory; the panel UI relocates the grid elements, nothing
     // else. Index -> grid position is pure math, so the layout below is load-bearing for saved
     // characters: never reorder or repurpose an index that has shipped.
     //
     //   0- 5  Quick1..Quick6
     //   6- 7  reserved
-    //   8-13  Helmet, Chest, Legs, Shoulder, Utility, Trinket
-    //  14-15  reserved
-    public static class Slots
-    {
+    //   8-15  Helmet, Chest, Legs, Shoulder, Utility, Trinket, Utility2, Utility3
+    //  16-23  reserved
+    public static class Slots {
         public const string quickSlotID = "Quick";
         public const string helmetSlotID = "Helmet";
         public const string chestSlotID = "Chest";
@@ -24,10 +22,13 @@ namespace EquipmentAndQuickSlots
         public const string shoulderSlotID = "Shoulder";
         public const string utilitySlotID = "Utility";
         public const string trinketSlotID = "Trinket";
+        // Utility 2 and 3 sit past Trinket so the indices that shipped first keep their cells.
+        public const string utilitySlot2ID = "Utility2";
+        public const string utilitySlot3ID = "Utility3";
         public const string emptySlotID = "Empty";
 
-        public const int SlotCount = 16;
-        public const int HiddenRows = 2;
+        public const int SlotCount = 24;
+        public const int HiddenRows = 3;
         public const int QuickSlotStartIndex = 0;
         public const int EquipmentSlotStartIndex = 8;
 
@@ -43,8 +44,7 @@ namespace EquipmentAndQuickSlots
         // cell's slot id; the sweep drops the marker as soon as the item is worn or elsewhere.
         internal const string customKeyParked = "eaqs_parked";
 
-        public class Slot
-        {
+        public class Slot {
             private readonly string _id;
             private readonly Func<string> _getName;
             private readonly Func<KeyboardShortcut> _getShortcut;
@@ -68,10 +68,11 @@ namespace EquipmentAndQuickSlots
             public bool IsEmptySlot => _id == emptySlotID;
 
             // Plugin GUID of the mod that registered this slot through the API; null for built-ins.
-            public string OwnerGuid { get; internal set; }
+            public string OwnerGuid {
+                get; internal set;
+            }
 
-            internal void UpdateGridPosition()
-            {
+            internal void UpdateGridPosition() {
                 ItemDrop.ItemData item = Item;
                 _gridPos = new Vector2i(_index % InventoryWidth, VisibleRows + _index / InventoryWidth);
                 if (item != null)
@@ -86,10 +87,8 @@ namespace EquipmentAndQuickSlots
             public KeyboardShortcut GetShortcut() => _getShortcut == null ? KeyboardShortcut.Empty : _getShortcut();
             public string GetShortcutText() => _getShortcutText == null ? Name : Localization.instance.Localize(_getShortcutText());
 
-            public ItemDrop.ItemData Item
-            {
-                get
-                {
+            public ItemDrop.ItemData Item {
+                get {
                     if (PlayerInventory == null || _gridPos == emptyPosition)
                         return null;
 
@@ -100,8 +99,7 @@ namespace EquipmentAndQuickSlots
                 }
             }
 
-            internal ItemDrop.ItemData CacheItem()
-            {
+            internal ItemDrop.ItemData CacheItem() {
                 if (PlayerInventory == null)
                     return null;
 
@@ -127,21 +125,18 @@ namespace EquipmentAndQuickSlots
             public bool IsParkedHere(ItemDrop.ItemData item) =>
                 item != null && item.m_customData.TryGetValue(customKeyParked, out string parkedSlot) && parkedSlot == _id;
 
-            internal void Park(ItemDrop.ItemData item)
-            {
+            internal void Park(ItemDrop.ItemData item) {
                 if (item != null)
                     item.m_customData[customKeyParked] = _id;
             }
 
             public bool IsFreeQuickSlot() => IsQuickSlot && IsActive && IsFree;
 
-            public void ClearItemCache()
-            {
+            public void ClearItemCache() {
                 cachedItems.Remove(_gridPos);
             }
 
-            public Slot(string slotID, int slotIndex, Func<string> getName, Func<ItemDrop.ItemData, bool> itemIsValid, Func<bool> isActive)
-            {
+            public Slot(string slotID, int slotIndex, Func<string> getName, Func<ItemDrop.ItemData, bool> itemIsValid, Func<bool> isActive) {
                 _id = slotID;
                 _index = slotIndex;
                 _getName = getName;
@@ -150,8 +145,7 @@ namespace EquipmentAndQuickSlots
             }
 
             public Slot(string slotID, int slotIndex, Func<string> getName, Func<ItemDrop.ItemData, bool> itemIsValid, Func<bool> isActive, Func<KeyboardShortcut> getShortcut, Func<string> getShortcutText)
-                : this(slotID, slotIndex, getName, itemIsValid, isActive)
-            {
+                : this(slotID, slotIndex, getName, itemIsValid, isActive) {
                 _getShortcut = getShortcut;
                 _getShortcutText = getShortcutText;
             }
@@ -164,13 +158,25 @@ namespace EquipmentAndQuickSlots
 
         // The reserved cells double as API custom-slot capacity. Growing capacity later means
         // adding a hidden row — save-safe, unlike ever shrinking one.
-        public static readonly int[] ReservedIndices = { 6, 7, 14, 15 };
+        public static readonly int[] ReservedIndices = { 6, 7, 16, 17, 18, 19, 20, 21, 22, 23 };
 
         public const string customSlotPrefix = "Custom";
 
         public const int VanillaInventoryHeight = 4;
         public const int VanillaInventoryWidth = 8;
-        public const int EquipmentSlotCount = 6;
+        public const int EquipmentSlotCount = 8;
+
+        // Utility is the one equipment type the player may wear more than one of. Vanilla holds a
+        // single m_utilityItem, so anything past the first is carried by MultiUtility; the cells
+        // themselves are ordinary equipment cells that happen to share a type.
+        public const int MaxUtilitySlots = 3;
+
+        // How many utility items may be worn, and how many cells exist to show them in, are two
+        // different questions. Turning the equipment cells off relocates worn gear into the visible
+        // grid without unequipping it, so the wearable count must not depend on them.
+        public static int WearableUtilityItems => Mathf.Clamp(ValConfig.UtilitySlotCount?.Value ?? 1, 1, MaxUtilitySlots);
+        public static int ExtraWearableUtilityItems => WearableUtilityItems - 1;
+        public static int ActiveExtraUtilitySlots => ValConfig.EquipmentSlotsEnabled.Value ? ExtraWearableUtilityItems : 0;
 
         // The visible rows are whatever the vanilla inventory (or a rows mod like moreslots)
         // established before we appended the hidden slot rows — captured once at Player.Awake —
@@ -195,8 +201,7 @@ namespace EquipmentAndQuickSlots
 
         private static bool _baseRowsCaptured;
 
-        internal static void CaptureBaseRows(Inventory inventory)
-        {
+        internal static void CaptureBaseRows(Inventory inventory) {
             // Captured exactly once, from the first Player.Awake before we ever extend a height —
             // after that any larger height we observe is our own FullHeight, not new base rows.
             if (_baseRowsCaptured)
@@ -210,11 +215,9 @@ namespace EquipmentAndQuickSlots
         // slot region moves with the visible rows. Slot residents move with their slots; anything
         // from the visible grid that now finds itself on a slot cell it doesn't belong in is moved
         // back into the visible grid (or a free slot) — never dropped, never lost.
-        internal static void OnExtraRowsChanged()
-        {
+        internal static void OnExtraRowsChanged() {
             Inventory inventory = PlayerInventory;
-            if (inventory == null)
-            {
+            if (inventory == null) {
                 UpdateSlotsGridPosition();
                 return;
             }
@@ -225,8 +228,7 @@ namespace EquipmentAndQuickSlots
             UpdateSlotsGridPosition();
 
             bool changed = false;
-            foreach (ItemDrop.ItemData item in inventory.m_inventory.ToList())
-            {
+            foreach (ItemDrop.ItemData item in inventory.m_inventory.ToList()) {
                 if (!IsGridPositionASlot(item.m_gridPos))
                     continue;
 
@@ -259,8 +261,7 @@ namespace EquipmentAndQuickSlots
         public static Slot[] GetEquipmentSlots(bool onlyActive = true) => slots.Where(slot => slot.IsEquipmentSlot && (!onlyActive || slot.IsActive)).ToArray();
         public static Slot[] GetQuickSlots() => Array.FindAll(slots, slot => slot.IsQuickSlot);
 
-        public static bool TryGetSavedPlayerSlot(ItemDrop.ItemData item, out Slot slot)
-        {
+        public static bool TryGetSavedPlayerSlot(ItemDrop.ItemData item, out Slot slot) {
             slot = null;
 
             if (item.m_customData.TryGetValue(customKeyPlayerID, out string playerID) && item.m_customData.TryGetValue(customKeySlotID, out string slotID) && playerID == CurrentPlayerProfile?.GetPlayerID().ToString())
@@ -272,15 +273,13 @@ namespace EquipmentAndQuickSlots
 
         public static Slot FindSlot(string slotID) => slots.FirstOrDefault(slot => slot.ID == slotID);
 
-        public static bool TryFindFreeSlotForItem(ItemDrop.ItemData item, out Slot slot)
-        {
+        public static bool TryFindFreeSlotForItem(ItemDrop.ItemData item, out Slot slot) {
             slot = null;
 
             if (item == null)
                 return false;
 
-            if (TryGetSavedPlayerSlot(item, out Slot prevSlot) && prevSlot.IsActive && prevSlot.ItemBelongs(item) && (prevSlot.IsFree || item == prevSlot.Item))
-            {
+            if (TryGetSavedPlayerSlot(item, out Slot prevSlot) && prevSlot.IsActive && prevSlot.ItemBelongs(item) && (prevSlot.IsFree || item == prevSlot.Item)) {
                 slot = prevSlot;
                 return true;
             }
@@ -293,8 +292,7 @@ namespace EquipmentAndQuickSlots
             return true;
         }
 
-        public static bool TryFindFreeEquipmentSlotForItem(ItemDrop.ItemData item, out Slot slot)
-        {
+        public static bool TryFindFreeEquipmentSlotForItem(ItemDrop.ItemData item, out Slot slot) {
             slot = null;
 
             if (item == null)
@@ -304,8 +302,7 @@ namespace EquipmentAndQuickSlots
             return slot != null;
         }
 
-        public static bool TryFindFirstUnequippedSlotForItem(ItemDrop.ItemData item, out Slot slot)
-        {
+        public static bool TryFindFirstUnequippedSlotForItem(ItemDrop.ItemData item, out Slot slot) {
             slot = null;
 
             if (item == null)
@@ -321,8 +318,7 @@ namespace EquipmentAndQuickSlots
         // Walks the visible grid bottom-right to top-left looking for a free cell; failing that,
         // pushes one visible item into a free quick slot to make room. Equipment cells hold only
         // equipped items, so they are never a stash target here.
-        public static bool TryMakeFreeSpaceInPlayerInventory(out Vector2i gridPos)
-        {
+        public static bool TryMakeFreeSpaceInPlayerInventory(out Vector2i gridPos) {
             gridPos = emptyPosition;
 
             itemsInGridOrder.Clear();
@@ -335,10 +331,8 @@ namespace EquipmentAndQuickSlots
 
             ClearCachedItems();
 
-            foreach (ItemDrop.ItemData item in itemsInGridOrder)
-            {
-                if (TryFindFreeSlotForItem(item, out Slot slot))
-                {
+            foreach (ItemDrop.ItemData item in itemsInGridOrder) {
+                if (TryFindFreeSlotForItem(item, out Slot slot)) {
                     gridPos = item.m_gridPos;
                     item.m_gridPos = slot.GridPosition;
                     ClearCachedItems();
@@ -355,32 +349,27 @@ namespace EquipmentAndQuickSlots
 
         public static Vector2i FindEmptyQuickSlot() => TryFindEmptyQuickSlot(out Slot slot) ? slot.GridPosition : emptyPosition;
 
-        public static bool TryFindEmptyQuickSlot(out Slot slot)
-        {
+        public static bool TryFindEmptyQuickSlot(out Slot slot) {
             slot = slots.FirstOrDefault(s => s.IsFreeQuickSlot());
             return slot != null;
         }
 
-        internal static void SaveLastEquippedSlotsToItems()
-        {
+        internal static void SaveLastEquippedSlotsToItems() {
             if (!Game.instance)
                 return;
 
             long playerID = Game.instance.GetPlayerProfile().GetPlayerID();
 
-            foreach (Slot slot in slots)
-            {
+            foreach (Slot slot in slots) {
                 ItemDrop.ItemData item = slot.Item;
-                if (item != null)
-                {
+                if (item != null) {
                     item.m_customData[customKeyPlayerID] = playerID.ToString();
                     item.m_customData[customKeySlotID] = slot.ID;
                 }
             }
         }
 
-        internal static void PruneLastEquippedSlotFromItem(ItemDrop.ItemData item)
-        {
+        internal static void PruneLastEquippedSlotFromItem(ItemDrop.ItemData item) {
             if (item == null || !item.m_customData.ContainsKey(customKeySlotID))
                 return;
 
@@ -394,8 +383,7 @@ namespace EquipmentAndQuickSlots
 
         public static bool IsItemInEquipmentSlot(ItemDrop.ItemData item) => GetItemSlot(item) is Slot slot && slot.IsEquipmentSlot;
 
-        public static Slot GetSlotInGrid(Vector2i pos)
-        {
+        public static Slot GetSlotInGrid(Vector2i pos) {
             if (!IsGridPositionASlot(pos))
                 return null;
 
@@ -406,8 +394,7 @@ namespace EquipmentAndQuickSlots
             return null;
         }
 
-        public static Slot GetItemSlot(ItemDrop.ItemData item)
-        {
+        public static Slot GetItemSlot(ItemDrop.ItemData item) {
             if (!IsItemInSlot(item))
                 return null;
 
@@ -421,8 +408,7 @@ namespace EquipmentAndQuickSlots
             return null;
         }
 
-        public static IEnumerable<ItemDrop.ItemData> GetAllSlotItems()
-        {
+        public static IEnumerable<ItemDrop.ItemData> GetAllSlotItems() {
             foreach (Slot slot in slots)
                 if (slot.Item is ItemDrop.ItemData item)
                     yield return item;
@@ -430,12 +416,11 @@ namespace EquipmentAndQuickSlots
 
         // Any equipped item whose type has a dedicated cell. Weapons and shields stay in the
         // visible grid: only the paperdoll types live in the slot region.
-        public static bool IsEquipmentSlotItem(ItemDrop.ItemData item)
-        {
+        public static bool IsEquipmentSlotItem(ItemDrop.ItemData item) {
             return slots.Any(slot => slot.IsEquipmentSlot && slot.IsActive && slot.ItemFits(item));
         }
 
-        // Index-aligned with slots 8-13.
+        // Index-aligned with slots 8-15.
         public static readonly ItemDrop.ItemData.ItemType[] EquipmentSlotTypes =
         {
             ItemDrop.ItemData.ItemType.Helmet,
@@ -444,15 +429,26 @@ namespace EquipmentAndQuickSlots
             ItemDrop.ItemData.ItemType.Shoulder,
             ItemDrop.ItemData.ItemType.Utility,
             ItemDrop.ItemData.ItemType.Trinket,
+            ItemDrop.ItemData.ItemType.Utility,
+            ItemDrop.ItemData.ItemType.Utility,
         };
+
+        // The utility cells past the first. Only these are subject to the no-duplicates rule: the
+        // base Utility cell is vanilla's, where dropping a second copy of a worn item is the
+        // ordinary swap it has always been.
+        public static bool IsExtraUtilitySlot(Slot slot) => slot != null && (slot.ID == utilitySlot2ID || slot.ID == utilitySlot3ID);
 
         public static ItemDrop.ItemData.ItemType GetEquipmentSlotType(Slot slot) =>
             slot.IsEquipmentSlot ? EquipmentSlotTypes[slot.Index - EquipmentSlotStartIndex] : ItemDrop.ItemData.ItemType.None;
 
         // "Would this item belong in this cell once equipped" — the drag-to-equip check, which has
         // to pass before the item is equipped and therefore can't use the slot's own predicate.
+        // Deliberately not part of Slot.ItemFits: a worn item must never fail the placement rule,
+        // or the validation sweep would chase it out of the cell it is legitimately sitting in.
         public static bool WouldFitEquipmentSlot(Slot slot, ItemDrop.ItemData item) =>
-            item != null && slot.IsEquipmentSlot && slot.IsActive && item.m_shared.m_itemType == GetEquipmentSlotType(slot);
+            item != null && slot.IsEquipmentSlot && slot.IsActive
+            && item.m_shared.m_itemType == GetEquipmentSlotType(slot)
+            && MultiUtility.CanEquipIntoUtilityCell(slot, item);
 
         internal static bool IsEquippedByPlayer(ItemDrop.ItemData item) => item != null && (item.m_equipped || CurrentPlayer?.IsItemEquiped(item) == true);
 
@@ -462,8 +458,7 @@ namespace EquipmentAndQuickSlots
         // bypassed by dragging. Vanilla's QueueEquipAction/QueueUnequipAction toggle (queuing an
         // item that already has an action removes it), hence the explicit state checks here.
 
-        private static bool IsActionQueued(ItemDrop.ItemData item, Player.MinorActionData.ActionType type)
-        {
+        private static bool IsActionQueued(ItemDrop.ItemData item, Player.MinorActionData.ActionType type) {
             Player player = CurrentPlayer;
             if (item == null || player == null || player.m_actionQueue == null)
                 return false;
@@ -479,14 +474,12 @@ namespace EquipmentAndQuickSlots
 
         internal static bool IsUnequipQueued(ItemDrop.ItemData item) => IsActionQueued(item, Player.MinorActionData.ActionType.Unequip);
 
-        internal static void QueueEquip(Player player, ItemDrop.ItemData item)
-        {
+        internal static void QueueEquip(Player player, ItemDrop.ItemData item) {
             if (player == null || item == null || player.IsItemEquiped(item) || IsEquipQueued(item))
                 return;
 
             // A pending unequip is simply cancelled: the item stays worn
-            if (IsUnequipQueued(item))
-            {
+            if (IsUnequipQueued(item)) {
                 player.RemoveEquipAction(item);
                 return;
             }
@@ -494,13 +487,11 @@ namespace EquipmentAndQuickSlots
             player.QueueEquipAction(item);
         }
 
-        internal static void QueueUnequip(Player player, ItemDrop.ItemData item)
-        {
+        internal static void QueueUnequip(Player player, ItemDrop.ItemData item) {
             if (player == null || item == null || !player.IsItemEquiped(item) || IsUnequipQueued(item))
                 return;
 
-            if (IsEquipQueued(item))
-            {
+            if (IsEquipQueued(item)) {
                 player.RemoveEquipAction(item);
                 return;
             }
@@ -508,8 +499,7 @@ namespace EquipmentAndQuickSlots
             player.QueueUnequipAction(item);
         }
 
-        private static Func<ItemDrop.ItemData, bool> EquipmentSlotValidator(ItemDrop.ItemData.ItemType itemType)
-        {
+        private static Func<ItemDrop.ItemData, bool> EquipmentSlotValidator(ItemDrop.ItemData.ItemType itemType) {
             // Type only. Equipped-only semantics live in Slot.ItemBelongs / the validation sweep,
             // never in the placement predicate (see ItemFits).
             return item => item != null && item.m_shared.m_itemType == itemType;
@@ -519,8 +509,11 @@ namespace EquipmentAndQuickSlots
 
         private static bool EquipmentSlotsAvailable() => ValConfig.EquipmentSlotsEnabled.Value;
 
-        private static string GetQuickSlotText(int index)
-        {
+        // extraIndex 0 is the second utility cell, 1 the third. Config is read live, so a server
+        // pushing a new count takes effect without re-registering slots.
+        private static bool IsExtraUtilitySlotAvailable(int extraIndex) => ActiveExtraUtilitySlots > extraIndex;
+
+        private static string GetQuickSlotText(int index) {
             string label = ValConfig.QuickSlotLabels[index].Value;
             if (!string.IsNullOrEmpty(label))
                 return label;
@@ -529,29 +522,24 @@ namespace EquipmentAndQuickSlots
             return key.Equals(KeyboardShortcut.Empty) ? "" : key.ToString();
         }
 
-        internal static void InitializeSlots()
-        {
+        internal static void InitializeSlots() {
             int index = 0;
 
-            void AddSlot(string id, Func<string> getName, Func<ItemDrop.ItemData, bool> itemIsValid, Func<bool> isActive)
-            {
+            void AddSlot(string id, Func<string> getName, Func<ItemDrop.ItemData, bool> itemIsValid, Func<bool> isActive) {
                 slots[index] = new Slot(id, index, getName, itemIsValid, isActive);
                 index++;
             }
 
-            void AddHotkeySlot(string id, Func<string> getName, Func<ItemDrop.ItemData, bool> itemIsValid, Func<bool> isActive, Func<KeyboardShortcut> getShortcut, Func<string> getShortcutText)
-            {
+            void AddHotkeySlot(string id, Func<string> getName, Func<ItemDrop.ItemData, bool> itemIsValid, Func<bool> isActive, Func<KeyboardShortcut> getShortcut, Func<string> getShortcutText) {
                 slots[index] = new Slot(id, index, getName, itemIsValid, isActive, getShortcut, getShortcutText);
                 index++;
             }
 
-            void AddReservedSlot()
-            {
+            void AddReservedSlot() {
                 AddSlot(emptySlotID, () => "", item => false, () => false);
             }
 
-            for (int i = 0; i < ValConfig.MaxQuickSlots; i++)
-            {
+            for (int i = 0; i < ValConfig.MaxQuickSlots; i++) {
                 int quickIndex = i;
                 AddHotkeySlot($"{quickSlotID}{i + 1}",
                     () => GetQuickSlotText(quickIndex),
@@ -570,23 +558,24 @@ namespace EquipmentAndQuickSlots
             AddSlot(shoulderSlotID, () => "Shoulders", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Shoulder), EquipmentSlotsAvailable);
             AddSlot(utilitySlotID, () => "Utility", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Utility), EquipmentSlotsAvailable);
             AddSlot(trinketSlotID, () => "Trinket", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Trinket), EquipmentSlotsAvailable);
+            AddSlot(utilitySlot2ID, () => "Utility", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Utility), () => IsExtraUtilitySlotAvailable(0));
+            AddSlot(utilitySlot3ID, () => "Utility", EquipmentSlotValidator(ItemDrop.ItemData.ItemType.Utility), () => IsExtraUtilitySlotAvailable(1));
 
-            AddReservedSlot();
-            AddReservedSlot();
+            // The rest of the region is API custom-slot capacity (see ReservedIndices).
+            while (index < SlotCount)
+                AddReservedSlot();
 
             UpdateSlotsGridPosition();
         }
 
         public static Slot[] GetCustomSlots() => slots.Where(slot => slot.IsCustomSlot).ToArray();
 
-        internal static bool TryAddCustomSlot(string slotId, string ownerGuid, Func<string> getName, Func<ItemDrop.ItemData, bool> itemIsValid, Func<bool> isActive)
-        {
+        internal static bool TryAddCustomSlot(string slotId, string ownerGuid, Func<string> getName, Func<ItemDrop.ItemData, bool> itemIsValid, Func<bool> isActive) {
             string internalId = customSlotPrefix + slotId;
             if (slots.Any(slot => slot.ID == internalId))
                 return false;
 
-            foreach (int index in ReservedIndices)
-            {
+            foreach (int index in ReservedIndices) {
                 if (!slots[index].IsEmptySlot)
                     continue;
 
@@ -600,8 +589,7 @@ namespace EquipmentAndQuickSlots
             return false;
         }
 
-        internal static bool TryRemoveCustomSlot(string slotId)
-        {
+        internal static bool TryRemoveCustomSlot(string slotId) {
             string internalId = customSlotPrefix + slotId;
             int index = Array.FindIndex(slots, slot => slot.IsCustomSlot && slot.ID == internalId);
             if (index == -1)
@@ -612,8 +600,7 @@ namespace EquipmentAndQuickSlots
             slots[index].UpdateGridPosition();
             ClearCachedItems();
 
-            if (item != null)
-            {
+            if (item != null) {
                 // Rescue the resident item: visible grid first, any other slot second, the
                 // ground as a last resort — never delete.
                 Vector2i free = PlayerInventory.FindEmptySlot(true);
@@ -630,8 +617,7 @@ namespace EquipmentAndQuickSlots
             return true;
         }
 
-        internal static void UpdateSlotsGridPosition()
-        {
+        internal static void UpdateSlotsGridPosition() {
             ClearCachedItems();
             foreach (Slot slot in slots)
                 slot.CacheItem();

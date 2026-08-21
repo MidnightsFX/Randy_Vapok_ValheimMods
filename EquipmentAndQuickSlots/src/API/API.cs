@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +18,7 @@ namespace EquipmentAndQuickSlots
     // out of the object[].
     public static partial class API
     {
-        public const int ApiVersion = 1;
+        public const int ApiVersion = 2;
 
         private static readonly List<Action<string>> slotChangedListeners = new List<Action<string>>();
         private static readonly List<Action<string, ItemDrop.ItemData, ItemDrop.ItemData>> slotItemChangedListeners = new List<Action<string, ItemDrop.ItemData, ItemDrop.ItemData>>();

@@ -1,4 +1,4 @@
-**3.0.0**
+﻿**3.0.0**
 * **Complete rewrite of the slot system.** Equipment and quick slots are now real cells of your
   inventory in hidden rows below the visible grid — one inventory, no wrapper layer. Most of the
   historical item-loss and duplication bugs are impossible by construction in this model.
@@ -7,6 +7,11 @@
   downgrade path** — after a character has saved under 3.0.0, going back to 2.x will not restore
   the old format (the automatic backup still protects the items themselves).
 * New **Trinket** equipment slot.
+* **Configurable utility slots** (`Equipment Slots / Utility Slot Count`, 1–3, default 1):
+  optionally wear more than one belt, Wishbone or Megingjord. Server-synced, since it is a
+  balance change, and off by default — the game itself allows one. Two copies of the same
+  item can never be worn at once. Extra utility items are drawn on the character model for
+  everyone (`Equipment Slots / Show extra utility items` to opt out).
 * **Quick slot count is configurable** (0–6, default 3); hotkeys 4–6 are unbound by default.
 * **Server-synced balance settings** (requires Jotunn; new hard dependency): slot toggles, quick
   slot count, every Gravestone option, extra inventory rows and base carry weight are

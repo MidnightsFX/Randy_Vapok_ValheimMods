@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using HarmonyLib;
 using TMPro;
@@ -38,9 +38,18 @@ namespace EquipmentAndQuickSlots {
             new Vector2(slotSpacing, -0.5f * slotSpacing),      // Shoulders
             new Vector2(slotSpacing, -1.5f * slotSpacing),      // Utility
             new Vector2(slotSpacing, -2.5f * slotSpacing),      // Trinket
+            new Vector2(2f * slotSpacing, -1.5f * slotSpacing), // Utility 2
+            new Vector2(2f * slotSpacing, -2.5f * slotSpacing), // Utility 3
         };
         private static readonly Vector2 equipmentBackgroundCenter = new Vector2(132.5f, -159f);
         private static readonly Vector2 equipmentBackgroundSize = new Vector2(210f, 300f);
+
+        // The extra utility cells form a third column. The background grows to cover it and the
+        // centre moves half as far, so its left edge — and the rest of the panel — stay put. With
+        // one utility slot the panel is pixel-for-pixel what it was.
+        private static float ExtraUtilityColumnWidth => ActiveExtraUtilitySlots > 0 ? slotSpacing : 0f;
+        private static Vector2 EquipmentBackgroundSize => equipmentBackgroundSize + new Vector2(ExtraUtilityColumnWidth, 0f);
+        private static Vector2 EquipmentBackgroundCenter => equipmentBackgroundCenter + new Vector2(ExtraUtilityColumnWidth / 2f, 0f);
         private static readonly Vector2 equipmentLabelPosition = new Vector2(32f, 5f);
 
         private const float rowLeft = 25.5f;                    // first cell of a slot row
@@ -67,6 +76,7 @@ namespace EquipmentAndQuickSlots {
         private static RectTransform quickBackground;
         private static RectTransform customBackground;
         private static GameObject paperdoll;
+        private static RectTransform[] paperdollImages;
 
         private static Color normalColor = Color.clear;
         private static Color highlightedColor = Color.clear;
@@ -117,7 +127,7 @@ namespace EquipmentAndQuickSlots {
             if (!customBackground)
                 customBackground = CreateBackground("EaqsCustomSlotBkg");
 
-            SyncBackground(equipmentBackground, EquipmentVisible, PanelBase + equipmentBackgroundCenter, equipmentBackgroundSize);
+            SyncBackground(equipmentBackground, EquipmentVisible, PanelBase + EquipmentBackgroundCenter, EquipmentBackgroundSize);
             UpdatePaperdoll();
 
             int quickCount = ActiveQuickSlots;
@@ -151,14 +161,22 @@ namespace EquipmentAndQuickSlots {
                 rect.offsetMax = Vector2.zero;
                 rect.SetAsFirstSibling();
 
-                foreach (Image image in paperdoll.GetComponentsInChildren<Image>(true)) {
-                    image.raycastTarget = false;
-                    image.preserveAspect = true;
-                    image.rectTransform.anchoredPosition = paperdollOffset;
+                Image[] images = paperdoll.GetComponentsInChildren<Image>(true);
+                paperdollImages = new RectTransform[images.Length];
+                for (int i = 0; i < images.Length; i++) {
+                    images[i].raycastTarget = false;
+                    images[i].preserveAspect = true;
+                    paperdollImages[i] = images[i].rectTransform;
                 }
             }
 
             paperdoll.SetActive(true);
+
+            // The doll sits under the body column, so it has to move back by whatever the extra
+            // utility column added to the background it is stretched across.
+            Vector2 dollOffset = paperdollOffset - new Vector2(ExtraUtilityColumnWidth / 2f, 0f);
+            foreach (RectTransform image in paperdollImages)
+                image.anchoredPosition = dollOffset;
 
             Player player = Player.m_localPlayer;
             bool female = player != null && player.m_visEquipment != null && player.m_visEquipment.GetModelIndex() == 1;
@@ -396,6 +414,7 @@ namespace EquipmentAndQuickSlots {
             quickBackground = null;
             customBackground = null;
             paperdoll = null;
+            paperdollImages = null;
             _dragPosition = null;
             normalColor = Color.clear;
             highlightedColor = Color.clear;

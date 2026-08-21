@@ -1,4 +1,4 @@
-# EquipmentAndQuickSlots integration API
+﻿# EquipmentAndQuickSlots integration API
 
 A supported contract for other plugins, so integrating with EAQS does not mean Harmony-patching
 its internals and re-breaking on every release.
@@ -41,11 +41,12 @@ shim, a missing endpoint logs a warning and no-ops rather than throwing.
 
 ## The slot model
 
-The player inventory is `8 × (visibleRows + 2)`; the two hidden rows are the slot region.
+The player inventory is `8 × (visibleRows + 3)`; the three hidden rows are the slot region.
 Built-in slot ids: `Quick1`–`Quick6`, `Helmet`, `Chest`, `Legs`, `Shoulder`, `Utility`,
-`Trinket`. Four reserved cells are available for custom slots. Slot items are ordinary inventory
-items at their slot's grid position — they persist through vanilla save/load, and anything that
-enumerates the player inventory sees them.
+`Trinket`, `Utility2`, `Utility3`. `Utility2` and `Utility3` are only active when the server's
+`Utility Slot Count` is above 1. Ten reserved cells are available for custom slots. Slot items
+are ordinary inventory items at their slot's grid position — they persist through vanilla
+save/load, and anything that enumerates the player inventory sees them.
 
 Equipment cells are **equipped-only**: they hold exactly the items the player is wearing.
 Unequipping moves the item to the visible grid automatically.
@@ -64,12 +65,16 @@ bool RemoveSlot(string slotId);
 - `isValid` decides which items the player may place in the slot (null = any item).
 - `isActive` gates the slot's visibility live (config toggles, progression, ...). An item sitting
   in a slot that becomes inactive is relocated to the regular inventory, never lost.
-- `AddSlot` returns `false` when the id is taken or all four custom cells are in use. Capacity
-  can grow in a future version (adding a hidden row is save-safe), so do not treat four as a
-  contract.
+- `AddSlot` returns `false` when the id is taken or all ten custom cells are in use. Capacity has
+  already grown once and can grow again (adding a hidden row is save-safe), so do not treat ten
+  as a contract — query `GetSlotIdsJson` rather than assuming a number.
 - `RemoveSlot` rescues a resident item into the inventory (ground as a last resort) and returns
   `false` for unknown ids. Re-register your slots on every launch — slot *definitions* are not
   persisted, only their contents are.
+- Custom slot contents get the same protections as EAQS's own slots (Stack All, auto-pickup, grave
+  round-trip to the same cell) and follow the `Dont drop equipment on death` setting together with
+  the paperdoll cells. EAQS never calls `EquipItem` for a custom slot — if the item should behave
+  as worn, apply that yourself from a `SlotItemChanged` listener.
 - Every consumer delegate runs inside a try/catch; one that throws is logged with your id —
   always, not gated by EAQS's logging config, because it is your bug — and treated as `false`.
 - **Epic Loot**: when Epic Loot is installed, items in custom slots are reported to it as

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using static EquipmentAndQuickSlots.Slots;
 
 namespace EquipmentAndQuickSlots {
@@ -18,7 +19,8 @@ namespace EquipmentAndQuickSlots {
         private const float tileSize = 74f;
 
         // Equipment diamond over the paperdoll (relative to the equipment cluster center):
-        // Head top, Chest/Shoulder at the sides, Legs bottom, Utility right, Trinket left.
+        // Head top, Chest/Shoulder at the sides, Legs bottom, Utility right, Trinket left, the
+        // extra utility cells continuing down the right edge.
         private static readonly Vector2 equipClusterCenter = new Vector2(110.5f, -57f);
         private static readonly Vector2[] equipPositions =
         {
@@ -28,11 +30,16 @@ namespace EquipmentAndQuickSlots {
             new Vector2(36f, -72f),     // Shoulder
             new Vector2(104f, 0f),      // Utility
             new Vector2(-104f, 0f),     // Trinket
+            new Vector2(104f, -72f),    // Utility 2
+            new Vector2(104f, -144f),   // Utility 3
         };
 
         private static GameObject _panel;
 
+        private const int customSlotsPerColumn = 4;
+
         private static int ActiveQuickSlots => ValConfig.QuickSlotsEnabled.Value ? ValConfig.QuickSlotCount.Value : 0;
+        private static Slot[] ActiveCustomSlots => GetCustomSlots().Where(slot => slot.IsActive).OrderBy(slot => slot.Index).ToArray();
 
         private static float PanelWidth => Mathf.Max(panelWidth, ActiveQuickSlots * tileSize + 20f);
 
@@ -46,9 +53,12 @@ namespace EquipmentAndQuickSlots {
             }
 
             if (slot.IsCustomSlot) {
-                // A column down the right edge of the panel
-                int ordinal = System.Array.IndexOf(ReservedIndices, slot.Index);
-                return panelBase + new Vector2(PanelWidth + 10f, -(ordinal * tileSize));
+                // Columns down the right edge of the panel, packed with no gaps and wrapping once
+                // a column is full — the API can register more slots than one column holds.
+                int ordinal = System.Math.Max(0, System.Array.IndexOf(ActiveCustomSlots, slot));
+                int row = ordinal % customSlotsPerColumn;
+                int col = ordinal / customSlotsPerColumn;
+                return panelBase + new Vector2(PanelWidth + 10f + col * tileSize, -(row * tileSize));
             }
 
             return panelBase;

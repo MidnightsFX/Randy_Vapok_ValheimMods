@@ -17,6 +17,7 @@ namespace EquipmentAndQuickSlots {
         public static ConfigEntry<bool> EquipmentPanelDraggable;
         public static ConfigEntry<KeyboardShortcut> EquipmentPanelDragKey;
         public static ConfigEntry<bool> ShowPaperdoll;
+        public static ConfigEntry<bool> ShowExtraUtilityItems;
         public static readonly ConfigEntry<KeyboardShortcut>[] QuickSlotKeys = new ConfigEntry<KeyboardShortcut>[MaxQuickSlots];
         public static readonly ConfigEntry<string>[] QuickSlotLabels = new ConfigEntry<string>[MaxQuickSlots];
 
@@ -24,6 +25,7 @@ namespace EquipmentAndQuickSlots {
         public static ConfigEntry<bool> EquipmentSlotsEnabled;
         public static ConfigEntry<bool> QuickSlotsEnabled;
         public static ConfigEntry<int> QuickSlotCount;
+        public static ConfigEntry<int> UtilitySlotCount;
         public static ConfigEntry<bool> DontDropEquipmentOnDeath;
         public static ConfigEntry<bool> DontDropQuickslotsOnDeath;
         public static ConfigEntry<bool> InstantlyReequipArmorOnPickup;
@@ -92,6 +94,12 @@ namespace EquipmentAndQuickSlots {
             ShowPaperdoll = Config.Bind("Equipment Panel", "Show Paperdoll", false,
                 new ConfigDescription("Draw the character paperdoll image behind the equipment slots.", null, new ConfigurationManagerAttributes { }));
 
+            // Whether your own extra utility items are rendered is your call, and it is your value
+            // that travels to everyone else: the visuals ride a ZDO the wearer owns.
+            ShowExtraUtilityItems = Config.Bind("Equipment Slots", "Show extra utility items", true,
+                new ConfigDescription("Draw the second and third utility items on the character model. The first utility item is drawn by the game either way.", null, new ConfigurationManagerAttributes { }));
+            ShowExtraUtilityItems.SettingChanged += (_, _) => Player.m_localPlayer?.SetupEquipment();
+
 
             PreventStackAll = Config.Bind("Protections", "Prevent Stack All", true,
                 new ConfigDescription("Items in equipment and quick slots are not moved by the container Stack All button.", null, new ConfigurationManagerAttributes { }));
@@ -104,6 +112,8 @@ namespace EquipmentAndQuickSlots {
             EquipmentSlotsEnabled = BindServerConfig("Toggles", "Enable Equipment Slots", true, "Enable the equipment slots. Disabling this while items are equipped will attempt to move them to your inventory.");
             QuickSlotsEnabled = BindServerConfig("Toggles", "Enable Quick Slots", true, "Enable the quick slots. Disabling this while items are in the slots will attempt to move them to your inventory.");
             QuickSlotCount = BindServerConfig("Quick Slots", "Quick Slot Count", 3, "Number of quick slots available.", false, 0, MaxQuickSlots);
+            UtilitySlotCount = BindServerConfig("Equipment Slots", "Utility Slot Count", 1, "Number of utility items (belts, the Wishbone, Megingjord) that may be worn at once. The game itself allows one; raising this is a balance change. You can never wear two copies of the same item.", false, 1, Slots.MaxUtilitySlots);
+            UtilitySlotCount.SettingChanged += (_, _) => MultiUtility.OnUtilitySlotCountChanged();
             ExtraInventoryRows = BindServerConfig("Inventory", "Extra Inventory Rows", 0, "Additional visible inventory rows on top of the game's four. The equipment and quick slots move down with the grid.", false, 0, Slots.MaxExtraRows);
             ExtraInventoryRows.SettingChanged += (_, _) => Slots.OnExtraRowsChanged();
             BaseCarryWeight = BindServerConfig("Inventory", "Base Carry Weight", VanillaCarryWeight, "The player's base carry weight before belts and other modifiers. 300 is the game default and leaves other mods' carry-weight changes untouched.", false, 50f, 5000f);

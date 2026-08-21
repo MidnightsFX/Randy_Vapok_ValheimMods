@@ -12,6 +12,7 @@ namespace EquipmentAndQuickSlots {
         public const string customKeyBackupID = "eaqs_backup";
 
         private const int EnvelopeVersion = 1;
+        // TODO verify this is actually still needed
         private const string ServerCharactersGUID = "org.bepinex.plugins.servercharacters";
 
         private class BackupEnvelope {

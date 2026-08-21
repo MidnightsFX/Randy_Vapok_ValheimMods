@@ -34,6 +34,9 @@ namespace EquipmentAndQuickSlots {
 
                 var inventory = player.GetInventory();
                 args.Context.AddString($"Inventory {inventory.m_width}x{inventory.m_height} (visible rows: {VisibleRows}), {inventory.m_inventory.Count} items");
+                args.Context.AddString($"Utility: {WearableUtilityItems} wearable, vanilla slot holds {player.m_utilityItem?.m_shared.m_name ?? "nothing"}");
+                for (int i = 0; i < ExtraWearableUtilityItems; i++)
+                    args.Context.AddString($"  extra utility {i + 2}: {MultiUtility.GetExtra(player, i)?.m_shared.m_name ?? "empty"}");
                 foreach (var item in new List<ItemDrop.ItemData>(inventory.m_inventory)) {
                     var slot = GetItemSlot(item);
                     var location = slot != null ? $"slot {slot}" : IsGridPositionASlot(item.m_gridPos) ? "unassigned slot cell" : "grid";

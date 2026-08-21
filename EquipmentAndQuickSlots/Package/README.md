@@ -1,4 +1,4 @@
-# Equipment and Quick Slots
+﻿# Equipment and Quick Slots
 ##### by RandyKnapp, rewritten by MidnightsFX
 
 Version 3.0 is a complete rewrite.
@@ -14,6 +14,10 @@ and Trinket — plus up to six hotkeyable quick slots.
   after saving under 3.0 — the automatic slot backup protects your items, but the old format is
   not written anymore.
 * Quick slot hotkeys no longer trigger vanilla actions on the same key.
+* Optional **extra utility slots** (`Equipment Slots / Utility Slot Count`, 1–3, default 1): wear
+  more than one belt, Wishbone or Megingjord. Off by default and server-synced, because it is a
+  balance change. You can never wear two copies of the same item, and the extra items show on
+  your character for everyone.
 * Configurable keep-on-death and auto-equip-on-gravestone-pickup behavior.
 * Other mods can add custom slots through the API — see
   [docs/API.md](https://github.com/RandyKnapp/ValheimMods/tree/main/EquipmentAndQuickSlots/docs/API.md).

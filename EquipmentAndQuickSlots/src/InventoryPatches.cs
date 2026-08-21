@@ -5,9 +5,6 @@ using UnityEngine;
 using static EquipmentAndQuickSlots.Slots;
 
 namespace EquipmentAndQuickSlots {
-    // The height-juggling core: vanilla Inventory code must only ever see the visible rows, while
-    // the real inventory keeps FullHeight so slot items persist through vanilla Save/Load. Every
-    // patch here is guarded to the local player's inventory.
     public static class InventoryPatches {
         public static void UpdatePlayerInventorySize() {
             if (CurrentPlayer == null)
@@ -36,8 +33,6 @@ namespace EquipmentAndQuickSlots {
             }
         }
 
-        // Vanilla's 300 is the sentinel "don't touch": at that value other mods' carry-weight
-        // changes are left alone; any other value is applied as the player's base capacity.
         internal static void ApplyBaseCarryWeight(Player player) {
             if (player == null)
                 return;
@@ -192,8 +187,11 @@ namespace EquipmentAndQuickSlots {
             // Dropping into a slot cell of the player inventory: the item must fit the cell by
             // type. Whether it may stay (equipped-only for paperdoll cells) is the validation
             // sweep's job — vanilla unequips an item for the duration of a drag move, so the
-            // equipped state can't be judged here.
-            if (grid.m_inventory == PlayerInventory && GetSlotInGrid(pos) is Slot targetSlot && !targetSlot.ItemFits(item)) {
+            // equipped state can't be judged here. Equipment cells additionally have to pass the
+            // drag-to-equip check, or a second copy of a worn utility item would land in a cell
+            // only to be swept back out a frame later.
+            if (grid.m_inventory == PlayerInventory && GetSlotInGrid(pos) is Slot targetSlot
+                && (!targetSlot.ItemFits(item) || targetSlot.IsEquipmentSlot && !WouldFitEquipmentSlot(targetSlot, item))) {
                 EquipmentAndQuickSlots.Log($"{source}: prevented dropping {item.m_shared.m_name} into unfit slot {targetSlot}");
                 return false;
             }

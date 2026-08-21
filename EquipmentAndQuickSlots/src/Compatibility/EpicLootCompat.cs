@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -104,7 +104,7 @@ namespace EquipmentAndQuickSlots
                 InvalidateEffectCache();
         }
 
-        private static void InvalidateEffectCache()
+        internal static void InvalidateEffectCache()
         {
             Player player = Player.m_localPlayer;
             if (player == null || _invalidatePlayerEffectCache == null)

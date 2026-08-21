@@ -56,7 +56,8 @@ namespace EquipmentAndQuickSlots {
             if (slot.Item == null)
                 return false;
 
-            return slot.IsEquipmentSlot && ValConfig.DontDropEquipmentOnDeath.Value
+            // API custom slots hold equipment-like accessories; they follow the equipment setting
+            return (slot.IsEquipmentSlot || slot.IsCustomSlot) && ValConfig.DontDropEquipmentOnDeath.Value
                    || slot.IsQuickSlot && ValConfig.DontDropQuickslotsOnDeath.Value;
         }
 
