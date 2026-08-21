@@ -3,6 +3,7 @@ using System.Linq;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static EquipmentAndQuickSlots.Slots;
 
@@ -17,10 +18,15 @@ namespace EquipmentAndQuickSlots {
     // real InventoryGrid elements.
     public static class EquipmentPanel {
         // --- 2.x geometry, in player-grid-root space. The panel used to be an empty 255x352 rect
-        // at (752,-166) holding two center-anchored InventoryGrids; these values are that layout
-        // flattened into absolute element positions (grid center + 100x100 root offset + the old
-        // (-20,79) element offset table). Tune panelBase if the grid root inset differs. ---
-        private static readonly Vector2 panelBase = new Vector2(752f, -166f);
+        // holding two center-anchored InventoryGrids; these values are that layout flattened into
+        // positions relative to the panel origin (grid center + 100x100 root offset + the old
+        // (-20,79) element offset table). The origin itself is the user's config position, or the
+        // live drag position while the panel is being dragged. ---
+        private static Vector2? _dragPosition;
+        private static Vector2 PanelBase => _dragPosition ?? ValConfig.EquipmentPanelPosition.Value;
+
+        private static bool CanDrag => ValConfig.EquipmentPanelDraggable.Value
+                                       || (ValConfig.EquipmentPanelDragKey.Value.MainKey != KeyCode.None && ZInput.GetKey(ValConfig.EquipmentPanelDragKey.Value.MainKey));
 
         private const float elementSpace = 70f;                 // vanilla InventoryGrid.m_elementSpace
         private const float slotSpacing = elementSpace + 10f;   // 2.x equipment grid spacing
@@ -59,18 +65,18 @@ namespace EquipmentAndQuickSlots {
 
         internal static Vector2 GetSlotPosition(Slot slot) {
             if (slot.IsEquipmentSlot)
-                return panelBase + equipmentOrigin + equipmentOffsets[slot.Index - EquipmentSlotStartIndex];
+                return PanelBase + equipmentOrigin + equipmentOffsets[slot.Index - EquipmentSlotStartIndex];
 
             if (slot.IsQuickSlot)
-                return panelBase + new Vector2(rowLeft + slot.Index * elementSpace, quickRowTop);
+                return PanelBase + new Vector2(rowLeft + slot.Index * elementSpace, quickRowTop);
 
             if (slot.IsCustomSlot) {
                 // API slots form a second row under the quick slots, packed left without gaps
                 int ordinal = Array.IndexOf(ActiveCustomSlots, slot);
-                return panelBase + new Vector2(rowLeft + Math.Max(0, ordinal) * elementSpace, customRowTop);
+                return PanelBase + new Vector2(rowLeft + Math.Max(0, ordinal) * elementSpace, customRowTop);
             }
 
-            return panelBase;
+            return PanelBase;
         }
 
         // Runs from InventoryGui.Update while visible: clones the inventory background once per
@@ -93,7 +99,7 @@ namespace EquipmentAndQuickSlots {
             if (!customBackground)
                 customBackground = CreateBackground("EaqsCustomSlotBkg");
 
-            SyncBackground(equipmentBackground, EquipmentVisible, panelBase + equipmentBackgroundCenter, equipmentBackgroundSize);
+            SyncBackground(equipmentBackground, EquipmentVisible, PanelBase + equipmentBackgroundCenter, equipmentBackgroundSize);
 
             int quickCount = ActiveQuickSlots;
             SyncBackground(quickBackground, quickCount > 0, RowBackgroundCenter(quickCount, quickRowTop), RowBackgroundSize(quickCount));
@@ -106,7 +112,7 @@ namespace EquipmentAndQuickSlots {
 
         // Row backgrounds are centered on their cells: the 64-tall cell sits mid-way in the 90-tall strip
         private static Vector2 RowBackgroundCenter(int slotCount, float rowTop) =>
-            panelBase + new Vector2(rowBackgroundLeft + RowBackgroundSize(slotCount).x / 2f, rowTop - (elementSpace - 6f) / 2f);
+            PanelBase + new Vector2(rowBackgroundLeft + RowBackgroundSize(slotCount).x / 2f, rowTop - (elementSpace - 6f) / 2f);
 
         private static RectTransform CreateBackground(string name) {
             Transform player = InventoryGui.instance.m_player;
@@ -122,7 +128,57 @@ namespace EquipmentAndQuickSlots {
             background.anchorMax = new Vector2(0f, 1f);
             background.pivot = new Vector2(0.5f, 0.5f);
             background.localScale = Vector3.one;
+
+            // The backgrounds are the drag handles: grabbing any of them moves the whole panel
+            Image image = background.GetComponent<Image>();
+            if (image)
+                image.raycastTarget = true;
+            background.gameObject.AddComponent<PanelDragHandle>();
+
             return background;
+        }
+
+        // Drag-to-move on the panel backgrounds. Gated behind the drag key (or the always-draggable
+        // toggle) so ordinary clicks around the slots can't nudge the panel. The live position is
+        // applied every frame while dragging; the config (and therefore the file) is written once
+        // on release.
+        private class PanelDragHandle : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler {
+            private bool _dragging;
+            private float _scaleFactor = 1f;
+
+            public void OnBeginDrag(PointerEventData eventData) {
+                if (!CanDrag || eventData.button != PointerEventData.InputButton.Left)
+                    return;
+
+                _dragging = true;
+                _dragPosition = PanelBase;
+                _scaleFactor = GetComponentInParent<Canvas>()?.scaleFactor ?? 1f;
+                if (_scaleFactor <= 0f)
+                    _scaleFactor = 1f;
+            }
+
+            public void OnDrag(PointerEventData eventData) {
+                if (!_dragging || _dragPosition == null)
+                    return;
+
+                _dragPosition = _dragPosition.Value + eventData.delta / _scaleFactor;
+            }
+
+            public void OnEndDrag(PointerEventData eventData) {
+                if (!_dragging)
+                    return;
+
+                _dragging = false;
+                if (_dragPosition != null)
+                    ValConfig.EquipmentPanelPosition.Value = _dragPosition.Value;
+                _dragPosition = null;
+            }
+
+            private void OnDisable() {
+                // Inventory closed mid-drag: keep whatever was dragged so far
+                if (_dragging)
+                    OnEndDrag(null);
+            }
         }
 
         private static void SyncBackground(RectTransform background, bool visible, Vector2 center, Vector2 size) {
@@ -231,6 +287,7 @@ namespace EquipmentAndQuickSlots {
             equipmentBackground = null;
             quickBackground = null;
             customBackground = null;
+            _dragPosition = null;
             normalColor = Color.clear;
             highlightedColor = Color.clear;
         }

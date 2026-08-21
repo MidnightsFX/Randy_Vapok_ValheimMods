@@ -16,6 +16,9 @@ namespace EquipmentAndQuickSlots {
         public static ConfigEntry<bool> PreventStackAll;
         public static ConfigEntry<bool> PreventAutoPickup;
         public static ConfigEntry<bool> BackupEnabled;
+        public static ConfigEntry<Vector2> EquipmentPanelPosition;
+        public static ConfigEntry<bool> EquipmentPanelDraggable;
+        public static ConfigEntry<KeyboardShortcut> EquipmentPanelDragKey;
         public static readonly ConfigEntry<KeyboardShortcut>[] QuickSlotKeys = new ConfigEntry<KeyboardShortcut>[MaxQuickSlots];
         public static readonly ConfigEntry<string>[] QuickSlotLabels = new ConfigEntry<string>[MaxQuickSlots];
 
@@ -74,6 +77,13 @@ namespace EquipmentAndQuickSlots {
                 new ConfigDescription("The point on the HUD to anchor the Quick Slots bar. Changing this also changes the pivot of the Quick Slots to that corner.", null, new ConfigurationManagerAttributes { }));
             QuickSlotsPosition = Config.Bind("Quick Slots", "Quick Slots Position", new Vector2(216, 150),
                 new ConfigDescription("The position offset from the Quick Slots Anchor at which to place the Quick Slots.", null, new ConfigurationManagerAttributes { }));
+
+            EquipmentPanelPosition = Config.Bind("Equipment Panel", "Equipment Panel Position", new Vector2(615f, 28f),
+                new ConfigDescription("Position of the equipment and quick slot panel, relative to the inventory grid. Drag the panel by its background in-game to move it (hold the drag key, or enable 'Equipment Panel Draggable').", null, new ConfigurationManagerAttributes { }));
+            EquipmentPanelDraggable = Config.Bind("Equipment Panel", "Equipment Panel Draggable", false,
+                new ConfigDescription("Allow dragging the panel by its background at any time, without holding the drag key.", null, new ConfigurationManagerAttributes { }));
+            EquipmentPanelDragKey = Config.Bind("Equipment Panel", "Equipment Panel Drag Key", new KeyboardShortcut(KeyCode.LeftAlt),
+                new ConfigDescription("Hold this key while dragging the panel background to move the panel.", null, new ConfigurationManagerAttributes { }));
 
             InstantlyReequipArmorOnPickup = Config.Bind("Gravestone", "Instantly re-equip armor on pickup", true,
                 new ConfigDescription("If set to true, when you pickup your gravestone the armor that was in your equipment slots is instantly re-equipped, if possible. Only valid when Equipment Slots are enabled.", null, new ConfigurationManagerAttributes { }));
