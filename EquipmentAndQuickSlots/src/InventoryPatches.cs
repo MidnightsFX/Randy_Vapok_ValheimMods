@@ -171,19 +171,13 @@ namespace EquipmentAndQuickSlots {
                 }
             }
 
-            // Dropping into a slot cell of the player inventory
-            if (grid.m_inventory == PlayerInventory && GetSlotInGrid(pos) is Slot targetSlot) {
-                if (targetSlot.IsEquipmentSlot) {
-                    // Only the drag-to-equip flow (handled in the OnSelectedItem prefix) may put
-                    // items here; a raw move of an unequipped or mismatched item never passes.
-                    if (!targetSlot.ItemFits(item)) {
-                        EquipmentAndQuickSlots.Log($"{source}: prevented dropping {item.m_shared.m_name} into equipment slot {targetSlot}");
-                        return false;
-                    }
-                } else if (!targetSlot.ItemFits(item)) {
-                    EquipmentAndQuickSlots.Log($"{source}: prevented dropping {item.m_shared.m_name} into unfit slot {targetSlot}");
-                    return false;
-                }
+            // Dropping into a slot cell of the player inventory: the item must fit the cell by
+            // type. Whether it may stay (equipped-only for paperdoll cells) is the validation
+            // sweep's job — vanilla unequips an item for the duration of a drag move, so the
+            // equipped state can't be judged here.
+            if (grid.m_inventory == PlayerInventory && GetSlotInGrid(pos) is Slot targetSlot && !targetSlot.ItemFits(item)) {
+                EquipmentAndQuickSlots.Log($"{source}: prevented dropping {item.m_shared.m_name} into unfit slot {targetSlot}");
+                return false;
             }
 
             // Swapping: the displaced item must fit the dragged item's source slot
@@ -198,32 +192,69 @@ namespace EquipmentAndQuickSlots {
 
         [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.OnSelectedItem))]
         public static class InventoryGui_OnSelectedItem_DragRules {
+            // An item dragged in from another inventory straight onto its equipment cell: vanilla
+            // has to move it first (EquipItem needs it in the player inventory), so it is equipped
+            // in the postfix once the move has happened.
+            private static ItemDrop.ItemData _equipAfterDrop;
+
             public static bool Prefix(InventoryGui __instance, InventoryGrid grid, Vector2i pos) {
+                _equipAfterDrop = null;
+
                 Player player = Player.m_localPlayer;
                 if (player == null || player.IsTeleporting() || !__instance.m_dragGo || __instance.m_dragItem == null || __instance.m_dragInventory == null)
                     return true;
 
                 ItemDrop.ItemData dragItem = __instance.m_dragItem;
+                bool targetIsPlayerGrid = grid.m_inventory == PlayerInventory;
+                bool dragFromPlayerGrid = __instance.m_dragInventory == PlayerInventory;
+                Slot targetSlot = targetIsPlayerGrid ? GetSlotInGrid(pos) : null;
+                Slot sourceSlot = dragFromPlayerGrid ? GetItemSlot(dragItem) : null;
+                bool dragItemEquipped = player.IsItemEquiped(dragItem);
 
-                // Drag-to-equip: an equippable dropped on its matching equipment cell equips it;
-                // the validation sweep then moves it into the cell.
-                if (grid.m_inventory == PlayerInventory && __instance.m_dragInventory == PlayerInventory
-                    && GetSlotInGrid(pos) is Slot targetSlot && WouldFitEquipmentSlot(targetSlot, dragItem)
-                    && !player.IsItemEquiped(dragItem)) {
-                    __instance.SetupDragItem(null, null, 1);
-                    player.EquipItem(dragItem);
-                    return false;
+                // Drag-to-equip: an unequipped equippable dropped on its matching equipment cell
+                // equips it; the validation sweep then moves it into the cell.
+                if (targetSlot != null && WouldFitEquipmentSlot(targetSlot, dragItem) && !dragItemEquipped) {
+                    if (dragFromPlayerGrid) {
+                        __instance.SetupDragItem(null, null, 1);
+                        player.EquipItem(dragItem);
+                        return false;
+                    }
+
+                    _equipAfterDrop = dragItem;
                 }
 
-                // Drag-to-unequip: an equipped item dragged out of its cell onto an empty regular
-                // cell is unequipped first, then vanilla moves it.
-                if (__instance.m_dragInventory == PlayerInventory && GetItemSlot(dragItem) is Slot sourceSlot && sourceSlot.IsEquipmentSlot
-                    && player.IsItemEquiped(dragItem) && GetSlotInGrid(pos) == null
-                    && grid.m_inventory.GetItemAt(pos.x, pos.y) == null) {
-                    player.UnequipItem(dragItem, false);
+                if (sourceSlot != null && sourceSlot.IsEquipmentSlot && dragItemEquipped) {
+                    ItemDrop.ItemData targetItem = grid.m_inventory.GetItemAt(pos.x, pos.y);
+
+                    // Swap-equip: the worn item dragged onto an unequipped item of the same type
+                    // in the grid means "wear that one instead" — equip it, let vanilla unequip
+                    // the dragged one, and let the sweep swap the positions.
+                    if (targetIsPlayerGrid && targetItem != null && targetItem != dragItem
+                        && WouldFitEquipmentSlot(sourceSlot, targetItem) && !player.IsItemEquiped(targetItem)) {
+                        __instance.SetupDragItem(null, null, 1);
+                        player.EquipItem(targetItem);
+                        return false;
+                    }
+
+                    // Drag-to-unequip: the worn item dragged onto an empty cell (regular grid or a
+                    // container) is unequipped first, then vanilla moves it.
+                    if ((!targetIsPlayerGrid || targetSlot == null) && targetItem == null)
+                        player.UnequipItem(dragItem, false);
                 }
 
                 return PassDropItem("InventoryGui.OnSelectedItem", grid, __instance.m_dragInventory, dragItem, pos);
+            }
+
+            public static void Postfix() {
+                ItemDrop.ItemData item = _equipAfterDrop;
+                _equipAfterDrop = null;
+
+                Player player = Player.m_localPlayer;
+                if (item == null || player == null || PlayerInventory == null)
+                    return;
+
+                if (PlayerInventory.ContainsItem(item) && !player.IsItemEquiped(item))
+                    player.EquipItem(item);
             }
         }
 

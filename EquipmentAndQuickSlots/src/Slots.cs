@@ -109,7 +109,14 @@ namespace EquipmentAndQuickSlots
 
             public bool IsFree => Item == null;
 
+            // Placement rule: may this item be put into this cell at all. For equipment cells this
+            // is the item type only — vanilla unequips an item for the duration of a drag move, so
+            // the equipped state must not gate placement.
             public bool ItemFits(ItemDrop.ItemData item) => item != null && IsActive && (_itemIsValid == null || _itemIsValid(item));
+
+            // Residence rule: may this item stay in this cell. Equipment cells are equipped-only;
+            // the validation sweep relocates anything that fits but doesn't belong.
+            public bool ItemBelongs(ItemDrop.ItemData item) => ItemFits(item) && (!IsEquipmentSlot || IsEquippedByPlayer(item));
 
             public bool IsFreeQuickSlot() => IsQuickSlot && IsActive && IsFree;
 
@@ -203,13 +210,13 @@ namespace EquipmentAndQuickSlots
             if (item == null)
                 return false;
 
-            if (TryGetSavedPlayerSlot(item, out Slot prevSlot) && prevSlot.IsActive && prevSlot.ItemFits(item) && (prevSlot.IsFree || item == prevSlot.Item))
+            if (TryGetSavedPlayerSlot(item, out Slot prevSlot) && prevSlot.IsActive && prevSlot.ItemBelongs(item) && (prevSlot.IsFree || item == prevSlot.Item))
             {
                 slot = prevSlot;
                 return true;
             }
 
-            int index = Array.FindIndex(slots, s => s.IsActive && s.IsFree && s.ItemFits(item));
+            int index = Array.FindIndex(slots, s => s.IsActive && s.IsFree && s.ItemBelongs(item));
             if (index == -1)
                 return false;
 
@@ -224,7 +231,7 @@ namespace EquipmentAndQuickSlots
             if (item == null)
                 return false;
 
-            slot = GetEquipmentSlots().FirstOrDefault(s => s.IsFree && s.ItemFits(item));
+            slot = GetEquipmentSlots().FirstOrDefault(s => s.IsFree && s.ItemBelongs(item));
             return slot != null;
         }
 
@@ -264,6 +271,7 @@ namespace EquipmentAndQuickSlots
                 {
                     gridPos = item.m_gridPos;
                     item.m_gridPos = slot.GridPosition;
+                    ClearCachedItems();
                     return true;
                 }
             }
@@ -376,13 +384,13 @@ namespace EquipmentAndQuickSlots
         public static bool WouldFitEquipmentSlot(Slot slot, ItemDrop.ItemData item) =>
             item != null && slot.IsEquipmentSlot && slot.IsActive && item.m_shared.m_itemType == GetEquipmentSlotType(slot);
 
-        private static bool IsEquippedByPlayer(ItemDrop.ItemData item) => item.m_equipped || CurrentPlayer?.IsItemEquiped(item) == true;
+        internal static bool IsEquippedByPlayer(ItemDrop.ItemData item) => item != null && (item.m_equipped || CurrentPlayer?.IsItemEquiped(item) == true);
 
         private static Func<ItemDrop.ItemData, bool> EquipmentSlotValidator(ItemDrop.ItemData.ItemType itemType)
         {
-            // Equipped-only semantics: the paperdoll always reflects what is worn. Unequipping
-            // fails this predicate and the validation sweep relocates the item to the visible grid.
-            return item => item != null && item.m_shared.m_itemType == itemType && IsEquippedByPlayer(item);
+            // Type only. Equipped-only semantics live in Slot.ItemBelongs / the validation sweep,
+            // never in the placement predicate (see ItemFits).
+            return item => item != null && item.m_shared.m_itemType == itemType;
         }
 
         private static bool IsQuickSlotAvailable(int index) => ValConfig.QuickSlotsEnabled.Value && ValConfig.QuickSlotCount.Value > index;

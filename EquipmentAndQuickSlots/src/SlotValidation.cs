@@ -27,7 +27,7 @@ namespace EquipmentAndQuickSlots
 
         private static bool PutIntoFirstEmptySlot(ItemDrop.ItemData item)
         {
-            if (TryGetSavedPlayerSlot(item, out Slot prevSlot) && prevSlot.IsActive && prevSlot.ItemFits(item) && (prevSlot.IsFree || item == prevSlot.Item))
+            if (TryGetSavedPlayerSlot(item, out Slot prevSlot) && prevSlot.IsActive && prevSlot.ItemBelongs(item) && (prevSlot.IsFree || item == prevSlot.Item))
             {
                 item.m_gridPos = prevSlot.GridPosition;
                 return true;
@@ -68,16 +68,17 @@ namespace EquipmentAndQuickSlots
 
                 isDirty = false;
 
+                bool moved = false;
                 for (int i = 0; i < slots.Length; i++)
                 {
                     Slot slot = slots[i];
                     ItemDrop.ItemData item = slot.Item;
-                    if (item == null || slot.ItemFits(item))
+                    if (item == null || slot.ItemBelongs(item))
                         continue;
 
-                    EquipmentAndQuickSlots.Log($"SlotValidation: item {item.m_shared.m_name} no longer fits slot {slot}");
+                    EquipmentAndQuickSlots.Log($"SlotValidation: item {item.m_shared.m_name} no longer belongs in slot {slot}");
 
-                    if (slot.IsEquipmentSlot && (item.m_equipped || Player.m_localPlayer.IsItemEquiped(item)))
+                    if (slot.IsEquipmentSlot && IsEquippedByPlayer(item))
                     {
                         // Still equipped but in the wrong cell (type changed by an upgrade, or a
                         // slot got deactivated): try the matching cell first.
@@ -86,6 +87,7 @@ namespace EquipmentAndQuickSlots
                         {
                             item.m_gridPos = freeEquipmentSlot.GridPosition;
                             freeEquipmentSlot.ClearItemCache();
+                            moved = true;
                             continue;
                         }
 
@@ -95,7 +97,8 @@ namespace EquipmentAndQuickSlots
                             itemToSwap.m_gridPos = item.m_gridPos;
                             item.m_gridPos = slotToSwap.GridPosition;
                             slotToSwap.ClearItemCache();
-                            if (slot.ItemFits(item = slot.Item))
+                            moved = true;
+                            if (slot.ItemBelongs(item = slot.Item))
                                 continue;
 
                             if (item == null)
@@ -103,8 +106,12 @@ namespace EquipmentAndQuickSlots
                         }
                     }
 
-                    PutIntoFirstEmptySlot(item);
+                    if (PutIntoFirstEmptySlot(item))
+                        moved = true;
                 }
+
+                if (moved)
+                    PlayerInventory.Changed();
             }
 
             [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.SetupEquipment))]
