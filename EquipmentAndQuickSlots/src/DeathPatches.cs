@@ -236,39 +236,44 @@ namespace EquipmentAndQuickSlots {
         // ---------------------------------------------------------------------------------------
         // Pickup: return items to remembered slots and auto-equip per config.
 
+        // Runs synchronously in the take-all frame — before the validation sweep prunes the
+        // slot-memory tags and before it could evict unequipped armor from its cell. Two states:
+        // with the auto-equip options on, the matching items are equipped instantly (no animation
+        // — this is your own gear coming back); with them off, armor that landed in its cell is
+        // parked there unequipped for the player to decide.
         [HarmonyPatch(typeof(TombStone), nameof(TombStone.OnTakeAllSuccess))]
         private static class TombStone_OnTakeAllSuccess_AutoEquip {
             private static void Postfix() {
-                if (PlayerInventory == null)
+                Player player = CurrentPlayer;
+                if (player == null || PlayerInventory == null || player.IsDead())
                     return;
 
-                CurrentPlayer?.StartCoroutine(AutoEquipItemsOnTombstoneTakeAll());
-            }
-        }
+                string playerID = Game.instance.GetPlayerProfile().GetPlayerID().ToString();
 
-        private static IEnumerator AutoEquipItemsOnTombstoneTakeAll() {
-            float timeoutTime = Time.time + 5f;
+                foreach (ItemDrop.ItemData item in PlayerInventory.GetAllItems().ToList()) {
+                    if (item == null)
+                        continue;
 
-            yield return new WaitUntil(() =>
-                CurrentPlayer?.GetSEMan()?.HaveStatusEffect(AfterdeathGhost) == false && CurrentPlayer?.IsDead() == false || Time.time >= timeoutTime);
+                    // An equipped flag without the matching equip reference is stale (it rode
+                    // along with the item through the grave). Clear it so the item is either
+                    // auto-equipped below or parked/evicted by the sweep, instead of masquerading
+                    // as worn.
+                    if (item.m_equipped && !player.IsItemEquiped(item))
+                        item.m_equipped = false;
 
-            yield return null;
+                    HandleLegacyMarkers(player, item);
 
-            Player player = CurrentPlayer;
-            if (player == null)
-                yield break;
+                    if (IsItemToEquip(player, item, playerID)) {
+                        PruneWeaponShieldKey(item);
+                        if (!player.IsItemEquiped(item))
+                            player.EquipItem(item, triggerEquipEffects: false);
+                        continue;
+                    }
 
-            string playerID = Game.instance.GetPlayerProfile().GetPlayerID().ToString();
-
-            foreach (ItemDrop.ItemData item in player.GetInventory().GetAllItems().ToList()) {
-                if (item == null)
-                    continue;
-
-                HandleLegacyMarkers(player, item);
-
-                if (IsItemToEquip(player, item, playerID)) {
-                    TryEquipItem(player, item);
-                    yield return null;
+                    // Not auto-equipped: armor that came back into its own equipment cell stays
+                    // there unequipped until the player equips it or moves it.
+                    if (!player.IsItemEquiped(item) && GetItemSlot(item) is Slot slot && slot.IsEquipmentSlot && WouldFitEquipmentSlot(slot, item))
+                        slot.Park(item);
                 }
             }
         }
@@ -293,20 +298,13 @@ namespace EquipmentAndQuickSlots {
             return false;
         }
 
-        private static void TryEquipItem(Player player, ItemDrop.ItemData item) {
-            PruneWeaponShieldKey(item);
-
-            if (!player.IsItemEquiped(item))
-                player.EquipItem(item);
-        }
-
         private static void PruneWeaponShieldKey(ItemDrop.ItemData item) {
             item.m_customData.Remove(customKeyWeaponShield);
         }
 
         private static void HandleLegacyMarkers(Player player, ItemDrop.ItemData item) {
             if (item.m_customData.Remove(legacyEquipmentKey) && ValConfig.InstantlyReequipArmorOnPickup.Value && !player.IsItemEquiped(item))
-                player.EquipItem(item);
+                player.EquipItem(item, triggerEquipEffects: false);
 
             if (item.m_customData.TryGetValue(legacyQuickSlotKey, out string posText)) {
                 item.m_customData.Remove(legacyQuickSlotKey);

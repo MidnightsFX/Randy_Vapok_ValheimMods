@@ -38,6 +38,10 @@ namespace EquipmentAndQuickSlots
         public const string customKeyPlayerID = "eaqs_player";
         public const string customKeySlotID = "eaqs_slot";
         internal const string customKeyWeaponShield = "eaqs_weaponshield";
+        // Armor returned from a gravestone without being re-equipped is "parked" in its cell: it
+        // may rest there unequipped until the player equips it or moves it out. The value is the
+        // cell's slot id; the sweep drops the marker as soon as the item is worn or elsewhere.
+        internal const string customKeyParked = "eaqs_parked";
 
         public class Slot
         {
@@ -114,10 +118,20 @@ namespace EquipmentAndQuickSlots
             // the equipped state must not gate placement.
             public bool ItemFits(ItemDrop.ItemData item) => item != null && IsActive && (_itemIsValid == null || _itemIsValid(item));
 
-            // Residence rule: may this item stay in this cell. Equipment cells are equipped-only
-            // (an item whose equip is queued and animating counts — it is about to be worn); the
+            // Residence rule: may this item stay in this cell. Equipment cells are equipped-only —
+            // with two deliberate exceptions: an item whose equip is queued and animating (about
+            // to be worn), and armor parked here by a gravestone pickup with auto-equip off. The
             // validation sweep relocates anything that fits but doesn't belong.
-            public bool ItemBelongs(ItemDrop.ItemData item) => ItemFits(item) && (!IsEquipmentSlot || IsEquippedByPlayer(item) || IsEquipQueued(item));
+            public bool ItemBelongs(ItemDrop.ItemData item) => ItemFits(item) && (!IsEquipmentSlot || IsEquippedByPlayer(item) || IsEquipQueued(item) || IsParkedHere(item));
+
+            public bool IsParkedHere(ItemDrop.ItemData item) =>
+                item != null && item.m_customData.TryGetValue(customKeyParked, out string parkedSlot) && parkedSlot == _id;
+
+            internal void Park(ItemDrop.ItemData item)
+            {
+                if (item != null)
+                    item.m_customData[customKeyParked] = _id;
+            }
 
             public bool IsFreeQuickSlot() => IsQuickSlot && IsActive && IsFree;
 

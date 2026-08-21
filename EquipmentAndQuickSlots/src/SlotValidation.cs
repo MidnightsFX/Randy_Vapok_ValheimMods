@@ -209,9 +209,24 @@ namespace EquipmentAndQuickSlots
                 if (misplacedItems.Count(PutIntoFirstEmptySlot) > 0)
                     PlayerInventory.Changed();
 
-                // Items back in a slot no longer need their return-address tag
-                foreach (ItemDrop.ItemData item in GetAllSlotItems().ToList())
-                    PruneLastEquippedSlotFromItem(item);
+                // Items settled in a slot no longer need their return-address tag. An item that
+                // merely sits in a cell it doesn't belong in yet (armor awaiting the pickup
+                // auto-equip, or about to be evicted) keeps it — the tag is what says where it goes.
+                foreach (Slot slot in slots)
+                    if (slot.Item is ItemDrop.ItemData slotItem && slot.ItemBelongs(slotItem))
+                        PruneLastEquippedSlotFromItem(slotItem);
+
+                // A parked marker only means something while the item is unequipped and still in
+                // the cell it was parked in; once it is worn or has been moved, drop it so the
+                // equipped-only rule applies again.
+                foreach (ItemDrop.ItemData item in PlayerInventory.m_inventory)
+                {
+                    if (item == null || !item.m_customData.TryGetValue(customKeyParked, out string parkedSlot))
+                        continue;
+
+                    if (Player.m_localPlayer.IsItemEquiped(item) || GetItemSlot(item)?.ID != parkedSlot)
+                        item.m_customData.Remove(customKeyParked);
+                }
             }
 
             private static bool ItemIsOverlapping(ItemDrop.ItemData itemData) => occupiedPositions.Contains(itemData.m_gridPos);
