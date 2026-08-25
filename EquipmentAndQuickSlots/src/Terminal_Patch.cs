@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using EquipmentAndQuickSlots.src.MultiUtility;
 using HarmonyLib;
 using static EquipmentAndQuickSlots.Slots;
 

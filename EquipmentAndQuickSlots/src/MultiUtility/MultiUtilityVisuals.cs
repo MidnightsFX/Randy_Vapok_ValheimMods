@@ -4,7 +4,7 @@ using HarmonyLib;
 using UnityEngine;
 using static EquipmentAndQuickSlots.Slots;
 
-namespace EquipmentAndQuickSlots {
+namespace EquipmentAndQuickSlots.src.MultiUtility {
     // Rendering the second and third utility item on the character model.
     //
     // VisEquipment has one utility slot (m_utilityItem / m_utilityItemInstances) driven by one ZDO

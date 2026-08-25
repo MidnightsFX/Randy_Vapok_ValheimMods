@@ -3,7 +3,7 @@ using HarmonyLib;
 using UnityEngine;
 using static EquipmentAndQuickSlots.Slots;
 
-namespace EquipmentAndQuickSlots {
+namespace EquipmentAndQuickSlots.src.MultiUtility {
     // Wearing more than one utility item.
     //
     // Vanilla keeps exactly one reference, Humanoid.m_utilityItem, and EquipItem's type chain

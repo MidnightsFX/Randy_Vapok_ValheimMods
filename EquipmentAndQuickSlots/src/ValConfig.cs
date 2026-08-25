@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using EquipmentAndQuickSlots.src.MultiUtility;
 using UnityEngine;
 
 namespace EquipmentAndQuickSlots {

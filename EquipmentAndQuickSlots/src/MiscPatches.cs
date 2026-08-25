@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace EquipmentAndQuickSlots.src {
-    public static class Patches {
+    public static class MiscPatches {
         [HarmonyPatch(typeof(UITooltip), nameof(UITooltip.LateUpdate))]
         public static class UIToolTip_LateUpdate_Patch {
             public static void Postfix(UITooltip __instance) {

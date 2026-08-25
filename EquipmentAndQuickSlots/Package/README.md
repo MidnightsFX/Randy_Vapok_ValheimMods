@@ -1,4 +1,4 @@
-﻿# Equipment and Quick Slots
+# Equipment and Quick Slots
 ##### by RandyKnapp, rewritten by MidnightsFX
 
 Version 3.0 is a complete rewrite.
@@ -36,3 +36,10 @@ copy `EquipmentAndQuickSlots.dll` into the `BepInEx/plugins` folder.
 * `invcheck` — prints the inventory grid contents
 * `eaqs_restorebackup` (cheat) — restores the automatic slot backup into free slots
 * `breakequipment`, `dropall` (cheat) — testing helpers
+
+### Notes
+
+The following things WILL NOT BE ADDED OR CONSIDERED.
+* Player wardrobe features (instead use [Advizes Armoire](https://thunderstore.io/c/valheim/p/Advize/Armoire/))
+* Slots which provide: dedicated arrow, or food slots, stat changes per slot (instead use [Extra Slots](https://thunderstore.io/c/valheim/p/shudnal/ExtraSlots/))
+* 3D or otherwise interactable character model (use [Azu Extended Inventory](https://valheim.hexium.gg/mods/Azumatt/AzuExtendedPlayerInventory) instead)
