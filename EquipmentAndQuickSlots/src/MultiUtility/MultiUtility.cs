@@ -219,6 +219,15 @@ namespace EquipmentAndQuickSlots {
                 item.m_equipped = true;
                 __instance.SetupEquipment();
             }
+
+            // The borrowed shared type must be restored even when EquipItem (or another mod's patch
+            // on it) throws and the postfix never runs -- m_shared is the descriptor for every copy
+            // of this item, and a stranded passthrough type would leave the item unequippable (and
+            // misrouted everywhere) for the rest of the session.
+            private static void Finalizer(ItemDrop.ItemData item, int __state) {
+                if (__state != -1 && item != null && item.m_shared.m_itemType == passthroughType)
+                    item.m_shared.m_itemType = ItemDrop.ItemData.ItemType.Utility;
+            }
         }
 
         // No prefix needed: the IsItemEquiped postfix gets vanilla past its early-out, no branch of

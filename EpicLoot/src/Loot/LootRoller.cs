@@ -86,6 +86,12 @@ namespace EpicLoot
 
         public static void Initialize(LootConfig lootConfig)
         {
+            if (lootConfig == null)
+            {
+                EpicLoot.LogWarning("LootRoller.Initialize called with a null config; keeping the currently loaded loot tables.");
+                return;
+            }
+
             Config = lootConfig;
 
             _weightedDropCountTable = new WeightedRandomCollection<KeyValuePair<int, float>>();
@@ -325,6 +331,14 @@ namespace EpicLoot
             HashSet<string> rolledItems = new HashSet<string>();
             int failures = 0;
 
+            if (lootTables == null || lootTables.Count == 0)
+            {
+                // A biome/category combination with no tables used to divide by zero below and had
+                // nothing to roll from regardless.
+                EpicLoot.LogWarning("RollLootNoTableWithSpecifics called with no loot tables; returning no loot.");
+                return results;
+            }
+
             // This is effectively an estimate, but we will just keep rolling until we get the number of results we want if this is not enough
             int lootPerCategory = numResults / lootTables.Count;
             if (lootPerCategory < 1)
@@ -332,8 +346,28 @@ namespace EpicLoot
                 lootPerCategory = 1;
             }
 
+            int previousResultCount = -1;
+            int stalledPasses = 0;
             while (results.Count < numResults)
             {
+                // A pass that produced nothing will not do better on the next spin with the same
+                // tables -- bail after a few, instead of freezing the game on the main thread.
+                if (results.Count == previousResultCount)
+                {
+                    stalledPasses++;
+                    if (stalledPasses >= 3)
+                    {
+                        EpicLoot.LogWarningForce($"Loot roll stalled after {results.Count}/{numResults} results " +
+                            $"({failures} failures); returning what was rolled. Check iteminfo/loottables for invalid items.");
+                        break;
+                    }
+                }
+                else
+                {
+                    stalledPasses = 0;
+                }
+                previousResultCount = results.Count;
+
                 foreach (LootTable lt in lootTables.shuffleList())
                 {
                     if (results.Count >= numResults)
@@ -409,9 +443,27 @@ namespace EpicLoot
                         }
 
                         GameObject selectedPrefab = ObjectDB.instance.GetItemPrefab(gatedItemName);
+                        if (selectedPrefab == null)
+                        {
+                            // The existence check above used PrefabManager -- a different registry --
+                            // so ObjectDB can still miss the name.
+                            failures += 1;
+                            continue;
+                        }
+
+                        GameObject droppedItem;
+                        bool previousForceDisableInit = ZNetView.m_forceDisableInit;
                         ZNetView.m_forceDisableInit = true;
-                        GameObject droppedItem = Object.Instantiate(selectedPrefab, location, new Quaternion(0, 0, 0, 0));
-                        ZNetView.m_forceDisableInit = false;
+                        try
+                        {
+                            droppedItem = Object.Instantiate(selectedPrefab, location, new Quaternion(0, 0, 0, 0));
+                        }
+                        finally
+                        {
+                            // Restore in a finally: a stranded true makes every later ZNetView.Awake
+                            // skip registration for the rest of the session.
+                            ZNetView.m_forceDisableInit = previousForceDisableInit;
+                        }
                         if (droppedItem == null)
                         {
                             failures += 1;
@@ -1488,19 +1540,38 @@ namespace EpicLoot
 
         private static bool CheckForSet(string lootdrop, List<LootDrop> current_results, out List<LootDrop> results)
         {
+            return CheckForSet(lootdrop, current_results, out results, null);
+        }
+
+        // Returns true when the name WAS an item set (its members were expanded into results);
+        // callers add the entry itself only on false. The old version returned false
+        // unconditionally, so set names leaked into resolved loot lists as if they were items.
+        private static bool CheckForSet(string lootdrop, List<LootDrop> current_results,
+            out List<LootDrop> results, HashSet<string> visited)
+        {
             results = current_results;
-            if (ItemSets.TryGetValue(lootdrop, out LootItemSet lootset))
+            if (!ItemSets.TryGetValue(lootdrop, out LootItemSet lootset))
             {
-                foreach (LootDrop ld in lootset.Loot)
+                return false;
+            }
+
+            visited ??= new HashSet<string>();
+            if (!visited.Add(lootdrop))
+            {
+                // A set referencing itself (directly or via a cycle) used to recurse forever.
+                EpicLoot.LogWarningForce($"Item set '{lootdrop}' references itself (directly or via a cycle); skipping the repeated expansion.");
+                return true;
+            }
+
+            foreach (LootDrop ld in lootset.Loot)
+            {
+                if (!CheckForSet(ld.Item, current_results, out results, visited))
                 {
-                    if (!CheckForSet(ld.Item, current_results, out results))
-                    {
-                        results.Add(ld);
-                    }
+                    results.Add(ld);
                 }
             }
 
-            return false;
+            return true;
         }
 
         public static bool LootSetContainsEntry(string lootdrop)
@@ -1632,6 +1703,9 @@ namespace EpicLoot
                 {
                     // If we rolled the same effect as the current one, try again a few times
                     EpicLoot.LogWarning($"Rolled a duplicate effect: {newEffect.EffectType} for item: {item.m_shared.m_name}, retrying...");
+                    // Count every retry (a null re-roll included), so an exhausted pool can never
+                    // spin this loop forever.
+                    fallbackAttempts++;
                     MagicItemEffect nmieffect = RollEffects(availableEffects, rarity, 1, true).FirstOrDefault();
                     if (nmieffect == null)
                     {
@@ -1639,7 +1713,12 @@ namespace EpicLoot
                     }
 
                     newEffect = nmieffect;
-                    fallbackAttempts++;
+                }
+
+                if (newEffect == null)
+                {
+                    // Nothing left to offer for this choice slot (exhausted effect pool).
+                    break;
                 }
 
                 results.Add(newEffect);

@@ -82,6 +82,11 @@ namespace EquipmentAndQuickSlots {
                             ItemDrop.ItemData itemToSwap = slotToSwap.Item;
                             itemToSwap.m_gridPos = item.m_gridPos;
                             item.m_gridPos = slotToSwap.GridPosition;
+                            // Clear THIS slot's cache too: the slot scans above re-cached the original
+                            // occupant, so without this the re-read below saw the just-moved equipped
+                            // item instead of the swapped-in one -- and immediately dragged it back
+                            // out of the cell it was swapped into.
+                            slot.ClearItemCache();
                             slotToSwap.ClearItemCache();
                             moved = true;
                             if (slot.ItemBelongs(item = slot.Item))

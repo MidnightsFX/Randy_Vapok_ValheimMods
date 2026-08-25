@@ -136,14 +136,17 @@ namespace EquipmentAndQuickSlots {
 
                 __instance.m_height = FullHeight;
 
-                // A finished craft upgrade re-adds the (possibly equipped) item: send it back to
-                // the slot it came from instead of a random visible cell.
+                // A finished craft upgrade re-adds the (possibly equipped) item: hand the capacity
+                // probe the cell it came from. The old gate compared m_craftTimer against
+                // m_craftDuration, but vanilla completes the craft at the SKILL-REDUCED duration
+                // (InventoryGui.UpdateRecipe), and TryFindFreeSlotForItem could never return an
+                // equipment cell for an item DoCrafting had just unequipped -- so with a full visible
+                // grid the upgraded item was destroyed (AddItem's FindEmptySlot capacity probe failed
+                // after the original was already removed from the inventory).
                 if (__result == emptyPosition
-                    && InventoryGui.instance != null
-                    && InventoryGui.instance.m_craftTimer >= InventoryGui.instance.m_craftDuration
-                    && InventoryGui.instance.m_craftUpgradeItem is ItemDrop.ItemData item
-                    && TryFindFreeSlotForItem(item, out Slot slot)) {
-                    __result = slot.GridPosition;
+                    && InventoryGui_DoCrafting_UpgradeInSlot.UpgradeSourceSlot is Slot sourceSlot
+                    && sourceSlot.IsFree) {
+                    __result = sourceSlot.GridPosition;
                 }
 
                 if (__result == emptyPosition && Inventory_AddItem_ByName_FindAppropriateSlot.itemToFindSlot != null
@@ -162,6 +165,53 @@ namespace EquipmentAndQuickSlots {
             private static void Finalizer(Inventory __instance) {
                 if (__instance == PlayerInventory)
                     __instance.m_height = FullHeight;
+            }
+        }
+
+        // Tracks the cell and equipped state of the item a craft upgrade consumes, for the duration
+        // of DoCrafting. The FindEmptySlot postfix above hands the freed cell to the capacity probe,
+        // and the postfix here re-equips the upgraded item: vanilla leaves an upgraded item
+        // unequipped, and an unequipped item does not belong in an equipment cell (the validation
+        // sweep would evict it to the visible grid a frame later).
+        [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.DoCrafting))]
+        internal static class InventoryGui_DoCrafting_UpgradeInSlot {
+            internal static Slot UpgradeSourceSlot;
+            private static bool wasEquipped;
+
+            [HarmonyPriority(Priority.First)]
+            private static void Prefix(InventoryGui __instance) {
+                UpgradeSourceSlot = null;
+                wasEquipped = false;
+
+                if (__instance.m_craftUpgradeItem is not ItemDrop.ItemData item)
+                    return;
+
+                UpgradeSourceSlot = GetSlotInGrid(item.m_gridPos);
+                wasEquipped = CurrentPlayer != null && CurrentPlayer.IsItemEquiped(item);
+            }
+
+            private static void Postfix() {
+                Slot slot = UpgradeSourceSlot;
+                bool reequip = wasEquipped;
+                UpgradeSourceSlot = null;
+                wasEquipped = false;
+
+                if (!reequip || slot == null || CurrentPlayer == null)
+                    return;
+
+                // Vanilla re-added the upgraded item at its old grid position. Re-equip it so it
+                // stays in its cell; when the craft did not go through, the occupant is still the
+                // old, already-equipped item and EquipItem's IsItemEquiped guard makes this a no-op.
+                ItemDrop.ItemData occupant = slot.Item;
+                if (occupant != null && !CurrentPlayer.IsItemEquiped(occupant))
+                    CurrentPlayer.EquipItem(occupant, triggerEquipEffects: false);
+            }
+
+            // The source slot must not survive an exception in DoCrafting: FindEmptySlot would keep
+            // rerouting unrelated additions into that cell.
+            private static void Finalizer() {
+                UpgradeSourceSlot = null;
+                wasEquipped = false;
             }
         }
 

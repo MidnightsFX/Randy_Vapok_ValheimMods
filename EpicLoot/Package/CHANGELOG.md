@@ -1,3 +1,6 @@
+**0.13.3**
+* Improves compatibility 
+
 **0.13.2**
 * Fixes Loot generation recursively happening with certain mods
 * Fixes terrain generation memory leak, noticable with excessive bounties

@@ -13,7 +13,9 @@ namespace EpicLoot.Magic.MagicItemEffects
                 if (__instance.m_character.IsPlayer() && Player.m_localPlayer != null &&
                     Player.m_localPlayer.HasActiveMagicEffect(MagicEffectType.DartingThoughts, out float dartThoughtsValue, 0.01f))
                 {
-                    eitrMultiplier += (1 + (dartThoughtsValue * 2));
+                    // "+X% Eitr Regen": the multiplier already starts at 1, so add only the rolled
+                    // fraction (the old line re-added the base AND doubled the roll: 10% -> 2.2x).
+                    eitrMultiplier += dartThoughtsValue;
                 }
             }
         }

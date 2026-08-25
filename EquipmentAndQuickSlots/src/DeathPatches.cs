@@ -153,6 +153,35 @@ namespace EquipmentAndQuickSlots {
             }
         }
 
+        // Runs right after CreateTombStone's MoveInventoryToGrave (Setup is the next call), with the
+        // grave's real inventory dimensions in place. Freeze them onto the Container fields and ZDO:
+        // reload builds the container inventory from those fields, so without this a lowered
+        // 'Extra Inventory Rows' (or a width-changing mod being removed) between death and pickup
+        // would rebuild the grave smaller and Inventory.Load would silently drop everything beyond
+        // the new bounds.
+        [HarmonyPatch(typeof(TombStone), nameof(TombStone.Setup))]
+        private static class TombStone_Setup_PersistGraveDimensions {
+            private static void Postfix(TombStone __instance) {
+                Container container = __instance.m_container != null
+                    ? __instance.m_container
+                    : __instance.GetComponent<Container>();
+                if (container == null || container.m_inventory == null)
+                    return;
+
+                container.m_width = Mathf.Max(container.m_width, container.m_inventory.m_width);
+                container.m_height = Mathf.Max(container.m_height, container.m_inventory.m_height);
+
+                if (container.m_nview?.IsValid() == true && container.m_nview.IsOwner()) {
+                    string typeName = container.GetType().Name;
+                    ZDO zdo = container.m_nview.GetZDO();
+                    zdo.Set(ZNetView.CustomFieldsStr, true);
+                    zdo.Set((ZNetView.CustomFieldsStr + typeName).GetStableHashCode(), true);
+                    zdo.Set(typeName + ".m_width", container.m_width);
+                    zdo.Set(typeName + ".m_height", container.m_height);
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(TombStone), nameof(TombStone.Interact))]
         private static class TombStone_Interact_AdjustHeight {
             [HarmonyPriority(Priority.First)]
@@ -245,37 +274,55 @@ namespace EquipmentAndQuickSlots {
         [HarmonyPatch(typeof(TombStone), nameof(TombStone.OnTakeAllSuccess))]
         private static class TombStone_OnTakeAllSuccess_AutoEquip {
             private static void Postfix() {
-                Player player = CurrentPlayer;
-                if (player == null || PlayerInventory == null || player.IsDead())
-                    return;
+                AutoEquipAndParkReturnedItems();
+            }
+        }
 
-                string playerID = Game.instance.GetPlayerProfile().GetPlayerID().ToString();
+        // OnTakeAllSuccess only fires on the easy-fit auto-loot path (TombStone.Interact ->
+        // Container.TakeAll -> RPC_TakeAllRespons). A grave that does not easy-fit is opened as a
+        // container, and its Take All button goes InventoryGui.OnTakeAll -> Inventory.MoveAll --
+        // which never raises m_onTakeAllSuccess. Cover that path too, or auto-equip/parking is
+        // silently dead exactly when the player died carrying the most.
+        [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.OnTakeAll))]
+        private static class InventoryGui_OnTakeAll_AutoEquip {
+            private static void Postfix(InventoryGui __instance) {
+                if (__instance.m_currentContainer != null
+                    && __instance.m_currentContainer.GetComponent<TombStone>() != null)
+                    AutoEquipAndParkReturnedItems();
+            }
+        }
 
-                foreach (ItemDrop.ItemData item in PlayerInventory.GetAllItems().ToList()) {
-                    if (item == null)
-                        continue;
+        private static void AutoEquipAndParkReturnedItems() {
+            Player player = CurrentPlayer;
+            if (player == null || PlayerInventory == null || player.IsDead())
+                return;
 
-                    // An equipped flag without the matching equip reference is stale (it rode
-                    // along with the item through the grave). Clear it so the item is either
-                    // auto-equipped below or parked/evicted by the sweep, instead of masquerading
-                    // as worn.
-                    if (item.m_equipped && !player.IsItemEquiped(item))
-                        item.m_equipped = false;
+            string playerID = Game.instance.GetPlayerProfile().GetPlayerID().ToString();
 
-                    HandleLegacyMarkers(player, item);
+            foreach (ItemDrop.ItemData item in PlayerInventory.GetAllItems().ToList()) {
+                if (item == null)
+                    continue;
 
-                    if (IsItemToEquip(player, item, playerID)) {
-                        PruneWeaponShieldKey(item);
-                        if (!player.IsItemEquiped(item))
-                            player.EquipItem(item, triggerEquipEffects: false);
-                        continue;
-                    }
+                // An equipped flag without the matching equip reference is stale (it rode
+                // along with the item through the grave). Clear it so the item is either
+                // auto-equipped below or parked/evicted by the sweep, instead of masquerading
+                // as worn.
+                if (item.m_equipped && !player.IsItemEquiped(item))
+                    item.m_equipped = false;
 
-                    // Not auto-equipped: armor that came back into its own equipment cell stays
-                    // there unequipped until the player equips it or moves it.
-                    if (!player.IsItemEquiped(item) && GetItemSlot(item) is Slot slot && slot.IsEquipmentSlot && WouldFitEquipmentSlot(slot, item))
-                        slot.Park(item);
+                HandleLegacyMarkers(player, item);
+
+                if (IsItemToEquip(player, item, playerID)) {
+                    PruneWeaponShieldKey(item);
+                    if (!player.IsItemEquiped(item))
+                        player.EquipItem(item, triggerEquipEffects: false);
+                    continue;
                 }
+
+                // Not auto-equipped: armor that came back into its own equipment cell stays
+                // there unequipped until the player equips it or moves it.
+                if (!player.IsItemEquiped(item) && GetItemSlot(item) is Slot slot && slot.IsEquipmentSlot && WouldFitEquipmentSlot(slot, item))
+                    slot.Park(item);
             }
         }
 

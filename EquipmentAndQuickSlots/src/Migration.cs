@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using EquipmentAndQuickSlots.src;
 using HarmonyLib;
+using System.Linq;
 using static EquipmentAndQuickSlots.Slots;
+using static EquipmentAndQuickSlots.src.MiscPatches;
 
 namespace EquipmentAndQuickSlots {
     // One-way migration of 2.x save data. Old versions kept two side inventories serialized into

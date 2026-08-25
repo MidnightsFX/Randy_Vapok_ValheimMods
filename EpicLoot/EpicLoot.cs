@@ -305,8 +305,10 @@ public sealed class EpicLoot : BaseUnityPlugin {
         foreach (string embeddedResouce in typeof(EpicLoot).Assembly.GetManifestResourceNames()) {
             if (!embeddedResouce.Contains("localizations")) { continue; }
             string localization = ReadEmbeddedResourceFile(embeddedResouce);
-            // This will clean comments out of the localization files
-            string cleaned_localization = Regex.Replace(localization, @"\/\/.*\n", "");
+            // This will clean comments out of the localization files. Full-line comments only: the
+            // old pattern also truncated any line containing "//" inside a value (URLs in
+            // translations), corrupting the JSON.
+            string cleaned_localization = Regex.Replace(localization, @"^\s*\/\/.*$", "", RegexOptions.Multiline);
             // Log($"Cleaned Localization: {cleaned_localization}");
             var name = embeddedResouce.Split('.');
             Log($"Adding localization: {name[2]}");
@@ -470,8 +472,9 @@ public sealed class EpicLoot : BaseUnityPlugin {
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
         ShardStones.Shards.CreateAndLoadShardItems();
-        // Needs to trigger late in order to get all potentially added items by other mods
-        MinimapManager.OnVanillaMapDataLoaded += () => AutoAddEnchantableItems.CheckAndAddAllEnchantableItems();
+        // Needs to trigger late in order to get all potentially added items by other mods.
+        // Subscribed via the stored handler so the self-unsubscribe inside actually matches.
+        MinimapManager.OnVanillaMapDataLoaded += AutoAddEnchantableItems.OnMapDataLoadedHandler;
 
         EpicAssets.AssertAssetIntegrety();
     }
@@ -816,8 +819,19 @@ public sealed class EpicLoot : BaseUnityPlugin {
         PrefabManager.OnPrefabsRegistered -= SetupAndvaranaut;
     }
 
+    // Legacy registration of an ObjectDB-visible "Paralyze" status effect. Nothing in the mod
+    // consumes it -- Paralyze.cs applies its own EL_Paralyze prototype directly via SEMan -- but it
+    // is kept for anything external that looks the effect up by hash. The old lookup used
+    // string.GetHashCode (ObjectDB matches on GetStableHashCode), always returned null, and
+    // CopyFields(null, ...) then threw a TargetException on every world load (swallowed by Jotunn's
+    // SafeInvoke), so the effect was never actually registered.
     private static void SetupStatusEffects() {
-        var lightning = ObjectDB.instance.GetStatusEffect("Lightning".GetHashCode());
+        var lightning = ObjectDB.instance.GetStatusEffect("Lightning".GetStableHashCode());
+        if (lightning == null) {
+            LogWarning("Vanilla 'Lightning' status effect not found; skipping legacy Paralyze ObjectDB registration.");
+            ItemManager.OnItemsRegistered -= SetupStatusEffects;
+            return;
+        }
         var paralyzed = ScriptableObject.CreateInstance<SE_Paralyzed>();
         Common.Utils.CopyFields(lightning, paralyzed, typeof(StatusEffect));
         paralyzed.name = "Paralyze";

@@ -5,8 +5,7 @@ using System.Reflection;
 using BepInEx.Bootstrap;
 using static EquipmentAndQuickSlots.Slots;
 
-namespace EquipmentAndQuickSlots
-{
+namespace EquipmentAndQuickSlots {
     // Epic Loot integration through its supported provider API (EpicLoot.API, reflection — no
     // assembly reference, Epic Loot stays a soft dependency):
     //
@@ -18,8 +17,7 @@ namespace EquipmentAndQuickSlots
     //    Equip/Unequip call, which is all Epic Loot watches on its own).
     //  - Sacrifice filter: nothing resting in an equipment or custom cell can be sacrificed by
     //    accident at the enchanting table.
-    internal static class EpicLootCompat
-    {
+    internal static class EpicLootCompat {
         public const string EpicLootGUID = "randyknapp.mods.epicloot";
         private const string ApiTypeName = "EpicLoot.API, EpicLoot";
         private const string ProviderId = EquipmentAndQuickSlots.PluginId;
@@ -29,18 +27,15 @@ namespace EquipmentAndQuickSlots
 
         public static bool IsLoaded => Chainloader.PluginInfos.ContainsKey(EpicLootGUID);
 
-        internal static void Initialize()
-        {
+        internal static void Initialize() {
             if (_initialized || !IsLoaded)
                 return;
 
             _initialized = true;
 
-            try
-            {
+            try {
                 Type api = Type.GetType(ApiTypeName);
-                if (api == null)
-                {
+                if (api == null) {
                     EquipmentAndQuickSlots.LogWarning("Epic Loot is loaded but EpicLoot.API could not be resolved; slot items will not contribute magic effects");
                     return;
                 }
@@ -52,8 +47,7 @@ namespace EquipmentAndQuickSlots
                 _invalidatePlayerEffectCache = api.GetMethod("InvalidatePlayerEffectCache", BindingFlags.Public | BindingFlags.Static,
                     null, new[] { typeof(Player) }, null);
 
-                if (registerEquipmentProvider == null || _invalidatePlayerEffectCache == null)
-                {
+                if (registerEquipmentProvider == null || _invalidatePlayerEffectCache == null) {
                     EquipmentAndQuickSlots.LogWarning("Epic Loot's equipment provider API is missing (older Epic Loot?); custom slot items will not contribute magic effects");
                     return;
                 }
@@ -61,8 +55,7 @@ namespace EquipmentAndQuickSlots
                 Func<Player, List<ItemDrop.ItemData>> getExtraEquipped = GetCustomSlotEquipment;
                 registerEquipmentProvider.Invoke(null, new object[] { ProviderId, getExtraEquipped });
 
-                if (registerSacrificeFilter != null)
-                {
+                if (registerSacrificeFilter != null) {
                     Func<ItemDrop.ItemData, bool> canSacrifice = CanSacrifice;
                     registerSacrificeFilter.Invoke(null, new object[] { ProviderId, canSacrifice });
                 }
@@ -73,15 +66,12 @@ namespace EquipmentAndQuickSlots
                 API.AddSlotChangedListener(_ => InvalidateEffectCache());
 
                 EquipmentAndQuickSlots.Log("Epic Loot equipment provider registered for custom slots");
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 EquipmentAndQuickSlots.LogWarning($"Epic Loot integration failed: {ex}");
             }
         }
 
-        private static List<ItemDrop.ItemData> GetCustomSlotEquipment(Player player)
-        {
+        private static List<ItemDrop.ItemData> GetCustomSlotEquipment(Player player) {
             // Our slots only track the local player's inventory
             if (player == null || player != Player.m_localPlayer)
                 return null;
@@ -93,29 +83,23 @@ namespace EquipmentAndQuickSlots
                 .ToList();
         }
 
-        private static bool CanSacrifice(ItemDrop.ItemData item)
-        {
+        private static bool CanSacrifice(ItemDrop.ItemData item) {
             return !(GetItemSlot(item) is Slot slot && (slot.IsCustomSlot || slot.IsEquipmentSlot));
         }
 
-        private static void OnSlotItemChanged(string slotId, ItemDrop.ItemData oldItem, ItemDrop.ItemData newItem)
-        {
+        private static void OnSlotItemChanged(string slotId, ItemDrop.ItemData oldItem, ItemDrop.ItemData newItem) {
             if (FindSlot(customSlotPrefix + slotId) is Slot slot && slot.IsCustomSlot)
                 InvalidateEffectCache();
         }
 
-        internal static void InvalidateEffectCache()
-        {
+        internal static void InvalidateEffectCache() {
             Player player = Player.m_localPlayer;
             if (player == null || _invalidatePlayerEffectCache == null)
                 return;
 
-            try
-            {
+            try {
                 _invalidatePlayerEffectCache.Invoke(null, new object[] { player });
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 EquipmentAndQuickSlots.LogWarning($"Epic Loot InvalidatePlayerEffectCache failed: {ex}");
             }
         }

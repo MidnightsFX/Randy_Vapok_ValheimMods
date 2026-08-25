@@ -95,16 +95,15 @@ namespace EquipmentAndQuickSlots {
             }
         }
 
+        // Warnings and errors are NOT gated behind the logging toggle: this mod's whole risk
+        // surface is item loss, and its loss-prevention diagnostics (backup restore failures,
+        // migration errors, relocation warnings) must be visible in every player's log.
         public static void LogWarning(string message) {
-            if (ValConfig.LoggingEnabled.Value) {
-                _instance.Logger.LogWarning(message);
-            }
+            _instance.Logger.LogWarning(message);
         }
 
         public static void LogError(string message) {
-            if (ValConfig.LoggingEnabled.Value) {
-                _instance.Logger.LogError(message);
-            }
+            _instance.Logger.LogError(message);
         }
     }
 }

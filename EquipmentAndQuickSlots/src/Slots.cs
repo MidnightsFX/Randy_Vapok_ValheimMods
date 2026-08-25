@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
+using EquipmentAndQuickSlots.src.MultiUtility;
 using UnityEngine;
 
 namespace EquipmentAndQuickSlots {
@@ -245,7 +246,13 @@ namespace EquipmentAndQuickSlots {
                     item.m_gridPos = free;
                 else if (TryFindFreeSlotForItem(item, out Slot freeSlot))
                     item.m_gridPos = freeSlot.GridPosition;
-                // else: leave it; the overlap sweep keeps trying to find it a home
+                else if (item.m_gridPos.y >= FullHeight || item.m_gridPos.x >= InventoryWidth)
+                    // No home found. The item must at least stay inside the grid: vanilla
+                    // InventoryGrid.UpdateGui indexes m_elements by grid position and throws every
+                    // frame for anything outside it, taking the whole inventory panel down. Park it
+                    // in the last cell (same pattern as Migration); the validation sweep keeps
+                    // trying to find it a proper home.
+                    item.m_gridPos = new Vector2i(InventoryWidth - 1, FullHeight - 1);
 
                 ClearCachedItems();
                 changed = true;
@@ -256,6 +263,20 @@ namespace EquipmentAndQuickSlots {
 
             SlotValidation.ValidateItems();
             SlotValidation.ValidateSlots();
+        }
+
+        // A slot-enabling config changed (server push or live edit): no grid positions move, but
+        // Slot.IsActive flipped, so run the validators now instead of waiting for the next
+        // inventory open -- residents of deactivated cells would otherwise be invisible while
+        // still occupying space (GetEmptySlots over-reports and auto-pickup can overfill).
+        internal static void OnSlotActivationChanged() {
+            if (PlayerInventory == null)
+                return;
+
+            ClearCachedItems();
+            SlotValidation.ValidateItems();
+            SlotValidation.ValidateSlots();
+            PlayerInventory.Changed();
         }
 
         public static Slot[] GetEquipmentSlots(bool onlyActive = true) => slots.Where(slot => slot.IsEquipmentSlot && (!onlyActive || slot.IsActive)).ToArray();

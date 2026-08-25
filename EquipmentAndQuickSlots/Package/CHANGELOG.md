@@ -1,47 +1,28 @@
-﻿**3.0.0**
-* **Complete rewrite of the slot system.** Equipment and quick slots are now real cells of your
-  inventory in hidden rows below the visible grid — one inventory, no wrapper layer. Most of the
-  historical item-loss and duplication bugs are impossible by construction in this model.
+**3.0.0**
+* **Complete rewrite of the slot system.**
+    * All configs that impact balance or functionality now are server synced (if the mod is installed on the server).   
 * **Your items are migrated automatically.** On first login per character, items from the old
   2.x slot storage (including pre-Mistlands saves) move into the new slots. **There is no
   downgrade path** — after a character has saved under 3.0.0, going back to 2.x will not restore
   the old format (the automatic backup still protects the items themselves).
 * New **Trinket** equipment slot.
 * **Configurable utility slots** (`Equipment Slots / Utility Slot Count`, 1–3, default 1):
-  optionally wear more than one belt, Wishbone or Megingjord. Server-synced, since it is a
-  balance change, and off by default — the game itself allows one. Two copies of the same
-  item can never be worn at once. Extra utility items are drawn on the character model for
-  everyone (`Equipment Slots / Show extra utility items` to opt out).
-* **Quick slot count is configurable** (0–6, default 3); hotkeys 4–6 are unbound by default.
-* **Server-synced balance settings** (requires Jotunn; new hard dependency): slot toggles, quick
-  slot count, every Gravestone option, extra inventory rows and base carry weight are
-  admin-controlled when the server runs the mod. The mod remains fully client-side installable —
-  settings just stay local then.
-* **Extra inventory rows** (`Inventory / Extra Inventory Rows`, 0–5): more visible rows; the
-  equipment and quick slots move down with the grid and items are re-homed safely when the value
-  changes.
+  optionally wear more than one utility item. 
+  (This was previously a glitch that could happen, but is now supported as an optional feature)
+* **Quick slot count is configurable** (0–6, default 3)
+* **Extra inventory rows** (`Inventory / Extra Inventory Rows`, 0–5 default 0): Optionally enable additional inventory rows. 
 * **Base carry weight** (`Inventory / Base Carry Weight`): the player's carry capacity before
   belts; 300 (vanilla) leaves other mods' carry-weight changes untouched.
-* **Death fixes**: the "Dont drop … on death" options now actually work (they were inverted),
-  kept gear can no longer be deleted by the Hammer/Hardcore world modifiers, the single enlarged
-  tombstone can never destroy items when full, and grave items return to their exact slots on
-  pickup. New auto-equip-on-pickup options for armor, carry-weight belts and the weapon/shield
-  you died holding.
+* **Death fixes**: Death item dropping/equipping now works correctly
 * **Hotkey conflict prevention**: quick slot hotkeys no longer trigger vanilla actions bound to
-  the same key (Z no longer makes you sit).
-* **Automatic slot backup** to the character save, restored when the slots load empty (e.g.
-  after the mod was temporarily removed). `eaqs_restorebackup` console command (cheat).
-* **Protections**: container "Stack All" never grabs slot items; optional auto-pickup blocking
-  for quick slots.
+  the same key.
 * **Public API for other mods** — add custom slots, query slot contents, subscribe to changes.
   See `docs/API.md`; an embeddable typed shim (`EquipmentAndQuickSlotsAPI.dll`) is available
   from the repository or follow the doc example to use reflection to access the API.
 * Console commands reworked: `eaqs_validate` repairs misplaced items (replaces the broken
   `fixinventory`); destructive commands now require cheats.
-* Removed the Creature Level and Loot Control integration remnants and the second death
+* Removed the dead Creature Level and Loot Control integration remnants and the second death
   tombstone (one grave now holds everything, sized to fit).
-* Crafting, upgrade and stat tracking paths now run pure vanilla code (fixes missing skill gain
-  on upgrades, wrong stat counters, `NoCraftCost` handling and a multi-craft ingredient exploit).
 
 **2.1.14**
 * Updated for Valheim 0.219.13 Patch (Bog Witch)

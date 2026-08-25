@@ -110,8 +110,15 @@ namespace EquipmentAndQuickSlots {
 
             // Instantiate server synced config entries here
             EquipmentSlotsEnabled = BindServerConfig("Toggles", "Enable Equipment Slots", true, "Enable the equipment slots. Disabling this while items are equipped will attempt to move them to your inventory.");
+            // A server push (or live edit) flips Slot.IsActive immediately; the validators must run
+            // now, not on the next inventory open -- items in deactivated cells would otherwise be
+            // invisible yet still occupy space (GetEmptySlots would over-report and auto-pickup
+            // could overfill the inventory).
+            EquipmentSlotsEnabled.SettingChanged += (_, _) => Slots.OnSlotActivationChanged();
             QuickSlotsEnabled = BindServerConfig("Toggles", "Enable Quick Slots", true, "Enable the quick slots. Disabling this while items are in the slots will attempt to move them to your inventory.");
+            QuickSlotsEnabled.SettingChanged += (_, _) => Slots.OnSlotActivationChanged();
             QuickSlotCount = BindServerConfig("Quick Slots", "Quick Slot Count", 3, "Number of quick slots available.", false, 0, MaxQuickSlots);
+            QuickSlotCount.SettingChanged += (_, _) => Slots.OnSlotActivationChanged();
             UtilitySlotCount = BindServerConfig("Equipment Slots", "Utility Slot Count", 1, "Number of utility items (belts, the Wishbone, Megingjord) that may be worn at once. The game itself allows one; raising this is a balance change. You can never wear two copies of the same item.", false, 1, Slots.MaxUtilitySlots);
             UtilitySlotCount.SettingChanged += (_, _) => MultiUtility.OnUtilitySlotCountChanged();
             ExtraInventoryRows = BindServerConfig("Inventory", "Extra Inventory Rows", 0, "Additional visible inventory rows on top of the game's four. The equipment and quick slots move down with the grid.", false, 0, Slots.MaxExtraRows);

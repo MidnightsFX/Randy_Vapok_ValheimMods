@@ -35,11 +35,17 @@ namespace EpicLoot.MagicItemEffects.Shards {
                     return;
                 }
 
+                // Rate limit: the cooldown indicator doubles as the gate (mirrors ElderForestsAid).
+                // It was wired up but never engaged, so every kill detonated with no cooldown.
+                if (player.GetSEMan().HaveStatusEffect(CooldownHash)) {
+                    return;
+                }
+
                 var center = __instance.GetCenterPoint();
                 SpawnExplosionFx(__instance.transform.position);
                 DamageInRadius.DamageEnemiesInRadius(player, center, CorpseRadius,
                     new HitData.DamageTypes { m_poison = value * PoisonPerTier });
-                //ShowCooldown(player);
+                ShowCooldown(player);
             }
         }
 
