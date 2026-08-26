@@ -123,6 +123,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
         // Register per-effect tooltip display-value providers (effects that show more than one number).
         // These are keyed by effect-type constant and don't depend on config load, so register once here.
         MagicItemEffects.BulkupEffect.RegisterDisplayValues();
+        Magic.MagicItemEffects.DartingThoughts.RegisterDisplayValues();
         MagicItemEffects.Shards.HealthGainPerXDamageDone.RegisterDisplayValues();
         MagicItemEffects.Shards.HealthOnEitrUse.RegisterDisplayValues();
         MagicItemEffects.Shards.Mercenary.RegisterDisplayValues();
