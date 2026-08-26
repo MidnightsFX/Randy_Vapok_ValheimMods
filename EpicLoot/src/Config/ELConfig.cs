@@ -71,6 +71,11 @@ internal class ELConfig {
     // Named ...StackingMode for the same shadowing reason as ShardSocketRemovalMode above.
     public static ConfigEntry<ShardStackMode> ShardStackingMode;
     public static ConfigEntry<float> ShardStackDecayFactor;
+    public static ConfigEntry<bool> AllowGiftOnItemsWithSlots;
+    public static ConfigEntry<int> LegendaryGiftSlotsAdded;
+    public static ConfigEntry<int> MythicGiftSlotsAdded;
+    public static ConfigEntry<float> LegendaryGiftSuccessChance;
+    public static ConfigEntry<float> MythicGiftSuccessChance;
     public static ConfigEntry<float> GlobalDropRateModifier;
     public static ConfigEntry<bool> DeferChestLootRoll;
 
@@ -447,6 +452,29 @@ internal class ELConfig {
             "DestroyItem = the item is consumed.\n" +
             "If the extracted enchantment is the item's only enchantment, the item reverts to a normal item.\n" +
             "Default: ReduceEnchants.");
+        AllowGiftOnItemsWithSlots = BindServer(SectionSockets, "Allow Brokkr Gift On Items With Slots", true,
+            "When true, Brokkr's Gift can extend an item that already has shard slots, up to the most " +
+            "its rarity allows. When false, it only works on an item with no shard slots at all -- an " +
+            "item with slots is refused even when every slot is still empty.\n" +
+            "Default: true.");
+        LegendaryGiftSlotsAdded = BindServer(SectionSockets, "Legendary Brokkr Gift Slots Added", 1,
+            "How many shard slots a Legendary Brokkr's Gift adds. The item's rarity cap still applies on " +
+            "top of this: if fewer slots are free than this grants, the item gains only what fits and the " +
+            "gift is still consumed.\n" +
+            $"Min = 1, Max = {LootRoller.MaxSocketCount}", new AcceptableValueRange<int>(1, LootRoller.MaxSocketCount));
+        MythicGiftSlotsAdded = BindServer(SectionSockets, "Mythic Brokkr Gift Slots Added", 2,
+            "How many shard slots a Mythic Brokkr's Gift adds. The item's rarity cap still applies on " +
+            "top of this: if fewer slots are free than this grants, the item gains only what fits and the " +
+            "gift is still consumed.\n" +
+            $"Min = 1, Max = {LootRoller.MaxSocketCount}", new AcceptableValueRange<int>(1, LootRoller.MaxSocketCount));
+        LegendaryGiftSuccessChance = BindServer(SectionSockets, "Legendary Brokkr Gift Success Chance", 100f,
+            "Percent chance that a Legendary Brokkr's Gift adds its slots. On a failed roll the gift is " +
+            "still consumed and nothing is added.\n" +
+            "Min = 0, Max = 100", new AcceptableValueRange<float>(0f, 100f));
+        MythicGiftSuccessChance = BindServer(SectionSockets, "Mythic Brokkr Gift Success Chance", 100f,
+            "Percent chance that a Mythic Brokkr's Gift adds its slots. On a failed roll the gift is " +
+            "still consumed and nothing is added.\n" +
+            "Min = 0, Max = 100", new AcceptableValueRange<float>(0f, 100f));
 
         // 4 - Enchanting Table
         EnchantingTableUpgradesActive = BindServer(SectionEnchanting, "Upgrades Active", true,

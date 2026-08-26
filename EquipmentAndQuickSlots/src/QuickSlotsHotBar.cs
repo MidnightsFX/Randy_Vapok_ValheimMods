@@ -16,6 +16,7 @@ namespace EquipmentAndQuickSlots {
         public const string barName = "QuickSlotsHotkeyBar";
 
         private static readonly List<HotkeyBar> bars = new List<HotkeyBar>();
+        private static readonly List<HotkeyBarRefreshGate> barGates = new List<HotkeyBarRefreshGate>();
         private static int _currentBarIndex = -1;
         private static HotkeyBar _quickBar;
 
@@ -43,6 +44,7 @@ namespace EquipmentAndQuickSlots {
 
         private static void ResetBars() {
             bars.Clear();
+            barGates.Clear();
             _quickBar = null;
             _currentBarIndex = -1;
         }
@@ -74,6 +76,8 @@ namespace EquipmentAndQuickSlots {
 
                 bars.Add(vanillaBar.GetComponent<HotkeyBar>());
                 bars.Add(_quickBar);
+                barGates.Add(new HotkeyBarRefreshGate());
+                barGates.Add(new HotkeyBarRefreshGate());
                 _currentBarIndex = 0;
             }
         }
@@ -121,9 +125,11 @@ namespace EquipmentAndQuickSlots {
                 if (player == null)
                     return;
 
-                if (bars.Any(bar => bar == null)) {
-                    ResetBars();
-                    return;
+                for (int i = 0; i < bars.Count; i++) {
+                    if (bars[i] == null) {
+                        ResetBars();
+                        return;
+                    }
                 }
 
                 if (ZInput.IsGamepadActive() && IsHotkeyBarsActive() && player.TakeInput()) {
@@ -140,7 +146,12 @@ namespace EquipmentAndQuickSlots {
                         ? Mathf.Clamp(bar.m_selected, 0, Mathf.Max(0, bar.m_elements.Count - 1))
                         : -1;
 
+                    HotkeyBarRefreshGate gate = barGates[i];
+                    if (!gate.ShouldRefresh(bar, player))
+                        continue;
+
                     bar.UpdateIcons(player);
+                    gate.Resample(bar, player);
                 }
             }
         }

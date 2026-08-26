@@ -472,6 +472,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         LoadUnidentifiedItems();
         ShardStones.Shards.CreateAndLoadShardItems();
+        LoadShardSlotChisels();
         // Needs to trigger late in order to get all potentially added items by other mods.
         // Subscribed via the stored handler so the self-unsubscribe inside actually matches.
         MinimapManager.OnVanillaMapDataLoaded += AutoAddEnchantableItems.OnMapDataLoadedHandler;
@@ -664,6 +665,33 @@ public sealed class EpicLoot : BaseUnityPlugin {
                 CustomItem custom = new CustomItem(prefab, false);
                 ItemManager.Instance.AddItem(custom);
             }
+        }
+    }
+
+    // Brokkr's Gift, the consumable that adds shard slots to a magic item. Two authored prefabs loaded
+    // by name, not runtime clones, so there is no deferred SetActive dance here -- and no ItemConfig
+    // either: name, description and icon are all baked on the prefab. Note the single icon: do NOT set
+    // m_variant, which on the crafting materials selects out of a ten-icon rarity array these lack.
+    private static void LoadShardSlotChisels() {
+        var chisels = new (string Prefab, ItemRarity Rarity)[] {
+            (ShardStones.ShardSlotChisel.LegendaryPrefab, ItemRarity.Legendary),
+            (ShardStones.ShardSlotChisel.MythicPrefab, ItemRarity.Mythic),
+        };
+
+        foreach (var (prefabName, rarity) in chisels) {
+            GameObject prefab = EpicAssets.AssetBundle.LoadAsset<GameObject>(prefabName);
+            if (prefab == null) {
+                LogErrorForce($"Tried to load asset {prefabName} but it does not exist in the asset bundle!");
+                continue;
+            }
+
+            if (prefab.TryGetComponent(out ItemDrop itemDrop)) {
+                itemDrop.m_itemData.m_dropPrefab = prefab;
+                // Cosmetic only: this is what colours the name and gives it the magic item background.
+                itemDrop.m_itemData.SaveMagicItem(new MagicItem { Rarity = rarity });
+            }
+
+            ItemManager.Instance.AddItem(new CustomItem(prefab, false));
         }
     }
 

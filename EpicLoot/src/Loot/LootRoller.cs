@@ -1283,6 +1283,26 @@ namespace EpicLoot
             return result;
         }
 
+        // The most shard slots an item of this rarity can hold: the highest count with a non-zero weight
+        // in its SocketCounts row. Zero-weight entries are skipped -- a count that can never roll is not
+        // a cap. Brokkr's Gift is bounded by this, so a config change to SocketCounts moves the ceiling
+        // for existing items immediately, with nothing persisted.
+        public static int GetMaxSocketCountForRarity(ItemRarity rarity)
+        {
+            var max = 0;
+            foreach (var entry in GetSocketCountsPerRarity(rarity))
+            {
+                if (entry.Value > 0 && entry.Key > max)
+                {
+                    max = entry.Key;
+                }
+            }
+
+            // GetSocketCountsPerRarity already drops out-of-range entries, but clamp anyway: this value
+            // sizes the socket UI row, and nothing else bounds MagicItem.SocketCount itself.
+            return Mathf.Min(max, MaxSocketCount);
+        }
+
         private static float[][] GetConfiguredSocketCounts(ItemRarity rarity)
         {
             var socketCounts = Config?.SocketCounts;
