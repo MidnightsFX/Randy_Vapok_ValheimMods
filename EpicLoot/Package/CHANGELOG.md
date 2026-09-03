@@ -1,3 +1,30 @@
+**0.13.4**
+
+Changes:
+* Shardstone effect tuning is now exposed to config. Every shard effect's cooldowns, radii, durations, thresholds, stack caps, charge counts and damage ratios read from a `Config` block on its grid entry in `shardstones.json`, merged over the code defaults -- so a partial block retunes one knob without blanking the rest. The keys render in the Shift-detail tooltip with proper labels
+* New `Global` block in `shardstones.json` for tunables shared by several shards rather than owned by one: `MovementPenaltyReference` (the seven movement-penalty shards) and `BloodBlockSelfDamagePercent` (both blood-block shards)
+* Retuned durations, cooldowns and pulse intervals now reach effects that are already running, instead of only applying to the next proc
+* Tempering costs are configurable per rarity through a `Tempering.CostsByRarity` block in `adventuredata.json`. A rarity left out keeps its built-in default; a rarity present but empty is taken literally and tempers for free. More than four cost entries are still charged in full, but only the first four rows fit in the panel and a warning says so
+* A `Config` block authored on a grid entry for an effect that already exists in `magiceffects.json` now overlays its keys onto that definition instead of being silently discarded
+* The same effect declared on several shard slots with disagreeing `Config` blocks is reported rather than silently resolved
+
+Bugfixes:
+* Editing `shardstones.json` live, now properly updates effects
+* Slow is clamped to a floor of 10%
+* A tempering cost naming an item that cannot be resolved is warned about once and skipped
+* Fixes Adrenaline Surge's "Seconds per 1%" tooltip not localizing
+* A patch edit now reloads the rebuilt configs into the running game
+* The patch file watcher now covers subdirectories, so patches shipped in `patches/<ModName>/` are watched
+* Patch files that changed but rebuilt nothing now say so in the log instead of failing silently
+* A baseconfig file that deserializes to null is rejected and the currently loaded config is kept
+
+Performance:
+* The movement-penalty measurement is cached per physics step
+* Magic effect value lookups hold on to the last player's table and no longer allocate a delegate per call on the per-tick paths
+* Every shard effect sitting on a hot vanilla method bails on a zero effect value before doing any other work
+* The comparison tooltip only walks the player's equipment while Ctrl is actually held
+
+
 **0.13.3**
 
 New Content:
