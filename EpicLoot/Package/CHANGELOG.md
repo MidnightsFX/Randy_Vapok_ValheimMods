@@ -1,11 +1,9 @@
 **0.13.4**
 
 Changes:
-* Shardstone effect tuning is now exposed to config. Every shard effect's cooldowns, radii, durations, thresholds, stack caps, charge counts and damage ratios read from a `Config` block on its grid entry in `shardstones.json`, merged over the code defaults -- so a partial block retunes one knob without blanking the rest. The keys render in the Shift-detail tooltip with proper labels
-* New `Global` block in `shardstones.json` for tunables shared by several shards rather than owned by one: `MovementPenaltyReference` (the seven movement-penalty shards) and `BloodBlockSelfDamagePercent` (both blood-block shards)
-* Retuned durations, cooldowns and pulse intervals now reach effects that are already running, instead of only applying to the next proc
-* Tempering costs are configurable per rarity through a `Tempering.CostsByRarity` block in `adventuredata.json`. A rarity left out keeps its built-in default; a rarity present but empty is taken literally and tempers for free. More than four cost entries are still charged in full, but only the first four rows fit in the panel and a warning says so
-* A `Config` block authored on a grid entry for an effect that already exists in `magiceffects.json` now overlays its keys onto that definition instead of being silently discarded
+* Shardstone effect tuning is now exposed to config
+    * New `Global` block in `shardstones.json` for tunables shared by several shards
+* Tempering costs are configurable per rarity through a `Tempering.CostsByRarity` block in `adventuredata.json`. A rarity left out keeps its built-in default
 * The same effect declared on several shard slots with disagreeing `Config` blocks is reported rather than silently resolved
 
 Bugfixes:
