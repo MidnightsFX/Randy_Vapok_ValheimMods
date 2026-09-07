@@ -1411,32 +1411,7 @@ namespace EpicLoot.CraftingV2
             }
 
             ItemRarity rarity = item.GetRarity();
-            List<ItemAmountConfig> costList;
-            switch (rarity)
-            {
-                case ItemRarity.Magic:
-                    costList = EnchantCostsHelper.Config.DisenchantCosts.Magic;
-                    break;
-
-                case ItemRarity.Rare:
-                    costList = EnchantCostsHelper.Config.DisenchantCosts.Rare;
-                    break;
-
-                case ItemRarity.Epic:
-                    costList = EnchantCostsHelper.Config.DisenchantCosts.Epic;
-                    break;
-
-                case ItemRarity.Legendary:
-                    costList = EnchantCostsHelper.Config.DisenchantCosts.Legendary;
-                    break;
-
-                case ItemRarity.Mythic:
-                    costList = EnchantCostsHelper.Config.DisenchantCosts.Mythic;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            List<ItemAmountConfig> costList = EnchantCostsHelper.Config.DisenchantCosts.GetForRarity(rarity);
 
             Tuple<float, float> featureValues = EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(EnchantingFeature.Disenchant);
             int reducedCost = 0;

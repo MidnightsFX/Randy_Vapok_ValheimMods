@@ -22,9 +22,13 @@
       { "Item": "ShardMythic",      "CoinsCost": 600 },
       { "Item": "DustMythic",       "CoinsCost": 600 },
       { "Item": "ReagentMythic",    "CoinsCost": 600 },
-      { "Item": "EssenceMythic",    "CoinsCost": 600 }
+      { "Item": "EssenceMythic",    "CoinsCost": 600 },
+      { "Item": "ShardAncient",     "CoinsCost": 1000 },
+      { "Item": "DustAncient",      "CoinsCost": 1000 },
+      { "Item": "ReagentAncient",   "CoinsCost": 1000 },
+      { "Item": "EssenceAncient",   "CoinsCost": 1000 }
     ],
-    "RollsPerRarity": [1, 1, 1, 1, 1],
+    "RollsPerRarity": [1, 1, 1, 1, 1, 1],
     "RandomItems": [
     ],
     "RandomItemsCount": 0,
@@ -60,13 +64,14 @@
       "Misc"
     ],
     "GamblesCount": 4,
-    "GambleRarityChance": [ 10, 68, 15, 4, 2, 1 ],
+    "GambleRarityChance": [ 10, 68, 15, 4, 2, 0.75, 0.25 ],
     "GambleRarityChanceByRarity" : [
-      [ 0, 90, 9, 1, 0, 0 ],
-      [ 0, 0, 90, 9, 1, 0 ],
-      [ 0, 0, 0, 90, 9, 1 ],
-      [ 0, 0, 0, 0, 90, 10 ],
-      [ 0, 0, 0, 0, 0, 100 ]
+      [ 0, 90, 9, 1, 0, 0, 0 ],
+      [ 0, 0, 90, 9, 1, 0, 0 ],
+      [ 0, 0, 0, 90, 9, 1, 0 ],
+      [ 0, 0, 0, 0, 90, 9, 1 ],
+      [ 0, 0, 0, 0, 0, 90, 10 ],
+      [ 0, 0, 0, 0, 0, 0, 100 ]
     ],
     "ForestTokenGamblesCount": 2,
     "ForestTokenGambleCoinsCost": 1.5,
@@ -277,7 +282,8 @@
       { "Item": "RunestoneRare",      "ForestTokenCost": 10 },
       { "Item": "RunestoneEpic",      "ForestTokenCost": 15 },
       { "Item": "RunestoneLegendary", "ForestTokenCost": 20 },
-      { "Item": "RunestoneMythic",    "ForestTokenCost": 25 }
+      { "Item": "RunestoneMythic",    "ForestTokenCost": 25 },
+      { "Item": "RunestoneAncient",   "ForestTokenCost": 30 }
     ] 
   },
   "Bounties": {
@@ -764,6 +770,12 @@
         { "Item": "EssenceMythic",    "Amount": 10 },
         { "Item": "ReagentMythic",    "Amount": 10 },
         { "Item": "DustMythic",       "Amount": 10 }
+      ],
+      "Ancient": [
+        { "Item": "GoldBountyToken",  "Amount": 3  },
+        { "Item": "EssenceAncient",   "Amount": 10 },
+        { "Item": "ReagentAncient",   "Amount": 10 },
+        { "Item": "DustAncient",      "Amount": 10 }
       ]
     }
   }

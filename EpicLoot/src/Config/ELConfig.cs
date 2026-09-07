@@ -35,11 +35,13 @@ internal class ELConfig {
     public static ConfigEntry<string> _epicRarityColor;
     public static ConfigEntry<string> _legendaryRarityColor;
     public static ConfigEntry<string> _mythicRarityColor;
+    public static ConfigEntry<string> _ancientRarityColor;
     public static ConfigEntry<int> _magicMaterialIconColor;
     public static ConfigEntry<int> _rareMaterialIconColor;
     public static ConfigEntry<int> _epicMaterialIconColor;
     public static ConfigEntry<int> _legendaryMaterialIconColor;
     public static ConfigEntry<int> _mythicMaterialIconColor;
+    public static ConfigEntry<int> _ancientMaterialIconColor;
     public static ConfigEntry<bool> UseScrollingCraftDescription;
     public static ConfigEntry<bool> ShowRarityInRecipeList;
     public static ConfigEntry<bool> ShowEnchantSelectionChance;
@@ -75,8 +77,10 @@ internal class ELConfig {
     public static ConfigEntry<bool> AllowGiftOnItemsWithSlots;
     public static ConfigEntry<int> LegendaryGiftSlotsAdded;
     public static ConfigEntry<int> MythicGiftSlotsAdded;
+    public static ConfigEntry<int> AncientGiftSlotsAdded;
     public static ConfigEntry<float> LegendaryGiftSuccessChance;
     public static ConfigEntry<float> MythicGiftSuccessChance;
+    public static ConfigEntry<float> AncientGiftSuccessChance;
     public static ConfigEntry<KeyCode> SocketOverlayModifier;
     public static ConfigEntry<float> GlobalDropRateModifier;
     public static ConfigEntry<bool> DeferChestLootRoll;
@@ -480,12 +484,21 @@ internal class ELConfig {
             "top of this: if fewer slots are free than this grants, the item gains only what fits and the " +
             "gift is still consumed.\n" +
             $"Min = 1, Max = {LootRoller.MaxSocketCount}", new AcceptableValueRange<int>(1, LootRoller.MaxSocketCount));
+        AncientGiftSlotsAdded = BindServer(SectionSockets, "Ancient Brokkr Gift Slots Added", 3,
+            "How many shard slots an Ancient Brokkr's Gift adds. The item's rarity cap still applies on " +
+            "top of this: if fewer slots are free than this grants, the item gains only what fits and the " +
+            "gift is still consumed.\n" +
+            $"Min = 1, Max = {LootRoller.MaxSocketCount}", new AcceptableValueRange<int>(1, LootRoller.MaxSocketCount));
         LegendaryGiftSuccessChance = BindServer(SectionSockets, "Legendary Brokkr Gift Success Chance", 100f,
             "Percent chance that a Legendary Brokkr's Gift adds its slots. On a failed roll the gift is " +
             "still consumed and nothing is added.\n" +
             "Min = 0, Max = 100", new AcceptableValueRange<float>(0f, 100f));
         MythicGiftSuccessChance = BindServer(SectionSockets, "Mythic Brokkr Gift Success Chance", 100f,
             "Percent chance that a Mythic Brokkr's Gift adds its slots. On a failed roll the gift is " +
+            "still consumed and nothing is added.\n" +
+            "Min = 0, Max = 100", new AcceptableValueRange<float>(0f, 100f));
+        AncientGiftSuccessChance = BindServer(SectionSockets, "Ancient Brokkr Gift Success Chance", 100f,
+            "Percent chance that an Ancient Brokkr's Gift adds its slots. On a failed roll the gift is " +
             "still consumed and nothing is added.\n" +
             "Min = 0, Max = 100", new AcceptableValueRange<float>(0f, 100f));
         SocketOverlayModifier = BindClient(SectionSockets, "Socket Overlay Modifier", KeyCode.LeftAlt,
@@ -594,11 +607,18 @@ internal class ELConfig {
             "Indicates the color of the icon used for legendary crafting materials. A number between 0 and 9.\n" +
             "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
         _mythicRarityColor = BindClient(SectionItemColors, "Mythic Rarity Color", "Orange",
-            "The color of Mythic rarity items, the highest magic item tier. " +
+            "The color of Mythic rarity items, the fifth magic item tier. " +
             "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
             "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
         _mythicMaterialIconColor = BindClient(SectionItemColors, "Mythic Crafting Material Icon Index", 1,
-            "Indicates the color of the icon used for legendary crafting materials. A number between 0 and 9.\n" +
+            "Indicates the color of the icon used for mythic crafting materials. A number between 0 and 9.\n" +
+            "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
+        _ancientRarityColor = BindClient(SectionItemColors, "Ancient Rarity Color", "Red",
+            "The color of Ancient rarity items, the highest magic item tier. " +
+            "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
+            "Available options: Red, Orange, Yellow, Green, Teal, Blue, Indigo, Purple, Pink, Gray");
+        _ancientMaterialIconColor = BindClient(SectionItemColors, "Ancient Crafting Material Icon Index", 0,
+            "Indicates the color of the icon used for ancient crafting materials. A number between 0 and 9.\n" +
             "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
         _setItemColor = BindClient(SectionItemColors, "Set Item Color", "#26ffff",
             "The color of set item text and the set item icon. Use a hex color, default is cyan");

@@ -96,6 +96,11 @@ public sealed class EpicLoot : BaseUnityPlugin {
     void Awake() {
         _instance = this;
 
+        // Before anything can touch a Json.NET type. Newtonsoft.Json is a shared package this mod does
+        // not ship, and a missing or pre-10.0.1 copy surfaces as a type/method load failure naming one
+        // of our own config classes, which tells a player nothing. Every config here is json, so stop.
+        if (JsonDotNetCheck.Verify() == false) { return; }
+
         // Wire the shared Common support layer (config binder, piece loader, drawers) to this plugin before
         // any config is bound, so ConfigBinder and ModLogger have a config file and log source to use.
         ModContext.Initialize(this, Logger, "EpicLoot");
@@ -405,17 +410,15 @@ public sealed class EpicLoot : BaseUnityPlugin {
         EpicAssets.AugaItemBgSprite = assetBundle.LoadAsset<Sprite>("AugaItemBG");
         EpicAssets.SmallButtonEnchantOverlay = assetBundle.LoadAsset<Sprite>("SmallButtonEnchantOverlay");
         EpicAssets.DodgeBuffSprite = assetBundle.LoadAsset<Sprite>("DodgeBuff");
-        EpicAssets.MagicItemLootBeamPrefabs[(int)ItemRarity.Magic] = assetBundle.LoadAsset<GameObject>("MagicLootBeam");
-        EpicAssets.MagicItemLootBeamPrefabs[(int)ItemRarity.Rare] = assetBundle.LoadAsset<GameObject>("RareLootBeam");
-        EpicAssets.MagicItemLootBeamPrefabs[(int)ItemRarity.Epic] = assetBundle.LoadAsset<GameObject>("EpicLootBeam");
-        EpicAssets.MagicItemLootBeamPrefabs[(int)ItemRarity.Legendary] = assetBundle.LoadAsset<GameObject>("LegendaryLootBeam");
-        EpicAssets.MagicItemLootBeamPrefabs[(int)ItemRarity.Mythic] = assetBundle.LoadAsset<GameObject>("MythicLootBeam");
-
-        EpicAssets.MagicItemDropSFX[(int)ItemRarity.Magic] = assetBundle.LoadAsset<AudioClip>("MagicItemDrop");
-        EpicAssets.MagicItemDropSFX[(int)ItemRarity.Rare] = assetBundle.LoadAsset<AudioClip>("RareItemDrop");
-        EpicAssets.MagicItemDropSFX[(int)ItemRarity.Epic] = assetBundle.LoadAsset<AudioClip>("EpicItemDrop");
-        EpicAssets.MagicItemDropSFX[(int)ItemRarity.Legendary] = assetBundle.LoadAsset<AudioClip>("LegendaryItemDrop");
-        EpicAssets.MagicItemDropSFX[(int)ItemRarity.Mythic] = assetBundle.LoadAsset<AudioClip>("MythicItemDrop");
+        // One beam and one drop sound per rarity, named "{Rarity}LootBeam" / "{Rarity}ItemDrop". A tier
+        // the bundle does not carry yet borrows the tier below: both are cosmetic, and LootBeam and
+        // GetMagicItemDropSFX index these arrays by rarity without a null check.
+        foreach (ItemRarity rarity in Rarities.All) {
+            EpicAssets.MagicItemLootBeamPrefabs[(int)rarity] = LoadRarityAssetOrPrevious(
+                assetBundle, $"{rarity}LootBeam", rarity, EpicAssets.MagicItemLootBeamPrefabs);
+            EpicAssets.MagicItemDropSFX[(int)rarity] = LoadRarityAssetOrPrevious(
+                assetBundle, $"{rarity}ItemDrop", rarity, EpicAssets.MagicItemDropSFX);
+        }
         EpicAssets.ItemLoopSFX = assetBundle.LoadAsset<AudioClip>("ItemLoop");
         EpicAssets.AugmentItemSFX = assetBundle.LoadAsset<AudioClip>("AugmentItem");
 
@@ -649,11 +652,63 @@ public sealed class EpicLoot : BaseUnityPlugin {
         }
     }
 
+    private static T LoadRarityAssetOrPrevious<T>(AssetBundle assetBundle, string assetName, ItemRarity rarity,
+        T[] loaded) where T : UnityEngine.Object {
+        T asset = assetBundle.LoadAsset<T>(assetName);
+        if (asset != null) {
+            return asset;
+        }
+
+        if (rarity > ItemRarity.Magic) {
+            ItemRarity previous = (ItemRarity)((int)rarity - 1);
+            LogWarning($"Asset {assetName} is not in the asset bundle; {rarity} uses the {previous} one until the bundle is rebuilt.");
+            return loaded[(int)previous];
+        }
+
+        LogErrorForce($"Tried to load asset {assetName} but it does not exist in the asset bundle!");
+        return null;
+    }
+
+    // An item prefab for a rarity the bundle predates, derived from the tier below it. Only the
+    // rarity-specific strings differ between the authored per-rarity variants: the "$mod_epicloot_{Rarity}"
+    // name token and the "{Rarity}|{Kind}" identity suffix in m_ammoType, which is what
+    // GetCraftingMaterialRarity reads back. Icons are picked per rarity by m_variant at the call site, so
+    // the clone keeps the full icon array; only its VFX stay the lower tier's until the bundle is rebuilt.
+    // PrefabManager.CreateClonedPrefab parks the clone under Jotunn's inactive container, so unlike the
+    // unidentified items there is no deferred SetActive dance here.
+    private static GameObject CloneItemForRarity(GameObject source, string prefabName, ItemRarity rarity) {
+        if (source == null || !source.TryGetComponent(out ItemDrop sourceDrop)) {
+            return null;
+        }
+
+        ItemRarity sourceRarity = sourceDrop.m_itemData.GetCraftingMaterialRarity();
+        GameObject prefab = PrefabManager.Instance.CreateClonedPrefab(prefabName, source);
+        if (prefab == null) {
+            return null;
+        }
+
+        ItemDrop clonedDrop = prefab.GetComponent<ItemDrop>();
+        ItemDrop.ItemData.SharedData shared = clonedDrop.m_itemData.m_shared;
+        shared.m_name = shared.m_name
+            .Replace($"$mod_epicloot_{sourceRarity}", $"$mod_epicloot_{rarity}")
+            .Replace($"$mod_epicloot_{sourceRarity.ToString().ToLowerInvariant()}_",
+                $"$mod_epicloot_{rarity.ToString().ToLowerInvariant()}_");
+        shared.m_ammoType = shared.m_ammoType.Replace($"{sourceRarity}|", $"{rarity}|");
+        clonedDrop.m_itemData.m_dropPrefab = prefab;
+
+        LogWarning($"Asset {prefabName} is not in the asset bundle; cloned it from {source.name} until the bundle is rebuilt.");
+        return prefab;
+    }
+
     private static void LoadCraftingMaterialAssets() {
         foreach (string type in MagicMaterials) {
-            foreach (ItemRarity rarity in Enum.GetValues(typeof(ItemRarity))) {
+            GameObject previous = null;
+            foreach (ItemRarity rarity in Rarities.All) {
                 string assetName = $"{type}{rarity}";
                 GameObject prefab = EpicAssets.AssetBundle.LoadAsset<GameObject>(assetName);
+                if (!prefab) {
+                    prefab = CloneItemForRarity(previous, assetName, rarity);
+                }
 
                 if (!prefab) {
                     LogErrorForce($"Tried to load asset {assetName} but it does not exist in the asset bundle!");
@@ -672,22 +727,29 @@ public sealed class EpicLoot : BaseUnityPlugin {
 
                 CustomItem custom = new CustomItem(prefab, false);
                 ItemManager.Instance.AddItem(custom);
+                previous = prefab;
             }
         }
     }
 
-    // Brokkr's Gift, the consumable that adds shard slots to a magic item. Two authored prefabs loaded
-    // by name, not runtime clones, so there is no deferred SetActive dance here -- and no ItemConfig
-    // either: name, description and icon are all baked on the prefab. Note the single icon: do NOT set
-    // m_variant, which on the crafting materials selects out of a ten-icon rarity array these lack.
+    // Brokkr's Gift, the consumable that adds shard slots to a magic item. Authored prefabs loaded by
+    // name (a tier the bundle predates is cloned from the one below, see CloneItemForRarity) with no
+    // ItemConfig: name, description and icon are all baked on the prefab. Note the single icon: do NOT
+    // set m_variant, which on the crafting materials selects out of a ten-icon rarity array these lack.
     private static void LoadShardSlotChisels() {
         var chisels = new (string Prefab, ItemRarity Rarity)[] {
             (ShardStones.ShardSlotChisel.LegendaryPrefab, ItemRarity.Legendary),
             (ShardStones.ShardSlotChisel.MythicPrefab, ItemRarity.Mythic),
+            (ShardStones.ShardSlotChisel.AncientPrefab, ItemRarity.Ancient),
         };
 
+        GameObject previous = null;
         foreach (var (prefabName, rarity) in chisels) {
             GameObject prefab = EpicAssets.AssetBundle.LoadAsset<GameObject>(prefabName);
+            if (prefab == null) {
+                prefab = CloneItemForRarity(previous, prefabName, rarity);
+            }
+
             if (prefab == null) {
                 LogErrorForce($"Tried to load asset {prefabName} but it does not exist in the asset bundle!");
                 continue;
@@ -700,6 +762,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
             }
 
             ItemManager.Instance.AddItem(new CustomItem(prefab, false));
+            previous = prefab;
         }
     }
 
@@ -994,6 +1057,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
                 return "$mod_epicloot_Legendary";
             case ItemRarity.Mythic:
                 return "$mod_epicloot_Mythic";
+            case ItemRarity.Ancient:
+                return "$mod_epicloot_Ancient";
             default:
                 return "<non magic>";
         }
@@ -1011,6 +1076,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
                 return GetColor(ELConfig._legendaryRarityColor.Value);
             case ItemRarity.Mythic:
                 return GetColor(ELConfig._mythicRarityColor.Value);
+            case ItemRarity.Ancient:
+                return GetColor(ELConfig._ancientRarityColor.Value);
             default:
                 return "#FFFFFF";
         }
@@ -1044,6 +1111,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
                 return Mathf.Clamp(ELConfig._legendaryMaterialIconColor.Value, 0, 9);
             case ItemRarity.Mythic:
                 return Mathf.Clamp(ELConfig._mythicMaterialIconColor.Value, 0, 9);
+            case ItemRarity.Ancient:
+                return Mathf.Clamp(ELConfig._ancientMaterialIconColor.Value, 0, 9);
             default:
                 throw new ArgumentOutOfRangeException(nameof(rarity), rarity, null);
         }

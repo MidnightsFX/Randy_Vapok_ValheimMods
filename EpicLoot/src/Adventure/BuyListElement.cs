@@ -139,21 +139,16 @@ namespace EpicLoot.Adventure
                 rarityChance = AdventureDataManager.Config.Gamble.GambleRarityChanceByRarity[(int)ItemInfo.Rarity];
             }
 
-            var labels = new[]
-            {
-                "$mod_epicloot_gamble_tooltip_nonmagic",
-                EpicLoot.GetRarityDisplayName(ItemRarity.Magic),
-                EpicLoot.GetRarityDisplayName(ItemRarity.Rare),
-                EpicLoot.GetRarityDisplayName(ItemRarity.Epic),
-                EpicLoot.GetRarityDisplayName(ItemRarity.Legendary),
-                EpicLoot.GetRarityDisplayName(ItemRarity.Mythic)
-            };
+            // Column 0 is the non-magic chance, then one column per rarity, matching GambleRarityChance.
+            var labels = new[] { "$mod_epicloot_gamble_tooltip_nonmagic" }
+                .Concat(Rarities.All.Select(EpicLoot.GetRarityDisplayName))
+                .ToArray();
 
             var totalWeight = AdventureDataManager.Config.Gamble.GambleRarityChance.Sum();
-            for (var i = 0; i < 6; ++i)
+            for (var i = 0; i < labels.Length; ++i)
             {
                 var color = i == 0 ? "white" : EpicLoot.GetRarityColor((ItemRarity) (i - 1));
-                var percent = rarityChance[i] / totalWeight * 100;
+                var percent = (i < rarityChance.Length ? rarityChance[i] : 0) / totalWeight * 100;
                 if (percent >= 0.01)
                 {
                     _sb.AppendLine($"<color={color}>{labels[i]}: {percent:0.#}%</color>");

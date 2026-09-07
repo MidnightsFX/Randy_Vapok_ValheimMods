@@ -1,3 +1,16 @@
+**Unreleased**
+
+Changes:
+* New **Ancient** rarity above Mythic, shown in red: the Ashlands-to-Deep North tier
+    * Ancient crafting materials, runestones, unidentified items, shardstones and Brokkr's Gift, with enchant, augment, disenchant, rune, identify, temper, secret stash, merchant and gamble entries
+    * Every value-based magic effect and shardstone effect gains an Ancient tier, extrapolated from the Legendary-to-Mythic step
+    * Ashlands creatures, treasure chests and Fader roll a small Ancient chance; generic `Tier9Mob` / `Tier9EliteMob` loot tables and the `ShardT8` shard set are in place for Deep North creatures to reference
+    * Every enchanting table feature gains a seventh level. Its upgrade cost is a `999 Coins` placeholder until Deep North resources exist
+    * Per-rarity assets missing from an older `epicloot` bundle (loot beam, drop sound, crafting materials, Brokkr's Gift, the Enchant tab's rarity toggle) fall back to the Mythic ones
+
+Bugfixes:
+* Swapping directly between two items that both carry the same exclusive shard category (boss or unique) is no longer refused. The equip check now measures the loadout the equip will produce, so an item the swap unequips no longer counts against the limit — you no longer have to unequip the first weapon by hand. Genuine cross-slot conflicts, such as a boss-shard helmet worn while equipping a boss-shard sword, are still blocked
+
 **0.13.5**
 
 Changes:

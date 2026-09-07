@@ -166,14 +166,12 @@ namespace EpicLoot.Adventure.Feature
                 return itemInfo.Item.Clone();
             }
 
-            var rarityTable = new[]
+            // Column 0 was the non-magic weight (handled above); columns 1.. are one per rarity.
+            var rarityTable = new float[Rarities.Count];
+            for (var i = 0; i < rarityTable.Length; i++)
             {
-                gambleRarity.Length > 1 ? gambleRarity[1] : 1,
-                gambleRarity.Length > 2 ? gambleRarity[2] : 1,
-                gambleRarity.Length > 3 ? gambleRarity[3] : 1,
-                gambleRarity.Length > 4 ? gambleRarity[4] : 1,
-                gambleRarity.Length > 5 ? gambleRarity[5] : 1
-            };
+                rarityTable[i] = gambleRarity.Length > i + 1 ? gambleRarity[i + 1] : 1;
+            }
 
             var lootTable = new LootTable()
             {

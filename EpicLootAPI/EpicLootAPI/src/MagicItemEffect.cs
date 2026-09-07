@@ -22,7 +22,8 @@ public enum ItemRarity
     Rare,
     Epic,
     Legendary,
-    Mythic
+    Mythic,
+    Ancient
 }
 
 [Serializable]
