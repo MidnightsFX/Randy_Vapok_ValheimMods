@@ -324,7 +324,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
             string cleaned_localization = Regex.Replace(localization, @"^\s*\/\/.*$", "", RegexOptions.Multiline);
             // Log($"Cleaned Localization: {cleaned_localization}");
             var name = embeddedResouce.Split('.');
-            Log($"Adding localization: {name[2]}");
+            //Log($"Adding localization: {name[2]}");
             Localization.AddJsonFile(name[2], cleaned_localization);
         }
         // Load the localization patches and additional languages
