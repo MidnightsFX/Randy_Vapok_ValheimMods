@@ -683,6 +683,7 @@ internal class ELConfig {
                 MerchantPanel.Instance.RefreshAll();
             }
         };
+        UIAudioVolumeAdjustment.SettingChanged += (_, _) => EnchantingUIController.RefreshUIAudioLevels();
         EnchantingTableUpgradesActive.SettingChanged += (_, _) => EnchantingTableUI.UpdateUpgradeActivation();
         EnchantingTableActivatedTabs.SettingChanged += (_, _) => EnchantingTableUI.UpdateTabActivation();
     }

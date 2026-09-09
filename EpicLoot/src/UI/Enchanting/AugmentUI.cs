@@ -218,10 +218,7 @@ namespace EpicLoot_UnityLib
 
             _choiceDialog = EnchantingUIController.AugmentItem(item, _augmentIndex);
 
-            foreach (AudioSource audioSource in _choiceDialog.GetComponentsInChildren<AudioSource>())
-            {
-                audioSource.volume = EnchantingUIController.GetAudioLevel();
-            }
+            EnchantingUIController.SetupUIAudioSources(_choiceDialog);
 
             Lock();
         }
@@ -271,10 +268,7 @@ namespace EpicLoot_UnityLib
                 GameObject enchantmentListElement = Instantiate(EnchantmentListPrefab, EnchantList);
                 Text enchantmentElement = enchantmentListElement.GetComponentInChildren<Text>();
                 Toggle enchantmentbutton = enchantmentListElement.GetComponent<Toggle>();
-                foreach (AudioSource audioSource in enchantmentListElement.GetComponentsInChildren<AudioSource>())
-                {
-                    audioSource.volume = EnchantingUIController.GetAudioLevel();
-                }
+                EnchantingUIController.SetupUIAudioSources(enchantmentListElement);
 
                 _AugmentSelectors.Add(enchantmentbutton);
                 enchantmentbutton.onValueChanged.AddListener((isOn) =>

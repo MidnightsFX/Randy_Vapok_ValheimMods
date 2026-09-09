@@ -95,10 +95,7 @@ namespace EpicLoot_UnityLib
         [UsedImplicitly]
         public void OnEnable()
         {
-            foreach(AudioSource audioSource in this.GetComponentsInChildren<AudioSource>())
-            {
-                audioSource.volume = EnchantingUIController.GetAudioLevel();
-            }
+            EnchantingUIController.SetupUIAudioSources(gameObject);
 
             _rarity = ItemRarity.Magic;
             OnRarityChanged();

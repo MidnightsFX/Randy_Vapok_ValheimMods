@@ -1,3 +1,8 @@
+**0.14.2**
+
+* Fixes biome explored not being updated on Deep North
+* Fixes audio issue with enchanting table not being volume adjusted
+
 **0.14.1**
 
 * Deep North support

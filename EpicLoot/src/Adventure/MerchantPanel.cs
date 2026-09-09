@@ -1,6 +1,7 @@
 ﻿using EpicLoot.Adventure.Feature;
 using EpicLoot.Config;
 using EpicLoot.Crafting;
+using EpicLoot.CraftingV2;
 using EpicLoot_UnityLib;
 using System;
 using System.Collections.Generic;
@@ -72,7 +73,10 @@ namespace EpicLoot.Adventure
             if (_audioSource == null)
             {
                 _audioSource = gameObject.AddComponent<AudioSource>();
+                _audioSource.playOnAwake = false;
             }
+
+            EnchantingUIController.SetupUIAudioSource(_audioSource);
 
             if (GambleSuccessDialog == null)
             {
@@ -500,7 +504,7 @@ namespace EpicLoot.Adventure
             RefreshAll();
             if (_audioSource != null)
             {
-                _audioSource.PlayOneShot(EpicAssets.AbandonBountySFX, _audioSource.volume);
+                _audioSource.PlayOneShot(EpicAssets.AbandonBountySFX);
             }
         }
     }
