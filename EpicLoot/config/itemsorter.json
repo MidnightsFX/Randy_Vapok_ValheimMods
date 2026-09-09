@@ -147,6 +147,40 @@
         "CelestialFeather"
       ],
       "BiomeSpecificCraftingStations": []
+    },
+    "DeepNorth": {
+      "Tier": "Tier8",
+      "BossKey": "defeated_frozenking_p3",
+      "BiomeMaterials": [
+        "Gold",
+        "GoldOre",
+        "Frostwood",
+        "FrostCore",
+        "Ice",
+        "FrozenFuel",
+        "MooseHide",
+        "MooseSinew",
+        "SealHide",
+        "SealBlubber",
+        "ElakingHairBundle",
+        "NornThread",
+        "Leatherstraps",
+        "MoleClaws",
+        "BarkaBranch",
+        "OozeMork",
+        "WrithanRoots",
+        "OrbFrostFire",
+        "OrbThunderBlood",
+        "AncientCoin",
+        "AncientGemstoneBlack",
+        "AncientGemstoneGreen",
+        "AncientGemstoneOrange",
+        "AncientGemstonePurple",
+        "MemorialCoal",
+        "CrownJewel",
+        "FrozenKingDrop"
+      ],
+      "BiomeSpecificCraftingStations": []
     }
   },
   "TierRarityProbabilities": {
@@ -168,6 +202,7 @@
     "defeated_dragon": 900,
     "defeated_goblinking": 1100,
     "defeated_queen": 1300,
-    "defeated_fader": 1600
+    "defeated_fader": 1600,
+    "defeated_frozenking_p3": 1900
   }
 }

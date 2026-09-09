@@ -2575,37 +2575,37 @@
       "CostByRarity": {
         "Magic": [
           {
-            "Item": "FlametalNew",
+            "Item": "Gold",
             "Amount": 1
           }
         ],
         "Rare": [
           {
-            "Item": "FlametalNew",
+            "Item": "Gold",
             "Amount": 2
           }
         ],
         "Epic": [
           {
-            "Item": "FlametalNew",
+            "Item": "Gold",
             "Amount": 3
           }
         ],
         "Legendary": [
           {
-            "Item": "FlametalNew",
+            "Item": "Gold",
             "Amount": 4
           }
         ],
         "Mythic": [
           {
-            "Item": "FlametalNew",
+            "Item": "Gold",
             "Amount": 5
           }
         ],
         "Ancient": [
           {
-            "Item": "FlametalNew",
+            "Item": "Gold",
             "Amount": 6
           }
         ]

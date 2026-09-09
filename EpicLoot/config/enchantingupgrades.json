@@ -48,7 +48,9 @@
         { "Item": "TrophyMorgen", "Amount": 1 }
       ],
       [
-        { "Item": "Coins", "Amount": 999 }
+        { "Item": "SurtlingCore", "Amount": 36 },
+        { "Item": "Gold", "Amount": 4 },
+        { "Item": "TrophyBarka", "Amount": 1 }
       ]
     ],
     "ConvertMaterials": [
@@ -88,7 +90,9 @@
         { "Item": "ProustitePowder", "Amount": 10 }
       ],
       [
-        { "Item": "Coins", "Amount": 999 }
+        { "Item": "Frostwood", "Amount": 30 },
+        { "Item": "MooseSinew", "Amount": 8 },
+        { "Item": "SealBlubber", "Amount": 10 }
       ]
     ],
     "Enchant": [
@@ -128,7 +132,9 @@
         { "Item": "FlametalNew", "Amount": 2 }
       ],
       [
-        { "Item": "Coins", "Amount": 999 }
+        { "Item": "DustAncient", "Amount": 5 },
+        { "Item": "FrozenKingDrop", "Amount": 2 },
+        { "Item": "Gold", "Amount": 2 }
       ]
     ],
     "Augment": [
@@ -168,7 +174,9 @@
         { "Item": "Coins", "Amount": 700 }
       ],
       [
-        { "Item": "Coins", "Amount": 999 }
+        { "Item": "ShardAncient", "Amount": 3 },
+        { "Item": "AncientGemstoneBlack", "Amount": 5 },
+        { "Item": "Coins", "Amount": 800 }
       ]
     ],
     "Disenchant": [
@@ -201,7 +209,8 @@
         { "Item": "MushroomSmokePuff", "Amount": 80 }
       ],
       [
-        { "Item": "Coins", "Amount": 999 }
+        { "Item": "ForestToken", "Amount": 180 },
+        { "Item": "Lingonberry", "Amount": 100 }
       ]
     ],
     "Rune": [
@@ -234,7 +243,8 @@
         { "Item": "FlametalNew", "Amount": 2 }
       ],
       [
-        { "Item": "Coins", "Amount": 999 }
+        { "Item": "FrostCore", "Amount": 5 },
+        { "Item": "Gold", "Amount": 2 }
       ]
     ]
   },

@@ -1899,6 +1899,102 @@
       "RefObject": "Tier8EliteMob"
     },
     {
+      "Object": "TrollFrost",
+      "RefObject": "Tier9EliteMob"
+    },
+    {
+      "Object": "Barka",
+      "RefObject": "Tier9EliteMob"
+    },
+    {
+      "Object": "DvergerDeepNorth",
+      "RefObject": "Tier9Mob"
+    },
+    {
+      "Object": "ElakingMole",
+      "RefObject": "Tier9Mob"
+    },
+    {
+      "Object": "JotunWarrior",
+      "RefObject": "Tier9Mob"
+    },
+    {
+      "Object": "JotunWarriorDualWield",
+      "RefObject": "Tier9Mob"
+    },
+    {
+      "Object": "Moose",
+      "RefObject": "Tier9Mob"
+    },
+    {
+      "Object": "JotunWitch",
+      "RefObject": "Tier9Mob"
+    },
+    {
+      "Object": "ShadowPerson",
+      "RefObject": "Tier9Mob"
+    },
+    {
+      "Object": "FallenWarrior",
+      "RefObject": "Tier9Mob"
+    },
+    {
+      "Object": "Writhan",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "Seal",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "Seal_Pup",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "Elaking",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "ElakingLantern",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "GoblinDeepNorth",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "BlobMork",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "BlobMorkBig",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "BlobMorkMini",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "Greydwarf_Shaman_Frozen",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "Greydwarf_Frozen",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "Skeleton_DeepNorth",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "Frysling",
+      "RefObject": "Tier8Mob"
+    },
+    {
+      "Object": "FrostWisp",
+      "RefObject": "Tier8Mob"
+    },
+    {
       "Object": "Eikthyr",
       "LeveledLoot": [
         {
@@ -2321,6 +2417,53 @@
       ]
     },
     {
+      "Object": "FrozenKing_p3",
+      "LeveledLoot": [
+        {
+          "Level": 1,
+          "Drops": [ [4, 20], [5, 60], [6, 15], [7, 5] ],
+          "Loot": [
+            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 0, 60, 35, 5 ] }
+          ]
+        },
+        {
+          "Level": 2,
+          "Drops": [ [5, 70], [6, 20], [7, 10] ],
+          "Loot": [
+            { "Item": "FrozenKing_p3.1", "Weight": 1, "Rarity": [ 0, 0, 0, 45, 45, 10 ] }
+          ]
+        },
+        {
+          "Level": 3,
+          "Drops": [ [5, 45], [6, 40], [7, 15] ],
+          "Loot": [
+            { "Item": "FrozenKing_p3.1", "Weight": 1, "Rarity": [ 0, 0, 0, 30, 55, 15 ] }
+          ]
+        },
+        {
+          "Level": 4,
+          "Drops": [ [5, 25], [6, 50], [7, 25] ],
+          "Loot": [
+            { "Item": "FrozenKing_p3.1", "Weight": 1, "Rarity": [ 0, 0, 0, 15, 60, 25 ] }
+          ]
+        },
+        {
+          "Level": 5,
+          "Drops": [ [5, 5], [6, 60], [7, 30], [8, 5] ],
+          "Loot": [
+            { "Item": "FrozenKing_p3.1", "Weight": 1, "Rarity": [ 0, 0, 0, 5, 60, 35 ] }
+          ]
+        },
+        {
+          "Level": 6,
+          "Drops": [ [6, 50], [7, 40], [8, 10] ],
+          "Loot": [
+            { "Item": "FrozenKing_p3.1", "Weight": 1, "Rarity": [ 0, 0, 0, 0, 55, 45 ] }
+          ]
+        }
+      ]
+    },
+    {
       "Object": "TreasureChest_meadows",
       "Drops": [ [0, 78], [1, 20], [2, 2] ],
       "Loot": [
@@ -2478,6 +2621,42 @@
       ]
     },
     {
+      "Object": "TreasureChest_deepnorth_village",
+      "Drops": [ [0, 55], [1, 30], [2, 12], [3, 3] ],
+      "Loot": [
+        { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 45, 35, 15, 5 ] },
+        { "Item": "ShardUnique", "Weight": 0.02 },
+        { "Item": "ShardSlotChisel", "Weight": 0.02 }
+      ]
+    },
+    {
+      "Object": "TreasureChest_memorial_buried",
+      "Drops": [ [0, 55], [1, 30], [2, 12], [3, 3] ],
+      "Loot": [
+        { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 45, 35, 15, 5 ] },
+        { "Item": "ShardUnique", "Weight": 0.02 },
+        { "Item": "ShardSlotChisel", "Weight": 0.02 }
+      ]
+    },
+    {
+      "Object": "Morkhalla_RandomLoot",
+      "Drops": [ [0, 50], [1, 32], [2, 14], [3, 4] ],
+      "Loot": [
+        { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 35, 38, 20, 7 ] },
+        { "Item": "ShardUnique", "Weight": 0.03 },
+        { "Item": "ShardSlotChisel", "Weight": 0.03 }
+      ]
+    },
+    {
+      "Object": "Morkhalla_ChestAncient",
+      "Drops": [ [0, 40], [1, 35], [2, 19], [3, 6] ],
+      "Loot": [
+        { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 20, 40, 28, 12 ] },
+        { "Item": "ShardUnique", "Weight": 0.05 },
+        { "Item": "ShardSlotChisel", "Weight": 0.05 }
+      ]
+    },
+    {
       "Object": "TreasureMapChest_Meadows",
       "Drops": [ [3, 80], [4, 15], [5, 5] ],
       "Loot": [
@@ -2538,6 +2717,15 @@
         { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 60, 25, 10, 5 ] },
         { "Item": "ShardUnique", "Weight": 0.02 },
         { "Item": "ShardSlotChisel", "Weight": 0.02 }
+      ]
+    },
+    {
+      "Object": "TreasureMapChest_DeepNorth",
+      "Drops": [ [3, 75], [4, 18], [5, 7] ],
+      "Loot": [
+        { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 30, 40, 22, 8 ] },
+        { "Item": "ShardUnique", "Weight": 0.03 },
+        { "Item": "ShardSlotChisel", "Weight": 0.03 }
       ]
     }
   ]
