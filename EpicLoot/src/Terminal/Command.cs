@@ -22,7 +22,7 @@ public class Command : Terminal.ConsoleCommand
         bool remoteCommand = false, 
         bool onlyAdmin = false, 
         bool hideFromHelp = false, 
-        params string[] alternates) : base(command, description, action, isCheat, isNetwork, onlyServer, isSecret, allowInDevBuild, optionsFetcher, alwaysRefreshTabOptions || options != null, remoteCommand, onlyAdmin)
+        params string[] alternates) : base(command, description, action, isCheat, isNetwork, onlyServer, isSecret, allowInDevBuild, hideBehindDevCommands: false, optionsFetcher, alwaysRefreshTabOptions || options != null, remoteCommand, onlyAdmin)
     {
         this.options = options;
         this.hideFromHelp = hideFromHelp;

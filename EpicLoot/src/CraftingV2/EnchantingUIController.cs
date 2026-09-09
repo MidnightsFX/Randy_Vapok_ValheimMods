@@ -557,7 +557,7 @@ namespace EpicLoot.CraftingV2
                 }
             }
 
-            Game.instance.GetPlayerProfile().m_playerStats.m_stats[PlayerStatType.Crafts]++;
+            Game.instance.GetPlayerProfile().IncrementStat(PlayerStatType.Crafts);
             Gogan.LogEvent("Game", "Enchanted", item.m_shared.m_name, 1);
 
             return successDialog.gameObject;
@@ -1228,7 +1228,7 @@ namespace EpicLoot.CraftingV2
                 }
             }
 
-            Game.instance.GetPlayerProfile().m_playerStats.m_stats[PlayerStatType.Crafts]++;
+            Game.instance.GetPlayerProfile().IncrementStat(PlayerStatType.Crafts);
             Gogan.LogEvent("Game", "RuneEnhanced", item.m_shared.m_name, 1);
 
             return successDialog.gameObject;
@@ -1384,7 +1384,7 @@ namespace EpicLoot.CraftingV2
 
             API.WithChangeReason(API.ChangeReason.Augment, () => item.SaveMagicItem(magicItem));
 
-            Game.instance.GetPlayerProfile().m_playerStats.m_stats[PlayerStatType.Crafts]++;
+            Game.instance.GetPlayerProfile().IncrementStat(PlayerStatType.Crafts);
             Gogan.LogEvent("Game", "Augmented", item.m_shared.m_name, 1);
 
             EquipmentEffectCache.Reset(Player.m_localPlayer);

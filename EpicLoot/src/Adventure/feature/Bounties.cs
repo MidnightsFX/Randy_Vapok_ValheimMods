@@ -72,7 +72,7 @@ namespace EpicLoot.Adventure.Feature
                     continue;
                 }
 
-                if ((bossBountiesGated && !unlockedBiomes.Contains(biome)) || !player.m_knownBiome.Contains(biome))
+                if ((bossBountiesGated && !unlockedBiomes.Contains(biome)) || !BiomeDataManager.IsDiscoveredBy(player, biome))
                 {
                     // Remove the results of undefeated biome bosses &
                     // Remove the results that the player doesn't know about yet

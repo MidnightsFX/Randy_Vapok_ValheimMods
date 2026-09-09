@@ -15,7 +15,7 @@ public static partial class TerminalManager
         {
             string keys = definition.BossDefeatedKeys.Count == 0 ? "(ungated)" : string.Join(", ", definition.BossDefeatedKeys);
             string defeated = BiomeDataManager.HasAllBossKeys(definition.Biome) ? "defeated" : "not defeated";
-            string known = Player.m_localPlayer != null && Player.m_localPlayer.m_knownBiome.Contains(definition.Biome) ?
+            string known = BiomeDataManager.IsDiscoveredBy(Player.m_localPlayer, definition.Biome) ?
                 "known" : "not known";
             string origin = definition.IsLegacy ? ", legacy Bounties.Bosses" : definition.IsVanilla ? "" : ", custom";
             string display = Localization.instance.Localize(BiomeDataManager.GetLocalizationToken(definition.Biome));
@@ -44,7 +44,7 @@ public static partial class TerminalManager
 
         // The same path the game takes when the player first walks into a biome, so bounties and
         // treasure maps for a custom biome can be tested without the biome mod generating terrain.
-        player.AddKnownBiome(biome);
+        BiomeDataManager.MarkDiscoveredBy(player, biome);
         args.Context.PrintInfo($"> {BiomeDataManager.GetName(biome)} is now a known biome");
     }
 

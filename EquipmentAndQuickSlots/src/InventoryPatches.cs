@@ -372,7 +372,7 @@ namespace EquipmentAndQuickSlots {
         // ---------------------------------------------------------------------------------------
         // AddItem rerouting
 
-        [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), typeof(ItemDrop.ItemData), typeof(int), typeof(int), typeof(int))]
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), typeof(ItemDrop.ItemData), typeof(int), typeof(int), typeof(int), typeof(bool))]
         private static class Inventory_AddItem_ItemData_amount_x_y_TargetPositionRerouting {
             [HarmonyPriority(Priority.Last)]
             private static void Prefix(Inventory __instance, ItemDrop.ItemData item, ref int x, ref int y) {
@@ -491,7 +491,7 @@ namespace EquipmentAndQuickSlots {
             }
         }
 
-        [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), typeof(string), typeof(int), typeof(int), typeof(int), typeof(long), typeof(string), typeof(Vector2i), typeof(bool))]
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), typeof(string), typeof(int), typeof(int), typeof(int), typeof(long), typeof(string), typeof(Vector2i), typeof(bool), typeof(bool), typeof(bool))]
         public static class Inventory_AddItem_ByName_FindAppropriateSlot {
             public static ItemDrop.ItemData itemToFindSlot = null;
 
@@ -514,7 +514,7 @@ namespace EquipmentAndQuickSlots {
             private static void Postfix() => itemToFindSlot = null;
         }
 
-        [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), typeof(string), typeof(int), typeof(float), typeof(Vector2i), typeof(bool), typeof(int), typeof(int), typeof(long), typeof(string), typeof(Dictionary<string, string>), typeof(int), typeof(bool))]
+        [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), typeof(string), typeof(int), typeof(float), typeof(Vector2i), typeof(bool), typeof(int), typeof(int), typeof(long), typeof(string), typeof(Dictionary<string, string>), typeof(int), typeof(bool), typeof(bool), typeof(bool))]
         public static class Inventory_AddItem_OnLoad_Marker {
             public static bool inCall = false;
 

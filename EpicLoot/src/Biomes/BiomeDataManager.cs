@@ -160,6 +160,30 @@ namespace EpicLoot.Biomes
             return _byBiome.ContainsKey(biome);
         }
 
+        /// <summary>
+        /// Whether the player has discovered this biome. Vanilla's <see cref="Player.m_knownBiome"/>
+        /// became a set of localization tokens ("$biome_meadows") in the Sept 2026 update, keyed by
+        /// <see cref="BiomeSector.GetBiomeName"/>. A sector carrying AltBiome modifiers is recorded
+        /// under its decorated name instead, so only the plain biome token is matched here - which is
+        /// what every caller here means by "the player has been there". Distinct from
+        /// <see cref="IsKnown"/>, which asks whether the registry knows the biome at all.
+        /// </summary>
+        public static bool IsDiscoveredBy(Player player, Heightmap.Biome biome)
+        {
+            return player != null && player.m_knownBiome.Contains(BiomeSector.GetBiomeName(biome));
+        }
+
+        /// <summary>
+        /// Records a biome as discovered without the <see cref="BiomeSector"/> that
+        /// <see cref="Player.AddKnownBiome"/> now requires - one cannot be synthesised for a biome the
+        /// world has not generated. Writes exactly the token vanilla would; the "biome found" message
+        /// and the tutorial it can trigger are skipped.
+        /// </summary>
+        public static void MarkDiscoveredBy(Player player, Heightmap.Biome biome)
+        {
+            player?.m_knownBiome.Add(BiomeSector.GetBiomeName(biome));
+        }
+
         /// <summary>Registry name, else the enum name, else the number a custom value prints as.</summary>
         public static string GetName(Heightmap.Biome biome)
         {

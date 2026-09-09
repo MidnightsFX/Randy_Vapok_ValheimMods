@@ -1,3 +1,6 @@
+**3.1.0**
+* Update for Deep North!
+
 **3.0.2**
 * Better Archery compatibility
 
