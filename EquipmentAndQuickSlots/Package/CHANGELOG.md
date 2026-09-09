@@ -1,3 +1,6 @@
+**3.1.1**
+* Fix item duplication from loading/unloading a character in Deep North
+
 **3.1.0**
 * Update for Deep North!
 
