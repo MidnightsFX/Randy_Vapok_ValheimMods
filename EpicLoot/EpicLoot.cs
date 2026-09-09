@@ -96,11 +96,6 @@ public sealed class EpicLoot : BaseUnityPlugin {
     void Awake() {
         _instance = this;
 
-        // Before anything can touch a Json.NET type. Newtonsoft.Json is a shared package this mod does
-        // not ship, and a missing or pre-10.0.1 copy surfaces as a type/method load failure naming one
-        // of our own config classes, which tells a player nothing. Every config here is json, so stop.
-        if (JsonDotNetCheck.Verify() == false) { return; }
-
         // Wire the shared Common support layer (config binder, piece loader, drawers) to this plugin before
         // any config is bound, so ConfigBinder and ModLogger have a config file and log source to use.
         ModContext.Initialize(this, Logger, "EpicLoot");

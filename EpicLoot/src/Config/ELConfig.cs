@@ -84,6 +84,7 @@ internal class ELConfig {
     public static ConfigEntry<KeyCode> SocketOverlayModifier;
     public static ConfigEntry<float> GlobalDropRateModifier;
     public static ConfigEntry<bool> DeferChestLootRoll;
+    public static ConfigEntry<bool> RemovePurchasedGambles;
 
     public static ConfigEntry<bool> AlwaysShowWelcomeMessage;
     public static ConfigEntry<bool> OutputPatchedConfigFiles;
@@ -535,6 +536,10 @@ internal class ELConfig {
             "Toggles limiting bounties. Players unable to purchase if enabled and maximum bounty in-progress count is met");
         MaxInProgressBounties = BindServer(SectionAdventure, "Max Bounties Per Player", 5,
             "Max amount of in-progress bounties allowed per player.");
+        RemovePurchasedGambles = BindServer(SectionAdventure, "Remove Purchased Gambles", false,
+            "When true, buying a gamble item from Haldor takes that offer off the Gamble list for the rest of " +
+            "the gamble refresh interval, so each offer can be taken once; the offer comes back next interval.\n" +
+            "When false the offer stays on the list and can be bought over and over. Default: false.");
 
         // 6 - Interface
         UseScrollingCraftDescription = BindClient(SectionInterface, "Use Scrolling Craft Description", true,
@@ -671,6 +676,13 @@ internal class ELConfig {
         TemperPanelPositionY.SettingChanged += (_, _) =>
             global::EpicLoot.TemperPanel.Instance?.ApplyConfiguredPosition();
         _adventureModeEnabled.SettingChanged += (_, _) => MinimapController.RefreshAdventureToggleContainer();
+        RemovePurchasedGambles.SettingChanged += (_, _) => {
+            // Only while the merchant is actually open -- rebuilding a hidden panel would
+            // instantiate every candidate ItemDrop for nothing, and it re-rolls on show anyway.
+            if (MerchantPanel.Instance != null && MerchantPanel.Instance.gameObject.activeInHierarchy) {
+                MerchantPanel.Instance.RefreshAll();
+            }
+        };
         EnchantingTableUpgradesActive.SettingChanged += (_, _) => EnchantingTableUI.UpdateUpgradeActivation();
         EnchantingTableActivatedTabs.SettingChanged += (_, _) => EnchantingTableUI.UpdateTabActivation();
     }

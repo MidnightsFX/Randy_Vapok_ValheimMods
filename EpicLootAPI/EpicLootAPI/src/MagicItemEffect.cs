@@ -77,6 +77,7 @@ public class ValuesPerRarityDef
     public ValueDef Epic = new();
     public ValueDef Legendary = new();
     public ValueDef Mythic = new();
+    public ValueDef Ancient = new();
 }
 
 [Serializable]

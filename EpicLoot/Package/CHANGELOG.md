@@ -7,7 +7,10 @@ Changes:
     * Every enchanting table feature gains a seventh level. Its upgrade cost is a `999 Coins` placeholder until Deep North resources exist
 
 Bugfixes:
-* Swapping directly between two items that both carry the same exclusive shard category (boss or unique) is no longer refused. The equip check now measures the loadout the equip will produce, so an item the swap unequips no longer counts against the limit — you no longer have to unequip the first weapon by hand. Genuine cross-slot conflicts, such as a boss-shard helmet worn while equipping a boss-shard sword, are still blocked
+* Haldor's stock no longer rerolls every time you interact with him (gambler's stock can be consumed when purchased, or infinitely purchasable)
+* Swapping directly between two items that both carry the same exclusive shard category (boss or unique) is no longer refused.
+* Augment UI now correctly re-highlights the selected enchant when augmenting
+* Fixes LightningStrikes not hitting creatures that were too large
 
 **0.13.5**
 

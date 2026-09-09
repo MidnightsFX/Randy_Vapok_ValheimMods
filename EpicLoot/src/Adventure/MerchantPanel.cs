@@ -317,7 +317,11 @@ namespace EpicLoot.Adventure
             return _currencies;
         }
 
-        public void BuyItem(Player player, BuyListElement listItem)
+        /// <summary>
+        /// Returns whether the item actually reached the player's inventory -- the gamble panel needs
+        /// to know, since it only strikes an offer off the list once it has been paid for.
+        /// </summary>
+        public bool BuyItem(Player player, BuyListElement listItem)
         {
             ItemDrop.ItemData item;
             if (listItem.ItemInfo.IsGamble)
@@ -334,7 +338,7 @@ namespace EpicLoot.Adventure
             if (item == null || !InventoryManagement.Instance.GiveItem(item))
             {
                 EpicLoot.LogWarning($"Could not buy item {listItem.ItemInfo.Item.m_shared.m_name}");
-                return;
+                return false;
             }
 
             if (listItem.ItemInfo.IsGamble)
@@ -364,6 +368,7 @@ namespace EpicLoot.Adventure
 
             StoreGui.instance.m_trader.OnBought(new Trader.TradeItem { m_price = 0 });
             StoreGui.instance.m_buyEffects.Create(player.transform.position, Quaternion.identity);
+            return true;
         }
 
         private static string GetRefreshTimeTooltip(int refreshInterval)
@@ -381,9 +386,17 @@ namespace EpicLoot.Adventure
 
             foreach (var panel in Panels)
             {
-                if (panel.NeedsRefresh(currenciesChanged))
+                // A currency change only changes what the player can afford, never what is on offer:
+                // rebuilding the rows for it wiped the selection, snapped the scroll and (with the
+                // gamble pool drawing from the global RNG) rerolled the stock. `else if` because a
+                // rebuild has already applied the new currencies through SetItem.
+                if (panel.NeedsRefresh())
                 {
                     panel.RefreshItems(_currencies);
+                }
+                else if (currenciesChanged)
+                {
+                    panel.UpdateAffordability(_currencies);
                 }
             }
 
