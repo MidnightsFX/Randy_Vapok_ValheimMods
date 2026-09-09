@@ -2,12 +2,13 @@
 
 * Fixes biome explored not being updated on Deep North
 * Fixes audio issue with enchanting table not being volume adjusted
+* Added Deep North bounty targets
 
 **0.14.1**
 
 * Deep North support
     * Deep North creatures drop magic items
-    * Deep North gear is not categorized
+    * Deep North gear is categorized
 * Epic Loot console commands are no longer flagged as cheats, but still require admin
 
 

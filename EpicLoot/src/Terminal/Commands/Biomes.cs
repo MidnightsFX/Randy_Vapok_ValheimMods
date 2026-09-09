@@ -23,6 +23,32 @@ public static partial class TerminalManager
                 $"keys {keys}, {defeated}, {known}, color {definition.Color}, shown as \"{display}\"");
         }
 
+        // The raw set vanilla actually keeps, and the two strings IsDiscoveredBy matches against it.
+        // Printing both sides is the only way to tell "the player has been nowhere" apart from
+        // "the player has been there but the recorded name does not match what we look for".
+        Player player = Player.m_localPlayer;
+        sb.AppendLine();
+        if (player == null)
+        {
+            sb.AppendLine("Player.m_knownBiome: no local player");
+        }
+        else
+        {
+            sb.AppendLine($"Player.m_knownBiome holds {player.m_knownBiome.Count} entry(s):");
+            foreach (string entry in player.m_knownBiome)
+            {
+                sb.AppendLine($"    \"{entry}\"");
+            }
+
+            sb.AppendLine("Looked up as:");
+            foreach (BiomeDefinition definition in BiomeDataManager.BiomesInOrder)
+            {
+                string token = BiomeSector.GetBiomeName(definition.Biome);
+                string localized = Localization.instance == null ? "(no Localization)" : Localization.instance.Localize(token);
+                sb.AppendLine($"    {definition.Name,-14} token \"{token}\" -> localized \"{localized}\"");
+            }
+        }
+
         args.Context.PrintInfo(sb.ToString());
     }
 
