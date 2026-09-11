@@ -142,7 +142,7 @@ namespace EpicLoot.Magic
                 .Select(x => x.m_itemData.m_dropPrefab.name).ToList();
             AddRemoveItemsFromLootLists(magicMats, foundByCategory, newConfig);
 
-            // Write out the new config, which will trigger a reload of the config
+            // Write out the new config; CheckAndAddAllEnchantableItems re-reads every rewritten file once all are written.
             try
             {
                 string contents = JsonConvert.SerializeObject(new ItemInfoConfig() { ItemInfo = newConfig }, Formatting.Indented);
@@ -158,6 +158,12 @@ namespace EpicLoot.Magic
                 EpicLoot.LogError($"Failed to auto-add items to iteminfo.json: {e.Message}");
                 return;
             }
+
+            // The files above were written from the merged result; put that result into memory now
+            // rather than on the reload scheduler's next poll. Load-bearing for iteminfo: it is only
+            // ever assigned in memory by re-reading it. The scheduler remains the backstop when the
+            // write above failed and returned early.
+            ELConfig.ReloadBaseConfigsFromDisk(RewrittenConfigFiles);
         }
 
         private static void AddRemoveItemsFromLootLists(List<string> magicMats,
@@ -276,7 +282,7 @@ namespace EpicLoot.Magic
             }
 
             EpicLoot.Log($"Finished Validating loottable.");
-            // Write out the new config, which will trigger a reload of the config
+            // Write out the new config; CheckAndAddAllEnchantableItems re-reads every rewritten file once all are written.
             try
             {
                 LootConfig newLootConfig = new LootConfig()
@@ -359,7 +365,7 @@ namespace EpicLoot.Magic
             AdventureDataConfig AdventureDataConfigReplacement = AdventureDataManager.Config;
             AdventureDataConfigReplacement.Gamble.GambleCosts = newGambleItems;
 
-            // Write out the new config, which will trigger a reload of the config
+            // Write out the new config; CheckAndAddAllEnchantableItems re-reads every rewritten file once all are written.
             EpicLoot.Log("Writing config.");
             try
             {

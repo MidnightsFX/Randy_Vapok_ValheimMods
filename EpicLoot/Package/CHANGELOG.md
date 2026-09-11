@@ -1,3 +1,12 @@
+**0.14.3**
+
+* Improves config synchronization refresh from disk on dedicated Linux servers, now also for the baseconfig json files (magiceffects, loottables, ...): an edit is applied once the file stops changing, and is picked up even when the server never sees a file event (NFS, SFTP, container mounts)
+* A config reloaded on a player-hosted game is now pushed to the connected players, not only from a dedicated server
+* A client connected to a server no longer applies edits to its own baseconfig files until it disconnects, at which point its own files are restored
+* Config reloads and server config pushes now log at the default log level
+* Fixed magicmats spawning broken items (reminder magicmats is a cheat command)
+* Delays main menu welcome message and config prompt until after cutscenes have played
+
 **0.14.2**
 
 * Fixes biome explored not being updated on Deep North

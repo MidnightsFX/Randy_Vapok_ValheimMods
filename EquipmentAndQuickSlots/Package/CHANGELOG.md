@@ -1,3 +1,8 @@
+**3.1.2**
+* Fixes item placement change when secondary sources change the inventory size
+* Console commands need devcommands again
+* Makes configuring the mod without it being on the server more flexible, server synced configs are still enforced if the mod is on the server
+
 **3.1.1**
 * Fix item duplication from loading/unloading a character in Deep North
 
