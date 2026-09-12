@@ -112,7 +112,8 @@ namespace EpicLoot.Magic
                 i.m_autoPickup == true &&
                 string.IsNullOrEmpty(i.m_itemData.m_shared.m_dlc) &&
                 !string.IsNullOrEmpty(i.m_itemData.m_shared.m_description) &&
-                EpicLoot.IsAllowedMagicItemType(i.m_itemData)).ToList();
+                EpicLoot.IsAllowedMagicItemType(i.m_itemData) &&
+                !AttackKillsWielder(i.m_itemData)).ToList();
 
             EpicLoot.Log($"Checking all equipment in game.");
             foundByCategory = EnsureItemsInConfigMutating(foundByCategory, itemsByCategory, allEquipment);
@@ -132,6 +133,12 @@ namespace EpicLoot.Magic
             EpicLoot.Log("Merging datasets and ensuring no duplicate entries.");
             // merge dataset and ensure unique values
             List<ItemTypeInfo> newConfig = MergeItemsByBossConfig(itemsByCategory);
+
+            // Strip prop items an EARLIER run already wrote to disk. Filtering allEquipment above only stops
+            // new ones being added; an entry already in iteminfo.json survives unless
+            // AutoRemoveEquipmentNotFound is on, and AddRemoveItemsFromLootLists below would feed it straight
+            // back into the loot tables.
+            RemovePropItemsFromConfig(newConfig, allItems);
 
             // Add/remove items from vendor if enabled.
             AddRemoveItemsFromVendor(newConfig);
@@ -164,6 +171,63 @@ namespace EpicLoot.Magic
             // ever assigned in memory by re-reading it. The scheduler remains the backstop when the
             // write above failed and returned early.
             ELConfig.ReloadBaseConfigsFromDisk(RewrittenConfigFiles);
+        }
+
+        /// <summary>
+        /// True for a prop weapon that kills whoever swings it, which must never be offered to a player.
+        ///
+        /// <para>The Deep North update added 28 "SP_" prefabs (SP_AxeBronze, SP_BowDraugrFang,
+        /// SP_SwordBlackmetal, ...) as scripted-NPC props. They are indistinguishable from real gear by every
+        /// other test in the scan above -- full ItemDrops with m_autoPickup, a description, no DLC flag and a
+        /// real item type -- and they even share the vanilla display token ($item_axe_bronze), so they sail
+        /// into iteminfo.json and from there into the loot lists. What sets them apart is that their PRIMARY
+        /// attack carries m_attackKillsSelf, and Attack.Trigger (assembly_valheim/Attack.cs:578) answers that
+        /// with 9,999,999 untyped true damage to the wielder via ApplyDamage the instant the swing completes
+        /// -- no damage text, no attacker, straight past Character.Damage. Their secondary attack does not set
+        /// it, which is why only the basic attack is fatal.</para>
+        ///
+        /// <para>Tested on the flag rather than the "SP_" name prefix, so a prop added under some other naming
+        /// convention later is excluded too.</para>
+        /// </summary>
+        private static bool AttackKillsWielder(ItemDrop.ItemData item)
+        {
+            return item.m_shared.m_attack?.m_attackKillsSelf == true ||
+                item.m_shared.m_secondaryAttack?.m_attackKillsSelf == true;
+        }
+
+        /// <summary>
+        /// Purges every <see cref="AttackKillsWielder"/> prop item from an already-written config, matched on
+        /// prefab name -- the same identity EnsureItemsInConfigMutating writes.
+        /// </summary>
+        private static void RemovePropItemsFromConfig(List<ItemTypeInfo> config, List<ItemDrop> allItems)
+        {
+            HashSet<string> propNames = new HashSet<string>(allItems
+                .Where(i => i.m_itemData?.m_shared != null && AttackKillsWielder(i.m_itemData))
+                .Select(i => i.name));
+
+            if (propNames.Count == 0)
+            {
+                return;
+            }
+
+            int removed = 0;
+            foreach (ItemTypeInfo itemType in config)
+            {
+#pragma warning disable 612 // Items is obsolete, but a config written by an older build may still use it.
+                removed += itemType.Items.RemoveAll(propNames.Contains);
+#pragma warning restore 612
+                foreach (KeyValuePair<string, List<string>> byBoss in itemType.ItemsByBoss)
+                {
+                    removed += byBoss.Value.RemoveAll(propNames.Contains);
+                }
+            }
+
+            if (removed > 0)
+            {
+                EpicLoot.LogWarningForce($"Removed {removed} self-killing prop item entries from iteminfo.json " +
+                    $"(e.g. {string.Join(", ", propNames.OrderBy(x => x).Take(3))}). These are NPC props whose " +
+                    "basic attack kills whoever swings it; they must never be player loot.");
+            }
         }
 
         private static void AddRemoveItemsFromLootLists(List<string> magicMats,
@@ -660,10 +724,15 @@ namespace EpicLoot.Magic
                 }
             }
 
-            return validItems.Contains(name)
-                || metaItemSetNames.Contains(name)
-                || magicMats.Contains(name)
-                || ObjectDB.instance.GetItemPrefab(name) != null;
+            if (validItems.Contains(name) || metaItemSetNames.Contains(name) || magicMats.Contains(name))
+            {
+                return true;
+            }
+
+            // ObjectDB.m_items also holds a few vanilla non-item prefabs (SnowRoller, ...), which
+            // LootRoller can never spawn as a drop, so a name has to resolve to an actual ItemDrop.
+            GameObject prefab = ObjectDB.instance.GetItemPrefab(name);
+            return prefab != null && prefab.TryGetComponent(out ItemDrop _);
         }
 
         // Drops only the unresolvable rarities from an entry's per-rarity map, leaving the entry itself

@@ -324,20 +324,103 @@ public static class ItemDataExtensions
                 continue;
             }
 
-            ItemDrop itemDrop = itemPrefab.GetComponent<ItemDrop>();
-            if (itemDrop == null)
+            // Vanilla registers some non-item prefabs in ObjectDB.m_items (Deep North added
+            // PropFeastDeepNorth, SnowRoller and FrozenKing_Summon); its own lookups skip them too.
+            if (!itemPrefab.TryGetComponent(out ItemDrop itemDrop))
             {
-                EpicLoot.LogError($"Item in ObjectDB missing ItemDrop: ({itemPrefab.name})");
                 continue;
             }
 
             if (itemDrop.m_itemData.m_shared.m_setName == setName)
             {
-                results.Add(itemPrefab.GetComponent<ItemDrop>().m_itemData.m_shared.m_name);
+                results.Add(itemDrop.m_itemData.m_shared.m_name);
             }
         }
 
         return results;
+    }
+
+    /// <summary>
+    /// Restores a real item prefab to <see cref="ItemDrop.ItemData.m_dropPrefab"/> when it is missing or has
+    /// been replaced by <see cref="EpicAssets.DummyName"/>.
+    ///
+    /// <para><see cref="Humanoid_Patch"/> stamps the dummy -- an empty prefab with no mesh and no ItemDrop --
+    /// onto any equipped ItemData whose m_dropPrefab is null, and that write is serialized with the item. The
+    /// item then renders as nothing ("transparent weapon") and, because the dummy is non-null but carries no
+    /// ItemDrop, it walks straight past every `m_dropPrefab == null` guard in the mod. Healing here repairs
+    /// items already saved that way; the sources that produced them are fixed separately.</para>
+    ///
+    /// <para>Resolution order:
+    /// <list type="number">
+    /// <item>ObjectDB's reference-keyed <c>m_itemByData</c> map (<c>TryGetItemPrefab(SharedData)</c>).
+    /// ItemData.Clone is a MemberwiseClone, so an instance shares its <c>m_shared</c> reference with the
+    /// prefab it came from -- this is exact and O(1).</item>
+    /// <item>A scan of ObjectDB matching <c>m_shared.m_name</c>, for items whose shared data was deep-copied
+    /// rather than shared (Instantiate does this, and shards rebuild theirs) and so miss the map.</item>
+    /// </list>
+    /// Returns true only when a prefab was actually restored.</para>
+    /// </summary>
+    public static bool HealDropPrefab(this ItemDrop.ItemData itemData)
+    {
+        if (itemData?.m_shared == null || ObjectDB.instance == null)
+        {
+            return false;
+        }
+
+        // Unity's operator== is the only thing that reports a destroyed object, so compare against null
+        // rather than pattern-matching. A prefab that is present and is not the dummy is already good.
+        GameObject current = itemData.m_dropPrefab;
+        if (current != null && current.name != EpicAssets.DummyName)
+        {
+            return false;
+        }
+
+        if (!ObjectDB.instance.TryGetItemPrefab(itemData.m_shared, out GameObject prefab) || prefab == null)
+        {
+            prefab = FindItemPrefabBySharedName(itemData.m_shared.m_name);
+        }
+
+        if (prefab == null)
+        {
+            // Nothing to restore it to. Leave whatever is there: the dummy at least keeps
+            // Humanoid.SetupVisEquipment from throwing, which is why it exists.
+            return false;
+        }
+
+        itemData.m_dropPrefab = prefab;
+        EpicLoot.Log($"Healed m_dropPrefab on '{itemData.m_shared.m_name}' -> '{prefab.name}' " +
+            $"(was {(current == null ? "null" : EpicAssets.DummyName)}).");
+        return true;
+    }
+
+    /// <summary>
+    /// Last-resort lookup for <see cref="HealDropPrefab"/>: the first ObjectDB item whose shared name matches.
+    /// Ambiguous in principle (two prefabs may share a display token) but only reached when the exact
+    /// reference lookup has already failed, and a same-named item prefab is a far better answer than the dummy.
+    /// </summary>
+    private static GameObject FindItemPrefabBySharedName(string sharedName)
+    {
+        if (sharedName.IsNullOrWhiteSpace())
+        {
+            return null;
+        }
+
+        foreach (GameObject itemPrefab in ObjectDB.instance.m_items)
+        {
+            if (itemPrefab == null)
+            {
+                continue;
+            }
+
+            // Vanilla registers some non-item prefabs in ObjectDB.m_items; its own lookups skip them too.
+            if (itemPrefab.TryGetComponent(out ItemDrop itemDrop) &&
+                itemDrop.m_itemData?.m_shared?.m_name == sharedName)
+            {
+                return itemPrefab;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -350,13 +433,28 @@ public static class ItemDataExtensions
         // even when the prefab is unresolved. Cheap no-op for everything else.
         Shards.EnsureShardMetadata(itemData);
 
+        // Repair a dummy-stamped prefab before anything reads it. This runs from the ItemDrop.Awake,
+        // Inventory.Load and Container.Load postfixes, so it is the point every already-corrupted item
+        // passes through on load.
+        itemData.HealDropPrefab();
+
         GameObject prefab = itemData.m_dropPrefab;
         if (prefab == null)
         {
             return;
         }
 
-        ItemDrop itemDropPrefab = prefab.GetComponent<ItemDrop>();
+        // m_dropPrefab is not necessarily an ITEM prefab: Humanoid_Patch.AssignEmptyToNull stamps
+        // EpicAssets.DummyPrefab (an empty CreateEmptyPrefab stand-in carrying no ItemDrop) onto any
+        // ItemData whose m_dropPrefab is null, which turns the safe null this method guards against into a
+        // non-null that sails past that guard. Without this check GetComponent returns null and the
+        // m_itemData dereference below throws -- and because the dummy is written back into the ItemData,
+        // that NRE then repeats on every later Inventory.Load / Container.Load / ItemDrop.Awake for the item.
+        if (!prefab.TryGetComponent(out ItemDrop itemDropPrefab))
+        {
+            return;
+        }
+
         if (EpicLoot.CanBeMagicItem(itemDropPrefab.m_itemData) && !itemData.IsExtended())
         {
             MagicItemComponent instanceData = itemData.Data().Add<MagicItemComponent>();
