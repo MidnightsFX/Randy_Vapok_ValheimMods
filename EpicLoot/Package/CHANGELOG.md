@@ -1,3 +1,7 @@
+**0.14.4**
+* Adds safety checks for data lookup issues
+* Prevents the item auto-sorter from adding new hidden, unused items to the loot pool
+
 **0.14.3**
 
 * Improves config synchronization refresh from disk on dedicated Linux servers, now also for the baseconfig json files (magiceffects, loottables, ...): an edit is applied once the file stops changing, and is picked up even when the server never sees a file event (NFS, SFTP, container mounts)
