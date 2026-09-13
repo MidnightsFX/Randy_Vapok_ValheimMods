@@ -1,4 +1,6 @@
-﻿using EpicLoot.CraftingV2;
+﻿using System;
+using System.Collections.Generic;
+using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,6 +26,8 @@ namespace EpicLoot_UnityLib
         public static EnchantingTableUI instance { get; set; }
 
         private int _hiddenFrames;
+        private GameObject[] _gamepadHintContainers = Array.Empty<GameObject>();
+        private bool _gamepadHintsShown = true;
         private bool _correctingTab;
 
         public void Awake()
@@ -38,6 +42,7 @@ namespace EpicLoot_UnityLib
             EnchantingUIController.SetupUIAudioSource(Audio);
 
             instance.SetupTabs();
+            instance.CollectGamepadHints();
 
             EnchantingUIAugaFixup.AugaFixup(this);
         }
@@ -151,6 +156,40 @@ namespace EpicLoot_UnityLib
             return tab.m_button != null && tab.m_button.gameObject.activeSelf;
         }
 
+        // Matches the prefab's hint containers by name; they ship always-on with nothing to toggle them.
+        private void CollectGamepadHints()
+        {
+            List<GameObject> hints = new List<GameObject>();
+            foreach (Transform child in Root.GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name == "GamepadHints" || child.name == "TabGamepadHints")
+                {
+                    hints.Add(child.gameObject);
+                }
+            }
+
+            _gamepadHintContainers = hints.ToArray();
+            RefreshGamepadHints();
+        }
+
+        private void RefreshGamepadHints()
+        {
+            bool show = ZInput.IsGamepadActive();
+            if (show == _gamepadHintsShown)
+            {
+                return;
+            }
+
+            _gamepadHintsShown = show;
+            foreach (GameObject hint in _gamepadHintContainers)
+            {
+                if (hint != null)
+                {
+                    hint.SetActive(show);
+                }
+            }
+        }
+
         public static void Show(EnchantingTable source)
         {
             if (instance == null)
@@ -235,6 +274,8 @@ namespace EpicLoot_UnityLib
             }
 
             _hiddenFrames = 0;
+
+            RefreshGamepadHints();
 
             // The player died (or logged out) with the table open: close it -- nothing else does,
             // and every dereference below would NRE each frame over the death screen.
