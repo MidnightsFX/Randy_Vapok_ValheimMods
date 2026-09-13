@@ -188,7 +188,7 @@ namespace EpicLoot_UnityLib
             Warning.text = Localization.instance.Localize("$mod_epicloot_sacrifice_warning");
             Warning.color = Color.red;
             Explainer.text = Localization.instance.Localize("$mod_epicloot_sacrifice_productsexplainer");
-            MainButton.GetComponentInChildren<Text>().text = Localization.instance.Localize("$mod_epicloot_sacrifice");
+            SetMainButtonLabel("$mod_epicloot_sacrifice");
             OnSelectedItemsChanged();
             IdentifyStylePanel.SetActive(false);
             CostList.gameObject.SetActive(false);
@@ -211,7 +211,7 @@ namespace EpicLoot_UnityLib
             OnSelectedItemsChanged();
             Warning.text = Localization.instance.Localize("$mod_epicloot_identify_explain");
             Warning.color = new Color(1f, 0.631f, 0.235f);
-            MainButton.GetComponentInChildren<Text>().text = Localization.instance.Localize("$mod_epicloot_identify");
+            SetMainButtonLabel("$mod_epicloot_identify");
             IdentifyStylePanel.SetActive(true);
             CostList.gameObject.SetActive(true);
         }
@@ -311,26 +311,31 @@ namespace EpicLoot_UnityLib
 
         public override void Cancel()
         {
-            if (_sacrificeMode == SacrificeMode.Sacrifice)
-            {
-                if (_useTMP)
-                {
-                    _tmpButtonLabel.text = Localization.instance.Localize("$mod_epicloot_sacrifice");
-                }
-                else
-                {
-                    _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_sacrifice");
-                }
-            }
-            if (SacrificeMode.Identify == _sacrificeMode)
-            {
-                if (_buttonLabel != null)
-                {
-                    _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_identify");
-                }
-            }
+            base.Cancel();
+            RefreshMainButtonLabel();
+        }
 
-            Unlock();
+        private void RefreshMainButtonLabel()
+        {
+            SetMainButtonLabel(_sacrificeMode == SacrificeMode.Identify
+                ? "$mod_epicloot_identify"
+                : "$mod_epicloot_sacrifice");
+        }
+
+        private void SetMainButtonLabel(string token)
+        {
+            string text = Localization.instance.Localize(token);
+            if (_useTMP)
+            {
+                if (_tmpButtonLabel != null)
+                {
+                    _tmpButtonLabel.text = text;
+                }
+            }
+            else if (_buttonLabel != null)
+            {
+                _buttonLabel.text = text;
+            }
         }
         
         public override void DeselectAll()
