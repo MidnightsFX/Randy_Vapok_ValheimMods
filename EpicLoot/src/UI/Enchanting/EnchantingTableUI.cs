@@ -99,7 +99,29 @@ namespace EpicLoot_UnityLib
 
             TabHandler.ActiveTabChanged += OnActiveTabChanged;
 
+            SortTabsIntoVisualOrder();
             RefreshTabActivation();
+        }
+
+        // The prefab lists Upgrade before Rune while the tab bar shows Rune before Upgrade, and TabHandler
+        // cycles by list index, so the triggers would visit the last two tabs in the wrong order.
+        private void SortTabsIntoVisualOrder()
+        {
+            TabHandler.Tab selected = TabHandler.m_selected >= 0 && TabHandler.m_selected < TabHandler.m_tabs.Count
+                ? TabHandler.m_tabs[TabHandler.m_selected]
+                : null;
+
+            TabHandler.m_tabs.Sort((a, b) => GetTabSiblingIndex(a).CompareTo(GetTabSiblingIndex(b)));
+
+            if (selected != null)
+            {
+                TabHandler.m_selected = TabHandler.m_tabs.IndexOf(selected);
+            }
+        }
+
+        private static int GetTabSiblingIndex(TabHandler.Tab tab)
+        {
+            return tab.m_button != null ? tab.m_button.transform.GetSiblingIndex() : int.MaxValue;
         }
 
         // Also called directly, not just from the event: TabHandler picks its default tab in Start, which
