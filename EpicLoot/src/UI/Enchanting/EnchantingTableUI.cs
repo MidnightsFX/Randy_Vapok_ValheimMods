@@ -24,6 +24,7 @@ namespace EpicLoot_UnityLib
         public static EnchantingTableUI instance { get; set; }
 
         private int _hiddenFrames;
+        private bool _correctingTab;
 
         public void Awake()
         {
@@ -83,7 +84,71 @@ namespace EpicLoot_UnityLib
                 }
             }
 
+            // Overrides the prefab's bindings, which put the tab bar on the bumpers that
+            // MultiSelectListFocusController also claims, and left Tab bound here while Update uses it to
+            // close the window.
+            TabHandler.m_gamepadInput = true;
+            TabHandler.m_gamepadNavigateLeft = "JoyLTrigger";
+            TabHandler.m_gamepadNavigateRight = "JoyRTrigger";
+            TabHandler.m_tabKeyInput = false;
+
+            TabHandler.ActiveTabChanged += OnActiveTabChanged;
+
+            RefreshTabActivation();
+        }
+
+        // Also called directly, not just from the event: TabHandler picks its default tab in Start, which
+        // may run before the subscription above.
+        private void RefreshTabActivation()
+        {
             EnchantingUIController.TabActivation(this);
+
+            if (TabHandler != null)
+            {
+                OnActiveTabChanged(TabHandler.GetActiveTab());
+            }
+        }
+
+        // TabHandler's own cycling skips tabs whose button is null, not ones config has deactivated, so it
+        // can land on a hidden tab and show its empty page.
+        private void OnActiveTabChanged(int index)
+        {
+            if (_correctingTab || TabHandler == null || index < 0 ||
+                index >= TabHandler.m_tabs.Count || IsTabAvailable(index))
+            {
+                return;
+            }
+
+            // Still readable here: this fires in the same frame as the press that moved the tab.
+            int direction = ZInput.GetButtonDown(TabHandler.m_gamepadNavigateLeft) ? -1 : 1;
+
+            int tabCount = TabHandler.m_tabs.Count;
+            for (int offset = 1; offset < tabCount; ++offset)
+            {
+                int candidate = ((index + offset * direction) % tabCount + tabCount) % tabCount;
+                if (!IsTabAvailable(candidate))
+                {
+                    continue;
+                }
+
+                _correctingTab = true;
+                try
+                {
+                    TabHandler.SetActiveTab(candidate);
+                }
+                finally
+                {
+                    _correctingTab = false;
+                }
+
+                return;
+            }
+        }
+
+        private bool IsTabAvailable(int index)
+        {
+            TabHandler.Tab tab = TabHandler.m_tabs[index];
+            return tab.m_button != null && tab.m_button.gameObject.activeSelf;
         }
 
         public static void Show(EnchantingTable source)
@@ -216,12 +281,12 @@ namespace EpicLoot_UnityLib
 
         public static void UpdateTabActivation()
         {
-            EnchantingUIController.TabActivation(instance);
+            instance?.RefreshTabActivation();
         }
 
         public static void UpdateUpgradeActivation()
         {
-            EnchantingUIController.TabActivation(instance);
+            UpdateTabActivation();
         }
 
         public void LockTabs()
