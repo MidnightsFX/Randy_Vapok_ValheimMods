@@ -53,6 +53,8 @@ namespace EpicLoot.Adventure
         public Text IronBountyTokensCount;
         public Text GoldBountyTokensCount;
 
+        public MerchantPanelGamepad Gamepad { get; private set; }
+
         private readonly Currencies _currencies = new Currencies(-1);
         public static MerchantPanel Instance => _instance;
         public static Text AcceptBountyText => _acceptBountyText;
@@ -245,10 +247,15 @@ namespace EpicLoot.Adventure
             }
 
             ApplyConfiguredPosition();
+
+            // Last, so the hints it builds are not swept up by the Auga fixups above.
+            Gamepad = new MerchantPanelGamepad(this, Panels);
         }
 
         public void OnEnable()
         {
+            Gamepad?.Release();
+
             UpdateCurrencies();
             foreach (var panel in Panels)
             {
@@ -263,6 +270,8 @@ namespace EpicLoot.Adventure
 
         public void OnDisable()
         {
+            Gamepad?.Release();
+
             if (GambleSuccessDialog != null)
             {
                 GambleSuccessDialog.Close();
@@ -405,6 +414,9 @@ namespace EpicLoot.Adventure
             }
 
             RefreshBuyButtons();
+
+            // After the buttons, so a press this frame lands on their current interactable state.
+            Gamepad?.Update();
         }
 
         public void RefreshAll()

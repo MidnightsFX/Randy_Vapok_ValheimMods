@@ -12,6 +12,7 @@ namespace EpicLoot.Adventure.Feature
         public AvailableBountiesListPanel(MerchantPanel merchantPanel, BountyListElement elementPrefab)
             : base(
                 merchantPanel.transform.Find("Bounties/AvailableBountiesPanel/ItemList") as RectTransform,
+                merchantPanel.transform.Find("Bounties/AvailableLabel"),
                 elementPrefab,
                 merchantPanel.transform.Find("Bounties/AcceptBountyButton").GetComponent<Button>(),
                 merchantPanel.transform.Find("Bounties/TimeLeft").GetComponent<Text>())
@@ -122,6 +123,7 @@ namespace EpicLoot.Adventure.Feature
         public ClaimableBountiesListPanel(MerchantPanel merchantPanel, BountyListElement elementPrefab)
             : base(
                 merchantPanel.transform.Find("Bounties/ClaimableBountiesPanel/ItemList") as RectTransform,
+                merchantPanel.transform.Find("Bounties/ClaimLabel"),
                 elementPrefab,
                 merchantPanel.transform.Find("Bounties/ClaimBountyButton").GetComponent<Button>(),
                 null)
@@ -132,6 +134,11 @@ namespace EpicLoot.Adventure.Feature
             AbandonButton.onClick.AddListener(OnAbandonButtonClicked);
 
             AbandonButtonIcon = AbandonButton.transform.Find("Icon").GetComponent<Image>();
+        }
+
+        public override Button GetSecondaryButton()
+        {
+            return AbandonButton;
         }
 
         public override bool NeedsRefresh()
