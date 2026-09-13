@@ -94,15 +94,15 @@ namespace EpicLoot_UnityLib
                     OnClicked();
                     ZInput.ResetButtonStatus("JoyButtonA");
                 }
+                // Deliberately no ResetButtonStatus on these two: it clears the held state ZInput's key
+                // repeat runs off, which costs a held d-pad every repeat past the first.
                 else if (ZInput.GetButtonDown("JoyDPadUp"))
                 {
                     SelectQuantity(_selectedQuantity + 1, false);
-                    ZInput.ResetButtonStatus("JoyDPadUp");
                 }
                 else if (ZInput.GetButtonDown("JoyDPadDown"))
                 {
                     SelectQuantity(_selectedQuantity - 1, false);
-                    ZInput.ResetButtonStatus("JoyDPadDown");
                 }
                 else if (ZInput.GetButtonDown("JoyDPadLeft"))
                 {
