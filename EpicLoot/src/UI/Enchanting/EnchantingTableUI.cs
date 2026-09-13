@@ -97,6 +97,11 @@ namespace EpicLoot_UnityLib
             TabHandler.m_gamepadNavigateRight = "JoyRTrigger";
             TabHandler.m_tabKeyInput = false;
 
+            if (TabScrim != null && !TabHandler.m_blockingElements.Contains(TabScrim))
+            {
+                TabHandler.m_blockingElements.Add(TabScrim);
+            }
+
             TabHandler.ActiveTabChanged += OnActiveTabChanged;
 
             SortTabsIntoVisualOrder();
