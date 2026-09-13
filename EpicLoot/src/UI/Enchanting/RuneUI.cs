@@ -93,6 +93,22 @@ namespace EpicLoot_UnityLib
                 Destroy(_successDialog);
                 _successDialog = null;
             }
+
+            if (!_locked && ZInput.IsGamepadActive() && ZInput.GetButtonDown("JoyButtonY"))
+            {
+                ZInput.ResetButtonStatus("JoyButtonY");
+
+                // Named rather than cycled through the ToggleGroup: it also holds ModeImbueButton, which the
+                // prefab ships deactivated.
+                if (_runeAction == RuneAction.Etch)
+                {
+                    RuneExtractButton.isOn = true;
+                }
+                else
+                {
+                    RuneEtchButton.isOn = true;
+                }
+            }
         }
 
         public void UpdateDisplaySelectedItemEnchantments()

@@ -72,6 +72,27 @@ namespace EpicLoot_UnityLib
             AvailableItems.DeselectAll();
         }
 
+        public override void Update()
+        {
+            base.Update();
+
+            if (_locked || !ZInput.IsGamepadActive() || !ZInput.GetButtonDown("JoyButtonY"))
+            {
+                return;
+            }
+
+            ZInput.ResetButtonStatus("JoyButtonY");
+
+            if (_sacrificeMode == SacrificeMode.Sacrifice)
+            {
+                IdentifyToggle.isOn = true;
+            }
+            else
+            {
+                SacrificeToggle.isOn = true;
+            }
+        }
+
         protected override void DoMainAction()
         {
             if (_sacrificeMode == SacrificeMode.Identify)
