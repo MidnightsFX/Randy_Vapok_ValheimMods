@@ -255,7 +255,7 @@ namespace EpicLoot_UnityLib
             int prevQuantity = _selectedQuantity;
             if (_item == null)
             {
-                _selectedQuantity = quantity;
+                _selectedQuantity = Mathf.Clamp(quantity, 0, 1);
             }
             else
             {
