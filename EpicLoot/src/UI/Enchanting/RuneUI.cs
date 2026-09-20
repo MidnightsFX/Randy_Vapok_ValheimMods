@@ -5,6 +5,7 @@ using System.Linq;
 using EpicLoot;
 using EpicLoot.CraftingV2;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace EpicLoot_UnityLib
@@ -63,7 +64,6 @@ namespace EpicLoot_UnityLib
         public void OnEnable()
         {
             RuneExtractButton.isOn = false;
-            RuneEtchButton.Select();
             RuneEtchButton.isOn = true;
             EtchModeSelected(true);
         }
@@ -94,6 +94,11 @@ namespace EpicLoot_UnityLib
                 _successDialog = null;
             }
 
+            if (ZInput.IsGamepadActive())
+            {
+                ClearModeToggleUISelection();
+            }
+
             if (!_locked && ZInput.IsGamepadActive() && ZInput.GetButtonDown("JoyButtonY"))
             {
                 ZInput.ResetButtonStatus("JoyButtonY");
@@ -108,6 +113,24 @@ namespace EpicLoot_UnityLib
                 {
                     RuneEtchButton.isOn = true;
                 }
+            }
+        }
+
+        // The gamepad's A is bound to Unity's Submit axis as well as to JoyButtonA, so a mode toggle left
+        // selected in the EventSystem re-fires the moment the player presses A on a list entry and drags
+        // the panel back into that mode. The toggles are driven by Y here, never by EventSystem navigation.
+        private void ClearModeToggleUISelection()
+        {
+            EventSystem eventSystem = EventSystem.current;
+            if (eventSystem == null)
+            {
+                return;
+            }
+
+            GameObject selected = eventSystem.currentSelectedGameObject;
+            if (selected != null && (selected == RuneExtractButton.gameObject || selected == RuneEtchButton.gameObject))
+            {
+                eventSystem.SetSelectedGameObject(null);
             }
         }
 
