@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using EpicLoot.Biomes;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace EpicLoot.Adventure;
 
@@ -33,6 +34,8 @@ public class MinimapController : MonoBehaviour
 
     private static AdventurePinFilter _bountyPinFilter;
     private static AdventurePinFilter _treasurePinFilter;
+
+    private static readonly List<PanelLayout> VanillaPanelLayout = new();
 
     public virtual void Awake()
     {
@@ -88,6 +91,7 @@ public class MinimapController : MonoBehaviour
         _treasurePinFilter?.Destroy();
         _bountyPinFilter = null;
         _treasurePinFilter = null;
+        VanillaPanelLayout.Clear();
     }
 
     private void EnsureVisibleIconTypeCapacity()
@@ -113,9 +117,9 @@ public class MinimapController : MonoBehaviour
 
     private void SetupPinFilters()
     {
-        if (_minimap.m_selectedIcon3 == null || _minimap.m_selectedIcon4 == null)
+        if (_minimap.m_selectedIconDeath == null || _minimap.m_selectedIconBoss == null)
         {
-            EpicLoot.LogError("Could not find the minimap pin icon row, adventure pins cannot be filtered!");
+            EpicLoot.LogError("Could not find the minimap pin filter panel, adventure pins cannot be filtered!");
             return;
         }
 
@@ -123,31 +127,58 @@ public class MinimapController : MonoBehaviour
             "$mod_epicloot_merchant_bounties");
         _treasurePinFilter = new AdventurePinFilter(_minimap, EpicLoot.TreasureMapPinType, EpicAssets.MapIconTreasureMap,
             "$mod_epicloot_merchant_treasuremaps");
-
-        GrowIconPanel(2);
     }
 
-    private void GrowIconPanel(int addedIcons)
+    /// <summary>
+    /// Sizes the filter panel to however many adventure filters are currently shown, so hiding them leaves the
+    /// vanilla layout exactly as it was found.
+    /// </summary>
+    private static void LayoutPinFilterPanel()
     {
-        if (_minimap.m_selectedIcon0.transform.parent is not RectTransform firstIcon ||
-            _minimap.m_selectedIcon1.transform.parent is not RectTransform secondIcon ||
+        RestorePinFilterPanel();
+
+        int addedIcons = (_bountyPinFilter is { Active: true } ? 1 : 0) +
+                         (_treasurePinFilter is { Active: true } ? 1 : 0);
+
+        if (addedIcons > 0)
+        {
+            GrowPinFilterPanel(addedIcons);
+        }
+    }
+
+    private static void GrowPinFilterPanel(int addedIcons)
+    {
+        Minimap minimap = Minimap.instance;
+
+        if (minimap == null || minimap.m_selectedIconDeath == null || minimap.m_selectedIconBoss == null)
+        {
+            return;
+        }
+
+        if (minimap.m_selectedIconDeath.transform.parent is not RectTransform firstIcon ||
+            minimap.m_selectedIconBoss.transform.parent is not RectTransform secondIcon ||
             firstIcon.parent is not RectTransform panel || panel.parent == null)
         {
             return;
         }
 
-        float growth = Mathf.Abs(secondIcon.anchoredPosition.y - firstIcon.anchoredPosition.y) * addedIcons;
-        if (growth <= 0f)
+        float step = (secondIcon.anchoredPosition.y - firstIcon.anchoredPosition.y) * addedIcons;
+        if (step == 0f)
         {
             return;
         }
 
-        float panelTop = panel.localPosition.y + panel.rect.yMax;
+        bool upwards = step > 0f;
+        float growth = Mathf.Abs(step);
+        float panelEdge = panel.localPosition.y + (upwards ? panel.rect.yMax : panel.rect.yMin);
         float panelCenterX = panel.localPosition.x + panel.rect.center.x;
         float panelWidth = panel.rect.width;
 
+        Capture(panel);
         panel.sizeDelta += new Vector2(0f, growth);
-        panel.anchoredPosition += new Vector2(0f, growth * (1f - panel.pivot.y));
+        panel.anchoredPosition += new Vector2(0f, upwards ? growth * panel.pivot.y : -growth * (1f - panel.pivot.y));
+
+        List<RectTransform> column = new() { panel };
 
         foreach (RectTransform sibling in panel.parent.Cast<Transform>().OfType<RectTransform>())
         {
@@ -161,14 +192,161 @@ public class MinimapController : MonoBehaviour
                 continue;
             }
 
-            if (sibling.localPosition.y + sibling.rect.yMin < panelTop)
+            float siblingEdge = sibling.localPosition.y + (upwards ? sibling.rect.yMin : sibling.rect.yMax);
+            if (upwards ? siblingEdge < panelEdge : siblingEdge > panelEdge)
             {
                 continue;
             }
 
-            // Nothing names the death/boss panel or the d-pad hint, so they are picked out by sitting above the
-            // icon panel in its own narrow column. Re-check this if the vanilla map layout changes.
-            sibling.localPosition += new Vector3(0f, growth, 0f);
+            // Nothing names the pin icon panel or the d-pad hint, so they are picked out by sitting past the
+            // filter panel in its own narrow column. Re-check this if the vanilla map layout changes.
+            Capture(sibling);
+            sibling.localPosition += new Vector3(0f, upwards ? growth : -growth, 0f);
+            column.Add(sibling);
+        }
+
+        KeepIconColumnOnMap(minimap, column);
+    }
+
+    /// <summary>
+    /// Growing the panel pushes the column the added icons' worth of height off the end of the map, so the whole
+    /// column slides back the other way by as much of that as the gap at the far end can take.
+    /// </summary>
+    private static void KeepIconColumnOnMap(Minimap minimap, List<RectTransform> column)
+    {
+        if (minimap.m_mapImageLarge == null)
+        {
+            return;
+        }
+
+        Vector3[] corners = new Vector3[4];
+        minimap.m_mapImageLarge.rectTransform.GetWorldCorners(corners);
+        float mapBottom = corners[0].y;
+        float mapTop = corners[1].y;
+
+        float columnBottom = float.MaxValue;
+        float columnTop = float.MinValue;
+
+        foreach (RectTransform rect in column)
+        {
+            rect.GetWorldCorners(corners);
+            columnBottom = Mathf.Min(columnBottom, corners[0].y);
+            columnTop = Mathf.Max(columnTop, corners[1].y);
+        }
+
+        float roomAbove = mapTop - columnTop;
+        float roomBelow = columnBottom - mapBottom;
+        float shift = 0f;
+
+        if (roomBelow < 0f)
+        {
+            shift = Mathf.Min(-roomBelow, Mathf.Max(0f, roomAbove));
+        }
+        else if (roomAbove < 0f)
+        {
+            shift = -Mathf.Min(-roomAbove, Mathf.Max(0f, roomBelow));
+        }
+
+        if (shift == 0f)
+        {
+            return;
+        }
+
+        foreach (RectTransform rect in column)
+        {
+            rect.position += new Vector3(0f, shift, 0f);
+        }
+    }
+
+    private static void Capture(RectTransform rect)
+    {
+        VanillaPanelLayout.Add(new PanelLayout(rect));
+    }
+
+    private static void RestorePinFilterPanel()
+    {
+        foreach (PanelLayout layout in VanillaPanelLayout)
+        {
+            layout.Restore();
+        }
+
+        VanillaPanelLayout.Clear();
+    }
+
+    /// <summary>
+    /// Minimap walks m_selectedIcons in insertion order for d-pad navigation, so the adventure filters have to be
+    /// rebuilt into it next to the boss and death filters they sit beside rather than appended.
+    /// </summary>
+    private static void RebuildSelectedIcons()
+    {
+        Minimap minimap = Minimap.instance;
+
+        if (minimap == null)
+        {
+            return;
+        }
+
+        Dictionary<Minimap.PinType, Image> rebuilt = new();
+        bool inserted = false;
+
+        foreach (KeyValuePair<Minimap.PinType, Image> entry in minimap.m_selectedIcons)
+        {
+            if (IsAdventurePinType(entry.Key))
+            {
+                continue;
+            }
+
+            rebuilt[entry.Key] = entry.Value;
+
+            if (entry.Key != Minimap.PinType.Boss)
+            {
+                continue;
+            }
+
+            AddSelectedIcon(rebuilt, _bountyPinFilter);
+            AddSelectedIcon(rebuilt, _treasurePinFilter);
+            inserted = true;
+        }
+
+        if (!inserted)
+        {
+            AddSelectedIcon(rebuilt, _bountyPinFilter);
+            AddSelectedIcon(rebuilt, _treasurePinFilter);
+        }
+
+        minimap.m_selectedIcons = rebuilt;
+    }
+
+    private static void AddSelectedIcon(Dictionary<Minimap.PinType, Image> icons, AdventurePinFilter filter)
+    {
+        if (filter is { Active: true })
+        {
+            icons[filter.pinType] = filter.selected;
+        }
+    }
+
+    private readonly struct PanelLayout
+    {
+        private readonly RectTransform _rect;
+        private readonly Vector2 _sizeDelta;
+        private readonly Vector3 _localPosition;
+
+        public PanelLayout(RectTransform rect)
+        {
+            _rect = rect;
+            _sizeDelta = rect.sizeDelta;
+            _localPosition = rect.localPosition;
+        }
+
+        public void Restore()
+        {
+            if (_rect == null)
+            {
+                return;
+            }
+
+            _rect.sizeDelta = _sizeDelta;
+            _rect.localPosition = _localPosition;
         }
     }
 
@@ -181,6 +359,8 @@ public class MinimapController : MonoBehaviour
 
         _bountyPinFilter?.SetActive(show);
         _treasurePinFilter?.SetActive(show);
+        LayoutPinFilterPanel();
+        RebuildSelectedIcons();
 
         PinJob pinJob = new PinJob
         {

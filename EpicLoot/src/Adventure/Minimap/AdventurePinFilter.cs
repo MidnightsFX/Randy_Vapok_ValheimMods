@@ -18,7 +18,7 @@ public class AdventurePinFilter
         _minimap = minimap;
         pinType = type;
 
-        Transform template = minimap.m_selectedIcon4.transform;
+        Transform template = minimap.m_selectedIconBoss.transform;
         GameObject source = template.parent.gameObject;
         int selectedIndex = template.GetSiblingIndex();
 
@@ -70,18 +70,17 @@ public class AdventurePinFilter
 
     public bool Visible => _minimap.m_visibleIconTypes[(int)pinType];
 
+    public bool Active => instance != null && instance.activeSelf;
+
     public void SetActive(bool active)
     {
         instance.SetActive(active);
 
         if (active)
         {
-            _minimap.m_selectedIcons[pinType] = selected;
             icon.color = Visible ? Color.white : Color.gray;
             return;
         }
-
-        _minimap.m_selectedIcons.Remove(pinType);
 
         if (_minimap.m_selectedType == pinType)
         {
@@ -103,10 +102,6 @@ public class AdventurePinFilter
         {
             _minimap.ToggleIconFilter(pinType);
         }
-        else
-        {
-            _minimap.SelectIcon(pinType);
-        }
     }
 
     private void Reposition()
@@ -116,8 +111,8 @@ public class AdventurePinFilter
             return;
         }
 
-        if (_minimap.m_selectedIcon3.transform.parent is not RectTransform step0 ||
-            _minimap.m_selectedIcon4.transform.parent is not RectTransform step1 ||
+        if (_minimap.m_selectedIconDeath.transform.parent is not RectTransform step0 ||
+            _minimap.m_selectedIconBoss.transform.parent is not RectTransform step1 ||
             rect.parent.GetChild(rect.GetSiblingIndex() - 1) is not RectTransform previous)
         {
             return;
