@@ -31,7 +31,7 @@ namespace EpicLoot_UnityLib
         public string GetDisplayNameSuffix() => string.Empty;
     }
 
-    public class MultiSelectItemList : MonoBehaviour
+    public class MultiSelectItemList : MonoBehaviour, IGamepadFocusPane
     {
         public enum SortMode { Rarity, Name, Quantity }
 
@@ -726,6 +726,16 @@ namespace EpicLoot_UnityLib
         {
             return ListContainer != null && ListContainer.GetComponent<GridLayoutGroup>() != null;
         }
+
+        public int GetFocusedIndex()
+        {
+            MultiSelectItemListElement focusedElement = GetFocusedElement();
+            return focusedElement != null ? focusedElement.transform.GetSiblingIndex() : -1;
+        }
+
+        public bool ShowSortHint => Sortable && SortByDropdown != null && SortByDropdown.isActiveAndEnabled;
+        public bool ShowSelectAllHint => Multiselect && SelectAllToggle != null && SelectAllToggle.isActiveAndEnabled;
+        public bool ShowSelectHint => !ReadOnly && GetFocusedElement() != null;
 
         public void InitWithExistingItems()
         {
