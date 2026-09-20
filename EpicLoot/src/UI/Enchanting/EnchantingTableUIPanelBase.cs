@@ -97,6 +97,38 @@ namespace EpicLoot_UnityLib
             }
         }
 
+        // The d-pad's horizontal axis still moves the player's hotbar selection behind this panel, so it
+        // is eaten here whether or not the panel answers it.
+        private void UpdateDPadHorizontalInput()
+        {
+            if (!ZInput.IsGamepadActive())
+            {
+                return;
+            }
+
+            int direction;
+            if (ZInput.GetButtonDown("JoyDPadLeft"))
+            {
+                direction = -1;
+                ZInput.ResetButtonStatus("JoyDPadLeft");
+            }
+            else if (ZInput.GetButtonDown("JoyDPadRight"))
+            {
+                direction = 1;
+                ZInput.ResetButtonStatus("JoyDPadRight");
+            }
+            else
+            {
+                return;
+            }
+
+            OnDPadHorizontal(direction);
+        }
+
+        protected virtual void OnDPadHorizontal(int direction)
+        {
+        }
+
         protected virtual void OnMainButtonClicked()
         {
             if (MainActionSFX != null)
@@ -121,6 +153,7 @@ namespace EpicLoot_UnityLib
         public virtual void Update()
         {
             UpdateMainButtonGamepadInput();
+            UpdateDPadHorizontalInput();
 
             if (ProgressBar != null)
             {

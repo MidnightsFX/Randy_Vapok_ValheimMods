@@ -104,14 +104,6 @@ namespace EpicLoot_UnityLib
                 {
                     SelectQuantity(_selectedQuantity - 1, false);
                 }
-                else if (ZInput.GetButtonDown("JoyDPadLeft"))
-                {
-                    ZInput.ResetButtonStatus("JoyDPadLeft");
-                }
-                else if (ZInput.GetButtonDown("JoyDPadRight"))
-                {
-                    ZInput.ResetButtonStatus("JoyDPadRight");
-                }
             }
 
             RefreshGamepadFocusIndicator();
