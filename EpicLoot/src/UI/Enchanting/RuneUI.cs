@@ -283,7 +283,7 @@ namespace EpicLoot_UnityLib
         public void ExtractModeSelected(bool enabled)
         {
             _runeAction = RuneAction.Extract;
-            MainButton.GetComponentInChildren<Text>().text = Localization.instance.Localize("$mod_epicloot_rune_extract");
+            RefreshMainButtonLabel();
             Warning.text = Localization.instance.Localize(EnchantingUIController.GetRuneExtractWarningKey());
 
             // Deselect runes and clear them
@@ -299,7 +299,7 @@ namespace EpicLoot_UnityLib
         public void EtchModeSelected(bool enabled)
         {
             _runeAction = RuneAction.Etch;
-            MainButton.GetComponentInChildren<Text>().text = Localization.instance.Localize("$mod_epicloot_rune_etch");
+            RefreshMainButtonLabel();
             Warning.text = Localization.instance.Localize("$mod_epicloot_rune_etch_warning");
 
             AvailableRunesWindow.SetActive(true);
@@ -442,6 +442,31 @@ namespace EpicLoot_UnityLib
             AvailableRunes.SetItems(new List<IListElement>());
         }
 
+        // base.Cancel restores _defaultButtonLabelText, which Awake captured from the prefab's shipped
+        // "$mod_epicloot_rune_slot" label, so every finished action relabelled the button "Apply Rune".
+        private void RefreshMainButtonLabel()
+        {
+            SetMainButtonLabel(_runeAction == RuneAction.Extract
+                ? "$mod_epicloot_rune_extract"
+                : "$mod_epicloot_rune_etch");
+        }
+
+        private void SetMainButtonLabel(string token)
+        {
+            string text = Localization.instance.Localize(token);
+            if (_useTMP)
+            {
+                if (_tmpButtonLabel != null)
+                {
+                    _tmpButtonLabel.text = text;
+                }
+            }
+            else if (_buttonLabel != null)
+            {
+                _buttonLabel.text = text;
+            }
+        }
+
         protected override AudioClip GetCompleteAudioClip()
         {
             return RunicActionCompleted;
@@ -554,6 +579,7 @@ namespace EpicLoot_UnityLib
         public override void Cancel()
         {
             base.Cancel();
+            RefreshMainButtonLabel();
 
             if (_successDialog != null && _successDialog.activeSelf)
             {
