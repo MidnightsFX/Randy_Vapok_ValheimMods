@@ -604,6 +604,7 @@ namespace EpicLoot
                 AllDefinitions.Remove(effectDef.Type);
             }
             AllDefinitions.Add(effectDef.Type, effectDef);
+            MagicEffectRarity.InvalidateAnchor();
         }
 
         public static MagicItemEffectDefinition Get(string type)

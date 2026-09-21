@@ -178,14 +178,14 @@ namespace EpicLoot
                 {
                     // Header without the inline range; the range and other details go in the block below.
                     // Close/reopen the rarity color around the dim detail block rather than nesting tags.
-                    tooltip.AppendLine($"{pip} {GetEffectText(effect, Rarity, false, LegendaryID)}");
+                    tooltip.AppendLine($"{pip} {MagicEffectRarity.Decorate(effect.EffectType, GetEffectText(effect, Rarity, false, LegendaryID), true)}");
                     tooltip.Append($"</color><color=#c0c0c0ff>");
                     tooltip.Append(GetEffectDetailBlock(effect, Rarity, LegendaryID, null, "   "));
                     tooltip.Append($"</color><color={color}>");
                 }
                 else
                 {
-                    tooltip.AppendLine($"{pip} {GetEffectText(effect, Rarity, false)}");
+                    tooltip.AppendLine($"{pip} {MagicEffectRarity.Decorate(effect.EffectType, GetEffectText(effect, Rarity, false), true)}");
                 }
             }
 
@@ -269,7 +269,8 @@ namespace EpicLoot
             var tooltip = new StringBuilder();
             tooltip.Append($"<color={color}>");
             for (var index = 0; index < Effects.Count; index++) {
-                tooltip.AppendLine($"{GetEffectText(Effects[index], Rarity, true)}");
+                tooltip.AppendLine($"{MagicEffectRarity.Decorate(Effects[index].EffectType, 
+                    GetEffectText(Effects[index], Rarity, true), false)}");
             }
             tooltip.Append($"</color>");
 

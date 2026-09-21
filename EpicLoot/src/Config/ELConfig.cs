@@ -45,6 +45,7 @@ internal class ELConfig {
     public static ConfigEntry<bool> UseScrollingCraftDescription;
     public static ConfigEntry<bool> ShowRarityInRecipeList;
     public static ConfigEntry<bool> ShowEnchantSelectionChance;
+    public static ConfigEntry<EffectRarityFlare> EffectRarityFlareMode;
     public static ConfigEntry<bool> TransferMagicItemToCrafts;
     public static ConfigEntry<bool> _loggingEnabled;
     public static ConfigEntry<LogLevel> _logLevel;
@@ -551,6 +552,12 @@ internal class ELConfig {
         ShowEnchantSelectionChance = BindServer(SectionInterface, "Show Enchant Selection Chance", false,
             "When true, the Enchant and Augment panels show the weighted chance that each available effect " +
             "is selected on a single roll, displayed right after the bullet for each effect.");
+        EffectRarityFlareMode = BindClient(SectionInterface, "Effect Rarity Flare", EffectRarityFlare.Animated,
+            "Marks magic effects that are rare to roll, derived from each effect's SelectionWeight relative " +
+            "to the median weight of every loaded effect -- no effect is singled out by name.\n" +
+            "Off = no marker.\n" +
+            "Static = a coloured star rating after the effect, one to three stars by how rare it is.\n" +
+            "Animated = as Static, and in the item tooltip those lines also drift and shimmer.");
         ShowEquippedAndHotbarItemsInSacrificeTab = BindClient(SectionInterface,
             "ShowEquippedAndHotbarItemsInSacrificeTab", false,
             "If set to false, hides the items that are equipped or on your hotbar in the Sacrifice items list.");
