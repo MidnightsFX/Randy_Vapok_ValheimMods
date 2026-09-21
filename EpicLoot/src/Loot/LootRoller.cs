@@ -102,6 +102,8 @@ namespace EpicLoot
         public static int CheatSocketCount = -1;
         public static bool CheatDisableGating;
         public static bool CheatForceMagicEffect;
+        public static int CheatEffectRarityTier;
+        public static bool CheatEffectRarityFirstOnly;
         public static string ForcedMagicEffect = "";
         public static string CheatForceLegendary;
         public static string CheatForceMythic;
@@ -302,7 +304,7 @@ namespace EpicLoot
         {
             return CheatRollingItem || CheatDisableGating || CheatForceMagicEffect ||
                 !string.IsNullOrEmpty(CheatForceLegendary) || !string.IsNullOrEmpty(CheatForceMythic) ||
-                CheatEffectCount > 0;
+                CheatEffectCount > 0 || CheatEffectRarityTier > 0;
         }
 
         public static Dictionary<string,float> GetLootTableChances(Vector3 location, List<LootTable> LootTables)
@@ -1215,7 +1217,7 @@ namespace EpicLoot
                     break;
                 }
 
-                _weightedEffectTable.Setup(availableEffects, x => x.SelectionWeight);
+                _weightedEffectTable.Setup(NarrowToCheatRarity(availableEffects, i), x => x.SelectionWeight);
                 var effectDef = _weightedEffectTable.Roll();
 
                 var effect = RollEffect(effectDef, magicItem.Rarity);
@@ -1477,12 +1479,38 @@ namespace EpicLoot
             return new MagicItemEffect(effectDef.Type, value);
         }
 
+        // Testing aid for the rarity flare: drops everything below the cheat tier out of the pool so a
+        // rare effect rolls on demand. Falls back to the full pool, loudly, when nothing qualifies --
+        // the eligible set is already narrowed by item type and rarity, so asking for 3 stars on a slot
+        // that has none would otherwise leave an empty table and break the roll.
+        private static List<MagicItemEffectDefinition> NarrowToCheatRarity(
+            List<MagicItemEffectDefinition> availableEffects, int effectIndex)
+        {
+            if (CheatEffectRarityTier <= 0 || (CheatEffectRarityFirstOnly && effectIndex > 0))
+            {
+                return availableEffects;
+            }
+
+            var narrowed = availableEffects
+                .Where(x => MagicEffectRarity.GetTier(x) >= CheatEffectRarityTier)
+                .ToList();
+
+            if (narrowed.Count > 0)
+            {
+                return narrowed;
+            }
+
+            EpicLoot.LogWarningForce($"[cheatrarity] no available effect reaches {CheatEffectRarityTier} " +
+                $"star(s) for this item; rolling from the normal pool of {availableEffects.Count} instead");
+            return availableEffects;
+        }
+
         public static List<MagicItemEffect> RollEffects(List<MagicItemEffectDefinition> availableEffects,
             ItemRarity itemRarity, int count, bool removeOnSelect = true)
         {
             var results = new List<MagicItemEffect>();
 
-            _weightedEffectTable.Setup(availableEffects, x => x.SelectionWeight, removeOnSelect);
+            _weightedEffectTable.Setup(NarrowToCheatRarity(availableEffects, 0), x => x.SelectionWeight, removeOnSelect);
             var effectDefs = _weightedEffectTable.Roll(count);
 
             foreach (var effectDef in effectDefs)

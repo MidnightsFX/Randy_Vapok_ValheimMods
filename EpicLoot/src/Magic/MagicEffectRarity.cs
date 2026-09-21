@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using EpicLoot.Compendium;
+using EpicLoot.Crafting;
 using EpicLoot.Config;
 using TMPro;
 using UnityEngine;
@@ -77,6 +78,7 @@ namespace EpicLoot
             }
 
             var weights = MagicItemEffectDefinitions.AllDefinitions.Values
+                .Where(CanRoll)
                 .Select(x => x.SelectionWeight)
                 .Where(x => x > 0f)
                 .OrderBy(x => x)
@@ -120,9 +122,26 @@ namespace EpicLoot
             return 0;
         }
 
+        public static float GetAnchorWeight()
+        {
+            EnsureAnchor();
+            return _anchorWeight;
+        }
+
+        // Anything that cannot be selected by a roll is excluded from BOTH the anchor and the tiers.
+        // ShardEffectDefinitions synthesizes ~35 NoRoll effects into AllDefinitions and never sets
+        // SelectionWeight, so they all sit at the field default of 1 -- enough phantom weight to drag
+        // the median from 2 to 1 and demote the rarest effect in the config by a whole tier.
+        private static bool CanRoll(MagicItemEffectDefinition effectDef)
+        {
+            return effectDef != null &&
+                !(effectDef.Requirements?.NoRoll ?? false) &&
+                !EnchantCostsHelper.EffectIsDeprecated(effectDef);
+        }
+
         public static int GetTier(MagicItemEffectDefinition effectDef)
         {
-            if (effectDef == null || effectDef.SelectionWeight <= 0f)
+            if (!CanRoll(effectDef) || effectDef.SelectionWeight <= 0f)
             {
                 return 0;
             }
@@ -134,6 +153,29 @@ namespace EpicLoot
             }
 
             return Mathf.Min(GetRankTier(effectDef.SelectionWeight), GetRatioTier(effectDef.SelectionWeight));
+        }
+
+        // Sockets are excluded on purpose: a socketed effect comes from the shard that was fitted, not
+        // from a weighted roll, so its SelectionWeight says nothing about how lucky this item was.
+        public static int GetBestTier(MagicItem magicItem)
+        {
+            var best = 0;
+            if (magicItem == null)
+            {
+                return best;
+            }
+
+            foreach (var effect in magicItem.Effects)
+            {
+                MagicItemEffectDefinitions.AllDefinitions.TryGetValue(effect.EffectType, out var effectDef);
+                var tier = GetTier(effectDef);
+                if (tier > best)
+                {
+                    best = tier;
+                }
+            }
+
+            return best;
         }
 
         public static string Decorate(MagicItemEffectDefinition effectDef, string effectText, bool allowAnimation)
