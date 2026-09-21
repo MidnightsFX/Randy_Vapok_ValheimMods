@@ -68,6 +68,7 @@ public static class PatchOnHoverFix
             header.GetComponent<TextMeshProUGUI>().text = Localization.instance.Localize(ComparisonTitleString);
             Transform contentt = Utils.FindChild(ComparisonTT.transform, "Text");
             contentt.GetComponent<TextMeshProUGUI>().text = Localization.instance.Localize(ComparisonTooltipString);
+            MagicTextShimmer.Ensure(contentt.GetComponent<TMP_Text>());
 
             // Offset the comparision tooltip to the right of the original tooltip
             RectTransform tooltipTfm = (RectTransform)UITooltip.m_tooltip.transform;
@@ -97,6 +98,16 @@ public static class PatchOnHoverFix
         {
             RectTransform transform = (RectTransform)go.transform;
             AddScrollbar(UITooltip.m_tooltip, transform);
+            EnsureShimmer(UITooltip.m_tooltip);
+        }
+    }
+
+    private static void EnsureShimmer(GameObject tooltipObject)
+    {
+        Transform textTransform = Utils.FindChild(tooltipObject.transform, "Text");
+        if (textTransform != null)
+        {
+            MagicTextShimmer.Ensure(textTransform.GetComponent<TMP_Text>());
         }
     }
 
