@@ -91,7 +91,7 @@ namespace EpicLoot
         // Two independent reads of the same weight, and the lower wins.
         //
         // Rank alone cheapens the top tier: the legendary/minimal configs use only four distinct
-        // weights, so their lowest rung holds 22+ effects. Ratio alone is just as bad the other way --
+        // weights, so their lowest rung holds 14-15 effects. Ratio alone is just as bad the other way --
         // it assumes a long tail, and hands out no stars at all once a config's spread is narrow.
         // Taking the min means a tier has to be earned on both counts, so a config with no genuine
         // outlier (legendary) simply has no three-star effects rather than inventing some.
@@ -129,9 +129,9 @@ namespace EpicLoot
         }
 
         // Anything that cannot be selected by a roll is excluded from BOTH the anchor and the tiers.
-        // ShardEffectDefinitions synthesizes ~35 NoRoll effects into AllDefinitions and never sets
+        // ShardEffectDefinitions synthesizes ~114 NoRoll effects into AllDefinitions and never sets
         // SelectionWeight, so they all sit at the field default of 1 -- enough phantom weight to drag
-        // the median from 2 to 1 and demote the rarest effect in the config by a whole tier.
+        // the balanced median from 5 to 1 and demote the rarest effect in the config by a whole tier.
         private static bool CanRoll(MagicItemEffectDefinition effectDef)
         {
             return effectDef != null &&
