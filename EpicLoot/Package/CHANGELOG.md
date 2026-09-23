@@ -1,4 +1,10 @@
 **0.14.11**
+* Quick Configure: an in-game settings panel, opened from the shared Mod Config button on the main menu and the pause menu
+    * Pages for balance presets, features, rarity tables, loot drops, shardstones, the enchanting table, the merchant, bounties, the interface, item colours, effect tuning and advanced options
+    * Edits the .cfg entries and a selected set of values from the JSON configs (host only); every row shows its config description on hover
+    * Includes editors for the treasure map costs per biome, for the item categories that gate drops behind bosses (iteminfo.json), for each biome's drop amounts and rarity weights (loottables.json), for the bounty targets and rewards per biome, and for every magic effect's tunables (magiceffects.json and the shardstone grid)
+    * Replaces the first-run welcome panel: the wizard opens once with a Welcome page, and the balance presets live on its Balance page
+    * A new client entry, `Show Quick Configure Button`, hides the launcher entry
 * Gamepad support for the enchanting table (Thanks ksavila!)
 * Gamepad support for the merchant panel (Thanks ksavila!)
 * The Compendium's magic pages now open when navigated to with a gamepad, and the right stick scrolls them

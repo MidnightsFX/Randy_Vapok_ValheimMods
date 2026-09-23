@@ -116,6 +116,7 @@ internal class ELConfig {
     public static ConfigEntry<float> TraderPanelPositionY;
     public static ConfigEntry<float> TemperPanelPositionX;
     public static ConfigEntry<float> TemperPanelPositionY;
+    public static ConfigEntry<bool> ShowQuickConfigButton;
 
     public static ConfigEntry<RuneExtractMode> RuneExtractItemMode;
 
@@ -581,6 +582,11 @@ internal class ELConfig {
             "The vertical on-screen position (RectTransform anchoredPosition Y, anchored to the " +
             "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
             "in-game updates this automatically. Default: -155.");
+        ShowQuickConfigButton = BindClient(SectionInterface, "Show Quick Configure Button", true,
+            "Lists Epic Loot in the shared Mod Config button on the main menu and the pause menu, which " +
+            "opens the Quick Configure panel: a paged editor over the settings most worlds change, " +
+            "including a few values from the JSON configs. Turn off to hide the entry; the panel can " +
+            "still be reached by other mods' launchers if they offer it. Applies without a restart.");
 
         // 7 - Item Colors
         _magicRarityColor = BindClient(SectionItemColors, "Magic Rarity Color", "Blue",
@@ -649,7 +655,10 @@ internal class ELConfig {
         _logLevel = BindClient(SectionDebug, "Log Level", LogLevel.Error,
             "Only log messages of the selected level or higher");
         AlwaysShowWelcomeMessage = BindClient(SectionDebug, "Show Welcome Message, automatically set to false once config is viewed.", true,
-            "Sets whether or not the welcome message is displayed on startup, this is automatically set to false once the player has viewed the message.");
+            "When true, the Quick Configure setup wizard opens once on the main menu with a Welcome page " +
+            "(balance preset, drop mix, features, and every other page). It is set back to false as soon " +
+            "as the wizard is closed by any route; set it to true to run the wizard again next launch. " +
+            "The panel can be reopened any time from the Mod Config button on the main or pause menu.");
         OutputPatchedConfigFiles = BindClient(SectionDebug, "OutputPatchedConfigFiles", false,
             "Just a debug flag for testing the patching system, do not use.");
         VerifyPenaltyScalingCache = BindClient(SectionDebug, "Verify Penalty Scaling Cache", false,
@@ -686,6 +695,7 @@ internal class ELConfig {
         UIAudioVolumeAdjustment.SettingChanged += (_, _) => EnchantingUIController.RefreshUIAudioLevels();
         EnchantingTableUpgradesActive.SettingChanged += (_, _) => EnchantingTableUI.UpdateUpgradeActivation();
         EnchantingTableActivatedTabs.SettingChanged += (_, _) => EnchantingTableUI.UpdateTabActivation();
+        ShowQuickConfigButton.SettingChanged += (_, _) => QuickConfig.QuickConfigureTool.ApplyRegistration();
     }
 
     /// <summary>Binds a client-local entry in declaration order, recording where it landed for the migration.</summary>
