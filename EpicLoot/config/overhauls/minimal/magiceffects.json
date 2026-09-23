@@ -54,6 +54,9 @@
           "TwoHandedWeapon",
           "Bows",
           "Crossbows"
+        ],
+        "ExcludedItemNames": [
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -169,6 +172,9 @@
           "AddPoisonDamage",
           "AddSpiritDamage",
           "ModifyElementalDamage"
+        ],
+        "ExcludedItemNames": [
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -233,7 +239,8 @@
           "Staff"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ],
         "ItemHasPhysicalDamage": true
       },
@@ -1485,6 +1492,9 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Bow"
+        ],
+        "ExcludedItemNames": [
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -1738,6 +1748,9 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Bow"
+        ],
+        "ExcludedItemNames": [
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -1976,7 +1989,8 @@
           "Pickaxes"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -2051,7 +2065,8 @@
           "Pickaxes"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -2125,7 +2140,8 @@
           "Staff"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -2201,7 +2217,8 @@
           "BloodMagic"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -2276,7 +2293,8 @@
           "BloodMagic"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -2351,7 +2369,8 @@
           "BloodMagic"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -2426,7 +2445,8 @@
           "BloodMagic"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -2501,7 +2521,8 @@
           "BloodMagic"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -3873,7 +3894,8 @@
           "Ancient"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ],
         "ItemUsesStaminaOnAttack": true
       },
@@ -3934,7 +3956,8 @@
           "Ancient"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ],
         "ItemUsesEitrOnAttack": false
       },
@@ -4186,6 +4209,9 @@
         ],
         "ExcludedSkillTypes": [
           "Pickaxes"
+        ],
+        "ExcludedItemNames": [
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -5171,6 +5197,104 @@
       ]
     },
     {
+      "Type": "ModifyGrapplePullSpeed",
+      "DisplayText": "$mod_epicloot_me_modifygrapplepullspeed_display",
+      "Description": "$mod_epicloot_me_modifygrapplepullspeed_desc",
+      "Requirements": {
+        "AllowedItemNames": [
+          "$item_graplinghook"
+        ]
+      },
+      "ValuesPerRarity": {
+        "Magic": {
+          "MinValue": 10,
+          "MaxValue": 20,
+          "Increment": 1
+        },
+        "Rare": {
+          "MinValue": 15,
+          "MaxValue": 25,
+          "Increment": 1
+        },
+        "Epic": {
+          "MinValue": 20,
+          "MaxValue": 35,
+          "Increment": 1
+        },
+        "Legendary": {
+          "MinValue": 30,
+          "MaxValue": 45,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 40,
+          "MaxValue": 60,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 50,
+          "MaxValue": 75,
+          "Increment": 1
+        }
+      },
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_modifygrapplepullspeed_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_modifygrapplepullspeed_suffix1"
+      ]
+    },
+    {
+      "Type": "ModifyGrappleFlightTime",
+      "DisplayText": "$mod_epicloot_me_modifygrappleflighttime_display",
+      "Description": "$mod_epicloot_me_modifygrappleflighttime_desc",
+      "Requirements": {
+        "AllowedItemNames": [
+          "$item_graplinghook"
+        ]
+      },
+      "ValuesPerRarity": {
+        "Magic": {
+          "MinValue": 10,
+          "MaxValue": 20,
+          "Increment": 1
+        },
+        "Rare": {
+          "MinValue": 15,
+          "MaxValue": 30,
+          "Increment": 1
+        },
+        "Epic": {
+          "MinValue": 25,
+          "MaxValue": 40,
+          "Increment": 1
+        },
+        "Legendary": {
+          "MinValue": 35,
+          "MaxValue": 55,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 50,
+          "MaxValue": 75,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 60,
+          "MaxValue": 100,
+          "Increment": 1
+        }
+      },
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_modifygrappleflighttime_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_modifygrappleflighttime_suffix1"
+      ]
+    },
+    {
       "Type": "AddMovementSkills",
       "DisplayText": "$mod_epicloot_me_addmovementskills_display",
       "Description": "$mod_epicloot_me_addmovementskills_desc",
@@ -5238,7 +5362,8 @@
           "Pickaxes"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -6037,6 +6162,9 @@
           "Bow",
           "Torch",
           "Staff"
+        ],
+        "ExcludedItemNames": [
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -6331,7 +6459,8 @@
           "Ancient"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ],
         "ItemUsesStaminaOnAttack": true
       },
@@ -6413,7 +6542,8 @@
           "Ancient"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ],
         "ItemUsesStaminaOnAttack": true
       },
@@ -6645,7 +6775,8 @@
           "Pickaxes"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -6812,7 +6943,8 @@
           "Pickaxes"
         ],
         "ExcludedItemNames": [
-          "$item_fishingrod"
+          "$item_fishingrod",
+          "$item_graplinghook"
         ]
       },
       "ValuesPerRarity": {
@@ -6899,6 +7031,9 @@
           "Legendary",
           "Mythic",
           "Ancient"
+        ],
+        "ExcludedItemNames": [
+          "$item_graplinghook"
         ]
       },
       "SelectionWeight": 2,

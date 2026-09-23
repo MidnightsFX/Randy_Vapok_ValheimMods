@@ -150,6 +150,8 @@ public static class EffectType
     public static string ChainLightning = nameof(ChainLightning);
     public static string Apportation = nameof(Apportation);
     public static string ModifyFireRate = nameof(ModifyFireRate);
+    public static string ModifyGrapplePullSpeed = nameof(ModifyGrapplePullSpeed);
+    public static string ModifyGrappleFlightTime = nameof(ModifyGrappleFlightTime);
     public static string Bulwark = nameof(Bulwark);
     public static string Undying = nameof(Undying);
 
