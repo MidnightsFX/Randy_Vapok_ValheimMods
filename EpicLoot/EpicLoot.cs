@@ -114,6 +114,9 @@ public sealed class EpicLoot : BaseUnityPlugin {
         AddLocalizations();
         LoadAssets();
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginId);
+        // Registers with the shared Mod Config launcher (main menu + pause menu) and, on first run,
+        // opens the setup wizard once the main menu is ready (FejdStartup.Start postfix).
+        QuickConfig.QuickConfigureTool.Init();
 
         LootTableLoaded?.Invoke();
         RegisterMagicEffectEvents();
@@ -436,7 +439,6 @@ public sealed class EpicLoot : BaseUnityPlugin {
         EpicAssets.OffSetSFX = assetBundle.LoadAsset<AudioClip>("sfx_offset");
         EpicAssets.DebugTextPrefab = assetBundle.LoadAsset<GameObject>("DebugText");
         EpicAssets.AbilityBar = assetBundle.LoadAsset<GameObject>("AbilityBar");
-        EpicAssets.WelcomMessagePrefab = assetBundle.LoadAsset<GameObject>("WelcomeMessage");
         EpicAssets.ConfigMessagePrefab = assetBundle.LoadAsset<GameObject>("ConfigMessage");
         EpicAssets.SocketMessagePrefab = assetBundle.LoadAsset<GameObject>("SocketMessage");
 

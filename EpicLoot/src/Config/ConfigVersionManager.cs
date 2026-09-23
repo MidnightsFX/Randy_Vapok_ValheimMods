@@ -39,9 +39,9 @@ public static class ConfigVersionManager
     public static bool DetectionRan => _detectionRan;
 
     /// <summary>
-    /// Snapshotted during Awake because both this feature and WelcomeMessage postfix
+    /// Snapshotted during Awake because both this feature and the Quick Configure wizard postfix
     /// FejdStartup.Start, and Harmony does not guarantee which of the two runs first. Reading the
-    /// config entry from the prompt itself would race with WelcomeMessage clearing it.
+    /// config entry from the prompt itself would race with the wizard clearing it.
     /// </summary>
     public static bool WelcomeMessageWillShow { get; private set; }
 
@@ -308,9 +308,7 @@ public static class ConfigVersionManager
             return;
         }
 
-        // Named for the version being upgraded *to*: the files inside predate it, and they may not
-        // all have come from the same older version, so naming it after one of them would mislead.
-        string backupDir = Path.Combine(BackupDirPath, $"pre-{EpicLoot.Version}_{DateTime.Now:yyyyMMdd-HHmmss}");
+        string backupDir = NewBackupDirPath();
         string baseConfigDir = ELConfig.GetOverhaulDirectoryPath();
         List<string> updated = new List<string>();
 
@@ -321,11 +319,7 @@ public static class ConfigVersionManager
 
             try
             {
-                if (File.Exists(configPath))
-                {
-                    Directory.CreateDirectory(backupDir);
-                    File.Copy(configPath, Path.Combine(backupDir, fileName), true);
-                }
+                BackupConfigFile(name, backupDir);
 
                 string embeddedHash = GetEmbeddedHash(name, out string variant, out string embedded);
                 ELConfig.CreateBaseConfigurations(configPath, fileName);
@@ -348,6 +342,64 @@ public static class ConfigVersionManager
         ELConfig.ReloadBaseConfigsFromDisk(updated.Select(name => $"{name}.json").ToList());
         EpicLoot.LogForce($"Updated {updated.Count} Epic Loot config file(s) to version {EpicLoot.Version}. " +
             $"The previous files were backed up to {backupDir}");
+    }
+
+    /// <summary>
+    /// A fresh backup folder path. Named for the version being upgraded *to*: the files inside predate
+    /// it, and they may not all have come from the same older version, so naming it after one of them
+    /// would mislead. Not created until a file is actually copied into it.
+    /// </summary>
+    private static string NewBackupDirPath()
+    {
+        return Path.Combine(BackupDirPath, $"pre-{EpicLoot.Version}_{DateTime.Now:yyyyMMdd-HHmmss}");
+    }
+
+    /// <summary>
+    /// Copies baseconfig/&lt;configName&gt;.json into the backup folder (created on demand). Returns the
+    /// folder it was copied to, or null when there was no file to copy. Throws on a failed copy.
+    /// </summary>
+    internal static string BackupConfigFile(string configName, string backupDir = null)
+    {
+        string fileName = $"{configName}.json";
+        string configPath = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), fileName);
+        if (!File.Exists(configPath))
+        {
+            return null;
+        }
+
+        backupDir ??= NewBackupDirPath();
+        Directory.CreateDirectory(backupDir);
+        File.Copy(configPath, Path.Combine(backupDir, fileName), true);
+        return backupDir;
+    }
+
+    /// <summary>
+    /// True when the on-disk config no longer matches what the mod last wrote, so replacing it would
+    /// lose the player's work. Unknown origin (no stamp, unreadable file) counts as modified; a missing
+    /// file does too, since a rewrite would then create it from scratch. With version tracking disabled
+    /// (Always Refresh Core Configs) nothing is ever considered the player's.
+    /// </summary>
+    internal static bool IsPlayerModified(string configName)
+    {
+        if (!_enabled || _state == null)
+        {
+            return false;
+        }
+
+        string configPath = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), $"{configName}.json");
+        if (!File.Exists(configPath))
+        {
+            return true;
+        }
+
+        ConfigVersionEntry entry = _state.Get(configName);
+        if (entry == null || string.IsNullOrEmpty(entry.WrittenHash))
+        {
+            return true;
+        }
+
+        string diskHash = TryHashFile(configPath);
+        return string.IsNullOrEmpty(diskHash) || diskHash != entry.WrittenHash;
     }
 
     /// <summary>Writes the embedded default over a config, reporting failure rather than throwing.</summary>

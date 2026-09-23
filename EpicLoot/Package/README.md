@@ -36,8 +36,23 @@ Also new in 0.13: **Tempering**, a service from Hildir that rerolls the value of
 Other notable changes:
 - Expanded tooltips that reveal the full details of an effect when you hold Shift
 - Config upgrade system can automatically upgrade your configs or just let you know when an upgrade includes changes to your configs
+- Quick Configure: an in-game settings panel for the options most worlds change
 
 See the wiki on thunderstore for more information! Link below!
+
+## Quick Configure
+
+The **Mod Config** button at the bottom right of the main menu and the pause menu opens Epic Loot's
+Quick Configure panel: a paged editor over the settings most worlds want to change (balance presets and
+drop mix, features, rarity tables, loot drops, shardstones, the enchanting table, the merchant,
+bounties, interface, item colours, effect tuning, advanced). Hover a row for the same description you
+would read in the config file. Save writes the `.cfg` in one go; on the host, the JSON-backed rows
+(rarity tables, each biome's drop amounts and rarity weights, merchant and bounty numbers, bounty
+targets and rewards per biome, treasure map costs per biome, the item categories that gate drops behind
+bosses, every effect's tunables) are written into `config/EpicLoot/baseconfig/` and reloaded live. A server admin who is not the host can
+change the server settings from the pause menu; the JSON rows are read-only there. The first launch
+opens the panel once as a setup wizard; `Show Welcome Message` in the config runs it again, and
+`Show Quick Configure Button` hides the launcher entry.
 
 ## Documentation
 

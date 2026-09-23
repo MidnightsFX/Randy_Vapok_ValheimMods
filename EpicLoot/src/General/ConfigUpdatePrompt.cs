@@ -9,7 +9,7 @@ namespace EpicLoot;
 
 /// <summary>
 /// Offers to refresh base configs the player has edited once an update changes their defaults.
-/// Mirrors the WelcomeMessage patch below it: a Postfix on FejdStartup.Start that instantiates a
+/// Like the Quick Configure wizard (QuickConfigPatches), a Postfix on FejdStartup.Start that instantiates a
 /// prefab under the main menu.
 /// </summary>
 [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
