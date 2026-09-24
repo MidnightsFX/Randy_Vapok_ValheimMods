@@ -16,6 +16,9 @@ namespace EpicLoot.Crafting
         public Image MagicBG;
         public List<Button> EffectChoiceButtons = new List<Button>();
 
+        /// <summary>Built on an Auga results panel (AugmentHelper.CreateAugaAugmentChoiceDialog): the item is shown as an Auga tooltip.</summary>
+        public bool IsAugaPanel;
+
         private AudioSource _audioSource;
         private int _choiceIndex = 0;
 
@@ -97,13 +100,16 @@ namespace EpicLoot.Crafting
             var magicItem = fromItem.GetMagicItem();
             var rarityColor = fromItem.GetRarityColor();
             
-            MagicBG.enabled = fromItem.IsMagic();
-            MagicBG.color = rarityColor;
+            if (MagicBG != null)
+            {
+                MagicBG.enabled = fromItem.IsMagic();
+                MagicBG.color = rarityColor;
+            }
 
-            //if (EpicLoot.HasAuga)
-            //{
-            //    Auga.API.ComplexTooltip_SetItem(gameObject, fromItem);
-            //}
+            if (IsAugaPanel)
+            {
+                Auga.API.ComplexTooltip_SetItem(gameObject, fromItem);
+            }
 
             if (NameText != null)
             {
@@ -132,22 +138,24 @@ namespace EpicLoot.Crafting
                 var effect = newEffectOptions[index];
                 var button = EffectChoiceButtons[index];
                 button.gameObject.SetActive(true);
-                var text = button.GetComponentInChildren<Text>();
+                // A legacy Text on the vanilla-built dialog, a TMP label on Auga's buttons.
+                Graphic text = (Graphic)button.GetComponentInChildren<TMP_Text>() ?? button.GetComponentInChildren<Text>();
                 // Option 0 is the effect the item already carries (RollAugmentEffects puts it first), so
                 // it shows the item's own range; the new options were rolled from the rarity table.
                 var legendaryID = index == 0 ? magicItem.LegendaryID : null;
-                text.text = Localization.instance.Localize((index == 0 ? "<color=white>($mod_epicloot_augment_keep)</color> " : "") +
-                    MagicItem.GetEffectText(effect, rarity, true, legendaryID));
-                text.color = rarityColor;
+                EpicLootAuga.SetLabel(button, Localization.instance.Localize((index == 0 ? "<color=white>($mod_epicloot_augment_keep)</color> " : "") +
+                    MagicItem.GetEffectText(effect, rarity, true, legendaryID)));
+                if (text != null)
+                {
+                    text.color = rarityColor;
+                }
 
-                //if (EpicLoot.HasAuga)
-                //{
-                //    Auga.API.Button_SetTextColors(button, Color.white, Color.white, Color.white, Color.white, Color.white, rarityColor);
-                //}
-                //else
-                //{
+                if (IsAugaPanel)
+                {
+                    // Auga's buttons recolour their label per state; every state gets the rarity colour.
+                    Auga.API.Button_SetTextColors(button, Color.white, Color.white, Color.white, Color.white, Color.white, rarityColor);
+                }
 
-                //}
                 var buttonColor = button.GetComponent<ButtonTextColor>();
                 if (buttonColor != null)
                 {
@@ -157,7 +165,10 @@ namespace EpicLoot.Crafting
                 button.onClick.RemoveAllListeners();
                 if (EnchantCostsHelper.EffectIsDeprecated(effect.EffectType))
                 {
-                    text.color = new Color(text.color.r, text.color.g, text.color.b, 0.5f);
+                    if (text != null)
+                    {
+                        text.color = new Color(text.color.r, text.color.g, text.color.b, 0.5f);
+                    }
                     button.interactable = false;
                 }
                 else

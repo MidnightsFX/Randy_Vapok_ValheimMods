@@ -81,8 +81,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
     public static bool AlwaysDropCheat = false;
     public const Minimap.PinType BountyPinType = (Minimap.PinType)800;
     public const Minimap.PinType TreasureMapPinType = (Minimap.PinType)801;
+    /// <summary>Project Auga is installed and its API is attached; set in Awake, see <see cref="InitializeAuga"/>.</summary>
     public static bool HasAuga;
-    public static bool AugaTooltipNoTextBoxes;
 
     public static event Action AbilitiesInitialized;
     public static event Action LootTableLoaded;
@@ -99,6 +99,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
         // Wire the shared Common support layer (config binder, piece loader, drawers) to this plugin before
         // any config is bound, so ConfigBinder and ModLogger have a config file and log source to use.
         ModContext.Initialize(this, Logger, "EpicLoot");
+
+        InitializeAuga();
 
         cfg = new ELConfig(Config);
 
@@ -185,135 +187,26 @@ public sealed class EpicLoot : BaseUnityPlugin {
     }
 
 
-    //sealed void Start()
-    //{
-    //    //HasAuga = Auga.API.IsLoaded();
+    /// <summary>
+    /// Auga's Awake has already run (the soft dependency orders it first), and by the time this assembly
+    /// loaded, Auga's APIManager had pointed every Auga.* reference in it at Auga.dll - which is what makes
+    /// IsLoaded() answer true. Auga installed but IsLoaded() false means that redirection did not happen
+    /// (the stubs in src/integrations/AugaAPI.cs are running), so the integration stays off.
+    /// </summary>
+    private void InitializeAuga() {
+        HasAuga = Auga.API.IsLoaded();
+        if (!HasAuga) {
+            if (BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("randyknapp.mods.auga")) {
+                LogWarningForce("Project Auga is installed but its API did not attach to Epic Loot; " +
+                    "Epic Loot's Auga integration is off. Check the log for an APIManager error.");
+            }
 
-    //    //if (HasAuga)
-    //    //{
-    //    //    Auga.API.ComplexTooltip_AddItemTooltipCreatedListener(ExtendAugaTooltipForMagicItem);
-    //    //    Auga.API.ComplexTooltip_AddItemStatPreprocessor(AugaTooltipPreprocessor.PreprocessTooltipStat);
-    //    //}
-    //}
+            return;
+        }
 
-    //public static void ExtendAugaTooltipForMagicItem(GameObject complexTooltip, ItemDrop.ItemData item)
-    //{
-    //    //Auga.API.ComplexTooltip_SetTopic(complexTooltip, Localization.instance.Localize(item.GetDecoratedName()));
-
-    //    var isMagic = item.IsMagic(out var magicItem);
-
-    //    var inFront = true;
-    //    var itemBG = complexTooltip.transform.Find("Tooltip/IconHeader/IconBkg/Item");
-    //    if (itemBG == null)
-    //    {
-    //        itemBG = complexTooltip.transform.Find("InventoryElement/icon");
-    //        inFront = false;
-    //    }
-
-    //    RectTransform magicBG = null;
-    //    if (itemBG != null)
-    //    {
-    //        var itemBGImage = itemBG.GetComponent<Image>();
-    //        magicBG = (RectTransform)itemBG.transform.Find("magicItem");
-    //        if (magicBG == null)
-    //        {
-    //            var magicItemObject = Instantiate(itemBGImage, inFront ?
-    //                itemBG.transform : itemBG.transform.parent).gameObject;
-    //            magicItemObject.name = "magicItem";
-    //            magicItemObject.SetActive(true);
-    //            magicBG = (RectTransform)magicItemObject.transform;
-    //            magicBG.anchorMin = Vector2.zero;
-    //            magicBG.anchorMax = new Vector2(1, 1);
-    //            magicBG.sizeDelta = Vector2.zero;
-    //            magicBG.pivot = new Vector2(0.5f, 0.5f);
-    //            magicBG.anchoredPosition = Vector2.zero;
-    //            var magicItemInit = magicBG.GetComponent<Image>();
-    //            magicItemInit.color = Color.white;
-    //            magicItemInit.raycastTarget = false;
-    //            magicItemInit.sprite = GetMagicItemBgSprite();
-
-    //            if (!inFront)
-    //            {
-    //                magicBG.SetSiblingIndex(0);
-    //            }
-    //        }
-    //    }
-
-    //    if (magicBG != null)
-    //    {
-    //        magicBG.gameObject.SetActive(isMagic);
-    //    }
-
-    //    if (item.IsMagicCraftingMaterial())
-    //    {
-    //        var rarity = item.GetCraftingMaterialRarity();
-    //        //Auga.API.ComplexTooltip_SetIcon(complexTooltip, item.m_shared.m_icons[GetRarityIconIndex(rarity)]);
-    //    }
-
-    //    if (isMagic)
-    //    {
-    //        var magicColor = magicItem.GetColorString();
-    //        var itemTypeName = magicItem.GetItemTypeName(item.Extended());
-
-    //        if (magicBG != null)
-    //        {
-    //            magicBG.GetComponent<Image>().color = item.GetRarityColor();
-    //        }
-
-    //        //Auga.API.ComplexTooltip_SetIcon(complexTooltip, item.GetIcon());
-
-    //        string localizedSubtitle;
-    //        if (item.IsLegendarySetItem())
-    //        {
-    //            localizedSubtitle = $"<color={GetSetItemColor()}>" +
-    //                $"$mod_epicloot_legendarysetlabel</color>, {itemTypeName}\n";
-    //        }
-    //        else
-    //        {
-    //            localizedSubtitle = $"<color={magicColor}>{magicItem.GetRarityDisplay()} {itemTypeName}</color>";
-    //        }
-
-    //        try
-    //        {
-    //            //Auga.API.ComplexTooltip_SetSubtitle(complexTooltip, Localization.instance.Localize(localizedSubtitle));
-    //        }
-    //        catch (Exception)
-    //        {
-    //            //Auga.API.ComplexTooltip_SetSubtitle(complexTooltip, localizedSubtitle);
-    //        }
-
-    //        if (AugaTooltipNoTextBoxes)
-    //            return;
-
-    //        //Don't need to process the InventoryTooltip Information.
-    //        if (complexTooltip.name.Contains("InventoryTooltip"))
-    //            return;
-
-    //        //The following is used only for Crafting Result Panel.
-    //        Auga.API.ComplexTooltip_AddDivider(complexTooltip);
-
-    //        var magicItemText = magicItem.GetTooltip();
-    //        var textBox = Auga.API.ComplexTooltip_AddTwoColumnTextBox(complexTooltip);
-    //        magicItemText = magicItemText.Replace("\n\n", "");
-    //        Auga.API.TooltipTextBox_AddLine(textBox, magicItemText);
-
-    //        if (magicItem.IsLegendarySetItem())
-    //        {
-    //            var textBox2 = Auga.API.ComplexTooltip_AddTwoColumnTextBox(complexTooltip);
-    //            Auga.API.TooltipTextBox_AddLine(textBox2, item.GetSetTooltip());
-    //        }
-
-    //        try
-    //        {
-    //            Auga.API.ComplexTooltip_SetDescription(complexTooltip,
-    //                Localization.instance.Localize(item.GetDescription()));
-    //        }
-    //        catch (Exception)
-    //        {
-    //            Auga.API.ComplexTooltip_SetDescription(complexTooltip, item.GetDescription());
-    //        }
-    //    }
-    //}
+        Auga.API.ComplexTooltip_AddItemTooltipCreatedListener(AugaTooltip.OnItemTooltipCreated);
+        Auga.API.ComplexTooltip_AddItemStatPreprocessor(AugaTooltip.PreprocessTooltipStat);
+    }
 
     private void AddLocalizations() {
         CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();

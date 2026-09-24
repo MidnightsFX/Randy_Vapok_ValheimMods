@@ -1,6 +1,11 @@
 **3.1.4**
 * Quick slot hotkeys no longer fire while the build menu (hammer, cultivator, feaster) is open,
   so typing a piece search like "bench" no longer uses the item in a quick slot.
+* New Gravestone option `Dont drop hotbar equipment on death` (off by default, server-synced):
+  weapons, shields, tools, torches and armor in the hotbar (keys 1-8) stay with you when you die,
+  and a weapon or shield you were holding is held again after respawning. Ammo, food, potions and
+  materials in the hotbar still drop. `Dont drop equipment on death` only ever covered the
+  equipment slots; its description now says so.
 
 **3.1.3**
 * Controller navigation in the inventory follows the equipment panel's layout: the D-pad moves

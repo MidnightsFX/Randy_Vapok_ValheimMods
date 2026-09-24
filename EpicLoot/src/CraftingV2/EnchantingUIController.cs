@@ -194,7 +194,7 @@ namespace EpicLoot.CraftingV2
             // EpicLoot.Log($"Setting up tooltip for {obj.name}");
             if (EpicLoot.HasAuga)
             {
-                //Auga.API.Tooltip_MakeSimpleTooltip(obj);
+                Auga.API.Tooltip_MakeSimpleTooltip(obj);
             }
             else
             {
@@ -229,13 +229,14 @@ namespace EpicLoot.CraftingV2
 
             if (tooltip)
             {
+                // Vanilla UITooltip only opens with a topic or text, so the topic is set under Auga as well.
+                tooltip.m_topic = Localization.instance.Localize(item.GetDecoratedName());
                 if (EpicLoot.HasAuga)
                 {
-                    //Auga.API.Tooltip_MakeItemTooltip(element.gameObject, item);
+                    Auga.API.Tooltip_MakeItemTooltip(tooltip.gameObject, item);
                 }
                 else
                 {
-                    tooltip.m_topic = Localization.instance.Localize(item.GetDecoratedName());
                     tooltip.m_text = Localization.instance.Localize(item.GetTooltip());
                 }
             }
@@ -247,6 +248,10 @@ namespace EpicLoot.CraftingV2
             if (EpicLoot.IsAllowedMagicItemType(item))
             {
                 tooltip.Set(item.GetDisplayName(), item.GetTooltip());
+                if (EpicLoot.HasAuga)
+                {
+                    Auga.API.Tooltip_MakeItemTooltip(tooltip.gameObject, item);
+                }
             }
             else
             {
@@ -611,20 +616,7 @@ namespace EpicLoot.CraftingV2
                 item.m_durability = previousDurabilityPercent * item.GetMaxDurability();
             }
 
-            CraftSuccessDialog successDialog;
-            //if (EpicLoot.HasAuga)
-            //{
-            //    //var resultsPanel = Auga.API.Workbench_CreateNewResultsPanel();
-            //    //resultsPanel.transform.SetParent(EnchantingTableUI.instance.transform);
-            //    //resultsPanel.SetActive(false);
-            //    //successDialog = resultsPanel.gameObject.AddComponent<CraftSuccessDialog>();
-            //    //successDialog.NameText = successDialog.transform.Find("Topic").GetComponent<TMP_Text>();
-            //}
-            //else
-            //{
-
-            //}
-            successDialog = CraftSuccessDialog.Create(EnchantingTableUI.instance.transform);
+            CraftSuccessDialog successDialog = CraftSuccessDialog.CreateForCurrentUI(EnchantingTableUI.instance.transform);
 
             successDialog.Show(item.Extended());
 
@@ -634,17 +626,15 @@ namespace EpicLoot.CraftingV2
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = new Vector2(0, 0);
 
-            if (!EpicLoot.HasAuga)
+            // A vanilla-built dialog keeps its content in a Frame child; an Auga results panel has none.
+            Transform frame = successDialog.transform.Find("Frame");
+            if (frame != null)
             {
-                Transform frame = successDialog.transform.Find("Frame");
-                if (frame != null)
-                {
-                    RectTransform frameRT = (RectTransform)frame;
-                    frameRT.pivot = new Vector2(0.5f, 0.5f);
-                    frameRT.anchorMax = new Vector2(0.5f, 0.5f);
-                    frameRT.anchorMin = new Vector2(0.5f, 0.5f);
-                    frameRT.anchoredPosition = new Vector2(0, 0);
-                }
+                RectTransform frameRT = (RectTransform)frame;
+                frameRT.pivot = new Vector2(0.5f, 0.5f);
+                frameRT.anchorMax = new Vector2(0.5f, 0.5f);
+                frameRT.anchorMin = new Vector2(0.5f, 0.5f);
+                frameRT.anchoredPosition = new Vector2(0, 0);
             }
 
             Game.instance.GetPlayerProfile().IncrementStat(PlayerStatType.Crafts);
@@ -1432,20 +1422,7 @@ namespace EpicLoot.CraftingV2
 
         internal static GameObject ShowRuneEtchSuccessDialog(ItemDrop.ItemData item)
         {
-            CraftSuccessDialog successDialog;
-            //if (EpicLoot.HasAuga)
-            //{
-            //    var resultsPanel = Auga.API.Workbench_CreateNewResultsPanel();
-            //    resultsPanel.transform.SetParent(EnchantingTableUI.instance.transform);
-            //    resultsPanel.SetActive(false);
-            //    successDialog = resultsPanel.gameObject.AddComponent<CraftSuccessDialog>();
-            //    successDialog.NameText = successDialog.transform.Find("Topic").GetComponent<TMP_Text>();
-            //}
-            //else
-            //{
-                
-            //}
-            successDialog = CraftSuccessDialog.Create(EnchantingTableUI.instance.transform);
+            CraftSuccessDialog successDialog = CraftSuccessDialog.CreateForCurrentUI(EnchantingTableUI.instance.transform);
 
             successDialog.Show(item.Extended());
 
@@ -1455,17 +1432,15 @@ namespace EpicLoot.CraftingV2
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = new Vector2(0, 0);
 
-            if (!EpicLoot.HasAuga)
+            // A vanilla-built dialog keeps its content in a Frame child; an Auga results panel has none.
+            Transform frame = successDialog.transform.Find("Frame");
+            if (frame != null)
             {
-                Transform frame = successDialog.transform.Find("Frame");
-                if (frame != null)
-                {
-                    RectTransform frameRT = (RectTransform)frame;
-                    frameRT.pivot = new Vector2(0.5f, 0.5f);
-                    frameRT.anchorMax = new Vector2(0.5f, 0.5f);
-                    frameRT.anchorMin = new Vector2(0.5f, 0.5f);
-                    frameRT.anchoredPosition = new Vector2(0, 0);
-                }
+                RectTransform frameRT = (RectTransform)frame;
+                frameRT.pivot = new Vector2(0.5f, 0.5f);
+                frameRT.anchorMax = new Vector2(0.5f, 0.5f);
+                frameRT.anchorMin = new Vector2(0.5f, 0.5f);
+                frameRT.anchoredPosition = new Vector2(0, 0);
             }
 
             return successDialog.gameObject;
@@ -1573,17 +1548,15 @@ namespace EpicLoot.CraftingV2
             rt.anchorMin = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = new Vector2(0, 0);
 
-            if (!EpicLoot.HasAuga)
+            // A vanilla-built dialog keeps its content in a Frame child; an Auga results panel has none.
+            Transform frame = choiceDialog.transform.Find("Frame");
+            if (frame != null)
             {
-                Transform frame = choiceDialog.transform.Find("Frame");
-                if (frame != null)
-                {
-                    RectTransform frameRT = (RectTransform)frame;
-                    frameRT.pivot = new Vector2(0.5f, 0.5f);
-                    frameRT.anchorMax = new Vector2(0.5f, 0.5f);
-                    frameRT.anchorMin = new Vector2(0.5f, 0.5f);
-                    frameRT.anchoredPosition = new Vector2(0, 0);
-                }
+                RectTransform frameRT = (RectTransform)frame;
+                frameRT.pivot = new Vector2(0.5f, 0.5f);
+                frameRT.anchorMax = new Vector2(0.5f, 0.5f);
+                frameRT.anchorMin = new Vector2(0.5f, 0.5f);
+                frameRT.anchoredPosition = new Vector2(0, 0);
             }
 
             choiceDialog.Show(item, augmentindex, OnAugmentComplete);

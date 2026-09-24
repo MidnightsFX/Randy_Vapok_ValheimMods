@@ -4,6 +4,12 @@
     * Without StarLevelSystem, a bounty creature loaded at full health no longer drops back to its normal health
 * Bounty targets now scale as StarLevelSystem bosses from the moment they spawn, not only after a reload
 * StarLevelSystem no longer deletes, copies or re-levels bounty targets and their minions (needs StarLevelSystem 1.18.2)
+* Project Auga support is back, for Auga's Valheim 1.x release
+    * Magic item tooltips show the magic name, rarity, rarity background, legendary lore and magic stat values in Auga's tooltip
+    * The enchanting table, merchant, welcome message and confirmation panels take Auga's look again
+    * Enchanting and augmenting results show in Auga's result panel
+    * Skill bonuses from magic effects show in Auga's skills panel again
+    * Epic Loot's compendium pages are listed in Auga's compendium, which they no longer break
 
 **0.14.13**
 * Adds a repair system for bounties/treasure which had not previous spawned, due to 1.0 save migration

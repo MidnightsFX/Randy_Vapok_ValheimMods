@@ -14,6 +14,9 @@ version_const: Version
 deploy:
   enabled: true
 
+# The Thunderstore/Hexium team these publish under.
+author_name: RandyKnapp
+
 publish:
   thunderstore:
     enabled: true

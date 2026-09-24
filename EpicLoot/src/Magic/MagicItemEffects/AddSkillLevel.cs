@@ -201,6 +201,8 @@ namespace EpicLoot.MagicItemEffects
             foreach (var element in elementList)
             {
                 var tooltipComponent = element.GetComponentInChildren<UITooltip>();
+                if (tooltipComponent == null)
+                    continue;
                 
                 if (EpicLoot.HasAuga)
                     tooltipComponent.m_topic = string.Empty;
@@ -218,6 +220,9 @@ namespace EpicLoot.MagicItemEffects
                     
                     if (EpicLoot.HasAuga) 
                         levelbar = Utils.FindChild(element.transform, "ProgressBarLevel");
+
+                    if (levelbar == null)
+                        continue;
                     
                     var extraLevelbar = Utils.FindChild(element.transform, "extrabar")?.gameObject;
                     
@@ -247,9 +252,13 @@ namespace EpicLoot.MagicItemEffects
 
                     if (EpicLoot.HasAuga)
                     {
+                        // Auga's skill element (SkillsPanelSkillController) rewrites its level text every second
+                        // and then calls SkillsDialog.Setup, so this is appended again after each rewrite.
                         levelText = Utils.FindChild(element.transform, "SkillLevel");
                         tooltipComponent.m_topic = $" <color={EpicLoot.GetRarityColor(ItemRarity.Magic)}>+{extraSkill}</color>";
-                        levelText.GetComponent<Text>().text += tooltipComponent.m_topic;
+                        var augaLevelText = levelText != null ? levelText.GetComponent<TMP_Text>() : null;
+                        if (augaLevelText != null)
+                            augaLevelText.text += tooltipComponent.m_topic;
                     }
                     else
                     {

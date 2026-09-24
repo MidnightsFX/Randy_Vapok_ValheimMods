@@ -57,8 +57,8 @@ namespace EpicLoot.Adventure
 
         private readonly Currencies _currencies = new Currencies(-1);
         public static MerchantPanel Instance => _instance;
-        public static Text AcceptBountyText => _acceptBountyText;
-        private static Text _acceptBountyText;
+        // The button, not its label: a legacy Text normally, a TMP_Text once Auga has replaced the button.
+        private static Transform _acceptBountyButton;
         private static MerchantPanel _instance;
         private AudioSource _audioSource;
 
@@ -88,17 +88,8 @@ namespace EpicLoot.Adventure
 
             if (GambleSuccessDialog == null)
             {
-                if (EpicLoot.HasAuga)
-                {
-                    //var resultsPanel = Auga.API.Workbench_CreateNewResultsPanel();
-                    //resultsPanel.SetActive(false);
-                    //resultsPanel.transform.SetParent(transform);
-                    //GambleSuccessDialog = resultsPanel.gameObject.AddComponent<CraftSuccessDialog>();
-                    //GambleSuccessDialog.NameText = GambleSuccessDialog.transform.Find("Topic").GetComponent<TMP_Text>();
-                    //GambleSuccessDialog.Frame = (RectTransform)GambleSuccessDialog.transform;
-                    //GambleSuccessDialog.Frame.anchoredPosition = new Vector2(0, 0);
-                }
-                else
+                GambleSuccessDialog = EpicLoot.HasAuga ? CraftSuccessDialog.CreateAuga(transform) : null;
+                if (GambleSuccessDialog == null)
                 {
                     GambleSuccessDialog = CraftSuccessDialog.Create(transform);
                     GambleSuccessDialog.Frame.anchoredPosition = new Vector2(-700, -300);
@@ -156,14 +147,14 @@ namespace EpicLoot.Adventure
             var bountiesRefreshTooltip = GetRefreshTimeTooltip(AdventureDataManager.Bounties.RefreshInterval);
 
             var sundialTooltip = transform.Find("Sundial").GetComponent<UITooltip>();
-            //if (EpicLoot.HasAuga)
-            //{
-            //    Auga.API.Tooltip_MakeSimpleTooltip(sundialTooltip.gameObject);
-            //    var rt = (RectTransform)sundialTooltip.transform;
-            //    rt.anchoredPosition = new Vector2(20, -20);
-            //    rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 40);
-            //    rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 40);
-            //}
+            if (EpicLoot.HasAuga)
+            {
+                Auga.API.Tooltip_MakeSimpleTooltip(sundialTooltip.gameObject);
+                var rt = (RectTransform)sundialTooltip.transform;
+                rt.anchoredPosition = new Vector2(20, -20);
+                rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 40);
+                rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 40);
+            }
 
             sundialTooltip.m_text =
                 $"$mod_epicloot_merchant_secretstash: {secretStashRefreshTooltip}\n" +
@@ -191,8 +182,7 @@ namespace EpicLoot.Adventure
                 EpicLootAuga.ReplaceButton(transform.Find("Bounties/AbandonBountyButton").GetComponent<Button>(), true);
             }
             
-            _acceptBountyText = transform.Find("Bounties/AcceptBountyButton").GetComponentInChildren<Text>();
-            
+            _acceptBountyButton = transform.Find("Bounties/AcceptBountyButton");
 
             Panels.Add(new SecretStashListPanel(this, buyListPrefab));
             Panels.Add(new GambleListPanel(this, buyListPrefab));
@@ -256,6 +246,14 @@ namespace EpicLoot.Adventure
 
             // Last, so the hints it builds are not swept up by the Auga fixups above.
             Gamepad = new MerchantPanelGamepad(this, Panels);
+        }
+
+        public static void SetAcceptBountyLabel(string label)
+        {
+            if (_acceptBountyButton != null)
+            {
+                EpicLootAuga.SetLabel(_acceptBountyButton, label);
+            }
         }
 
         public void OnEnable()

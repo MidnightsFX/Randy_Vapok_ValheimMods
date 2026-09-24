@@ -56,9 +56,9 @@ public sealed class WelcomeMessage : MonoBehaviour
         EpicLootAuga.ReplaceBackground(gameObject, withCornerDecoration: true);
         EpicLootAuga.FixFonts(gameObject);
 
-        EpicLootAuga.ReplaceButton(DiscordButton);
-        EpicLootAuga.ReplaceButton(PatchNotesButton);
-        EpicLootAuga.ReplaceButton(CloseButton);
+        DiscordButton = EpicLootAuga.ReplaceButton(DiscordButton);
+        PatchNotesButton = EpicLootAuga.ReplaceButton(PatchNotesButton);
+        CloseButton = EpicLootAuga.ReplaceButton(CloseButton);
     }
 
     public void OnJoinDiscordClick()

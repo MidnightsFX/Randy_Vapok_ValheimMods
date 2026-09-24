@@ -97,7 +97,7 @@ namespace EpicLoot.Adventure
             {
                 if (EpicLoot.HasAuga)
                 {
-                    //Auga.API.Tooltip_MakeSimpleTooltip(gameObject);
+                    Auga.API.Tooltip_MakeSimpleTooltip(gameObject);
                 }
 
                 // The affordable spelling on purpose: a tooltip heading has no business greying out,
@@ -107,13 +107,14 @@ namespace EpicLoot.Adventure
             }
             else
             {
+                // Vanilla UITooltip only opens with a topic or text, so the topic is set under Auga as well.
+                Tooltip.m_topic = Localization.instance.Localize(ItemInfo.Item.GetDecoratedName());
                 if (EpicLoot.HasAuga)
                 {
-                    //Auga.API.Tooltip_MakeItemTooltip(gameObject, ItemInfo.Item);
+                    Auga.API.Tooltip_MakeItemTooltip(gameObject, ItemInfo.Item);
                 }
                 else
                 {
-                    Tooltip.m_topic = Localization.instance.Localize(ItemInfo.Item.GetDecoratedName());
                     Tooltip.m_text = Localization.instance.Localize(ItemInfo.Item.GetTooltip());
                 }
             }

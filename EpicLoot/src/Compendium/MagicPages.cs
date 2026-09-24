@@ -30,6 +30,15 @@ public class MagicPages : MonoBehaviour
 
     private bool wasGlowing;
 
+    /// <summary>The dialog had the parts the pages are built into; without them this component does nothing.</summary>
+    public bool IsReady { get; private set; }
+
+    // Auga's compendium dialogs have no close button to line the search bar up with, so it runs along the
+    // top of Epic Loot's text area and the page content starts below it.
+    private const float AUGA_SEARCH_BAR_HEIGHT = 32f;
+    private const float AUGA_SEARCH_BAR_MARGIN = 8f;
+
+    /// <summary>The dialog whose pages are being built or shown; the text list and elements size themselves from it.</summary>
     public static MagicPages instance;
 
     public void Awake()
@@ -45,16 +54,47 @@ public class MagicPages : MonoBehaviour
         ShardStonePage = new ShardStoneTextInfo(Localization.instance.Localize(
             $"{EpicLoot.GetMagicEffectPip(false)} $mod_epicloot_shardstones_title"));
         
-        instance = this;
-        
+        // The vanilla dialog keeps its parts in Texts_frame. Auga's compendium dialogs (AugaTextsDialog) have no
+        // frame: the text area, in the same TextArea/ScrollArea/Content shape, sits under the root, and there
+        // is no close button.
         Transform frame = transform.Find("Texts_frame");
-        Image closeButtonImg = frame.Find("Closebutton").GetComponent<Image>();
-        Button closeButton = closeButtonImg.GetComponent<Button>();
-        RectTransform closeButtonRect = closeButtonImg.GetComponent<RectTransform>();
-        compendiumTextArea = frame.Find("TextArea").gameObject;
+        bool augaDialog = frame == null;
+        if (augaDialog)
+        {
+            frame = transform;
+        }
+
+        Transform textArea = frame.Find("TextArea");
+        if (textArea == null || textArea.Find("ScrollArea/Content") == null)
+        {
+            EpicLoot.LogWarning($"Compendium: {name} has no TextArea/ScrollArea/Content; Epic Loot's pages are left out of it.");
+            return;
+        }
+
+        instance = this;
+
+        compendiumTextArea = textArea.gameObject;
         RectTransform textAreaRect = compendiumTextArea.GetComponent<RectTransform>();
         MinWidth = textAreaRect.rect.width;
         MinHeight = textAreaRect.rect.height;
+
+        if (augaDialog)
+        {
+            MagicPagesTextArea = new MagicTextList(compendiumTextArea, frame);
+            MagicPagesTextArea.SetTopPadding(Mathf.RoundToInt(AUGA_SEARCH_BAR_HEIGHT + 2 * AUGA_SEARCH_BAR_MARGIN));
+            Search = new MagicSearchField(MagicPagesTextArea.Root);
+            Search.DockTop(Mathf.Max(MinWidth - 40f, 200f), AUGA_SEARCH_BAR_HEIGHT, AUGA_SEARCH_BAR_MARGIN);
+            Search.SetBackgroundColor(new Color(0f, 0f, 0f, 0.5f));
+            Search.SetFont(MagicFontManager.GetFont(MagicFontManager.FontOptions.AveriaSerifLibre));
+            Search.Input.onValueChanged.AddListener(OnSearch);
+            IsReady = true;
+            Reset();
+            return;
+        }
+
+        Image closeButtonImg = frame.Find("Closebutton").GetComponent<Image>();
+        Button closeButton = closeButtonImg.GetComponent<Button>();
+        RectTransform closeButtonRect = closeButtonImg.GetComponent<RectTransform>();
         Search = new MagicSearchField(frame);
 
         // Calculate the Seach bar position
@@ -73,11 +113,17 @@ public class MagicPages : MonoBehaviour
         Search.Input.onValueChanged.AddListener(OnSearch);
         
         MagicPagesTextArea = new MagicTextList(compendiumTextArea, frame);
+        IsReady = true;
         Reset();
     }
 
     public void Update()
     {
+        if (!IsReady)
+        {
+            return;
+        }
+
         UpdateGamepadScroll();
 
         //  makes search field glow when focused
@@ -109,7 +155,7 @@ public class MagicPages : MonoBehaviour
 
     public static bool InSearchField()
     {
-        if (instance == null || instance.Search == null)
+        if (instance == null || !instance.IsReady || instance.Search == null)
         {
             return false;
         }
@@ -127,6 +173,11 @@ public class MagicPages : MonoBehaviour
 
     public void Reset()
     {
+        if (!IsReady)
+        {
+            return;
+        }
+
         // One retry per open for anything that missed because its asset was not loaded yet; the lookup
         // scans every loaded object, so it must not run per line.
         MagicFontManager.RetryFailedLookups();
@@ -140,6 +191,12 @@ public class MagicPages : MonoBehaviour
 
     public void OnSelectText(MagicTextInfo text)
     {
+        if (!IsReady)
+        {
+            return;
+        }
+
+        instance = this;
         compendiumTextArea.SetActive(false);
         MagicPagesTextArea.Enable(true);
         Search.Enable(text.ShowSearchBar);
