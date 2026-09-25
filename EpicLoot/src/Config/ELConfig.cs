@@ -383,8 +383,9 @@ internal class ELConfig {
             "0 = no materials drop.\n" +
             "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         SetItemDropChance = BindServer(SectionBalance, "Set Item Drop Chance", 0.15f,
-            "The percent chance that a legendary or mythic special item will be dropped, enchanted, " +
-            "or identified as a set item from the legendaries configuration file.\n" +
+            "The percent chance that an item of a rarity with item sets enabled (Legendary, Mythic and " +
+            "Ancient by default, see each set's Rarities in legendaries.json) is dropped, enchanted " +
+            "or identified as a set item. If no set piece fits the item it rolls a regular unique instead.\n" +
             "Min = 0, Max = 1",
             new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         TransferMagicItemToCrafts = BindServer(SectionBalance, "Transfer Enchants to Crafted Items", true,
@@ -400,21 +401,21 @@ internal class ELConfig {
             "when the chest is actually reached.\n" +
             "Only applies to chests generated from now on; chests that already rolled keep their contents.");
         _bossTrophyDropMode = BindServer(SectionBalance, "Boss Trophy Drop Mode", BossDropMode.OnePerPlayerNearBoss,
-            "Sets bosses to drop a number of trophies equal to the number of players. " +
-            "Optionally set it to only include players within a certain distance, " +
-            "use 'Boss Trophy Drop Player Range' to set the range.");
+            "Bosses drop one extra trophy for each player after the first, on top of their normal drop. " +
+            "OnePerPlayerOnServer counts every player on the server; OnePerPlayerNearBoss counts only players " +
+            "within 'Boss Trophy Drop Player Range' of the boss. Default leaves the drop unchanged.");
         _bossTrophyDropPlayerRange = BindServer(SectionBalance, "Boss Trophy Drop Player Range", 100.0f,
             "Sets the range that bosses check when dropping multiple trophies using the OnePerPlayerNearBoss drop mode.");
         _bossCryptKeyDropMode = BindServer(SectionBalance, "Crypt Key Drop Mode", BossDropMode.OnePerPlayerNearBoss,
-            "Sets bosses to drop a number of crypt keys equal to the number of players. " +
-            "Optionally set it to only include players within a certain distance, " +
-            "use 'Crypt Key Drop Player Range' to set the range.");
+            "Bosses drop one extra crypt key for each player after the first, on top of their normal drop. " +
+            "OnePerPlayerOnServer counts every player on the server; OnePerPlayerNearBoss counts only players " +
+            "within 'Crypt Key Drop Player Range' of the boss. Default keeps vanilla's one key per player on the server.");
         _bossCryptKeyDropPlayerRange = BindServer(SectionBalance, "Crypt Key Drop Player Range", 100.0f,
             "Sets the range that bosses check when dropping multiple crypt keys using the OnePerPlayerNearBoss drop mode.");
         _bossWishboneDropMode = BindServer(SectionBalance, "Wishbone Drop Mode", BossDropMode.OnePerPlayerNearBoss,
-            "Sets bosses to drop a number of wishbones equal to the number of players. " +
-            "Optionally set it to only include players within a certain distance, " +
-            "use 'Crypt Key Drop Player Range' to set the range.");
+            "Bosses drop one extra wishbone for each player after the first, on top of their normal drop. " +
+            "OnePerPlayerOnServer counts every player on the server; OnePerPlayerNearBoss counts only players " +
+            "within 'Wishbone Drop Player Range' of the boss. Default keeps vanilla's one wishbone per player on the server.");
         _bossWishboneDropPlayerRange = BindServer(SectionBalance, "Wishbone Drop Player Range", 100.0f,
             "Sets the range that bosses check when dropping multiple wishbones using the OnePerPlayerNearBoss drop mode.");
         // 3 - Sockets

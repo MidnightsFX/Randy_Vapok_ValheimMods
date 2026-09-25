@@ -16,6 +16,7 @@ namespace EpicLoot.Crafting
         public Image MagicBG;
 
         private AudioSource _audioSource;
+        private bool _isAugaPanel;
 
         [UsedImplicitly]
         public void Awake()
@@ -58,10 +59,12 @@ namespace EpicLoot.Crafting
                 MagicBG.color = rarityColor;
             }
 
-            //if (EpicLoot.HasAuga)
-            //{
-            //    Auga.API.ComplexTooltip_SetItem(gameObject, item);
-            //}
+            // An Auga results panel (CreateAuga) is an Auga tooltip: this fills in its stats and, through
+            // AugaTooltip, the magic effects. The fields below are then only the ones it left set.
+            if (EpicLoot.HasAuga && _isAugaPanel)
+            {
+                Auga.API.ComplexTooltip_SetItem(gameObject, item);
+            }
 
             if (NameText != null)
             {
@@ -140,6 +143,44 @@ namespace EpicLoot.Crafting
 
             return scrollRect;
         }
+        /// <summary>
+        /// The dialog on one of Auga's crafting results panels, centred on <paramref name="parent"/>. Null when
+        /// Auga cannot make one (its crafting panel does not exist yet); callers fall back to <see cref="Create"/>.
+        /// </summary>
+        public static CraftSuccessDialog CreateAuga(Transform parent)
+        {
+            GameObject resultsPanel = Auga.API.Workbench_CreateNewResultsPanel();
+            if (resultsPanel == null)
+            {
+                return null;
+            }
+
+            resultsPanel.SetActive(false);
+            resultsPanel.transform.SetParent(parent, false);
+            resultsPanel.name = "CraftingSuccessDialog";
+
+            var dialog = resultsPanel.AddComponent<CraftSuccessDialog>();
+            dialog._isAugaPanel = true;
+            dialog.NameText = resultsPanel.transform.Find("Topic")?.GetComponent<TMP_Text>();
+            dialog.Frame = (RectTransform)resultsPanel.transform;
+            dialog.Frame.pivot = dialog.Frame.anchorMin = dialog.Frame.anchorMax = new Vector2(0.5f, 0.5f);
+            dialog.Frame.anchoredPosition = Vector2.zero;
+
+            var closeButton = resultsPanel.transform.Find("CloseButton")?.GetComponent<Button>();
+            if (closeButton != null)
+            {
+                closeButton.onClick.AddListener(dialog.Close);
+            }
+
+            return dialog;
+        }
+
+        /// <summary>Auga's results panel when Auga is installed, the vanilla-built dialog otherwise.</summary>
+        public static CraftSuccessDialog CreateForCurrentUI(Transform parent)
+        {
+            return (EpicLoot.HasAuga ? CreateAuga(parent) : null) ?? Create(parent);
+        }
+
         public static CraftSuccessDialog Create(Transform parent)
         {
             var inventoryGui = InventoryGui.instance;

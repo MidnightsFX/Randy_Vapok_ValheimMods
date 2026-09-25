@@ -61,6 +61,20 @@ namespace EpicLoot_UnityLib
             EnchantingUIController.SetupUIAudioSources(gameObject);
         }
 
+        /// <summary>
+        /// Takes <paramref name="button"/> as the main button. The Auga fixup swaps the prefab's button for an
+        /// Auga one in EnchantingTableUI.Start, after Awake has already cached the old button's label on the
+        /// panel that is open; a panel that wakes later reads the new button in Awake itself.
+        /// </summary>
+        public void ReplaceMainButton(Button button)
+        {
+            MainButton = button;
+            _buttonLabel = button.GetComponentInChildren<Text>();
+            _tmpButtonLabel = _buttonLabel == null ? button.GetComponentInChildren<TMP_Text>() : null;
+            _useTMP = _buttonLabel == null;
+            _mainButtonGamepadHint = FindGamepadHint(button.transform);
+        }
+
         // Matches the prefab's glyph child by name: "Hint" in most panels, "Hint-1" in the ones with two.
         private static GameObject FindGamepadHint(Transform button)
         {
@@ -284,7 +298,9 @@ namespace EpicLoot_UnityLib
             EnchantingTableUI.instance.UnlockTabs();
         }
 
-        protected static bool LocalPlayerCanAffordCost(List<InventoryItemListElement> cost)
+        // Internal as well as protected: EnchantingUIController re-checks the identify cost with it after
+        // rolling, right before charging.
+        protected internal static bool LocalPlayerCanAffordCost(List<InventoryItemListElement> cost)
         {
             if (Player.m_localPlayer.NoCostCheat())
             {

@@ -425,6 +425,10 @@ namespace EquipmentAndQuickSlots {
             // also where a cell has to go back to when its slot is switched on again.
             Transform activeParent = cellRoot ? cellRoot : grid.m_gridRoot;
 
+            // Auga's panel is laid out from the live player panel, so it is placed before its cells.
+            if (EquipmentAndQuickSlots.HasAuga)
+                AugaPanel.Layout(cellRoot);
+
             for (int i = 0; i < Math.Min(slots.Length, grid.m_elements.Count - startIndex); ++i) {
                 InventoryElement element = grid.m_elements[startIndex + i];
                 Slot slot = slots[i];

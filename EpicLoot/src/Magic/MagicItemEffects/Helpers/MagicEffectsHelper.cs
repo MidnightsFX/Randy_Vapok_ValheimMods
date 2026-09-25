@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
@@ -55,6 +56,15 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
         {
             if (player != null)
             {
+                if (itemData != null && !player.IsItemEquiped(itemData))
+                {
+                    // The player-wide total already stands the firing weapon in for the held ones.
+                    return itemData == HitSource.FiringWeapon
+                        ? player.GetTotalActiveMagicEffectValue(effectType, scale)
+                        : player.GetTotalActiveMagicEffectValue(effectType, scale) +
+                            GetStandInAdjustment(player, itemData, effectType, scale);
+                }
+
                 return player.GetTotalActiveMagicEffectValue(effectType, scale, GetIgnoreWeapon(player, itemData));
             }
             else if (itemData.IsMagic(out var magicItem))
@@ -63,6 +73,47 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
             }
 
             return 0;
+        }
+
+        /// <summary>
+        /// What to add to the player's equipped-gear total while a thrown weapon's projectile is landing. Vanilla
+        /// unequips a thrown weapon as it leaves the hand, so its effects had dropped out of every total by the
+        /// time it hit; for the duration of its hit it counts in place of the weapons held now, the way it
+        /// counted when it was thrown. Zero at all other times, including for an arrow (the bow stays equipped).
+        /// </summary>
+        public static float GetFiringWeaponAdjustment(Player player, string effectType, float scale)
+        {
+            ItemDrop.ItemData firing = HitSource.FiringWeapon;
+            if (firing == null || player != Player.m_localPlayer || player.IsItemEquiped(firing))
+            {
+                return 0f;
+            }
+
+            return GetStandInAdjustment(player, firing, effectType, scale);
+        }
+
+        // An unequipped weapon counted in place of the weapons held now: its own value, less theirs. Also what
+        // an inventory tooltip for an unequipped weapon should show.
+        private static float GetStandInAdjustment(Player player, ItemDrop.ItemData weapon, string effectType, float scale)
+        {
+            float adjustment = GetOwnEffectValue(weapon, effectType, scale);
+            if (IsWeapon(player.m_rightItem))
+            {
+                adjustment -= GetOwnEffectValue(player.m_rightItem, effectType, scale);
+            }
+            if (IsWeapon(player.m_leftItem))
+            {
+                adjustment -= GetOwnEffectValue(player.m_leftItem, effectType, scale);
+            }
+
+            return adjustment;
+        }
+
+        private static float GetOwnEffectValue(ItemDrop.ItemData item, string effectType, float scale)
+        {
+            return item != null && item.IsMagic(out MagicItem magicItem)
+                ? magicItem.GetTotalEffectValue(effectType, scale, includeSocketed: true)
+                : 0f;
         }
 
         public static bool HasActiveMagicEffect(Player player, ItemDrop.ItemData itemData, string effectType, out float effectValue)
@@ -90,7 +141,8 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
             effectValue = 0f;
             if (player != null)
             {
-                return player.HasActiveMagicEffect(effectType, out effectValue, scale, GetIgnoreWeapon(player, itemData));
+                effectValue = GetTotalActiveMagicEffectValueForWeapon(player, itemData, effectType, scale);
+                return effectValue != 0f;
             }
             else if (itemData.IsMagic(out var magicItem))
             {
@@ -100,10 +152,32 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
             return false;
         }
 
+        // Set-bonus-only totals share EquipmentEffectCache with the full per-effect totals, under their own key.
+        private static readonly Dictionary<string, string> _setEffectCacheKeys = new Dictionary<string, string>();
+
         public static float GetTotalActiveSetEffectValue(Player player, string effectType, float scale = 1.0f)
         {
-            var setEffects = player.GetAllActiveSetMagicEffects(effectType);
-            return setEffects.Count > 0 ? scale * setEffects.Sum(x => x.EffectValue) : 0;
+            if (player == null || effectType == null)
+            {
+                return 0;
+            }
+
+            // ModifyArmor reads this from every ItemData.GetArmor, so it is memoized like
+            // GetTotalActiveMagicEffectValue rather than re-walking the set tiers each call.
+            if (!_setEffectCacheKeys.TryGetValue(effectType, out string cacheKey))
+            {
+                cacheKey = "set|" + effectType;
+                _setEffectCacheKeys[effectType] = cacheKey;
+            }
+
+            if (!EquipmentEffectCache.TryGetValue(player, cacheKey, out float? cached))
+            {
+                var setEffects = player.GetAllActiveSetMagicEffects(effectType);
+                cached = setEffects.Count > 0 ? setEffects.Sum(x => x.EffectValue) : (float?)null;
+                EquipmentEffectCache.Store(player, cacheKey, cached);
+            }
+
+            return scale * (cached ?? 0);
         }
 
         // --- Shared guards/lookups for effect dispatchers -------------------------------------------
@@ -140,13 +214,55 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
         }
 
         /// <summary>
-        /// The weapon that produced the current attack: the in-progress melee attack's weapon when one is
-        /// active (<see cref="Attack_Patch.ActiveAttack"/>), otherwise the player's currently equipped
-        /// weapon. Used by on-hit effects socketed into the attacking weapon.
+        /// The weapon that produced the current attack: the weapon that fired the projectile or area effect
+        /// now dealing damage (<see cref="HitSource.FiringWeapon"/>), else the in-progress melee attack's weapon
+        /// (<see cref="Attack_Patch.ActiveAttack"/>), otherwise the player's currently equipped weapon. Used by
+        /// on-hit effects socketed into the attacking weapon.
         /// </summary>
         public static ItemDrop.ItemData GetActiveWeapon(Player player)
         {
-            return Attack_Patch.ActiveAttack?.m_weapon ?? player?.GetCurrentWeapon();
+            return HitSource.FiringWeapon ?? Attack_Patch.ActiveAttack?.m_weapon ?? player?.GetCurrentWeapon();
+        }
+
+        /// <summary>
+        /// Whether <paramref name="hit"/> killed <paramref name="target"/>, for a Character.Damage postfix on the
+        /// attacker's client. When this client owns the target, Character.Damage has already run RPC_Damage
+        /// synchronously (ZRoutedRpc handles a call to its own peer immediately), so the health is post-hit and
+        /// is read as-is -- subtracting the hit again refunded Wager on hits that left the target alive. A
+        /// remote target has not taken the hit yet, so its owner's resistance, armor and difficulty scaling are
+        /// estimated here; fire, poison and spirit arrive as damage over time and never kill on the hit itself.
+        /// </summary>
+        public static bool IsLethalHit(Character target, HitData hit)
+        {
+            if (target == null || hit == null || target.m_nview == null || !target.m_nview.IsValid())
+            {
+                return false;
+            }
+
+            if (target.m_nview.IsOwner())
+            {
+                return target.GetHealth() <= 0f || target.IsDead();
+            }
+
+            HitData estimate = hit.Clone();
+            estimate.ApplyResistance(target.GetDamageModifiers(), out _);
+            if (!target.IsPlayer())
+            {
+                if (target.IsStaggering())
+                {
+                    estimate.ApplyModifier(2f);
+                }
+                if (Game.m_worldLevel > 0)
+                {
+                    estimate.ApplyArmor(Game.m_worldLevel * Game.instance.m_worldLevelEnemyBaseAC);
+                }
+                estimate.ApplyModifier(Game.instance.GetDifficultyDamageScaleEnemy(target.transform.position));
+                estimate.ApplyModifier(Game.m_playerDamageRate);
+            }
+
+            HitData.DamageTypes damage = estimate.m_damage;
+            float instantDamage = damage.GetTotalDamage() - damage.m_fire - damage.m_poison - damage.m_spirit;
+            return target.GetHealth() - instantDamage <= 0f;
         }
     }
 }

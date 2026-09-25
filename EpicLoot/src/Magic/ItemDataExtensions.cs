@@ -207,8 +207,10 @@ public static class ItemDataExtensions
             return false;
         }
 
-        return itemData.GetMagicItem().Effects.Select(effect => MagicItemEffectDefinitions.Get(effect.EffectType))
-            .Any(effectDef => effectDef.CanBeAugmented);
+        // An effect with no registered definition is never augmentable.
+        return itemData.GetMagicItem().Effects.Any(effect =>
+            MagicItemEffectDefinitions.TryGet(effect.EffectType, out MagicItemEffectDefinition effectDef) &&
+            effectDef.CanBeAugmented);
     }
 
     public static bool CanBeRunified(this ItemDrop.ItemData itemData)
@@ -218,8 +220,10 @@ public static class ItemDataExtensions
             return false;
         }
 
-        return itemData.GetMagicItem().Effects.Select(effect => MagicItemEffectDefinitions.Get(effect.EffectType))
-            .Any(effectDef => effectDef.CanBeRunified);
+        // An effect with no registered definition is never extracted or overwritten by a rune.
+        return itemData.GetMagicItem().Effects.Any(effect =>
+            MagicItemEffectDefinitions.TryGet(effect.EffectType, out MagicItemEffectDefinition effectDef) &&
+            effectDef.CanBeRunified);
     }
 
     // Shardstones and Brokkr's Gifts carry a cosmetic MagicItem -- a rarity and nothing else -- purely
@@ -261,7 +265,7 @@ public static class ItemDataExtensions
 
     public static LegendarySetInfo GetLegendarySetInfo(this ItemDrop.ItemData itemData)
     {
-        UniqueLegendaryHelper.TryGetLegendarySetInfo(itemData.GetSetID(), out LegendarySetInfo setInfo, out ItemRarity rarity);
+        UniqueLegendaryHelper.TryGetLegendarySetInfo(itemData.GetSetID(), out LegendarySetInfo setInfo);
         return setInfo;
     }
 
@@ -293,9 +297,11 @@ public static class ItemDataExtensions
             {
                 return itemData.m_shared.m_setSize;
             }
-            else if (UniqueLegendaryHelper.TryGetLegendarySetInfo(setID, out LegendarySetInfo setInfo, out ItemRarity rarity))
+            else if (UniqueLegendaryHelper.TryGetLegendarySetInfo(setID, out LegendarySetInfo setInfo))
             {
-                return setInfo.LegendaryIDs.Count;
+                // Pieces needed for every bonus, which is less than the piece list when the set offers
+                // alternatives for one slot.
+                return UniqueLegendaryHelper.GetFullSetCount(setInfo);
             }
         }
 
@@ -304,7 +310,7 @@ public static class ItemDataExtensions
 
     public static List<string> GetSetPieces(string setName, bool isMundane)
     {
-        if (!isMundane && UniqueLegendaryHelper.TryGetLegendarySetInfo(setName, out LegendarySetInfo setInfo, out ItemRarity rarity))
+        if (!isMundane && UniqueLegendaryHelper.TryGetLegendarySetInfo(setName, out LegendarySetInfo setInfo))
         {
             return setInfo.LegendaryIDs;
         }
@@ -316,6 +322,10 @@ public static class ItemDataExtensions
     {
         // TODO: improve performace of this call
         List<string> results = new List<string>();
+        // One entry per display token, not per prefab. Deep North registers SP_/FW_ NPC prop copies of
+        // set armour (SP_ArmorTrollLeatherChest, FW_CapeTrollHide, ...) that keep the real item's
+        // m_name and m_setName, so without this the troll set listed its tunic, pants and cape three times.
+        HashSet<string> seen = new HashSet<string>();
         foreach (GameObject itemPrefab in ObjectDB.instance.m_items)
         {
             if (itemPrefab == null)
@@ -331,7 +341,7 @@ public static class ItemDataExtensions
                 continue;
             }
 
-            if (itemDrop.m_itemData.m_shared.m_setName == setName)
+            if (itemDrop.m_itemData.m_shared.m_setName == setName && seen.Add(itemDrop.m_itemData.m_shared.m_name))
             {
                 results.Add(itemDrop.m_itemData.m_shared.m_name);
             }
@@ -529,6 +539,15 @@ public static class ItemDataExtensions
 
     private static string GetSetTooltip(ItemDrop.ItemData item, string setID, int setSize, bool isMundane)
     {
+        if (!isMundane)
+        {
+            LegendarySetInfo magicSetInfo = item.GetLegendarySetInfo();
+            if (magicSetInfo != null)
+            {
+                return GetMagicSetTooltip(item, magicSetInfo);
+            }
+        }
+
         StringBuilder text = new StringBuilder();
         List<string> setPieces = GetSetPieces(setID, isMundane);
         List<ItemDrop.ItemData> currentSetEquipped = Player.m_localPlayer.GetEquippedSetPieces(setID);
@@ -545,6 +564,7 @@ public static class ItemDataExtensions
             text.Append($"\n  <color={color}>{displayName}</color>");
         }
 
+        // A magic set only gets here when its ID is not in legendaries.json (any more): no bonuses to list.
         if (isMundane)
         {
             string setEffectColor = currentSetEquipped.Count == setSize ? EpicLoot.GetSetItemColor() : "#808080ff";
@@ -552,29 +572,57 @@ public static class ItemDataExtensions
             text.Append($"\n<color={setEffectColor}>({setSize}) ‣ " +
                 $"{item.GetSetStatusEffectTooltip(item.m_quality, skillLevel).Replace("\n", " ")}</color>");
         }
-        else
+
+        return text.ToString();
+    }
+
+    // Counts the way bonus application does (SetBonusEvaluator): equipment providers included, each piece
+    // once, each bonus at its own tier.
+    private static string GetMagicSetTooltip(ItemDrop.ItemData item, LegendarySetInfo setInfo)
+    {
+        const string inactiveColor = "#808080ff";
+        StringBuilder text = new StringBuilder();
+        LegendarySetProgress progress = SetBonusEvaluator.GetSetProgress(Player.m_localPlayer, setInfo);
+
+        text.Append($"\n\n<color={EpicLoot.GetSetItemColor()}> $mod_epicloot_set: " +
+            $"{GetSetDisplayName(item, false)} ({progress.Count}/{progress.FullCount}):</color>");
+
+        foreach (string pieceID in setInfo.LegendaryIDs.Distinct())
         {
-            LegendarySetInfo setInfo = item.GetLegendarySetInfo();
+            // An equipped piece shows in the rarity it is worn at, which is what its bonuses tier by.
+            string color = progress.EquippedPieces.TryGetValue(pieceID, out ItemRarity pieceRarity)
+                ? EpicLoot.GetRarityColor(pieceRarity)
+                : inactiveColor;
+            text.Append($"\n  <color={color}>{GetSetItemDisplayName(pieceID, false)}</color>");
+        }
 
-            if (setInfo != null)
+        ItemRarity itemRarity = item.GetRarity();
+        foreach (SetBonusInfo setBonusInfo in setInfo.SetBonuses.OrderBy(x => x.Count))
+        {
+            if (setBonusInfo.Effect == null)
             {
-                foreach (SetBonusInfo setBonusInfo in setInfo.SetBonuses.OrderBy(x => x.Count))
-                {
-                    bool hasEquipped = currentSetEquipped.Count >= setBonusInfo.Count;
-                    MagicItemEffectDefinition effectDef = MagicItemEffectDefinitions.Get(setBonusInfo.Effect.Type);
-
-                    if (effectDef == null)
-                    {
-                        EpicLoot.LogError($"Set Tooltip: Could not find effect ({setBonusInfo.Effect.Type}) " +
-                            $"for set ({setInfo.ID}) bonus ({setBonusInfo.Count})!");
-                        continue;
-                    }
-
-                    string display = MagicItem.GetEffectText(effectDef, setBonusInfo.Effect.Values?.MinValue ?? 0);
-                    text.Append($"\n<color={(hasEquipped ? EpicLoot.GetSetItemColor() : "#808080ff")}>" +
-                        $"({setBonusInfo.Count}) ‣ {display}</color>");
-                }
+                continue;
             }
+
+            if (!MagicItemEffectDefinitions.TryGet(setBonusInfo.Effect.Type, out MagicItemEffectDefinition effectDef))
+            {
+                EpicLoot.LogError($"Set Tooltip: Could not find effect ({setBonusInfo.Effect.Type}) " +
+                    $"for set ({setInfo.ID}) bonus ({setBonusInfo.Count})!");
+                continue;
+            }
+
+            // An inactive bonus previews the value it would have at the hovered item's rarity.
+            ItemRarity? tier = progress.GetTier(setBonusInfo);
+            string display = MagicItem.GetEffectText(effectDef,
+                SetBonusEvaluator.GetBonusValue(setBonusInfo, tier ?? itemRarity));
+
+            // The tier only changes anything when the bonus has per-rarity values.
+            string tierTag = tier.HasValue && setBonusInfo.Effect.ValuesPerRarity != null
+                ? $" <color={EpicLoot.GetRarityColor(tier.Value)}>({EpicLoot.GetRarityDisplayName(tier.Value)})</color>"
+                : "";
+
+            text.Append($"\n<color={(tier.HasValue ? EpicLoot.GetSetItemColor() : inactiveColor)}>" +
+                $"({setBonusInfo.Count}) ‣ {display}</color>{tierTag}");
         }
 
         return text.ToString();

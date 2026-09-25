@@ -95,16 +95,17 @@ namespace EpicLoot
         private static WeightedRandomCollection<KeyValuePair<int, float>> _weightedEffectCountTable;
         private static WeightedRandomCollection<KeyValuePair<int, float>> _weightedSocketCountTable;
         private static WeightedRandomCollection<KeyValuePair<ItemRarity, float>> _weightedRarityTable;
-        private static WeightedRandomCollection<LegendaryInfo> _weightedLegendaryTable;
-        private static WeightedRandomCollection<LegendaryInfo> _weightedMythicTable;
+        private static WeightedRandomCollection<LegendaryInfo> _weightedUniqueTable;
         public static bool CheatRollingItem = false;
         public static int CheatEffectCount;
         public static int CheatSocketCount = -1;
         public static bool CheatDisableGating;
         public static bool CheatForceMagicEffect;
         public static string ForcedMagicEffect = "";
-        public static string CheatForceLegendary;
-        public static string CheatForceMythic;
+        // The magicsetitem / magicitemset console commands: the unique (or set piece) to roll and the
+        // rarity to roll it at.
+        public static string CheatForceUniqueID;
+        public static ItemRarity? CheatForceUniqueRarity;
 
         public static void Initialize(LootConfig lootConfig)
         {
@@ -123,8 +124,7 @@ namespace EpicLoot
             _weightedEffectCountTable = new WeightedRandomCollection<KeyValuePair<int, float>>();
             _weightedSocketCountTable = new WeightedRandomCollection<KeyValuePair<int, float>>();
             _weightedRarityTable = new WeightedRandomCollection<KeyValuePair<ItemRarity, float>>();
-            _weightedLegendaryTable = new WeightedRandomCollection<LegendaryInfo>();
-            _weightedMythicTable = new WeightedRandomCollection<LegendaryInfo>();
+            _weightedUniqueTable = new WeightedRandomCollection<LegendaryInfo>();
 
             ItemSets.Clear();
             LootTables.Clear();
@@ -301,7 +301,7 @@ namespace EpicLoot
         public static bool AnyItemSpawnCheatsActive()
         {
             return CheatRollingItem || CheatDisableGating || CheatForceMagicEffect ||
-                !string.IsNullOrEmpty(CheatForceLegendary) || !string.IsNullOrEmpty(CheatForceMythic) ||
+                !string.IsNullOrEmpty(CheatForceUniqueID) ||
                 CheatEffectCount > 0;
         }
 
@@ -424,8 +424,11 @@ namespace EpicLoot
                         looteqrare.Add(new LootDrop() { Item = ld.Item, Weight = ld.Weight, Rarity = [1] });
                     }
 
+                    // Never ask a table for more than is still owed: several tables share one category,
+                    // and a pass after a gating failure used to roll the full per-table count again,
+                    // so an identify handed back more items than it was paid for.
                     _weightedLootTable.Setup(looteqrare.ToArray(), x => x.Weight);
-                    List<LootDrop> selectedDrops = _weightedLootTable.Roll(lootPerCategory);
+                    List<LootDrop> selectedDrops = _weightedLootTable.Roll(Math.Min(lootPerCategory, numResults - results.Count));
 
                     EpicLoot.Log($"Available Loot ({lt.Loot.Length}) for table: {lt.Object}");
                     foreach (LootDrop lootDrop in lt.Loot)
@@ -438,6 +441,11 @@ namespace EpicLoot
                     EpicLoot.Log($"Selected Drops from: {lt.Object} - {selectedDrops.Count}");
                     foreach (LootDrop lootDrop in selectedDrops)
                     {
+                        if (results.Count >= numResults)
+                        {
+                            break;
+                        }
+
                         string itemName = !string.IsNullOrEmpty(lootDrop?.Item) ? lootDrop.Item : "Invalid Item Name";
                         int rarityLength = lootDrop?.Rarity?.Length != null ? lootDrop.Rarity.Length : -1;
                         EpicLoot.Log($"Item: {itemName} - Rarity Count: {rarityLength} - Weight: {lootDrop.Weight}");
@@ -1120,16 +1128,22 @@ namespace EpicLoot
 
         public static MagicItem RollMagicItem(ItemRarity rarity, ItemDrop.ItemData baseItem, float luckFactor, float powerlevelMod = 1f)
         {
-            var cheatLegendary = !string.IsNullOrEmpty(CheatForceLegendary);
-            var cheatMythic = !string.IsNullOrEmpty(CheatForceMythic);
-            
-            if (cheatMythic)
+            LegendaryInfo forcedUnique = null;
+            if (!string.IsNullOrEmpty(CheatForceUniqueID))
             {
-                rarity = ItemRarity.Mythic;
+                UniqueLegendaryHelper.TryGetLegendaryInfo(CheatForceUniqueID, out forcedUnique);
             }
-            else if (cheatLegendary)
+
+            // Every rolled value is multiplied by this, so a mis-authored upgrade value (0 or negative
+            // in enchantingupgrades.json) would otherwise zero out the whole item.
+            if (float.IsNaN(powerlevelMod) || powerlevelMod <= 0f)
             {
-                rarity = ItemRarity.Legendary;
+                powerlevelMod = 1f;
+            }
+
+            if (forcedUnique != null && CheatForceUniqueRarity.HasValue)
+            {
+                rarity = CheatForceUniqueRarity.Value;
             }
 
             var magicItem = new MagicItem { Rarity = rarity };
@@ -1138,44 +1152,12 @@ namespace EpicLoot
 
             var effectCount = CheatEffectCount >= 1 ? CheatEffectCount : RollEffectCountPerRarity(magicItem.Rarity);
 
-            if (rarity == ItemRarity.Legendary || rarity == ItemRarity.Mythic)
+            // Uniques and set pieces roll at whichever rarities legendaries.json enables them for, not only
+            // Legendary and Mythic. A rarity nothing is enabled at spends no extra random rolls.
+            LegendaryInfo itemInfo = forcedUnique ?? RollUniqueInfo(rarity, baseItem, magicItem);
+            if (itemInfo != null)
             {
-                LegendaryInfo itemInfo = null;
-                if (cheatMythic)
-                {
-                    UniqueLegendaryHelper.TryGetLegendaryInfo(CheatForceMythic, out itemInfo);
-                }
-                else if (cheatLegendary)
-                {
-                    UniqueLegendaryHelper.TryGetLegendaryInfo(CheatForceLegendary, out itemInfo);
-                }
-
-                if (itemInfo == null)
-                {
-                    var roll = Random.Range(0.0f, 1.0f);
-                    var rollSetItem = roll < ELConfig.SetItemDropChance.Value;
-                    EpicLoot.Log($"Rolling Legendary/Mythic: set={rollSetItem} ({roll:#.##}/{ELConfig.SetItemDropChance.Value})");
-                    if (rarity == ItemRarity.Legendary)
-                    {
-                        var availableLegendaries = UniqueLegendaryHelper.GetAvailableLegendaries(baseItem, magicItem, rollSetItem);
-                        EpicLoot.Log($"Available Legendaries: {string.Join(", ", availableLegendaries.Select(x => x.ID))}");
-                        _weightedLegendaryTable.Setup(availableLegendaries, x => x.SelectionWeight);
-                        itemInfo = _weightedLegendaryTable.Roll();
-                    }
-                    else
-                    {
-                        var availableMythics = UniqueLegendaryHelper.GetAvailableMythics(baseItem, magicItem, rollSetItem);
-                        EpicLoot.Log($"Available Mythics: {string.Join(", ", availableMythics.Select(x => x.ID))}");
-                        _weightedMythicTable.Setup(availableMythics, x => x.SelectionWeight);
-                        itemInfo = _weightedMythicTable.Roll();
-                    }
-                }
-
-                if (itemInfo.IsSetItem)
-                {
-                    var setID = UniqueLegendaryHelper.GetSetForLegendaryItem(itemInfo);
-                    magicItem.SetID = setID;
-                }
+                magicItem.SetID = UniqueLegendaryHelper.GetSetForLegendaryItem(itemInfo);
 
                 if (!UniqueLegendaryHelper.IsGenericLegendary(itemInfo))
                 {
@@ -1189,15 +1171,15 @@ namespace EpicLoot
 
                     foreach (var guaranteedMagicEffect in itemInfo.GuaranteedMagicEffects)
                     {
-                        var effectDef = MagicItemEffectDefinitions.Get(guaranteedMagicEffect.Type);
-                        if (effectDef == null)
+                        if (!MagicItemEffectDefinitions.TryGet(guaranteedMagicEffect.Type, out var effectDef))
                         {
                             EpicLoot.LogError($"Could not find magic effect (Type={guaranteedMagicEffect.Type}) " +
                                 $"while creating legendary/mythic item (ID={itemInfo.ID})");
                             continue;
                         }
 
-                        var effect = RollEffect(effectDef, rarity, guaranteedMagicEffect.Values, powerlevelMod);
+                        var effect = RollEffect(effectDef, rarity,
+                            UniqueLegendaryHelper.ResolveValues(guaranteedMagicEffect, rarity), powerlevelMod);
                         magicItem.Effects.Add(effect);
                         effectCount--;
                     }
@@ -1218,7 +1200,9 @@ namespace EpicLoot
                 _weightedEffectTable.Setup(availableEffects, x => x.SelectionWeight);
                 var effectDef = _weightedEffectTable.Roll();
 
-                var effect = RollEffect(effectDef, magicItem.Rarity);
+                // Same power scaling as the guaranteed effects above. Only identification passes
+                // anything but 1 (the Sacrifice upgrade's "identified item power").
+                var effect = RollEffect(effectDef, magicItem.Rarity, null, powerlevelMod);
                 magicItem.Effects.Add(effect);
             }
 
@@ -1228,6 +1212,44 @@ namespace EpicLoot
             }
 
             return magicItem;
+        }
+
+        /// <summary>
+        /// Picks the unique a fresh <paramref name="rarity"/> item becomes, or null for a plain item. With
+        /// probability SetItemDropChance it tries a set piece first; when no set piece enabled at this
+        /// rarity fits the item it falls through to the regular unique roll rather than making the item
+        /// generic. The regular roll includes <see cref="UniqueLegendaryHelper.GenericLegendaryInfo"/>.
+        /// </summary>
+        private static LegendaryInfo RollUniqueInfo(ItemRarity rarity, ItemDrop.ItemData baseItem, MagicItem magicItem)
+        {
+            if (UniqueLegendaryHelper.AnySetEnabledAt(rarity))
+            {
+                var roll = Random.Range(0.0f, 1.0f);
+                var rollSetItem = roll < ELConfig.SetItemDropChance.Value;
+                EpicLoot.Log($"Rolling {rarity} unique: set={rollSetItem} ({roll:#.##}/{ELConfig.SetItemDropChance.Value})");
+                if (rollSetItem)
+                {
+                    var availablePieces = UniqueLegendaryHelper.GetAvailableSetPieces(baseItem, magicItem, rarity);
+                    if (availablePieces.Count > 0)
+                    {
+                        EpicLoot.Log($"Available {rarity} set pieces: {string.Join(", ", availablePieces.Select(x => x.ID))}");
+                        _weightedUniqueTable.Setup(availablePieces, x => x.SelectionWeight);
+                        return _weightedUniqueTable.Roll();
+                    }
+
+                    EpicLoot.Log($"No {rarity} set piece fits {baseItem.m_shared.m_name}; rolling a regular unique instead.");
+                }
+            }
+
+            if (!UniqueLegendaryHelper.AnyUniqueEnabledAt(rarity))
+            {
+                return null;
+            }
+
+            var availableUniques = UniqueLegendaryHelper.GetAvailableUniques(baseItem, magicItem, rarity);
+            EpicLoot.Log($"Available {rarity} uniques: {string.Join(", ", availableUniques.Select(x => x.ID))}");
+            _weightedUniqueTable.Setup(availableUniques, x => x.SelectionWeight);
+            return _weightedUniqueTable.Roll();
         }
 
         // internal rather than private: API.TryMakeMagicItem reproduces the full drop flow for external

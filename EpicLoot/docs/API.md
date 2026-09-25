@@ -272,11 +272,18 @@ bool   UpdateLootTables(string key, string json);
 ```
 
 `TryMakeMagicItem` is the one-call path: it reproduces the whole drop flow — effect selection, socket
-count, legendary/mythic assignment, randomized wear, display name — and raises both `LootRoll` and
+count, unique and set-piece assignment, randomized wear, display name — and raises both `LootRoll` and
 `OnLootGenerated`. Check `CanBeMagicItem` first. Passing an unknown `legendaryID`, or one whose
 requirements do not fit the item, **fails the roll** rather than silently downgrading it.
 
 To inspect before applying, use `RollMagicItemJson` then `ApplyMagicItemJson`.
+
+Uniques and sets are not tied to one rarity: each carries a `Rarities` list in `legendaries.json`, and any
+rarity can be enabled. `GetLegendaryIDs(rarity)` returns every unique and set piece enabled at that
+rarity (empty where none are). `AddLegendaryItem(type, json)` and `AddLegendarySet(type, json)` accept any
+rarity name; `type` is only the default for an entry whose json has no `Rarities`. `HasLegendarySet`
+reports the number of distinct pieces worn, and returns true once enough are worn for every set bonus, at
+any mix of rarities.
 
 `AddLootTables` returns an opaque key; pass it back to `UpdateLootTables` to replace what you added.
 Registrations are cached and re-applied whenever `loottables.json` reloads or a dedicated server pushes

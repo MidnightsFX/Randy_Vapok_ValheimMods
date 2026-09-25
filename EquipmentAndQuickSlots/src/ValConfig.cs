@@ -30,6 +30,7 @@ namespace EquipmentAndQuickSlots {
         public static ConfigEntry<int> UtilitySlotCount;
         public static ConfigEntry<bool> DontDropEquipmentOnDeath;
         public static ConfigEntry<bool> DontDropQuickslotsOnDeath;
+        public static ConfigEntry<bool> DontDropHotbarEquipmentOnDeath;
         public static ConfigEntry<bool> InstantlyReequipArmorOnPickup;
         public static ConfigEntry<bool> AutoEquipCarryWeightItems;
         public static ConfigEntry<bool> AutoEquipWeaponShield;
@@ -135,11 +136,12 @@ namespace EquipmentAndQuickSlots {
 
             // Everything under Gravestone is balance: what survives death and what the player
             // gets back for free on pickup.
-            DontDropEquipmentOnDeath = BindServerConfig("Gravestone", "Dont drop equipment on death", false, "If set to true, your equipped items stay with you when you die instead of dropping into the gravestone.");
+            DontDropEquipmentOnDeath = BindServerConfig("Gravestone", "Dont drop equipment on death", false, "If set to true, the items in your equipment slots (armor, utility and trinket) stay with you when you die instead of dropping into the gravestone. Weapons and tools in the hotbar are covered by 'Dont drop hotbar equipment on death'.");
             InstantlyReequipArmorOnPickup = BindServerConfig("Gravestone", "Instantly re-equip armor on pickup", true, "True: picking up your gravestone instantly re-equips the armor that was in your equipment slots (no equip animation). False: the armor is returned to its slots but left unequipped until you equip it. Only valid when Equipment Slots are enabled.");
             AutoEquipCarryWeightItems = BindServerConfig("Gravestone", "Auto-equip carry weight items on pickup", true, "If set to true, belts and other carry-weight gear from your gravestone are equipped immediately on pickup so the rest of the loot stays carryable.");
             AutoEquipWeaponShield = BindServerConfig("Gravestone", "Auto-equip weapon and shield on pickup", true, "If set to true, the weapon and shield you were holding when you died are re-equipped when you pick up your gravestone.");
             DontDropQuickslotsOnDeath = BindServerConfig("Gravestone", "Dont drop quickslot items on death", false, "If set to true, the items in the quickslots stay with you when you die instead of dropping into the gravestone.");
+            DontDropHotbarEquipmentOnDeath = BindServerConfig("Gravestone", "Dont drop hotbar equipment on death", false, "If set to true, weapons, shields, tools, torches and armor in the hotbar (the first inventory row, keys 1-8) stay with you when you die instead of dropping into the gravestone. A weapon or shield you were holding is held again when you respawn. Ammo, food, potions and materials in the hotbar still drop.");
         }
 
         // Every overload below marks the entry IsAdminOnly, which is what makes Jotunn's

@@ -50,8 +50,8 @@ public abstract class MessagePanelBase : MonoBehaviour
         EpicLootAuga.ReplaceBackground(gameObject, withCornerDecoration: true);
         EpicLootAuga.FixFonts(gameObject);
 
-        EpicLootAuga.ReplaceButton(AcceptButton);
-        EpicLootAuga.ReplaceButton(DenyButton);
+        AcceptButton = EpicLootAuga.ReplaceButton(AcceptButton);
+        DenyButton = EpicLootAuga.ReplaceButton(DenyButton);
     }
 
     /// <summary>

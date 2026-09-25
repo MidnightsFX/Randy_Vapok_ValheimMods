@@ -60,6 +60,12 @@ public class MagicTextList
 
     public bool IsEnabled => _obj.activeSelf;
 
+    /// <summary>The cloned text area; shown while an Epic Loot page is.</summary>
+    public Transform Root => _obj.transform;
+
+    /// <summary>Room above the page content, for a search bar docked over it.</summary>
+    public void SetTopPadding(int pixels) => _layout.padding.top = pixels;
+
     public void ScrollBy(float pixels)
     {
         RectTransform viewport = _scrollRect.viewport ? _scrollRect.viewport : _scrollRect.transform as RectTransform;

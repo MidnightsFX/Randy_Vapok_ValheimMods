@@ -108,8 +108,8 @@
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Utility\Data\MagicaObjectId.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Manager\TransformManager\TransformManager.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Utility\NativeCollection\ExCostSortedList1.cs" />
-    <Compile Include="Assets\MagicaCloth2\Scripts\Core\Utility\NativeCollection\ExProcessingList.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Cloth\ClothDisableMode.cs" />
+    <Compile Include="Assets\MagicaCloth2\Scripts\Core\Utility\NativeCollection\ExProcessingList.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Utility\Time\TimeSpan.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Cloth\ClothSerializeData2.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Manager\Render\RenderSetupSerializeData.cs" />
@@ -158,8 +158,8 @@
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Utility\ResultCode\Exception.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Manager\Render\RenderSetupData.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Manager\Simulation\SimulationManagerNormal.cs" />
-    <Compile Include="Assets\MagicaCloth2\Scripts\Core\Cloth\Wind\WindParams.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Utility\Mesh\MeshUtility.cs" />
+    <Compile Include="Assets\MagicaCloth2\Scripts\Core\Cloth\Wind\WindParams.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Cloth\Collider\MagicaSphereCollider.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Utility\Math\MathUtility.cs" />
     <Compile Include="Assets\MagicaCloth2\Scripts\Core\Settings\ClothDebugSettings.cs" />
@@ -687,6 +687,10 @@
       <HintPath>Assets\ExternalLibraries\Jotunn.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Collections.LowLevel.ILSupport">
+      <HintPath>Library\PackageCache\com.unity.collections@84e8eb3fc12e\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>Library\PackageCache\com.unity.ext.nunit@031a54704bff\net40\unity-custom\nunit.framework.dll</HintPath>
       <Private>False</Private>
@@ -753,10 +757,6 @@
     </Reference>
     <Reference Include="com.rlabrecque.steamworks.net">
       <HintPath>Assets\ExternalLibraries\valheim\com.rlabrecque.steamworks.net.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Collections.LowLevel.ILSupport">
-      <HintPath>Library\PackageCache\com.unity.collections@84e8eb3fc12e\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">

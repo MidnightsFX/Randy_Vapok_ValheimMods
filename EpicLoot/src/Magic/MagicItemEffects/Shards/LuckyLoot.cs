@@ -206,9 +206,10 @@ namespace EpicLoot.MagicItemEffects.Shards {
 
         // Trophies and the two named boss keys are never multiplied.
         //
-        // The name check is not redundant with the m_onePerPlayer guard: EpicLoot's own
-        // CharacterDrop_GenerateDropList_Patch.Prefix *clears* m_onePerPlayer on Wishbone and CryptKey
-        // under the non-default boss drop modes, so that guard is defeatable by config. Excluding all
+        // The name check is not redundant with the m_onePerPlayer guard: that flag is only as reliable as
+        // whoever authored the drop, and a drop-table mod can clear it on Wishbone or CryptKey. (EpicLoot's
+        // own CharacterDrop_GenerateDropList_Patch suspends it while vanilla builds the list, but restores it
+        // in a postfix that runs ahead of this one.) Excluding all
         // trophies on top of that keeps Lucky Loot out of Headhunter's lane (DarkRed head) and draws a
         // legible line: Lucky Loot multiplies materials, not trophies.
         private static bool IsProtected(GameObject prefab) {

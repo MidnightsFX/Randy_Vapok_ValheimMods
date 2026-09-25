@@ -29,63 +29,11 @@ namespace EpicLoot.Crafting
             }
 
             InventoryGui inventoryGui = InventoryGui.instance;
-            AugmentChoiceDialog choiceDialog;
-            //if (EpicLoot.HasAuga)
-            //{
-                //var resultDialog = Auga.API.Workbench_CreateNewResultsPanel();
-                //resultDialog.SetActive(false);
-
-                //choiceDialog = resultDialog.AddComponent<AugmentChoiceDialog>();
-
-                //var icon = choiceDialog.transform.Find("InventoryElement/icon").GetComponent<Image>();
-                //choiceDialog.MagicBG = Object.Instantiate(icon, icon.transform.parent);
-                //choiceDialog.MagicBG.name = "MagicItemBG";
-                //choiceDialog.MagicBG.sprite = EpicLoot.GetMagicItemBgSprite();
-                //choiceDialog.MagicBG.color = Color.white;
-                //choiceDialog.MagicBG.rectTransform.anchorMin = new Vector2(0, 0);
-                //choiceDialog.MagicBG.rectTransform.anchorMax = new Vector2(1, 1);
-                //choiceDialog.MagicBG.rectTransform.sizeDelta = new Vector2(0, 0);
-                //choiceDialog.MagicBG.rectTransform.anchoredPosition = new Vector2(0, 0);
-
-                //choiceDialog.NameText = choiceDialog.transform.Find("Topic").GetComponent<TMP_Text>();
-
-                //var closeButton = choiceDialog.gameObject.GetComponentInChildren<Button>();
-                //Object.Destroy(closeButton.gameObject);
-
-                //var tooltipHeight = 360;
-                //var buttonStart = -220;
-                //if (augmentChoices > 3)
-                //{
-                //    var extra = augmentChoices - 3;
-                //    tooltipHeight -= extra * 40;
-                //    buttonStart += extra * 40;
-                //}
-
-                //var tooltip = (RectTransform)choiceDialog.transform.Find("TooltipScrollContainer");
-                //tooltip.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tooltipHeight);
-                //var scrollbar = (RectTransform)choiceDialog.transform.Find("ScrollBar");
-                //scrollbar.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tooltipHeight);
-
-                //for (var i = 0; i < augmentChoices; i++)
-                //{
-                //    //var button = Auga.API.MediumButton_Create(resultDialog.transform, $"AugmentButton{i}", string.Empty);
-                //    //Auga.API.Button_SetTextColors(button, Color.white, Color.white, Color.white, Color.white, Color.white, Color.white);
-                //    //button.navigation = new Navigation { mode = Navigation.Mode.None };
-
-                //    //var focus = Object.Instantiate(EpicLoot.LoadAsset<GameObject>("ButtonFocusAuga"), button.transform);
-                //    //focus.SetActive(false);
-                //    //focus.name = "ButtonFocus";
-
-                //    //var rt = (RectTransform)button.transform;
-                //    //rt.anchoredPosition = new Vector2(0, buttonStart - (i * 40));
-                //    //rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 295);
-                //    //choiceDialog.EffectChoiceButtons.Add(button);
-                //}
-            //}
-            //else
-            //{
-
-            //}
+            AugmentChoiceDialog choiceDialog = EpicLoot.HasAuga ? CreateAugaAugmentChoiceDialog(augmentChoices) : null;
+            if (choiceDialog != null)
+            {
+                return choiceDialog;
+            }
 
             float height = 550.0f;
             if (augmentChoices > 3)
@@ -144,6 +92,86 @@ namespace EpicLoot.Crafting
             return choiceDialog;
         }
 
+        /// <summary>
+        /// The augment choice dialog on one of Auga's crafting results panels: the item as an Auga tooltip
+        /// (AugmentChoiceDialog.Show fills it in, AugaTooltip adds the rarity background and effects) with the
+        /// choices as Auga buttons below it. Null when Auga cannot make a results panel.
+        /// </summary>
+        private static AugmentChoiceDialog CreateAugaAugmentChoiceDialog(int augmentChoices)
+        {
+            GameObject resultsPanel = Auga.API.Workbench_CreateNewResultsPanel();
+            if (resultsPanel == null)
+            {
+                return null;
+            }
+
+            resultsPanel.SetActive(false);
+            resultsPanel.name = "AugmentChoiceDialog";
+            if (EnchantingTableUI.instance != null)
+            {
+                resultsPanel.transform.SetParent(EnchantingTableUI.instance.transform, false);
+            }
+
+            AugmentChoiceDialog choiceDialog = resultsPanel.AddComponent<AugmentChoiceDialog>();
+            choiceDialog.IsAugaPanel = true;
+            choiceDialog.NameText = resultsPanel.transform.Find("Topic")?.GetComponent<TMPro.TMP_Text>();
+
+            // The choices close the dialog; the panel's own close button would skip the choice callback.
+            Transform closeButton = resultsPanel.transform.Find("CloseButton");
+            if (closeButton != null)
+            {
+                Object.Destroy(closeButton.gameObject);
+            }
+
+            float tooltipHeight = 360;
+            float buttonStart = -220;
+            if (augmentChoices > 3)
+            {
+                int extra = augmentChoices - 3;
+                tooltipHeight -= extra * 40;
+                buttonStart += extra * 40;
+            }
+
+            if (resultsPanel.transform.Find("TooltipScrollContainer") is RectTransform tooltip)
+            {
+                tooltip.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tooltipHeight);
+            }
+
+            if (resultsPanel.transform.Find("ScrollBar") is RectTransform scrollbar)
+            {
+                scrollbar.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tooltipHeight);
+            }
+
+            for (int i = 0; i < augmentChoices; i++)
+            {
+                Button button = Auga.API.MediumButton_Create(resultsPanel.transform, $"AugmentButton{i}", string.Empty);
+                if (button == null)
+                {
+                    Object.Destroy(resultsPanel);
+                    return null;
+                }
+
+                Auga.API.Button_SetTextColors(button, Color.white, Color.white, Color.white, Color.white, Color.white, Color.white);
+                button.navigation = new Navigation { mode = Navigation.Mode.None };
+
+                // AugmentChoiceDialog shows the gamepad focus through a "ButtonFocus" child; Auga's medium
+                // button carries one of its own.
+                if (button.transform.Find("ButtonFocus") == null)
+                {
+                    GameObject focus = Object.Instantiate(EpicLoot.LoadAsset<GameObject>("ButtonFocusAuga"), button.transform);
+                    focus.SetActive(false);
+                    focus.name = "ButtonFocus";
+                }
+
+                RectTransform rt = (RectTransform)button.transform;
+                rt.anchoredPosition = new Vector2(0, buttonStart - (i * 40));
+                rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 295);
+                choiceDialog.EffectChoiceButtons.Add(button);
+            }
+
+            return choiceDialog;
+        }
+
         public static T CreateDialog<T>(InventoryGui inventoryGui, string name, float height = 550) where T : Component
         {
             VariantDialog newDialog = Object.Instantiate(inventoryGui.m_variantDialog, inventoryGui.m_variantDialog.transform.parent);
@@ -186,7 +214,9 @@ namespace EpicLoot.Crafting
             string pip = EpicLoot.GetMagicEffectPip(magicItem.IsEffectAugmented(i));
             bool free = EnchantCostsHelper.EffectIsDeprecated(augmentableEffects[i].EffectType);
 
-            return $"{pip} {Localization.instance.Localize(MagicItem.GetEffectText(augmentableEffects[i], rarity, true))}" +
+            // The item's own legendary ID: these are effects already on the item, so a unique shows the
+            // range its legendary entry declares (if any) rather than the plain rarity table.
+            return $"{pip} {Localization.instance.Localize(MagicItem.GetEffectText(augmentableEffects[i], rarity, true, magicItem.LegendaryID))}" +
                 $"{(free ? " [<color=yellow>*FREE</color>]" : "")}";
         }
 

@@ -9,12 +9,13 @@ using static EquipmentAndQuickSlots.Slots;
 namespace EquipmentAndQuickSlots {
     // Death handling for the single enlarged tombstone.
     //
-    // Keep-on-death: kept slot items are pulled out of m_inventory in a Character.CheckDeath
-    // prefix at Priority.First — before vanilla or any other mod touches the inventory — so
-    // neither the tombstone transfer nor the DeathDeleteItems/DeathDeleteUnequipped world
-    // modifiers can reach them. Finalizers on CheckDeath and Player.OnDeath put them back.
-    // Kept equipment is re-marked m_equipped afterwards, so the death-save stores it worn and
-    // the respawn load re-equips it natively via EquipInventoryItems.
+    // Keep-on-death: kept items (slot items, plus equipable gear in the hotbar row when that
+    // setting is on) are pulled out of m_inventory in a Character.CheckDeath prefix at
+    // Priority.First — before vanilla or any other mod touches the inventory — so neither the
+    // tombstone transfer nor the DeathDeleteItems/DeathDeleteUnequipped world modifiers can
+    // reach them. Finalizers on CheckDeath and Player.OnDeath put them back. Kept equipment
+    // (held weapons included) is re-marked m_equipped afterwards, so the death-save stores it
+    // worn and the respawn load re-equips it natively via EquipInventoryItems.
     //
     // Everything else runs pure vanilla: MoveInventoryToGrave copies the full-height inventory
     // with grid positions intact, so dropped slot items return to their exact cells on take-all.
@@ -41,15 +42,21 @@ namespace EquipmentAndQuickSlots {
             SaveLastEquippedWeaponShieldToItems(player);
 
             foreach (Slot slot in slots) {
-                if (!IsSlotToKeep(slot))
-                    continue;
+                if (IsSlotToKeep(slot))
+                    KeepItem(player, slot.Item);
+            }
 
-                ItemDrop.ItemData item = slot.Item;
-                itemsToKeep.Add(new KeptItem { item = item, wasEquipped = item.m_equipped || player.IsItemEquiped(item) });
-                player.GetInventory().m_inventory.Remove(item);
+            if (ValConfig.DontDropHotbarEquipmentOnDeath.Value) {
+                foreach (ItemDrop.ItemData item in player.GetInventory().m_inventory.Where(IsHotbarEquipmentToKeep).ToList())
+                    KeepItem(player, item);
             }
 
             ClearCachedItems();
+        }
+
+        private static void KeepItem(Player player, ItemDrop.ItemData item) {
+            itemsToKeep.Add(new KeptItem { item = item, wasEquipped = item.m_equipped || player.IsItemEquiped(item) });
+            player.GetInventory().m_inventory.Remove(item);
         }
 
         private static bool IsSlotToKeep(Slot slot) {
@@ -61,6 +68,12 @@ namespace EquipmentAndQuickSlots {
                    || slot.IsQuickSlot && ValConfig.DontDropQuickslotsOnDeath.Value;
         }
 
+        // The hotbar is the whole first inventory row, the same cells vanilla binds to keys 1-8
+        // (Inventory.GetBoundItems). Only gear: ammo is equipable but it is a consumable stack.
+        private static bool IsHotbarEquipmentToKeep(ItemDrop.ItemData item) =>
+            item != null && item.m_gridPos.y == 0 && item.IsEquipable()
+            && item.m_shared.m_itemType != ItemDrop.ItemData.ItemType.Ammo;
+
         public static void OnDeathPostfix(Player player) {
             if (itemsToKeep.Count == 0)
                 return;
@@ -69,6 +82,9 @@ namespace EquipmentAndQuickSlots {
                 // Vanilla unequipped the gear through the humanoid's equip references while the
                 // item was outside the inventory; re-mark it so the death-save stores it worn.
                 kept.item.m_equipped = kept.wasEquipped;
+                // The held-weapon tag only matters for items coming back out of the grave. A kept
+                // one would keep it, and a later gravestone pickup would equip this item again.
+                kept.item.m_customData.Remove(customKeyWeaponShield);
                 player.GetInventory().m_inventory.Add(kept.item);
             }
 

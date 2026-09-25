@@ -8,7 +8,17 @@ namespace EpicLoot;
 [HarmonyPatch(typeof(TextsDialog), nameof(TextsDialog.Awake))]
 internal static class TextsDialog_Awake_Patch
 {
-    private static void Postfix(TextsDialog __instance) => __instance.gameObject.AddComponent<MagicPages>();
+    private static void Postfix(TextsDialog __instance)
+    {
+        // Auga's compendium holds a tutorial and a lore dialog (AugaTextsDialogTutorial / AugaTextsDialogLore);
+        // the pages belong with the tutorials only.
+        if (EpicLoot.HasAuga && __instance.name.IndexOf("Lore", System.StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            return;
+        }
+
+        __instance.gameObject.AddComponent<MagicPages>();
+    }
 }
 
 [HarmonyPatch(typeof(TextsDialog), nameof(TextsDialog.UpdateTextsList))]
@@ -16,16 +26,20 @@ internal static class TextsDialog_UpdateTextsList_Patch
 {
     private static void Postfix(TextsDialog __instance)
     {
-        if (!Player.m_localPlayer || MagicPages.instance == null)
+        // Each dialog lists its own page objects: a TextInfo carries the list element built for it, so one
+        // shared between two dialogs would be rewired by whichever set up last.
+        if (!Player.m_localPlayer || !__instance.TryGetComponent(out MagicPages pages) || !pages.IsReady)
         {
             return;
         }
 
-        __instance.m_texts.Insert(EpicLoot.HasAuga ? 0 : 2, MagicPages.instance.MagicEffectsPage);
-        __instance.m_texts.Insert(EpicLoot.HasAuga ? 1 : 3, MagicPages.instance.ExplainPage);
-        __instance.m_texts.Insert(EpicLoot.HasAuga ? 2 : 4, MagicPages.instance.TreasureBountyPage);
-        __instance.m_texts.Insert(EpicLoot.HasAuga ? 3 : 5, MagicPages.instance.SetInfos);
-        __instance.m_texts.Insert(EpicLoot.HasAuga ? 4 : 6, MagicPages.instance.ShardStonePage);
+        // Vanilla lists Active Effects and Logs first; Auga lists neither, so the pages go at the top.
+        int first = EpicLoot.HasAuga ? 0 : 2;
+        __instance.m_texts.Insert(first, pages.MagicEffectsPage);
+        __instance.m_texts.Insert(first + 1, pages.ExplainPage);
+        __instance.m_texts.Insert(first + 2, pages.TreasureBountyPage);
+        __instance.m_texts.Insert(first + 3, pages.SetInfos);
+        __instance.m_texts.Insert(first + 4, pages.ShardStonePage);
     }
 }
 
