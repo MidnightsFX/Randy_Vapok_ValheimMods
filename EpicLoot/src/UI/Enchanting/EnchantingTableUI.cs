@@ -41,10 +41,12 @@ namespace EpicLoot_UnityLib
 
             EnchantingUIController.SetupUIAudioSource(Audio);
 
+            // Before SetupTabs: the Auga fixup swaps every tab button, and the tab sorting, activation and
+            // feature status wiring below have to see the buttons that stay.
+            EnchantingUIAugaFixup.AugaFixup(this);
+
             instance.SetupTabs();
             instance.CollectGamepadHints();
-
-            EnchantingUIAugaFixup.AugaFixup(this);
         }
 
         private static void CreateUI(EnchantingTable source)

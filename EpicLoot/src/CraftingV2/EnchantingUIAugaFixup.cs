@@ -31,16 +31,19 @@ namespace EpicLoot.CraftingV2
             {
                 EpicLootAuga.FixFonts(panelBase.gameObject);
 
-                //var dividerParts = Auga.API.Divider_CreateLarge(panelBase.transform, "TitleDivider");
-                //var dividerRT = (RectTransform)dividerParts.Item1.transform;
-                //dividerRT.SetSiblingIndex(0);
-                //dividerRT.anchoredPosition = new Vector2(0, 295);
-                //dividerRT.sizeDelta = new Vector2(910, 40);
-                //Object.Destroy(dividerParts.Item2.GetComponent<ContentSizeFitter>());
-                //var contentRT = (RectTransform)dividerParts.Item2.transform;
-                //contentRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 300);
+                var dividerParts = Auga.API.Divider_CreateLarge(panelBase.transform, "TitleDivider");
+                if (dividerParts != null)
+                {
+                    var dividerRT = (RectTransform)dividerParts.Item1.transform;
+                    dividerRT.SetSiblingIndex(0);
+                    dividerRT.anchoredPosition = new Vector2(0, 295);
+                    dividerRT.sizeDelta = new Vector2(910, 40);
+                    Object.Destroy(dividerParts.Item2.GetComponent<ContentSizeFitter>());
+                    var contentRT = (RectTransform)dividerParts.Item2.transform;
+                    contentRT.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 300);
+                }
 
-                panelBase.MainButton = EpicLootAuga.ReplaceButtonFancy(panelBase.MainButton, false, true);
+                panelBase.ReplaceMainButton(EpicLootAuga.ReplaceButtonFancy(panelBase.MainButton, false, true));
                 
                 if (panelBase.AvailableItems != null)
                     AugaFixupMultiselectPrefab(panelBase.AvailableItems.ElementPrefab.gameObject);
@@ -110,57 +113,82 @@ namespace EpicLoot.CraftingV2
 
         public static void AugaFixupModeSelectButton(Toggle modeButton)
         {
-            //Object.Destroy(modeButton.GetComponent<Image>());
-            //var toggle = modeButton.GetComponent<Toggle>();
-            //toggle.toggleTransition = Toggle.ToggleTransition.None;
-            //var oldText = modeButton.transform.Find("Text").GetComponent<Text>();
-            //var newButton = Auga.API.MediumButton_Create(modeButton.transform, modeButton.name, oldText.text);
-            //newButton.transform.SetSiblingIndex(0);
-            //Object.Destroy(oldText.gameObject);
-            //var rt = (RectTransform)newButton.transform;
-            //rt.anchorMin = new Vector2(0, 0);
-            //rt.anchorMax = new Vector2(1, 1);
-            //rt.anchoredPosition = new Vector2(34, 0);
-            //rt.sizeDelta = new Vector2(0, -10);
+            var newButton = ReplaceToggleWithAugaButton(modeButton);
+            if (newButton == null)
+                return;
 
-            //newButton.onClick = new Button.ButtonClickedEvent();
-            //newButton.onClick.AddListener(() => toggle.OnSubmit(null));
-
-            //Object.Destroy(newButton.GetComponent<ButtonSfx>());
-            //Object.Destroy(newButton.GetComponent<UITooltip>());
+            var rt = (RectTransform)newButton.transform;
+            rt.anchoredPosition = new Vector2(34, 0);
+            rt.sizeDelta = new Vector2(0, -10);
         }
 
         public static void AugaFixupRaritySelectButton(Toggle rarityButton)
         {
-            //Object.Destroy(rarityButton.GetComponent<Image>());
-            //var toggle = rarityButton.GetComponent<Toggle>();
-            //toggle.toggleTransition = Toggle.ToggleTransition.None;
-            //var oldText = rarityButton.transform.Find("Text").GetComponent<Text>();
-            //var newButton = Auga.API.MediumButton_Create(rarityButton.transform, rarityButton.name, oldText.text);
-            //newButton.transform.SetSiblingIndex(0);
-            //Object.Destroy(oldText.gameObject);
-            //var rt = (RectTransform)newButton.transform;
-            //rt.anchorMin = new Vector2(0, 0);
-            //rt.anchorMax = new Vector2(1, 1);
-            //rt.anchoredPosition = new Vector2(0, 0);
-            //rt.sizeDelta = new Vector2(0, 0);
+            var oldLabel = rarityButton.transform.Find("Text")?.GetComponent<Graphic>();
+            var newButton = ReplaceToggleWithAugaButton(rarityButton);
+            if (newButton == null)
+                return;
 
-            //var rarityColor = toggle.GetComponent<SetRarityColor>();
-            //rarityColor.Graphics[0] = newButton.GetComponentInChildren<TMP_Text>();
-            //rarityColor.Refresh();
+            var rt = (RectTransform)newButton.transform;
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = Vector2.zero;
 
-            //var border = toggle.transform.Find("Border").GetComponent<Image>();
-            //var augaBorderAsset = EpicLoot.LoadAsset<GameObject>("ButtonFocusAuga");
-            //var augaBorderImage = augaBorderAsset.GetComponent<Image>();
-            //border.raycastTarget = false;
-            //border.sprite = augaBorderImage.sprite;
-            //border.pixelsPerUnitMultiplier = augaBorderImage.pixelsPerUnitMultiplier;
+            // The rarity colour now goes onto the Auga button's label, which must then stop taking the
+            // button's per-state text colours.
+            var rarityColor = rarityButton.GetComponent<SetRarityColor>();
+            var newLabel = newButton.GetComponentInChildren<TMP_Text>();
+            if (rarityColor != null && newLabel != null)
+            {
+                Auga.API.Button_OverrideTextColor(newButton, newLabel.color);
+                rarityColor.ReplaceGraphic(oldLabel, newLabel);
+            }
 
-            //newButton.onClick = new Button.ButtonClickedEvent();
-            //newButton.onClick.AddListener(() => toggle.OnSubmit(null));
+            var border = rarityButton.transform.Find("Border")?.GetComponent<Image>();
+            var augaBorderAsset = EpicLoot.LoadAsset<GameObject>("ButtonFocusAuga");
+            var augaBorderImage = augaBorderAsset != null ? augaBorderAsset.GetComponent<Image>() : null;
+            if (border != null && augaBorderImage != null)
+            {
+                border.raycastTarget = false;
+                border.sprite = augaBorderImage.sprite;
+                border.pixelsPerUnitMultiplier = augaBorderImage.pixelsPerUnitMultiplier;
+            }
+        }
 
-            //Object.Destroy(newButton.GetComponent<ButtonSfx>());
-            //Object.Destroy(newButton.GetComponent<UITooltip>());
+        /// <summary>
+        /// Puts an Auga medium button, stretched over the toggle, in place of the toggle's own background and
+        /// label. The toggle keeps its state and group; the button only forwards the click to it.
+        /// </summary>
+        private static Button ReplaceToggleWithAugaButton(Toggle toggle)
+        {
+            var oldLabel = toggle.transform.Find("Text");
+            var labelText = oldLabel != null ? EpicLootAuga.GetLabel(oldLabel) : string.Empty;
+            var newButton = Auga.API.MediumButton_Create(toggle.transform, toggle.name, labelText);
+            if (newButton == null)
+                return null;
+
+            var background = toggle.GetComponent<Image>();
+            if (background != null)
+            {
+                Object.Destroy(background);
+            }
+
+            toggle.toggleTransition = Toggle.ToggleTransition.None;
+            newButton.transform.SetSiblingIndex(0);
+            if (oldLabel != null)
+            {
+                Object.Destroy(oldLabel.gameObject);
+            }
+
+            var rt = (RectTransform)newButton.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+
+            newButton.onClick = new Button.ButtonClickedEvent();
+            newButton.onClick.AddListener(() => toggle.OnSubmit(null));
+
+            Object.Destroy(newButton.GetComponent<ButtonSfx>());
+            Object.Destroy(newButton.GetComponent<UITooltip>());
+            return newButton;
         }
     }
 }

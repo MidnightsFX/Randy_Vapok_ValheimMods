@@ -43,12 +43,9 @@ namespace EpicLoot.Adventure.Feature
             bool allowedToBuy = !(ELConfig.EnableLimitedBountiesInProgress.Value &&
                 bountyInProgressCount >= ELConfig.MaxInProgressBounties.Value);
 
-            if (MerchantPanel.AcceptBountyText != null)
-            {
-                MerchantPanel.AcceptBountyText.text = Localization.instance.Localize(
-                    !allowedToBuy ? string.Format("$mod_epicloot_merchant_max_bounties ({0})",
-                    ELConfig.MaxInProgressBounties.Value): "$mod_epicloot_merchant_acceptbounty");
-            }
+            MerchantPanel.SetAcceptBountyLabel(Localization.instance.Localize(
+                !allowedToBuy ? string.Format("$mod_epicloot_merchant_max_bounties ({0})",
+                ELConfig.MaxInProgressBounties.Value): "$mod_epicloot_merchant_acceptbounty"));
 
             MainButton.interactable = selectedItem != null && selectedItem.CanAccept && allowedToBuy;
         }

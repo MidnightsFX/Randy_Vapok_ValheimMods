@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -84,13 +85,73 @@ namespace EpicLoot.MagicItemEffects
         }
     }
 
+    // The skill *level* vanilla reads for gameplay -- a hit's m_skillLevel, which sets the Staff of Protection
+    // bubble's absorb; a summon's damage factor and how many may be out at once (SpawnAbility) -- as opposed to
+    // the skill factor, which the patch above already raises. Adding the bonus to Skills.GetSkillLevel outright
+    // would count it twice in GetSkillFactor (which reads GetSkillLevel, then gets the bonus above) and in the
+    // skills panel, so it is only added for the duration of a gameplay read: Character.GetSkillLevel, which
+    // every attack, projectile, area effect and item tooltip goes through, and SpawnAbility's spawn coroutine,
+    // which reads Skills.GetSkillLevel directly. A GetSkillFactor inside such a read (SkillIncrease's
+    // skill-as-skill effects call it) suspends the read, for the same double-count reason.
+    [HarmonyPatch]
+    public static class AddSkillLevel_GameplaySkillLevel_Patch
+    {
+        private static int _gameplayReads;
+
+        [HarmonyPatch(typeof(Skills), nameof(Skills.GetSkillLevel))]
+        [HarmonyPostfix]
+        private static void Skills_GetSkillLevel_Postfix(Skills __instance, SkillType skillType, ref float __result)
+        {
+            if (_gameplayReads > 0 && __instance.m_player != null && skillType != SkillType.None)
+            {
+                __result += AddSkillLevel_Skills_GetSkillFactor_Patch.SkillIncrease(__instance.m_player, skillType);
+            }
+        }
+
+        [HarmonyPatch(typeof(Character), nameof(Character.GetSkillLevel))]
+        [HarmonyPrefix]
+        private static void Character_GetSkillLevel_Prefix() => _gameplayReads++;
+
+        [HarmonyPatch(typeof(Character), nameof(Character.GetSkillLevel))]
+        [HarmonyFinalizer]
+        private static void Character_GetSkillLevel_Finalizer() => _gameplayReads--;
+
+        [HarmonyPatch(typeof(Skills), nameof(Skills.GetSkillFactor))]
+        [HarmonyPrefix]
+        private static void Skills_GetSkillFactor_Prefix(out int __state)
+        {
+            __state = _gameplayReads;
+            _gameplayReads = 0;
+        }
+
+        [HarmonyPatch(typeof(Skills), nameof(Skills.GetSkillFactor))]
+        [HarmonyFinalizer]
+        private static void Skills_GetSkillFactor_Finalizer(int __state) => _gameplayReads = __state;
+
+        [HarmonyPatch]
+        private static class SpawnAbility_Spawn_Patch
+        {
+            [UsedImplicitly]
+            private static MethodBase TargetMethod() =>
+                AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(SpawnAbility), nameof(SpawnAbility.Spawn)));
+
+            [UsedImplicitly]
+            private static void Prefix() => _gameplayReads++;
+
+            [UsedImplicitly]
+            private static void Finalizer() => _gameplayReads--;
+        }
+    }
+
     // These fix a bug in vanilla where skill factor cannot go over 100
     [HarmonyPatch(typeof(Skills), nameof(Skills.GetRandomSkillRange))]
     public static class Skills_GetRandomSkillRange_Patch
     {
         public static bool Prefix(Skills __instance, out float min, out float max, SkillType skillType)
         {
-            var skillValue = Mathf.Lerp(0.4f, 1.0f, __instance.GetSkillFactor(skillType));
+            // Unclamped: the factor is above 1 when an EpicLoot skill bonus takes a skill past 100, and a
+            // clamped Lerp threw that part away, so +skill added no damage at trained 100.
+            var skillValue = Mathf.LerpUnclamped(0.4f, 1.0f, __instance.GetSkillFactor(skillType));
             min = Mathf.Max(0, skillValue - 0.15f);
             max = skillValue + 0.15f;
             return false;
@@ -140,6 +201,8 @@ namespace EpicLoot.MagicItemEffects
             foreach (var element in elementList)
             {
                 var tooltipComponent = element.GetComponentInChildren<UITooltip>();
+                if (tooltipComponent == null)
+                    continue;
                 
                 if (EpicLoot.HasAuga)
                     tooltipComponent.m_topic = string.Empty;
@@ -157,6 +220,9 @@ namespace EpicLoot.MagicItemEffects
                     
                     if (EpicLoot.HasAuga) 
                         levelbar = Utils.FindChild(element.transform, "ProgressBarLevel");
+
+                    if (levelbar == null)
+                        continue;
                     
                     var extraLevelbar = Utils.FindChild(element.transform, "extrabar")?.gameObject;
                     
@@ -186,9 +252,13 @@ namespace EpicLoot.MagicItemEffects
 
                     if (EpicLoot.HasAuga)
                     {
+                        // Auga's skill element (SkillsPanelSkillController) rewrites its level text every second
+                        // and then calls SkillsDialog.Setup, so this is appended again after each rewrite.
                         levelText = Utils.FindChild(element.transform, "SkillLevel");
                         tooltipComponent.m_topic = $" <color={EpicLoot.GetRarityColor(ItemRarity.Magic)}>+{extraSkill}</color>";
-                        levelText.GetComponent<Text>().text += tooltipComponent.m_topic;
+                        var augaLevelText = levelText != null ? levelText.GetComponent<TMP_Text>() : null;
+                        if (augaLevelText != null)
+                            augaLevelText.text += tooltipComponent.m_topic;
                     }
                     else
                     {

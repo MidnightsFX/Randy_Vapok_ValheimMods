@@ -1,10 +1,77 @@
+**0.14.14**
+* Quick Configure: an in-game settings panel, opened from the Mod Config button on the main and pause menus
+    * Covers balance presets, features, loot and rarity tables, shardstones, enchanting, the merchant, bounties and the interface
+    * Hosts can also edit selected JSON config values, such as drop tables, bounty rewards, item gating and effect tunables
+    * Every row shows its config description on hover
+    * Replaces the first-run welcome panel with a one-time setup wizard
+    * The new client option `Show Quick Configure Button` hides the launcher entry
+* Fix for Stagger Duration shortening the stagger on most creatures instead of lengthening it
+* Fix for Stagger Duration from projectiles not applying in multiplayer
+* Fix for bounty creatures losing their extra health after a reload or when another player's game took them over
+    * With StarLevelSystem, the bonus now stays on the creature
+    * Without StarLevelSystem, a bounty creature loaded at full health keeps its extra health
+* Fix for set tooltips listing some set pieces more than once
+* Fix for Lucky Craft saving materials when building, planting and tempering; it now only applies to crafting
+* Uniques and item sets are no longer tied to one rarity
+    * Each entry in legendaries.json takes a `Rarities` list and can roll at any rarity, including Ancient and below Legendary
+    * The Heimdall and Ragnar sets now drop at Legendary, Mythic and Ancient
+    * Set pieces worn at different rarities count toward the same set; each bonus uses the rarity that enough pieces reach
+    * Guaranteed effects and set bonuses can declare `ValuesPerRarity` alongside their flat `Values`
+    * `MythicItems` and `MythicSets` still load, as entries enabled at Mythic, so existing configs and patches keep working
+    * Config problems (missing set pieces, a piece in two sets, a unique defined twice with different contents) are reported in the log
+* Fix for a set roll on an item no set piece fits producing a plain legendary instead of rolling a unique
+* Fix for two copies of the same set piece counting as two pieces
+* Fix for set tooltips counting pieces differently from the bonuses actually applied
+* Fix for set bonus armor being recalculated on every armor check
+* Set items of every rarity are labelled as such in their tooltip
+* The compendium lists each set once, with its rarities and bonus values
+* Console: `magicsetitem [id] [item|random] [rarity|random]` replaces `magicitemlegendary` and `magicitemmythic`; `magicitemset` takes an optional rarity, or `random` for a different rarity per piece
+* Boss per-player drops now add to the boss's normal drop instead of replacing it: each player after the first adds one trophy, wishbone or crypt key
+    * A boss with no players in range still drops its normal trophy; previously it could drop none
+    * The Crypt Key and Wishbone drop mode and range settings now take effect; both previously followed the trophy settings
+    * Players who hide their map position no longer count as near a boss close to the world centre
+
+
+**0.14.13**
+* Adds a repair system for bounties/treasure which had not previous spawned, due to 1.0 save migration
+* Fix for rune etching being free
+    * The rune tab's effect list is now locked during the countdown
+* Tempering Fixes 
+    * Fix for tempering an item without paying for it
+    * Fix for effects on unique legendaries and mythics not being temperable at all
+    * A failed temper no longer raises an effect that was below its rarity's minimum up to the minimum
+* Fix for identifying items consuming them without giving anything back
+* Fix for identifying several items at once handing back more items than were identified
+* The identify preview only lists items progression gating will actually hand out
+* In the "Player Must Have Crafted Item" drop mode, identifying no longer caps items at the biome of the last boss killed
+* Fix for extracting the last enchantment from a socketed item destroying its sockets and the shardstones in them
+* Extracting an enchantment no longer resets the item's augment history (which reset the rising re-augment cost), and augmented/tempered markers stay on the effects that earned them
+* Sacrifice, identify, rune etching and rune extraction only pay out for items they actually removed (no cost when cancelled, no gain either)
+* Unknown magic effects (a typo in legendaries.json, a removed mod) are skipped instead of being given made-up value ranges, and the missing-definition warning is logged once
+* Hold-Shift ranges, temper ranges and the augment and rune lists now show the correct range for effects on unique items
+* Blood Block's self-damage no longer triggers any effect
+* Forest's Aid and Icy Retribution now need an attacker; falls, lava and drowning no longer trigger them
+* Damage dealt by effects themselves is no longer treated as a weapon strike
+    * Reflect, Eikthyr's charge, Frost AOE, Trailblazer, the meteor, Icy Retribution, Corpse Rot and chain lightning no longer crit, double, pay Wager or Mercenary per target, lifesteal, execute, Slow, Paralyze or build Eikthyr charges
+* Fix for Reflect and other effects reading a creature's attack as your weapon whenever your game controlled the attacking creature
+* Arrows and thrown weapons now use the effects of the weapon that fired them
+* Executioner is only used up by a hit that carries Executioner
+* Fix for Wager refunding its stake on hits that did not kill (single player and hosts); Stamina on Kill and Queen's Everflow used the same check
+* Fix for Triple Shot and Double Magic Shot able to leave every weapon of that kind at reduced damage until restart, if an error happened mid-shot
+* Fix for Explosive Arrows' explosion hurting players without PvP enabled
+* The parry bonus in shield tooltips now shows the real multiplier
+* Fix for Immovable blocks failing silently once the stagger bar filled
+* Fix for blocked hits being converted to elemental damage twice
+* Eitr Shield and Coinplated now only pay for damage that gets past the Staff of Protection bubble, blocking, resistances and armor
+* Automatic Mead now judges the damage that will actually land, drinks at most one mead per hit, and works with Instant Mead
+* Skill enchantments now count wherever the game reads the skill level
+* Skill enchantments now add weapon damage past skill 100
+
+
+**0.14.12**
+* Fixes a bug with the new save system which would cause Bounties to get lost
+
 **0.14.11**
-* Quick Configure: an in-game settings panel, opened from the shared Mod Config button on the main menu and the pause menu
-    * Pages for balance presets, features, rarity tables, loot drops, shardstones, the enchanting table, the merchant, bounties, the interface, item colours, effect tuning and advanced options
-    * Edits the .cfg entries and a selected set of values from the JSON configs (host only); every row shows its config description on hover
-    * Includes editors for the treasure map costs per biome, for the item categories that gate drops behind bosses (iteminfo.json), for each biome's drop amounts and rarity weights (loottables.json), for the bounty targets and rewards per biome, and for every magic effect's tunables (magiceffects.json and the shardstone grid)
-    * Replaces the first-run welcome panel: the wizard opens once with a Welcome page, and the balance presets live on its Balance page
-    * A new client entry, `Show Quick Configure Button`, hides the launcher entry
 * Gamepad support for the enchanting table (Thanks ksavila!)
 * Gamepad support for the merchant panel (Thanks ksavila!)
 * The Compendium's magic pages now open when navigated to with a gamepad, and the right stick scrolls them

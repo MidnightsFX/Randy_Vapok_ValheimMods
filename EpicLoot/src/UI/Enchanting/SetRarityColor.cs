@@ -12,6 +12,7 @@ namespace EpicLoot_UnityLib
         public Graphic[] Graphics;
 
         private readonly Dictionary<Graphic, Color> _defaultColors = new Dictionary<Graphic, Color>();
+        private bool _awake;
 
         public void Awake()
         {
@@ -20,6 +21,35 @@ namespace EpicLoot_UnityLib
                 _defaultColors.Add(graphic, graphic.color);
             }
 
+            _awake = true;
+            Refresh();
+        }
+
+        /// <summary>Swaps one of the coloured graphics for another (the Auga fixup replaces the label), keeping its default colour.</summary>
+        public void ReplaceGraphic(Graphic oldGraphic, Graphic newGraphic)
+        {
+            int index = oldGraphic != null ? System.Array.IndexOf(Graphics, oldGraphic) : -1;
+            if (index < 0)
+            {
+                index = Graphics.Length;
+                System.Array.Resize(ref Graphics, index + 1);
+            }
+
+            Graphics[index] = newGraphic;
+
+            // Before Awake (the tab has not been shown yet) Awake itself records the default colours.
+            if (!_awake)
+            {
+                return;
+            }
+
+            Color defaultColor = oldGraphic != null && _defaultColors.TryGetValue(oldGraphic, out Color color) ? color : newGraphic.color;
+            if (oldGraphic != null)
+            {
+                _defaultColors.Remove(oldGraphic);
+            }
+
+            _defaultColors[newGraphic] = defaultColor;
             Refresh();
         }
 

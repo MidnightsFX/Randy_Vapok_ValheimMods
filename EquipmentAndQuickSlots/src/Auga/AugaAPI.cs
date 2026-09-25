@@ -1,63 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using HarmonyLib;
+using System;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+// Compile-time mirror of Project Auga's API (AugaAPI 1.6.0, Auga/API.cs in the Auga repo). Every body is a
+// stub: when Auga is installed, its APIManager rewrites this assembly as it loads (this mod declares the
+// randyknapp.mods.auga soft dependency, which is what opts it in) so that every reference to a type in the
+// Auga namespace resolves to Auga.dll instead. Methods are matched by name, parameter types and return type
+// and fields by name alone, so each signature here has to match Auga's exactly - a mismatch is left calling
+// the stub, or reads Auga's field as the wrong type. Without Auga nothing is rewritten, the stubs run, and
+// IsLoaded() answers false.
+//
+// Deliberately left out: CraftingControls / GetCraftingControls (unused, and CraftingControls needs
+// gui_framework). Do not add types to the Auga namespace that Auga itself does not have.
 namespace Auga
 {
-    public static class API
+    [PublicAPI]
+    internal static class API
     {
-        private static readonly Assembly _targetAssembly;
-
-        static API()
-        {
-            _targetAssembly = LoadAssembly();
-            if (_targetAssembly != null)
-            {
-                var harmony = new Harmony("mods.randyknapp.auga.API");
-                foreach (var method in typeof(API).GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public).Where(m => m.Name != "IsLoaded" && m.Name != "LoadAssembly"))
-                {
-                    harmony.Patch(method, transpiler: new HarmonyMethod(AccessTools.DeclaredMethod(typeof(API), nameof(Transpiler))));
-                }
-            }
-        }
-
-        // ReSharper disable once UnusedParameter.Local
-        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> _, MethodBase original)
-        {
-            var parameters = original.GetParameters().Select(p =>
-            {
-                var type = p.ParameterType;
-                if (type.Assembly == Assembly.GetExecutingAssembly() && _targetAssembly != null)
-                {
-                    type = _targetAssembly.GetType(type.FullName ?? string.Empty);
-                }
-                return type;
-            }).ToArray();
-
-            MethodBase originalMethod = _targetAssembly.GetType("Auga.API").GetMethod(original.Name, parameters);
-
-            for (var i = 0; i < parameters.Length; ++i)
-            {
-                yield return new CodeInstruction(OpCodes.Ldarg, i);
-            }
-
-            yield return new CodeInstruction(OpCodes.Call, originalMethod);
-            yield return new CodeInstruction(OpCodes.Ret);
-        }
-
-        public static Assembly LoadAssembly()
-        {
-            return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name == "Auga");
-        }
-
-        public static bool IsLoaded() => LoadAssembly() != null;
-
         public static string RedText = "#CD2121";
         public static string Red = "#AD1616";
         public static string Brown1 = "#EAE1D9";
@@ -75,11 +36,15 @@ namespace Auga
         public static string GoldDark = "#755608";
         public static string Green = "#1B9B37";
 
+        public static bool IsLoaded() => false;
+
+        // Fonts & Assets. The fonts are legacy UnityEngine.Font objects; the UI is TextMeshPro now.
         public static Font GetBoldFont() => null;
         public static Font GetSemiBoldFont() => null;
         public static Font GetRegularFont() => null;
         public static Sprite GetItemBackgroundSprite() => null;
 
+        // Panels & Buttons
         public static GameObject Panel_Create(Transform parent, Vector2 size, string name, bool withCornerDecoration) => null;
         public static Button SmallButton_Create(Transform parent, string name, string labelText) => null;
         public static Button MediumButton_Create(Transform parent, string name, string labelText) => null;
@@ -91,14 +56,21 @@ namespace Auga
         public static Tuple<GameObject, GameObject> Divider_CreateLarge(Transform parent, string name, float width = -1) => null;
         public static void Button_SetTextColors(Button button, Color normal, Color highlighted, Color pressed, Color selected, Color disabled, Color baseTextColor) { }
         public static void Button_OverrideTextColor(Button button, Color color) { }
+
+        // Tooltips
         public static void Tooltip_MakeSimpleTooltip(GameObject obj) { }
         public static void Tooltip_MakeItemTooltip(GameObject obj, ItemDrop.ItemData item) { }
+        public static void Tooltip_MakeFoodTooltip(GameObject obj, Player.Food food) { }
+        public static void Tooltip_MakeStatusEffectTooltip(GameObject obj, StatusEffect statusEffect) { }
+        public static void Tooltip_MakeSkillTooltip(GameObject obj, Skills.Skill skill) { }
 
+        // Player Panel Tabs
         public static bool PlayerPanel_HasTab(string tabID) => false;
         public static PlayerPanelTabData PlayerPanel_AddTab(string tabID, Sprite tabIcon, string tabTitleText, Action<int> onTabSelected) => null;
         public static bool PlayerPanel_IsTabActive(GameObject tabButton) => false;
         public static Button PlayerPanel_GetTabButton(int index) => null;
 
+        // Workbench Tabs
         public static bool Workbench_HasWorkbenchTab(string tabID) => false;
         public static WorkbenchTabData Workbench_AddWorkbenchTab(string tabID, Sprite tabIcon, string tabTitleText, Action<int> onTabSelected) => null;
         public static WorkbenchTabData Workbench_AddVanillaWorkbenchTab(string tabID, Sprite tabIcon, string tabTitleText, Action<int> onTabSelected) => null;
@@ -107,12 +79,19 @@ namespace Auga
         public static Button Workbench_GetUpgradeTabButton() => null;
         public static GameObject Workbench_CreateNewResultsPanel() => null;
 
-        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, Text t, object s, bool localize = true, bool overwrite = false) { }
-        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, object a, bool localize = true, bool overwrite = false) { }
-        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, object a, object b, bool localize = true, bool overwrite = false) { }
-        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, object a, object b, object parenthetical, bool localize = true, bool overwrite = false) { }
-        public static void TooltipTextBox_AddUpgradeLine(GameObject tooltipTextBoxGO, object label, object value1, object value2, string color2, bool localize = true, bool overwrite = false) { }
+        // Tooltip Text Boxes. The Text overloads take a legacy UnityEngine.UI.Text; Auga's own text boxes are TMP.
+        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, Text t, object s, bool localize = true) { }
+        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, Text t, object s, bool localize, bool overwrite) { }
+        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, object a, bool localize = true) { }
+        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, object a, bool localize, bool overwrite) { }
+        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, object a, object b, bool localize = true) { }
+        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, object a, object b, bool localize, bool overwrite) { }
+        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, object a, object b, object parenthetical, bool localize = true) { }
+        public static void TooltipTextBox_AddLine(GameObject tooltipTextBoxGO, object a, object b, object parenthetical, bool localize, bool overwrite) { }
+        public static void TooltipTextBox_AddUpgradeLine(GameObject tooltipTextBoxGO, object label, object value1, object value2, string color2, bool localize = true) { }
+        public static void TooltipTextBox_AddUpgradeLine(GameObject tooltipTextBoxGO, object label, object value1, object value2, string color2, bool localize, bool overwrite) { }
 
+        // Complex Tooltip
         public static void ComplexTooltip_AddItemTooltipCreatedListener(Action<GameObject, ItemDrop.ItemData> listener) { }
         public static void ComplexTooltip_AddFoodTooltipCreatedListener(Action<GameObject, Player.Food> listener) { }
         public static void ComplexTooltip_AddStatusEffectTooltipCreatedListener(Action<GameObject, StatusEffect> listener) { }
@@ -137,11 +116,13 @@ namespace Auga
         public static void ComplexTooltip_SetStatusEffect(GameObject complexTooltipGO, StatusEffect statusEffect) { }
         public static void ComplexTooltip_SetSkill(GameObject complexTooltipGO, Skills.Skill skill) { }
 
+        // Requirements Panel
         public static Image RequirementsPanel_GetIcon(GameObject requirementsPanelGO) => null;
         public static GameObject[] RequirementsPanel_RequirementList(GameObject requirementsPanelGO) => null;
         public static void RequirementsPanel_SetWires(GameObject requirementsPanelGO, RequirementWireState[] wireStates, bool canCraft) { }
 
-        public static Text CustomVariantPanel_Enable(string buttonLabel, Action<bool> onShow) => null;
+        // Custom Variant Panel
+        public static TMP_Text CustomVariantPanel_Enable(string buttonLabel, Action<bool> onShow) => null;
         public static void CustomVariantPanel_SetButtonLabel(string buttonLabel) { }
         public static void CustomVariantPanel_Disable() { }
     }

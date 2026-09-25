@@ -208,6 +208,22 @@ private static void TeleportInstant(this Player player, Vector3 position, Quater
 ### Example Legendary Item
 Add a custom legendary item, with its own specific enchantments, on a specific item type. 
 
+A unique rolls at the rarities in its `Rarities` list. The `LegendaryType` constructor registers it at that
+one rarity; the `params ItemRarity[]` constructor enables several, and `SetValuesForRarity` gives a
+guaranteed effect a different range per rarity (a rarity left unset uses the effect's flat values).
+Per-rarity uniques need an Epic Loot that supports them; an older one registers the unique at the first
+rarity listed and ignores the rest.
+
+```c#
+var legendary = new LegendaryInfo("FrostCrossbow", "Frozen Crossbow", "Colder with every age",
+    ItemRarity.Legendary, ItemRarity.Mythic, ItemRarity.Ancient);
+legendary.Requirements.AllowedSkillTypes.Add(Skills.SkillType.Crossbows);
+legendary.GuaranteedMagicEffects.Add(new GuaranteedMagicEffect("AddFrostDamage", 5, 10, 1)
+    .SetValuesForRarity(ItemRarity.Ancient, 10, 15, 1));
+```
+
+The original single-rarity form still works:
+
 ```c#
 var legendary = new LegendaryInfo(LegendaryType.Mythic, "EndlessCrossbow", "Rusty Crossbow", "Gods have favored you");
 legendary.Requirements.AllowedSkillTypes.Add(Skills.SkillType.Crossbows);
@@ -218,6 +234,12 @@ legendary.GuaranteedEffectCount = 3;
 
 ### Example Legendary Set
 Add a custom legendary set. Each of the set entries must also be added.
+
+A set's pieces roll at the set's `Rarities` (a piece's own list is ignored), and pieces worn at different
+rarities count together. Each bonus applies at the rarity that enough pieces reach: with two Ancient pieces
+and one Legendary, a 2-piece bonus uses its Ancient values and a 3-piece bonus its Legendary ones. Use
+`new LegendarySetInfo("DragonForm", "Dragon Form", ItemRarity.Mythic, ItemRarity.Ancient)` to enable
+several rarities, and `SetValuesForRarity` on a bonus's `Effect` for per-rarity values.
 
 ```C#
 LegendarySetInfo DragonSet = new LegendarySetInfo(LegendaryType.Mythic, "DragonForm", "Dragon Form");

@@ -17,6 +17,8 @@ public class MagicSearchField
 
     private const float WIDTH_PADDING = 20f;
 
+    private readonly bool _hasGlow;
+
     public MagicSearchField(Transform parent)
     {
         _obj = new GameObject("searchField");
@@ -28,11 +30,19 @@ public class MagicSearchField
         Input.targetGraphic = _background;
 
         _glow = new GameObject("glow").AddComponent<Image>();
-        var craftGlow = InventoryGui.instance.m_crafting.Find("RepairButton/Glow").GetComponent<Image>();
-        _glow.sprite = craftGlow.sprite;
-        _glow.type = craftGlow.type;
-        _glow.color = craftGlow.color;
-        _glow.material = craftGlow.material;
+        // The repair button's glow; under Auga m_crafting is the vanilla panel Auga destroyed, and the
+        // compendium can be built before the inventory exists at all. Without it there is no glow.
+        Transform crafting = InventoryGui.instance != null ? InventoryGui.instance.m_crafting : null;
+        Image craftGlow = crafting != null ? crafting.Find("RepairButton/Glow")?.GetComponent<Image>() : null;
+        _hasGlow = craftGlow != null;
+        if (_hasGlow)
+        {
+            _glow.sprite = craftGlow.sprite;
+            _glow.type = craftGlow.type;
+            _glow.color = craftGlow.color;
+            _glow.material = craftGlow.material;
+        }
+
         _glow.rectTransform.SetParent(_rect);
         _glow.rectTransform.localScale = Vector3.one;
         _glow.enabled = false;
@@ -53,7 +63,24 @@ public class MagicSearchField
         _placeholder.alignment = TextAnchor.MiddleLeft;
     }
 
-    public void EnableGlow(bool enable) => _glow.enabled = enable;
+    public void EnableGlow(bool enable) => _glow.enabled = enable && _hasGlow;
+
+    /// <summary>Centres the field along the top edge of its parent, <paramref name="margin"/> below it.</summary>
+    public void DockTop(float width, float height, float margin)
+    {
+        _rect.anchorMin = _rect.anchorMax = new Vector2(0.5f, 1f);
+        _rect.pivot = new Vector2(0.5f, 1f);
+        _rect.localScale = Vector3.one;
+        _rect.localRotation = Quaternion.identity;
+        _rect.anchoredPosition3D = new Vector3(0f, -margin, 0f);
+        SetSize(width, height);
+    }
+
+    public void SetBackgroundColor(Color color)
+    {
+        _background.sprite = null;
+        _background.color = color;
+    }
 
     public void SetPosition(Vector2 pos) => _rect.position = pos;
 

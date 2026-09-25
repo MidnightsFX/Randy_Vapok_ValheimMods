@@ -38,7 +38,11 @@ namespace EquipmentAndQuickSlots {
         private void Awake() {
             _instance = this;
 
+            // True only when Auga's APIManager pointed this assembly's Auga.* references at Auga.dll as it
+            // loaded (the soft dependency above opts it in); otherwise the stubs in src/Auga run.
             HasAuga = Auga.API.IsLoaded();
+            if (!HasAuga && BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("randyknapp.mods.auga"))
+                LogWarning("Project Auga is installed but its API did not attach to Equipment and Quick Slots; the Auga layout is off. Check the log for an APIManager error.");
 
             new ValConfig(Config);
 
@@ -74,17 +78,26 @@ namespace EquipmentAndQuickSlots {
             API.DetectSlotItemChanges();
         }
 
-        // Auga's HUD leaves less vertical room, so a bar still sitting on the stock default is
-        // nudged down to clear it. A user-moved bar is left alone.
+        // Auga keeps health, stamina and eitr in the bottom left corner, and the stock default puts
+        // the bar on top of health and stamina. A bar still on a position this mod wrote moves to the
+        // Auga one, and back to the stock default once Auga is gone; a bar the user moved is left
+        // alone. The bar hangs below its position (lower-left pivot over Auga's top-left slots), so
+        // y 74 is the highest that clears Auga's eitr bar; 3.0 wrote 86, which overlaps it.
+        private const float AugaQuickSlotsY = 74f;
+        private const float OldAugaQuickSlotsY = 86f;
+
         private static void FixQuickSlotPositionForAuga() {
-            if (!HasAuga)
-                return;
-
             var defaultPosition = (Vector2)ValConfig.QuickSlotsPosition.DefaultValue;
-            if (ValConfig.QuickSlotsPosition.Value != defaultPosition)
-                return;
+            var augaPosition = new Vector2(defaultPosition.x, AugaQuickSlotsY);
+            var oldAugaPosition = new Vector2(defaultPosition.x, OldAugaQuickSlotsY);
+            var position = ValConfig.QuickSlotsPosition.Value;
 
-            ValConfig.QuickSlotsPosition.Value = new Vector2(defaultPosition.x, 86);
+            if (HasAuga) {
+                if (position == defaultPosition || position == oldAugaPosition)
+                    ValConfig.QuickSlotsPosition.Value = augaPosition;
+            } else if (position == augaPosition || position == oldAugaPosition) {
+                ValConfig.QuickSlotsPosition.Value = defaultPosition;
+            }
         }
 
         private static void LoadAssets() {

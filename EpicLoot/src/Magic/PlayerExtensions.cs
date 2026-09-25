@@ -1,4 +1,5 @@
 ﻿using EpicLoot.LegendarySystem;
+using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -42,16 +43,21 @@ public static class PlayerExtensions
     public static List<MagicItemEffect> GetAllActiveSetMagicEffects(this Player player, string effectType = null)
     {
         List<MagicItemEffect> activeSetEffects = new List<MagicItemEffect>();
-        HashSet<LegendarySetInfo> equippedSets = player.GetEquippedSets();
-        foreach (LegendarySetInfo setInfo in equippedSets)
+        foreach (LegendarySetProgress progress in SetBonusEvaluator.GetEquippedSetProgress(player))
         {
-            int count = player.GetMagicEquippedSetPieces(setInfo.ID).Count;
-            foreach (SetBonusInfo setBonusInfo in setInfo.SetBonuses)
+            foreach (SetBonusInfo setBonusInfo in progress.Set.SetBonuses)
             {
-                if (count >= setBonusInfo.Count && (effectType == null || setBonusInfo.Effect.Type == effectType))
+                if (setBonusInfo.Effect == null || (effectType != null && setBonusInfo.Effect.Type != effectType))
                 {
-                    MagicItemEffect effect = new MagicItemEffect(setBonusInfo.Effect.Type, setBonusInfo.Effect.Values?.MinValue ?? MagicItemEffect.DefaultValue);
-                    activeSetEffects.Add(effect);
+                    continue;
+                }
+
+                // Each bonus applies at its own tier, so mixed-rarity pieces still count toward the set.
+                ItemRarity? tier = progress.GetTier(setBonusInfo);
+                if (tier.HasValue)
+                {
+                    activeSetEffects.Add(new MagicItemEffect(setBonusInfo.Effect.Type,
+                        SetBonusEvaluator.GetBonusValue(setBonusInfo, tier.Value)));
                 }
             }
         }
@@ -66,7 +72,7 @@ public static class PlayerExtensions
         {
             if (itemData.IsMagic(out MagicItem magicItem) && magicItem.IsLegendarySetItem())
             {
-                if (UniqueLegendaryHelper.TryGetLegendarySetInfo(magicItem.SetID, out LegendarySetInfo setInfo, out ItemRarity rarity))
+                if (UniqueLegendaryHelper.TryGetLegendarySetInfo(magicItem.SetID, out LegendarySetInfo setInfo))
                 {
                     sets.Add(setInfo);
                 }
@@ -95,6 +101,11 @@ public static class PlayerExtensions
         {
             totalValue -= magicItem.GetTotalEffectValue(effectType, scale, includeSocketed: true);
         }
+        else if (ignoreThisItem == null)
+        {
+            // Only non-zero while a thrown weapon's projectile is landing (see HitSource.FiringWeapon).
+            totalValue += MagicEffectsHelper.GetFiringWeaponAdjustment(player, effectType, scale);
+        }
 
         return totalValue;
     }
@@ -119,6 +130,10 @@ public static class PlayerExtensions
         return player.GetInventory().GetEquippedItems().Where(x => x.IsPartOfSet(setName)).ToList();
     }
 
+    /// <summary>
+    /// Every equipped item of the set, duplicates of one piece included. For bonus counting use
+    /// <see cref="SetBonusEvaluator.GetSetProgress(Player, LegendarySetInfo)"/>, which counts each piece once.
+    /// </summary>
     public static List<ItemDrop.ItemData> GetMagicEquippedSetPieces(this Player player, string setName)
     {
         return player.GetMagicEquipment().Where(x => x.IsPartOfSet(setName)).ToList();

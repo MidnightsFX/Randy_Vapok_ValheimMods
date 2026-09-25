@@ -190,69 +190,141 @@ namespace EpicLoot
         }
     }
 
+    // Boss per-player drops. Under the OnePerPlayer modes a boss's trophy, Wishbone and CryptKey each
+    // gain one extra copy for every counted player after the first. The mode only ever adds to the amount
+    // the list already carries (vanilla's roll plus whatever a mod ahead of us made of it), so it never
+    // lowers, replaces or resurrects a drop, and a kill with no one counted still drops the normal amount.
     [HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.GenerateDropList))]
     public static class CharacterDrop_GenerateDropList_Patch
     {
-        public static void Prefix(CharacterDrop __instance)
+        // Vanilla's m_onePerPlayer (Wishbone, CryptKey) replaces the drop's amount with the whole server's
+        // player count, which would leave nothing for the mode to add to. Where a mode owns such a drop the
+        // flag is suspended for this call only, so vanilla generates the drop's own amount; the postfix puts
+        // it back before any later postfix (Lucky Loot's boss-reward guard) reads it.
+        public static void Prefix(CharacterDrop __instance, out List<CharacterDrop.Drop> __state)
         {
-            if (__instance.m_character != null && __instance.m_character.IsBoss() &&
-                EpicLoot.GetBossTrophyDropMode() != BossDropMode.Default)
+            __state = null;
+            if (!IsBoss(__instance) || __instance.m_drops == null)
             {
-                foreach (CharacterDrop.Drop drop in __instance.m_drops)
+                return;
+            }
+
+            foreach (CharacterDrop.Drop drop in __instance.m_drops)
+            {
+                if (drop != null && drop.m_onePerPlayer && drop.m_prefab != null &&
+                    GetDropMode(drop.m_prefab, out _) != BossDropMode.Default)
                 {
-                    if (!(drop.m_prefab == null))
-                    {
-                        if ((drop.m_prefab.name.Equals("Wishbone") && EpicLoot.GetBossWishboneDropMode() != BossDropMode.Default) ||
-                            (drop.m_prefab.name.Equals("CryptKey") && EpicLoot.GetBossCryptKeyDropMode() != BossDropMode.Default))
-                            if (drop.m_onePerPlayer)
-                                drop.m_onePerPlayer = false;
-                    }
+                    drop.m_onePerPlayer = false;
+                    (__state ??= new List<CharacterDrop.Drop>()).Add(drop);
                 }
             }
         }
 
-        public static void Postfix(CharacterDrop __instance, ref List<KeyValuePair<GameObject, int>> __result)
+        public static void Postfix(CharacterDrop __instance, ref List<KeyValuePair<GameObject, int>> __result,
+            List<CharacterDrop.Drop> __state)
         {
-            if (__instance.m_character != null && __instance.m_character.IsBoss() && EpicLoot.GetBossTrophyDropMode() != BossDropMode.Default)
+            RestoreOnePerPlayer(__state);
+
+            if (__result == null || !IsBoss(__instance))
             {
-                for (int index = 0; index < __result.Count; index++)
+                return;
+            }
+
+            Vector3 position = __instance.m_character.transform.position;
+            // Once per prefab, so a drop table listing the same trophy twice doesn't pay out twice per player.
+            HashSet<GameObject> extended = new HashSet<GameObject>();
+            for (int index = 0; index < __result.Count; index++)
+            {
+                GameObject prefab = __result[index].Key;
+                int amount = __result[index].Value;
+                // An amount of zero is another mod suppressing the drop; leave it suppressed.
+                if (prefab == null || amount <= 0 || extended.Contains(prefab))
                 {
-                    KeyValuePair<GameObject, int> entry = __result[index];
-                    GameObject prefab = entry.Key;
-
-                    ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
-
-                    if (itemDrop == null || itemDrop.m_itemData == null)
-                    {
-                        continue;
-                    }
-
-                    if (itemDrop.m_itemData.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Trophy ||
-                        prefab.name.Equals("Wishbone") ||
-                        prefab.name.Equals("CryptKey"))
-                    {
-                        int dropCount;
-                        List<ZNet.PlayerInfo> playerList = ZNet.instance.GetPlayerList();
-                        switch (EpicLoot.GetBossTrophyDropMode())
-                        {
-                            case BossDropMode.OnePerPlayerOnServer:
-                                dropCount = playerList.Count;
-                                break;
-                            case BossDropMode.OnePerPlayerNearBoss:
-                                Vector3 position = __instance.m_character.transform.position;
-                                float range = EpicLoot.GetBossTrophyDropPlayerRange();
-                                dropCount = Math.Max(Player.GetPlayersInRangeXZ(position, range),
-                                    playerList.Count(x => Vector3.Distance(x.m_position, position) <= range));
-                                break;
-                            default:
-                                dropCount = 1;
-                                break;
-                        }
-
-                        EpicLoot.Log($"Dropping trophies: {dropCount} (mode={EpicLoot.GetBossTrophyDropMode()})");
-                        __result[index] = new KeyValuePair<GameObject, int>(prefab, dropCount);
-                    }
+                    continue;
                 }
+
+                BossDropMode mode = GetDropMode(prefab, out float range);
+                if (mode == BossDropMode.Default)
+                {
+                    continue;
+                }
+
+                extended.Add(prefab);
+                int extra = CountPlayers(mode, position, range) - 1;
+                if (extra <= 0)
+                {
+                    continue;
+                }
+
+                EpicLoot.Log($"Boss drop {prefab.name}: {amount} + {extra} for additional players (mode={mode})");
+                __result[index] = new KeyValuePair<GameObject, int>(prefab, amount + extra);
+            }
+        }
+
+        // Only has work left to do when GenerateDropList threw, since the postfix empties the list.
+        public static void Finalizer(List<CharacterDrop.Drop> __state)
+        {
+            RestoreOnePerPlayer(__state);
+        }
+
+        private static void RestoreOnePerPlayer(List<CharacterDrop.Drop> suspended)
+        {
+            if (suspended == null)
+            {
+                return;
+            }
+
+            foreach (CharacterDrop.Drop drop in suspended)
+            {
+                drop.m_onePerPlayer = true;
+            }
+            suspended.Clear();
+        }
+
+        private static bool IsBoss(CharacterDrop characterDrop)
+        {
+            return characterDrop != null && characterDrop.m_character != null && characterDrop.m_character.IsBoss();
+        }
+
+        // Wishbone and CryptKey follow their own settings; every other trophy follows the trophy settings.
+        private static BossDropMode GetDropMode(GameObject prefab, out float range)
+        {
+            switch (prefab.name)
+            {
+                case "Wishbone":
+                    range = EpicLoot.GetBossWishboneDropPlayerRange();
+                    return EpicLoot.GetBossWishboneDropMode();
+                case "CryptKey":
+                    range = EpicLoot.GetBossCryptKeyPlayerRange();
+                    return EpicLoot.GetBossCryptKeyDropMode();
+            }
+
+            ItemDrop itemDrop = prefab.GetComponent<ItemDrop>();
+            if (itemDrop?.m_itemData?.m_shared != null &&
+                itemDrop.m_itemData.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Trophy)
+            {
+                range = EpicLoot.GetBossTrophyDropPlayerRange();
+                return EpicLoot.GetBossTrophyDropMode();
+            }
+
+            range = 0f;
+            return BossDropMode.Default;
+        }
+
+        private static int CountPlayers(BossDropMode mode, Vector3 position, float range)
+        {
+            List<ZNet.PlayerInfo> playerList = ZNet.instance.GetPlayerList();
+            switch (mode)
+            {
+                case BossDropMode.OnePerPlayerOnServer:
+                    return playerList.Count;
+                case BossDropMode.OnePerPlayerNearBoss:
+                    // Characters this machine has loaded, or the server's list for anyone it hasn't. A player
+                    // hiding their map position is listed at the world origin, so never counts as near.
+                    return Math.Max(Player.GetPlayersInRangeXZ(position, range),
+                        playerList.Count(x => x.m_publicPosition && Vector3.Distance(x.m_position, position) <= range));
+                default:
+                    return 1;
             }
         }
     }

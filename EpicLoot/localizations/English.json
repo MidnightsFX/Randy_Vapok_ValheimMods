@@ -2160,6 +2160,10 @@
 
     "mod_epicloot_legendarysetlabel": "Legendary Set Item",
     "mod_epicloot_mythicsetlabel": "Mythic Set Item",
+    "mod_epicloot_ancientsetlabel": "Ancient Set Item",
+    "mod_epicloot_epicsetlabel": "Epic Set Item",
+    "mod_epicloot_raresetlabel": "Rare Set Item",
+    "mod_epicloot_magicsetlabel": "Magic Set Item",
     "mod_epicloot_Magic": "Magic",
     "mod_epicloot_Rare": "Rare",
     "mod_epicloot_Epic": "Epic",

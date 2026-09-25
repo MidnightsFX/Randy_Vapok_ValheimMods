@@ -400,6 +400,7 @@
     {
       "ID": "Heimdall",
       "Name": "$mod_epicloot_set_heimdall",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
       "LegendaryIDs": [
         "HeimdallTowerShield",
         "HeimdallHelmet",
@@ -415,6 +416,7 @@
     {
       "ID": "Ragnar",
       "Name": "$mod_epicloot_set_ragnar",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
       "LegendaryIDs": [
         "RagnarBattleAxe",
         "RagnarCape",
