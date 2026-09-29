@@ -121,6 +121,7 @@ public static partial class TerminalManager
             _ = new Command("globalkeys", "print active global keys", PrintGlobalKeys);
             _ = new Command("lootres", "print loot resolution: [creature] [level] [itemIndex]", PrintLootResolution, GetLootResolutionOptions);
             _ = new Command("resetcooldowns", "reset ability cooldowns", ResetAbilityCooldowns);
+            _ = new Command("hexen", "become a Hexen (JotunWitch): [off|scale] (toggle at 0.6 if omitted)", Hexen, GetHexenOptions);
             _ = new Command("debugluck", "print players luck factor in console", DebugLuck);
             _ = new Command("tooltipdebug", "write inventory item tooltips to disk", DebugTooltip);
             _ = new Command("tooltipdebugvanilla", "write inventory item tooltips to disk, without magic effects", DebugVanillaTooltip);
