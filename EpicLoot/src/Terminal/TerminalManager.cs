@@ -125,6 +125,7 @@ public static partial class TerminalManager
             _ = new Command("lootpreview", "print what a creature's or chest's loot tables roll per level after star scaling: [object] [maxLevel]", PrintLootPreview, GetLootPreviewOptions);
             _ = new Command("creaturesort", "give creatures without a loot table one from itemsorter.json's rules: [dry|all] (dry/all preview only)", RunCreatureSort, GetCreatureSortOptions);
             _ = new Command("resetcooldowns", "reset ability cooldowns", ResetAbilityCooldowns);
+            _ = new Command("hexen", "become a Hexen (JotunWitch): [off|scale] (toggle at 0.6 if omitted)", Hexen, GetHexenOptions);
             _ = new Command("debugluck", "print players luck factor in console", DebugLuck);
             _ = new Command("tooltipdebug", "write inventory item tooltips to disk", DebugTooltip);
             _ = new Command("tooltipdebugvanilla", "write inventory item tooltips to disk, without magic effects", DebugVanillaTooltip);
