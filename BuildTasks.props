@@ -11,7 +11,7 @@
     <!-- EpicLoot.dll runtime dependency closure (needed when authoring/baking the enchanting UI prefabs
          against the merged EpicLoot assembly in the Unity editor). Guarded so a missing package/lib on a
          given machine doesn't fail the copy target. -->
-    <Copy SourceFiles="$(SolutionDir)Packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries" Condition="Exists('$(SolutionDir)Packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll')" />
+    <Copy SourceFiles="$(GamePathManaged)Newtonsoft.Json.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries" Condition="Exists('$(GamePathManaged)Newtonsoft.Json.dll')" />
     <Copy SourceFiles="$(SolutionDir)Libs\System.Runtime.Serialization.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries" Condition="Exists('$(SolutionDir)Libs\System.Runtime.Serialization.dll')" />
     <Copy SourceFiles="$(GamePathManaged)\Assembly-CSharp.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" />
     <Copy SourceFiles="$(GamePathManaged)\assembly_valheim.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" />
@@ -29,5 +29,14 @@
     <Copy SourceFiles="$(GamePathManaged)\gui_framework.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" />
     <Copy SourceFiles="$(GamePathManaged)\com.rlabrecque.steamworks.net.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" />
     <Copy SourceFiles="$(GamePathManaged)\SoftReferenceableAssets.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" />
+    <!-- ItemDrop.ItemData.SharedData reaches VisEquipment, which holds MagicaCloth colliders. Without this
+         closure Mono cannot load SharedData in the editor and Unity silently drops every item's shared data
+         from the bundle. -->
+    <Copy SourceFiles="$(GamePathManaged)\MagicaClothV2.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" Condition="Exists('$(GamePathManaged)\MagicaClothV2.dll')" />
+    <Copy SourceFiles="$(GamePathManaged)\Unity.Burst.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" Condition="Exists('$(GamePathManaged)\Unity.Burst.dll')" />
+    <Copy SourceFiles="$(GamePathManaged)\Unity.Burst.Unsafe.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" Condition="Exists('$(GamePathManaged)\Unity.Burst.Unsafe.dll')" />
+    <Copy SourceFiles="$(GamePathManaged)\Unity.Collections.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" Condition="Exists('$(GamePathManaged)\Unity.Collections.dll')" />
+    <Copy SourceFiles="$(GamePathManaged)\Unity.Collections.LowLevel.ILSupport.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" Condition="Exists('$(GamePathManaged)\Unity.Collections.LowLevel.ILSupport.dll')" />
+    <Copy SourceFiles="$(GamePathManaged)\Unity.Mathematics.dll" DestinationFolder="$(SolutionUnity)Assets\ExternalLibraries\valheim" Condition="Exists('$(GamePathManaged)\Unity.Mathematics.dll')" />
   </Target>
 </Project>

@@ -4911,7 +4911,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 307672582731279886}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1254579870, guid: 2f9828d4dfcaa584280fbdd93cb3976a, type: 3}
+  m_Script: {fileID: 1254579870, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   EnchantingUIPrefab: {fileID: 4711453124207427240, guid: a22cb0cf95519874fbb5152b68e58827,
@@ -8046,7 +8046,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 692499500688793944}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -935680321, guid: 2f9828d4dfcaa584280fbdd93cb3976a, type: 3}
+  m_Script: {fileID: -935680321, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Rarity: 2
@@ -32082,7 +32082,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3710312909261974031}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -935680321, guid: 2f9828d4dfcaa584280fbdd93cb3976a, type: 3}
+  m_Script: {fileID: -935680321, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Rarity: 1
@@ -32250,7 +32250,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3856732692329818743}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 2018946289, guid: 2f9828d4dfcaa584280fbdd93cb3976a, type: 3}
+  m_Script: {fileID: 2018946289, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   SourceTable: {fileID: 2006865758942121268}
@@ -52198,7 +52198,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5362584265157364678}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 2018946289, guid: 2f9828d4dfcaa584280fbdd93cb3976a, type: 3}
+  m_Script: {fileID: 2018946289, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   SourceTable: {fileID: 2006865758942121268}
@@ -62469,7 +62469,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6046106307306378927}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -935680321, guid: 2f9828d4dfcaa584280fbdd93cb3976a, type: 3}
+  m_Script: {fileID: -935680321, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Rarity: 0
@@ -62652,7 +62652,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6127468981591724920}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 2018946289, guid: 2f9828d4dfcaa584280fbdd93cb3976a, type: 3}
+  m_Script: {fileID: 2018946289, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   SourceTable: {fileID: 2006865758942121268}
@@ -83229,7 +83229,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7028745980310496348}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 2018946289, guid: 2f9828d4dfcaa584280fbdd93cb3976a, type: 3}
+  m_Script: {fileID: 2018946289, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   SourceTable: {fileID: 2006865758942121268}
@@ -88157,7 +88157,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7139152573808780471}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 2018946289, guid: 2f9828d4dfcaa584280fbdd93cb3976a, type: 3}
+  m_Script: {fileID: 2018946289, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   SourceTable: {fileID: 2006865758942121268}

@@ -1,30 +1,27 @@
 fileFormatVersion: 2
-guid: 70bb3390a764b0448a6e4a40a527db08
+guid: 97d17793bfe62b147bf7ec3a12631d52
 PluginImporter:
   externalObjects: {}
-  serializedVersion: 2
+  serializedVersion: 3
   iconMap: {}
   executionOrder: {}
   defineConstraints: []
   isPreloaded: 0
   isOverridable: 0
   isExplicitlyReferenced: 0
-  validateReferences: 0
+  validateReferences: 1
   platformData:
-  - first:
-      Any: 
-    second:
+    Any:
       enabled: 1
       settings: {}
-  - first:
-      Editor: Editor
-    second:
-      enabled: 0
+    Editor:
+      enabled: 1
       settings:
         DefaultValueInitialized: true
-  - first:
-      Windows Store Apps: WindowsStoreApps
-    second:
+    Win64:
+      enabled: 1
+      settings: {}
+    WindowsStoreApps:
       enabled: 0
       settings:
         CPU: AnyCPU
