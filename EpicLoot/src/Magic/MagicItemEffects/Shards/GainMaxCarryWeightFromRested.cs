@@ -1,6 +1,8 @@
 namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a bonus to max carry weight based on the player's comfort level when rested.
     public static class GainMaxCarryWeightFromRested {
+        internal static int RestedComfort;
+
         // ModifyMaxCarryWeight handler invoked by SharedSEManModifyMaxCarryWeightPatch.
         public static void ModifyMaxCarryWeight(Player player, SEMan seman, ref float limit) {
             var perComfort = player.GetTotalActiveMagicEffectValue(
@@ -14,12 +16,11 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 return;
             }
 
-            var comfortLevel = player.GetComfortLevel();
-            if (comfortLevel <= 0) {
+            if (RestedComfort <= 0) {
                 return;
             }
 
-            limit += perComfort * comfortLevel;
+            limit += perComfort * RestedComfort;
         }
     }
 }
