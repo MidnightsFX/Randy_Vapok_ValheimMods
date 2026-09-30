@@ -2,14 +2,8 @@ using HarmonyLib;
 
 namespace EpicLoot.QuickConfig;
 
-// Start runs before the intro cinematic; QueueTutorial only queues a coroutine on the FejdStartup
-// that opens the wizard once the main menu is actually ready. Replaces the old WelcomeMessage patch.
-[HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
-internal static class QuickConfig_FejdStartup_Start_Patch {
-    private static void Postfix(FejdStartup __instance) {
-        QuickConfigureTool.QueueTutorial(__instance);
-    }
-}
+// The setup wizard no longer needs a FejdStartup.Start hook: QuickConfigureTool.Init queues it on the
+// shared startup popup queue (Common/src/Config/UI), which waits for the main menu itself.
 
 // Valheim reads Escape inline in Menu.Update, so while the panel is open the press must be swallowed
 // for that frame or it would also collapse the pause menu the panel was opened from. The broker's own

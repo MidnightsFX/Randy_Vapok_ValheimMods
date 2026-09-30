@@ -51,8 +51,11 @@ would read in the config file. Save writes the `.cfg` in one go; on the host, th
 targets and rewards per biome, treasure map costs per biome, the item categories that gate drops behind
 bosses, every effect's tunables) are written into `config/EpicLoot/baseconfig/` and reloaded live. A server admin who is not the host can
 change the server settings from the pause menu; the JSON rows are read-only there. The first launch
-opens the panel once as a setup wizard; `Show Welcome Message` in the config runs it again, and
-`Show Quick Configure Button` hides the launcher entry.
+opens the panel once as a setup wizard, once per user rather than once per mod manager profile: the
+record is `ModQuickConfig/FirstRun.cfg` next to your Valheim saves. Set `Welcome Wizard` in the config to
+`ShowNextLaunch` to run it again, or to `Never` to keep it closed in that profile.
+`Show Quick Configure Button` hides the launcher entry. The config update prompt opens after the wizard,
+and other mods' welcomes take turns with it rather than opening on top of it.
 
 ## Documentation
 

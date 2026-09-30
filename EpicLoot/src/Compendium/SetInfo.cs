@@ -37,16 +37,20 @@ public class SetInfo(string topic, bool showSearchBar = true) : MagicTextInfo(to
         List<ItemRarity> rarities = UniqueLegendaryHelper.GetRarities(set);
         List<string> content = [];
 
-        content.Add(string.Join(", ", rarities.Select(r =>
-            $"<color={EpicLoot.GetRarityColor(r)}>{EpicLoot.GetRarityDisplayName(r)}</color>")));
+        content.Add(SetDescriptions.FormatRarities(rarities));
 
         content.Add($"$mod_epicloot_set ({infos.Count}):");
+        bool anyFurtherRestricted = false;
         foreach (LegendaryInfo item in infos)
         {
-            string requirements = DescribeRequirements(item);
-            content.Add(requirements.Length > 0
-                ? $" - {item.Name} <color=#c0c0c0ff>({requirements})</color>"
-                : $" - {item.Name}");
+            string requirements = SetDescriptions.DescribePieceRequirements(item, out bool furtherRestricted);
+            anyFurtherRestricted |= furtherRestricted;
+            content.Add($" - {item.Name} <color=#c0c0c0ff>({requirements}{(furtherRestricted ? "*" : "")})</color>");
+        }
+
+        if (anyFurtherRestricted)
+        {
+            content.Add("<color=#c0c0c0ff>* $mod_epicloot_set_restricted</color>");
         }
 
         content.Add("$mod_epicloot_set_bonuses: ");
@@ -58,41 +62,11 @@ public class SetInfo(string topic, bool showSearchBar = true) : MagicTextInfo(to
                 continue;
             }
 
-            content.Add($" - ({bonus.Count}) {DescribeBonus(definition, bonus, rarities)}");
+            content.Add($" - ({bonus.Count}) {SetDescriptions.DescribeSetBonus(definition, bonus, rarities)}");
         }
 
         instance.MagicPagesTextArea.Add($"<size={MagicPages.LARGE_FONT_SIZE}>" +
                                         $"<color={EpicLoot.GetRarityColor(rarities.Max())}>" +
                                         $"{set.Name}</color></size>", content.ToArray());
-    }
-
-    // The real value, or one value per rarity when the bonus has per-rarity overrides that differ.
-    private static string DescribeBonus(MagicItemEffectDefinition definition, SetBonusInfo bonus, List<ItemRarity> rarities)
-    {
-        List<float> values = rarities.Select(r => SetBonusEvaluator.GetBonusValue(bonus, r)).ToList();
-        if (values.Distinct().Count() <= 1)
-        {
-            return MagicItem.GetEffectText(definition, values.FirstOrDefault());
-        }
-
-        string perRarity = string.Join(" / ", rarities.Select((r, i) =>
-            $"<color={EpicLoot.GetRarityColor(r)}>{values[i]:0.#}</color>"));
-        return $"{MagicItem.GetEffectTextGeneric(definition, "<b><color=yellow>X</color></b>")} (X = {perRarity})";
-    }
-
-    private static string DescribeRequirements(LegendaryInfo item)
-    {
-        MagicItemEffectRequirements requirements = item.Requirements;
-        if (requirements?.AllowedItemTypes?.Count > 0)
-        {
-            return string.Join(", ", requirements.AllowedItemTypes);
-        }
-
-        if (requirements?.AllowedSkillTypes?.Count > 0)
-        {
-            return string.Join(", ", requirements.AllowedSkillTypes);
-        }
-
-        return "";
     }
 }

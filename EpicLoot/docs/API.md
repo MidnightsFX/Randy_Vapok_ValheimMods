@@ -290,6 +290,12 @@ Registrations are cached and re-applied whenever `loottables.json` reloads or a 
 its copy, so they survive both. (`LootRoller.Initialize` clears the table map, which is why the re-apply
 matters — the same contract the content-registration endpoints have always had.)
 
+The JSON takes the same table shape as `loottables.json` — `LeveledLoot` levels plus the optional
+`StarScaling`, `Modifiers` and `StarMultiplier` — documented in [LootTables.md](LootTables.md). A table
+in the deprecated flat form (`Drops`/`Loot` directly on the table) is still accepted and converted to a
+level 1 entry, with a one-time warning in the log. A creature you give a table this way is never touched by
+the creature sorter, which only fills in creatures that have none.
+
 ---
 
 ## Content registration

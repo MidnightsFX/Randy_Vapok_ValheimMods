@@ -74,16 +74,21 @@ internal static class BountyTables {
 
     /// <summary>The on-disk file's targets (what the write rebuilds), or null when the file has no Bounties.Targets.</summary>
     internal static BountiesValue Read() {
-        JArray targets;
+        JObject root;
         try {
             string path = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), "adventuredata.json");
             if (File.Exists(path) == false) { return null; }
-            targets = JObject.Parse(File.ReadAllText(path))["Bounties"]?["Targets"] as JArray;
+            root = JObject.Parse(File.ReadAllText(path));
         } catch (Exception e) {
             EpicLoot.LogWarning($"Quick Configure could not read adventuredata.json for the bounty editor: {e.Message}");
             return null;
         }
-        if (targets == null) { return null; }
+        return Read(root);
+    }
+
+    /// <summary>The targets of any adventuredata.json root (the shipped default, for a page reset).</summary>
+    internal static BountiesValue Read(JObject root) {
+        if (root?["Bounties"]?["Targets"] is JArray targets == false) { return null; }
 
         BountiesValue value = new BountiesValue();
         foreach (JToken token in targets) {

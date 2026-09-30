@@ -3,7 +3,6 @@ using EpicLoot.Config;
 using HarmonyLib;
 using Jotunn.Managers;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using TMPro;
@@ -46,6 +45,7 @@ internal static class QuickConfigureTool {
     private static GameObject backBtn;
     private static GameObject nextBtn;
     private static GameObject finishBtn;
+    private static GameObject resetBtn;
     private static TMP_Text nextCaption;
     private static bool discardArmed;
     private static bool overhaulBackupConfirmed;
@@ -53,11 +53,6 @@ internal static class QuickConfigureTool {
     // What the pages edit, and what was live when the panel opened (or was last saved).
     private static StagedConfig staged;
     private static StagedConfig baseline;
-
-    // First-time setup: shown at most once a session. The FejdStartup it was queued on is kept so a
-    // new visit to the main menu can queue it again if the last one ended before the menu was ready.
-    private static bool tutorialShownThisSession;
-    private static FejdStartup tutorialQueuedOn;
 
     internal static bool IsOpen => panelRoot != null;
 
@@ -71,6 +66,7 @@ internal static class QuickConfigureTool {
         // in Common/src/Config/UI, so several mods share one button. See its README for the contract.
         ConfigUILauncher.Init();
         ApplyRegistration();
+        QueueWelcomeWizard();
     }
 
     // Also the SettingChanged handler for ShowQuickConfigButton.
@@ -128,39 +124,21 @@ internal static class QuickConfigureTool {
     //  First-time setup
     // ------------------------------------------------------------------------------------------------
 
-    // Called from the FejdStartup.Start postfix. Start runs before the intro cinematic, so this only
-    // queues: the coroutine lives on the FejdStartup, and dies with it if the player leaves the start
-    // scene first.
-    internal static void QueueTutorial(FejdStartup startup) {
-        if (startup == null || GUIManager.IsHeadless()) { return; }
-        if (TutorialWanted() == false || tutorialShownThisSession || tutorialQueuedOn == startup) { return; }
-        tutorialQueuedOn = startup;
-        startup.StartCoroutine(OpenTutorialWhenMenuReady(startup));
+    // Queued once, from Init, on the startup popup queue every mod carrying Common/src/Config/UI shares:
+    // it waits for the main menu to settle and opens the popups one at a time, so this never lands on
+    // top of another mod's welcome, or of the config update prompt queued behind it. Whether this user
+    // has seen it is kept per user rather than per profile; see ConfigUIFirstRun.
+    private static void QueueWelcomeWizard() {
+        ConfigUIFirstRun.QueueFirstRunPopup(ELConfig.WelcomeWizardKey, ELConfig.WelcomeWizardRevision,
+            ELConfig.WelcomeWizardMode, ConfigUIStartupPopups.OrderWelcome + 10, OpenWelcomeWizard, () => IsOpen);
     }
 
-    private static bool TutorialWanted() {
-        return ELConfig.AlwaysShowWelcomeMessage != null && ELConfig.AlwaysShowWelcomeMessage.Value;
-    }
-
-    private static IEnumerator OpenTutorialWhenMenuReady(FejdStartup startup) {
-        while (MainMenuReady(startup) == false) { yield return null; }
-        // The menu fades in once the cinematic ends; let it land before covering it.
-        yield return new WaitForSeconds(1f);
-        while (MainMenuReady(startup) == false) { yield return null; }
-        if (TutorialWanted() == false || tutorialShownThisSession || panelRoot != null) { yield break; }
+    // Declines when the panel is already up: someone reached it through Mod Config while this waited
+    // its turn.
+    private static bool OpenWelcomeWizard() {
+        if (IsOpen) { return false; }
         OpenPanel(tutorial: true);
-    }
-
-    // PlayIntroCinematic keeps m_mainMenu hidden until the video stops, whether it ends, is skipped,
-    // or never plays. The menu list is inactive under the character and world pickers, which are not
-    // a moment to interrupt either.
-    private static bool MainMenuReady(FejdStartup startup) {
-        return startup != null
-            && CinematicsManager.IsStartedPlaying() == false
-            && startup.m_mainMenu != null && startup.m_mainMenu.activeInHierarchy
-            && startup.m_menuList != null && startup.m_menuList.activeInHierarchy
-            && UnifiedPopup.IsVisible() == false
-            && GUIManager.CustomGUIFront != null;
+        return IsOpen;
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -177,7 +155,6 @@ internal static class QuickConfigureTool {
         // Built fresh every time, so every widget starts from the current configuration.
         DestroyPanel();
         tutorialMode = tutorial;
-        if (tutorial) { tutorialShownThisSession = true; }
         staged = StagedConfig.Snapshot();
         baseline = StagedConfig.Snapshot();
         bool built;
@@ -232,6 +209,8 @@ internal static class QuickConfigureTool {
         nextCaption = nextBtn != null ? QuickConfigUi.CaptionOf(nextBtn.GetComponent<Button>()) : null;
         finishBtn = WireNav(panel, "Finish", "$mod_epicloot_cfg_finish", OnFinishClicked,
             "Saves everything and closes the panel.");
+        resetBtn = WireNav(panel, "Reset", "$mod_epicloot_cfg_reset_page", OnResetPageClicked,
+            "Puts every setting on this page back to the value Epic Loot ships with. Nothing is written until you save.");
 
         pages = new List<PageInstance>();
         foreach (string pageName in PageOrder) {
@@ -304,6 +283,7 @@ internal static class QuickConfigureTool {
         }
 
         PageInstance shown = pages[currentPage];
+        if (resetBtn != null) { resetBtn.SetActive(shown.Binder.ResettableKeys().Count > 0); }
         shown.Binder.Refresh();
         if (shown.Binder.HasReadOnlyRows && IsHost() == false) {
             SetStatus(L("$mod_epicloot_cfg_readonly_offhost"), true);
@@ -331,6 +311,26 @@ internal static class QuickConfigureTool {
     private static void RefreshAll() {
         if (pages == null) { return; }
         foreach (PageInstance page in pages) { page.Binder.Refresh(); }
+    }
+
+    // Asks first: the reset replaces whatever this page has staged, saved or not.
+    private static void OnResetPageClicked() {
+        if (pages == null || currentPage < 0 || currentPage >= pages.Count) { return; }
+        PageInstance page = pages[currentPage];
+        bool asked = QuickConfigConfirm.Show("$mod_epicloot_cfg_reset_title", "$mod_epicloot_cfg_reset_body",
+            "$mod_epicloot_cfg_keep_editing", null, "$mod_epicloot_cfg_reset_confirm",
+            onKeep: null,
+            onDiscard: null,
+            onSaveClose: () => ResetPage(page));
+        if (asked == false) { ResetPage(page); }
+    }
+
+    private static void ResetPage(PageInstance page) {
+        if (staged == null || page == null) { return; }
+        int changed = QuickConfigDefaults.Reset(staged, page.Binder.ResettableKeys());
+        discardArmed = false;
+        RefreshAll();
+        SetStatus(L(changed > 0 ? "$mod_epicloot_cfg_reset_done" : "$mod_epicloot_cfg_reset_nothing"), true);
     }
 
     // The X. Unsaved changes get a chance to be kept.
@@ -407,9 +407,11 @@ internal static class QuickConfigureTool {
     }
 
     // Closing by any route finishes the first-time setup: the welcome page promises that the X is enough.
+    // Only the shared record is written: a "show it again next launch" ticked on the Advanced page and
+    // saved stays as it was saved.
     private static void ClosePanel() {
-        if (tutorialMode && ELConfig.AlwaysShowWelcomeMessage != null) {
-            ELConfig.AlwaysShowWelcomeMessage.Value = false;
+        if (tutorialMode) {
+            ConfigUIFirstRun.MarkSeen(ELConfig.WelcomeWizardKey, ELConfig.WelcomeWizardRevision);
         }
         DestroyPanel();
     }
@@ -428,6 +430,7 @@ internal static class QuickConfigureTool {
         backBtn = null;
         nextBtn = null;
         finishBtn = null;
+        resetBtn = null;
         nextCaption = null;
         tutorialMode = false;
         textFocusedLastFrame = false;

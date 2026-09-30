@@ -10,9 +10,10 @@ namespace EpicLoot.QuickConfig;
 
 /// <summary>
 /// One editable drop target of loottables.json: a tier template or boss at one creature level, or a
-/// chest. AmountText is the count:weight table (Drops), RarityText the per-rarity weights the target's
-/// Loot entries carry. Identity is Object + Occurrence (a boss's item table and shard table share the
-/// Object name) + Level.
+/// chest. Amount is the Drops table (how many items drop, count:weight), Rarity the per-rarity weights
+/// the target's Loot entries carry, one entry per rarity (index = rarity). Either is null when the file
+/// has none. Identity is Object + Occurrence (a boss's item table and shard table share the Object
+/// name) + Level.
 /// </summary>
 internal sealed class BiomeDropRow {
     internal string Biome = BiomeDropTables.Other;
@@ -20,8 +21,8 @@ internal sealed class BiomeDropRow {
     internal int Occurrence;
     internal int? Level;
     internal string Label = "";
-    internal string AmountText = "";
-    internal string RarityText = "";
+    internal List<WeightEntry> Amount;
+    internal List<WeightEntry> Rarity;
     /// <summary>True when the target's Loot entries carry different Rarity arrays; the first is shown.</summary>
     internal bool Mixed;
     /// <summary>Length of the first Rarity array in the file (5 or 6), so a write can keep a 5-wide file 5-wide.</summary>
@@ -31,11 +32,11 @@ internal sealed class BiomeDropRow {
 
     internal BiomeDropRow Clone() => new BiomeDropRow {
         Biome = Biome, Object = Object, Occurrence = Occurrence, Level = Level, Label = Label,
-        AmountText = AmountText, RarityText = RarityText, Mixed = Mixed, RarityLength = RarityLength
+        Amount = WeightTable.Clone(Amount), Rarity = WeightTable.Clone(Rarity), Mixed = Mixed, RarityLength = RarityLength
     };
 
     internal static bool Same(BiomeDropRow a, BiomeDropRow b) {
-        return a.Id == b.Id && a.AmountText == b.AmountText && a.RarityText == b.RarityText;
+        return a.Id == b.Id && WeightTable.Same(a.Amount, b.Amount) && WeightTable.Same(a.Rarity, b.Rarity);
     }
 }
 
@@ -65,8 +66,11 @@ internal static class BiomeDropTables {
     // ------------------------------------------------------------------------------------------------
 
     /// <summary>The rows for the live loot config, grouped by biome in progression order then Other; null when not loaded.</summary>
-    internal static List<BiomeDropRow> Read() {
-        LootTable[] tables = LootRoller.Config?.LootTables;
+    internal static List<BiomeDropRow> Read() => Read(LootRoller.Config);
+
+    /// <summary>The rows of any loot config (the shipped default, for a page reset); its tables must be leveled.</summary>
+    internal static List<BiomeDropRow> Read(LootConfig config) {
+        LootTable[] tables = config?.LootTables;
         if (tables == null) { return null; }
 
         // Creatures that reference a template give the template its label.
@@ -84,23 +88,23 @@ internal static class BiomeDropTables {
         Dictionary<string, int> occurrences = new Dictionary<string, int>(StringComparer.Ordinal);
         foreach (LootTable table in tables) {
             if (table == null || string.IsNullOrEmpty(table.Object) || string.IsNullOrEmpty(table.RefObject) == false) { continue; }
-            bool leveled = table.LeveledLoot != null && table.LeveledLoot.Count > 0;
-            if (leveled == false && table.Drops == null) { continue; }
+            // Every table is LeveledLoot by the time it is loaded (LootTableMigration).
+            if (table.LeveledLoot == null || table.LeveledLoot.Count == 0) { continue; }
 
             occurrences.TryGetValue(table.Object, out int occurrence);
             occurrences[table.Object] = occurrence + 1;
-            string biome = GroupOf(table.Object);
-            string suffix = OccurrenceSuffix(table, occurrence);
             references.TryGetValue(table.Object, out List<string> creatures);
+            string biome = GroupOf(table.Object, creatures);
+            string suffix = OccurrenceSuffix(table, occurrence);
 
-            if (leveled) {
-                foreach (LeveledLootDef def in table.LeveledLoot) {
-                    if (def == null) { continue; }
-                    rows.Add(MakeRow(biome, table.Object, occurrence, def.Level, def.Drops, def.Loot,
-                        $"{table.Object} · level {def.Level}{suffix}{CreatureList(creatures)}"));
-                }
-            } else {
-                rows.Add(MakeRow(biome, table.Object, occurrence, null, table.Drops, table.Loot, table.Object + suffix));
+            // A single-level table (chests, and templates collapsed onto one anchor) needs no level label.
+            bool singleLevel = table.LeveledLoot.Count(def => def != null) == 1;
+            foreach (LeveledLootDef def in table.LeveledLoot) {
+                if (def == null) { continue; }
+                string label = singleLevel
+                    ? $"{table.Object}{suffix}{CreatureList(creatures)}"
+                    : $"{table.Object} · level {def.Level}{suffix}{CreatureList(creatures)}";
+                rows.Add(MakeRow(biome, table.Object, occurrence, def.Level, def.Drops, def.Loot, label));
             }
         }
 
@@ -116,7 +120,7 @@ internal static class BiomeDropTables {
     private static BiomeDropRow MakeRow(string biome, string obj, int occurrence, int? level, float[][] drops, LootDrop[] loot, string label) {
         BiomeDropRow row = new BiomeDropRow {
             Biome = biome, Object = obj, Occurrence = occurrence, Level = level, Label = label,
-            AmountText = drops != null ? QuickConfigBindings.FormatRarityTable(drops) : ""
+            Amount = drops != null ? WeightTable.FromRows(drops) : null
         };
         float[] first = null;
         if (loot != null) {
@@ -130,16 +134,16 @@ internal static class BiomeDropTables {
                 }
             }
         }
-        row.RarityText = first != null ? FormatRarity(first) : "";
+        row.Rarity = first != null ? WeightTable.FromWeights(first, Rarities.Count) : null;
         return row;
     }
 
     // A boss's second table with the same Object name is its shard table; anything else is numbered.
     private static string OccurrenceSuffix(LootTable table, int occurrence) {
         if (occurrence == 0) { return ""; }
-        IEnumerable<LootDrop> loot = table.LeveledLoot != null && table.LeveledLoot.Count > 0
+        IEnumerable<LootDrop> loot = table.LeveledLoot != null
             ? table.LeveledLoot.Where(def => def?.Loot != null).SelectMany(def => def.Loot)
-            : table.Loot ?? Array.Empty<LootDrop>();
+            : Array.Empty<LootDrop>();
         List<LootDrop> entries = loot.Where(entry => entry != null).ToList();
         bool shards = entries.Count > 0 && entries.All(entry => (entry.Item ?? "").IndexOf("Shard", StringComparison.OrdinalIgnoreCase) >= 0);
         return shards ? " (shards)" : $" #{occurrence + 1}";
@@ -180,9 +184,47 @@ internal static class BiomeDropTables {
         return group == Other ? Other : QuickConfigBindings.BiomeDisplayName(group);
     }
 
-    private static string GroupOf(string obj) {
-        string biome = TemplateBiome(obj) ?? BossBiome(obj) ?? ChestBiome(obj);
+    private static string GroupOf(string obj, List<string> creatures) {
+        string biome = CreatureBiome(creatures) ?? LadderBiome(obj) ?? TemplateBiome(obj) ?? BossBiome(obj) ?? ChestBiome(obj);
         return string.IsNullOrEmpty(biome) ? Other : biome;
+    }
+
+    // Where most of the creatures using a template live, as the creature sorter placed them on its last
+    // run. Tier numbers are not biomes (Meadows creatures use Tier0Mob), so this beats any name rule.
+    private static string CreatureBiome(List<string> creatures) {
+        List<CreatureDecision> decisions = CreatureSorterRunner.LastDecisions;
+        if (decisions == null || creatures == null || creatures.Count == 0) { return null; }
+        HashSet<string> names = new HashSet<string>(creatures, StringComparer.Ordinal);
+        string biome = decisions
+            .Where(decision => decision.Biome != null && names.Contains(decision.Name))
+            .GroupBy(decision => decision.Biome, StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(group => group.Count())
+            .Select(group => group.Key)
+            .FirstOrDefault();
+        return biome != null ? RegistryName(biome) ?? biome : null;
+    }
+
+    // The first biome, in progression order, whose itemsorter Creatures ladder uses the template as its
+    // Normal rung, else at any rung.
+    private static string LadderBiome(string obj) {
+        Dictionary<string, AutoAddEnchantableItems.SortingData> sorter = AutoAddEnchantableItems.Config?.BiomeSorterData;
+        if (sorter == null) { return null; }
+        List<(string Biome, CreatureLadder Ladder)> ladders = new List<(string, CreatureLadder)>();
+        foreach (KeyValuePair<string, AutoAddEnchantableItems.SortingData> pair in sorter) {
+            string biome = pair.Value?.Creatures != null ? RegistryName(pair.Key) : null;
+            if (biome != null) { ladders.Add((biome, pair.Value.Creatures)); }
+        }
+        List<string> order = GroupOrder();
+        ladders = ladders.OrderBy(entry => GroupIndex(order, entry.Biome)).ToList();
+        foreach ((string biome, CreatureLadder ladder) in ladders) {
+            if (string.Equals(ladder.Normal, obj, StringComparison.Ordinal)) { return biome; }
+        }
+        foreach ((string biome, CreatureLadder ladder) in ladders) {
+            foreach (CreatureClass rung in Enum.GetValues(typeof(CreatureClass))) {
+                if (string.Equals(ladder.Get(rung), obj, StringComparison.Ordinal)) { return biome; }
+            }
+        }
+        return null;
     }
 
     // Tier{N}Mob / Tier{N}EliteMob belong to the biome whose sorter entry names that tier.
@@ -257,55 +299,13 @@ internal static class BiomeDropTables {
     }
 
     // ------------------------------------------------------------------------------------------------
-    //  Rarity weights text form
+    //  Rarity weights
     // ------------------------------------------------------------------------------------------------
 
     private static float[] Padded(float[] rarity) {
         float[] padded = new float[Rarities.Count];
         for (int i = 0; i < padded.Length && i < rarity.Length; i++) { padded[i] = rarity[i]; }
         return padded;
-    }
-
-    /// <summary>"75, 25, 0, 0, 0, 0": one weight per rarity, padded to Rarities.Count.</summary>
-    internal static string FormatRarity(float[] rarity) {
-        return string.Join(", ", Padded(rarity).Select(weight => weight.ToString("0.###", CultureInfo.InvariantCulture)));
-    }
-
-    /// <summary>Parses comma-separated weights (at most one per rarity, padded with zeros), each 0 or more, at least one above 0.</summary>
-    internal static bool ParseRarity(string text, out float[] weights, out string error) {
-        weights = null;
-        error = null;
-        if (string.IsNullOrWhiteSpace(text)) {
-            error = "enter one weight per rarity, for example 75, 25, 0, 0, 0, 0.";
-            return false;
-        }
-        string[] parts = text.Split(',');
-        if (parts.Length > Rarities.Count) {
-            error = $"at most {Rarities.Count} weights (one per rarity, Magic to {Rarities.Highest}).";
-            return false;
-        }
-        float[] parsed = new float[Rarities.Count];
-        bool any = false;
-        for (int i = 0; i < parts.Length; i++) {
-            string part = parts[i].Trim();
-            if (part.Length == 0) { continue; }
-            if (float.TryParse(part, NumberStyles.Float, CultureInfo.InvariantCulture, out float weight) == false) {
-                error = $"'{part}' is not a number.";
-                return false;
-            }
-            if (weight < 0f) {
-                error = $"weight {part} must be 0 or more.";
-                return false;
-            }
-            parsed[i] = weight;
-            any |= weight > 0f;
-        }
-        if (any == false) {
-            error = "at least one rarity weight must be above 0.";
-            return false;
-        }
-        weights = parsed;
-        return true;
     }
 
     /// <summary>How many weights to write: the file's own width when it was narrower and the extra weights are all 0.</summary>

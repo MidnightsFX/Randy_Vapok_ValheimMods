@@ -15,7 +15,7 @@ using Object = UnityEngine.Object;
 /// EpicLoot/src/QuickConfig/README.md; keep the two in step. The generator exists so the initial set of
 /// prefabs is reproducible: "Build Row Templates" and "Build Shell And Overlays" overwrite their outputs,
 /// "Build Missing Pages" only creates pages that do not exist yet so hand edits in the editor survive,
-/// and "Rebuild All Pages" is the deliberate reset.
+/// and "Rebuild Selected Pages" / "Rebuild All Pages" are the deliberate resets.
 ///
 /// The prefabs carry no EpicLoot components, by design: a row is identified by its GameObject name and a
 /// page by its root name, so the prefabs never depend on the mod assembly (and they open cleanly in an
@@ -42,6 +42,7 @@ public static class QuickConfigPrefabBuilder
     private const float RowH = 34f;
     private const float SubRowH = 26f;
     private const float LabelW = 200f;
+    private const float SmallButtonW = 40f;
 
     private static readonly Color Beige = Hex("#CDBE91");
     private static readonly Color Yellow = Hex("#FFE083");
@@ -55,28 +56,49 @@ public static class QuickConfigPrefabBuilder
     //  Menu
     // ------------------------------------------------------------------------------------------------
 
+    // Every row template and its builder, in build order. Pages may nest any of these.
+    private static readonly (string Name, Action Build)[] RowTemplates =
+    {
+        ("Row_Toggle", BuildToggleRow),
+        ("Row_Slider", BuildSliderRow),
+        ("Row_Cycle", BuildCycleRow),
+        ("Row_Picker", BuildPickerRow),
+        ("Row_TextField", BuildTextFieldRow),
+        ("Row_Flags", BuildFlagsRow),
+        ("Row_Button", BuildButtonRow),
+        ("Row_Header", BuildHeaderRow),
+        ("Row_Text", BuildTextRow),
+        ("Row_Color", BuildColorRow),
+        ("Row_ListEditor", BuildListEditorRow),
+        ("Row_BiomeCosts", BuildBiomeCostsRow),
+        ("Row_ItemCategories", BuildItemCategoriesRow),
+        ("Row_BiomeDrops", BuildBiomeDropsRow),
+        ("Row_EffectConfigs", BuildEffectConfigsRow),
+        ("Row_Bounties", BuildBountiesRow),
+        ("Row_RarityCounts", BuildRarityCountsRow),
+        ("Row_UpgradeCosts", BuildUpgradeCostsRow),
+    };
+
     [MenuItem("Mod/Quick Configure/Build Row Templates")]
     public static void BuildRowTemplates()
     {
+        BuildRowTemplates(RowTemplates.Select(template => template.Name).ToArray());
+    }
+
+    // Writes only the named templates, so a new or reworked one does not rewrite the others.
+    public static void BuildRowTemplates(params string[] names)
+    {
         EnsureFolders();
-        BuildToggleRow();
-        BuildSliderRow();
-        BuildCycleRow();
-        BuildPickerRow();
-        BuildTextFieldRow();
-        BuildFlagsRow();
-        BuildButtonRow();
-        BuildHeaderRow();
-        BuildTextRow();
-        BuildColorRow();
-        BuildListEditorRow();
-        BuildBiomeCostsRow();
-        BuildItemCategoriesRow();
-        BuildBiomeDropsRow();
-        BuildEffectConfigsRow();
-        BuildBountiesRow();
+        HashSet<string> wanted = new HashSet<string>(names ?? new string[0]);
+        int written = 0;
+        foreach ((string name, Action build) in RowTemplates)
+        {
+            if (!wanted.Contains(name)) { continue; }
+            build();
+            written++;
+        }
         AssetDatabase.SaveAssets();
-        Debug.Log("[QuickConfig] Row templates written to " + RowsDir);
+        Debug.Log("[QuickConfig] Wrote " + written + " row template(s) to " + RowsDir);
     }
 
     [MenuItem("Mod/Quick Configure/Build Shell And Overlays")]
@@ -102,6 +124,25 @@ public static class QuickConfigPrefabBuilder
         BuildPages(overwrite: true);
     }
 
+    // Select page prefabs in the Project window first. Only those are reset to this script's table.
+    [MenuItem("Mod/Quick Configure/Rebuild Selected Pages (overwrite)")]
+    public static void RebuildSelectedPages()
+    {
+        RebuildPages(Selection.objects.OfType<GameObject>().Select(go => go.name).ToArray());
+    }
+
+    public static void RebuildPages(params string[] pageNames)
+    {
+        HashSet<string> only = new HashSet<string>(pageNames ?? new string[0]);
+        only.IntersectWith(Pages.Select(page => page.Name));
+        if (only.Count == 0)
+        {
+            Debug.LogWarning("[QuickConfig] No Quick Configure page selected; select page prefabs in " + PagesDir + " first.");
+            return;
+        }
+        BuildPages(overwrite: true, only);
+    }
+
     [MenuItem("Mod/Quick Configure/Build Everything")]
     public static void BuildEverything()
     {
@@ -122,6 +163,13 @@ public static class QuickConfigPrefabBuilder
         public string Label;
         public float Height;
         public string ButtonText;
+        public RowDef[] Children;   // a Row_Group: these rows side by side
+        public float Width;         // > 0: fixed width as a Row_Group cell
+        public bool Flexible;       // a Row_Group cell that shares the remaining width
+        public string[] Hidden;     // children of the row switched off (a group cell showing only its Value)
+        public float LabelWidth;    // > 0: the Label's fixed width
+        public int LabelSize;       // > 0: label font size, centred vertically
+        public bool AutoHeight;     // the row takes the height its content asks for
 
         public RowDef(string template, string key, string label, float height = 0f, string buttonText = null)
         {
@@ -166,9 +214,49 @@ public static class QuickConfigPrefabBuilder
     private static RowDef L(string key, string label) => new RowDef("Row_ListEditor", key, label, 300f);
     private static RowDef BC(string key, string label) => new RowDef("Row_BiomeCosts", key, label, 270f);
     private static RowDef IC(string key, string label) => new RowDef("Row_ItemCategories", key, label, 300f);
-    private static RowDef BD(string key, string label) => new RowDef("Row_BiomeDrops", key, label, 220f);
+    private static RowDef BD(string key, string label, float height = 220f) => new RowDef("Row_BiomeDrops", key, label, height);
     private static RowDef EC(string key, string label) => new RowDef("Row_EffectConfigs", key, label, 470f);
     private static RowDef BT(string key, string label) => new RowDef("Row_Bounties", key, label, 540f);
+
+    // A Row_Group places rows side by side in one line of the column; the mod binds its children like
+    // the column's own (see README). Cells are fixed-width or share what is left equally.
+    private const string GroupName = "Row_Group";
+    private static RowDef G(params RowDef[] cells) => new RowDef(GroupName, "", "") { Children = cells };
+    private static RowDef Fixed(RowDef cell, float width) { cell.Width = width; return cell; }
+    private static RowDef Flex(RowDef cell) { cell.Flexible = true; return cell; }
+    private static RowDef Hide(RowDef row, params string[] children) { row.Hidden = children; return row; }
+    private static RowDef Short(RowDef group) { group.Height = SubRowH; return group; }
+
+    // A row sized by its content (a Flags row's grid grows with the enum), with a narrower label.
+    private static RowDef Tall(RowDef row, float labelWidth) { row.AutoHeight = true; row.LabelWidth = labelWidth; return row; }
+
+    // Column captions over group lines: small text cells laid out like the cells below them.
+    private static RowDef Caption(string text)
+    {
+        RowDef caption = X("", text, SubRowH);
+        caption.LabelSize = 13;
+        return caption;
+    }
+
+    // An extra-boss-drop line: the mode (short label, cycle), then the player range as a bare value box.
+    private const float RangeCellW = 76f;
+    private static RowDef BossLine(string modeKey, string label, string rangeKey)
+    {
+        RowDef mode = C(modeKey, label);
+        mode.LabelWidth = 100f;
+        return G(Flex(mode), Fixed(Hide(S(rangeKey, ""), "Label", "Slider"), RangeCellW));
+    }
+
+    // A feature-level line of the enchanting table page: the feature, then its default and max level.
+    private const float FeatureNameW = 110f;
+    private static RowDef FeatureLine(string feature, string label)
+    {
+        RowDef name = X("", label, RowH);
+        name.LabelSize = 15;
+        return G(Fixed(name, FeatureNameW),
+            Flex(Hide(F("json:enchantingupgrades:DefaultFeatureLevels." + feature, label + " default"), "Label")),
+            Flex(Hide(F("json:enchantingupgrades:MaximumFeatureLevels." + feature, label + " max"), "Label")));
+    }
 
     private static readonly PageDef[] Pages =
     {
@@ -183,52 +271,23 @@ public static class QuickConfigPrefabBuilder
             B("action:url:patchnotes", "$mod_epicloot_cfg_welcome_patchnotes"),
         }),
 
-        new PageDef("Page_Balance", "$mod_epicloot_cfg_page_balance", new[]
-        {
-            H("Balance template"),
-            B("action:preset:balanced", "$mod_epicloot_cfg_preset_balanced", "Recommended: enchantments are powerful, stronger enemies stay a threat."),
-            B("action:preset:minimal", "$mod_epicloot_cfg_preset_minimal", "Reduced enchantment power, for vanilla difficulty."),
-            B("action:preset:legendary", "$mod_epicloot_cfg_preset_legendary", "Legacy balancing; players can become godlike."),
-            X("readout:template", "", 30f),
-            C("BalanceConfigurationType", "Balance Template"),
-            X("", "$mod_epicloot_cfg_balance_note", 40f),
-            H("Drops"),
-            S("GlobalDropRateModifier", "Global Drop Rate Modifier"),
-            C("_gatedItemTypeModeConfig", "Item Drop Limits"),
-            S("SetItemDropChance", "Set Item Drop Chance"),
-        }),
-
-        new PageDef("Page_Rarity", "$mod_epicloot_cfg_page_rarity",
+        new PageDef("Page_Balance", "$mod_epicloot_cfg_page_balance",
             new[]
             {
-                H("Effects per rarity (count:weight)"),
-                F("json:loottables:MagicEffectsCount.Magic", "Magic"),
-                F("json:loottables:MagicEffectsCount.Rare", "Rare"),
-                F("json:loottables:MagicEffectsCount.Epic", "Epic"),
-                F("json:loottables:MagicEffectsCount.Legendary", "Legendary"),
-                F("json:loottables:MagicEffectsCount.Mythic", "Mythic"),
-                F("json:loottables:MagicEffectsCount.Ancient", "Ancient"),
-                X("", "Each entry is a possible number of effects and its relative weight, e.g. 1:80, 2:18, 3:2.", 40f),
+                H("Balance template"),
+                B("action:preset:balanced", "$mod_epicloot_cfg_preset_balanced", "Recommended: enchantments are powerful, stronger enemies stay a threat."),
+                B("action:preset:minimal", "$mod_epicloot_cfg_preset_minimal", "Reduced enchantment power, for vanilla difficulty."),
+                B("action:preset:legendary", "$mod_epicloot_cfg_preset_legendary", "Legacy balancing; players can become godlike."),
+                X("readout:template", "", 30f),
+                C("BalanceConfigurationType", "Balance Template"),
+                X("", "$mod_epicloot_cfg_balance_note", 40f),
+                H("Drops"),
+                S("GlobalDropRateModifier", "Global Drop Rate Modifier"),
+                C("_gatedItemTypeModeConfig", "Item Drop Limits"),
+                S("SetItemDropChance", "Set Item Drop Chance"),
+                T("HealthCriticalEffectsEnabled", "Health Critical Enchantments"),
+                T("TransferMagicItemToCrafts", "Transfer Enchants to Crafted Items"),
             },
-            new[]
-            {
-                H("Sockets per rarity (count:weight)"),
-                F("json:loottables:SocketCounts.Magic", "Magic"),
-                F("json:loottables:SocketCounts.Rare", "Rare"),
-                F("json:loottables:SocketCounts.Epic", "Epic"),
-                F("json:loottables:SocketCounts.Legendary", "Legendary"),
-                F("json:loottables:SocketCounts.Mythic", "Mythic"),
-                F("json:loottables:SocketCounts.Ancient", "Ancient"),
-                X("", "Each entry is a possible socket count and its relative weight. Brokkr's Gift can raise an item up to the highest count listed here.", 40f),
-            },
-            bottom: new[]
-            {
-                H("Drops by biome"),
-                BD("json:loottables:LootTables", "Per creature tier level and chest: drop amount (count:weight) and rarity weights"),
-            },
-            bottomShare: 0.44f),
-
-        new PageDef("Page_LootDrops", "$mod_epicloot_cfg_page_lootdrops",
             new[]
             {
                 H("Drop mix"),
@@ -236,17 +295,29 @@ public static class QuickConfigPrefabBuilder
                 S("ShardStoneDropRatio", "Shard Stone Drop Ratio"),
                 S("ItemsUnidentifiedDropRatio", "Unidentified Drop Ratio"),
                 S("MaterialsDropRatio", "Materials Drop Ratio"),
-                X("readout:dropmix", "", 30f),
-                H("Items"),
-                T("TransferMagicItemToCrafts", "Transfer Enchants to Crafted Items"),
-                T("DeferChestLootRoll", "Defer Chest Loot Roll"),
-                H("Boss drops"),
-                C("_bossTrophyDropMode", "Boss Trophy Drop Mode"),
-                S("_bossTrophyDropPlayerRange", "Boss Trophy Player Range"),
-                C("_bossCryptKeyDropMode", "Crypt Key Drop Mode"),
-                S("_bossCryptKeyDropPlayerRange", "Crypt Key Player Range"),
-                C("_bossWishboneDropMode", "Wishbone Drop Mode"),
-                S("_bossWishboneDropPlayerRange", "Wishbone Player Range"),
+                X("readout:dropmix", "", 40f),
+                new RowDef("Row_RarityCounts", "json:loottables:RarityCounts", "Enchantments and sockets of", 356f),
+            }),
+
+        new PageDef("Page_Rarity", "$mod_epicloot_cfg_page_rarity", new[]
+        {
+            H("Drops by biome"),
+            BD("json:loottables:LootTables", "Loot table", 560f),
+        }),
+
+        new PageDef("Page_LootDrops", "$mod_epicloot_cfg_page_lootdrops",
+            new[]
+            {
+                H("Extra boss drops for more players"),
+                Short(G(Fixed(Caption("Drop"), 110f), Flex(Caption("Mode")), Fixed(Caption("Range (m)"), RangeCellW))),
+                BossLine("_bossTrophyDropMode", "Trophies", "_bossTrophyDropPlayerRange"),
+                BossLine("_bossCryptKeyDropMode", "Crypt Key", "_bossCryptKeyDropPlayerRange"),
+                BossLine("_bossWishboneDropMode", "Wishbone", "_bossWishboneDropPlayerRange"),
+                BossLine("ModerDropMode", "Moder", "ModerDropPlayerRange"),
+                BossLine("YagluthDropMode", "Yagluth", "YagluthDropPlayerRange"),
+                BossLine("QueenDropMode", "The Queen", "QueenDropPlayerRange"),
+                BossLine("FaderDropMode", "Fader", "FaderDropPlayerRange"),
+                BossLine("FrozenKingDropMode", "Frozen King", "FrozenKingDropPlayerRange"),
             },
             new[]
             {
@@ -267,10 +338,12 @@ public static class QuickConfigPrefabBuilder
                 C("ShardStackingMode", "Shard Stack Mode"),
                 S("ShardStackDecayFactor", "Shard Stack Decay Factor"),
                 C("RuneExtractItemMode", "Rune Extract Mode"),
+                C("RuneSetExtractItemMode", "Set Rune Extract Mode"),
             },
             new[]
             {
                 H("Brokkr's Gift"),
+                X("", "Brokkr's Gift adds shard sockets to an item you already own: drag a Legendary, Mythic or Ancient gift onto a magic item. Each tier adds the slots set below, up to the most sockets the item's rarity can roll (the Sockets table on the Balance page). A failed roll still uses up the gift.", 60f),
                 T("AllowGiftOnItemsWithSlots", "Allow Gift On Items With Slots"),
                 S("LegendaryGiftSlotsAdded", "Legendary Slots Added"),
                 S("MythicGiftSlotsAdded", "Mythic Slots Added"),
@@ -278,7 +351,6 @@ public static class QuickConfigPrefabBuilder
                 S("LegendaryGiftSuccessChance", "Legendary Success Chance"),
                 S("MythicGiftSuccessChance", "Mythic Success Chance"),
                 S("AncientGiftSuccessChance", "Ancient Success Chance"),
-                X("", "Brokkr's Gift is an artifact that adds shard sockets to an item you already own, up to the most its rarity allows. Each tier of gift adds the slots set above.", 60f),
                 H("Shard globals"),
                 S("json:shardstones:Global.Values.MovementPenaltyReference", "Movement Penalty Reference"),
                 S("json:shardstones:Global.Values.BloodBlockSelfDamagePercent", "Blood Block Self Damage %"),
@@ -289,27 +361,27 @@ public static class QuickConfigPrefabBuilder
             {
                 H("Table"),
                 T("EnchantingTableUpgradesActive", "Enchanting Table Upgrades Active"),
-                FL("EnchantingTableActivatedTabs", "Table Features Active"),
+                Tall(FL("EnchantingTableActivatedTabs", "Active features"), 90f),
                 H("Table UI"),
                 T("ShowEnchantSelectionChance", "Show Enchant Selection Chance"),
                 T("ShowEquippedAndHotbarItemsInSacrificeTab", "Show Equipped & Hotbar In Sacrifice"),
             },
             new[]
             {
-                H("Feature levels (default / max, -1 = locked)"),
-                F("json:enchantingupgrades:DefaultFeatureLevels.Sacrifice", "Sacrifice default"),
-                F("json:enchantingupgrades:MaximumFeatureLevels.Sacrifice", "Sacrifice max"),
-                F("json:enchantingupgrades:DefaultFeatureLevels.ConvertMaterials", "Convert default"),
-                F("json:enchantingupgrades:MaximumFeatureLevels.ConvertMaterials", "Convert max"),
-                F("json:enchantingupgrades:DefaultFeatureLevels.Enchant", "Enchant default"),
-                F("json:enchantingupgrades:MaximumFeatureLevels.Enchant", "Enchant max"),
-                F("json:enchantingupgrades:DefaultFeatureLevels.Augment", "Augment default"),
-                F("json:enchantingupgrades:MaximumFeatureLevels.Augment", "Augment max"),
-                F("json:enchantingupgrades:DefaultFeatureLevels.Disenchant", "Disenchant default"),
-                F("json:enchantingupgrades:MaximumFeatureLevels.Disenchant", "Disenchant max"),
-                F("json:enchantingupgrades:DefaultFeatureLevels.Rune", "Rune default"),
-                F("json:enchantingupgrades:MaximumFeatureLevels.Rune", "Rune max"),
-            }),
+                H("Feature levels (-1 = locked)"),
+                Short(G(Fixed(Caption("Feature"), FeatureNameW), Flex(Caption("Default")), Flex(Caption("Max")))),
+                FeatureLine("Sacrifice", "Sacrifice"),
+                FeatureLine("ConvertMaterials", "Convert"),
+                FeatureLine("Enchant", "Enchant"),
+                FeatureLine("Augment", "Augment"),
+                FeatureLine("Disenchant", "Disenchant"),
+                FeatureLine("Rune", "Rune"),
+            },
+            bottom: new[]
+            {
+                new RowDef("Row_UpgradeCosts", "json:enchantingupgrades:UpgradeCosts", "Upgrade costs of", 280f),
+            },
+            bottomShare: 0.47f),
 
         new PageDef("Page_Merchant", "$mod_epicloot_cfg_page_merchant",
             new[]
@@ -378,6 +450,7 @@ public static class QuickConfigPrefabBuilder
                 S("TooltipMaxWidth", "Tooltip Max Width"),
                 S("TooltipMaxHeight", "Tooltip Max Height"),
                 P("SocketOverlayModifier", "Socket Overlay Modifier"),
+                P("TraderPanelDragKey", "Trader Panel Drag Key"),
                 B("action:reset:TraderPanelPosition", "Reset", "Trader panel position"),
                 B("action:reset:TemperPanelPosition", "Reset", "Temper panel position"),
                 T("ShowQuickConfigButton", "Show in Mod Config launcher"),
@@ -589,17 +662,103 @@ public static class QuickConfigPrefabBuilder
 
     // loottables.json per biome: pick a biome, edit the drop amount table and rarity weights of each
     // creature tier level and chest that belongs to it.
+    // loottables.json per biome: pick a biome and one of its loot tables (creature tier level, boss or
+    // chest), then edit how many items it drops and at which rarity, as count:chance lists.
     private static void BuildBiomeDropsRow()
     {
-        GameObject row = NewListRow("Row_BiomeDrops", 220f, "Amount (count:weight) and rarity weights", out Transform head, out Transform content);
-        MakeButton(head, "Biome", "Biome", 180f, 26f, 13);
+        GameObject row = NewStackRow("Row_BiomeDrops", 220f, "Loot table", out Transform head);
+        LayoutElement label = head.Find("Label").GetComponent<LayoutElement>();
+        label.flexibleWidth = 0f;
+        label.preferredWidth = 80f;
+        MakeButton(head, "Biome", "Biome", 170f, 26f, 13);
+        MakeButton(head, "Prev", "<", 28f, 26f, 14);
+        MakeButton(head, "Target", "Table", 300f, 26f, 12).GetComponent<LayoutElement>().flexibleWidth = 1f;
+        MakeButton(head, "Next", ">", 28f, 26f, 14);
 
-        Transform item = NewListItem(content);
-        AddLabel(item, "Name", "Table", 13, Beige, flexible: true, preferredWidth: 260f);
-        MakeInputField(item, "Amount", 170f, 26f, TMP_InputField.ContentType.Standard, TextAlignmentOptions.MidlineLeft);
-        MakeInputField(item, "Rarity", 210f, 26f, TMP_InputField.ContentType.Standard, TextAlignmentOptions.MidlineLeft);
+        GameObject lists = NewUI("Lists", row.transform);
+        LayoutElement le = lists.AddComponent<LayoutElement>();
+        le.flexibleHeight = 1f;
+        HorizontalLayoutGroup hlg = lists.AddComponent<HorizontalLayoutGroup>();
+        hlg.spacing = 16f;
+        hlg.childControlWidth = true;
+        hlg.childControlHeight = true;
+        hlg.childForceExpandWidth = true;
+        hlg.childForceExpandHeight = true;
+        MakeWeightList(lists.transform, "Amount", "Drop amount (items, chance)", openKeys: true);
+        MakeWeightList(lists.transform, "Rarity", "Rarity (chance)", openKeys: false);
 
         SavePrefab(row, RowsDir + "/Row_BiomeDrops.prefab");
+    }
+
+    // loottables.json MagicEffectsCount and SocketCounts: pick a rarity, edit its two count:chance lists.
+    private static void BuildRarityCountsRow()
+    {
+        GameObject row = NewStackRow("Row_RarityCounts", 356f, "Enchantments and sockets of", out Transform head);
+        MakeButton(head, "Rarity", "Rarity", 150f, 26f, 14);
+        MakeWeightList(row.transform, "Enchantments", "Enchantments (count, chance)", openKeys: true);
+        MakeWeightList(row.transform, "Sockets", "Sockets (count, chance)", openKeys: true);
+        SavePrefab(row, RowsDir + "/Row_RarityCounts.prefab");
+    }
+
+    // enchantingupgrades.json UpgradeCosts: pick a feature, and all its levels show at once as a grid
+    // of Level blocks (the level's name and +, then its items with their amounts). The mod clones the
+    // inactive Level template per level and the Item inside it per item, and sets the grid's cell
+    // height to the level with the most items.
+    private const float LevelBlockW = 202f;
+
+    private static void BuildUpgradeCostsRow()
+    {
+        GameObject row = NewStackRow("Row_UpgradeCosts", 280f, "Upgrade costs of", out Transform head);
+        MakeButton(head, "Feature", "Feature", 180f, 26f, 13);
+
+        GameObject items = NewUI("Items", row.transform);
+        LayoutElement ile = items.AddComponent<LayoutElement>();
+        ile.flexibleHeight = 1f;
+        ile.preferredHeight = 280f - RowH - 20f;
+        Transform content = MakeScrollList(items);
+        Object.DestroyImmediate(content.GetComponent<VerticalLayoutGroup>());
+        GridLayoutGroup grid = content.gameObject.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(LevelBlockW, 106f);
+        grid.spacing = new Vector2(6f, 6f);
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 4;
+        grid.childAlignment = TextAnchor.UpperLeft;
+
+        GameObject level = NewUI("Level", content);
+        Image background = level.AddComponent<Image>();
+        background.color = new Color(0f, 0f, 0f, 0.25f);
+        VerticalLayoutGroup vlg = level.AddComponent<VerticalLayoutGroup>();
+        vlg.padding = new RectOffset(4, 4, 3, 3);
+        vlg.spacing = 2f;
+        vlg.childAlignment = TextAnchor.UpperLeft;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+
+        GameObject levelHead = NewUI("Head", level.transform);
+        LayoutElement hle = levelHead.AddComponent<LayoutElement>();
+        hle.preferredHeight = 22f;
+        hle.minHeight = 22f;
+        HorizontalLayoutGroup hh = levelHead.AddComponent<HorizontalLayoutGroup>();
+        hh.childAlignment = TextAnchor.MiddleLeft;
+        hh.spacing = 4f;
+        hh.childControlWidth = true;
+        hh.childControlHeight = true;
+        hh.childForceExpandWidth = false;
+        hh.childForceExpandHeight = false;
+        AddLabel(levelHead.transform, "Label", "Level 1", 13, Yellow, flexible: true).fontStyle = FontStyles.Bold;
+        MakeButton(levelHead.transform, "Add", "+", 22f, 20f, 14);
+
+        Transform item = NewListItem(level.transform);
+        item.GetComponent<LayoutElement>().preferredHeight = 24f;
+        TMP_InputField name = MakeInputField(item, "Field", 90f, 22f, TMP_InputField.ContentType.Standard, TextAlignmentOptions.MidlineLeft);
+        name.GetComponent<LayoutElement>().flexibleWidth = 1f;
+        MakeButton(item, "Pick", "...", 22f, 22f, 12);
+        MakeInputField(item, "Amount", 34f, 22f, TMP_InputField.ContentType.IntegerNumber, TextAlignmentOptions.MidlineRight);
+        MakeButton(item, "Remove", "x", 20f, 22f, 12);
+
+        SavePrefab(row, RowsDir + "/Row_UpgradeCosts.prefab");
     }
 
     // Every magic effect with a Config block: pick an effect, edit its key/value tunables.
@@ -659,6 +818,18 @@ public static class QuickConfigPrefabBuilder
     // its buttons after) and an Items scroll list whose content the caller fills with an Item template.
     private static GameObject NewListRow(string name, float height, string label, out Transform head, out Transform content)
     {
+        GameObject row = NewStackRow(name, height, label, out head);
+        GameObject items = NewUI("Items", row.transform);
+        LayoutElement ile = items.AddComponent<LayoutElement>();
+        ile.flexibleHeight = 1f;
+        ile.preferredHeight = height - RowH - 20f;
+        content = MakeScrollList(items);
+        return row;
+    }
+
+    // A vertical row whose first child is a Head line (Label first; the caller adds its buttons after).
+    private static GameObject NewStackRow(string name, float height, string label, out Transform head)
+    {
         GameObject row = NewRow(name, height);
         Object.DestroyImmediate(row.GetComponent<HorizontalLayoutGroup>());
         VerticalLayoutGroup vlg = row.AddComponent<VerticalLayoutGroup>();
@@ -681,13 +852,66 @@ public static class QuickConfigPrefabBuilder
         hh.childForceExpandHeight = false;
         AddLabel(headGo.transform, "Label", label, 15, Beige, flexible: true);
         head = headGo.transform;
+        return row;
+    }
 
-        GameObject items = NewUI("Items", row.transform);
+    // A count:chance list (the mod's WeightListView): Head -> Label, Total (the warning shown while the
+    // chances do not add up to 100), Add; Items -> Item with Count or Name, Slider (0-100), Value, Remove.
+    // With open keys the counts are typed and entries added or removed; otherwise each entry is a fixed
+    // key the mod names (the rarity chances).
+    private static Transform MakeWeightList(Transform parent, string name, string label, bool openKeys)
+    {
+        GameObject list = NewUI(name, parent);
+        LayoutElement le = list.AddComponent<LayoutElement>();
+        le.flexibleWidth = 1f;
+        le.flexibleHeight = 1f;
+        VerticalLayoutGroup vlg = list.AddComponent<VerticalLayoutGroup>();
+        vlg.spacing = 2f;
+        vlg.childAlignment = TextAnchor.UpperLeft;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+
+        GameObject head = NewUI("Head", list.transform);
+        LayoutElement hle = head.AddComponent<LayoutElement>();
+        hle.preferredHeight = 24f;
+        hle.minHeight = 24f;
+        HorizontalLayoutGroup hh = head.AddComponent<HorizontalLayoutGroup>();
+        hh.childAlignment = TextAnchor.MiddleLeft;
+        hh.spacing = 6f;
+        hh.childControlWidth = true;
+        hh.childControlHeight = true;
+        hh.childForceExpandWidth = false;
+        hh.childForceExpandHeight = false;
+        AddLabel(head.transform, "Label", label, 14, Beige, flexible: true);
+        AddLabel(head.transform, "Total", "", 12, Orange, flexible: false, preferredWidth: 170f).alignment = TextAlignmentOptions.MidlineRight;
+        if (openKeys)
+        {
+            MakeButton(head.transform, "Add", "+", 26f, 22f, 15);
+        }
+
+        GameObject items = NewUI("Items", list.transform);
         LayoutElement ile = items.AddComponent<LayoutElement>();
         ile.flexibleHeight = 1f;
-        ile.preferredHeight = height - RowH - 20f;
-        content = MakeScrollList(items);
-        return row;
+        ile.preferredHeight = 64f;
+        Transform item = NewListItem(MakeScrollList(items));
+        if (openKeys)
+        {
+            MakeInputField(item, "Count", 44f, 24f, TMP_InputField.ContentType.IntegerNumber, TextAlignmentOptions.MidlineRight);
+        }
+        else
+        {
+            AddLabel(item, "Name", "Rarity", 13, Beige, flexible: false, preferredWidth: 80f);
+        }
+        MakeSlider(item, "Slider", 100f).GetComponent<LayoutElement>().flexibleWidth = 1f;
+        MakeInputField(item, "Value", 44f, 24f, TMP_InputField.ContentType.IntegerNumber, TextAlignmentOptions.MidlineRight);
+        AddLabel(item, "Percent", "%", 13, Beige, flexible: false, preferredWidth: 14f);
+        if (openKeys)
+        {
+            MakeButton(item, "Remove", "x", 24f, 24f, 13);
+        }
+        return list.transform;
     }
 
     private static Transform NewListItem(Transform content)
@@ -756,6 +980,7 @@ public static class QuickConfigPrefabBuilder
         srt.sizeDelta = new Vector2(-52f, 24f);
 
         PlaceNavButton(MakeButton(panel.transform, "Back", "$mod_epicloot_cfg_back", 130f, 40f, 16), new Vector2(0f, 0f), new Vector2(26f, 18f));
+        PlaceNavButton(MakeButton(panel.transform, "Reset", "$mod_epicloot_cfg_reset_page", 150f, 40f, 15), new Vector2(0f, 0f), new Vector2(168f, 18f));
         PlaceNavButton(MakeButton(panel.transform, "Save", "$mod_epicloot_cfg_save", 170f, 40f, 16), new Vector2(0.5f, 0f), new Vector2(0f, 18f));
         PlaceNavButton(MakeButton(panel.transform, "Next", "$mod_epicloot_cfg_next", 170f, 40f, 16), new Vector2(1f, 0f), new Vector2(-26f, 18f));
         PlaceNavButton(MakeButton(panel.transform, "Finish", "$mod_epicloot_cfg_finish", 170f, 40f, 16), new Vector2(1f, 0f), new Vector2(-26f, 18f));
@@ -865,11 +1090,11 @@ public static class QuickConfigPrefabBuilder
     //  Pages
     // ------------------------------------------------------------------------------------------------
 
-    private static void BuildPages(bool overwrite)
+    private static void BuildPages(bool overwrite, ICollection<string> only = null)
     {
         EnsureFolders();
         Dictionary<string, GameObject> templates = new Dictionary<string, GameObject>();
-        foreach (string name in new[] { "Row_Toggle", "Row_Slider", "Row_Cycle", "Row_Picker", "Row_TextField", "Row_Flags", "Row_Button", "Row_Header", "Row_Text", "Row_Color", "Row_ListEditor", "Row_BiomeCosts", "Row_ItemCategories", "Row_BiomeDrops", "Row_EffectConfigs", "Row_Bounties" })
+        foreach (string name in RowTemplates.Select(template => template.Name))
         {
             GameObject template = AssetDatabase.LoadAssetAtPath<GameObject>(RowsDir + "/" + name + ".prefab");
             if (template == null)
@@ -884,7 +1109,7 @@ public static class QuickConfigPrefabBuilder
         foreach (PageDef page in Pages)
         {
             string path = PagesDir + "/" + page.Name + ".prefab";
-            if (!overwrite && File.Exists(path))
+            if ((!overwrite && File.Exists(path)) || (only != null && !only.Contains(page.Name)))
             {
                 continue;
             }
@@ -944,34 +1169,100 @@ public static class QuickConfigPrefabBuilder
     {
         foreach (RowDef def in rows)
         {
-            GameObject row = (GameObject)PrefabUtility.InstantiatePrefab(templates[def.Template], column);
-            // The row's name IS its key: that is how the mod finds it (see README). Decorative rows keep
-            // their template name and are never bound.
-            row.name = string.IsNullOrEmpty(def.Key) ? def.Template : def.Key;
-
-            Transform label = row.transform.Find("Label") ?? row.transform.Find("Head/Label");
-            if (label != null)
+            if (def.Children != null)
             {
-                TextMeshProUGUI text = label.GetComponent<TextMeshProUGUI>();
-                if (text != null) { text.text = def.Label ?? ""; }
+                FillGroup(column, def, templates);
             }
-
-            if (!string.IsNullOrEmpty(def.ButtonText))
+            else
             {
-                Transform button = row.transform.Find("Button");
-                TextMeshProUGUI text = button != null ? button.GetComponentInChildren<TextMeshProUGUI>() : null;
-                if (text != null) { text.text = def.ButtonText; }
+                AddRow(column, def, templates);
             }
+        }
+    }
 
-            if (def.Height > 0f)
+    // A plain container, not a template: nothing in it is bound but its rows, and it keeps its name.
+    private static void FillGroup(Transform column, RowDef def, Dictionary<string, GameObject> templates)
+    {
+        GameObject group = NewRow(GroupName, def.Height > 0f ? def.Height : RowH);
+        group.transform.SetParent(column, false);
+        HorizontalLayoutGroup hlg = group.GetComponent<HorizontalLayoutGroup>();
+        hlg.padding = new RectOffset(0, 0, 0, 0);
+        hlg.childForceExpandHeight = true;
+        // Force-expanding children makes the group report a flexible height, and the column would hand
+        // it the column's spare space.
+        group.GetComponent<LayoutElement>().flexibleHeight = 0f;
+        foreach (RowDef cell in def.Children)
+        {
+            AddRow(group.transform, cell, templates);
+        }
+    }
+
+    private static void AddRow(Transform parent, RowDef def, Dictionary<string, GameObject> templates)
+    {
+        GameObject row = (GameObject)PrefabUtility.InstantiatePrefab(templates[def.Template], parent);
+        // The row's name IS its key: that is how the mod finds it (see README). Decorative rows keep
+        // their template name and are never bound.
+        row.name = string.IsNullOrEmpty(def.Key) ? def.Template : def.Key;
+
+        Transform label = row.transform.Find("Label") ?? row.transform.Find("Head/Label");
+        if (label != null)
+        {
+            TextMeshProUGUI text = label.GetComponent<TextMeshProUGUI>();
+            if (text != null)
             {
-                LayoutElement le = row.GetComponent<LayoutElement>();
-                if (le != null)
+                text.text = def.Label ?? "";
+                if (def.LabelSize > 0)
                 {
-                    le.preferredHeight = def.Height;
-                    le.minHeight = def.Height;
+                    text.fontSize = def.LabelSize;
+                    text.alignment = TextAlignmentOptions.MidlineLeft;
+                    HorizontalLayoutGroup hlg = row.GetComponent<HorizontalLayoutGroup>();
+                    if (hlg != null) { hlg.childAlignment = TextAnchor.MiddleLeft; }
                 }
             }
+            if (def.LabelWidth > 0f)
+            {
+                LayoutElement labelLayout = label.GetComponent<LayoutElement>() ?? label.gameObject.AddComponent<LayoutElement>();
+                labelLayout.preferredWidth = def.LabelWidth;
+                labelLayout.flexibleWidth = 0f;
+            }
+        }
+        foreach (string hidden in def.Hidden ?? new string[0])
+        {
+            Transform child = row.transform.Find(hidden);
+            if (child != null) { child.gameObject.SetActive(false); }
+        }
+
+        if (!string.IsNullOrEmpty(def.ButtonText))
+        {
+            Transform button = row.transform.Find("Button");
+            TextMeshProUGUI text = button != null ? button.GetComponentInChildren<TextMeshProUGUI>() : null;
+            if (text != null) { text.text = def.ButtonText; }
+        }
+
+        LayoutElement le = row.GetComponent<LayoutElement>();
+        if (le == null) { return; }
+        if (def.Height > 0f)
+        {
+            le.preferredHeight = def.Height;
+            le.minHeight = def.Height;
+        }
+        if (def.AutoHeight)
+        {
+            le.preferredHeight = -1f;
+            le.minHeight = RowH;
+        }
+        // Group cells: the fixed ones hold their width, the flexible ones split the rest equally.
+        if (def.Width > 0f)
+        {
+            le.preferredWidth = def.Width;
+            le.minWidth = def.Width;
+            le.flexibleWidth = 0f;
+        }
+        else if (def.Flexible)
+        {
+            le.preferredWidth = 0f;
+            le.minWidth = 0f;
+            le.flexibleWidth = 1f;
         }
     }
 
@@ -1078,6 +1369,15 @@ public static class QuickConfigPrefabBuilder
         TextMeshProUGUI label = AddText(go.transform, "Text", text, fontSize, FieldText, TextAlignmentOptions.Center);
         Stretch(label.gameObject);
         RectTransform lrt = label.rectTransform;
+        if (w <= SmallButtonW)
+        {
+            // A one-glyph caption (+, x, ...): the game's font sets a taller line than the placeholder, and
+            // Truncate drops a line that does not fit, which left + blank in game. No margins, no wrap,
+            // allowed to overflow.
+            label.overflowMode = TextOverflowModes.Overflow;
+            label.textWrappingMode = TextWrappingModes.NoWrap;
+            return button;
+        }
         lrt.offsetMin = new Vector2(6f, 2f);
         lrt.offsetMax = new Vector2(-6f, -2f);
         return button;
@@ -1245,7 +1545,8 @@ public static class QuickConfigPrefabBuilder
         Stretch(viewport);
         RectTransform vrt = (RectTransform)viewport.transform;
         vrt.offsetMin = new Vector2(4f, 4f);
-        vrt.offsetMax = new Vector2(-4f, -4f);
+        // Room on the right for the scrollbar, so it never covers a row's last widget.
+        vrt.offsetMax = new Vector2(-(ScrollbarW + 6f), -4f);
         viewport.AddComponent<RectMask2D>();
         Image vimg = viewport.AddComponent<Image>();
         vimg.color = new Color(0f, 0f, 0f, 0f);
@@ -1272,8 +1573,55 @@ public static class QuickConfigPrefabBuilder
         scroll.horizontal = false;
         scroll.vertical = true;
         scroll.movementType = ScrollRect.MovementType.Clamped;
-        scroll.scrollSensitivity = 30f;
+        scroll.inertia = false;
+        // The mod raises this and pins the handle size at runtime (QuickConfigStyle); see there why.
+        scroll.scrollSensitivity = 800f;
+        scroll.verticalScrollbar = MakeScrollbar(holder.transform);
+        // Shown whenever the list holds more than fits, so it is obvious there is more to see.
+        scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
         return content.transform;
+    }
+
+    // The merchant panel's scrollbar: a thin dark track on the right edge, an orange item_background handle.
+    private const float ScrollbarW = 8f;
+    private static readonly Color ScrollTrack = new Color(0.19215687f, 0.1254902f, 0.078431375f, 1f);
+
+    private static Scrollbar MakeScrollbar(Transform holder)
+    {
+        GameObject bar = NewUI("Scrollbar", holder);
+        RectTransform rt = (RectTransform)bar.transform;
+        rt.anchorMin = new Vector2(1f, 0f);
+        rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot = new Vector2(1f, 1f);
+        rt.anchoredPosition = new Vector2(-3f, -4f);
+        rt.sizeDelta = new Vector2(ScrollbarW, -8f);
+        Image track = bar.AddComponent<Image>();
+        track.sprite = Sprite(SpriteField);
+        track.type = Image.Type.Sliced;
+        track.color = ScrollTrack;
+
+        GameObject area = NewUI("Sliding Area", bar.transform);
+        Stretch(area);
+        GameObject handle = NewUI("Handle", area.transform);
+        Stretch(handle);
+        Image handleImage = handle.AddComponent<Image>();
+        handleImage.sprite = Sprite(SpriteField);
+        handleImage.type = Image.Type.Sliced;
+
+        Scrollbar scrollbar = bar.AddComponent<Scrollbar>();
+        scrollbar.handleRect = (RectTransform)handle.transform;
+        scrollbar.targetGraphic = handleImage;
+        scrollbar.direction = Scrollbar.Direction.BottomToTop;
+        scrollbar.transition = Selectable.Transition.ColorTint;
+        ColorBlock colors = scrollbar.colors;
+        colors.normalColor = new Color(0.9254902f, 0.64705884f, 0.34117648f, 1f);
+        colors.highlightedColor = new Color(1f, 0.78431374f, 0.09019608f, 1f);
+        colors.pressedColor = new Color(0.8392157f, 0.64705884f, 0.03137255f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        scrollbar.colors = colors;
+        // Kept out of gamepad navigation, so the D-pad never stops on it between two rows.
+        scrollbar.navigation = new Navigation { mode = Navigation.Mode.None };
+        return scrollbar;
     }
 
     // ------------------------------------------------------------------------------------------------

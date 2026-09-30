@@ -8,7 +8,8 @@ widget children below. Nothing here positions anything.
 The editor-side generator that produced the initial prefabs is
 `ValheimUnity/Assets/Scripts/Editor/QuickConfigPrefabBuilder.cs` (menu `Mod/Quick Configure/...`).
 It only creates pages that do not exist yet, so hand edits survive; row templates and the shell can be
-regenerated on purpose.
+regenerated on purpose, and "Rebuild Selected Pages" resets just the page prefabs selected in the
+Project window to the script's table.
 
 ## Rows and pages are identified by GameObject name (no baked components)
 
@@ -20,6 +21,12 @@ open cleanly in an editor that has no mod DLLs at all. (Historically the editor 
 - A row's **GameObject name is its key** (`GlobalDropRateModifier`, `json:adventuredata:Gamble.GamblesCount`,
   `action:preset:balanced`). Rename the object to rebind it. Decorative rows keep their template name
   (`Row_Header`, `Row_Text`) and are not bound.
+- A **`Row_Group`** (a plain `HorizontalLayoutGroup` + `LayoutElement` in the column, not a template) puts
+  several rows side by side; its children are bound exactly like the column's own. Give it
+  `LayoutElement.flexibleHeight = 0`, or its force-expanded children make it take the column's spare
+  height. The enchanting table's feature-level lines are groups (a `Row_Text` name, then the default and
+  max `Row_TextField`s with their `Label` switched off), and so are the Loot Drops page's boss drop lines
+  (a `Row_Cycle` mode, then its range `Row_Slider` showing only its `Value`).
 - An optional tooltip override is an **inactive child named `Tooltip`** holding a `TMP_Text`; when
   present its text replaces the setting's own description.
 - A page prefab's root name is the page id (`Page_Balance`); its title token is derived by code
@@ -32,7 +39,7 @@ open cleanly in an editor that has no mod DLLs at all. (Historically the editor 
 | `<ELConfig static field>` | a BepInEx entry on `EpicLoot.Config.ELConfig` | `GlobalDropRateModifier`, `_adventureModeEnabled`, `ShowQuickConfigButton` |
 | `<field>.<part>` | one part of a composite entry | `AbilityKeyCodes.0`, `AbilityBarPosition.x` |
 | `Common.<Entry>` | a Common-layer entry on `Common.ModContext` | `Common.EnableDebugMode`, `Common.ConfigApplyDelay` |
-| `json:<file>:<path>` | a value in a baseconfig JSON (host only) | `json:adventuredata:Gamble.GamblesCount`, `json:loottables:SocketCounts.Magic`, `json:magiceffects:TripleBowShot.Chance`, `json:magiceffects:Riches` |
+| `json:<file>:<path>` | a value in a baseconfig JSON (host only) | `json:adventuredata:Gamble.GamblesCount`, `json:loottables:RarityCounts`, `json:magiceffects:TripleBowShot.Chance`, `json:magiceffects:Riches` |
 | `action:<verb>:<arg>` | a button | `action:preset:balanced`, `action:reset:TraderPanelPosition`, `action:url:discord` |
 | `readout:<name>` | code-fed text | `readout:dropmix`, `readout:template` |
 
@@ -44,7 +51,16 @@ Unknown keys log one warning and the row is disabled. A registered key with no r
 Every row root: `RectTransform` + `LayoutElement`, named after its key, laid out by the column's
 `VerticalLayoutGroup`. Inside the row a `HorizontalLayoutGroup` places the children; the code never
 sets positions. Texts are TextMeshPro (`TMP_Text` / `TMP_InputField`); the placeholder font is replaced at
-runtime by `QuickConfigStyle` (`MagicFontManager`).
+runtime by `QuickConfigStyle` (`MagicFontManager`). The same pass gives every `Image` whose sprite name
+starts with `woodpanel` vanilla's `litpanel` material, so the panel backgrounds dim with the day/night
+light like vanilla's own panels. That material exists only in the game, so the prefabs keep the default
+one; buttons and fields stay unlit, as in vanilla.
+
+Every scroll list (a row's `Items`, a WeightList's `Items`, the picker's `List`) carries a vertical
+`Scrollbar` child wired to its `ScrollRect` with `AutoHide`, so it shows whenever there is more than fits.
+The same style pass gives each `ScrollRect` the scroll fix the enchanting table and merchant panel use:
+scroll sensitivity 800 (since Call to Arms a wheel notch moves a list far less) and a handle pinned at
+0.4 of the track, so a long list never shrinks it to a sliver.
 
 | Template | Children the code binds |
 |---|---|
@@ -61,7 +77,17 @@ runtime by `QuickConfigStyle` (`MagicFontManager`).
 | `Row_EffectConfigs` | `Head` → `Label`, `Effect` (`Button` + child `Text`: the shown effect; opens the picker over every loaded effect with a Config, editable ones first sorted by name, read-only ones last marked "(read-only)"), `Add` (`Button`, shown only for open-key effects, i.e. Riches); `Items` (`ScrollRect`; `content` holds an inactive `Item` template: `Key` (`TMP_InputField`, read-only unless open-key), `Pick` (`Button`, ObjectDB item picker, open-key effects in a world only), `Value` (`TMP_InputField`, float), `Remove` (`Button`, open-key only)). Key `json:magiceffects:EffectConfigs`; writes `shardstones.json` and/or `magiceffects.json` depending on the effect. Each item row carries its key's localized label as tooltip; the row tooltip sits on `Head`. |
 | `Row_Bounties` | `Head` → `Label`, `Biome` (`Button` + child `Text`: the shown biome; opens the picker over the file's biomes plus every registry biome), `Add` (`Button`); `Items` (`ScrollRect`; `content` holds an inactive `Item` template: `Target` (`TMP_InputField`, creature prefab name), `Pick` (`Button`, monster picker; hidden when nothing is known), `Iron`, `Gold`, `Coins` (`TMP_InputField` ints), `Remove` (`Button`)). Key `json:adventuredata:Bounties.Targets`; every biome is staged, the shown one is row UI state. The tooltip sits on `Head`. |
 | `Row_BiomeCosts` | `Head` → `Label`; `Items` (`ScrollRect`; its `content` holds an inactive `Item` template, cloned per biome of `TreasureMap.BiomeInfo`: `Name` (`TMP_Text`, read-only biome name), `Cost` (`TMP_InputField` int coins, -1 = not offered), `Tokens` (`TMP_InputField` int forest tokens)). No Add/Remove: the biome set is the file's. Key `json:adventuredata:TreasureMap.BiomeInfo`. The tooltip sits on `Head`. |
-| `Row_BiomeDrops` | `Head` → `Label`, `Biome` (`Button` + child `Text`: the shown biome; opens the picker over the biomes that have drop tables, plus "Other"); `Items` (`ScrollRect`; `content` holds an inactive `Item` template, cloned per drop target of the shown biome: `Name` (`TMP_Text`, e.g. "Tier1Mob · level 2 (Greydwarf, Skeleton)"), `Amount` (`TMP_InputField`, `count:weight` table), `Rarity` (`TMP_InputField`, one weight per rarity, comma-separated)). No Add/Remove. Key `json:loottables:LootTables`; every biome is staged, the shown one is row UI state. The tooltip sits on `Head`. |
+| `Row_BiomeDrops` | `Head` → `Label`, `Biome` (`Button` + child `Text`: the shown biome; opens the picker over the biomes that have drop tables, plus "Other"), `Target` (`Button` + child `Text`: the shown loot table, e.g. "Tier1Mob · level 2 (Greydwarf, Skeleton)"; opens the picker over the biome's tables), optional `Prev` / `Next` (`Button`s stepping through them); `Amount` (a WeightList with open keys: how many items drop) and `Rarity` (a WeightList with fixed keys: one chance per rarity). Key `json:loottables:LootTables`; every table is staged, the shown biome and table are row UI state. The tooltip sits on `Head`. |
+| `Row_RarityCounts` | `Head` → `Label`, `Rarity` (`Button` + child `Text`: the shown rarity; opens the picker); `Enchantments` and `Sockets` (WeightLists with open keys). Key `json:loottables:RarityCounts` (MagicEffectsCount and SocketCounts); every rarity is staged, the shown one is row UI state. The tooltip sits on `Head`. |
+| `Row_UpgradeCosts` | `Head` → `Label`, `Feature` (`Button`: the shown enchanting table feature); `Items` (`ScrollRect` whose `content` lays out an inactive `Level` template, cloned per level of the shown feature: `Head` → `Label` ("Unlock" for level 0, then "Level N"), `Add` (`Button`); then an `Item` template cloned per cost item: `Field` (`TMP_InputField`, item prefab name), `Pick` (`Button`, ObjectDB item picker, hidden when no item list is known), `Amount` (`TMP_InputField` int), `Remove` (`Button`)). When `content` carries a `GridLayoutGroup`, the code sets its cell height to fit the level with the most items. Key `json:enchantingupgrades:UpgradeCosts`; the level count is the file's. The tooltip sits on `Head`. |
+
+A **WeightList** is a named child of a row (`Enchantments`, `Amount`, ...) holding a count:chance table
+whose chances should add up to 100: `Head` → `Label`, `Total` (`TMP_Text`, the warning shown only while
+they do not), `Add` (`Button`, open keys only); `Items` (`ScrollRect`; `content` holds an inactive `Item`
+template: `Count` (`TMP_InputField` int, open keys) or `Name` (`TMP_Text`, fixed keys), `Slider` (0-100),
+`Value` (`TMP_InputField` int), `Remove` (`Button`, open keys)). The sliders move freely; on Save each
+changed table is rebalanced to 100, the chances the player changed keeping their values and the others
+filling the rest (`WeightTable.Rebalance`). A table left untouched is not rewritten, even when it is off.
 | `Row_ItemCategories` | `Head` → `Label`, `Category` (`Button` + child `Text`: the shown category; opens the picker over every `ItemInfo[].Type`), `Add` (`Button`); `Items` (`ScrollRect`; `content` holds an inactive `Item` template: `Boss` (`Button` + child `Text`: boss key; opens the picker over `none` + the known keys), `Field` (`TMP_InputField` item prefab name), `Pick` (`Button`, ObjectDB item picker, hidden on the main menu), `Remove` (`Button`)). Key `json:iteminfo:ItemInfo`; every category is staged, the shown one is row UI state. The tooltip sits on `Head`. |
 
 Overlays, instantiated by code under `GUIManager.CustomGUIFront`:
@@ -72,12 +98,22 @@ Overlays, instantiated by code under `GUIManager.CustomGUIFront`:
 
 Shell `QuickConfigPanel` (root stretched full screen, carries vanilla `Localize`):
 `Overlay` (dim `Image`, blocks clicks) → `Panel` → `Title`, `Close`, `Pages` (empty container the page
-prefabs are instantiated into), `Status`, `Back`, `Save`, `Next`, `Finish`.
+prefabs are instantiated into), `Status`, `Back`, `Reset`, `Save`, `Next`, `Finish`.
 
 Pages `Pages/Page_<Name>` (root stretched, named after the page id): one `Column` or `Left` + `Right`
 columns, each with a `VerticalLayoutGroup`; children are nested instances of the row templates, each
 renamed to its key. Page order lives in code (`QuickConfigureTool.PageOrder`); a page prefab missing
 from the bundle is skipped with a warning.
+
+## Reset Page
+
+The shell's `Reset` button stages the shipped default of every row on the shown page the player may
+edit (after a confirm); Save writes it like any other edit, and other pages are untouched. A .cfg row
+takes its BepInEx default. A JSON row takes the value from the file the mod ships (the embedded
+baseconfig, `ShippedDefaults`; magiceffects.json is the overhaul of the staged Balance Template): a
+simple value by the dotted path in its key, a table through its slot's `Default`, which merges by identity
+so an entry the shipped file lacks (a loot table, a bounty biome, an item category another mod added)
+keeps its current values. A slot without a default is left alone.
 
 ## Text and localization
 

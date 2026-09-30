@@ -1,4 +1,5 @@
 using EpicLoot.Config;
+using EpicLoot_UnityLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -230,12 +231,16 @@ internal static class JsonConfigEdits {
     /// Writes one drop target of loottables.json: the Drops table of the N-th LootTables element named
     /// row.Object (its LeveledLoot element with row.Level when the row is leveled), and the Rarity
     /// weights onto every Loot entry of that target that already carries a Rarity array. Entries
-    /// without one (shard sets) and everything else in the table are left alone.
+    /// without one (shard sets) and everything else in the table are left alone. The caller passes the
+    /// tables already rebalanced; a null one is not written.
     /// </summary>
-    internal static void SetBiomeDrops(JObject root, BiomeDropRow row, bool writeAmount, bool writeRarity) {
+    internal static void SetBiomeDrops(JObject root, BiomeDropRow row, List<WeightEntry> amount, List<WeightEntry> rarity) {
         if (root["LootTables"] is JArray tables == false) {
             throw new InvalidDataException("loottables.json has no LootTables array");
         }
+        // The live config is always LeveledLoot, so the rows address levels; a file still holding a flat
+        // table (a player's edit since the last load) is brought into the same shape first.
+        LootTableMigration.NormalizeJson(root);
         JObject table = null;
         int seen = 0;
         foreach (JToken token in tables) {
@@ -254,10 +259,11 @@ internal static class JsonConfigEdits {
                 ?? throw new InvalidDataException($"loottables.json: {row.Object} has no LeveledLoot entry for level {row.Level}");
         }
 
-        if (writeAmount && QuickConfigBindings.ParseRarityTable(row.AmountText, int.MaxValue, out float[][] drops, out _)) {
-            target["Drops"] = TableToJArray(drops);
+        if (amount != null) {
+            target["Drops"] = TableToJArray(WeightTable.ToRows(amount));
         }
-        if (writeRarity && BiomeDropTables.ParseRarity(row.RarityText, out float[] weights, out _) && target["Loot"] is JArray loot) {
+        if (rarity != null && target["Loot"] is JArray loot) {
+            float[] weights = WeightTable.ToWeights(rarity, Rarities.Count);
             int length = BiomeDropTables.WriteLength(weights, row.RarityLength);
             foreach (JToken token in loot) {
                 if (token is JObject entry && entry["Rarity"] is JArray) {
@@ -265,6 +271,24 @@ internal static class JsonConfigEdits {
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Replaces one level's cost list of UpgradeCosts.{feature} in enchantingupgrades.json. The level
+    /// must exist: levels are added in the file together with their UpgradeValues, never here.
+    /// </summary>
+    internal static void SetUpgradeCost(JObject root, EnchantingFeature feature, int level, List<CostEntry> cost) {
+        if (root["UpgradeCosts"]?[feature.ToString()] is JArray levels == false) {
+            throw new InvalidDataException($"enchantingupgrades.json has no UpgradeCosts.{feature} array");
+        }
+        if (level < 0 || level >= levels.Count) {
+            throw new InvalidDataException($"enchantingupgrades.json: UpgradeCosts.{feature} has no level {level}");
+        }
+        JArray items = new JArray();
+        foreach (CostEntry entry in cost) {
+            items.Add(new JObject { ["Item"] = entry.Item.Trim(), ["Amount"] = entry.Amount });
+        }
+        levels[level] = items;
     }
 
     private static JToken Number(float value) {

@@ -74,6 +74,13 @@ internal abstract class ConfigSlot {
 
     /// <summary>The live value, or null when the source is not loaded (no effect definition, no config).</summary>
     internal abstract object ReadLive();
+
+    /// <summary>
+    /// What a page reset stages: the shipped default, as a new value built from <paramref name="current"/>
+    /// where only part of it has a default (a loot table another mod added keeps its values). Null when
+    /// the slot has no known default.
+    /// </summary>
+    internal abstract object DefaultFor(object current, ShippedDefaults shipped);
 }
 
 internal sealed class CfgSlot : ConfigSlot {
@@ -81,14 +88,20 @@ internal sealed class CfgSlot : ConfigSlot {
     internal ConfigEntryBase Entry;
     internal Func<object> Read;
     internal Action<object> Write;
+    /// <summary>The entry's default in the slot's own form, when Read transforms the value (a part, a normalized name).</summary>
+    internal Func<object> ReadDefault;
 
     internal override object ReadLive() => Read();
+
+    internal override object DefaultFor(object current, ShippedDefaults shipped) => ReadDefault != null ? ReadDefault() : Entry?.DefaultValue;
 }
 
 internal sealed class JsonSlot : ConfigSlot {
     /// <summary>The baseconfig file, with extension ("adventuredata.json").</summary>
     internal string File;
     internal Func<object> Read;
+    /// <summary>The shipped default (current staged value, the embedded files) -> value; null when unknown.</summary>
+    internal Func<object, ShippedDefaults, object> Default;
     internal Action<JObject, object> Write;
     /// <summary>Alternative to Write for values that must only touch the parts that changed: (root, staged, baseline).</summary>
     internal Action<JObject, object, object> WriteWithBaseline;
@@ -103,6 +116,8 @@ internal sealed class JsonSlot : ConfigSlot {
 
     internal override object ReadLive() => Read();
 
+    internal override object DefaultFor(object current, ShippedDefaults shipped) => Default?.Invoke(current, shipped);
+
     internal void Apply(JObject root, object staged, object baseline) {
         if (WriteWithBaseline != null) {
             WriteWithBaseline(root, staged, baseline);
@@ -116,8 +131,8 @@ internal sealed class JsonSlot : ConfigSlot {
 /// What the pages edit, and what was live when the panel opened (or was last saved). Unsaved changes
 /// are the difference between the two, so an edit that is put back is not an edit. Values are boxed
 /// and keyed by the row key rule (see QuickConfigBindings): bool, float, int, string, a boxed enum,
-/// or one of the table values (EffectConfigsValue, BountiesValue, ItemCategoriesValue, the biome
-/// lists). Rarity tables are staged in their text form.
+/// or one of the table values (EffectConfigsValue, BountiesValue, ItemCategoriesValue, RarityCountsValue,
+/// UpgradeCostsValue, the biome lists).
 /// </summary>
 internal sealed class StagedConfig {
     /// <summary>The baseconfig files the panel writes, in the order they are applied (magiceffects last).</summary>
@@ -280,6 +295,12 @@ internal sealed class StagedConfig {
             }
             return true;
         }
+        if (a is RarityCountsValue countsA && b is RarityCountsValue countsB) {
+            return RarityCountsValue.Same(countsA, countsB);
+        }
+        if (a is UpgradeCostsValue costsA && b is UpgradeCostsValue costsB) {
+            return UpgradeCostsValue.Same(costsA, costsB);
+        }
         return a.Equals(b);
     }
 
@@ -290,6 +311,8 @@ internal sealed class StagedConfig {
             case List<BiomeCostEntry> biomes: return biomes.Select(entry => entry.Clone()).ToList();
             case ItemCategoriesValue categories: return categories.Clone();
             case List<BiomeDropRow> drops: return drops.Select(row => row.Clone()).ToList();
+            case RarityCountsValue counts: return counts.Clone();
+            case UpgradeCostsValue costs: return costs.Clone();
             default: return value;
         }
     }

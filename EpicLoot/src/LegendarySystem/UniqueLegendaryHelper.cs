@@ -8,9 +8,10 @@ namespace EpicLoot.LegendarySystem
 {
     /// <summary>
     /// Every unique ("legendary") and item set from legendaries.json, in one pool whatever rarity it rolls
-    /// at. Each entry carries a Rarities list; the legacy per-rarity blocks (LegendaryItems/LegendarySets
-    /// vs MythicItems/MythicSets) only decide the default when that list is empty. A set piece always rolls
-    /// at its set's rarities.
+    /// at. Each entry carries a Rarities list; the legacy per-rarity blocks (LegendaryItems vs MythicItems)
+    /// only decide the default when that list is empty. A unique defaults to its own block's rarity, and a
+    /// set to the rarity of the blocks its pieces are in, which is where the old per-pool roll dropped them.
+    /// A set piece always rolls at its set's rarities.
     /// </summary>
     public static class UniqueLegendaryHelper
     {
@@ -105,8 +106,9 @@ namespace EpicLoot.LegendarySystem
 
             // Mythic blocks first, matching the old lookups, which checked the Mythic pool first: an ID
             // defined in both blocks keeps resolving to the definition it did before.
-            AddSets(Config.MythicSets, ItemRarity.Mythic);
-            AddSets(Config.LegendarySets, ItemRarity.Legendary);
+            Dictionary<string, List<ItemRarity>> pieceBlocks = GetBlockRarities();
+            AddSets(Config.MythicSets, ItemRarity.Mythic, pieceBlocks);
+            AddSets(Config.LegendarySets, ItemRarity.Legendary, pieceBlocks);
             AddUniques(Config.MythicItems, ItemRarity.Mythic);
             AddUniques(Config.LegendaryItems, ItemRarity.Legendary);
 
@@ -127,7 +129,74 @@ namespace EpicLoot.LegendarySystem
             }
         }
 
-        private static void AddSets(List<LegendarySetInfo> sets, ItemRarity defaultRarity)
+        // The rarity of the block each unique is defined in (both, when an ID is in both). Before sets had a
+        // Rarities list, a piece dropped from its own block's pool whichever block its set was in.
+        private static Dictionary<string, List<ItemRarity>> GetBlockRarities()
+        {
+            Dictionary<string, List<ItemRarity>> result = new Dictionary<string, List<ItemRarity>>();
+
+            void Collect(List<LegendaryInfo> uniques, ItemRarity rarity)
+            {
+                if (uniques == null)
+                {
+                    return;
+                }
+
+                foreach (LegendaryInfo info in uniques)
+                {
+                    if (info == null || string.IsNullOrEmpty(info.ID))
+                    {
+                        continue;
+                    }
+
+                    if (!result.TryGetValue(info.ID, out List<ItemRarity> rarities))
+                    {
+                        rarities = new List<ItemRarity>();
+                        result.Add(info.ID, rarities);
+                    }
+
+                    if (!rarities.Contains(rarity))
+                    {
+                        rarities.Add(rarity);
+                    }
+                }
+            }
+
+            Collect(Config.MythicItems, ItemRarity.Mythic);
+            Collect(Config.LegendaryItems, ItemRarity.Legendary);
+            return result;
+        }
+
+        // What a set with no Rarities of its own rolls at: the blocks its pieces are in, or, when none of
+        // its pieces is defined, the set's own block.
+        private static List<ItemRarity> GetDefaultSetRarities(LegendarySetInfo set, ItemRarity setBlockRarity,
+            Dictionary<string, List<ItemRarity>> pieceBlocks)
+        {
+            List<ItemRarity> result = new List<ItemRarity>();
+            foreach (string pieceID in set.LegendaryIDs)
+            {
+                if (!string.IsNullOrEmpty(pieceID) && pieceBlocks.TryGetValue(pieceID, out List<ItemRarity> rarities))
+                {
+                    foreach (ItemRarity rarity in rarities)
+                    {
+                        if (!result.Contains(rarity))
+                        {
+                            result.Add(rarity);
+                        }
+                    }
+                }
+            }
+
+            if (result.Count == 0)
+            {
+                result.Add(setBlockRarity);
+            }
+
+            return result;
+        }
+
+        private static void AddSets(List<LegendarySetInfo> sets, ItemRarity defaultRarity,
+            Dictionary<string, List<ItemRarity>> pieceBlocks)
         {
             if (sets == null)
             {
@@ -145,7 +214,8 @@ namespace EpicLoot.LegendarySystem
                 set.LegendaryIDs ??= new List<string>();
                 set.SetBonuses ??= new List<SetBonusInfo>();
                 set.SetBonuses.RemoveAll(x => x == null);
-                set.Rarities = NormalizeRarities(set.Rarities, defaultRarity, $"set '{set.ID}'");
+                set.Rarities = NormalizeRarities(set.Rarities,
+                    GetDefaultSetRarities(set, defaultRarity, pieceBlocks), $"set '{set.ID}'");
 
                 if (AllSets.TryGetValue(set.ID, out LegendarySetInfo existing))
                 {
@@ -202,7 +272,8 @@ namespace EpicLoot.LegendarySystem
                 // A set piece's list is replaced by its set's afterwards, so leave it alone here.
                 if (!ItemsToSetMap.ContainsKey(info.ID))
                 {
-                    info.Rarities = NormalizeRarities(info.Rarities, defaultRarity, $"unique '{info.ID}'");
+                    info.Rarities = NormalizeRarities(info.Rarities, new List<ItemRarity> { defaultRarity },
+                        $"unique '{info.ID}'");
                 }
 
                 if (AllUniques.TryGetValue(info.ID, out LegendaryInfo existing))
@@ -282,8 +353,8 @@ namespace EpicLoot.LegendarySystem
         }
 
         // Null becomes empty, values outside the enum are dropped, duplicates removed, and an empty list
-        // gets the block's default.
-        private static List<ItemRarity> NormalizeRarities(List<ItemRarity> rarities, ItemRarity defaultRarity, string owner)
+        // gets the defaults.
+        private static List<ItemRarity> NormalizeRarities(List<ItemRarity> rarities, List<ItemRarity> defaults, string owner)
         {
             List<ItemRarity> result = new List<ItemRarity>();
             if (rarities != null)
@@ -305,7 +376,7 @@ namespace EpicLoot.LegendarySystem
 
             if (result.Count == 0)
             {
-                result.Add(defaultRarity);
+                result.AddRange(defaults);
             }
 
             result.Sort();
@@ -557,6 +628,67 @@ namespace EpicLoot.LegendarySystem
             }
 
             return result;
+        }
+
+        /// <summary>A set's pieces that are actually defined, once each, in the set's own order.</summary>
+        public static IEnumerable<LegendaryInfo> GetDefinedSetPieces(LegendarySetInfo set)
+        {
+            if (set?.LegendaryIDs == null)
+            {
+                yield break;
+            }
+
+            foreach (string pieceID in set.LegendaryIDs.Where(id => !string.IsNullOrEmpty(id)).Distinct())
+            {
+                if (AllUniques.TryGetValue(pieceID, out LegendaryInfo info))
+                {
+                    yield return info;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The piece of <paramref name="set"/> that <paramref name="item"/> would become at
+        /// <paramref name="rarity"/>, judged by each piece's Requirements the way a loot roll judges them.
+        /// <paramref name="preferredID"/> is tried first when it is still one of the set's pieces, then the
+        /// rest in the set's order. False when the set is not enabled at that rarity or no piece fits.
+        /// </summary>
+        public static bool TryGetSetPieceForItem(LegendarySetInfo set, ItemDrop.ItemData item, ItemRarity rarity,
+            string preferredID, out LegendaryInfo piece)
+        {
+            piece = null;
+            if (set == null || item == null || !IsEnabledAt(set, rarity))
+            {
+                return false;
+            }
+
+            // A fresh item of the target rarity, as LootRoller.RollMagicItem passes: the pieces' rules are
+            // about the host item, and the item's own effects must not trip the effect-composition half.
+            MagicItem probe = new MagicItem { Rarity = rarity };
+            List<LegendaryInfo> pieces = GetDefinedSetPieces(set).ToList();
+
+            LegendaryInfo preferred = string.IsNullOrEmpty(preferredID) ? null : pieces.Find(x => x.ID == preferredID);
+            if (preferred != null && PieceFits(preferred, item, probe))
+            {
+                piece = preferred;
+                return true;
+            }
+
+            foreach (LegendaryInfo candidate in pieces)
+            {
+                if (candidate != preferred && PieceFits(candidate, item, probe))
+                {
+                    piece = candidate;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool PieceFits(LegendaryInfo piece, ItemDrop.ItemData item, MagicItem probe)
+        {
+            return piece.Requirements == null || piece.Requirements.CheckRequirements(item, probe);
         }
 
         [Obsolete("Use GetAvailableUniques or GetAvailableSetPieces with a rarity.")]

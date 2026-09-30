@@ -116,9 +116,12 @@ public sealed class EpicLoot : BaseUnityPlugin {
         AddLocalizations();
         LoadAssets();
         _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginId);
-        // Registers with the shared Mod Config launcher (main menu + pause menu) and, on first run,
-        // opens the setup wizard once the main menu is ready (FejdStartup.Start postfix).
+        // Registers with the shared Mod Config launcher (main menu + pause menu) and, on a user's first
+        // run, queues the setup wizard on the shared startup popup queue, which opens it once the main
+        // menu is ready.
         QuickConfig.QuickConfigureTool.Init();
+        // Opens behind the wizard (a notice, not a welcome). After LoadAssets, which loads its prefab.
+        ConfigUpdatePrompt.Init();
 
         LootTableLoaded?.Invoke();
         RegisterMagicEffectEvents();
@@ -388,6 +391,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
         LoadShardSlotChisels();
         // Needs to trigger late in order to get all potentially added items by other mods.
         // Subscribed via the stored handler so the self-unsubscribe inside actually matches.
+        // A headless server never loads the minimap; it runs the pass from the world load instead
+        // (AutoAddEnchantableItems.RunOnHeadlessWorldLoad).
         MinimapManager.OnVanillaMapDataLoaded += AutoAddEnchantableItems.OnMapDataLoadedHandler;
 
         EpicAssets.AssertAssetIntegrety();
@@ -955,8 +960,10 @@ public sealed class EpicLoot : BaseUnityPlugin {
         return item.m_shared.m_icons.Length > 0;
     }
 
+    // The prefab name, which is what loot tables are keyed by: strips "(Clone)" and also the " (1)" a
+    // copy placed inside a location prefab carries (the memorial site's FallenWarrior (1)).
     public static string GetCharacterCleanName(Character character) {
-        return character.name.Replace("(Clone)", "").Trim();
+        return global::Utils.GetPrefabName(character.gameObject);
     }
 
     public static string GetSetItemColor() {

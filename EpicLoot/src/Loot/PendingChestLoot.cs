@@ -113,9 +113,9 @@ namespace EpicLoot
                 container.transform.position);
             EpicLoot.Log($"Rolling on loot table: {containerName}, " +
                 $"spawned {items.Count} items at drop point({container.transform.position.ToString("0")}).");
+            ContainerCapacity.AddItems(container, items);
             foreach (var item in items)
             {
-                container.m_inventory.AddItem(item);
                 EpicLoot.Log($"  - {item.m_shared.m_name}" + (item.IsMagic() ?
                     $": {string.Join(", ", item.GetMagicItem().Effects.Select(x => x.EffectType.ToString()))}" :
                     ""));

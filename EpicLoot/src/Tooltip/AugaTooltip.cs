@@ -117,6 +117,12 @@ public static class AugaTooltip
     // The set label the vanilla-UI tooltip heads a magic set item with (MagicTooltip.AddMagicSetLabel).
     private static string GetSetLabel(ItemDrop.ItemData item)
     {
+        // A set rune carries a SetID too, but it is not a piece of the set.
+        if (item.IsSetRune())
+        {
+            return "$mod_epicloot_setrune_label";
+        }
+
         return item.IsMagicSetItem() ? UniqueLegendaryHelper.GetSetLabelToken(item.GetRarity()) : null;
     }
 

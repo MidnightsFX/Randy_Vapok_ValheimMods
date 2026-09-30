@@ -258,11 +258,14 @@ namespace EpicLoot
                     float currentZdoLuckyLoot = zdo.GetFloat(LuckyLoot.ZdoValueKey);
                     // Head Hunter reads on the same GenerateDropList path, for the same reason.
                     float currentZdoHeadHunter = zdo.GetFloat(Headhunter.ZdoValueKey);
+                    // Prosperity is read wherever loot rolls: the creature's or chest's owner.
+                    float currentZdoProsperity = zdo.GetFloat(Prosperity.ZdoValueKey);
 
                     int currentLuck = (int)player.GetTotalActiveMagicEffectValue(MagicEffectType.Luck);
                     int currentRiches = (int)player.GetTotalActiveMagicEffectValue(MagicEffectType.Riches);
                     float currentLuckyLoot = player.GetTotalActiveMagicEffectValue(MagicEffectType.LuckyLoot);
                     float currentHeadHunter = player.GetTotalActiveMagicEffectValue(MagicEffectType.HeadHunter);
+                    float currentProsperity = player.GetTotalActiveMagicEffectValue(MagicEffectType.Prosperity);
 
                     if (currentLuck != currentZdoLuck)
                     {
@@ -282,6 +285,11 @@ namespace EpicLoot
                     if (currentHeadHunter != currentZdoHeadHunter)
                     {
                         zdo.Set(Headhunter.ZdoValueKey, currentHeadHunter);
+                    }
+
+                    if (currentProsperity != currentZdoProsperity)
+                    {
+                        zdo.Set(Prosperity.ZdoValueKey, currentProsperity);
                     }
                 }
             }

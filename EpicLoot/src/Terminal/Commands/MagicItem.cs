@@ -42,15 +42,10 @@ public static partial class TerminalManager
 
             args.Context.PrintInfo($">  {i + 1} - rarity: [{string.Join(", ", rarityTable)}], item: {item}");
 
-            var loot = new LootTable
-            {
-                Object = "Console",
-                Drops = [[1, 1]],
-                Loot =
-                [
-                    new LootDrop { Item = item, Rarity = rarityTable, Weight = 1 }
-                ]
-            };
+            var loot = LootTable.Simple("Console", [[1, 1]],
+            [
+                new LootDrop { Item = item, Rarity = rarityTable, Weight = 1 }
+            ]);
 
             var randomOffset = Random.insideUnitSphere;
             var dropPoint = Player.m_localPlayer.transform.position +
@@ -139,19 +134,14 @@ public static partial class TerminalManager
         ItemRarity itemRarity = effectRequirements.AllowedRarities.Count == 0 ? ItemRarity.Magic :
             effectRequirements.AllowedRarities.First();
         float[] rarityTable = GetRarityTable(itemRarity.ToString());
-        LootTable loot = new LootTable
-        {
-            Object = "Console",
-            Drops = [[1, 1]],
-            Loot =
-            [
-                new LootDrop
-                {
-                    Item = itemPrefab.name,
-                    Rarity = rarityTable
-                }
-            ]
-        };
+        LootTable loot = LootTable.Simple("Console", [[1, 1]],
+        [
+            new LootDrop
+            {
+                Item = itemPrefab.name,
+                Rarity = rarityTable
+            }
+        ]);
 
         Vector3 randomOffset = UnityEngine.Random.insideUnitSphere;
         Vector3 dropPoint = Player.m_localPlayer.transform.position +
@@ -287,19 +277,14 @@ public static partial class TerminalManager
             return;
         }
 
-        LootTable loot = new LootTable
-        {
-            Object = "Console",
-            Drops = [[1, 1]],
-            Loot =
-            [
-                new LootDrop
-                {
-                    Item = itemId,
-                    Rarity = GetRarityTable(rarity.ToString())
-                }
-            ]
-        };
+        LootTable loot = LootTable.Simple("Console", [[1, 1]],
+        [
+            new LootDrop
+            {
+                Item = itemId,
+                Rarity = GetRarityTable(rarity.ToString())
+            }
+        ]);
 
         LootRoller.CheatForceUniqueID = legendaryID;
         LootRoller.CheatForceUniqueRarity = rarity;
