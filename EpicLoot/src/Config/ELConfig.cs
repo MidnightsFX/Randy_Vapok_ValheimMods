@@ -64,6 +64,7 @@ internal class ELConfig {
     public static ConfigEntry<TextAnchor> AbilityBarLayoutAlignment;
     public static ConfigEntry<float> AbilityBarIconSpacing;
     public static ConfigEntry<float> SetItemDropChance;
+    public static ConfigEntry<bool> HealthCriticalEffectsEnabled;
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
     public static ConfigEntry<bool> AllowShardstoneDuplicateItemEffect;
     public static ConfigEntry<bool> AllowRunestoneDuplicateItemEffect;
@@ -83,10 +84,17 @@ internal class ELConfig {
     public static ConfigEntry<float> AncientGiftSuccessChance;
     public static ConfigEntry<KeyCode> SocketOverlayModifier;
     public static ConfigEntry<float> GlobalDropRateModifier;
+    public static ConfigEntry<float> StarLootScaling;
     public static ConfigEntry<bool> DeferChestLootRoll;
     public static ConfigEntry<bool> RemovePurchasedGambles;
 
-    public static ConfigEntry<bool> AlwaysShowWelcomeMessage;
+    public static ConfigEntry<FirstRunMode> WelcomeWizardMode;
+    /// <summary>The Welcome Wizard's line in the shared per-user first-run record. Never change it once shipped.</summary>
+    internal const string WelcomeWizardKey = "EpicLoot";
+    /// <summary>Raise to show a reworked Welcome Wizard to users who have seen this one.</summary>
+    internal const int WelcomeWizardRevision = 1;
+    /// <summary>The per-profile flag WelcomeWizardMode replaced; see MigrateWelcomeWizard.</summary>
+    private const string LegacyWelcomeMessageKey = "Show Welcome Message, automatically set to false once config is viewed.";
     public static ConfigEntry<bool> OutputPatchedConfigFiles;
     public static ConfigEntry<bool> VerifyPenaltyScalingCache;
     public static ConfigEntry<bool> EnchantingTableUpgradesActive;
@@ -97,6 +105,16 @@ internal class ELConfig {
     public static ConfigEntry<float> _bossCryptKeyDropPlayerRange;
     public static ConfigEntry<BossDropMode> _bossWishboneDropMode;
     public static ConfigEntry<float> _bossWishboneDropPlayerRange;
+    public static ConfigEntry<BossExtraDropMode> ModerDropMode;
+    public static ConfigEntry<float> ModerDropPlayerRange;
+    public static ConfigEntry<BossExtraDropMode> YagluthDropMode;
+    public static ConfigEntry<float> YagluthDropPlayerRange;
+    public static ConfigEntry<BossExtraDropMode> QueenDropMode;
+    public static ConfigEntry<float> QueenDropPlayerRange;
+    public static ConfigEntry<BossExtraDropMode> FaderDropMode;
+    public static ConfigEntry<float> FaderDropPlayerRange;
+    public static ConfigEntry<BossExtraDropMode> FrozenKingDropMode;
+    public static ConfigEntry<float> FrozenKingDropPlayerRange;
     public static ConfigEntry<string> BalanceConfigurationType;
     public static ConfigEntry<bool> AutoAddEquipment;
     public static ConfigEntry<bool> AutoRemoveEquipmentNotFound;
@@ -108,6 +126,7 @@ internal class ELConfig {
     public static ConfigEntry<float> UIAudioVolumeAdjustment;
     public static ConfigEntry<bool> AutoAddRemoveEquipmentFromVendor;
     public static ConfigEntry<bool> AutoAddRemoveEquipmentFromLootLists;
+    public static ConfigEntry<bool> AutoAddCreaturesToLootTables;
     public static ConfigEntry<bool> EnableHotReloadPatches;
     public static ConfigEntry<bool> AlwaysRefreshCoreConfigs;
     public static ConfigEntry<int> TooltipMaxWidth;
@@ -116,9 +135,11 @@ internal class ELConfig {
     public static ConfigEntry<float> TraderPanelPositionY;
     public static ConfigEntry<float> TemperPanelPositionX;
     public static ConfigEntry<float> TemperPanelPositionY;
+    public static ConfigEntry<KeyCode> TraderPanelDragKey;
     public static ConfigEntry<bool> ShowQuickConfigButton;
 
     public static ConfigEntry<RuneExtractMode> RuneExtractItemMode;
+    public static ConfigEntry<RuneSetExtractMode> RuneSetExtractItemMode;
 
     public static ConfigEntry<bool> TemperDestroysItem;
     public static ConfigEntry<float> TemperChanceToDestroy;
@@ -233,6 +254,12 @@ internal class ELConfig {
     /// <summary>Raw values of the config file as it was before this run bound anything, keyed "Section::Key".</summary>
     private static readonly Dictionary<string, string> PreviousConfigValues = new Dictionary<string, string>();
 
+    /// <summary>
+    /// The section names each "Section::Key" of <see cref="PreviousConfigValues"/> was found under, order prefix
+    /// and all ("9 - Debug"): what a retired key has to be addressed by to take it out of the file.
+    /// </summary>
+    private static readonly Dictionary<string, List<string>> PreviousRawSections = new Dictionary<string, List<string>>();
+
     /// <summary>Everything bound this run, with the section name minus its order prefix.</summary>
     private static readonly List<(ConfigEntryBase Entry, string Location)> BoundEntries =
         new List<(ConfigEntryBase, string)>();
@@ -252,6 +279,7 @@ internal class ELConfig {
         cfg.SaveOnConfigSet = false;
         ReadPreviousConfigValues();
         CreateConfigValues();
+        MigrateWelcomeWizard();
         ApplyPreviousConfigValues();
         // After the migration, so restoring a saved value does not fire a handler into a UI that Awake
         // has not built yet.
@@ -321,6 +349,11 @@ internal class ELConfig {
             "Automatically adds/removes equipment from the vendor when it is added/removed from the game. ");
         AutoAddRemoveEquipmentFromLootLists = BindServer(SectionGeneral, "Auto Add Remove Equipment From Loot Lists", true,
             "Automatically adds/removes equipment from the tier based loot lists, and validates other loot lists only contain valid items.");
+        AutoAddCreaturesToLootTables = BindServer(SectionGeneral, "Auto Add Creatures To Loot Tables", true,
+            "Gives creatures that have no loot table (most often ones other mods add) a tier loot table, chosen from " +
+            "their biome and how tough they are by the CreatureSorter rules in itemsorter.json. The entries it " +
+            "writes into loottables.json are marked \"Auto\": true and are re-sorted every time a world loads; " +
+            "entries without that mark are never touched. Runs on the server (or in single player) only.");
 
         // 2 - Balance
         BalanceConfigurationType = BindServer(SectionBalance, "Balance Template", "Default",
@@ -351,6 +384,14 @@ internal class ELConfig {
             "2 = The number of items in the drop table are twice as likely to drop " +
             "(note, this doesn't double the number of loot dropped, just doubles the relative chance for it to drop).\n" +
             "Min = 0, Max = 4", new AcceptableValueRange<float>(minValue: 0, maxValue: 4));
+        StarLootScaling = BindServer(SectionBalance, "Star Loot Scaling", 1.0f,
+            "How much a creature's stars improve its loot, on top of what loottables.json authors for each level.\n" +
+            "Every star counts as this many stars when a loot table extrapolates past its authored levels " +
+            "(StarScaling: drop chance, extra drops, item mix and rarity).\n" +
+            "1 = as configured.\n" +
+            "0 = stars never affect loot; every creature drops its level 1 loot.\n" +
+            "2 = each star counts double.\n" +
+            "Min = 0, Max = 3", new AcceptableValueRange<float>(minValue: 0, maxValue: 3));
         // The four ratios below are RELATIVE WEIGHTS, not independent chances. Every drop the loot
         // tables produce rolls exactly one of these four categories, weighted against each other, so
         // they need not sum to 1 -- only their proportions matter. Setting one to 0 removes that
@@ -388,6 +429,12 @@ internal class ELConfig {
             "or identified as a set item. If no set piece fits the item it rolls a regular unique instead.\n" +
             "Min = 0, Max = 1",
             new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
+        HealthCriticalEffectsEnabled = BindServer(SectionBalance, "Health Critical Enchantments", true,
+            "When false, the enchantments that only act at critical health stop rolling: every " +
+            "'(Health Critical)' effect, Instant Mead, Automatic Mead Consumption and Health Critical Threshold " +
+            "no longer come up from loot, identifying, enchanting or augmenting.\n" +
+            "Items that already carry one keep it and it keeps working, and a runestone holding one can still " +
+            "be etched. Default: True.");
         TransferMagicItemToCrafts = BindServer(SectionBalance, "Transfer Enchants to Crafted Items", true,
             "When enchanted items are used as ingredients in recipes, transfer every enchantment from the " +
             "consumed items that is valid on the newly crafted item, along with the highest socket count. " +
@@ -418,6 +465,11 @@ internal class ELConfig {
             "within 'Wishbone Drop Player Range' of the boss. Default keeps vanilla's one wishbone per player on the server.");
         _bossWishboneDropPlayerRange = BindServer(SectionBalance, "Wishbone Drop Player Range", 100.0f,
             "Sets the range that bosses check when dropping multiple wishbones using the OnePerPlayerNearBoss drop mode.");
+        BindBossExtraDrop("Moder", "Dragon Tears", 10, out ModerDropMode, out ModerDropPlayerRange);
+        BindBossExtraDrop("Yagluth", "Torn Spirits", 3, out YagluthDropMode, out YagluthDropPlayerRange);
+        BindBossExtraDrop("Queen", "Majestic Carapaces", 5, out QueenDropMode, out QueenDropPlayerRange);
+        BindBossExtraDrop("Fader", "Fader Relics", 5, out FaderDropMode, out FaderDropPlayerRange);
+        BindBossExtraDrop("Frozen King", "Sacrificial Blood", 1, out FrozenKingDropMode, out FrozenKingDropPlayerRange);
         // 3 - Sockets
         AllowDuplicateSocketedEffects = BindServer(SectionSockets, "Allow Duplicate Socketed Effects", false,
             "When false, an effect that is already socketed on an item cannot be socketed again.");
@@ -472,6 +524,13 @@ internal class ELConfig {
             "DestroyItem = the item is consumed.\n" +
             "If the extracted enchantment is the item's only enchantment, the item reverts to a normal item.\n" +
             "Default: ReduceEnchants.");
+        RuneSetExtractItemMode = BindServer(SectionSockets, "Set Rune Extract Mode", RuneSetExtractMode.StripSet,
+            "Controls what happens to the source item when its set is extracted into a set rune " +
+            "(Rune page, Set Extract).\n" +
+            "StripSet = the item keeps its rarity, enchantments and shard slots but is no longer a set " +
+            "piece, and gets a generated name.\n" +
+            "DestroyItem = the item is consumed; socketed stones that are not permanent are returned.\n" +
+            "Default: StripSet.");
         AllowGiftOnItemsWithSlots = BindServer(SectionSockets, "Allow Brokkr Gift On Items With Slots", true,
             "When true, Brokkr's Gift can extend an item that already has shard slots, up to the most " +
             "its rarity allows. When false, it only works on an item with no shard slots at all -- an " +
@@ -561,28 +620,39 @@ internal class ELConfig {
             "1 = full UI sounds\n" +
             "0 = no UI sounds",
             new AcceptableValueRange<float>(0, 1));
-        TooltipMaxWidth = BindClient(SectionInterface, "Tooltip Max Width", 350,
-            "Maximum width of the item tooltip box, in pixels.", new AcceptableValueRange<int>(150, 1200));
-        TooltipMaxHeight = BindClient(SectionInterface, "Tooltip Max Height", 650,
-            "Maximum height of the item tooltip box, in pixels. Content taller than this scrolls.",
+        TooltipMaxWidth = BindClient(SectionInterface, "Tooltip Max Width", 400,
+            "Maximum width of the item tooltip box, in pixels. The box narrows to fit shorter text, and longer " +
+            "lines wrap at this width.", new AcceptableValueRange<int>(150, 1200));
+        TooltipMaxHeight = BindClient(SectionInterface, "Tooltip Max Height", 850,
+            "Maximum height of the item tooltip box, in pixels. The box shrinks to fit its content, and " +
+            "content taller than this scrolls. Never taller than the screen.",
             new AcceptableValueRange<int>(350, 4000));
         TraderPanelPositionX = BindClient(SectionInterface, "Trader Panel X Position", -200f,
             "The horizontal on-screen position (RectTransform anchoredPosition X, anchored to the " +
             "top-right of the trader window) of the EpicLoot adventure trader panel. Dragging the " +
-            "panel in-game updates this automatically. Default: -200. More negative moves it left, " +
-            "toward 0 (and positive) moves it right.");
+            "panel in-game (by its corner handle, or anywhere while holding the Trader Panel Drag " +
+            "Key) updates this automatically. Default: -200. More negative moves it left, toward 0 " +
+            "(and positive) moves it right.");
         TraderPanelPositionY = BindClient(SectionInterface, "Trader Panel Y Position", -155f,
             "The vertical on-screen position (RectTransform anchoredPosition Y, anchored to the " +
             "top-right of the trader window) of the EpicLoot adventure trader panel. Dragging the " +
-            "panel in-game updates this automatically. Default: -155.");
+            "panel in-game (by its corner handle, or anywhere while holding the Trader Panel Drag " +
+            "Key) updates this automatically. Default: -155.");
         TemperPanelPositionX = BindClient(SectionInterface, "Temper Panel X Position", -200f,
             "The horizontal on-screen position (RectTransform anchoredPosition X, anchored to the " +
             "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
-            "in-game updates this automatically. Default: -200.");
+            "in-game (by its corner handle, or anywhere while holding the Trader Panel Drag Key) " +
+            "updates this automatically. Default: -200.");
         TemperPanelPositionY = BindClient(SectionInterface, "Temper Panel Y Position", -155f,
             "The vertical on-screen position (RectTransform anchoredPosition Y, anchored to the " +
             "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
-            "in-game updates this automatically. Default: -155.");
+            "in-game (by its corner handle, or anywhere while holding the Trader Panel Drag Key) " +
+            "updates this automatically. Default: -155.");
+        TraderPanelDragKey = BindClient(SectionInterface, "Trader Panel Drag Key", KeyCode.LeftAlt,
+            "Hold this key to drag the adventure trader and tempering panels from anywhere on them, their " +
+            "lists and buttons included. Without it the panels stay put, so clicking them never moves " +
+            "them. The arrow handle in each panel's top-right corner drags it without the key. Set to None " +
+            "to move the panels by the handle only.");
         ShowQuickConfigButton = BindClient(SectionInterface, "Show Quick Configure Button", true,
             "Lists Epic Loot in the shared Mod Config button on the main menu and the pause menu, which " +
             "opens the Quick Configure panel: a paged editor over the settings most worlds change, " +
@@ -655,11 +725,13 @@ internal class ELConfig {
         _loggingEnabled = BindClient(SectionDebug, "Logging Enabled", true, "Enable logging");
         _logLevel = BindClient(SectionDebug, "Log Level", LogLevel.Error,
             "Only log messages of the selected level or higher");
-        AlwaysShowWelcomeMessage = BindClient(SectionDebug, "Show Welcome Message, automatically set to false once config is viewed.", true,
-            "When true, the Quick Configure setup wizard opens once on the main menu with a Welcome page " +
-            "(balance preset, drop mix, features, and every other page). It is set back to false as soon " +
-            "as the wizard is closed by any route; set it to true to run the wizard again next launch. " +
-            "The panel can be reopened any time from the Mod Config button on the main or pause menu.");
+        WelcomeWizardMode = BindClient(SectionDebug, "Welcome Wizard", FirstRunMode.Auto,
+            "Whether the Quick Configure setup wizard opens by itself on the main menu, with a Welcome page " +
+            "(balance preset, drop mix, features, and every other page). Auto opens it once per user: whether " +
+            "you have seen it is shared by every mod manager profile, in ModQuickConfig/FirstRun.cfg next to " +
+            "your Valheim saves. ShowNextLaunch opens it on the next launch and then goes back to Auto. Never " +
+            "stops it opening by itself in this profile. The panel can be reopened any time from the Mod Config " +
+            "button on the main or pause menu.");
         OutputPatchedConfigFiles = BindClient(SectionDebug, "OutputPatchedConfigFiles", false,
             "Just a debug flag for testing the patching system, do not use.");
         VerifyPenaltyScalingCache = BindClient(SectionDebug, "Verify Penalty Scaling Cache", false,
@@ -697,6 +769,11 @@ internal class ELConfig {
         EnchantingTableUpgradesActive.SettingChanged += (_, _) => EnchantingTableUI.UpdateUpgradeActivation();
         EnchantingTableActivatedTabs.SettingChanged += (_, _) => EnchantingTableUI.UpdateTabActivation();
         ShowQuickConfigButton.SettingChanged += (_, _) => QuickConfig.QuickConfigureTool.ApplyRegistration();
+        foreach (ConfigEntry<string> rarityColor in new[] {
+            _magicRarityColor, _rareRarityColor, _epicRarityColor,
+            _legendaryRarityColor, _mythicRarityColor, _ancientRarityColor }) {
+            rarityColor.SettingChanged += (_, _) => SetRarityColor.RefreshAll();
+        }
     }
 
     /// <summary>Binds a client-local entry in declaration order, recording where it landed for the migration.</summary>
@@ -709,6 +786,18 @@ internal class ELConfig {
     private static ConfigEntry<T> BindServer<T>(string section, string key, T value, string description,
                                                AcceptableValueBase acceptableValues = null) {
         return Track(ConfigBinder.BindServerConfigInOrder(section, key, value, description, acceptableValues), section, key);
+    }
+
+    // The mode and range pair of one late boss's own drop (EpicLootDropsHelper), in the Balance section.
+    private static void BindBossExtraDrop(string boss, string drop, int amount,
+                                          out ConfigEntry<BossExtraDropMode> mode, out ConfigEntry<float> range) {
+        mode = BindServer(SectionBalance, $"{boss} Drop Mode", BossExtraDropMode.OneExtraPerNearbyPlayer,
+            $"How many {drop} {boss} drops ({amount} normally) when several players take part.\n" +
+            $"OneExtraPerNearbyPlayer: one more for each player after the first within '{boss} Drop Player Range'.\n" +
+            $"MultiplyByNearbyPlayers: the whole drop once for each of those players ({amount * 4} for four players).\n" +
+            "Default leaves the drop unchanged.");
+        range = BindServer(SectionBalance, $"{boss} Drop Player Range", 100.0f,
+            $"How far from {boss} a player may be to count for '{boss} Drop Mode'.");
     }
 
     private static ConfigEntry<T> Track<T>(ConfigEntry<T> entry, string section, string key) {
@@ -724,11 +813,13 @@ internal class ELConfig {
     /// </summary>
     private static void ReadPreviousConfigValues() {
         PreviousConfigValues.Clear();
+        PreviousRawSections.Clear();
         if (!File.Exists(cfg.ConfigFilePath)) {
             return;
         }
 
         string section = string.Empty;
+        string rawSection = string.Empty;
         bool sectionIsOrdered = false;
         foreach (string rawLine in File.ReadAllLines(cfg.ConfigFilePath)) {
             string line = rawLine.Trim();
@@ -738,6 +829,7 @@ internal class ELConfig {
 
             if (line[0] == '[' && line[line.Length - 1] == ']') {
                 section = line.Substring(1, line.Length - 2).Trim();
+                rawSection = section;
                 Match orderPrefix = Regex.Match(section, @"^\d+\s*-\s*");
                 sectionIsOrdered = orderPrefix.Success;
                 section = sectionIsOrdered ? section.Substring(orderPrefix.Length) : section;
@@ -756,6 +848,37 @@ internal class ELConfig {
             string location = $"{section}::{line.Substring(0, separator).Trim()}";
             if (sectionIsOrdered || !PreviousConfigValues.ContainsKey(location)) {
                 PreviousConfigValues[location] = line.Substring(separator + 1).Trim();
+            }
+            if (!PreviousRawSections.TryGetValue(location, out List<string> rawSections)) {
+                rawSections = new List<string>();
+                PreviousRawSections[location] = rawSections;
+            }
+            if (!rawSections.Contains(rawSection)) {
+                rawSections.Add(rawSection);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Retires the old per-profile "Show Welcome Message" flag in favour of <see cref="WelcomeWizardMode"/> and the
+    /// per-user first-run record every mod manager profile shares (Common/Config/UI, ConfigUIFirstRun). false meant
+    /// the wizard had been closed, so this user has seen it; true was both the default and "run it again", which is
+    /// Auto. The line is taken out of every section it was found under, so it is not written back. Must run before
+    /// <see cref="ApplyPreviousConfigValues"/>, which clears the snapshot this reads.
+    /// </summary>
+    private static void MigrateWelcomeWizard() {
+        string location = $"{SectionDebug}::{LegacyWelcomeMessageKey}";
+        if (PreviousConfigValues.TryGetValue(location, out string previous)
+            && bool.TryParse(previous, out bool show) && !show
+            // A dedicated server has no wizard, and must not write the record on its user's behalf.
+            && !GUIManager.IsHeadless()) {
+            ConfigUIFirstRun.MarkSeen(WelcomeWizardKey, WelcomeWizardRevision);
+            EpicLoot.Log("The Welcome Wizard had already been closed in this profile; recorded it as seen for every profile.");
+        }
+
+        if (PreviousRawSections.TryGetValue(location, out List<string> sections)) {
+            foreach (string section in sections) {
+                ConfigUIFirstRun.TakeLegacyEntry(cfg, section, LegacyWelcomeMessageKey, out _);
             }
         }
     }
@@ -779,6 +902,7 @@ internal class ELConfig {
 
         BoundEntries.Clear();
         PreviousConfigValues.Clear();
+        PreviousRawSections.Clear();
     }
 
     public static void InitializeConfig() {
@@ -995,12 +1119,22 @@ internal class ELConfig {
 
     /// <summary>
     /// Re-reads baseconfig files into the live config, in registration order.
+    ///
+    /// Only where this machine owns its config files, the rule the reload scheduler applies to every
+    /// edit. On a client connected to someone else's server the live config is the server's push: it is
+    /// left in place and the files are left unapplied, so the scheduler reads them after disconnecting.
     /// </summary>
     /// <param name="fileNames">
     /// The files to reload, with extension ("loottables.json"). Null reloads every registered file;
     /// an empty collection reloads none.
     /// </param>
     internal static void ReloadBaseConfigsFromDisk(ICollection<string> fileNames) {
+        if (!ConfigFileReloader.OwnsConfigOnDisk()) {
+            EpicLoot.Log($"Not reloading {(fileNames == null ? "the baseconfig files" : string.Join(", ", fileNames))}: " +
+                "this client is connected to a server whose configs are in effect. They are read after disconnecting.");
+            return;
+        }
+
         string baseConfigDir = GetOverhaulDirectoryPath();
         foreach ((string fileName, Func<bool> reloadFromDisk) in BaseConfigReloaders) {
             if (fileNames != null && !fileNames.Contains(fileName)) {
@@ -1035,17 +1169,36 @@ internal class ELConfig {
             return;
         }
 
+        // The rebuilt files are this player's own. Connected to someone else's server, its configs stay in
+        // effect, as they do for a baseconfig file edited by hand: the reload scheduler reads the rebuilt
+        // files after disconnecting. They are rebuilt from the embedded defaults, without the items the
+        // equipment pass adds, so the pass runs again on the next world this player loads.
+        if (!ConfigFileReloader.OwnsConfigOnDisk()) {
+            AutoAddEnchantableItems.RunOnNextWorldLoad();
+            EpicLoot.LogForce($"Patch files changed; rebuilt {string.Join(", ", rebuiltTargets)}. This client is " +
+                "connected to a server whose configs are in effect, so the change applies after disconnecting.");
+            return;
+        }
+
         EpicLoot.LogForce($"Patch files changed; rebuilt and reloaded {string.Join(", ", rebuiltTargets)}.");
         HashSet<string> rebuiltFiles = new HashSet<string>(rebuiltTargets.Select(target => $"{target}.json"));
         ReloadBaseConfigsFromDisk(rebuiltFiles);
+
+        // A rebuilt loottables.json comes back without the creature sorter's "Auto" entries; put them
+        // back before the equipment pass below rewrites the file from the live config.
+        if (rebuiltFiles.Contains("loottables.json")) {
+            CreatureSorterRunner.RunIfWorldLoaded("patch reload");
+        }
 
         if (AutoAddEquipment.Value == false && AutoRemoveEquipmentNotFound.Value == false) {
             return;
         }
 
         // The scan classifies the ItemDrops currently loaded, so outside a world it finds nothing and
-        // writes configs stripped of every item. It runs again on the next world load regardless.
+        // writes configs stripped of every item. Re-armed for the next world load instead, since it may
+        // already have run this session.
         if (ZNetScene.instance == null) {
+            AutoAddEnchantableItems.RunOnNextWorldLoad();
             EpicLoot.LogForce("Patches were rebuilt, but the equipment auto-add pass needs a loaded " +
                 "world and was skipped; it runs again when you load one.");
             return;
@@ -1061,10 +1214,9 @@ internal class ELConfig {
             return;
         }
 
-        if (SynchronizationManager.Instance.PlayerIsAdmin == false) {
-            EpicLoot.Log("Player is not an admin, and not allowed to change local configuration. Local config change will not be loaded.");
-            return;
-        }
+        // No admin check: a rebuild writes only this player's own files, and on a client connected to
+        // someone else's server RunPatchHotReload leaves the server's configs in effect until it
+        // disconnects. Being that server's admin does not make the local files the server's.
 
         // Directory events carry no patch content, and the watcher spans subdirectories itself.
         // Directory.Exists instead of File.GetAttributes: a Deleted event (or a Changed event racing

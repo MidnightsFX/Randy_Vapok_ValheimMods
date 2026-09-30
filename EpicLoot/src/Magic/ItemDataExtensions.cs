@@ -137,6 +137,11 @@ public static class ItemDataExtensions
 
     public static string GetDisplayName(this ItemDrop.ItemData itemData)
     {
+        if (itemData.IsSetRune())
+        {
+            return GetSetRuneName(itemData);
+        }
+
         // TODO: investigate
         string name = itemData.m_shared.m_name;
 
@@ -179,8 +184,25 @@ public static class ItemDataExtensions
         return $"<color={color}>{name}</color>";
     }
 
+    // A set rune is named after its set when shown, never stored, so it follows a language change or a
+    // renamed set, and reads as unknown once the set is gone from legendaries.json.
+    public static string GetSetRuneName(this ItemDrop.ItemData itemData)
+    {
+        MagicItem magicItem = itemData.GetMagicItem();
+        return UniqueLegendaryHelper.TryGetLegendarySetInfo(magicItem?.SetID, out LegendarySetInfo set)
+            ? Localization.instance.Localize("$mod_epicloot_setrune_nameformat", Localization.instance.Localize(set.Name))
+            : Localization.instance.Localize("$mod_epicloot_setrune_unknown");
+    }
+
     public static string GetDescription(this ItemDrop.ItemData itemData)
     {
+        // A set rune carries its source piece's LegendaryID only as an etch preference; the piece's lore
+        // does not describe the rune.
+        if (itemData.IsSetRune())
+        {
+            return "$mod_epicloot_setrune_desc";
+        }
+
         if (itemData.IsMagic())
         {
             MagicItem magicItem = itemData.GetMagicItem();

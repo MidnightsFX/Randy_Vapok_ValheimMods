@@ -245,7 +245,8 @@ namespace EpicLoot.MagicItemEffects.Shards {
         }
 
         // Re-rolls the creature's EpicLoot magic-item table extraRolls more times. Normal rarity and
-        // gating rules apply to each roll, so a roll legitimately producing nothing is expected.
+        // gating rules apply to each roll, so a roll legitimately producing nothing is expected. Prosperity
+        // is left off these rolls; it already had its turn on the kill's own roll.
         public static void RollBonusEpicLootDrops(string characterName, int level, Vector3 dropPoint,
             int extraRolls) {
             if (extraRolls <= 0 || string.IsNullOrEmpty(characterName)) {
@@ -254,7 +255,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
 
             EpicLoot.Log($"Lucky Loot: rolling {extraRolls} bonus magic item drops for {characterName}.");
             for (var i = 0; i < extraRolls; i++) {
-                EpicLootDropsHelper.OnCharacterDeath(characterName, level, dropPoint);
+                EpicLootDropsHelper.OnCharacterDeath(characterName, level, dropPoint, allowBonusRolls: false);
             }
         }
 

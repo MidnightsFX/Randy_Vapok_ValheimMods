@@ -5342,6 +5342,58 @@
       ]
     },
     {
+      "Type": "GreenThumb",
+      "DisplayText": "$mod_epicloot_me_greenthumb_display",
+      "Description": "$mod_epicloot_me_greenthumb_desc",
+      "Requirements": {
+        "AllowedItemNames": [
+          "$item_cultivator"
+        ]
+      },
+      "ValuesPerRarity": {
+        "Magic": {
+          "MinValue": 5,
+          "MaxValue": 10,
+          "Increment": 1
+        },
+        "Rare": {
+          "MinValue": 10,
+          "MaxValue": 15,
+          "Increment": 1
+        },
+        "Epic": {
+          "MinValue": 15,
+          "MaxValue": 20,
+          "Increment": 1
+        },
+        "Legendary": {
+          "MinValue": 20,
+          "MaxValue": 30,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 30,
+          "MaxValue": 40,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 40,
+          "MaxValue": 50,
+          "Increment": 1
+        }
+      },
+      "Config": {
+        "Max": 75
+      },
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_greenthumb_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_greenthumb_suffix1"
+      ]
+    },
+    {
       "Type": "RecallWeapon",
       "DisplayText": "$mod_epicloot_me_recallweapon_display",
       "Description": "$mod_epicloot_me_recallweapon_desc",
@@ -6647,10 +6699,72 @@
       ]
     },
     {
+      "Type": "CloseQuarter",
+      "DisplayText": "$mod_epicloot_me_closequarter_display",
+      "Description": "$mod_epicloot_me_closequarter_desc",
+      "Requirements": {
+        "AllowedItemTypes": [
+          "OneHandedWeapon",
+          "TwoHandedWeapon",
+          "TwoHandedWeaponLeft"
+        ],
+        "ExcludedSkillTypes": [
+          "Pickaxes",
+          "ElementalMagic",
+          "BloodMagic"
+        ],
+        "ExcludedItemNames": [
+          "$item_fishingrod"
+        ]
+      },
+      "ValuesPerRarity": {
+        "Magic": {
+          "MinValue": 20,
+          "MaxValue": 30,
+          "Increment": 1
+        },
+        "Rare": {
+          "MinValue": 30,
+          "MaxValue": 40,
+          "Increment": 1
+        },
+        "Epic": {
+          "MinValue": 40,
+          "MaxValue": 55,
+          "Increment": 1
+        },
+        "Legendary": {
+          "MinValue": 55,
+          "MaxValue": 70,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 70,
+          "MaxValue": 85,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 85,
+          "MaxValue": 100,
+          "Increment": 1
+        }
+      },
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_closequarter_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_closequarter_suffix1"
+      ]
+    },
+    {
       "Type": "Luck",
       "DisplayText": "$mod_epicloot_me_luck_display",
       "Description": "$mod_epicloot_me_luck_desc",
       "Requirements": {
+        "ExclusiveEffectTypes": [
+          "Prosperity"
+        ],
         "AllowedItemTypes": [
           "Utility",
           "Trinket"
@@ -6700,6 +6814,68 @@
       ],
       "Suffixes": [
         "$mod_epicloot_me_luck_suffix1"
+      ]
+    },
+    {
+      "Type": "Prosperity",
+      "DisplayText": "$mod_epicloot_me_prosperity_display",
+      "Description": "$mod_epicloot_me_prosperity_desc",
+      "Requirements": {
+        "ExclusiveEffectTypes": [
+          "Luck"
+        ],
+        "AllowedItemTypes": [
+          "Utility",
+          "Trinket"
+        ],
+        "AllowedRarities": [
+          "Epic",
+          "Legendary",
+          "Mythic",
+          "Ancient"
+        ]
+      },
+      "ValuesPerRarity": {
+        "Magic": {
+          "MinValue": 1,
+          "MaxValue": 3,
+          "Increment": 1
+        },
+        "Rare": {
+          "MinValue": 3,
+          "MaxValue": 6,
+          "Increment": 1
+        },
+        "Epic": {
+          "MinValue": 6,
+          "MaxValue": 9,
+          "Increment": 1
+        },
+        "Legendary": {
+          "MinValue": 9,
+          "MaxValue": 12,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 12,
+          "MaxValue": 15,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 15,
+          "MaxValue": 18,
+          "Increment": 1
+        }
+      },
+      "Config": {
+        "BonusRollsMax": 3
+      },
+      "SelectionWeight": 5,
+      "Prefixes": [
+        "$mod_epicloot_me_prosperity_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_prosperity_suffix1"
       ]
     },
     {

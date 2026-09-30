@@ -1,4 +1,5 @@
 using EpicLoot.Config;
+using EpicLoot.Magic.MagicItemEffects.Helpers;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -135,6 +136,32 @@ internal static class EffectConfigTables {
             }
             value.Order.Add(definition.Type);
             value.Effects[definition.Type] = set;
+        }
+        return value;
+    }
+
+    /// <summary>
+    /// The shipped Config of every editable effect in <paramref name="current"/>: an overhaul effect's
+    /// block from the staged template's magiceffects.json, a shard effect's grid block from
+    /// shardstones.json merged over its code defaults (as a load builds it). An effect the shipped files
+    /// do not carry, and every read-only one, keeps its entries.
+    /// </summary>
+    internal static EffectConfigsValue Shipped(EffectConfigsValue current, ShippedDefaults shipped) {
+        EffectConfigsValue value = current.Clone();
+        JObject overhaul = shipped.Root(BalancePreset.MagicEffectsFile);
+        JObject grid = shipped.Root("shardstones.json");
+        foreach (EffectConfigSet set in value.Effects.Values) {
+            Dictionary<string, float> config = null;
+            if (set.Source == EffectSource.Overhaul && overhaul != null) {
+                config = (JsonConfigEdits.FindEffect(overhaul, set.Type)?["Config"] as JObject)?.ToObject<Dictionary<string, float>>();
+            } else if (set.Source == EffectSource.Shard && grid != null) {
+                JObject entry = ShardSlotEntries(grid).FirstOrDefault(slot => (string)slot["EffectType"] == set.Type && slot["Config"] is JObject);
+                if (entry != null) {
+                    config = ShardEffectDefinitions.ConfigWith(set.Type, entry["Config"].ToObject<Dictionary<string, float>>());
+                }
+            }
+            if (config == null || config.Count == 0) { continue; }
+            set.Entries = config.Select(pair => new EffectConfigEntry { Key = pair.Key, Value = pair.Value }).ToList();
         }
         return value;
     }

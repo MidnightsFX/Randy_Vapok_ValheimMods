@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using EpicLoot.Crafting;
 using EpicLoot.LegendarySystem;
 using EpicLoot.ShardStones;
 
@@ -14,6 +15,11 @@ public partial class MagicTooltip(ItemDrop.ItemData item, MagicItem magicItem, i
 
     public string GetTooltip() {
         text.Clear();
+
+        if (item.IsSetRune()) {
+            AddSetRuneTooltip();
+            return text.ToString();
+        }
 
         //AddMagicDisplayName();
         AddMagicSetLabel();

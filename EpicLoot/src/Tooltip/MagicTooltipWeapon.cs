@@ -231,7 +231,10 @@ public partial class MagicTooltip {
 
     private void AddKnockback() {
         if (item.m_shared.m_attackForce > 0f) {
-            text.AppendFormat("\n$item_knockback: <color=orange>{0}</color>", item.m_shared.m_attackForce);
+            bool hasCloseQuarter = magicItem.HasEffect(MagicEffectType.CloseQuarter, includeSocketed: true);
+            string knockbackColor = hasCloseQuarter ? magicColor : "orange";
+            text.AppendFormat("\n$item_knockback: <color={0}>{1:0.#}</color>",
+                knockbackColor, CloseQuarter.GetKnockback(item, magicItem));
         }
     }
 }

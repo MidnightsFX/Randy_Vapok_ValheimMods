@@ -119,6 +119,8 @@ public static partial class TerminalManager
             _ = new Command("gotomerchant", "teleport to merchant: [merchant]", GoToMerchant, GetGoToOptions, alternates: "gotom");
             _ = new Command("globalkeys", "print active global keys", PrintGlobalKeys);
             _ = new Command("lootres", "print loot resolution: [creature] [level] [itemIndex]", PrintLootResolution, GetLootResolutionOptions);
+            _ = new Command("lootpreview", "print what a creature's or chest's loot tables roll per level after star scaling: [object] [maxLevel]", PrintLootPreview, GetLootPreviewOptions);
+            _ = new Command("creaturesort", "give creatures without a loot table one from itemsorter.json's rules: [dry|all] (dry/all preview only)", RunCreatureSort, GetCreatureSortOptions);
             _ = new Command("resetcooldowns", "reset ability cooldowns", ResetAbilityCooldowns);
             _ = new Command("debugluck", "print players luck factor in console", DebugLuck);
             _ = new Command("tooltipdebug", "write inventory item tooltips to disk", DebugTooltip);

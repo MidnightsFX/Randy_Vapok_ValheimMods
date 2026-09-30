@@ -2,6 +2,7 @@
 using EpicLoot.GatedItemType;
 using EpicLoot.General;
 using EpicLoot.LegendarySystem;
+using EpicLoot.MagicItemEffects;
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
@@ -728,15 +729,19 @@ namespace EpicLoot
                 magicItem.Effects.RemoveAt(ignoreEffectIndex);
             }
 
+            // A rune etch moves an effect some item already had instead of rolling a new one, so an effect
+            // family switched off in the config (health critical) only leaves the rolled pools.
+            bool rolling = !checkruneroll;
             var results = AllDefinitions.Values.Where(x => x.CheckRequirements(itemData, magicItem, checklootroll, checkaugment, checkruneroll) &&
-                !EnchantCostsHelper.EffectIsDeprecated(x)).ToList();
+                !EnchantCostsHelper.EffectIsDeprecated(x) && (!rolling || ModifyWithLowHealth.MayRoll(x.Type))).ToList();
 
             if (effect != null)
             {
                 magicItem.Effects.Insert(ignoreEffectIndex, effect);
                 if (AllDefinitions.TryGetValue(effect.EffectType, out var ignoredEffectDef))
                 {
-                    if (!results.Contains(ignoredEffectDef) && !EnchantCostsHelper.EffectIsDeprecated(ignoredEffectDef))
+                    if (!results.Contains(ignoredEffectDef) && !EnchantCostsHelper.EffectIsDeprecated(ignoredEffectDef) &&
+                        (!rolling || ModifyWithLowHealth.MayRoll(ignoredEffectDef.Type)))
                     {
                         results.Add(ignoredEffectDef);
                     }

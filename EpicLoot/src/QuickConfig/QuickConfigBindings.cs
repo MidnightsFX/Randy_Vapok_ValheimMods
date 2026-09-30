@@ -16,18 +16,18 @@ using UnityEngine;
 
 namespace EpicLoot.QuickConfig;
 
-internal enum BindingKind { Bool, Float, Int, Enum, Flags, String, Key, Color, RarityTable, BiomeCosts, ItemCategories, BiomeDrops, EffectConfigs, Bounties, Action, Readout }
+internal enum BindingKind { Bool, Float, Int, Enum, Flags, String, Key, Color, RarityCounts, BiomeCosts, ItemCategories, BiomeDrops, EffectConfigs, Bounties, UpgradeCosts, Action, Readout }
 
 internal enum BindingScope { Client, Server, Json, Action }
 
 /// <summary>
 /// What a row key means: how to show it, how to read and write it on the staged snapshot, and when it
 /// is visible or enabled. The UI-facing value convention per Kind:
-/// Bool = bool, Float = float, Int = int, Enum/Key/String/Color/RarityTable = string (an enum member
+/// Bool = bool, Float = float, Int = int, Enum/Key/String/Color = string (an enum member
 /// name, a key name, free text), Flags = HashSet&lt;string&gt; of set member names,
 /// BiomeCosts = List&lt;BiomeCostEntry&gt;, ItemCategories = ItemCategoriesValue, BiomeDrops = List&lt;BiomeDropRow&gt;,
-/// EffectConfigs = EffectConfigsValue, Bounties = BountiesValue. Action rows run <see cref="Act"/>,
-/// Readout rows show <see cref="Readout"/>.
+/// EffectConfigs = EffectConfigsValue, Bounties = BountiesValue, RarityCounts = RarityCountsValue,
+/// UpgradeCosts = UpgradeCostsValue. Action rows run <see cref="Act"/>, Readout rows show <see cref="Readout"/>.
 /// </summary>
 internal sealed class Binding {
     internal string Key;
@@ -164,32 +164,7 @@ internal static class QuickConfigBindings {
         FloatSlider("GlobalDropRateModifier", ELConfig.GlobalDropRateModifier, "Global Drop Rate Modifier", BindingScope.Server, 0f, 4f, 0.05f);
         EnumCycle("_gatedItemTypeModeConfig", ELConfig._gatedItemTypeModeConfig, "Item Drop Limits", BindingScope.Server);
         FloatSlider("SetItemDropChance", ELConfig.SetItemDropChance, "Set Item Drop Chance", BindingScope.Server, 0f, 1f, 0.01f);
-
-        // --- 2. Features ---
-        Toggle("_adventureModeEnabled", ELConfig._adventureModeEnabled, "Adventure Mode Enabled", BindingScope.Server);
-        Toggle("EnchantingTableUpgradesActive", ELConfig.EnchantingTableUpgradesActive, "Enchanting Table Upgrades Active", BindingScope.Server);
-        Flags("EnchantingTableActivatedTabs", ELConfig.EnchantingTableActivatedTabs, "Table Features Active", BindingScope.Server);
-
-        // --- 3. Rarity (loottables.json) ---
-        foreach (ItemRarity rarity in Rarities.All) {
-            ItemRarity r = rarity;
-            RarityTable($"json:loottables:MagicEffectsCount.{r}", $"{r} effects", int.MaxValue,
-                () => GetTable(LootRoller.Config?.MagicEffectsCount, r),
-                (root, rows) => JsonConfigEdits.SetPath(root, $"MagicEffectsCount.{r}", JsonConfigEdits.TableToJArray(rows)),
-                $"How many magic effects a {r} item rolls: 'count:weight' pairs, weights relative to each other. " +
-                "Example: 1:80, 2:18, 3:2");
-        }
-        foreach (ItemRarity rarity in Rarities.All) {
-            ItemRarity r = rarity;
-            RarityTable($"json:loottables:SocketCounts.{r}", $"{r} sockets", LootRoller.MaxSocketCount,
-                () => GetTable(LootRoller.Config?.SocketCounts, r),
-                (root, rows) => JsonConfigEdits.SetPath(root, $"SocketCounts.{r}", JsonConfigEdits.TableToJArray(rows)),
-                $"How many shard sockets a {r} item rolls: 'count:weight' pairs, weights relative to each other, " +
-                $"counts up to {LootRoller.MaxSocketCount}. Example: 0:90, 1:10");
-        }
-        BiomeDrops();
-
-        // --- 4. Loot Drops ---
+        Toggle("HealthCriticalEffectsEnabled", ELConfig.HealthCriticalEffectsEnabled, "Health Critical Enchantments", BindingScope.Server);
         FloatSlider("ItemDropRatio", ELConfig.ItemDropRatio, "Item Drop Ratio", BindingScope.Server, 0f, 1f, 0.01f);
         FloatSlider("ShardStoneDropRatio", ELConfig.ShardStoneDropRatio, "Shard Stone Drop Ratio", BindingScope.Server, 0f, 1f, 0.01f);
         FloatSlider("ItemsUnidentifiedDropRatio", ELConfig.ItemsUnidentifiedDropRatio, "Items Unidentified Drop Ratio", BindingScope.Server, 0f, 1f, 0.01f);
@@ -197,6 +172,17 @@ internal static class QuickConfigBindings {
         Readout("readout:dropmix", DropMixReadout, "Drop mix",
             "How the four ratios above split each loot drop. They are relative weights, so only their " +
             "proportions matter; this line shows the resulting share of each category.");
+        RarityCounts();
+
+        // --- 2. Features ---
+        Toggle("_adventureModeEnabled", ELConfig._adventureModeEnabled, "Adventure Mode Enabled", BindingScope.Server);
+        Toggle("EnchantingTableUpgradesActive", ELConfig.EnchantingTableUpgradesActive, "Enchanting Table Upgrades Active", BindingScope.Server);
+        Flags("EnchantingTableActivatedTabs", ELConfig.EnchantingTableActivatedTabs, "Table Features Active", BindingScope.Server);
+
+        // --- 3. Rarity (loottables.json) ---
+        BiomeDrops();
+
+        // --- 4. Loot Drops ---
         Toggle("AutoAddEquipment", ELConfig.AutoAddEquipment, "Auto Add Equipment", BindingScope.Server);
         Func<StagedConfig, bool> autoAddOn = staged => staged.Get("AutoAddEquipment", true);
         Toggle("AutoRemoveEquipmentNotFound", ELConfig.AutoRemoveEquipmentNotFound, "Auto Remove Equipment Not Found", BindingScope.Server, enabled: autoAddOn);
@@ -204,13 +190,17 @@ internal static class QuickConfigBindings {
         Toggle("AutoAddRemoveEquipmentFromVendor", ELConfig.AutoAddRemoveEquipmentFromVendor, "Auto Add/Remove Equipment From Vendor", BindingScope.Server, enabled: autoAddOn);
         Toggle("AutoAddRemoveEquipmentFromLootLists", ELConfig.AutoAddRemoveEquipmentFromLootLists, "Auto Add/Remove Equipment From Loot Lists", BindingScope.Server, enabled: autoAddOn);
         Toggle("TransferMagicItemToCrafts", ELConfig.TransferMagicItemToCrafts, "Transfer Enchants to Crafted Items", BindingScope.Server);
-        Toggle("DeferChestLootRoll", ELConfig.DeferChestLootRoll, "Defer Chest Loot Roll", BindingScope.Server);
         BossDrop("_bossTrophyDropMode", ELConfig._bossTrophyDropMode, "Boss Trophy Drop Mode",
             "_bossTrophyDropPlayerRange", ELConfig._bossTrophyDropPlayerRange, "Boss Trophy Drop Player Range");
         BossDrop("_bossCryptKeyDropMode", ELConfig._bossCryptKeyDropMode, "Crypt Key Drop Mode",
             "_bossCryptKeyDropPlayerRange", ELConfig._bossCryptKeyDropPlayerRange, "Crypt Key Drop Player Range");
         BossDrop("_bossWishboneDropMode", ELConfig._bossWishboneDropMode, "Wishbone Drop Mode",
             "_bossWishboneDropPlayerRange", ELConfig._bossWishboneDropPlayerRange, "Wishbone Drop Player Range");
+        BossExtraDrop("ModerDropMode", ELConfig.ModerDropMode, "ModerDropPlayerRange", ELConfig.ModerDropPlayerRange, "Moder");
+        BossExtraDrop("YagluthDropMode", ELConfig.YagluthDropMode, "YagluthDropPlayerRange", ELConfig.YagluthDropPlayerRange, "Yagluth");
+        BossExtraDrop("QueenDropMode", ELConfig.QueenDropMode, "QueenDropPlayerRange", ELConfig.QueenDropPlayerRange, "Queen");
+        BossExtraDrop("FaderDropMode", ELConfig.FaderDropMode, "FaderDropPlayerRange", ELConfig.FaderDropPlayerRange, "Fader");
+        BossExtraDrop("FrozenKingDropMode", ELConfig.FrozenKingDropMode, "FrozenKingDropPlayerRange", ELConfig.FrozenKingDropPlayerRange, "Frozen King");
 
         // --- 5. Shardstones & Runes ---
         Toggle("AllowDuplicateSocketedEffects", ELConfig.AllowDuplicateSocketedEffects, "Allow Duplicate Socketed Effects", BindingScope.Server);
@@ -222,6 +212,7 @@ internal static class QuickConfigBindings {
         FloatSlider("ShardStackDecayFactor", ELConfig.ShardStackDecayFactor, "Shard Stack Decay Factor", BindingScope.Server, 0f, 1f, 0.01f,
             visible: staged => staged.Get("ShardStackingMode", ShardStackMode.Diminishing) == ShardStackMode.Diminishing);
         EnumCycle("RuneExtractItemMode", ELConfig.RuneExtractItemMode, "Rune Extract Mode", BindingScope.Server);
+        EnumCycle("RuneSetExtractItemMode", ELConfig.RuneSetExtractItemMode, "Set Rune Extract Mode", BindingScope.Server);
         Toggle("AllowGiftOnItemsWithSlots", ELConfig.AllowGiftOnItemsWithSlots, "Allow Brokkr Gift On Items With Slots", BindingScope.Server);
         IntSlider("LegendaryGiftSlotsAdded", ELConfig.LegendaryGiftSlotsAdded, "Legendary Gift Slots Added", BindingScope.Server, 1, LootRoller.MaxSocketCount);
         IntSlider("MythicGiftSlotsAdded", ELConfig.MythicGiftSlotsAdded, "Mythic Gift Slots Added", BindingScope.Server, 1, LootRoller.MaxSocketCount);
@@ -262,6 +253,7 @@ internal static class QuickConfigBindings {
                 $"The highest level the {f} feature can be upgraded to. Cannot exceed the number of upgrade cost steps defined for it.",
                 staged => FeatureLevelError(staged, f, defaultKey, maxKey));
         }
+        UpgradeCosts();
 
         // --- 7. Adventure: Merchant ---
         IntSlider("_andvaranautRange", ELConfig._andvaranautRange, "Andvaranaut Range", BindingScope.Server, 5, 100);
@@ -312,7 +304,8 @@ internal static class QuickConfigBindings {
             () => AdventureDataManager.Config?.TreasureMap?.ScaleRadiiToWorldSize,
             (root, value) => JsonConfigEdits.SetPath(root, "TreasureMap.ScaleRadiiToWorldSize", value),
             "Scale every biome's treasure-map radius band by the real world radius / 10000, so the shipped " +
-            "bands keep their meaning on a resized world. Turn off if the bands were retuned by hand.");
+            "bands keep their meaning on a resized world. Turn off if the bands were retuned by hand.",
+            new TreasureMapConfig().ScaleRadiiToWorldSize);
         BiomeCosts();
 
         // --- 8. Adventure: Bounties ---
@@ -344,6 +337,7 @@ internal static class QuickConfigBindings {
         FloatSlider("TraderPanelPositionY", ELConfig.TraderPanelPositionY, "Trader Panel Y Position", BindingScope.Client, -4000f, 4000f, 1f);
         FloatSlider("TemperPanelPositionX", ELConfig.TemperPanelPositionX, "Temper Panel X Position", BindingScope.Client, -4000f, 4000f, 1f);
         FloatSlider("TemperPanelPositionY", ELConfig.TemperPanelPositionY, "Temper Panel Y Position", BindingScope.Client, -4000f, 4000f, 1f);
+        KeyCodeChoice("TraderPanelDragKey", ELConfig.TraderPanelDragKey, "Trader Panel Drag Key", BindingScope.Client);
         ResetAction("action:reset:TraderPanelPosition", "Reset trader panel position", "TraderPanelPositionX", "TraderPanelPositionY",
             ELConfig.TraderPanelPositionX, ELConfig.TraderPanelPositionY, "Puts the adventure trader panel back where it was originally.");
         ResetAction("action:reset:TemperPanelPosition", "Reset temper panel position", "TemperPanelPositionX", "TemperPanelPositionY",
@@ -383,7 +377,7 @@ internal static class QuickConfigBindings {
         if (ModContext.ConfigApplyDelay != null) {
             FloatSlider("Common.ConfigApplyDelay", ModContext.ConfigApplyDelay, "Config Apply Delay", BindingScope.Server, 0f, 10f, 0.5f);
         }
-        Toggle("AlwaysShowWelcomeMessage", ELConfig.AlwaysShowWelcomeMessage, "Show Welcome Wizard Next Launch", BindingScope.Client);
+        WelcomeWizardNextLaunch();
         ItemCategories();
     }
 
@@ -510,6 +504,7 @@ internal static class QuickConfigBindings {
         Func<IList<string>> options, Func<string, string> normalize, Func<StagedConfig, bool> visible = null) {
         CfgSlot slot = CfgSlotFor(key, entry);
         slot.Read = () => normalize(entry.Value);
+        slot.ReadDefault = () => normalize((string)entry.DefaultValue);
         Add(new Binding {
             Key = key, DisplayName = name, Kind = BindingKind.String, Scope = scope,
             Options = options,
@@ -544,11 +539,39 @@ internal static class QuickConfigBindings {
         });
     }
 
+    // The Advanced page's "Show Welcome Wizard Next Launch" box, over the three-way WelcomeWizardMode: ticked is
+    // ShowNextLaunch, and unticking only takes back a ShowNextLaunch, leaving Never alone. The row keeps the key of the
+    // bool setting it replaced, because that name is baked into the Page_Advanced prefab.
+    private static void WelcomeWizardNextLaunch() {
+        const string key = "AlwaysShowWelcomeMessage";
+        ConfigEntry<FirstRunMode> entry = ELConfig.WelcomeWizardMode;
+        slots.Add(new CfgSlot {
+            Key = key,
+            Entry = entry,
+            Read = () => entry.Value == FirstRunMode.ShowNextLaunch,
+            ReadDefault = () => (FirstRunMode)entry.DefaultValue == FirstRunMode.ShowNextLaunch,
+            Write = value => {
+                if (value is bool next && next) {
+                    entry.Value = FirstRunMode.ShowNextLaunch;
+                } else if (entry.Value == FirstRunMode.ShowNextLaunch) {
+                    entry.Value = FirstRunMode.Auto;
+                }
+            }
+        });
+        Add(new Binding {
+            Key = key, DisplayName = "Show Welcome Wizard Next Launch", Kind = BindingKind.Bool, Scope = BindingScope.Client,
+            Tooltip = () => QuickConfigTooltip.Of(entry),
+            Get = staged => staged.Get(key, entry.Value == FirstRunMode.ShowNextLaunch),
+            Set = (staged, value) => staged.Set(key, value is bool b && b)
+        });
+    }
+
     private static void Vector2Part(string key, ConfigEntry<Vector2> entry, string name, bool isX) {
         CfgSlot slot = new CfgSlot {
             Key = key,
             Entry = entry,
             Read = () => isX ? entry.Value.x : entry.Value.y,
+            ReadDefault = () => isX ? ((Vector2)entry.DefaultValue).x : ((Vector2)entry.DefaultValue).y,
             Write = value => {
                 Vector2 current = entry.Value;
                 entry.Value = isX ? new Vector2((float)value, current.y) : new Vector2(current.x, (float)value);
@@ -568,6 +591,13 @@ internal static class QuickConfigBindings {
         EnumCycle(modeKey, modeEntry, modeName, BindingScope.Server);
         FloatSlider(rangeKey, rangeEntry, rangeName, BindingScope.Server, 10f, 500f, 5f,
             visible: staged => staged.Get(modeKey, modeEntry.Value) == BossDropMode.OnePerPlayerNearBoss);
+    }
+
+    private static void BossExtraDrop(string modeKey, ConfigEntry<BossExtraDropMode> modeEntry,
+        string rangeKey, ConfigEntry<float> rangeEntry, string boss) {
+        EnumCycle(modeKey, modeEntry, $"{boss} Drop Mode", BindingScope.Server);
+        FloatSlider(rangeKey, rangeEntry, $"{boss} Drop Player Range", BindingScope.Server, 10f, 500f, 5f,
+            visible: staged => staged.Get(modeKey, modeEntry.Value) != BossExtraDropMode.Default);
     }
 
     private static void ResetAction(string key, string name, string xKey, string yKey,
@@ -621,15 +651,25 @@ internal static class QuickConfigBindings {
         });
     }
 
+    // A #hex-only colour. The picker still offers the named colours, stored as their hex value.
     private static void HexColor(string key, ConfigEntry<string> entry, string name) {
         CfgSlotFor(key, entry);
+        List<string> colorNames = EpicLoot.MagicItemColors.Keys.ToList();
         Add(new Binding {
             Key = key, DisplayName = name, Kind = BindingKind.Color, Scope = BindingScope.Client,
+            Options = () => colorNames,
             Tooltip = () => QuickConfigTooltip.Of(entry),
             Get = staged => staged.Get(key, entry.Value),
-            Set = (staged, value) => { if (value is string text) { staged.Set(key, text.Trim()); } },
+            Set = (staged, value) => { if (value is string text) { staged.Set(key, NamedColorToHex(text.Trim())); } },
             Validate = staged => ColorError(staged.Get(key, ""), true, name)
         });
+    }
+
+    private static string NamedColorToHex(string text) {
+        foreach (KeyValuePair<string, string> pair in EpicLoot.MagicItemColors) {
+            if (string.Equals(pair.Key, text, StringComparison.OrdinalIgnoreCase)) { return pair.Value; }
+        }
+        return text;
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -644,7 +684,8 @@ internal static class QuickConfigBindings {
 
     private static void JsonFloat(string key, string file, string name, float min, float max, float step,
         Func<float?> read, Action<JObject, float> write, string description, Func<StagedConfig, string> validate = null) {
-        JsonSlotFor(key, file, () => read(), (root, value) => write(root, (float)value));
+        JsonSlot slot = JsonSlotFor(key, file, () => read(), (root, value) => write(root, (float)value));
+        slot.Default = (_, shipped) => shipped.Token(file, JsonPath(key)) is JValue token ? token.ToObject<float>() : null;
         Add(new Binding {
             Key = key, DisplayName = name, Kind = BindingKind.Float, Scope = BindingScope.Json, HostOnly = true,
             Min = min, Max = max, Step = step,
@@ -657,7 +698,8 @@ internal static class QuickConfigBindings {
 
     private static void JsonInt(string key, string file, string name, int min, int max,
         Func<int?> read, Action<JObject, int> write, string description, Func<StagedConfig, string> validate = null) {
-        JsonSlotFor(key, file, () => read(), (root, value) => write(root, (int)value));
+        JsonSlot slot = JsonSlotFor(key, file, () => read(), (root, value) => write(root, (int)value));
+        slot.Default = (_, shipped) => shipped.Token(file, JsonPath(key)) is JValue token ? token.ToObject<int>() : null;
         Add(new Binding {
             Key = key, DisplayName = name, Kind = BindingKind.Int, Scope = BindingScope.Json, HostOnly = true,
             Min = min, Max = max, Step = 1f,
@@ -668,9 +710,11 @@ internal static class QuickConfigBindings {
         });
     }
 
+    // A key the shipped file leaves out is read at the config class's own default: pass it as shippedDefault.
     private static void JsonBool(string key, string file, string name,
-        Func<bool?> read, Action<JObject, bool> write, string description) {
-        JsonSlotFor(key, file, () => read(), (root, value) => write(root, (bool)value));
+        Func<bool?> read, Action<JObject, bool> write, string description, bool? shippedDefault = null) {
+        JsonSlot slot = JsonSlotFor(key, file, () => read(), (root, value) => write(root, (bool)value));
+        slot.Default = (_, shipped) => shipped.Token(file, JsonPath(key)) is JValue token ? token.ToObject<bool>() : shippedDefault;
         Add(new Binding {
             Key = key, DisplayName = name, Kind = BindingKind.Bool, Scope = BindingScope.Json, HostOnly = true,
             Tooltip = () => QuickConfigTooltip.Text(JsonTooltipKey(key), description),
@@ -679,23 +723,165 @@ internal static class QuickConfigBindings {
         });
     }
 
-    private static void RarityTable(string key, string name, int maxCount, Func<float[][]> read,
-        Action<JObject, float[][]> write, string description) {
-        JsonSlotFor(key, "loottables.json",
+    // --- Enchantments and sockets per rarity (loottables.json MagicEffectsCount / SocketCounts) ---
+    // One staged value for both tables of every rarity; a table is only written, rebalanced to 100,
+    // when it differs from the baseline.
+
+    // Where + starts looking for a free enchantment count. Validation still accepts 0, as the file does.
+    internal const int MinEffectCount = 1;
+
+    private static void RarityCounts() {
+        const string key = "json:loottables:RarityCounts";
+        JsonSlot slot = JsonSlotFor(key, "loottables.json",
             () => {
-                float[][] rows = read();
-                return rows == null ? null : FormatRarityTable(rows);
+                MagicEffectsCountConfig effects = LootRoller.Config?.MagicEffectsCount;
+                SocketCountsConfig sockets = LootRoller.Config?.SocketCounts;
+                if (effects == null || sockets == null) { return null; }
+                RarityCountsValue value = new RarityCountsValue();
+                foreach (ItemRarity rarity in Rarities.All) {
+                    value.Effects[rarity.ToString()] = WeightTable.FromRows(GetTable(effects, rarity));
+                    value.Sockets[rarity.ToString()] = WeightTable.FromRows(GetTable(sockets, rarity));
+                }
+                return value;
             },
-            (root, value) => {
-                if (ParseRarityTable((string)value, maxCount, out float[][] rows, out _)) { write(root, rows); }
-            });
+            null);
+        slot.WriteWithBaseline = (root, stagedValue, baselineValue) => {
+            RarityCountsValue current = (RarityCountsValue)stagedValue;
+            RarityCountsValue before = baselineValue as RarityCountsValue;
+            WriteRarityTables(root, "MagicEffectsCount", current.Effects, before?.Effects);
+            WriteRarityTables(root, "SocketCounts", current.Sockets, before?.Sockets);
+        };
+        slot.Default = (currentValue, shipped) => {
+            RarityCountsValue value = (currentValue as RarityCountsValue)?.Clone() ?? new RarityCountsValue();
+            foreach (ItemRarity rarity in Rarities.All) {
+                string r = rarity.ToString();
+                if (shipped.Token("loottables.json", $"MagicEffectsCount.{r}") is JArray effects) {
+                    value.Effects[r] = WeightTable.FromRows(effects.ToObject<float[][]>());
+                }
+                if (shipped.Token("loottables.json", $"SocketCounts.{r}") is JArray sockets) {
+                    value.Sockets[r] = WeightTable.FromRows(sockets.ToObject<float[][]>());
+                }
+            }
+            return value;
+        };
         Add(new Binding {
-            Key = key, DisplayName = name, Kind = BindingKind.RarityTable, Scope = BindingScope.Json, HostOnly = true,
-            Tooltip = () => QuickConfigTooltip.Text(JsonTooltipKey(key), description),
-            Get = staged => staged.Get(key, ""),
-            Set = (staged, value) => { if (value is string text) { staged.Set(key, text.Trim()); } },
-            Validate = staged => ParseRarityTable(staged.Get(key, ""), maxCount, out _, out string error) ? null : $"{name}: {error}"
+            Key = key, DisplayName = "Rarity", Kind = BindingKind.RarityCounts, Scope = BindingScope.Json, HostOnly = true,
+            Options = () => Rarities.All.Select(rarity => rarity.ToString()).ToList(),
+            Tooltip = () => QuickConfigTooltip.Text("loottables.json: MagicEffectsCount, SocketCounts",
+                "How many enchantments and shard sockets an item of each rarity rolls. Each line is a possible " +
+                "count and its chance in percent; + adds a count. The chances of one table should add up to 100: " +
+                "on Save, the ones you did not change are raised or lowered to make up the rest. " +
+                $"Sockets go from 0 to {LootRoller.MaxSocketCount}, and Brokkr's Gift can raise an item up to the " +
+                "highest socket count listed."),
+            Get = staged => staged.Get(key, new RarityCountsValue()),
+            Set = (staged, value) => { if (value is RarityCountsValue table) { staged.Set(key, table); } },
+            Validate = staged => {
+                RarityCountsValue value = staged.Get(key, new RarityCountsValue());
+                foreach (ItemRarity rarity in Rarities.All) {
+                    string r = rarity.ToString();
+                    string error = WeightTable.Validate(RarityCountsValue.Get(value.Effects, r), 0, int.MaxValue, $"{r} enchantments")
+                        ?? WeightTable.Validate(RarityCountsValue.Get(value.Sockets, r), 0, LootRoller.MaxSocketCount, $"{r} sockets");
+                    if (error != null) { return error; }
+                }
+                return null;
+            }
         });
+    }
+
+    private static void WriteRarityTables(JObject root, string path, Dictionary<string, List<WeightEntry>> current,
+        Dictionary<string, List<WeightEntry>> before) {
+        foreach (KeyValuePair<string, List<WeightEntry>> pair in current) {
+            List<WeightEntry> was = null;
+            before?.TryGetValue(pair.Key, out was);
+            if (WeightTable.Same(pair.Value, was)) { continue; }
+            List<WeightEntry> rebalanced = WeightTable.Rebalance(pair.Value, was);
+            JsonConfigEdits.SetPath(root, $"{path}.{pair.Key}", JsonConfigEdits.TableToJArray(WeightTable.ToRows(rebalanced)));
+        }
+    }
+
+    // --- Enchanting table upgrade costs (enchantingupgrades.json UpgradeCosts) ---
+
+    private static void UpgradeCosts() {
+        const string key = "json:enchantingupgrades:UpgradeCosts";
+        JsonSlot slot = JsonSlotFor(key, "enchantingupgrades.json", () => ReadUpgradeCosts(EnchantingTableUpgrades.Config), null);
+        // The shipped costs, level by level; a level the shipped file lacks keeps its current cost.
+        slot.Default = (currentValue, shipped) => {
+            UpgradeCostsValue defaults = ReadUpgradeCosts(shipped.Typed<EnchantingUpgradesConfig>("enchantingupgrades.json"));
+            if (defaults == null || currentValue is UpgradeCostsValue current == false) { return null; }
+            UpgradeCostsValue value = current.Clone();
+            foreach (KeyValuePair<EnchantingFeature, List<List<CostEntry>>> pair in value.Levels) {
+                List<List<CostEntry>> shippedLevels = defaults.Get(pair.Key);
+                for (int level = 0; shippedLevels != null && level < pair.Value.Count && level < shippedLevels.Count; level++) {
+                    pair.Value[level] = shippedLevels[level];
+                }
+            }
+            return value;
+        };
+        slot.WriteWithBaseline = (root, stagedValue, baselineValue) => {
+            UpgradeCostsValue current = (UpgradeCostsValue)stagedValue;
+            UpgradeCostsValue before = baselineValue as UpgradeCostsValue;
+            foreach (KeyValuePair<EnchantingFeature, List<List<CostEntry>>> pair in current.Levels) {
+                List<List<CostEntry>> was = before?.Get(pair.Key);
+                for (int level = 0; level < pair.Value.Count; level++) {
+                    List<CostEntry> cost = pair.Value[level];
+                    List<CostEntry> old = was != null && level < was.Count ? was[level] : null;
+                    if (cost == null || UpgradeCostsValue.SameLevel(cost, old)) { continue; }
+                    JsonConfigEdits.SetUpgradeCost(root, pair.Key, level, cost);
+                }
+            }
+        };
+        Add(new Binding {
+            Key = key, DisplayName = "Upgrade costs", Kind = BindingKind.UpgradeCosts, Scope = BindingScope.Json, HostOnly = true,
+            Options = ItemPrefabNames,
+            Tooltip = () => QuickConfigTooltip.Text("enchantingupgrades.json: UpgradeCosts",
+                "What each enchanting table upgrade costs: pick a feature and a level, then edit its items. " +
+                "Unlock is the cost of opening a feature that starts locked (default level -1). The number of " +
+                "levels is file-only, since each level also needs its UpgradeValues entry; the item picker lists " +
+                "every item of a loaded world."),
+            Get = staged => staged.Get(key, new UpgradeCostsValue()),
+            Set = (staged, value) => { if (value is UpgradeCostsValue table) { staged.Set(key, table); } },
+            Validate = staged => {
+                UpgradeCostsValue value = staged.Get(key, new UpgradeCostsValue());
+                foreach (KeyValuePair<EnchantingFeature, List<List<CostEntry>>> pair in value.Levels) {
+                    for (int level = 0; level < pair.Value.Count; level++) {
+                        foreach (CostEntry entry in pair.Value[level] ?? new List<CostEntry>()) {
+                            string where = $"{pair.Key} {UpgradeLevelName(level)} cost";
+                            if (string.IsNullOrWhiteSpace(entry.Item)) { return $"{where}: every row needs an item name."; }
+                            if (entry.Amount < 1) { return $"{where}: the amount of '{entry.Item}' must be at least 1."; }
+                        }
+                    }
+                }
+                return null;
+            }
+        });
+    }
+
+    internal static string UpgradeLevelName(int level) => level == 0 ? "Unlock" : $"Level {level}";
+
+    private static UpgradeCostsValue ReadUpgradeCosts(EnchantingUpgradesConfig config) {
+        EnchantingUpgradeCosts costs = config?.UpgradeCosts;
+        if (costs == null) { return null; }
+        UpgradeCostsValue value = new UpgradeCostsValue();
+        foreach (EnchantingFeature feature in (EnchantingFeature[])Enum.GetValues(typeof(EnchantingFeature))) {
+            List<List<ItemAmount>> levels = CostLevels(costs, feature);
+            if (levels == null) { continue; }
+            value.Levels[feature] = levels
+                .Select(level => level?.Select(item => new CostEntry { Item = item?.Item ?? "", Amount = item?.Amount ?? 1 }).ToList())
+                .ToList();
+        }
+        return value;
+    }
+
+    private static List<List<ItemAmount>> CostLevels(EnchantingUpgradeCosts costs, EnchantingFeature feature) {
+        return feature switch {
+            EnchantingFeature.Sacrifice => costs.Sacrifice,
+            EnchantingFeature.ConvertMaterials => costs.ConvertMaterials,
+            EnchantingFeature.Enchant => costs.Enchant,
+            EnchantingFeature.Augment => costs.Augment,
+            EnchantingFeature.Disenchant => costs.Disenchant,
+            EnchantingFeature.Rune => costs.Rune,
+            _ => null
+        };
     }
 
     private static void BountyTier(string tier, Func<int?> readMin, Func<int?> readMax, Func<float?> readHealth) {
@@ -721,6 +907,7 @@ internal static class QuickConfigBindings {
     private static void EffectConfigs() {
         const string key = "json:magiceffects:EffectConfigs";
         JsonSlot shard = JsonSlotFor(key, "shardstones.json", () => EffectConfigTables.Read(), null);
+        shard.Default = (current, shipped) => current is EffectConfigsValue value ? EffectConfigTables.Shipped(value, shipped) : null;
         shard.Changed = (current, before) => ((EffectConfigsValue)current).PartChanged(before as EffectConfigsValue, EffectSource.Shard);
         shard.WriteWithBaseline = (root, current, before) => WriteEffectConfigs(root, (EffectConfigsValue)current, before as EffectConfigsValue, EffectSource.Shard);
 
@@ -774,8 +961,18 @@ internal static class QuickConfigBindings {
 
     private static void Bounties() {
         const string key = "json:adventuredata:Bounties.Targets";
-        JsonSlotFor(key, "adventuredata.json", () => BountyTables.Read(),
+        JsonSlot slot = JsonSlotFor(key, "adventuredata.json", () => BountyTables.Read(),
             (root, value) => JsonConfigEdits.SetBountyTargets(root, (BountiesValue)value));
+        slot.Default = (currentValue, shipped) => {
+            BountiesValue defaults = BountyTables.Read(shipped.Root("adventuredata.json"));
+            if (defaults == null || currentValue is BountiesValue current == false) { return null; }
+            BountiesValue value = current.Clone();
+            foreach (string biome in defaults.FileBiomes) {
+                value.Entries[biome] = defaults.Get(biome).Select(entry => entry.Clone()).ToList();
+                if (value.BiomeOrder.Contains(biome) == false) { value.BiomeOrder.Add(biome); }
+            }
+            return value;
+        };
         Add(new Binding {
             Key = key, DisplayName = "Bounty Targets", Kind = BindingKind.Bounties, Scope = BindingScope.Json, HostOnly = true,
             Options = BountyTables.MonsterNames,
@@ -812,7 +1009,7 @@ internal static class QuickConfigBindings {
 
     private static void BiomeCosts() {
         const string key = "json:adventuredata:TreasureMap.BiomeInfo";
-        JsonSlotFor(key, "adventuredata.json",
+        JsonSlot slot = JsonSlotFor(key, "adventuredata.json",
             () => {
                 List<TreasureMapBiomeInfoConfig> infos = AdventureDataManager.Config?.TreasureMap?.BiomeInfo;
                 if (infos == null) { return null; }
@@ -822,6 +1019,17 @@ internal static class QuickConfigBindings {
                     .ToList();
             },
             (root, value) => JsonConfigEdits.SetBiomeCosts(root, (List<BiomeCostEntry>)value));
+        slot.Default = (currentValue, shipped) => {
+            if (currentValue is List<BiomeCostEntry> current == false || shipped.Token("adventuredata.json", "TreasureMap.BiomeInfo") is JArray infos == false) { return null; }
+            List<BiomeCostEntry> value = current.Select(entry => entry.Clone()).ToList();
+            foreach (BiomeCostEntry entry in value) {
+                JObject info = infos.OfType<JObject>().FirstOrDefault(token => string.Equals((string)token["Biome"], entry.Biome, StringComparison.OrdinalIgnoreCase));
+                if (info == null) { continue; }
+                entry.Cost = (int?)info["Cost"] ?? entry.Cost;
+                entry.ForestTokens = (int?)info["ForestTokens"] ?? entry.ForestTokens;
+            }
+            return value;
+        };
         Add(new Binding {
             Key = key, DisplayName = "Treasure Map Costs", Kind = BindingKind.BiomeCosts, Scope = BindingScope.Json, HostOnly = true,
             Tooltip = () => QuickConfigTooltip.Text("adventuredata.json: TreasureMap.BiomeInfo",
@@ -845,39 +1053,57 @@ internal static class QuickConfigBindings {
     private static void BiomeDrops() {
         const string key = "json:loottables:LootTables";
         JsonSlot slot = JsonSlotFor(key, "loottables.json", BiomeDropTables.Read, null);
+        // A table the shipped file lacks (a creature another mod added) keeps its values.
+        slot.Default = (currentValue, shipped) => {
+            LootConfig config = shipped.Typed<LootConfig>("loottables.json");
+            if (config?.LootTables == null || currentValue is List<BiomeDropRow> current == false) { return null; }
+            foreach (LootTable table in config.LootTables) {
+                if (table != null) { LootTableMigration.Normalize(table); }
+            }
+            Dictionary<string, BiomeDropRow> defaults = new Dictionary<string, BiomeDropRow>(StringComparer.Ordinal);
+            foreach (BiomeDropRow row in BiomeDropTables.Read(config) ?? new List<BiomeDropRow>()) { defaults[row.Id] = row; }
+            List<BiomeDropRow> value = current.Select(row => row.Clone()).ToList();
+            foreach (BiomeDropRow row in value) {
+                if (defaults.TryGetValue(row.Id, out BiomeDropRow shippedRow) == false) { continue; }
+                row.Amount = WeightTable.Clone(shippedRow.Amount) ?? row.Amount;
+                row.Rarity = WeightTable.Clone(shippedRow.Rarity) ?? row.Rarity;
+            }
+            return value;
+        };
         slot.WriteWithBaseline = (root, stagedValue, baselineValue) => {
             List<BiomeDropRow> current = (List<BiomeDropRow>)stagedValue;
             Dictionary<string, BiomeDropRow> before = new Dictionary<string, BiomeDropRow>(StringComparer.Ordinal);
             foreach (BiomeDropRow row in baselineValue as List<BiomeDropRow> ?? new List<BiomeDropRow>()) { before[row.Id] = row; }
             foreach (BiomeDropRow row in current) {
                 before.TryGetValue(row.Id, out BiomeDropRow was);
-                bool amount = string.IsNullOrEmpty(row.AmountText) == false && (was == null || was.AmountText != row.AmountText);
-                bool rarity = string.IsNullOrEmpty(row.RarityText) == false && (was == null || was.RarityText != row.RarityText);
-                if (amount || rarity) { JsonConfigEdits.SetBiomeDrops(root, row, amount, rarity); }
+                bool amount = row.Amount != null && row.Amount.Count > 0 && WeightTable.Same(row.Amount, was?.Amount) == false;
+                bool rarity = row.Rarity != null && WeightTable.Same(row.Rarity, was?.Rarity) == false;
+                if (amount || rarity) {
+                    JsonConfigEdits.SetBiomeDrops(root, row,
+                        amount ? WeightTable.Rebalance(row.Amount, was?.Amount) : null,
+                        rarity ? WeightTable.Rebalance(row.Rarity, was?.Rarity) : null);
+                }
             }
         };
         Add(new Binding {
             Key = key, DisplayName = "Biome Drops", Kind = BindingKind.BiomeDrops, Scope = BindingScope.Json, HostOnly = true,
             Tooltip = () => QuickConfigTooltip.Text("loottables.json: LootTables",
-                "Per biome, how many magic items a creature or chest drops and with which rarity weights. " +
-                "Amount is a 'count:weight' table (0:95, 1:5 = one item 5% of the time); Rarity is one relative " +
-                $"weight per rarity, Magic to {Rarities.Highest}. Creatures inherit their tier template " +
-                "(Tier1Mob, Tier3EliteMob...), so editing the template changes every creature listed beside it. " +
-                "A target marked (mixed) has entries with different weights: the first is shown, and saving " +
-                "applies it to all of that target's entries. Auto Add Equipment's loot-list validation rewrites " +
-                "loottables.json but keeps these values."),
+                "Per biome and loot table, how many magic items a creature or chest drops and at which rarity. " +
+                "Drop amount lists each possible number of items with its chance in percent (0 items 95%, 1 item 5%); " +
+                $"Rarity gives the chance of each rarity, Magic to {Rarities.Highest}. Each should add up to 100: on " +
+                "Save, the chances you did not change are raised or lowered to make up the rest. Creatures inherit " +
+                "their tier template (Tier1Mob, Tier3EliteMob...), so editing the template changes every creature " +
+                "listed beside it. A table marked (mixed) has entries with different rarity weights: the first is " +
+                "shown, and saving applies it to all of that table's entries. Auto Add Equipment's loot-list " +
+                "validation rewrites loottables.json but keeps these values."),
             Get = staged => staged.Get(key, new List<BiomeDropRow>()),
             Set = (staged, value) => { if (value is List<BiomeDropRow> rows) { staged.Set(key, rows); } },
             Validate = staged => {
                 foreach (BiomeDropRow row in staged.Get(key, new List<BiomeDropRow>())) {
-                    if (string.IsNullOrWhiteSpace(row.AmountText) == false
-                        && ParseRarityTable(row.AmountText, int.MaxValue, out _, out string amountError) == false) {
-                        return $"{row.Label}: amount table: {amountError}";
-                    }
-                    if (string.IsNullOrWhiteSpace(row.RarityText) == false
-                        && BiomeDropTables.ParseRarity(row.RarityText, out _, out string rarityError) == false) {
-                        return $"{row.Label}: rarity weights: {rarityError}";
-                    }
+                    string error = (row.Amount != null && row.Amount.Count > 0
+                            ? WeightTable.Validate(row.Amount, 0, int.MaxValue, $"{row.Label}: drop amount") : null)
+                        ?? (row.Rarity != null ? WeightTable.Validate(row.Rarity, 0, Rarities.Count - 1, $"{row.Label}: rarity") : null);
+                    if (error != null) { return error; }
                 }
                 return null;
             }
@@ -902,28 +1128,18 @@ internal static class QuickConfigBindings {
 
     private static void ItemCategories() {
         const string key = "json:iteminfo:ItemInfo";
-        JsonSlot slot = JsonSlotFor(key, "iteminfo.json",
-            () => {
-                List<ItemTypeInfo> infos = GatedItemTypeHelper.GatedConfig?.ItemInfo;
-                if (infos == null) { return null; }
-                ItemCategoriesValue value = new ItemCategoriesValue();
-                foreach (ItemTypeInfo info in infos) {
-                    if (info == null || string.IsNullOrEmpty(info.Type) || value.Entries.ContainsKey(info.Type)) { continue; }
-                    List<ItemByBossEntry> entries = new List<ItemByBossEntry>();
-                    if (info.ItemsByBoss != null) {
-                        foreach (KeyValuePair<string, List<string>> pair in info.ItemsByBoss) {
-                            if (pair.Value == null) { continue; }
-                            foreach (string item in pair.Value) {
-                                entries.Add(new ItemByBossEntry { Boss = pair.Key, Item = item ?? "" });
-                            }
-                        }
-                    }
-                    value.Categories.Add(info.Type);
-                    value.Entries[info.Type] = entries;
-                }
-                return value;
-            },
-            null);
+        JsonSlot slot = JsonSlotFor(key, "iteminfo.json", () => ReadItemCategories(GatedItemTypeHelper.GatedConfig), null);
+        // The shipped categories' items; a category the shipped file lacks keeps its own.
+        slot.Default = (currentValue, shipped) => {
+            ItemCategoriesValue defaults = ReadItemCategories(shipped.Typed<ItemInfoConfig>("iteminfo.json"));
+            if (defaults == null || currentValue is ItemCategoriesValue current == false) { return null; }
+            ItemCategoriesValue value = current.Clone();
+            foreach (string category in value.Categories) {
+                List<ItemByBossEntry> entries = defaults.Get(category);
+                if (entries != null) { value.Entries[category] = entries; }
+            }
+            return value;
+        };
         slot.WriteWithBaseline = (root, stagedValue, baselineValue) => {
             ItemCategoriesValue current = (ItemCategoriesValue)stagedValue;
             ItemCategoriesValue before = baselineValue as ItemCategoriesValue;
@@ -957,6 +1173,27 @@ internal static class QuickConfigBindings {
                 return null;
             }
         });
+    }
+
+    private static ItemCategoriesValue ReadItemCategories(ItemInfoConfig config) {
+        List<ItemTypeInfo> infos = config?.ItemInfo;
+        if (infos == null) { return null; }
+        ItemCategoriesValue value = new ItemCategoriesValue();
+        foreach (ItemTypeInfo info in infos) {
+            if (info == null || string.IsNullOrEmpty(info.Type) || value.Entries.ContainsKey(info.Type)) { continue; }
+            List<ItemByBossEntry> entries = new List<ItemByBossEntry>();
+            if (info.ItemsByBoss != null) {
+                foreach (KeyValuePair<string, List<string>> pair in info.ItemsByBoss) {
+                    if (pair.Value == null) { continue; }
+                    foreach (string item in pair.Value) {
+                        entries.Add(new ItemByBossEntry { Boss = pair.Key, Item = item ?? "" });
+                    }
+                }
+            }
+            value.Categories.Add(info.Type);
+            value.Entries[info.Type] = entries;
+        }
+        return value;
     }
 
     // "none", then the boss keys the biome registry knows in progression order, then any key the file
@@ -1027,17 +1264,7 @@ internal static class QuickConfigBindings {
 
     private static int UpgradeStepCount(EnchantingFeature feature) {
         EnchantingUpgradeCosts costs = EnchantingTableUpgrades.Config?.UpgradeCosts;
-        if (costs == null) { return -1; }
-        List<List<ItemAmount>> steps = feature switch {
-            EnchantingFeature.Sacrifice => costs.Sacrifice,
-            EnchantingFeature.ConvertMaterials => costs.ConvertMaterials,
-            EnchantingFeature.Enchant => costs.Enchant,
-            EnchantingFeature.Augment => costs.Augment,
-            EnchantingFeature.Disenchant => costs.Disenchant,
-            EnchantingFeature.Rune => costs.Rune,
-            _ => null
-        };
-        return steps?.Count ?? -1;
+        return costs == null ? -1 : CostLevels(costs, feature)?.Count ?? -1;
     }
 
     private static float? ShardGlobal(string name) {
@@ -1109,6 +1336,12 @@ internal static class QuickConfigBindings {
     // ------------------------------------------------------------------------------------------------
     //  Value helpers
     // ------------------------------------------------------------------------------------------------
+
+    // "json:adventuredata:Gamble.GamblesCount" -> "Gamble.GamblesCount", the dotted path inside the file.
+    private static string JsonPath(string key) {
+        string[] parts = key.Split(new[] { ':' }, 3);
+        return parts.Length == 3 ? parts[2] : key;
+    }
 
     private static string JsonTooltipKey(string key) {
         // "json:adventuredata:Gamble.GamblesCount" -> "adventuredata.json: Gamble.GamblesCount"
@@ -1198,49 +1431,5 @@ internal static class QuickConfigBindings {
         string html = value.StartsWith("#") ? value : EpicLoot.MagicItemColors.TryGetValue(value, out string hex) ? hex : null;
         if (html != null && ColorUtility.TryParseHtmlString(html, out Color color)) { return color; }
         return null;
-    }
-
-    internal static string FormatRarityTable(float[][] rows) {
-        if (rows == null) { return ""; }
-        List<string> parts = new List<string>();
-        foreach (float[] row in rows) {
-            if (row == null || row.Length < 2) { continue; }
-            parts.Add($"{Mathf.RoundToInt(row[0])}:{row[1].ToString("0.###", CultureInfo.InvariantCulture)}");
-        }
-        return string.Join(", ", parts);
-    }
-
-    /// <summary>Parses "count:weight, count:weight" into rows. Counts are whole numbers from 0 to maxCount, weights positive.</summary>
-    internal static bool ParseRarityTable(string text, int maxCount, out float[][] rows, out string error) {
-        rows = null;
-        error = null;
-        if (string.IsNullOrWhiteSpace(text)) {
-            error = "enter at least one 'count:weight' pair, for example 1:80, 2:20.";
-            return false;
-        }
-        List<float[]> parsed = new List<float[]>();
-        HashSet<int> counts = new HashSet<int>();
-        foreach (string rawPair in text.Split(',')) {
-            string pair = rawPair.Trim();
-            if (pair.Length == 0) { continue; }
-            string[] halves = pair.Split(':');
-            if (halves.Length != 2
-                || int.TryParse(halves[0].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int count) == false
-                || float.TryParse(halves[1].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out float weight) == false) {
-                error = $"'{pair}' is not a 'count:weight' pair.";
-                return false;
-            }
-            if (count < 0) { error = $"count {count} must be 0 or more."; return false; }
-            if (count > maxCount) { error = $"count {count} exceeds the maximum of {maxCount}."; return false; }
-            if (weight <= 0f) { error = $"the weight for count {count} must be greater than 0."; return false; }
-            if (counts.Add(count) == false) { error = $"count {count} is listed twice."; return false; }
-            parsed.Add(new[] { count, weight });
-        }
-        if (parsed.Count == 0) {
-            error = "enter at least one 'count:weight' pair.";
-            return false;
-        }
-        rows = parsed.ToArray();
-        return true;
     }
 }

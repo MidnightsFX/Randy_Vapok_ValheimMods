@@ -62,7 +62,8 @@ namespace EpicLoot.LegendarySystem
         public string ID;
         public string Name;
         // The rarities the set's pieces can roll at. Empty here for the same reason as
-        // LegendaryInfo.Rarities; backfilled from the block (LegendarySets -> Legendary, MythicSets -> Mythic).
+        // LegendaryInfo.Rarities; backfilled from the blocks its pieces are in (LegendaryItems -> Legendary,
+        // MythicItems -> Mythic), since that is where the pieces dropped before sets had a rarity list.
         public List<ItemRarity> Rarities = new List<ItemRarity>();
         public List<string> LegendaryIDs = new List<string>();
         public List<SetBonusInfo> SetBonuses = new List<SetBonusInfo>();
@@ -74,7 +75,8 @@ namespace EpicLoot.LegendarySystem
         // Every unique and set, whatever rarities it rolls at, belongs in these two blocks.
         public List<LegendaryInfo> LegendaryItems = new List<LegendaryInfo>();
         public List<LegendarySetInfo> LegendarySets = new List<LegendarySetInfo>();
-        // Legacy per-rarity blocks, still loaded and merged into the ones above with a default of Mythic.
+        // Legacy per-rarity blocks, still loaded and merged into the ones above: a unique here defaults to
+        // Mythic, and a set to the blocks its pieces are in.
         // Kept so existing patches that target $.MythicItems / $.MythicSets keep applying.
         public List<LegendaryInfo> MythicItems = new List<LegendaryInfo>();
         public List<LegendarySetInfo> MythicSets = new List<LegendarySetInfo>();

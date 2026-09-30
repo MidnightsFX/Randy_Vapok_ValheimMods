@@ -4,6 +4,7 @@ using EpicLoot.Config;
 using EpicLoot.Crafting;
 using EpicLoot.Data;
 using EpicLoot.GatedItemType;
+using EpicLoot.LegendarySystem;
 using EpicLoot.ShardStones;
 using EpicLoot_UnityLib;
 using Jotunn.Managers;
@@ -36,7 +37,9 @@ namespace EpicLoot.CraftingV2
     public enum RuneActions
     {
         Extract,
-        Etch
+        Etch,
+        SetExtract,
+        SetEtch
     }
 
     public class EnchantingUIController : MonoBehaviour
@@ -596,11 +599,7 @@ namespace EpicLoot.CraftingV2
         {
             Player player = Player.m_localPlayer;
 
-            float previousDurabilityPercent = 0;
-            if (item.m_shared.m_useDurability)
-            {
-                previousDurabilityPercent = item.m_durability / item.GetMaxDurability();
-            }
+            float? previousDurability = MagicItemEffects.ModifyDurability.GetDurabilityFraction(item);
 
             float luckFactor = player.GetTotalActiveMagicEffectValue(MagicEffectType.Luck, 0.01f);
             MagicItem magicItem = LootRoller.RollMagicItem(rarity, item, luckFactor);
@@ -611,10 +610,7 @@ namespace EpicLoot.CraftingV2
             EquipmentEffectCache.Reset(player);
 
             // Maintain durability
-            if (item.m_shared.m_useDurability)
-            {
-                item.m_durability = previousDurabilityPercent * item.GetMaxDurability();
-            }
+            MagicItemEffects.ModifyDurability.SetDurabilityFraction(item, previousDurability);
 
             CraftSuccessDialog successDialog = CraftSuccessDialog.CreateForCurrentUI(EnchantingTableUI.instance.transform);
 
@@ -1131,22 +1127,291 @@ namespace EpicLoot.CraftingV2
             return returnList;
         }
 
+        // ---- Set runes (Rune page: Set Extract / Set Etch) ----
+        //
+        // A set rune is an EtchedRunestone{Rarity} whose MagicItem carries the SetID (and the source
+        // piece's LegendaryID as a preference) with no effects. Set Etch makes the target whichever piece
+        // of that set it fits, at the target's own rarity; the target keeps its effects.
+
+        // A piece whose set can be extracted: an identified magic item carrying the SetID of a set that
+        // still exists. A vanilla (m_setName) set lives on the prefab and cannot move.
+        internal static bool TryGetSetExtractSource(ItemDrop.ItemData item, out LegendarySetInfo set)
+        {
+            set = null;
+            return item != null && !item.IsRunestone() && !item.IsUnidentified() &&
+                item.IsMagic(out MagicItem magicItem) &&
+                UniqueLegendaryHelper.TryGetLegendarySetInfo(magicItem.SetID, out set);
+        }
+
+        // An item a set rune may be etched onto: an identified magic item that is not already a unique or
+        // a magic set piece. A vanilla set piece qualifies -- only the magic SetID is checked.
+        internal static bool IsSetEtchTarget(ItemDrop.ItemData item)
+        {
+            return item != null && EpicLoot.CanBeMagicItem(item) && !item.IsUnidentified() &&
+                item.IsMagic(out MagicItem magicItem) &&
+                string.IsNullOrEmpty(magicItem.LegendaryID) && string.IsNullOrEmpty(magicItem.SetID);
+        }
+
+        internal static bool TryGetSetRuneSet(ItemDrop.ItemData rune, out LegendarySetInfo set)
+        {
+            set = null;
+            return rune != null && rune.IsSetRune() &&
+                UniqueLegendaryHelper.TryGetLegendarySetInfo(rune.GetMagicItem().SetID, out set);
+        }
+
+        // Whether the rune can go on the target, and the piece the target would become.
+        internal static bool TryResolveSetEtch(ItemDrop.ItemData target, ItemDrop.ItemData rune,
+            out LegendarySetInfo set, out LegendaryInfo piece)
+        {
+            piece = null;
+            if (!IsSetEtchTarget(target) || !TryGetSetRuneSet(rune, out set))
+            {
+                set = null;
+                return false;
+            }
+
+            return UniqueLegendaryHelper.TryGetSetPieceForItem(set, target, target.GetMagicItem().Rarity,
+                rune.GetMagicItem().LegendaryID, out piece);
+        }
+
+        internal static List<InventoryItemListElement> GetRuneSetExtractItems()
+        {
+            List<InventoryItemListElement> result = new List<InventoryItemListElement>();
+            if (Player.m_localPlayer == null)
+            {
+                return result;
+            }
+
+            List<ItemDrop.ItemData> boundItems = InventoryManagement.Instance.GetBoundItems();
+            foreach (ItemDrop.ItemData item in InventoryManagement.Instance.GetAllItems())
+            {
+                // The same equipped/hotbar rule as a normal extract.
+                if (!ELConfig.ShowEquippedAndHotbarItemsInSacrificeTab.Value &&
+                    (item != null && item.m_equipped || boundItems.Contains(item)))
+                {
+                    continue;
+                }
+
+                if (TryGetSetExtractSource(item, out _))
+                {
+                    result.Add(new InventoryItemListElement() { Item = item });
+                }
+            }
+
+            return result;
+        }
+
+        // Only items at least one owned set rune can go on, so the list is not every magic item carried.
+        internal static List<InventoryItemListElement> GetRuneSetEtchItems()
+        {
+            List<InventoryItemListElement> result = new List<InventoryItemListElement>();
+            if (Player.m_localPlayer == null)
+            {
+                return result;
+            }
+
+            List<ItemDrop.ItemData> items = InventoryManagement.Instance.GetAllItems();
+            List<ItemDrop.ItemData> runes = items.Where(x => TryGetSetRuneSet(x, out _)).ToList();
+            if (runes.Count == 0)
+            {
+                return result;
+            }
+
+            foreach (ItemDrop.ItemData item in items)
+            {
+                if (IsSetEtchTarget(item) && runes.Any(rune => TryResolveSetEtch(item, rune, out _, out _)))
+                {
+                    result.Add(new InventoryItemListElement() { Item = item });
+                }
+            }
+
+            return result;
+        }
+
+        internal static List<InventoryItemListElement> GetApplyableSetRunesForItem(ItemDrop.ItemData target)
+        {
+            List<InventoryItemListElement> result = new List<InventoryItemListElement>();
+            if (target == null)
+            {
+                return result;
+            }
+
+            foreach (ItemDrop.ItemData rune in InventoryManagement.Instance.GetAllItems())
+            {
+                if (TryResolveSetEtch(target, rune, out LegendarySetInfo set, out LegendaryInfo piece))
+                {
+                    result.Add(new InventoryItemListElement()
+                    {
+                        Item = rune,
+                        EnchantName = GetSetRuneRowName(rune, set, piece)
+                    });
+                }
+            }
+
+            return result;
+        }
+
+        // The set in the rune's rarity color, then the piece the selected item would become.
+        private static string GetSetRuneRowName(ItemDrop.ItemData rune, LegendarySetInfo set, LegendaryInfo piece)
+        {
+            string color = EpicLoot.GetRarityColor(rune.GetMagicItem().Rarity);
+            return Localization.instance.Localize(
+                $"<color={color}>{set.Name}</color>\n<color=#c0c0c0ff>→ {piece.Name}</color>");
+        }
+
+        internal static ItemDrop.ItemData BuildSetRune(ItemDrop.ItemData source)
+        {
+            if (!TryGetSetExtractSource(source, out LegendarySetInfo set))
+            {
+                return null;
+            }
+
+            MagicItem sourceMagicItem = source.GetMagicItem();
+            ItemDrop.ItemData rune = CreateEtchedRunestone(sourceMagicItem.Rarity);
+            if (rune == null)
+            {
+                return null;
+            }
+
+            MagicItem setRune = new MagicItem
+            {
+                Rarity = sourceMagicItem.Rarity,
+                SetID = set.ID,
+                // Only a preference for Set Etch, and only while the piece is still part of the set.
+                LegendaryID = set.LegendaryIDs != null && set.LegendaryIDs.Contains(sourceMagicItem.LegendaryID)
+                    ? sourceMagicItem.LegendaryID
+                    : null
+            };
+
+            MagicItemComponent magicItemComponent = rune.Data().GetOrCreate<MagicItemComponent>();
+            API.WithChangeReason(API.ChangeReason.Rune, () => magicItemComponent.SetMagicItem(setRune));
+            return rune;
+        }
+
+        internal static RuneSetExtractMode GetRuneSetExtractMode()
+        {
+            return ELConfig.RuneSetExtractItemMode.Value;
+        }
+
+        internal static string GetRuneSetExtractWarningKey()
+        {
+            return GetRuneSetExtractMode() == RuneSetExtractMode.DestroyItem
+                ? "$mod_epicloot_rune_setextract_warning_destroy"
+                : "$mod_epicloot_rune_setextract_warning_strip";
+        }
+
+        // Set Extract with StripSet: the item stops being a set piece and a unique, and takes a generated
+        // name. Rarity, effects, augment/temper markers and sockets stay.
+        internal static void StripSetAfterExtract(ItemDrop.ItemData item)
+        {
+            MagicItem magicItem = item.GetMagicItem();
+            if (magicItem == null)
+            {
+                return;
+            }
+
+            magicItem.LegendaryID = null;
+            magicItem.SetID = null;
+            // Null when generated names are turned off, which falls back to the item's own name.
+            magicItem.DisplayName = MagicItemNames.GetNameForItem(item, magicItem);
+
+            API.WithChangeReason(API.ChangeReason.Rune, () => item.SaveMagicItem(magicItem));
+            RefreshEquippedSetState(item);
+        }
+
+        // Works out what etching the set rune onto the item produces, on a copy, the same way
+        // BuildRuneEtchResult does. Null when the rune no longer fits the item.
+        internal static MagicItem BuildSetEtchResult(ItemDrop.ItemData target, ItemDrop.ItemData rune)
+        {
+            if (!TryResolveSetEtch(target, rune, out LegendarySetInfo set, out LegendaryInfo piece))
+            {
+                return null;
+            }
+
+            MagicItem result = JsonConvert.DeserializeObject<MagicItem>(JsonConvert.SerializeObject(target.GetMagicItem()));
+            result.LegendaryID = piece.ID;
+            result.SetID = set.ID;
+            result.DisplayName = piece.Name;
+            return result;
+        }
+
+        internal static void ApplySetEtch(ItemDrop.ItemData target, MagicItem result)
+        {
+            API.WithChangeReason(API.ChangeReason.Rune, () => target.SaveMagicItem(result));
+            RefreshEquippedSetState(target);
+
+            Game.instance.GetPlayerProfile().IncrementStat(PlayerStatType.Crafts);
+            Gogan.LogEvent("Game", "SetRuneEtched", target.m_shared.m_name, 1);
+        }
+
+        // SetMagicItem updates the equipment ZDO and the effect cache for a worn item, but a change of
+        // piece also changes what is drawn and which set abilities are granted, and those only refresh on
+        // an equip change. Redo them here so a worn item shows its new set straight away.
+        private static void RefreshEquippedSetState(ItemDrop.ItemData item)
+        {
+            Player player = Player.m_localPlayer;
+            if (player == null)
+            {
+                return;
+            }
+
+            // Also for items held by an external equipment provider, which never read as m_equipped.
+            EquipmentEffectCache.Reset(player);
+
+            if (!player.IsItemEquiped(item))
+            {
+                return;
+            }
+
+            // Texture replacements and equip fx are applied when the item is attached; clearing the slot's
+            // hash makes VisEquipment attach it again. The SetupVisEquipment postfix refreshes the fx.
+            Multiplayer_Player_Patch.WatchLegendaryEquipment_Player_Update_Patch.ForceResetVisEquipment(player, item);
+            player.SetupVisEquipment(player.m_visEquipment, false);
+
+            player.GetComponent<Abilities.AbilityController>()?.UpdatePlayerAbilities();
+            Multiplayer_Player_Patch.WatchMultiplayerMagicEffects_Player_Patch.UpdateRichesAndLuck(player);
+        }
+
         internal static List<InventoryItemListElement> GetRuneExtractCost(ItemDrop.ItemData item, ItemRarity rarity, float costModifier)
         {
-            return EnchantHelper.GetRuneCost(item, rarity, RuneActions.Extract).Select(entry =>
+            return GetRuneCostElements(item, rarity, RuneActions.Extract, costModifier);
+        }
+
+        internal static List<InventoryItemListElement> GetRuneEtchCost(ItemDrop.ItemData item, ItemRarity rarity, float costModifier)
+        {
+            return GetRuneCostElements(item, rarity, RuneActions.Etch, costModifier);
+        }
+
+        internal static List<InventoryItemListElement> GetRuneSetExtractCost(ItemDrop.ItemData item, ItemRarity rarity, float costModifier)
+        {
+            return GetRuneCostElements(item, rarity, RuneActions.SetExtract, costModifier);
+        }
+
+        // The configured materials only. The set rune being etched is taken as that exact item and is
+        // never part of this list: etched runes of one rarity share a name, so paying by name could
+        // take a different rune.
+        internal static List<InventoryItemListElement> GetRuneSetEtchCost(ItemDrop.ItemData item, ItemRarity rarity, float costModifier)
+        {
+            return GetRuneCostElements(item, rarity, RuneActions.SetEtch, costModifier);
+        }
+
+        private static List<InventoryItemListElement> GetRuneCostElements(ItemDrop.ItemData item, ItemRarity rarity,
+            RuneActions operation, float costModifier)
+        {
+            return EnchantHelper.GetRuneCost(item, rarity, operation).Select(entry =>
             {
                 ItemDrop.ItemData itemData = entry.Key.m_itemData.Clone();
                 itemData.m_dropPrefab = entry.Key.gameObject;
                 int cost = entry.Value;
                 // float.IsNaN, never == float.NaN (that comparison is always false): the NaN
                 // modifier used to multiply through and the <= 0 clamp collapsed every rune
-                // extract cost to 1 of each item.
+                // cost to 1 of each item.
                 if (!float.IsNaN(costModifier))
                 {
                     cost = Mathf.RoundToInt(entry.Value * costModifier);
                 }
 
-                EpicLoot.Log($"Cost settings: E:{entry.Value} modifier:{costModifier} result:{cost}");
+                EpicLoot.Log($"Cost settings ({operation}): E:{entry.Value} modifier:{costModifier} result:{cost}");
                 itemData.m_stack = cost;
                 if (itemData.m_stack <= 0)
                 {
@@ -1157,28 +1422,20 @@ namespace EpicLoot.CraftingV2
             }).ToList();
         }
 
-        internal static List<InventoryItemListElement> GetRuneEtchCost(ItemDrop.ItemData item, ItemRarity rarity, float costModifier)
+        // A fresh, blank EtchedRunestone of the rarity, ready for a MagicItem. m_dropPrefab is set because
+        // a clone of the ObjectDB prefab's data carries none, and later custom-data loads need it.
+        private static ItemDrop.ItemData CreateEtchedRunestone(ItemRarity rarity)
         {
-            return EnchantHelper.GetRuneCost(item, rarity, RuneActions.Etch).Select(entry =>
+            GameObject prefab = PrefabManager.Instance.GetPrefab($"EtchedRunestone{rarity}");
+            ItemDrop baseData = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
+            if (baseData == null)
             {
-                ItemDrop.ItemData itemData = entry.Key.m_itemData.Clone();
-                itemData.m_dropPrefab = entry.Key.gameObject;
-                int cost = entry.Value;
-                // float.IsNaN, never != float.NaN (always true) -- see GetRuneExtractCost above.
-                if (!float.IsNaN(costModifier))
-                {
-                    cost = Mathf.RoundToInt(entry.Value * costModifier);
-                }
+                return null;
+            }
 
-                EpicLoot.Log($"Cost settings: E:{entry.Value} modifier:{costModifier} result:{cost}");
-                itemData.m_stack = cost;
-                if (itemData.m_stack <= 0)
-                {
-                    itemData.m_stack = 1;
-                }
-
-                return new InventoryItemListElement() { Item = itemData };
-            }).ToList();
+            ItemDrop.ItemData newItem = baseData.m_itemData.Clone();
+            newItem.m_dropPrefab = prefab;
+            return newItem;
         }
 
         internal static ItemDrop.ItemData BuildEnchantedRune(ItemDrop.ItemData selectedItem, int targetEnchant, float powerModifier)
@@ -1191,25 +1448,15 @@ namespace EpicLoot.CraftingV2
                 return null;
             }
 
-            string prefabName = $"EtchedRunestone{selectedItem.GetRarity()}";
-            EpicLoot.Log($"Checking for EtchedRune ({prefabName}) with power " +
+            EpicLoot.Log($"Checking for EtchedRune{selectedItem.GetRarity()} with power " +
                 $"{effect.EffectValue} * {powerModifier} = {runeEffect.EffectValue} to return");
 
-            GameObject item = PrefabManager.Instance.GetPrefab(prefabName);
-
-            if (item == null)
+            ItemDrop.ItemData newItem = CreateEtchedRunestone(selectedItem.GetRarity());
+            if (newItem == null)
             {
                 return null;
             }
 
-            ItemDrop baseData = item.GetComponent<ItemDrop>();
-
-            if (baseData == null)
-            {
-                return null;
-            }
-
-            ItemDrop.ItemData newItem = baseData.m_itemData.Clone();
             MagicItemComponent magicItemComponent = newItem.Data().GetOrCreate<MagicItemComponent>();
 
             // We might need to rethink how power modifier is checked and applied here
@@ -1693,7 +1940,13 @@ namespace EpicLoot.CraftingV2
                 // has to be handed back before it goes.
                 returnedItems.AddRange(ReclaimSockets(magicItem));
 
+                // Losing a durability bonus lowers the maximum, so carry durability over as a fraction of
+                // it, as enchanting does; keeping the amount would leave the item above full.
+                float? previousDurability = MagicItemEffects.ModifyDurability.GetDurabilityFraction(item);
+
                 item.Data().Remove<MagicItemComponent>();
+
+                MagicItemEffects.ModifyDurability.SetDurabilityFraction(item, previousDurability);
 
                 // Dropping the component does not write through SetMagicItem, so the change event has to
                 // be raised by hand here.

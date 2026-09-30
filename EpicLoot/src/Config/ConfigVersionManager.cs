@@ -38,13 +38,6 @@ public static class ConfigVersionManager
     /// <summary>Guards the prompt against running before detection has had a chance to populate.</summary>
     public static bool DetectionRan => _detectionRan;
 
-    /// <summary>
-    /// Snapshotted during Awake because both this feature and the Quick Configure wizard postfix
-    /// FejdStartup.Start, and Harmony does not guarantee which of the two runs first. Reading the
-    /// config entry from the prompt itself would race with the wizard clearing it.
-    /// </summary>
-    public static bool WelcomeMessageWillShow { get; private set; }
-
     // A sibling of baseconfig/, not a child, so the directory the player browses stays clean.
     private static string BackupDirPath => Path.Combine(Paths.ConfigPath, "EpicLoot", "baseconfig-backup");
 
@@ -61,7 +54,6 @@ public static class ConfigVersionManager
         _pendingSourceHashes.Clear();
         _stampAfterInit.Clear();
 
-        WelcomeMessageWillShow = ELConfig.AlwaysShowWelcomeMessage.Value;
         _enabled = !ELConfig.AlwaysRefreshCoreConfigs.Value;
 
         if (!_enabled)
@@ -272,6 +264,45 @@ public static class ConfigVersionManager
         {
             EpicLoot.LogWarning($"Could not record written content for {configName}.json.\n{e.Message}");
         }
+    }
+
+    /// <summary>
+    /// Drops files that stopped being outdated after detection ran: something this session rewrote them
+    /// to the shipped default, or stamped what it wrote as the mod's own output of it. The prompt calls
+    /// this as it opens, because it now waits its turn behind the Quick Configure welcome wizard, whose
+    /// balance preset can rewrite magiceffects.json in the meantime.
+    /// </summary>
+    public static void PruneResolvedOutdated()
+    {
+        if (!_enabled || _state == null || !HasOutdatedConfigs)
+        {
+            return;
+        }
+
+        string baseConfigDir = ELConfig.GetOverhaulDirectoryPath();
+        OutdatedConfigs.RemoveAll(name =>
+        {
+            string embeddedHash = GetEmbeddedHash(name, out string variant, out _);
+            if (string.IsNullOrEmpty(embeddedHash))
+            {
+                return false;
+            }
+
+            string diskHash = TryHashFile(Path.Combine(baseConfigDir, $"{name}.json"));
+            if (string.IsNullOrEmpty(diskHash))
+            {
+                return false;
+            }
+
+            if (diskHash == embeddedHash)
+            {
+                return true;
+            }
+
+            ConfigVersionEntry entry = _state.Get(name);
+            return entry != null && entry.SourceHash == embeddedHash && entry.Variant == (variant ?? "")
+                && diskHash == entry.WrittenHash;
+        });
     }
 
     /// <summary>

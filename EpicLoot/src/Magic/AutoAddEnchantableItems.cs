@@ -20,6 +20,11 @@ namespace EpicLoot.Magic
             public Dictionary<string, SortingData> BiomeSorterData = new Dictionary<string, SortingData>();
             public Dictionary<string, List<float>> TierRarityProbabilities = new Dictionary<string, List<float>>();
             public Dictionary<string, int> VendorCostByBiomeKey = new Dictionary<string, int>();
+
+            // How creatures without a loot table are given one; see CreatureSorter. Left null when absent
+            // so a file that predates it falls through to the code-side defaults field by field.
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public CreatureSorterConfig CreatureSorter;
         }
 
         public class SortingData
@@ -29,11 +34,17 @@ namespace EpicLoot.Magic
             public List<string> BiomeMaterials { get; set; } = new List<string>();
             public List<string> BiomeSpecificCraftingStations { get; set; } = new List<string>();
 
+            // The loot table template each class of creature in this biome gets from the creature sorter.
+            [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+            public CreatureLadder Creatures { get; set; }
         }
 
         public static void InitializeConfig(AutoSorterConfiguration config)
         {
             Config = config;
+            // The creature rules live in this file too; a live edit (or a patch) re-sorts the creatures
+            // while a world is loaded. At startup nothing is loaded yet and this does nothing.
+            CreatureSorterRunner.RunIfWorldLoaded("itemsorter.json reload");
         }
 
         public static AutoSorterConfiguration GetCFG()
@@ -51,6 +62,45 @@ namespace EpicLoot.Magic
         // scan -- and rewrite iteminfo/loottables/adventuredata on disk -- on every world join.
         public static readonly Action OnMapDataLoadedHandler = () => CheckAndAddAllEnchantableItems();
 
+        private static bool _ranOnHeadlessServer;
+
+        /// <summary>
+        /// The trigger for a headless (dedicated) server, which never fires the minimap hook: Minimap.Update
+        /// returns before LoadMapData when there is no graphics device. Called from the creature sorter's
+        /// ZoneSystem.SetupLocations postfix, after the sorter, which is the order a host gets too. Once per
+        /// session, like the minimap hook's self-unsubscribe.
+        /// </summary>
+        internal static void RunOnHeadlessWorldLoad()
+        {
+            if (!Jotunn.Managers.GUIManager.IsHeadless() || _ranOnHeadlessServer || !OwnsItemConfig())
+            {
+                return;
+            }
+
+            _ranOnHeadlessServer = true;
+            CheckAndAddAllEnchantableItems();
+        }
+
+        /// <summary>
+        /// Re-arms the minimap hook, so the pass runs on the next world this machine loads itself even if it
+        /// already ran this session. For a patch rebuild the pass cannot follow straight away (no world is
+        /// loaded, or this client is on someone else's server): the rebuilt files start from the embedded
+        /// defaults, without the items the pass adds.
+        /// </summary>
+        internal static void RunOnNextWorldLoad()
+        {
+            // Removed first: a handler that is still subscribed would otherwise be added twice and run twice.
+            Jotunn.Managers.MinimapManager.OnVanillaMapDataLoaded -= OnMapDataLoadedHandler;
+            Jotunn.Managers.MinimapManager.OnVanillaMapDataLoaded += OnMapDataLoadedHandler;
+        }
+
+        // Same rule as the creature sorter's: a dedicated server, a host or single player. Not a client on
+        // someone else's server, and not the main menu (no world, so nothing to scan).
+        private static bool OwnsItemConfig()
+        {
+            return ZNet.instance != null && ZNet.instance.IsServer();
+        }
+
         /// <summary>
         /// The baseconfig files this pass writes back out. A caller that needs the live config to
         /// match disk without waiting on the file watchers reloads exactly these.
@@ -60,6 +110,18 @@ namespace EpicLoot.Magic
 
         public static void CheckAndAddAllEnchantableItems(bool deregister = true)
         {
+            // The pass merges onto the LIVE configs and writes the result over this machine's own baseconfig
+            // files. On a client connected to someone else's server those are the server's push
+            // (ELConfig.ApplyClientConfig), so running here copied the server's loottables, iteminfo and
+            // adventuredata over the player's own files, and the reload at the end skips the scheduler's
+            // connected-client rule. The server runs the pass and its configs reach clients in the push.
+            // Checked before unsubscribing, so a world this session later loads itself still gets the pass.
+            if (!OwnsItemConfig())
+            {
+                EpicLoot.Log("Equipment auto-add skipped: this client is connected to a server, whose configs are in effect.");
+                return;
+            }
+
             if (deregister)
             {
                 Jotunn.Managers.MinimapManager.OnVanillaMapDataLoaded -= OnMapDataLoadedHandler;
@@ -334,51 +396,58 @@ namespace EpicLoot.Magic
             }
 
             EpicLoot.Log($"Checking loot tables for invalid entries.");
-            List<string> metaLootTables = new List<string>();
-            //LootRoller.Config.LootTables
+            // Every table name up front: a reference to a table further down the file -- or a boss table's
+            // reference to its own level 1 -- is as valid as one to a table above it.
+            List<string> metaLootTables = LootRoller.Config.LootTables
+                .Where(x => !string.IsNullOrEmpty(x?.Object))
+                .Select(x => x.Object)
+                .Distinct()
+                .ToList();
             foreach (LootTable lt in LootRoller.Config.LootTables)
             {
-                List<LootDrop> updatedLootDrop = new List<LootDrop>();
-
-                // Valid existing entries. Only lt.Loot is validated -- LeveledLoot is deliberately left
-                // untouched. Boss drops live there (Eikthyr_{Rarity}_ShardStone and friends), and a
-                // level-gated entry has no independent existence to check that ValidateLootList would
-                // not already cover, so validating it only adds ways to delete working loot.
-                if (lt.Loot != null)
+                if (lt == null)
                 {
-                    updatedLootDrop.AddRange(ValidateLootList(lt, metaLootTables, metaItemSetNames, validItems, magicMats));
+                    continue;
                 }
 
-                LootTable ltc = lt;
-                ltc.Loot = updatedLootDrop.ToArray();
-                updatedLootTables.Add(ltc);
-                metaLootTables.Add(lt.Object);
+                // Every level's list is validated, the same way the old flat Loot was: since the flat form
+                // was folded into LeveledLoot, that is where chest loot lives. A list that would come out
+                // empty is left as written instead -- with nothing valid left to roll it was already
+                // broken, and emptying it on disk would make a validation gap permanent.
+                if (lt.LeveledLoot != null)
+                {
+                    foreach (LeveledLootDef level in lt.LeveledLoot)
+                    {
+                        if (level?.Loot == null || level.Loot.Length == 0)
+                        {
+                            continue;
+                        }
+
+                        string owner = $"{lt.Object} level {level.Level}";
+                        List<LootDrop> valid = ValidateLootList(owner, level.Loot, metaLootTables,
+                            metaItemSetNames, validItems, magicMats);
+                        if (valid.Count == 0)
+                        {
+                            EpicLoot.LogWarning($"Loot table {owner}: no entry passed validation. Keeping " +
+                                "it as written; it will drop nothing until its entries are fixed.");
+                            continue;
+                        }
+
+                        level.Loot = valid.ToArray();
+                    }
+                }
+
+                updatedLootTables.Add(lt);
             }
 
             EpicLoot.Log($"Finished Validating loottable.");
             // Write out the new config; CheckAndAddAllEnchantableItems re-reads every rewritten file once all are written.
-            try
-            {
-                LootConfig newLootConfig = new LootConfig()
-                {
-                    ItemSets = updatedItemSets.ToArray(),
-                    LootTables = updatedLootTables.ToArray(),
-                    MagicEffectsCount = LootRoller.Config.MagicEffectsCount,
-                    SocketCounts = LootRoller.Config.SocketCounts,
-                    RestrictedItems = LootRoller.Config.RestrictedItems
-                };
-                string contents = JsonConvert.SerializeObject(newLootConfig, Formatting.Indented);
-                string overhaulFileLocation = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), "loottables.json");
-                string previousContents = File.Exists(overhaulFileLocation) ? File.ReadAllText(overhaulFileLocation) : null;
-                File.WriteAllText(overhaulFileLocation, contents);
-                // Claim this as the mod's own output ONLY when the baseline it merged over was also
-                // ours -- a player-edited baseline must stay flagged as the player's.
-                ConfigVersionManager.RecordWrittenContent("loottables", contents, previousContents);
-            }
-            catch (Exception e)
-            {
-                EpicLoot.LogError($"Failed to auto-update loottables.json: {e.Message}");
-            }
+            // A copy of the live config, not a new one built field by field, so every other root field
+            // (DefaultStarScaling, and anything added later) is written back too.
+            LootConfig newLootConfig = LootRoller.Config.ShallowCopy();
+            newLootConfig.ItemSets = updatedItemSets.ToArray();
+            newLootConfig.LootTables = updatedLootTables.ToArray();
+            LootConfigFile.Write(newLootConfig, "equipment auto-add");
         }
 
         private static void AddRemoveItemsFromVendor(List<ItemTypeInfo> newConfig)
@@ -689,20 +758,25 @@ namespace EpicLoot.Magic
             return itemsByCategory;
         }
 
-        private static List<LootDrop> ValidateLootList(LootTable lt,
+        private static List<LootDrop> ValidateLootList(string owner, LootDrop[] lootList,
             List<string> metaLootTables, List<string> metaItemSetNames, List<string> validItems,
             List<string> magicMats)
         {
             List<LootDrop> updatedLootDrop = new List<LootDrop>();
-            foreach (LootDrop loot in lt.Loot)
+            foreach (LootDrop loot in lootList)
             {
-                if (!IsValidLootEntryName(loot.Item, metaItemSetNames, metaLootTables, validItems, magicMats))
+                if (loot == null)
                 {
-                    EpicLoot.Log($"REMOVING: Loot table ({lt.Object}) Item {loot.Item} not found.");
                     continue;
                 }
 
-                PruneRarityItems(loot, lt.Object, metaItemSetNames, metaLootTables, validItems, magicMats);
+                if (!IsValidLootEntryName(loot.Item, metaItemSetNames, metaLootTables, validItems, magicMats))
+                {
+                    EpicLoot.Log($"REMOVING: Loot table ({owner}) Item {loot.Item} not found.");
+                    continue;
+                }
+
+                PruneRarityItems(loot, owner, metaItemSetNames, metaLootTables, validItems, magicMats);
                 updatedLootDrop.Add(loot);
             }
             return updatedLootDrop;

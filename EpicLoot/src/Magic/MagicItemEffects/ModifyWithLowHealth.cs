@@ -1,4 +1,5 @@
-﻿using EpicLoot.General;
+﻿using EpicLoot.Config;
+using EpicLoot.General;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,6 +30,25 @@ namespace EpicLoot.MagicItemEffects
         public static string EffectNameWithLowHealth(string name)
         {
             return name + "LowHealth";
+        }
+
+        /// <summary>
+        /// The enchantments that only act at critical health: every ...LowHealth variant (which includes the
+        /// ModifyLowHealth threshold) and the two meads that fire there. The suffix is matched rather than a
+        /// list kept, so a variant added later, or one another mod registers, is covered too.
+        /// </summary>
+        public static bool IsHealthCriticalEffect(string effectType)
+        {
+            return effectType != null &&
+                (effectType.EndsWith("LowHealth", StringComparison.Ordinal) ||
+                 effectType == MagicEffectType.InstantMead || effectType == MagicEffectType.AutoMead);
+        }
+
+        /// <summary>False for a health critical effect while the Health Critical Enchantments config is off.</summary>
+        public static bool MayRoll(string effectType)
+        {
+            return ELConfig.HealthCriticalEffectsEnabled == null || ELConfig.HealthCriticalEffectsEnabled.Value ||
+                !IsHealthCriticalEffect(effectType);
         }
 
         public static bool PlayerHasLowHealth(Player player)
