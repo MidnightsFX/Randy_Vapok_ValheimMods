@@ -512,7 +512,7 @@ namespace EpicLoot.CraftingV2
             StringBuilder sb = new StringBuilder();
             string rarityColor = EpicLoot.GetRarityColor(rarity);
             string rarityDisplay = EpicLoot.GetRarityDisplayName(rarity);
-            sb.AppendLine($"{item.m_shared.m_name} \u2794 <color={rarityColor}>{rarityDisplay}</color> " +
+            sb.AppendLine($"{item.m_shared.m_name} → <color={rarityColor}>{rarityDisplay}</color> " +
                 $"{item.GetDecoratedName(rarityColor)}");
             sb.AppendLine($"<color={rarityColor}>");
 

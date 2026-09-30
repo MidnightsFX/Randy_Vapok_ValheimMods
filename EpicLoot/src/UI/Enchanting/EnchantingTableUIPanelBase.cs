@@ -49,7 +49,15 @@ namespace EpicLoot_UnityLib
                 _buttonLabel = MainButton.GetComponentInChildren<Text>();
                 if (_buttonLabel == null)
                 {
-                    _tmpButtonLabel = MainButton.GetComponentInChildren<TMP_Text>();
+                    foreach (TMP_Text text in MainButton.GetComponentsInChildren<TMP_Text>(true))
+                    {
+                        if (text.GetComponent<GamepadGlyph>() == null)
+                        {
+                            _tmpButtonLabel = text;
+                            break;
+                        }
+                    }
+
                     _useTMP = true;
                 }
                 
