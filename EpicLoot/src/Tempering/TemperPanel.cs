@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using EpicLoot.Compendium;
 using EpicLoot.Config;
+using EpicLoot_UnityLib;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
@@ -295,19 +296,12 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         TextMeshProUGUI[] hints = gamepadPanelHints.GetComponentsInChildren<TextMeshProUGUI>(true);
         for (int i = 0; i < hints.Length; ++i) {
             TextMeshProUGUI tmp = hints[i];
-            string key = ZInput.instance.GetBoundKeyString(tmp.name);
-            tmp.text = Localization.instance.Localize(key);
+            GamepadGlyph.Localize(tmp, tmp.name);
             if (tmp.name.StartsWith("JoyDPad")) {
                 tmp.gameObject.SetActive(false);
             }
         }
-        UIGamePad[] uiGamePads = GetComponentsInChildren<UIGamePad>(true);
-        for (int i = 0; i < uiGamePads.Length; ++i) {
-            UIGamePad uiGamePad = uiGamePads[i];
-            TextMeshProUGUI tmp = uiGamePad.m_hint.GetComponentInChildren<TextMeshProUGUI>();
-            string keyString = ZInput.instance.GetBoundKeyString(uiGamePad.m_zinputKey, true);
-            tmp.text = Localization.instance.Localize(keyString);
-        }
+        GamepadGlyph.LocalizeHints(gameObject);
     }
 
     public void OnDestroy() {
@@ -934,22 +928,17 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     // fontSharedMaterial setter never runs.
     public static void LoadFonts() {
         if (!fontsLoaded) {
-            bool applied = true;
-            TextMeshProUGUI[] textMeshPros = EpicAssets.TemperPanel.GetComponentsInChildren<TextMeshProUGUI>(true);
-            for (int i = 0; i < textMeshPros.Length; ++i) {
-                TextMeshProUGUI tmp = textMeshPros[i];
-                if (tmp.name == "Title") {
-                    applied &= MagicFontManager.Apply(tmp, MagicFontManager.TMP_FontOptions.NorseBoldOutline);
-                } else if (tmp.transform.parent.name == "gamepad_hint") {
-                    applied &= MagicFontManager.Apply(tmp, MagicFontManager.TMP_FontOptions.AveriaSansLibre);
-                } else {
-                    applied &= MagicFontManager.Apply(tmp, MagicFontManager.TMP_FontOptions.AveriaSansLibreOutline);
-                }
-            }
-
             // Only latched on success: StoreGui reopens call this again, so a lookup that missed
             // because the font was not loaded yet gets another go rather than sticking on the default.
-            fontsLoaded = applied;
+            fontsLoaded = MagicFontManager.ApplyAll(EpicAssets.TemperPanel, tmp => {
+                if (tmp.name == "Title") {
+                    return MagicFontManager.TMP_FontOptions.NorseBoldOutline;
+                }
+                if (tmp.transform.parent.name == "gamepad_hint") {
+                    return MagicFontManager.TMP_FontOptions.AveriaSansLibre;
+                }
+                return MagicFontManager.TMP_FontOptions.AveriaSansLibreOutline;
+            });
         }
     }
 }

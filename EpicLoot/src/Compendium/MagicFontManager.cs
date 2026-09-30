@@ -142,6 +142,17 @@ public static class MagicFontManager
         return true;
     }
 
+    public static bool ApplyAll(GameObject root, Func<TMP_Text, TMP_FontOptions> select)
+    {
+        bool applied = true;
+        foreach (TMP_Text text in root.GetComponentsInChildren<TMP_Text>(true))
+        {
+            applied &= Apply(text, select(text));
+        }
+
+        return applied;
+    }
+
     private static Material MaterialForCurrentAtlas(TMP_FontAsset font, Material material, TMP_FontOptions option)
     {
         // atlasTexture dereferences atlasTextures[0] unguarded, and this runs per compendium line.
