@@ -457,14 +457,7 @@ namespace EpicLoot_UnityLib
         private void SetMainButtonLabel(string token)
         {
             string text = Localization.instance.Localize(token);
-            if (_useTMP)
-            {
-                if (_tmpButtonLabel != null)
-                {
-                    _tmpButtonLabel.text = text;
-                }
-            }
-            else if (_buttonLabel != null)
+            if (_buttonLabel != null)
             {
                 _buttonLabel.text = text;
             }

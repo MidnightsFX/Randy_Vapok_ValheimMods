@@ -139,37 +139,25 @@ namespace EpicLoot_UnityLib
                 case MaterialConversionType.Upgrade:
                     CostLabel.text = Localization.instance.Localize("$mod_epicloot_upgradecost");
                     _progressLabel.text = Localization.instance.Localize("$mod_epicloot_upgradeprogress");
-                    if (_useTMP)
-                        _tmpButtonLabel.text = Localization.instance.Localize("$mod_epicloot_upgrade");
-                    else
-                        _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_upgrade");
+                    _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_upgrade");
                     break;
 
                 case MaterialConversionType.Convert:
                     CostLabel.text = Localization.instance.Localize("$mod_epicloot_convertcost");
                     _progressLabel.text = Localization.instance.Localize("$mod_epicloot_convertprogress");
-                    if (_useTMP)
-                        _tmpButtonLabel.text = Localization.instance.Localize("$mod_epicloot_convert");
-                    else
-                        _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_convert");
+                    _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_convert");
                     break;
 
                 case MaterialConversionType.Junk:
                     CostLabel.text = Localization.instance.Localize("$mod_epicloot_junkcost");
                     _progressLabel.text = Localization.instance.Localize("$mod_epicloot_junkprogress");
-                    if (_useTMP)
-                        _tmpButtonLabel.text = Localization.instance.Localize("$mod_epicloot_junk");
-                    else
-                        _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_junk");
+                    _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_junk");
                     break;
 
                 case MaterialConversionType.ShardUpgrade:
                     CostLabel.text = Localization.instance.Localize("$mod_epicloot_shardupgradecost");
                     _progressLabel.text = Localization.instance.Localize("$mod_epicloot_shardupgradeprogress");
-                    if (_useTMP)
-                        _tmpButtonLabel.text = Localization.instance.Localize("$mod_epicloot_shardupgrade");
-                    else
-                        _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_shardupgrade");
+                    _buttonLabel.text = Localization.instance.Localize("$mod_epicloot_shardupgrade");
                     break;
 
                 default:

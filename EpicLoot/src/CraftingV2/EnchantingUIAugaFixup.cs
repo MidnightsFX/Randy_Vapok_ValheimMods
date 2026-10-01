@@ -69,23 +69,12 @@ namespace EpicLoot.CraftingV2
                     AugaFixupMultiselectPrefab(convertUI.Products.ElementPrefab.gameObject);
                     AugaFixupMultiselectPrefab(convertUI.CostList.ElementPrefab.gameObject);
 
-                    for (var index = 0; index < convertUI.ModeButtons.Count; index++)
-                    {
-                        var modeButton = convertUI.ModeButtons[index];
-                        AugaFixupModeSelectButton(modeButton);
-                    }
-
                     var modeButtonContainer = (RectTransform)convertUI.ModeButtons[0].transform.parent;
                     modeButtonContainer.anchoredPosition = new Vector2(-20, modeButtonContainer.anchoredPosition.y);
                 }
                 else if (panelBase is EnchantUI enchantUI)
                 {
                     AugaFixupMultiselectPrefab(enchantUI.CostList.ElementPrefab.gameObject);
-
-                    foreach (var rarityButton in enchantUI.RarityButtons)
-                    {
-                        AugaFixupRaritySelectButton(rarityButton);
-                    }
                 }
                 else if (panelBase is AugmentUI augmentUI)
                 {
@@ -106,61 +95,6 @@ namespace EpicLoot.CraftingV2
             EpicLootAuga.FixFonts(prefab);
 
             _hasBeenFixedUp.Add(prefab);
-        }
-
-        public static void AugaFixupModeSelectButton(Toggle modeButton)
-        {
-            //Object.Destroy(modeButton.GetComponent<Image>());
-            //var toggle = modeButton.GetComponent<Toggle>();
-            //toggle.toggleTransition = Toggle.ToggleTransition.None;
-            //var oldText = modeButton.transform.Find("Text").GetComponent<Text>();
-            //var newButton = Auga.API.MediumButton_Create(modeButton.transform, modeButton.name, oldText.text);
-            //newButton.transform.SetSiblingIndex(0);
-            //Object.Destroy(oldText.gameObject);
-            //var rt = (RectTransform)newButton.transform;
-            //rt.anchorMin = new Vector2(0, 0);
-            //rt.anchorMax = new Vector2(1, 1);
-            //rt.anchoredPosition = new Vector2(34, 0);
-            //rt.sizeDelta = new Vector2(0, -10);
-
-            //newButton.onClick = new Button.ButtonClickedEvent();
-            //newButton.onClick.AddListener(() => toggle.OnSubmit(null));
-
-            //Object.Destroy(newButton.GetComponent<ButtonSfx>());
-            //Object.Destroy(newButton.GetComponent<UITooltip>());
-        }
-
-        public static void AugaFixupRaritySelectButton(Toggle rarityButton)
-        {
-            //Object.Destroy(rarityButton.GetComponent<Image>());
-            //var toggle = rarityButton.GetComponent<Toggle>();
-            //toggle.toggleTransition = Toggle.ToggleTransition.None;
-            //var oldText = rarityButton.transform.Find("Text").GetComponent<Text>();
-            //var newButton = Auga.API.MediumButton_Create(rarityButton.transform, rarityButton.name, oldText.text);
-            //newButton.transform.SetSiblingIndex(0);
-            //Object.Destroy(oldText.gameObject);
-            //var rt = (RectTransform)newButton.transform;
-            //rt.anchorMin = new Vector2(0, 0);
-            //rt.anchorMax = new Vector2(1, 1);
-            //rt.anchoredPosition = new Vector2(0, 0);
-            //rt.sizeDelta = new Vector2(0, 0);
-
-            //var rarityColor = toggle.GetComponent<SetRarityColor>();
-            //rarityColor.Graphics[0] = newButton.GetComponentInChildren<TMP_Text>();
-            //rarityColor.Refresh();
-
-            //var border = toggle.transform.Find("Border").GetComponent<Image>();
-            //var augaBorderAsset = EpicLoot.LoadAsset<GameObject>("ButtonFocusAuga");
-            //var augaBorderImage = augaBorderAsset.GetComponent<Image>();
-            //border.raycastTarget = false;
-            //border.sprite = augaBorderImage.sprite;
-            //border.pixelsPerUnitMultiplier = augaBorderImage.pixelsPerUnitMultiplier;
-
-            //newButton.onClick = new Button.ButtonClickedEvent();
-            //newButton.onClick.AddListener(() => toggle.OnSubmit(null));
-
-            //Object.Destroy(newButton.GetComponent<ButtonSfx>());
-            //Object.Destroy(newButton.GetComponent<UITooltip>());
         }
     }
 }

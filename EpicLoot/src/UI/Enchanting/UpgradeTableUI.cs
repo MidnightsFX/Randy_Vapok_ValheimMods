@@ -184,10 +184,7 @@ namespace EpicLoot_UnityLib
                     CostList.SetItems(cost.Cast<IListElement>().ToList());
                     canAfford = LocalPlayerCanAffordCost(cost);
                     string buttonText = Localization.instance.Localize("$mod_epicloot_featureunlock");
-                    if (_useTMP)
-                        _tmpButtonLabel.text = buttonText;
-                    else
-                        _buttonLabel.text = buttonText;
+                    _buttonLabel.text = buttonText;
                 }
                 else
                 {
@@ -196,10 +193,7 @@ namespace EpicLoot_UnityLib
                     CostList.SetItems(cost.Cast<IListElement>().ToList());
                     canAfford = LocalPlayerCanAffordCost(cost);
                     string buttonText = Localization.instance.Localize("$mod_epicloot_upgrade");
-                    if (_useTMP)
-                        _tmpButtonLabel.text = buttonText;
-                    else
-                        _buttonLabel.text = buttonText;
+                    _buttonLabel.text = buttonText;
                 }
             }
 
