@@ -50,6 +50,18 @@ public static class PanelTmpMigration
             });
     }
 
+    [MenuItem("Mod/Migrations/RuneContent to TMP")]
+    public static void Rune()
+    {
+        Migrate("RuneContent", new string[0],
+            Concat(BottomRowIcons, ("MainButton/Hint-1/Icon", "JoyButtonX"), ("GamepadHints/Hint/Icon", "JoyButtonY"), ("ModeSelectors/Hint/Icon", "JoyButtonY")),
+            content =>
+            {
+                RuneUI ui = content.GetComponent<RuneUI>();
+                Require(ui.CostLabel, ui.Warning);
+            });
+    }
+
     private static void Migrate(string content, string[] nestedPrefabs, (string path, string key)[] icons, Action<GameObject> verify)
     {
         foreach (string nested in nestedPrefabs)

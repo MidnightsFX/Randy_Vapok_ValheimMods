@@ -17,7 +17,7 @@ namespace EpicLoot_UnityLib
         public Toggle RuneEtchButton;
 
         [Header("Cost")]
-        public Text CostLabel;
+        public TMP_Text CostLabel;
         public MultiSelectItemList CostList;
 
         [Header("Rune Selector")]
@@ -26,7 +26,7 @@ namespace EpicLoot_UnityLib
         public GameObject AvailableRunesWindow;
         public MultiSelectItemList AvailableRunes;
 
-        public Text Warning;
+        public TMP_Text Warning;
 
         public AudioClip RunicActionCompleted;
 

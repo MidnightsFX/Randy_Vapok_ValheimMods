@@ -42,12 +42,20 @@ public static class LegacyTextToTmp
     }
 
     // Texts inside nested prefab instances belong to their own asset; convert that asset instead.
+    // A legacy InputField drives its text and placeholder itself and would lose them to a TMP swap.
     public static int Convert(GameObject root, List<PrefabYaml.Reference> yamlReferences)
     {
+        HashSet<Text> inputTexts = new HashSet<Text>();
+        foreach (InputField input in root.GetComponentsInChildren<InputField>(true))
+        {
+            inputTexts.Add(input.textComponent);
+            inputTexts.Add(input.placeholder as Text);
+        }
+
         int count = 0;
         foreach (Text text in root.GetComponentsInChildren<Text>(true))
         {
-            if (PrefabUtility.IsPartOfPrefabInstance(text))
+            if (PrefabUtility.IsPartOfPrefabInstance(text) || inputTexts.Contains(text))
             {
                 continue;
             }
