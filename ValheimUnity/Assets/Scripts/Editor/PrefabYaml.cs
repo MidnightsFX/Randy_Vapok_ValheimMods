@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 public static class PrefabYaml
 {
     public const string TextScriptGuid = "5f7201a12d95ffc409449d95f23cf332";
+    public const string InputFieldScriptGuid = "d199490a83bb2b844b9695cbf13b01ef";
+    public const string DropdownScriptGuid = "0d0b652f32a2cc243917e4028fa0f046";
 
     public struct Reference
     {
@@ -61,7 +63,7 @@ public static class PrefabYaml
             else if (block.ClassId == 114)
             {
                 componentGo[block.FileId] = Field(block.Body, "m_GameObject");
-                if (block.Body.Contains("guid: " + TextScriptGuid))
+                if (block.Body.Contains("guid: " + TextScriptGuid) || block.Body.Contains("guid: " + InputFieldScriptGuid) || block.Body.Contains("guid: " + DropdownScriptGuid))
                 {
                     textIds.Add(block.FileId);
                 }
@@ -217,9 +219,14 @@ public static class PrefabYaml
                 }
             }
 
-            if (instanceName == null || texts.Count == 0)
+            if (texts.Count == 0)
             {
                 continue;
+            }
+
+            if (instanceName == null)
+            {
+                instanceName = System.IO.Path.GetFileNameWithoutExtension(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
             }
 
             if (!sourceNames.TryGetValue(guid, out Dictionary<long, string> names))

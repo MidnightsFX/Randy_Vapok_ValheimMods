@@ -188,6 +188,43 @@ public static class PanelTmpMigration
         return null;
     }
 
+    [MenuItem("Mod/Migrations/Input fields and dropdowns to TMP")]
+    public static void Controls()
+    {
+        string[] panels = { "EnchantContent", "AugmentContent", "RuneContent", "SacrificeContent", "ConvertContent", "DisenchantContent", "UpgradeContent" };
+        Dictionary<string, List<PrefabYaml.TextOverride>> overrides = new Dictionary<string, List<PrefabYaml.TextOverride>>();
+        foreach (string panel in panels)
+        {
+            overrides[panel] = PrefabYaml.NestedTextOverrides(Folder + panel + ".prefab");
+        }
+
+        foreach (string prefab in new[] { "MultiSelectItemList", "SingleSelectItemList", "ItemElement", "RuneContent", "SacrificeContent" })
+        {
+            string path = Folder + prefab + ".prefab";
+            Debug.Log($"{path}: converted {LegacyTextToTmp.ConvertPrefab(path)} controls and labels");
+        }
+
+        foreach (string list in new[] { "MultiSelectItemList", "SingleSelectItemList" })
+        {
+            MultiSelectItemList component = AssetDatabase.LoadAssetAtPath<GameObject>(Folder + list + ".prefab").GetComponent<MultiSelectItemList>();
+            Require(component.SortByDropdown, component.FilterByText);
+        }
+
+        Require(AssetDatabase.LoadAssetAtPath<GameObject>(Folder + "ItemElement.prefab").GetComponent<MultiSelectItemListElement>().ItemSelectedQuantity);
+        Require(AssetDatabase.LoadAssetAtPath<GameObject>(Folder + "SacrificeContent.prefab").GetComponent<SacrificeUI>().IdentifyStyle);
+
+        foreach (string panel in panels)
+        {
+            if (overrides[panel].Count > 0)
+            {
+                ReapplyNestedTextOverrides(panel, overrides[panel]);
+            }
+        }
+
+        AssetDatabase.SaveAssets();
+        Debug.Log("Controls migration done");
+    }
+
     private static void Migrate(string content, string[] nestedPrefabs, (string path, string key)[] icons, Action<GameObject> verify)
     {
         foreach (string nested in nestedPrefabs)

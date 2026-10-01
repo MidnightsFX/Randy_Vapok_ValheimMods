@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EpicLoot.CraftingV2;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -275,8 +276,8 @@ namespace EpicLoot_UnityLib
                 return false;
             }
 
-            InputField[] textFields = instance.Root.GetComponentsInChildren<InputField>(false);
-            foreach (InputField inputField in textFields)
+            TMP_InputField[] textFields = instance.Root.GetComponentsInChildren<TMP_InputField>(false);
+            foreach (TMP_InputField inputField in textFields)
             {
                 if (inputField.isFocused)
                 {

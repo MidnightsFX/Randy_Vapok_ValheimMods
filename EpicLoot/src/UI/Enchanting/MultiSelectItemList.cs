@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using EpicLoot.CraftingV2;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -44,8 +45,8 @@ namespace EpicLoot_UnityLib
         public bool UseEnchantAsName = false;
         public Transform ListContainer;
         public MultiSelectItemListElement ElementPrefab;
-        public Dropdown SortByDropdown;
-        public InputField FilterByText;
+        public TMP_Dropdown SortByDropdown;
+        public TMP_InputField FilterByText;
         public Toggle SelectAllToggle;
 
         public event Action OnSelectedItemsChanged;
@@ -67,7 +68,7 @@ namespace EpicLoot_UnityLib
             
             if (SortByDropdown != null)
             {
-                foreach (Dropdown.OptionData optionData in SortByDropdown.options)
+                foreach (TMP_Dropdown.OptionData optionData in SortByDropdown.options)
                 {
                     optionData.text = Localization.instance.Localize(optionData.text);
                 }

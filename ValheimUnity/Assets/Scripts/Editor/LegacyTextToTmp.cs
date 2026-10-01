@@ -45,6 +45,7 @@ public static class LegacyTextToTmp
     // A legacy InputField or Dropdown drives its own labels and would lose them to a TMP swap.
     public static int Convert(GameObject root, List<PrefabYaml.Reference> yamlReferences)
     {
+        int count = ConvertControls(root, yamlReferences);
         HashSet<Text> inputTexts = new HashSet<Text>();
         foreach (InputField input in root.GetComponentsInChildren<InputField>(true))
         {
@@ -58,7 +59,6 @@ public static class LegacyTextToTmp
             inputTexts.Add(dropdown.itemText);
         }
 
-        int count = 0;
         foreach (Text text in root.GetComponentsInChildren<Text>(true))
         {
             if (PrefabUtility.IsPartOfPrefabInstance(text) || inputTexts.Contains(text))
@@ -73,7 +73,189 @@ public static class LegacyTextToTmp
         return count;
     }
 
-    private static void ConvertOne(GameObject root, Text text, List<PrefabYaml.Reference> yamlReferences)
+    private static int ConvertControls(GameObject root, List<PrefabYaml.Reference> yamlReferences)
+    {
+        int count = 0;
+        foreach (InputField input in root.GetComponentsInChildren<InputField>(true))
+        {
+            if (!PrefabUtility.IsPartOfPrefabInstance(input))
+            {
+                ConvertInputField(root, input, yamlReferences);
+                count++;
+            }
+        }
+
+        foreach (Dropdown dropdown in root.GetComponentsInChildren<Dropdown>(true))
+        {
+            if (!PrefabUtility.IsPartOfPrefabInstance(dropdown))
+            {
+                ConvertDropdown(root, dropdown, yamlReferences);
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private static void ConvertInputField(GameObject root, InputField input, List<PrefabYaml.Reference> yamlReferences)
+    {
+        GameObject go = input.gameObject;
+        Text text = input.textComponent;
+        Text placeholder = input.placeholder as Text;
+        string content = input.text;
+        int characterLimit = input.characterLimit;
+        string contentType = input.contentType.ToString();
+        string lineType = input.lineType.ToString();
+        bool readOnly = input.readOnly;
+        float caretBlinkRate = input.caretBlinkRate;
+        int caretWidth = input.caretWidth;
+        bool customCaretColor = input.customCaretColor;
+        Color caretColor = input.caretColor;
+        Color selectionColor = input.selectionColor;
+        SelectableState state = SelectableState.Capture(input);
+        List<(Component, string)> references = CollectReferences(root, input, yamlReferences);
+
+        Object.DestroyImmediate(input);
+        TextMeshProUGUI tmpText = text != null ? ConvertOne(root, text, yamlReferences) : null;
+        TextMeshProUGUI tmpPlaceholder = placeholder != null ? ConvertOne(root, placeholder, yamlReferences) : null;
+
+        TMP_InputField tmp = go.AddComponent<TMP_InputField>();
+        tmp.textComponent = tmpText;
+        tmp.placeholder = tmpPlaceholder;
+        tmp.textViewport = (RectTransform)(tmpText != null ? tmpText.transform.parent : go.transform);
+        tmp.text = content;
+        tmp.characterLimit = characterLimit;
+        tmp.contentType = (TMP_InputField.ContentType)System.Enum.Parse(typeof(TMP_InputField.ContentType), contentType);
+        tmp.lineType = (TMP_InputField.LineType)System.Enum.Parse(typeof(TMP_InputField.LineType), lineType);
+        tmp.readOnly = readOnly;
+        tmp.caretBlinkRate = caretBlinkRate;
+        tmp.caretWidth = caretWidth;
+        tmp.customCaretColor = customCaretColor;
+        tmp.caretColor = caretColor;
+        tmp.selectionColor = selectionColor;
+        if (tmpText != null)
+        {
+            tmp.pointSize = tmpText.fontSize;
+        }
+
+        state.Apply(tmp);
+        Relink(references, tmp);
+    }
+
+    private static void ConvertDropdown(GameObject root, Dropdown dropdown, List<PrefabYaml.Reference> yamlReferences)
+    {
+        GameObject go = dropdown.gameObject;
+        Text captionText = dropdown.captionText;
+        Text itemText = dropdown.itemText;
+        Image captionImage = dropdown.captionImage;
+        Image itemImage = dropdown.itemImage;
+        RectTransform template = dropdown.template;
+        int value = dropdown.value;
+        float alphaFadeSpeed = dropdown.alphaFadeSpeed;
+        List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
+        foreach (Dropdown.OptionData option in dropdown.options)
+        {
+            options.Add(new TMP_Dropdown.OptionData(option.text, option.image, Color.white));
+        }
+
+        SelectableState state = SelectableState.Capture(dropdown);
+        List<(Component, string)> references = CollectReferences(root, dropdown, yamlReferences);
+
+        Object.DestroyImmediate(dropdown);
+        TextMeshProUGUI tmpCaption = captionText != null ? ConvertOne(root, captionText, yamlReferences) : null;
+        TextMeshProUGUI tmpItem = itemText != null ? ConvertOne(root, itemText, yamlReferences) : null;
+
+        TMP_Dropdown tmp = go.AddComponent<TMP_Dropdown>();
+        tmp.template = template;
+        tmp.captionText = tmpCaption;
+        tmp.itemText = tmpItem;
+        tmp.captionImage = captionImage;
+        tmp.itemImage = itemImage;
+        tmp.options = options;
+        tmp.alphaFadeSpeed = alphaFadeSpeed;
+        tmp.SetValueWithoutNotify(value);
+
+        state.Apply(tmp);
+        Relink(references, tmp);
+    }
+
+    private struct SelectableState
+    {
+        private bool _interactable;
+        private Graphic _targetGraphic;
+        private Selectable.Transition _transition;
+        private ColorBlock _colors;
+        private SpriteState _spriteState;
+        private AnimationTriggers _animationTriggers;
+        private Navigation _navigation;
+
+        public static SelectableState Capture(Selectable from)
+        {
+            return new SelectableState
+            {
+                _interactable = from.interactable,
+                _targetGraphic = from.targetGraphic,
+                _transition = from.transition,
+                _colors = from.colors,
+                _spriteState = from.spriteState,
+                _animationTriggers = from.animationTriggers,
+                _navigation = from.navigation,
+            };
+        }
+
+        public void Apply(Selectable to)
+        {
+            to.interactable = _interactable;
+            to.targetGraphic = _targetGraphic;
+            to.transition = _transition;
+            to.colors = _colors;
+            to.spriteState = _spriteState;
+            to.animationTriggers = _animationTriggers;
+            to.navigation = _navigation;
+        }
+    }
+
+    private static List<(Component, string)> CollectReferences(GameObject root, Component target, List<PrefabYaml.Reference> yamlReferences)
+    {
+        List<(Component, string)> references = FindReferences(root, target);
+        string targetPath = PathOf(target.transform, root.transform);
+        foreach (PrefabYaml.Reference reference in yamlReferences)
+        {
+            if (reference.TargetPath != targetPath)
+            {
+                continue;
+            }
+
+            Transform owner = reference.OwnerPath == "" ? root.transform : root.transform.Find(reference.OwnerPath);
+            Component[] components = owner != null ? owner.GetComponents<Component>() : null;
+            if (components != null && reference.OwnerComponentIndex < components.Length &&
+                components[reference.OwnerComponentIndex] != null && components[reference.OwnerComponentIndex] != target)
+            {
+                references.Add((components[reference.OwnerComponentIndex], reference.PropertyPath));
+            }
+        }
+
+        return references;
+    }
+
+    private static void Relink(List<(Component, string)> references, Object value)
+    {
+        foreach ((Component component, string propertyPath) in references)
+        {
+            SerializedObject serialized = new SerializedObject(component);
+            SerializedProperty property = serialized.FindProperty(propertyPath);
+            if (property == null)
+            {
+                Debug.LogWarning($"{component.GetType().Name} has no property {propertyPath}");
+                continue;
+            }
+
+            property.objectReferenceValue = value;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+    }
+
+    private static TextMeshProUGUI ConvertOne(GameObject root, Text text, List<PrefabYaml.Reference> yamlReferences)
     {
         GameObject go = text.gameObject;
         string textPath = PathOf(text.transform, root.transform);
@@ -134,19 +316,8 @@ public static class LegacyTextToTmp
             }
         }
 
-        foreach ((Component component, string propertyPath) in references)
-        {
-            SerializedObject serialized = new SerializedObject(component);
-            SerializedProperty property = serialized.FindProperty(propertyPath);
-            if (property == null)
-            {
-                Debug.LogWarning($"{component.GetType().Name} has no property {propertyPath} for {textPath}");
-                continue;
-            }
-
-            property.objectReferenceValue = tmp;
-            serialized.ApplyModifiedPropertiesWithoutUndo();
-        }
+        Relink(references, tmp);
+        return tmp;
     }
 
     private static string PathOf(Transform transform, Transform root)

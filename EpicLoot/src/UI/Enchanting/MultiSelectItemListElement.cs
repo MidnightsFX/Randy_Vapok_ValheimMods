@@ -18,7 +18,7 @@ namespace EpicLoot_UnityLib
         public Image MagicBG;
         public Image ItemIcon;
         public TMP_Text ItemTotalQuantity;
-        public InputField ItemSelectedQuantity;
+        public TMP_InputField ItemSelectedQuantity;
         public Button QuantityUpButton;
         public Button QuantityDownButton;
         public UITooltip Tooltip;

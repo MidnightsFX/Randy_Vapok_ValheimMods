@@ -25,7 +25,7 @@ namespace EpicLoot_UnityLib
         public GameObject IdentifyStylePanel;
         public MultiSelectItemList CostList;
 
-        public Dropdown IdentifyStyle;
+        public TMP_Dropdown IdentifyStyle;
 
         public MultiSelectItemList SacrificeProducts;
         public EnchantBonus BonusPanel;
@@ -55,7 +55,7 @@ namespace EpicLoot_UnityLib
             IdentifyStyle.ClearOptions();
             foreach (KeyValuePair<string, string> entry in EnchantingUIController.GetIdentifyStyles())
             {
-                IdentifyStyle.options.Add(new Dropdown.OptionData(Localization.instance.Localize(entry.Value)));
+                IdentifyStyle.options.Add(new TMP_Dropdown.OptionData(Localization.instance.Localize(entry.Value)));
             }
 
             // Trigger cost update when the identify style changes
