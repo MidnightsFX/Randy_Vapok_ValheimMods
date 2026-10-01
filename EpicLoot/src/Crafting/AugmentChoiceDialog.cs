@@ -137,7 +137,7 @@ namespace EpicLoot.Crafting
                 // it shows the item's own range; the new options were rolled from the rarity table.
                 var legendaryID = index == 0 ? magicItem.LegendaryID : null;
                 text.text = Localization.instance.Localize((index == 0 ? "<color=white>($mod_epicloot_augment_keep)</color> " : "") +
-                    MagicItem.GetEffectText(effect, rarity, true, legendaryID));
+                    MagicEffectRarity.Decorate(effect.EffectType, MagicItem.GetEffectText(effect, rarity, true, legendaryID), false));
                 text.color = rarityColor;
 
                 //if (EpicLoot.HasAuga)

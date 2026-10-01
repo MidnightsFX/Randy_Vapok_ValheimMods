@@ -503,7 +503,7 @@ namespace EpicLoot.CraftingV2
             }
 
             float chance = selectionWeight / totalSelectionWeight * 100f;
-            return $"{chance:0.#}% ";
+            return $"{chance:0.##}% ";
         }
 
         internal static string GetEnchantInfo(ItemDrop.ItemData item, ItemRarity _rarity)
@@ -568,7 +568,7 @@ namespace EpicLoot.CraftingV2
             {
                 MagicItemEffectDefinition.ValueDef values = effectDef.GetValuesForRarity(rarity);
                 string chancePrefix = GetSelectionChancePrefix(effectDef.SelectionWeight, totalSelectionWeight);
-                sb.AppendLine($"‣ {chancePrefix}{MagicItem.GetEffectTextRange(effectDef, values)}");
+                sb.AppendLine($"‣ {chancePrefix}{MagicEffectRarity.Decorate(effectDef, MagicItem.GetEffectTextRange(effectDef, values), false)}");
             }
 
             sb.Append("</color>");
@@ -1530,7 +1530,7 @@ namespace EpicLoot.CraftingV2
             {
                 MagicItemEffectDefinition.ValueDef values = effectDef.GetValuesForRarity(item.GetRarity());
                 string chancePrefix = GetSelectionChancePrefix(effectDef.SelectionWeight, totalSelectionWeight);
-                sb.AppendLine($"‣ {chancePrefix}{MagicItem.GetEffectTextRange(effectDef, values)}");
+                sb.AppendLine($"‣ {chancePrefix}{MagicEffectRarity.Decorate(effectDef, MagicItem.GetEffectTextRange(effectDef, values), false)}");
             }
             sb.Append("</color>");
 

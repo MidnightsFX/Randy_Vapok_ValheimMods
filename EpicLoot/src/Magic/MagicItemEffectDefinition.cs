@@ -607,6 +607,7 @@ namespace EpicLoot
                 AllDefinitions.Remove(effectDef.Type);
             }
             AllDefinitions.Add(effectDef.Type, effectDef);
+            MagicEffectRarity.InvalidateAnchor();
         }
 
         // Stand-ins handed out by Get() for types with no registered definition, one per type so the

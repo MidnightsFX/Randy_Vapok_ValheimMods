@@ -188,7 +188,10 @@ namespace EpicLoot.Crafting
 
             // The item's own legendary ID: these are effects already on the item, so a unique shows the
             // range its legendary entry declares (if any) rather than the plain rarity table.
-            return $"{pip} {Localization.instance.Localize(MagicItem.GetEffectText(augmentableEffects[i], rarity, true, magicItem.LegendaryID))}" +
+            string effectText = MagicEffectRarity.Decorate(augmentableEffects[i].EffectType,
+                Localization.instance.Localize(MagicItem.GetEffectText(augmentableEffects[i], rarity, true, magicItem.LegendaryID)), false);
+
+            return $"{pip} {effectText}" +
                 $"{(free ? " [<color=yellow>*FREE</color>]" : "")}";
         }
 

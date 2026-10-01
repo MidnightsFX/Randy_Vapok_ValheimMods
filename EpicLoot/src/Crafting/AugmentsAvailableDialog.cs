@@ -74,7 +74,8 @@ namespace EpicLoot.Crafting
                 foreach (var effectDef in availableEffects)
                 {
                     var values = effectDef.GetValuesForRarity(item.GetRarity());
-                    t.AppendLine($"‣ {MagicItem.GetEffectTextRange(effectDef, values)}");
+                    t.AppendLine($"‣ {MagicEffectRarity.Decorate(effectDef, 
+                        MagicItem.GetEffectTextRange(effectDef, values), false)}");
                 }
                 
                 Description.color = rarityColor;
