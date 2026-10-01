@@ -567,6 +567,7 @@ GameObject:
   - component: {fileID: 3566989283674967734}
   - component: {fileID: 7260453405337877202}
   - component: {fileID: 6286000475402763153}
+  - component: {fileID: 4155872093617264530}
   m_Layer: 5
   m_Name: UpgradeContent
   m_TagString: Untagged
@@ -745,6 +746,24 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &4155872093617264530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 960917325948946909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1829327813, guid: 97d17793bfe62b147bf7ec3a12631d52, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  Lists: []
+  SortHints: []
+  SelectAllHints: []
+  SelectHints:
+  - {fileID: 8920567320931339016}
+  - {fileID: 7549006397640243095}
 --- !u!1 &1039618007705561110
 GameObject:
   m_ObjectHideFlags: 0

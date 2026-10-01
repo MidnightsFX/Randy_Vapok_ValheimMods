@@ -20,6 +20,29 @@ namespace EpicLoot_UnityLib
         private readonly List<MultiSelectItemListElement> _featureButtons = new List<MultiSelectItemListElement>();
 
         private int _selectedFeature = -1;
+        private bool _featuresFocused = true;
+
+        private class FeatureColumn : IGamepadFocusPane
+        {
+            private readonly UpgradeTableUI _owner;
+
+            public FeatureColumn(UpgradeTableUI owner)
+            {
+                _owner = owner;
+            }
+
+            public int GetItemCount() => _owner.GetAvailableButtons().Count;
+            public int GetFocusedIndex() => _owner.GetAvailableButtons().FindIndex(x => x.HasGamepadFocus());
+            public bool IsGrid() => false;
+            public bool ShowSortHint => false;
+            public bool ShowSelectAllHint => false;
+            public bool ShowSelectHint => GetFocusedIndex() >= 0;
+
+            public void GiveFocus(bool focused, int tryFocusIndex)
+            {
+                _owner.SetFeaturesFocused(focused);
+            }
+        }
 
         protected override void OnSelectedItemsChanged() {}
 
@@ -34,13 +57,19 @@ namespace EpicLoot_UnityLib
                 child.OnSelectionChanged += OnButtonSelected;
                 child.SelectMaxQuantity(true);
             }
+
+            MultiSelectListFocusController focusController = GetComponent<MultiSelectListFocusController>();
+            if (focusController != null)
+            {
+                focusController.SetPanes(new IGamepadFocusPane[] { new FeatureColumn(this), CostList });
+            }
         }
 
         public override void Update()
         {
             base.Update();
 
-            if (_locked || !ZInput.IsGamepadActive())
+            if (_locked || !_featuresFocused || !ZInput.IsGamepadActive())
             {
                 return;
             }
@@ -160,6 +189,7 @@ namespace EpicLoot_UnityLib
             if (_selectedFeature < 0)
             {
                 CostLabel.enabled = false;
+                CostList.SetItems(new List<IListElement>());
                 CostList.gameObject.SetActive(false);
                 MainButton.interactable = false;
                 return;
@@ -206,8 +236,26 @@ namespace EpicLoot_UnityLib
             return _featureButtons.Where(x => x.gameObject.activeSelf).ToList();
         }
 
+        private void SetFeaturesFocused(bool focused)
+        {
+            _featuresFocused = focused;
+            if (focused)
+            {
+                RefreshGamepadFocus();
+            }
+            else
+            {
+                FocusButton(null);
+            }
+        }
+
         private void RefreshGamepadFocus()
         {
+            if (!_featuresFocused)
+            {
+                return;
+            }
+
             List<MultiSelectItemListElement> available = GetAvailableButtons();
             if (available.Count == 0 || available.Any(x => x.HasGamepadFocus()))
             {
