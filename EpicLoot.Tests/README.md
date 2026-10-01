@@ -1,7 +1,0 @@
-# Rested carry-weight regression
-
-Run `dotnet test EpicLoot.Tests/EpicLoot.Tests.csproj` from the repository root. The test project compiles Epic Loot's **shipped** Rested patch and carry-weight handler against the published `Valheim.Testing.Doubles` source package. It does not reference or launch Valheim, and the package is a development dependency only.
-
-The tests exercise the two handlers together: initial comfort, leaving shelter while Rested remains active, higher and lower refreshes, equipment removal, expiry, remote-player updates, and replacing the local character without `StatusEffect.Stop`. The last case matters because Valheim's `SEMan.OnDestroy` calls each effect's `OnDestroy`, not `Stop`.
-
-These are controlled integration tests, not proof that Harmony attached to the current game assembly or that the HUD reads the new limit. The small native acceptance check for this change is: on a disposable character with only Epic Loot and dependencies, equip a +5-per-Rested-level shard, become Rested at Comfort 3, verify 315 carry capacity there and after leaving shelter, then verify 300 after Rested expires. Repeat with a higher-comfort refresh and a lower-comfort refresh. After changing characters or rejoining, verify no previous character's comfort survives; when the new character becomes Rested at a lower comfort, it gets only its own bonus. Record plugin versions and any Harmony warnings. Keep the native check bounded; the source tests cover the state transitions on every change.
