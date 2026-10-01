@@ -139,7 +139,53 @@ namespace EpicLoot_UnityLib
             if (TabHandler != null)
             {
                 OnActiveTabChanged(TabHandler.GetActiveTab());
+                PositionTabHints();
             }
+        }
+
+        // The layout group only moves the tabs at the end of the frame, and not at all while Root is
+        // inactive, so this forces the rebuild and Show repeats it for tabs toggled while hidden.
+        private void PositionTabHints()
+        {
+            Transform hints = Root.transform.Find("TabGamepadHints");
+            if (hints == null || !Root.activeInHierarchy)
+            {
+                return;
+            }
+
+            RectTransform leftHint = hints.Find("LTrigger") as RectTransform;
+            RectTransform rightHint = hints.Find("RTrigger") as RectTransform;
+            RectTransform tabs = (RectTransform)TabHandler.transform;
+            RectTransform firstTab = null;
+            RectTransform lastTab = null;
+            foreach (RectTransform tab in tabs)
+            {
+                if (!tab.gameObject.activeSelf)
+                {
+                    continue;
+                }
+
+                if (firstTab == null)
+                {
+                    firstTab = tab;
+                }
+
+                lastTab = tab;
+            }
+
+            if (leftHint == null || rightHint == null || lastTab == null)
+            {
+                return;
+            }
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(tabs);
+
+            float firstTabTop = hints.InverseTransformPoint(firstTab.TransformPoint(0, firstTab.rect.yMax, 0)).y;
+            float lastTabBottom = hints.InverseTransformPoint(lastTab.TransformPoint(0, lastTab.rect.yMin, 0)).y;
+
+            Vector3 position = rightHint.localPosition;
+            position.y = lastTabBottom + (firstTabTop - leftHint.localPosition.y);
+            rightHint.localPosition = position;
         }
 
         // TabHandler's own cycling skips tabs whose button is null, not ones config has deactivated, so it
@@ -243,6 +289,7 @@ namespace EpicLoot_UnityLib
             }
             instance.Root.SetActive(true);
             instance.Scrim.SetActive(true);
+            instance.PositionTabHints();
             instance.SourceTable.Refresh();
 
             foreach (EnchantingTableUIPanelBase panel in instance.Panels)
