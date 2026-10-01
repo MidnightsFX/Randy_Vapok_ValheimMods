@@ -82,14 +82,6 @@ namespace EpicLoot_UnityLib
                 toggle.group = template.group;
                 toggle.isOn = false;
                 RarityButtons.Add(toggle);
-
-                // The selector column is a fixed-height vertical layout; give it room for one more row.
-                if (template.transform.parent is RectTransform column &&
-                    template.transform is RectTransform templateRect)
-                {
-                    float spacing = column.TryGetComponent(out VerticalLayoutGroup layout) ? layout.spacing : 0f;
-                    column.sizeDelta = new Vector2(column.sizeDelta.x, column.sizeDelta.y + templateRect.sizeDelta.y + spacing);
-                }
             }
         }
 

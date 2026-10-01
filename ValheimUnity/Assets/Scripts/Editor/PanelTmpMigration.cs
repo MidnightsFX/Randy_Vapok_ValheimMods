@@ -5,6 +5,7 @@ using EpicLoot_UnityLib;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public static class PanelTmpMigration
 {
@@ -235,6 +236,58 @@ public static class PanelTmpMigration
                 ("Panel/TabGamepadHints/RTrigger/RTrigger (1)", "JoyRTrigger"),
             },
             content => { });
+    }
+
+    [MenuItem("Mod/Migrations/Selector hints follow the last button")]
+    public static void SelectorHints()
+    {
+        (string content, string selectors)[] columns =
+        {
+            ("SacrificeContent", "ModeSelectors"),
+            ("RuneContent", "ModeSelectors"),
+            ("ConvertContent", "ModeSelectors"),
+            ("EnchantContent", "RaritySelectors"),
+        };
+
+        foreach ((string content, string selectors) in columns)
+        {
+            string contentPath = Folder + content + ".prefab";
+            GameObject root = PrefabUtility.LoadPrefabContents(contentPath);
+            try
+            {
+                Transform column = root.transform.Find(selectors);
+                if (!column.TryGetComponent(out ContentSizeFitter fitter))
+                {
+                    fitter = column.gameObject.AddComponent<ContentSizeFitter>();
+                }
+
+                fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+                if (column.Find("Hint") == null)
+                {
+                    RectTransform hint = (RectTransform)root.transform.Find("GamepadHints/Hint");
+                    hint.SetParent(column, false);
+                    hint.anchorMin = hint.anchorMax = new Vector2(1, 0);
+                    hint.anchoredPosition = new Vector2(5, -8);
+
+                    // UIGamePad lives in assembly_valheim, which the editor assembly cannot reference.
+                    Component mainButtonPad = root.transform.Find("MainButton").GetComponent("UIGamePad");
+                    SerializedObject pad = new SerializedObject(column.gameObject.AddComponent(mainButtonPad.GetType()));
+                    pad.FindProperty("m_hint").objectReferenceValue = hint.gameObject;
+                    pad.ApplyModifiedPropertiesWithoutUndo();
+                }
+
+                PrefabUtility.SaveAsPrefabAsset(root, contentPath);
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+
+            Debug.Log($"{content} selector hint migration done");
+        }
+
+        AssetDatabase.SaveAssets();
     }
 
     private static void Migrate(string content, string[] nestedPrefabs, (string path, string key)[] icons, Action<GameObject> verify)

@@ -1999,6 +1999,7 @@ GameObject:
   - component: {fileID: 4323609675437425779}
   - component: {fileID: 3928853010674538173}
   - component: {fileID: 5564704074696603791}
+  - component: {fileID: 6630365588635092149}
   m_Layer: 5
   m_Name: ModeSelectors
   m_TagString: Untagged
@@ -2087,6 +2088,20 @@ MonoBehaviour:
   m_hint: {fileID: 6900139563150269124}
   m_blockingElements: []
   alternativeGroupHandler: {fileID: 0}
+--- !u!114 &6630365588635092149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3789161828951690199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &3844860124302043218
 GameObject:
   m_ObjectHideFlags: 0
@@ -5596,6 +5611,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4499364606361371005, guid: d9faa635a033505458f87ef0043b6a22,
+        type: 3}
+      propertyPath: m_text
+      value: "\u200B"
       objectReference: {fileID: 0}
     - target: {fileID: 5101049115624961278, guid: d9faa635a033505458f87ef0043b6a22,
         type: 3}
