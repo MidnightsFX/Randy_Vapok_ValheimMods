@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EpicLoot.CraftingV2;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -49,10 +50,10 @@ namespace EpicLoot_UnityLib
         public List<Toggle> ModeButtons;
 
         [Header("Cost")]
-        public Text CostLabel;
+        public TMP_Text CostLabel;
         public MultiSelectItemList CostList;
 
-        private Text _progressLabel;
+        private TMP_Text _progressLabel;
         private ToggleGroup _toggleGroup;
         private MaterialConversionType _mode;
 
@@ -60,7 +61,7 @@ namespace EpicLoot_UnityLib
         {
             base.Awake();
 
-            _progressLabel = ProgressBar.gameObject.GetComponentInChildren<Text>();
+            _progressLabel = ProgressBar.gameObject.GetComponentInChildren<TMP_Text>(true);
 
             if (ModeButtons.Count > 0)
             {

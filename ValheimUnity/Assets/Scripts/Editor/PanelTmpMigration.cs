@@ -21,6 +21,12 @@ public static class PanelTmpMigration
         ("GamepadHints/BottomRow/SelectButton/Icon", "JoyButtonA"),
         ("GamepadHints/BottomRow/SortingButton/Icon", "JoyRStick"));
 
+    private static readonly (string path, string key)[] QuantityRowIcons = Concat(TabIcons,
+        ("GamepadHints/BottomRow/QuantityButton/Icon", "JoyDPadUp"),
+        ("GamepadHints/BottomRow/SelectAllButton/Icon", "JoyLStick"),
+        ("GamepadHints/BottomRow/SelectButton/Icon", "JoyButtonA"),
+        ("GamepadHints/BottomRow/SortingButton/Icon", "JoyRStick"));
+
     [MenuItem("Mod/Migrations/EnchantContent to TMP")]
     public static void Enchant()
     {
@@ -68,17 +74,23 @@ public static class PanelTmpMigration
     public static void Sacrifice()
     {
         Migrate("SacrificeContent", new string[0],
-            Concat(TabIcons,
-                ("GamepadHints/BottomRow/QuantityButton/Icon", "JoyDPadUp"),
-                ("GamepadHints/BottomRow/SelectAllButton/Icon", "JoyLStick"),
-                ("GamepadHints/BottomRow/SelectButton/Icon", "JoyButtonA"),
-                ("GamepadHints/BottomRow/SortingButton/Icon", "JoyRStick"),
-                ("ModeSelectors/Hint/Icon", "JoyButtonY"),
-                ("SacrificeButton/Hint/Icon", "JoyButtonX")),
+            Concat(QuantityRowIcons, ("ModeSelectors/Hint/Icon", "JoyButtonY"), ("SacrificeButton/Hint/Icon", "JoyButtonX")),
             content =>
             {
                 SacrificeUI ui = content.GetComponent<SacrificeUI>();
                 Require(ui.Warning, ui.Explainer);
+            });
+    }
+
+    [MenuItem("Mod/Migrations/ConvertContent to TMP")]
+    public static void Convert()
+    {
+        Migrate("ConvertContent", new string[0],
+            Concat(QuantityRowIcons, ("ModeSelectors/Hint/Icon", "JoyButtonY"), ("MainButton/Hint/Icon", "JoyButtonX")),
+            content =>
+            {
+                ConvertUI ui = content.GetComponent<ConvertUI>();
+                Require(ui.CostLabel);
             });
     }
 
