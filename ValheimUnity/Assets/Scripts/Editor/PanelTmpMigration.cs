@@ -10,14 +10,16 @@ public static class PanelTmpMigration
 {
     private const string Folder = "Assets/EpicLoot/Prefabs/Enchanting/";
 
-    private static readonly (string path, string key)[] BottomRowIcons =
+    private static readonly (string path, string key)[] TabIcons =
     {
-        ("GamepadHints/BottomRow/ScrollButton/Icon", "JoyRStickUp"),
-        ("GamepadHints/BottomRow/SelectButton/Icon", "JoyButtonA"),
-        ("GamepadHints/BottomRow/SortingButton/Icon", "JoyRStick"),
         ("GamepadHints/TabHints/TabLeft/TabLeft (1)", "JoyTabLeft"),
         ("GamepadHints/TabHints/TabRight/TabRight (1)", "JoyTabRight"),
     };
+
+    private static readonly (string path, string key)[] BottomRowIcons = Concat(TabIcons,
+        ("GamepadHints/BottomRow/ScrollButton/Icon", "JoyRStickUp"),
+        ("GamepadHints/BottomRow/SelectButton/Icon", "JoyButtonA"),
+        ("GamepadHints/BottomRow/SortingButton/Icon", "JoyRStick"));
 
     [MenuItem("Mod/Migrations/EnchantContent to TMP")]
     public static void Enchant()
@@ -59,6 +61,24 @@ public static class PanelTmpMigration
             {
                 RuneUI ui = content.GetComponent<RuneUI>();
                 Require(ui.CostLabel, ui.Warning);
+            });
+    }
+
+    [MenuItem("Mod/Migrations/SacrificeContent to TMP")]
+    public static void Sacrifice()
+    {
+        Migrate("SacrificeContent", new string[0],
+            Concat(TabIcons,
+                ("GamepadHints/BottomRow/QuantityButton/Icon", "JoyDPadUp"),
+                ("GamepadHints/BottomRow/SelectAllButton/Icon", "JoyLStick"),
+                ("GamepadHints/BottomRow/SelectButton/Icon", "JoyButtonA"),
+                ("GamepadHints/BottomRow/SortingButton/Icon", "JoyRStick"),
+                ("ModeSelectors/Hint/Icon", "JoyButtonY"),
+                ("SacrificeButton/Hint/Icon", "JoyButtonX")),
+            content =>
+            {
+                SacrificeUI ui = content.GetComponent<SacrificeUI>();
+                Require(ui.Warning, ui.Explainer);
             });
     }
 

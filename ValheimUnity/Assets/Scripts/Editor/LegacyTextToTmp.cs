@@ -42,7 +42,7 @@ public static class LegacyTextToTmp
     }
 
     // Texts inside nested prefab instances belong to their own asset; convert that asset instead.
-    // A legacy InputField drives its text and placeholder itself and would lose them to a TMP swap.
+    // A legacy InputField or Dropdown drives its own labels and would lose them to a TMP swap.
     public static int Convert(GameObject root, List<PrefabYaml.Reference> yamlReferences)
     {
         HashSet<Text> inputTexts = new HashSet<Text>();
@@ -50,6 +50,12 @@ public static class LegacyTextToTmp
         {
             inputTexts.Add(input.textComponent);
             inputTexts.Add(input.placeholder as Text);
+        }
+
+        foreach (Dropdown dropdown in root.GetComponentsInChildren<Dropdown>(true))
+        {
+            inputTexts.Add(dropdown.captionText);
+            inputTexts.Add(dropdown.itemText);
         }
 
         int count = 0;

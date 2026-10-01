@@ -5,6 +5,7 @@ using EpicLoot;
 using EpicLoot.Crafting;
 using EpicLoot.CraftingV2;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -28,8 +29,8 @@ namespace EpicLoot_UnityLib
 
         public MultiSelectItemList SacrificeProducts;
         public EnchantBonus BonusPanel;
-        public Text Warning;
-        public Text Explainer;
+        public TMP_Text Warning;
+        public TMP_Text Explainer;
 
 
         SacrificeMode _sacrificeMode = SacrificeMode.Sacrifice;
@@ -78,8 +79,6 @@ namespace EpicLoot_UnityLib
             AvailableItems.DeselectAll();
         }
 
-        // The row's glyphs are fixed sprites, and the bundle ships only an up/down d-pad: the clone wears
-        // the same one turned on its side.
         private void CreateIdentifyCategoryHint()
         {
             Transform bottomRow = transform.Find("GamepadHints/BottomRow");
@@ -101,7 +100,7 @@ namespace EpicLoot_UnityLib
 
             GameObject labelClone = Instantiate(label.gameObject, bottomRow, false);
             labelClone.name = "IdentifyCategory";
-            Text labelText = labelClone.GetComponentInChildren<Text>(true);
+            TMP_Text labelText = labelClone.GetComponentInChildren<TMP_Text>(true);
             if (labelText != null)
             {
                 labelText.text = Localization.instance.Localize("$mod_epicloot_enchanting_identifycategory");
@@ -109,10 +108,10 @@ namespace EpicLoot_UnityLib
 
             GameObject glyphClone = Instantiate(glyph.gameObject, bottomRow, false);
             glyphClone.name = "IdentifyCategoryButton";
-            Transform icon = glyphClone.transform.Find("Icon");
-            if (icon != null)
+            GamepadGlyph glyphKey = glyphClone.GetComponentInChildren<GamepadGlyph>(true);
+            if (glyphKey != null)
             {
-                icon.localEulerAngles = new Vector3(0f, 0f, 90f);
+                glyphKey.ZInputKey = "JoyDPadLeft";
             }
 
             _identifyCategoryHints.Add(spacingClone);
