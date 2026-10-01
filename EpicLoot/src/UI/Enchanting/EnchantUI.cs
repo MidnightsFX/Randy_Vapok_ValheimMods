@@ -29,6 +29,7 @@ namespace EpicLoot_UnityLib
         {
             base.Awake();
 
+            MagicTextShimmer.Ensure(EnchantInfo);
             EnsureRarityButtons();
 
             if (RarityButtons.Count > 0)

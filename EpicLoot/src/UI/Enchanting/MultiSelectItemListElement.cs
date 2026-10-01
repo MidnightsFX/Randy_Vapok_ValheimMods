@@ -1,4 +1,5 @@
 ﻿using System;
+using EpicLoot;
 using EpicLoot.Config;
 using EpicLoot.CraftingV2;
 using TMPro;
@@ -248,6 +249,7 @@ namespace EpicLoot_UnityLib
             if (UseEnchantAsName && _item.GetEnchantName() != string.Empty)
             {
                 ItemName.text = _item.GetEnchantName();
+                MagicTextShimmer.Ensure(ItemName);
                 ItemName.alignment = TextAlignmentOptions.Left;
                 // Adjust the text box container to give it the whole width, which is normally used for quantity
                 ItemName.GetComponent<RectTransform>().offsetMax = new Vector2(y: 0f, x: -5f);

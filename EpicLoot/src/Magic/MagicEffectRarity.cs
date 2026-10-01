@@ -15,48 +15,43 @@ namespace EpicLoot
         // Escapes, not literals: a CP1252 round-trip corrupted the pip glyphs in
         // EpicLoot.GetMagicEffectPip once already.
         //
-        // Tried in order against the real tooltip font, because guessing loses: U+2726 renders on the
-        // Enchant panel (legacy Text, Valheim UI font) and as an empty box in the item tooltip, whose
-        // TMP asset resolves through a different fallback chain. U+25C6 is last and is not a guess --
-        // GetMagicEffectPip already draws it on every effect line of that same tooltip.
+        // Tried in order against the real fonts, because guessing loses: U+2726 comes up as an empty box
+        // in the item tooltip. The tooltip and the enchanting table between them draw the marker in both
+        // Averia faces, each with its own fallback chain, so a candidate has to clear both. U+25C6 is
+        // last and is not a guess -- GetMagicEffectPip already draws it on every effect line.
         private static readonly char[] GlyphCandidates = { '\u2605', '\u2726', '\u25C8', '\u25C6' };
 
         private static char _tierGlyph = '\u25C6';
         private static bool _glyphResolved;
 
-        public static void ResolveGlyph(TMP_FontAsset font)
+        private static void ResolveGlyph()
         {
-            if (_glyphResolved || font == null)
+            if (_glyphResolved)
+            {
+                return;
+            }
+
+            TMP_FontAsset sans = MagicFontManager.GetTMPFont(MagicFontManager.TMP_FontOptions.AveriaSansLibre)?.font;
+            TMP_FontAsset serif = MagicFontManager.GetTMPFont(MagicFontManager.TMP_FontOptions.AveriaSerifLibre)?.font;
+            if (sans == null || serif == null)
             {
                 return;
             }
 
             _glyphResolved = true;
 
-            var legacyFont = MagicFontManager.GetFont(MagicFontManager.FontOptions.AveriaSerifLibre);
-
             foreach (var candidate in GlyphCandidates)
             {
                 // searchFallbacks/tryAddCharacter both true: a dynamic atlas reports a glyph as missing
                 // until something asks it to add it, which is exactly what drawing the text would do.
-                if (!font.HasCharacter(candidate, true, true))
+                if (sans.HasCharacter(candidate, true, true) && serif.HasCharacter(candidate, true, true))
                 {
-                    continue;
+                    _tierGlyph = candidate;
+                    break;
                 }
-
-                // The Enchant/Augment panels draw the same marker through legacy UnityEngine.UI.Text,
-                // which resolves glyphs against its own Font rather than the TMP fallback chain. A
-                // candidate has to clear both or the panel boxes whatever the tooltip settled on.
-                if (legacyFont != null && !legacyFont.HasCharacter(candidate))
-                {
-                    continue;
-                }
-
-                _tierGlyph = candidate;
-                break;
             }
 
-            EpicLoot.LogWarningForce($"[flare] rarity marker U+{(int)_tierGlyph:X4} on font '{font.name}'");
+            EpicLoot.LogWarningForce($"[flare] rarity marker U+{(int)_tierGlyph:X4}");
         }
 
         private static readonly float[] TierRatioCeilings = { 0.35f, 0.125f, 0.0625f };
@@ -191,8 +186,8 @@ namespace EpicLoot
             return Decorate(effectDef, effectText, allowAnimation);
         }
 
-        // allowAnimation is false for any surface backed by UnityEngine.UI.Text (the Enchant and Augment
-        // panels): legacy Text has no <link> tag and prints it verbatim instead of ignoring it.
+        // allowAnimation is false for any surface backed by UnityEngine.UI.Text: legacy Text has no
+        // <link> tag and prints it verbatim instead of ignoring it.
         public static string Decorate(int tier, string effectText, bool allowAnimation)
         {
             if (tier <= 0 || tier > MaxTier || ELConfig.EffectRarityFlareMode == null ||
@@ -200,6 +195,8 @@ namespace EpicLoot
             {
                 return effectText;
             }
+
+            ResolveGlyph();
 
             var marker = $"<color={TierColors[tier - 1]}>{new string(_tierGlyph, tier)}</color>";
             var decorated = $"{effectText} {marker}";

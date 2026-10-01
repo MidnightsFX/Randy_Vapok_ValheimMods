@@ -270,7 +270,7 @@ namespace EpicLoot
             tooltip.Append($"<color={color}>");
             for (var index = 0; index < Effects.Count; index++) {
                 tooltip.AppendLine($"{MagicEffectRarity.Decorate(Effects[index].EffectType, 
-                    GetEffectText(Effects[index], Rarity, true), false)}");
+                    GetEffectText(Effects[index], Rarity, true), true)}");
             }
             tooltip.Append($"</color>");
 

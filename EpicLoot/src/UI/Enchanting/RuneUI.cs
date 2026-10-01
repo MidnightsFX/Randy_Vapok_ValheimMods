@@ -431,6 +431,7 @@ namespace EpicLoot_UnityLib
                 if (enchantmentElement != null)
                 {
                     enchantmentElement.text = effect.Item1;
+                    MagicTextShimmer.Ensure(enchantmentElement);
                 }
 
                 // Dimming the row was all that marked an effect with CanBeRunified off, and it could

@@ -9,11 +9,10 @@ public class MagicTextShimmer : MonoBehaviour
     private const float SheenSpeed = 44f;
     private const float SheenCore = 2f;
     private const float SheenWidth = 6f;
-    // Character units, not seconds. The dark stretch it buys is
-    // (SheenGap - 2 * SheenWidth + 1) / SheenSpeed seconds -- currently 1.0 -- so it has to be
-    // retuned alongside SheenSpeed. Because all three are constants that rest is the same on a
-    // two-word effect and a long one; only the sweep scales with length.
-    private const float SheenGap = 56f;
+    // Character units, not seconds: one pass every SheenCycle / SheenSpeed seconds, so it has to be
+    // retuned alongside SheenSpeed. The same cycle on every line of every text is what keeps them in
+    // step; a line longer than SheenCycle - 2 * SheenWidth loses the tail of its sweep.
+    private const float SheenCycle = 100f;
     private const float SheenStrength = 1f;
     private const float SheenTierFloor = 1f;
 
@@ -35,8 +34,6 @@ public class MagicTextShimmer : MonoBehaviour
         {
             return;
         }
-
-        MagicEffectRarity.ResolveGlyph(text.font);
 
         if (text.GetComponent<MagicTextShimmer>() == null)
         {
@@ -141,13 +138,12 @@ public class MagicTextShimmer : MonoBehaviour
             return;
         }
 
-        var time = Time.unscaledTime;
+        var sheenHead = Mathf.Repeat(Time.unscaledTime * SheenSpeed, SheenCycle) - SheenWidth;
         var touched = false;
 
         foreach (var range in _ranges)
         {
             var end = Mathf.Min(range.Start + range.Length, textInfo.characterCount);
-            var sheenHead = Mathf.Repeat(time * SheenSpeed, range.Length + SheenGap) - SheenWidth;
             var tierScale = SheenStrength * (SheenTierFloor + (1f - SheenTierFloor) * range.Weight);
 
             for (var c = range.Start; c < end; c++)

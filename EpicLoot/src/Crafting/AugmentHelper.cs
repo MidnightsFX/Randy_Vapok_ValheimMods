@@ -1,7 +1,9 @@
 ﻿using Common;
+using EpicLoot.Compendium;
 using EpicLoot_UnityLib;
 using Jotunn.Managers;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -132,6 +134,7 @@ namespace EpicLoot.Crafting
                     width: 300f,
                     height: 40f).GetComponent<Button>();
                 button.interactable = true;
+                ConvertLabelToTmp(button);
                 GameObject focus = Object.Instantiate(EpicLoot.LoadAsset<GameObject>("ButtonFocus"), button.transform);
                 focus.SetActive(false);
                 focus.name = "ButtonFocus";
@@ -142,6 +145,28 @@ namespace EpicLoot.Crafting
             }
 
             return choiceDialog;
+        }
+
+        private static void ConvertLabelToTmp(Button button)
+        {
+            GameObject labelObject = button.GetComponentInChildren<Text>(true).gameObject;
+            foreach (BaseMeshEffect effect in labelObject.GetComponents<BaseMeshEffect>())
+            {
+                Object.DestroyImmediate(effect);
+            }
+            Object.DestroyImmediate(labelObject.GetComponent<Text>());
+
+            TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
+            MagicFontManager.Apply(label, MagicFontManager.TMP_FontOptions.AveriaSerifLibreOutline);
+            label.fontStyle = FontStyles.Bold;
+            label.alignment = TextAlignmentOptions.Center;
+            label.textWrappingMode = TextWrappingModes.Normal;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 10;
+            label.fontSizeMax = 16;
+            label.overflowMode = TextOverflowModes.Truncate;
+            label.raycastTarget = false;
+            MagicTextShimmer.Ensure(label);
         }
 
         public static T CreateDialog<T>(InventoryGui inventoryGui, string name, float height = 550) where T : Component
@@ -189,7 +214,7 @@ namespace EpicLoot.Crafting
             // The item's own legendary ID: these are effects already on the item, so a unique shows the
             // range its legendary entry declares (if any) rather than the plain rarity table.
             string effectText = MagicEffectRarity.Decorate(augmentableEffects[i].EffectType,
-                Localization.instance.Localize(MagicItem.GetEffectText(augmentableEffects[i], rarity, true, magicItem.LegendaryID)), false);
+                Localization.instance.Localize(MagicItem.GetEffectText(augmentableEffects[i], rarity, true, magicItem.LegendaryID)), true);
 
             return $"{pip} {effectText}" +
                 $"{(free ? " [<color=yellow>*FREE</color>]" : "")}";

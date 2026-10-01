@@ -30,6 +30,7 @@ namespace EpicLoot_UnityLib
         public override void Awake()
         {
             base.Awake();
+            MagicTextShimmer.Ensure(AvailableEffectsText);
         }
 
         [UsedImplicitly]
@@ -277,6 +278,7 @@ namespace EpicLoot_UnityLib
                 if (enchantmentElement != null)
                 {
                     enchantmentElement.text = effect.Item1;
+                    MagicTextShimmer.Ensure(enchantmentElement);
                 }
 
                 if (effect.Item2 == false)

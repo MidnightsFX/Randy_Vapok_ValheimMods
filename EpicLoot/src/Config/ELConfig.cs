@@ -558,7 +558,7 @@ internal class ELConfig {
             "to the median weight of every loaded effect -- no effect is singled out by name.\n" +
             "Off = no marker.\n" +
             "Static = a coloured star rating after the effect, one to three stars by how rare it is.\n" +
-            "Animated = as Static, and in the item tooltip those lines also drift and shimmer.");
+            "Animated = as Static, and in the item tooltip and the enchanting table those lines also drift and shimmer.");
         ShowEquippedAndHotbarItemsInSacrificeTab = BindClient(SectionInterface,
             "ShowEquippedAndHotbarItemsInSacrificeTab", false,
             "If set to false, hides the items that are equipped or on your hotbar in the Sacrifice items list.");
