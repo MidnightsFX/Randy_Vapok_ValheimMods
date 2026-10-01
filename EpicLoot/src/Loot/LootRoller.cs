@@ -274,39 +274,27 @@ namespace EpicLoot
         public static List<GameObject> RollLootTableAndSpawnObjects(List<LootTable> lootTables,
             int level, string objectName, Vector3 dropPoint, bool allowBonusRolls)
         {
-            return RollLootTableInternal(lootTables, level, objectName, dropPoint, true, allowBonusRolls);
+            var output = LootOutput.ForObjects();
+            RollLootTableInternal(lootTables, level, objectName, dropPoint, output, allowBonusRolls);
+            return output.Objects;
         }
 
-        public static List<GameObject> RollLootTableAndSpawnObjects(LootTable lootTable, 
+        public static List<GameObject> RollLootTableAndSpawnObjects(LootTable lootTable,
             int level, string objectName, Vector3 dropPoint)
         {
-            return RollLootTableInternal(lootTable, level, objectName, dropPoint, true);
+            var output = LootOutput.ForObjects();
+            RollLootTableInternal(lootTable, level, objectName, dropPoint, output);
+            return output.Objects;
         }
 
+        // Chests, treasure maps and gambles. Each drop is built as ItemData straight from its prefab (see
+        // LootOutput), so no world object is spawned just to have its data cloned off it.
         public static List<ItemDrop.ItemData> RollLootTable(List<LootTable> lootTables,
             int level, string objectName, Vector3 dropPoint)
         {
-            var results = new List<ItemDrop.ItemData>();
-            var gameObjects = RollLootTableInternal(lootTables, level, objectName, dropPoint, false, true);
-            foreach (var itemObject in gameObjects)
-            {
-                results.Add(itemObject.GetComponent<ItemDrop>().m_itemData.Clone());
-
-                // ZNetScene.Destroy is the right call either way: it no-ops the ZDO half when the
-                // ZNetView never registered (the normal case here, since these are spawned with
-                // m_forceDisableInit), and unregisters properly if it did. Plain Object.Destroy would
-                // strand a live entry in ZNetScene.m_instances in that second case.
-                if (ZNetScene.instance != null)
-                {
-                    ZNetScene.instance.Destroy(itemObject);
-                }
-                else
-                {
-                    Object.Destroy(itemObject);
-                }
-            }
-
-            return results;
+            var output = LootOutput.ForItems();
+            RollLootTableInternal(lootTables, level, objectName, dropPoint, output, true);
+            return output.Items;
         }
 
         public static List<ItemDrop.ItemData> RollLootTable(LootTable lootTable,
@@ -327,10 +315,9 @@ namespace EpicLoot
             return RollLootTable(lootTable, level, objectName, dropPoint);
         }
 
-        private static List<GameObject> RollLootTableInternal(IEnumerable<LootTable> lootTables,
-            int level, string objectName, Vector3 dropPoint, bool initializeObject, bool allowBonusRolls)
+        private static void RollLootTableInternal(IEnumerable<LootTable> lootTables,
+            int level, string objectName, Vector3 dropPoint, LootOutput output, bool allowBonusRolls)
         {
-            var results = new List<GameObject>();
             var tables = lootTables.ToList();
 
             // Prosperity repeats the whole roll -- drop count, drop type and rarity all re-rolled -- exactly
@@ -351,10 +338,77 @@ namespace EpicLoot
             {
                 foreach (var lootTable in tables)
                 {
-                    results.AddRange(RollLootTableInternal(lootTable, level, objectName, dropPoint, initializeObject));
+                    RollLootTableInternal(lootTable, level, objectName, dropPoint, output);
                 }
             }
-            return results;
+        }
+
+        /// <summary>
+        /// Where one roll's drops go. A creature kill or a console spawn wants live world objects. A
+        /// chest, a treasure map or a gamble only wants the ItemData, and building that straight from the
+        /// prefab, the way vanilla's DropTable fills a chest, skips instantiating a whole world object per
+        /// drop (renderers, colliders, rigidbody, every component's Awake) only to clone its data and
+        /// destroy it again.
+        /// </summary>
+        private sealed class LootOutput
+        {
+            public readonly List<GameObject> Objects;
+            public readonly List<ItemDrop.ItemData> Items;
+
+            private LootOutput(List<GameObject> objects, List<ItemDrop.ItemData> items)
+            {
+                Objects = objects;
+                Items = items;
+            }
+
+            public static LootOutput ForObjects() => new LootOutput(new List<GameObject>(), null);
+
+            public static LootOutput ForItems() => new LootOutput(null, new List<ItemDrop.ItemData>());
+
+            /// <summary>
+            /// Creates one drop of <paramref name="prefab"/> and returns its ItemData, or null when the
+            /// prefab has no ItemDrop. <paramref name="itemDrop"/> is the spawned object's component, and
+            /// null for a data-only drop, which has nothing to save to.
+            /// </summary>
+            public ItemDrop.ItemData Create(GameObject prefab, Vector3 dropPoint, out ItemDrop itemDrop)
+            {
+                if (Objects != null)
+                {
+                    var spawned = SpawnLootForDrop(prefab, dropPoint, true);
+                    Objects.Add(spawned);
+                    itemDrop = spawned.GetComponent<ItemDrop>();
+                    return itemDrop != null ? itemDrop.m_itemData : null;
+                }
+
+                itemDrop = null;
+                var itemData = CreateLootItemData(prefab);
+                if (itemData != null)
+                {
+                    Items.Add(itemData);
+                }
+
+                return itemData;
+            }
+        }
+
+        /// <summary>
+        /// A drop's ItemData made from its prefab without instantiating it: the clone and m_dropPrefab
+        /// vanilla's DropTable gives chest contents, plus the ItemData half of what EpicLoot's
+        /// ItemDrop.Awake postfixes do to a spawned drop, since no Awake runs here.
+        /// </summary>
+        private static ItemDrop.ItemData CreateLootItemData(GameObject prefab)
+        {
+            var prefabDrop = prefab.GetComponent<ItemDrop>();
+            if (prefabDrop == null || prefabDrop.m_itemData == null)
+            {
+                return null;
+            }
+
+            var itemData = prefabDrop.m_itemData.Clone();
+            itemData.m_dropPrefab = prefab;
+            itemData.InitializeCustomData();
+            Crafting.ItemDrop_Awake_Patch.InitializeItemData(itemData, out _);
+            return itemData;
         }
 
         public static bool AnyItemSpawnCheatsActive()
@@ -600,13 +654,12 @@ namespace EpicLoot
             return results;
         }
 
-        private static List<GameObject> RollLootTableInternal(LootTable lootTable,
-            int level, string objectName, Vector3 dropPoint, bool initializeObject)
+        private static void RollLootTableInternal(LootTable lootTable,
+            int level, string objectName, Vector3 dropPoint, LootOutput output)
         {
-            var results = new List<GameObject>();
             if (lootTable == null || level <= 0 || string.IsNullOrEmpty(objectName))
             {
-                return results;
+                return;
             }
 
             // A third-party caller may hand a flat table straight in, past AddLootTable.
@@ -622,7 +675,7 @@ namespace EpicLoot
                         $"{plan.Scaling.EffectiveLevel:0.##} (rolled for {objectName}); nothing drops.");
                 }
 
-                return results;
+                return;
             }
 
             var drops = LootScalingMath.ScaleDropChance(ToDropList(plan.DropsAnchor.Drops), plan.DropChanceAdd);
@@ -639,7 +692,7 @@ namespace EpicLoot
             _weightedDropCountTable.Setup(drops, dropPair => dropPair.Value);
             if (_weightedDropCountTable.TotalWeight <= 0)
             {
-                return results;
+                return;
             }
 
             var dropCount = _weightedDropCountTable.Roll().Key;
@@ -648,37 +701,46 @@ namespace EpicLoot
 
             if (dropCount <= 0)
             {
-                return results;
+                return;
             }
 
             var loot = plan.LootAnchor?.Loot ?? Array.Empty<LootDrop>();
             var lootSteps = plan.Scaling.LootSteps;
 
-            EpicLoot.Log($"Available Loot ({loot.Length}) for table: {lootTable.Object} for level {level} " +
-                $"(effective {plan.Scaling.EffectiveLevel:0.##}, {lootSteps:0.##} past level {plan.LootAnchor?.Level})");
-            foreach (var lootDrop in loot)
+            // These listings build a string per entry (and re-weigh each one) whether or not the line is
+            // written, so skip them entirely at the default log level.
+            var logInfo = EpicLoot.IsLogEnabled(LogLevel.Info);
+            if (logInfo)
             {
-                var itemName = lootDrop?.Item ?? "Invalid/Null";
-                var rarity = lootDrop?.Rarity?.Length ?? -1;
-                var weight = LootScalingMath.ScaledWeight(lootDrop, lootSteps);
-                EpicLoot.Log($"Item: {itemName} - Rarity Count: {rarity} - Weight: {weight}");
+                EpicLoot.Log($"Available Loot ({loot.Length}) for table: {lootTable.Object} for level {level} " +
+                    $"(effective {plan.Scaling.EffectiveLevel:0.##}, {lootSteps:0.##} past level {plan.LootAnchor?.Level})");
+                foreach (var lootDrop in loot)
+                {
+                    var itemName = lootDrop?.Item ?? "Invalid/Null";
+                    var rarity = lootDrop?.Rarity?.Length ?? -1;
+                    var weight = LootScalingMath.ScaledWeight(lootDrop, lootSteps);
+                    EpicLoot.Log($"Item: {itemName} - Rarity Count: {rarity} - Weight: {weight}");
+                }
             }
 
             _weightedLootTable.Setup(loot, x => LootScalingMath.ScaledWeight(x, lootSteps));
             if (_weightedLootTable.TotalWeight <= 0)
             {
                 EpicLoot.Log($"Every loot entry of ({lootTable.Object}) weighs 0 at level {level}; nothing drops.");
-                return results;
+                return;
             }
 
             var selectedDrops = _weightedLootTable.Roll(dropCount);
 
-            EpicLoot.Log($"Selected Drops: {lootTable.Object} for level {level}");
-            foreach (var lootDrop in selectedDrops)
+            if (logInfo)
             {
-                var itemName = !string.IsNullOrEmpty(lootDrop?.Item) ? lootDrop.Item : "Invalid Item Name";
-                var rarityLength = lootDrop?.Rarity?.Length != null ? lootDrop.Rarity.Length : -1;
-                EpicLoot.Log($"Item: {itemName} - Rarity Count: {rarityLength} - Weight: {lootDrop.Weight}");
+                EpicLoot.Log($"Selected Drops: {lootTable.Object} for level {level}");
+                foreach (var lootDrop in selectedDrops)
+                {
+                    var itemName = !string.IsNullOrEmpty(lootDrop?.Item) ? lootDrop.Item : "Invalid Item Name";
+                    var rarityLength = lootDrop?.Rarity?.Length != null ? lootDrop.Rarity.Length : -1;
+                    EpicLoot.Log($"Item: {itemName} - Rarity Count: {rarityLength} - Weight: {lootDrop.Weight}");
+                }
             }
 
 
@@ -722,13 +784,13 @@ namespace EpicLoot
                 switch (dropType)
                 {
                     case LootDropType.ShardStone:
-                        spawned = TrySpawnBiomeShard(lootDrop, ref dropPoint, luckFactor, initializeObject, results);
+                        spawned = TrySpawnBiomeShard(lootDrop, ref dropPoint, luckFactor, output);
                         break;
                     case LootDropType.Unidentified:
-                        spawned = TrySpawnUnidentified(lootDrop, ref dropPoint, luckFactor, initializeObject, results);
+                        spawned = TrySpawnUnidentified(lootDrop, ref dropPoint, luckFactor, output);
                         break;
                     case LootDropType.Materials:
-                        spawned = TrySpawnMaterials(lootDrop, dropPoint, luckFactor, results);
+                        spawned = TrySpawnMaterials(lootDrop, dropPoint, luckFactor, output);
                         break;
                 }
 
@@ -737,11 +799,9 @@ namespace EpicLoot
                 // loot table actually named is what keeps a failure from silently eating the drop.
                 if (!spawned)
                 {
-                    SpawnNormalItem(lootDrop, objectName, dropPoint, luckFactor, initializeObject, results);
+                    SpawnNormalItem(lootDrop, objectName, dropPoint, luckFactor, output);
                 }
             }
-
-            return results;
         }
 
         // Rolls what a single drop becomes. The four Balance drop ratios are relative weights, not
@@ -811,7 +871,7 @@ namespace EpicLoot
         // (ShardStone_{Biome} in loottables.json), which resolves to one of the ShardT1..ShardT7 tier sets,
         // so the whole biome preset stays config-patchable.
         private static bool TrySpawnBiomeShard(LootDrop lootDrop, ref Vector3 dropPoint, float luckFactor,
-            bool initializeObject, List<GameObject> results)
+            LootOutput output)
         {
             ZoneSystem.instance.GetGroundData(ref dropPoint, out var _, out var shardBiome, out var _, out var _);
 
@@ -849,16 +909,21 @@ namespace EpicLoot
             }
 
             EpicLoot.Log($"Adding {shardDrop.Item} shard stone for biome {shardBiome}");
-            var shardObject = SpawnLootForDrop(shardPrefab, dropPoint, initializeObject);
-            var shardItemDrop = shardObject.GetComponent<ItemDrop>();
+            var shardData = output.Create(shardPrefab, dropPoint, out var shardItemDrop);
+            if (shardData == null)
+            {
+                return false;
+            }
 
             // Identity already rides on the prefab's shared data and Awake restores the cosmetic MagicItem,
             // but stamping and saving here keeps the intent explicit and matches the unidentified path.
             // Both calls are idempotent.
-            global::EpicLoot.ShardStones.Shards.EnsureShardMetadata(shardItemDrop.m_itemData);
-            shardItemDrop.Save();
+            global::EpicLoot.ShardStones.Shards.EnsureShardMetadata(shardData);
+            if (shardItemDrop != null)
+            {
+                shardItemDrop.Save();
+            }
 
-            results.Add(shardObject);
             return true;
         }
 
@@ -866,7 +931,7 @@ namespace EpicLoot
         // gating the item's own progression where that is known, falling back to the biome at the drop
         // point.
         private static bool TrySpawnUnidentified(LootDrop lootDrop, ref Vector3 dropPoint, float luckFactor,
-            bool initializeObject, List<GameObject> results)
+            LootOutput output)
         {
             var rarity = RollItemRarity(lootDrop, luckFactor);
 
@@ -902,37 +967,26 @@ namespace EpicLoot
             }
 
             EpicLoot.Log($"Adding {rarity} unidentified item");
-            var randomRotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
-
-            // m_forceDisableInit is a global that ZNetView.Awake reads to decide whether to register a
-            // ZDO at all. Restore whatever it was, in a finally: leaving it stuck true makes every
-            // later ZNetView awake unregistered, which strands null-ZDO entries in ZNetScene.m_instances
-            // and NREs ZNetScene.RemoveObjects every frame for the rest of the session.
-            var priorForceDisableInit = ZNetView.m_forceDisableInit;
-            GameObject lootdrop;
-            try
+            var itemData = output.Create(prefab, dropPoint, out var itemDrop);
+            if (itemData == null)
             {
-                ZNetView.m_forceDisableInit = !initializeObject;
-                lootdrop = Object.Instantiate(prefab, dropPoint, randomRotation);
-                // Ensure that the unidentified item has the correct magic item data for the rarity
-                var id = lootdrop.GetComponent<ItemDrop>();
-                var mic = id.m_itemData.Data().GetOrCreate<MagicItemComponent>();
-                mic.SetMagicItem(new MagicItem
-                {
-                    Rarity = rarity,
-                    IsUnidentified = true,
-                });
-                // Persist the rarity/unidentified state into the ZDO so a real world drop survives reload.
-                // No-op for the container path where the ZNetView was disabled (Save early-returns on
-                // invalid nview).
-                id.Save();
-            }
-            finally
-            {
-                ZNetView.m_forceDisableInit = priorForceDisableInit;
+                return false;
             }
 
-            results.Add(lootdrop);
+            // Ensure that the unidentified item has the correct magic item data for the rarity
+            var mic = itemData.Data().GetOrCreate<MagicItemComponent>();
+            mic.SetMagicItem(new MagicItem
+            {
+                Rarity = rarity,
+                IsUnidentified = true,
+            });
+
+            // Persist the rarity/unidentified state into the ZDO so a real world drop survives reload.
+            if (itemDrop != null)
+            {
+                itemDrop.Save();
+            }
+
             return true;
         }
 
@@ -940,7 +994,7 @@ namespace EpicLoot
         // false when nothing could be spawned — an item with no sacrifice products for the rolled rarity
         // drops as itself rather than as nothing at all.
         private static bool TrySpawnMaterials(LootDrop lootDrop, Vector3 dropPoint, float luckFactor,
-            List<GameObject> results)
+            LootOutput output)
         {
             GameObject prefab = null;
 
@@ -978,16 +1032,19 @@ namespace EpicLoot
                     continue;
                 }
 
-                var materialItem = SpawnLootForDrop(materialPrefab, dropPoint, true);
-                var materialItemDrop = materialItem.GetComponent<ItemDrop>();
-                materialItemDrop.m_itemData.m_stack = itemAmountConfig.Amount;
-
-                if (materialItemDrop.m_itemData.IsMagicCraftingMaterial())
+                var materialData = output.Create(materialPrefab, dropPoint, out _);
+                if (materialData == null)
                 {
-                    materialItemDrop.m_itemData.m_variant = EpicLoot.GetRarityIconIndex(rarity);
+                    continue;
                 }
 
-                results.Add(materialItem);
+                materialData.m_stack = itemAmountConfig.Amount;
+
+                if (materialData.IsMagicCraftingMaterial())
+                {
+                    materialData.m_variant = EpicLoot.GetRarityIconIndex(rarity);
+                }
+
                 spawnedAny = true;
             }
 
@@ -997,7 +1054,7 @@ namespace EpicLoot
         // The default path: spawn the item the loot table named, gated by boss progression, and roll its
         // magic item data when the item is eligible for one.
         private static void SpawnNormalItem(LootDrop lootDrop, string objectName, Vector3 dropPoint,
-            float luckFactor, bool initializeObject, List<GameObject> results)
+            float luckFactor, LootOutput output)
         {
             var gatedItemName = (CheatDisableGating) ?
                 GatedItemTypeHelper.GetGatedItemNameFromItemOrType(lootDrop.Item, GatedItemTypeMode.Unlimited) :
@@ -1017,12 +1074,10 @@ namespace EpicLoot
                 return;
             }
 
-            var item = SpawnLootForDrop(itemPrefab, dropPoint, initializeObject);
-            var itemDrop = item.GetComponent<ItemDrop>();
+            var itemData = output.Create(itemPrefab, dropPoint, out var itemDrop);
 
-            if (itemDrop != null && EpicLoot.CanBeMagicItem(itemDrop.m_itemData) && !ArrayUtils.IsNullOrEmpty(lootDrop.Rarity))
+            if (itemData != null && EpicLoot.CanBeMagicItem(itemData) && !ArrayUtils.IsNullOrEmpty(lootDrop.Rarity))
             {
-                var itemData = itemDrop.m_itemData;
                 var magicItemComponent = itemData.Data().GetOrCreate<MagicItemComponent>();
                 var magicItem = RollMagicItem(lootDrop, itemData, luckFactor);
 
@@ -1032,13 +1087,14 @@ namespace EpicLoot
                 }
 
                 API.WithChangeReason(API.ChangeReason.LootRoll, () => magicItemComponent.SetMagicItem(magicItem));
-                itemDrop.m_itemData = itemData;
-                itemDrop.Save();
+                if (itemDrop != null)
+                {
+                    itemDrop.Save();
+                }
+
                 InitializeMagicItem(itemData);
                 API.RaiseLootGenerated(itemData);
             }
-
-            results.Add(item);
         }
 
         public static GameObject SpawnLootForDrop(GameObject itemPrefab, Vector3 dropPoint, bool initializeObject)
@@ -1046,9 +1102,11 @@ namespace EpicLoot
             Quaternion randomRotation = Quaternion.Euler(0.0f, Random.Range(0.0f, 360.0f), 0.0f);
 
             // Save and restore rather than assigning false: Instantiate runs the new object's Awake
-            // chain (ItemDrop.Awake, ItemDataManager, our own postfixes), any of which can throw, and
-            // the chest path can run nested inside another instantiate. A stranded true here breaks
-            // ZNetScene for the rest of the session — see the comment in TrySpawnUnidentified.
+            // chain (ItemDrop.Awake, ItemDataManager, our own postfixes), any of which can throw, and a
+            // caller may already be inside another instantiate. m_forceDisableInit is a global that
+            // ZNetView.Awake reads to decide whether to register a ZDO at all, so a stranded true makes
+            // every later ZNetView awake unregistered, which strands null-ZDO entries in
+            // ZNetScene.m_instances and NREs ZNetScene.RemoveObjects every frame for the session.
             var priorForceDisableInit = ZNetView.m_forceDisableInit;
             try
             {

@@ -7,6 +7,11 @@
     * `Show Welcome Message` is replaced by `Welcome Wizard` (Auto, ShowNextLaunch or Never); a welcome you already closed stays closed
     * The config update prompt now opens after the wizard instead of being skipped, and other mods' welcomes take turns with it
     * The new client option `Show Quick Configure Button` hides the launcher entry
+* Item Favorite Framework support (optional)
+    * Items you favorite there, and anything in a favorited inventory slot, never show up in Sacrifice, Identify, Disenchant or Set Extract
+    * Rune Extract hides them too, unless its mode keeps the item; favorited runes are never offered for etching
+    * Favorited items get a star in the enchanting table and temper lists
+    * New client options `Respect Item Favorites` and `Show Favorite Stars`, both on by default
 * The new server option `Health Critical Enchantments` stops the enchantments that only work at critical health from rolling
     * Covers every "(Health Critical)" effect, Instant Mead, Automatic Mead Consumption and Health Critical Threshold
     * They stop coming from loot, identifying, enchanting and augmenting; items that already have one keep it, and it still works
@@ -43,6 +48,16 @@
 * Fix for creatures placed inside a location, such as the memorial site's fallen warriors, dropping no magic loot
 * Fix for the Plains stone tower chest's magic loot, which pointed at a table that did not exist
 * Fix for chest-style loot tables causing an error on creatures with three or more stars
+* Less work when chests are nearby or their loot is rolled
+    * A chest, treasure map or gamble builds its magic loot directly instead of spawning and removing an object in the world for each item, and saves the chest once rather than after every item
+    * Loaded chests no longer look over every item they hold once a second, only when their contents change
+    * Mods that look through nearby chests (crafting from containers) no longer line every chest up for a loot roll
+* Fix for the Dvergr rogues' crossbows showing up as a second Arbalest in loot, the merchant and item gating
+    * They never drop, and are removed from existing configs at the next world load
+    * `Only Add Equipment With Recipes` now looks for a recipe that crafts the item itself, so creature weapons named after a craftable item are no longer added
+* The grappling hook is sorted as a tool instead of a bow, and moves from the Mistlands weapon loot to the tool loot
+* Lox hide counts as a Plains material when sorting gear, so the Lox armor set is sorted into Plains loot
+    * Gear already listed in iteminfo.json keeps its place
 * New magic effect: Prosperity, a chance for creatures slain and chests opened nearby to roll their magic loot an extra time
     * Rolls on the same items and rarities as Luck, and an item cannot have both
     * Every 100% is a guaranteed extra roll; nearby players' Prosperity adds together, up to `BonusRollsMax` extra rolls (default 3)
@@ -105,6 +120,12 @@
     * With the key held they can be dragged from anywhere, including over their lists and buttons
     * A four-way arrow handle in each panel's top-right corner drags it without the key, and can't be dragged off screen
     * Set the key to None to move the panels by the handle only; it is also on Quick Configure's Interface page
+* Fix for enchantments on items in nearby chests (shown at the enchanting table by AzuCraftyBoxes) reverting a moment later, after the materials were spent
+    * Enchanting, augmenting, etching, disenchanting, a reducing rune extract or a set strip changed only the chest's copy in memory, and the chest reloading undid it; a disenchant also handed back the socketed stones first, duplicating them
+    * The new server option `Spend-Only Storage Mods` (default `Azumatt.AzuCraftyBoxes`) lists mods whose stored items the table only spends: they still pay for materials and runes and can be sacrificed or identified, but take an item out of the chest to work on it
+    * The table now re-checks, before paying, that the item it is about to change is still where it was
+* API: `RegisterInventoryProviderSaveHandler` lets a mod that shows its storage at the table save the items the table changes there; DvergerAutomation uses it, so gear in its linked chests can be worked on in place
+* Fix for magic staff tooltips showing a hugely inflated health cost and leaving out the eitr cost, which now both reflect their cost-reducing enchantments
 
 
 **0.14.13**

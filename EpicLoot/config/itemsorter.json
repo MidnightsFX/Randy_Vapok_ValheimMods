@@ -123,7 +123,8 @@
         "BlackMetal",
         "LinenThread",
         "UndeadBjornRibcage",
-        "TrophyBjornUndead"
+        "TrophyBjornUndead",
+        "LoxPelt"
       ],
       "BiomeSpecificCraftingStations": [],
       "Creatures": { "ReferenceHealth": 175, "Weak": "Tier5Mob", "Normal": "Tier5Mob", "Strong": "Tier6Mob", "Elite": "Tier6EliteMob", "Boss": "Tier6EliteMob" }

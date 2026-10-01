@@ -78,6 +78,21 @@ EpicLoot.RegisterInventoryProvider(
 `removeExactItem` must match by reference, not by name — magic data lives on the item instance, so a
 name match will consume the wrong enchanted item.
 
+The items `getItems` offers can also be *changed in place* at the table: enchanted, augmented, etched,
+reduced by a rune extract, stripped of a set or disenchanted. Epic Loot writes that change to the
+instance, and only you know how to save it where it lives. Register a save handler so it is not lost when
+your storage reloads (a vanilla chest re-reads its ZDO after anyone opens it):
+
+```c#
+EpicLoot.RegisterInventoryProviderSaveHandler("my.plugin.guid", item => SaveContainerHolding(item));
+```
+
+It runs on the frame of the change, right after Epic Loot re-checked that `getItems` still offers the
+item. Save without reloading the container first — a reload replaces the instance and throws the change
+away — and return false if you could not save it. A provider without a save handler still has its items
+edited unless the player lists its id under Epic Loot's `Spend-Only Storage Mods` setting, which keeps
+them to spending only.
+
 ### Equipment provider
 
 Equipment providers are a way to ensure that equipment that is registered in custom slots count towards Epicloots effect totals.

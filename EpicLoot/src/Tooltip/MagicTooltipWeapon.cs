@@ -128,7 +128,8 @@ public partial class MagicTooltip {
         // TODO: place logic into helper method
         bool hasSpellSword = magicItem.HasEffect(MagicEffectType.SpellSword);
 
-        if (item.m_shared.m_attack.m_attackEitr <= 0f || !hasSpellSword) {
+        // Spellsword gives a weapon an eitr cost it would not otherwise have.
+        if (item.m_shared.m_attack.m_attackEitr <= 0f && !hasSpellSword) {
             return;
         }
 
@@ -138,8 +139,15 @@ public partial class MagicTooltip {
 
         string magicAttackEitrColor = hasAttackEitrModifier ? magicColor : "orange";
 
+        // Same order as the game: Spellsword's extra eitr (half the base stamina cost) is added first,
+        // then ModifyAttackEitrUse scales the whole cost.
+        float baseEitrUse = item.m_shared.m_attack.m_attackEitr;
+        if (hasSpellSword) {
+            baseEitrUse += Spellsword.GetAdditionalSpellswordAttackEitr(item.m_shared.m_attack.m_attackStamina);
+        }
+
         float eitrUsePercentage = 1 - magicItem.GetTotalEffectValue(MagicEffectType.ModifyAttackEitrUse, 0.01f);
-        float totalEitrUse = eitrUsePercentage * item.m_shared.m_attack.m_attackEitr;
+        float totalEitrUse = eitrUsePercentage * baseEitrUse;
 
         // TODO: find an appropriate way to display all the information from multishot.
         // This is half implemented and untested here.
@@ -152,10 +160,6 @@ public partial class MagicTooltip {
             int projectiles = Mathf.RoundToInt(configuration[MultiShot.PROJECTILES_KEY]);
             additionalEtir = $"/{totalEitrUse * projectiles}:0.#";
         }*/
-
-        if (hasSpellSword) {
-            totalEitrUse += Spellsword.GetAdditionalSpellswordAttackEitr(totalEitrUse);
-        }
 
         text.Append($"\n$item_eitruse: <color={magicAttackEitrColor}>{totalEitrUse:0.#}</color>");
     }
@@ -190,7 +194,17 @@ public partial class MagicTooltip {
 
     private void AddHealthUsePercentage() {
         if (item.m_shared.m_attack.m_attackHealthPercentage > 0f) {
-            text.Append($"\n$item_healthuse: <color=orange>{item.m_shared.m_attack.m_attackHealthPercentage:0.#%}</color>");
+            // Already a percentage (40 = 40% of current health), so no "%" format specifier, which would
+            // multiply by 100. Attack.GetAttackHealth folds this into the same cost ModifyAttackHealthUse
+            // scales, so the reduction applies here too.
+            bool magicAttackHealth = magicItem.HasEffect(MagicEffectType.ModifyAttackHealthUse);
+            string magicAttackHealthColor = magicAttackHealth ? magicColor : "orange";
+
+            float effectValue = magicItem.GetTotalEffectValue(MagicEffectType.ModifyAttackHealthUse, 0.01f);
+            float healthUsePercentage = ModifyAttackCosts.GetEffectPercentage(effectValue) *
+                item.m_shared.m_attack.m_attackHealthPercentage;
+
+            text.Append($"\n$item_healthuse: <color={magicAttackHealthColor}>{healthUsePercentage:0.#}%</color>");
         }
     }
 

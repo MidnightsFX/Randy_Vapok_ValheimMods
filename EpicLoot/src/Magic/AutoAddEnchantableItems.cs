@@ -133,6 +133,8 @@ namespace EpicLoot.Magic
             }
 
             List<ItemTypeInfo> currentConfigs = GatedItemTypeHelper.GatedConfig.ItemInfo;
+            // Taken before the passes below, which replace these entries' lists in place.
+            Dictionary<string, HashSet<string>> previousTypes = TypesByItem(currentConfigs);
 
             Dictionary<string, ItemTypeInfo> itemsByCategory = new Dictionary<string, ItemTypeInfo>();
             Dictionary<string, ItemTypeInfo> foundByCategory = new Dictionary<string, ItemTypeInfo>();
@@ -210,7 +212,7 @@ namespace EpicLoot.Magic
                 i.m_itemData.m_dropPrefab != null &&
                 (i.m_itemData.IsMagicCraftingMaterial() || i.m_itemData.IsRunestone()))
                 .Select(x => x.m_itemData.m_dropPrefab.name).ToList();
-            AddRemoveItemsFromLootLists(magicMats, foundByCategory, newConfig);
+            AddRemoveItemsFromLootLists(magicMats, foundByCategory, newConfig, previousTypes);
 
             // Write out the new config; CheckAndAddAllEnchantableItems re-reads every rewritten file once all are written.
             try
@@ -297,14 +299,15 @@ namespace EpicLoot.Magic
             if (removed > 0)
             {
                 EpicLoot.LogWarningForce($"Removed {removed} prop item entries ({removedNames.Count} distinct) " +
-                    $"from iteminfo.json: {string.Join(", ", removedNames)}. These are NPC props -- invisible " +
-                    "when worn, and in some cases killing whoever attacks with them -- and must never be loot.");
+                    $"from iteminfo.json: {string.Join(", ", removedNames)}. These are creature weapons and NPC " +
+                    "props -- some invisible when worn, some killing whoever attacks with them -- and must never be loot.");
             }
         }
 
         private static void AddRemoveItemsFromLootLists(List<string> magicMats,
             Dictionary<string, ItemTypeInfo> foundByCategory,
-            List<ItemTypeInfo> newConfig)
+            List<ItemTypeInfo> newConfig,
+            Dictionary<string, HashSet<string>> previousTypes)
         {
             if (!ELConfig.AutoAddRemoveEquipmentFromLootLists.Value)
             {
@@ -315,6 +318,7 @@ namespace EpicLoot.Magic
             LootConfig defaultcfg = LootRoller.Config;
             List<LootTable> updatedLootTables = [];
             List<LootItemSet> updatedItemSets = [];
+            Dictionary<string, HashSet<string>> newTypes = TypesByItem(newConfig);
 
             // entry of all of the currently defined meta sets as they are valid targets also
             List<string> metaItemSetNames = LootRoller.Config.ItemSets.Select(x => x.Name).ToList();
@@ -332,10 +336,25 @@ namespace EpicLoot.Magic
             {
                 List<LootDrop> entries = new List<LootDrop>();
                 List<string> addedItems = new List<string>();
+                // The item categories a tiered set (Tier6Weapons) is filled from; null for any other set.
+                List<string> setCategories = null;
+                bool tiered = DetermineTierAndType(lis.Name, out string tier, out string loottype);
+                if (tiered)
+                {
+                    Config.LootSetsToItemCategories.TryGetValue(loottype, out setCategories);
+                }
+
                 // Validate existing entries in the lootset
                 EpicLoot.Log($"Checking LootSet entry: {lis.Name}");
                 foreach (LootDrop loot in lis.Loot)
                 {
+                    if (WasRefiledOutOf(loot.Item, setCategories, previousTypes, newTypes))
+                    {
+                        EpicLoot.Log($"{loot.Item} is now filed under {string.Join(", ", newTypes[loot.Item])} " +
+                            $"and is removed from {lis.Name}.");
+                        continue;
+                    }
+
                     if (IsValidLootEntryName(loot.Item, metaItemSetNames, null, validItems, magicMats))
                     {
                         PruneRarityItems(loot, lis.Name, metaItemSetNames, null, validItems, magicMats);
@@ -347,7 +366,7 @@ namespace EpicLoot.Magic
                     EpicLoot.Log($"{loot.Item} is not a found item and will be removed from the loot tables.");
                 }
 
-                if (DetermineTierAndType(lis.Name, out string tier, out string loottype))
+                if (tiered)
                 {
                     string bosskey = "none";
                     foreach (KeyValuePair<string, SortingData> entry in Config.BiomeSorterData)
@@ -448,6 +467,57 @@ namespace EpicLoot.Magic
             newLootConfig.ItemSets = updatedItemSets.ToArray();
             newLootConfig.LootTables = updatedLootTables.ToArray();
             LootConfigFile.Write(newLootConfig, "equipment auto-add");
+        }
+
+        // Item prefab name -> every iteminfo.json type that lists it, under any boss key.
+        private static Dictionary<string, HashSet<string>> TypesByItem(IEnumerable<ItemTypeInfo> config)
+        {
+            Dictionary<string, HashSet<string>> types = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+            foreach (ItemTypeInfo itemType in config)
+            {
+                if (itemType?.ItemsByBoss == null)
+                {
+                    continue;
+                }
+
+                foreach (List<string> items in itemType.ItemsByBoss.Values)
+                {
+                    if (items == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (string item in items)
+                    {
+                        if (string.IsNullOrEmpty(item))
+                        {
+                            continue;
+                        }
+
+                        if (!types.TryGetValue(item, out HashSet<string> itemTypes))
+                        {
+                            itemTypes = new HashSet<string>(StringComparer.Ordinal);
+                            types.Add(item, itemTypes);
+                        }
+
+                        itemTypes.Add(itemType.Type);
+                    }
+                }
+            }
+
+            return types;
+        }
+
+        // True when this pass moved the item out of every category a tiered set is filled from (the grappling
+        // hook, once filed under Bows, now under Tools): its entry in that set is the sorter's own stale output,
+        // and validation alone keeps any real item. Only a move made on this pass counts, so an entry put in a
+        // set by hand stays -- the shipped Torch in Tier0Weapons is a Torches item.
+        private static bool WasRefiledOutOf(string item, List<string> setCategories,
+            Dictionary<string, HashSet<string>> previousTypes, Dictionary<string, HashSet<string>> newTypes)
+        {
+            return setCategories != null && !string.IsNullOrEmpty(item) &&
+                previousTypes.TryGetValue(item, out HashSet<string> before) && before.Overlaps(setCategories) &&
+                newTypes.TryGetValue(item, out HashSet<string> after) && !after.Overlaps(setCategories);
         }
 
         private static void AddRemoveItemsFromVendor(List<ItemTypeInfo> newConfig)
@@ -602,7 +672,7 @@ namespace EpicLoot.Magic
                     continue;
                 }
 
-                string key = DetermineBossLevelForItem(item.m_itemData);
+                string key = DetermineBossLevelForItem(item);
                 bool uncraftableFound = false;
                 foreach(KeyValuePair<string, List<string>> uncraftable in Config.UncraftableItemsAlwaysAllowed)
                 {
@@ -911,15 +981,10 @@ namespace EpicLoot.Magic
             return [97, 2, 1, 0, 0, 0];
         }
 
-        public static string DetermineBossLevelForItem(ItemDrop.ItemData item)
+        public static string DetermineBossLevelForItem(ItemDrop itemDrop)
         {
-            if (item == null || ObjectDB.instance == null)
-            {
-                return NONE;
-            }
-
-            Recipe itemRecipe = ObjectDB.instance.GetRecipe(item);
-            if (itemRecipe == null || itemRecipe.m_enabled == false || itemRecipe.m_resources == null)
+            Recipe itemRecipe = FindEnabledRecipe(itemDrop);
+            if (itemRecipe == null || itemRecipe.m_resources == null)
             {
                 return NONE;
             }
@@ -947,6 +1012,30 @@ namespace EpicLoot.Magic
             }
 
             return NONE;
+        }
+
+        /// <summary>
+        /// The enabled recipe that crafts this exact prefab. Not ObjectDB.GetRecipe: that matches on
+        /// m_shared.m_name, the display token, which creature weapons copy from the item they imitate. The
+        /// Dvergr rogues' DvergerArbalest_shoot* are all "$item_crossbow_arbalest", so they were handed the real
+        /// Arbalest's recipe, passed Only Add Equipment With Recipes and were filed beside it.
+        /// </summary>
+        private static Recipe FindEnabledRecipe(ItemDrop itemDrop)
+        {
+            if (itemDrop == null || ObjectDB.instance == null)
+            {
+                return null;
+            }
+
+            foreach (Recipe recipe in ObjectDB.instance.m_recipes)
+            {
+                if (recipe != null && recipe.m_enabled && recipe.m_item != null && recipe.m_item.name == itemDrop.name)
+                {
+                    return recipe;
+                }
+            }
+
+            return null;
         }
     }
 }

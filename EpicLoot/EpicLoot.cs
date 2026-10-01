@@ -35,6 +35,7 @@ namespace EpicLoot;
 [BepInDependency("vapok.mods.adventurebackpacks", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("kg.ValheimEnchantmentSystem", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("org.bepinex.plugins.steadyregeneration", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("MidnightsFX.ItemFavoriteFramework", BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class EpicLoot : BaseUnityPlugin {
     public const string PluginId = "randyknapp.mods.epicloot";
     public const string DisplayName = "Epic Loot";
@@ -170,6 +171,9 @@ public sealed class EpicLoot : BaseUnityPlugin {
         MagicItemEffects.Shards.NecroticFire.RegisterDisplayValues();
         MagicItemEffects.Shards.BlockAsDodgeAsBlock.RegisterDisplayValues();
         MagicItemEffects.Shards.BlockAsWoodCuttingAndPickaxes.RegisterDisplayValues();
+        MagicItemEffects.OverwhelmingLaunch.RegisterDisplayValues();
+        MagicItemEffects.Artillery.RegisterDisplayValues();
+        MagicItemEffects.Assassin.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;
@@ -261,6 +265,14 @@ public sealed class EpicLoot : BaseUnityPlugin {
         BepInEx.Configuration.ConfigEntry<bool> enabled = ELConfig._loggingEnabled;
         BepInEx.Configuration.ConfigEntry<LogLevel> threshold = ELConfig._logLevel;
         return enabled == null || threshold == null || (enabled.Value && threshold.Value <= level);
+    }
+
+    /// <summary>
+    /// Whether a Log* call at this level would be written. The interpolated message is built before
+    /// Log sees it, so a loop that exists only to log (loot table listings) checks this first.
+    /// </summary>
+    public static bool IsLogEnabled(LogLevel level) {
+        return ShouldLog(level);
     }
 
     public static void Log(string message) {

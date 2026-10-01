@@ -218,6 +218,10 @@ namespace EpicLoot_UnityLib
                 Deselect(true);
             }
 
+            // Every time, empty rows included: rows are pooled and would keep the last item's star. Cost and
+            // product rows are read-only, and a star on "5 Magic Dust" would only say dust is favorited.
+            EpicLoot.Compatibility.ItemFavorites.UpdateStar(ItemIcon, ReadOnly ? null : _item?.GetItem());
+
             RefreshGamepadFocusIndicator();
 
             

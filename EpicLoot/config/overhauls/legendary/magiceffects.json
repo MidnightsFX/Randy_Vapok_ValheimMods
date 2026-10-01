@@ -7332,6 +7332,90 @@
         "NoRoll": true
       },
       "Ability": "Berserker"
+    },
+    {
+      "Type": "OverwhelmingLaunch",
+      "DisplayText": "$mod_epicloot_set_me_overwhelminglaunch",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Legendary": {
+          "MinValue": 50,
+          "MaxValue": 50,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 50,
+          "MaxValue": 50,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 50,
+          "MaxValue": 50,
+          "Increment": 1
+        }
+      },
+      "Config": {
+        "MaxDistance": 30,
+        "ProjectileSpeed": 25,
+        "HangTime": 0.2,
+        "Radius": 4,
+        "StaggerMultiplier": 2,
+        "CostScale": 3
+      }
+    },
+    {
+      "Type": "Artillery",
+      "DisplayText": "$mod_epicloot_set_me_artillery",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 10, "MaxValue": 10, "Increment": 1 },
+        "Rare": { "MinValue": 15, "MaxValue": 15, "Increment": 1 },
+        "Epic": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+        "Legendary": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+        "Mythic": { "MinValue": 30, "MaxValue": 30, "Increment": 1 },
+        "Ancient": { "MinValue": 35, "MaxValue": 35, "Increment": 1 }
+      },
+      "Config": {
+        "MaxDistance": 60,
+        "Gravity": 30,
+        "ArcHeight": 0.2,
+        "RadiusPerValue": 0.04
+      }
+    },
+    {
+      "Type": "Assassin",
+      "DisplayText": "$mod_epicloot_set_me_assassin",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 125, "MaxValue": 125, "Increment": 1 },
+        "Rare": { "MinValue": 150, "MaxValue": 150, "Increment": 1 },
+        "Epic": { "MinValue": 175, "MaxValue": 175, "Increment": 1 },
+        "Legendary": { "MinValue": 200, "MaxValue": 200, "Increment": 1 },
+        "Mythic": { "MinValue": 225, "MaxValue": 225, "Increment": 1 },
+        "Ancient": { "MinValue": 250, "MaxValue": 250, "Increment": 1 }
+      },
+      "Config": {
+        "MaxDistance": 20,
+        "HoverTime": 2,
+        "Cooldown": 340,
+        "CooldownPerValue": 0.8,
+        "MinCooldown": 30
+      }
     }
   ]
 }

@@ -188,6 +188,18 @@ namespace EpicLoot_UnityLib
             }
 
             ItemDrop.ItemData item = selectedItem.Item1.GetItem();
+
+            // Checked before paying: the item may have left the inventory, or its chest reloaded and
+            // replaced it, since it was selected. An augment only lasts on an item whose storage saves it.
+            if (!InventoryManagement.Instance.IsEditable(item))
+            {
+                Debug.LogWarning("[Augment Item] Cancelled: the item is no longer held anywhere the change would be saved.");
+                Cancel();
+                AvailableItems.SetItems(EnchantingUIController.GetAugmentableItems().Cast<IListElement>().ToList());
+                DeselectAll();
+                return;
+            }
+
             List<InventoryItemListElement> cost = EnchantingUIController.GetAugmentCost(item, _augmentIndex);
 
             Player player = Player.m_localPlayer;

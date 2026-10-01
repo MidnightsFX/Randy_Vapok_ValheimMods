@@ -57,12 +57,16 @@ internal class ELConfig {
     public static ConfigEntry<float> _bossTrophyDropPlayerRange;
     public static ConfigEntry<int> _andvaranautRange;
     public static ConfigEntry<bool> ShowEquippedAndHotbarItemsInSacrificeTab;
+    public static ConfigEntry<bool> RespectItemFavorites;
+    public static ConfigEntry<bool> ShowFavoriteStars;
     public static ConfigEntry<bool> _adventureModeEnabled;
     public static readonly ConfigEntry<string>[] AbilityKeyCodes = new ConfigEntry<string>[AbilityController.AbilitySlotCount];
     public static ConfigEntry<TextAnchor> AbilityBarAnchor;
     public static ConfigEntry<Vector2> AbilityBarPosition;
     public static ConfigEntry<TextAnchor> AbilityBarLayoutAlignment;
     public static ConfigEntry<float> AbilityBarIconSpacing;
+    public static ConfigEntry<KeyCode> OverwhelmingLaunchKey;
+    public static ConfigEntry<KeyCode> OverwhelmingLaunchGamepadButton;
     public static ConfigEntry<float> SetItemDropChance;
     public static ConfigEntry<bool> HealthCriticalEffectsEnabled;
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
@@ -140,6 +144,7 @@ internal class ELConfig {
 
     public static ConfigEntry<RuneExtractMode> RuneExtractItemMode;
     public static ConfigEntry<RuneSetExtractMode> RuneSetExtractItemMode;
+    public static ConfigEntry<string> SpendOnlyStorageMods;
 
     public static ConfigEntry<bool> TemperDestroysItem;
     public static ConfigEntry<float> TemperChanceToDestroy;
@@ -584,6 +589,14 @@ internal class ELConfig {
             "When tempering fails, the item will be destroyed. If False, the item will be returned intact. Default value: False");
         TemperChanceToDestroy = BindServer(SectionEnchanting, "Temper Destroy Chance", 0.5f,
             "If Fail Destroys Item is enabled, Destroy Chance rolls if item should be destroyed. Default value: 0.5");
+        SpendOnlyStorageMods = BindServer(SectionEnchanting, "Spend-Only Storage Mods", "Azumatt.AzuCraftyBoxes",
+            "Comma-separated plugin ids of mods that let the enchanting table use items stored outside your " +
+            "inventory, such as nearby chests. The table still spends those items as materials and runes, and " +
+            "can sacrifice or identify them, but it will not enchant, augment, etch, disenchant, reduce or strip " +
+            "one in place: the change would only reach the mod's copy in memory, and the chest reloading would " +
+            "undo it after the materials were spent. Take the item out of the chest to work on it.\n" +
+            "Remove a mod from the list once it saves these changes through Epic Loot's API (DvergerAutomation " +
+            "does, so it is not listed). Default: Azumatt.AzuCraftyBoxes");
 
         // 5 - Adventure
         _adventureModeEnabled = BindServer(SectionAdventure, "Adventure Mode Enabled", true,
@@ -615,6 +628,14 @@ internal class ELConfig {
         ShowEquippedAndHotbarItemsInSacrificeTab = BindClient(SectionInterface,
             "ShowEquippedAndHotbarItemsInSacrificeTab", false,
             "If set to false, hides the items that are equipped or on your hotbar in the Sacrifice items list.");
+        RespectItemFavorites = BindClient(SectionInterface, "Respect Item Favorites", true,
+            "When Item Favorite Framework is installed, items you favorited there, and anything in a favorited " +
+            "inventory slot, are left out of every list that destroys or consumes the item: Sacrifice, Identify, " +
+            "Disenchant, Set Extract, Rune Extract (unless the extract mode keeps the item) and the runes offered " +
+            "for etching.");
+        ShowFavoriteStars = BindClient(SectionInterface, "Show Favorite Stars", true,
+            "When Item Favorite Framework is installed, items you favorited there show a star on their icon in the " +
+            "enchanting table and temper lists.");
         UIAudioVolumeAdjustment = BindClient(SectionInterface, "AudioVolumeAdjustment", 1.0f,
             "Multiplies the crafting UI sound volume by this percentage [0.0-1.0].\n" +
             "1 = full UI sounds\n" +
@@ -720,6 +741,13 @@ internal class ELConfig {
             "'Left' will be left aligned, and similar for 'Right'.");
         AbilityBarIconSpacing = BindClient(SectionAbilities, "Ability Bar Icon Spacing", 8.0f,
             "The number of units between the icons on the ability bar.");
+        OverwhelmingLaunchKey = BindClient(SectionAbilities, "Overwhelming Launch Hotkey", KeyCode.T,
+            "Key that hurls your weapon while the Overwhelming Launch set bonus is active and a melee weapon " +
+            "is held. While that is true the key does only this: whatever vanilla action shares it (T is the " +
+            "emote wheel) is suppressed. None disables the keyboard binding.");
+        OverwhelmingLaunchGamepadButton = BindClient(SectionAbilities, "Overwhelming Launch Gamepad Button", KeyCode.None,
+            "Gamepad button (JoystickButton0-19) for Overwhelming Launch. Unbound by default. Every gamepad " +
+            "button already has a vanilla action, and that action is suppressed while a launchable weapon is held.");
 
         // 9 - Debug
         _loggingEnabled = BindClient(SectionDebug, "Logging Enabled", true, "Enable logging");
