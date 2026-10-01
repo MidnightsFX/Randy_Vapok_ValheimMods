@@ -109,6 +109,21 @@ public static class PanelTmpMigration
             });
     }
 
+    [MenuItem("Mod/Migrations/UpgradeContent to TMP")]
+    public static void Upgrade()
+    {
+        Migrate("UpgradeContent", new string[0],
+            Concat(TabIcons,
+                ("GamepadHints/BottomRow/SelectButton/Icon", "JoyButtonA"),
+                ("MainButton/Hint/Icon", "JoyButtonX")),
+            content =>
+            {
+                UpgradeTableUI ui = content.GetComponent<UpgradeTableUI>();
+                Require(ui.SelectedFeatureText, ui.SelectedFeatureInfoText, ui.CostLabel);
+                ui.SelectedFeatureInfoText.lineSpacing = -15;
+            });
+    }
+
     private static void Migrate(string content, string[] nestedPrefabs, (string path, string key)[] icons, Action<GameObject> verify)
     {
         foreach (string nested in nestedPrefabs)

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,11 +10,11 @@ namespace EpicLoot_UnityLib
     public class UpgradeTableUI : EnchantingTableUIPanelBase
     {
         public Transform ListContainer;
-        public Text SelectedFeatureText;
+        public TMP_Text SelectedFeatureText;
         public Image SelectedFeatureImage;
         public FeatureStatus SelectedFeatureStatus;
-        public Text SelectedFeatureInfoText;
-        public Text CostLabel;
+        public TMP_Text SelectedFeatureInfoText;
+        public TMP_Text CostLabel;
         public MultiSelectItemList CostList;
 
         private readonly List<MultiSelectItemListElement> _featureButtons = new List<MultiSelectItemListElement>();
