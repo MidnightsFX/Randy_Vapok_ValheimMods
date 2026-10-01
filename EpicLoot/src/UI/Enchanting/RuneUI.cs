@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using EpicLoot;
 using EpicLoot.CraftingV2;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -418,7 +419,7 @@ namespace EpicLoot_UnityLib
                 GameObject enchantmentListElement = Instantiate(EnchantmentListPrefab, EnchantList);
                 // Include inactive: the prefab ships deactivated, so the clone is still inactive here and
                 // the plain overload would hand back null and leave every row reading "Enchant Selector".
-                Text enchantmentElement = enchantmentListElement.GetComponentInChildren<Text>(true);
+                TMP_Text enchantmentElement = enchantmentListElement.GetComponentInChildren<TMP_Text>(true);
                 Toggle enchantmentbutton = enchantmentListElement.GetComponent<Toggle>();
                 enchantmentbutton.onValueChanged.AddListener((isOn) =>
                 {
