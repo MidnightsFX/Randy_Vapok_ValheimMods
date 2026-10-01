@@ -3249,6 +3249,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: ea5a8d0f0d32ff04dbe19e025742fab6,
         type: 3}
+    - target: {fileID: 3856126355316563622, guid: b66791bd7603af84882898d31160bbc7,
+        type: 3}
+      propertyPath: m_text
+      value: $mod_epicloot_runes
+      objectReference: {fileID: 0}
     - target: {fileID: 4152070679221612302, guid: b66791bd7603af84882898d31160bbc7,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -3595,6 +3600,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: e3283dd9cd0aeb34b8ad3a8e7712f627,
         type: 3}
+    - target: {fileID: 3856126355316563622, guid: b66791bd7603af84882898d31160bbc7,
+        type: 3}
+      propertyPath: m_text
+      value: $mod_epicloot_augment
+      objectReference: {fileID: 0}
     - target: {fileID: 4152070679221612302, guid: b66791bd7603af84882898d31160bbc7,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -4070,6 +4080,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 52f625198d6b8d1478a74a7bf3c88297,
         type: 3}
+    - target: {fileID: 3856126355316563622, guid: b66791bd7603af84882898d31160bbc7,
+        type: 3}
+      propertyPath: m_text
+      value: $mod_epicloot_disenchant
+      objectReference: {fileID: 0}
     - target: {fileID: 4152070679221612302, guid: b66791bd7603af84882898d31160bbc7,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -4575,6 +4590,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 67b5ecae470942047bf0f3675fbcc181,
         type: 3}
+    - target: {fileID: 3856126355316563622, guid: b66791bd7603af84882898d31160bbc7,
+        type: 3}
+      propertyPath: m_text
+      value: $mod_epicloot_enchant
+      objectReference: {fileID: 0}
     - target: {fileID: 4152070679221612302, guid: b66791bd7603af84882898d31160bbc7,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -5375,6 +5395,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 263b5536f5fd2e4458bec98bc9de9935,
         type: 3}
+    - target: {fileID: 3856126355316563622, guid: b66791bd7603af84882898d31160bbc7,
+        type: 3}
+      propertyPath: m_text
+      value: $mod_epicloot_convertmaterials
+      objectReference: {fileID: 0}
     - target: {fileID: 4152070679221612302, guid: b66791bd7603af84882898d31160bbc7,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -5716,6 +5741,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 51f5d8a6186227c4eac0bab1770444c7,
         type: 3}
+    - target: {fileID: 3856126355316563622, guid: b66791bd7603af84882898d31160bbc7,
+        type: 3}
+      propertyPath: m_text
+      value: $mod_epicloot_sacrifice
+      objectReference: {fileID: 0}
     - target: {fileID: 4152070679221612302, guid: b66791bd7603af84882898d31160bbc7,
         type: 3}
       propertyPath: m_AnchorMax.y

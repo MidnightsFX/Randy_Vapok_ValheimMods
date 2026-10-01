@@ -1,5 +1,6 @@
 ﻿using System;
 using EpicLoot.CraftingV2;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,10 +14,10 @@ namespace EpicLoot_UnityLib
         public Button MainButton;
         public Toggle SelectedToggle;
         public GameObject SelectedBackground;
-        public Text ItemName;
+        public TMP_Text ItemName;
         public Image MagicBG;
         public Image ItemIcon;
-        public Text ItemTotalQuantity;
+        public TMP_Text ItemTotalQuantity;
         public InputField ItemSelectedQuantity;
         public Button QuantityUpButton;
         public Button QuantityDownButton;
@@ -228,7 +229,7 @@ namespace EpicLoot_UnityLib
             if (UseEnchantAsName && _item.GetEnchantName() != string.Empty)
             {
                 ItemName.text = _item.GetEnchantName();
-                ItemName.alignment = TextAnchor.MiddleLeft;
+                ItemName.alignment = TextAlignmentOptions.Left;
                 // Adjust the text box container to give it the whole width, which is normally used for quantity
                 ItemName.GetComponent<RectTransform>().offsetMax = new Vector2(y: 0f, x: -5f);
                 return true;

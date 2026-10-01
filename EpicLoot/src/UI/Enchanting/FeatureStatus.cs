@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using EpicLoot.CraftingV2;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +13,7 @@ namespace EpicLoot_UnityLib
         public Transform LockedContainer;
         public GameObject UnlockedLabel;
         public Image[] Stars;
-        public Text ManyStarsLabel;
+        public TMP_Text ManyStarsLabel;
         public UITooltip Tooltip;
 
         public void Awake()

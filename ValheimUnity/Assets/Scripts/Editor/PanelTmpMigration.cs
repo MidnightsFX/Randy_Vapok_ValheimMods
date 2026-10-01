@@ -124,6 +124,70 @@ public static class PanelTmpMigration
             });
     }
 
+    [MenuItem("Mod/Migrations/List elements to TMP")]
+    public static void ListElements()
+    {
+        List<PrefabYaml.TextOverride> upgradeOverrides = PrefabYaml.NestedTextOverrides(Folder + "UpgradeContent.prefab");
+        foreach (string leaf in new[] { "EnchantElement", "ItemElement", "ItemGridElement", "FeatureStatus", "TableFeatureElement", "MultiSelectItemList", "SingleSelectItemList" })
+        {
+            string path = Folder + leaf + ".prefab";
+            Debug.Log($"{path}: converted {LegacyTextToTmp.ConvertPrefab(path)} Text components");
+        }
+
+        foreach (string leaf in new[] { "ItemElement", "ItemGridElement", "TableFeatureElement" })
+        {
+            MultiSelectItemListElement element = AssetDatabase.LoadAssetAtPath<GameObject>(Folder + leaf + ".prefab").GetComponent<MultiSelectItemListElement>();
+            Require(element.ItemName != null ? element.ItemName : element.ItemTotalQuantity);
+        }
+
+        Require(AssetDatabase.LoadAssetAtPath<GameObject>(Folder + "FeatureStatus.prefab").GetComponent<FeatureStatus>().ManyStarsLabel);
+        ReapplyNestedTextOverrides("UpgradeContent", upgradeOverrides);
+        AssetDatabase.SaveAssets();
+        Debug.Log("List elements migration done");
+    }
+
+    // Captured before the nested prefab converts: the override targets the old Text file id.
+    private static void ReapplyNestedTextOverrides(string content, List<PrefabYaml.TextOverride> overrides)
+    {
+        string contentPath = Folder + content + ".prefab";
+        GameObject root = PrefabUtility.LoadPrefabContents(contentPath);
+        try
+        {
+            int applied = 0;
+            foreach (PrefabYaml.TextOverride entry in overrides)
+            {
+                Transform instance = FindDeep(root.transform, entry.InstanceName);
+                Transform target = instance != null ? FindDeep(instance, entry.TargetObjectName) : null;
+                TMP_Text label = target != null ? target.GetComponent<TMP_Text>() : null;
+                if (label != null)
+                {
+                    label.text = entry.Value;
+                    applied++;
+                }
+            }
+
+            Debug.Log($"{contentPath}: re-applied {applied} of {overrides.Count} nested label overrides");
+            PrefabUtility.SaveAsPrefabAsset(root, contentPath);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+    }
+
+    private static Transform FindDeep(Transform parent, string name)
+    {
+        foreach (Transform child in parent.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name == name)
+            {
+                return child;
+            }
+        }
+
+        return null;
+    }
+
     private static void Migrate(string content, string[] nestedPrefabs, (string path, string key)[] icons, Action<GameObject> verify)
     {
         foreach (string nested in nestedPrefabs)

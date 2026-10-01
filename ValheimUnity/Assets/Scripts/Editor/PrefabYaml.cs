@@ -175,6 +175,103 @@ public static class PrefabYaml
         return references;
     }
 
+    public struct TextOverride
+    {
+        public string InstanceName;
+        public string TargetObjectName;
+        public string Value;
+    }
+
+    // Per-instance m_Text overrides on nested prefabs die with the Text component they target.
+    public static List<TextOverride> NestedTextOverrides(string assetPath)
+    {
+        List<TextOverride> overrides = new List<TextOverride>();
+        Dictionary<string, Dictionary<long, string>> sourceNames = new Dictionary<string, Dictionary<long, string>>();
+        foreach (Block block in Parse(File.ReadAllText(assetPath)))
+        {
+            if (block.ClassId != 1001)
+            {
+                continue;
+            }
+
+            Match source = Regex.Match(block.Body, @"m_SourcePrefab: \{fileID: \d+, guid: ([0-9a-f]+)");
+            if (!source.Success)
+            {
+                continue;
+            }
+
+            string guid = source.Groups[1].Value;
+            string instanceName = null;
+            List<(long target, string value)> texts = new List<(long, string)>();
+            foreach (Match m in Regex.Matches(block.Body, @"- target: \{fileID: (-?\d+), guid: [0-9a-f]+,\s*type: 3\}\s*propertyPath: ([^\r\n]+)\r?\n\s*value: ([^\r\n]*)"))
+            {
+                string property = m.Groups[2].Value.Trim();
+                string value = m.Groups[3].Value.Trim();
+                if (property == "m_Name")
+                {
+                    instanceName = value;
+                }
+                else if (property == "m_Text")
+                {
+                    texts.Add((long.Parse(m.Groups[1].Value), value));
+                }
+            }
+
+            if (instanceName == null || texts.Count == 0)
+            {
+                continue;
+            }
+
+            if (!sourceNames.TryGetValue(guid, out Dictionary<long, string> names))
+            {
+                names = ComponentObjectNames(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+                sourceNames[guid] = names;
+            }
+
+            foreach ((long target, string value) in texts)
+            {
+                if (names.TryGetValue(target, out string objectName))
+                {
+                    overrides.Add(new TextOverride { InstanceName = instanceName, TargetObjectName = objectName, Value = value });
+                }
+            }
+        }
+
+        return overrides;
+    }
+
+    private static Dictionary<long, string> ComponentObjectNames(string assetPath)
+    {
+        Dictionary<long, string> goNames = new Dictionary<long, string>();
+        Dictionary<long, long> componentGo = new Dictionary<long, long>();
+        foreach (Block block in Parse(File.ReadAllText(assetPath)))
+        {
+            if (block.ClassId == 1)
+            {
+                Match name = Regex.Match(block.Body, @"^  m_Name: (.*)$", RegexOptions.Multiline);
+                if (name.Success)
+                {
+                    goNames[block.FileId] = name.Groups[1].Value.Trim();
+                }
+            }
+            else if (block.ClassId == 114)
+            {
+                componentGo[block.FileId] = Field(block.Body, "m_GameObject");
+            }
+        }
+
+        Dictionary<long, string> result = new Dictionary<long, string>();
+        foreach (KeyValuePair<long, long> pair in componentGo)
+        {
+            if (goNames.TryGetValue(pair.Value, out string name))
+            {
+                result[pair.Key] = name;
+            }
+        }
+
+        return result;
+    }
+
     private static List<Block> Parse(string yaml)
     {
         List<Block> blocks = new List<Block>();
