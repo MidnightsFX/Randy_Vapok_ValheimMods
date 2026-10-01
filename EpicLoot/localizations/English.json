@@ -828,6 +828,7 @@
     "mod_epicloot_upgrademessage": "$1 upgraded to level $2",
     "mod_epicloot_unlockmessage": "$1 unlocked!",
     "mod_epicloot_bonus": "Bonus!",
+    "mod_epicloot_storagecount": "$1 in storage",
 
     "mod_epicloot_featureinfo_none": "Select a feature from the list to the left to view upgrade options.",
     "mod_epicloot_featureinfo_sacrifice": "Sacrifice magic items and trophies, destroying them to produce enchanting materials.\n\nWhen upgraded, gain a chance to receive double the items normally gained from the sacrifice.",

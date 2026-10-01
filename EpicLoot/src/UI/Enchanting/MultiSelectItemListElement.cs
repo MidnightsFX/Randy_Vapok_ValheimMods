@@ -1,4 +1,5 @@
 ﻿using System;
+using EpicLoot.Config;
 using EpicLoot.CraftingV2;
 using TMPro;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace EpicLoot_UnityLib
     {
         public const string TotalQuantityFormat = "/ {0}";
         public const string ReadOnlyQuantityFormat = "{0}";
+        public const string StorageCountColor = "#9BDB9B";
 
         public Button MainButton;
         public Toggle SelectedToggle;
@@ -203,6 +205,13 @@ namespace EpicLoot_UnityLib
                 EnchantingUIController.SetMagicItem(this, _item.GetItem(), Tooltip);
                 CheckAndSetNameToEnchantingEffects();
 
+                int stored = GetStorageCount();
+                if (Tooltip != null && stored > 0)
+                {
+                    string storageLine = Localization.instance.Localize("$mod_epicloot_storagecount", stored.ToString());
+                    Tooltip.m_text += $"\n<color={StorageCountColor}>{storageLine}</color>";
+                }
+
                 if (ItemName != null)
                 {
                     ItemName.text += _item.GetDisplayNameSuffix();
@@ -222,6 +231,16 @@ namespace EpicLoot_UnityLib
             RefreshGamepadFocusIndicator();
 
             
+        }
+
+        private int GetStorageCount()
+        {
+            if (!CheckPlayerInventory || !ELConfig.ShowStorageCounts.Value || _item?.GetItem() == null)
+            {
+                return 0;
+            }
+
+            return InventoryManagement.Instance.CountProviderItem(_item.GetItem());
         }
 
         private bool CheckAndSetNameToEnchantingEffects()
@@ -308,6 +327,14 @@ namespace EpicLoot_UnityLib
                     {
                         quantityText = $"<color=red>{quantityText}</color>";
                     }
+                }
+
+                int stored = GetStorageCount();
+                if (stored > 0)
+                {
+                    // The cost cell's label wraps and autosizes, so without nobr a long count can drop
+                    // to a second line instead of shrinking.
+                    quantityText = $"<nobr>{quantityText} <color={StorageCountColor}>+{stored}</color></nobr>";
                 }
                 ItemTotalQuantity.text = quantityText;
             }

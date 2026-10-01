@@ -57,6 +57,7 @@ internal class ELConfig {
     public static ConfigEntry<float> _bossTrophyDropPlayerRange;
     public static ConfigEntry<int> _andvaranautRange;
     public static ConfigEntry<bool> ShowEquippedAndHotbarItemsInSacrificeTab;
+    public static ConfigEntry<bool> ShowStorageCounts;
     public static ConfigEntry<bool> _adventureModeEnabled;
     public static readonly ConfigEntry<string>[] AbilityKeyCodes = new ConfigEntry<string>[AbilityController.AbilitySlotCount];
     public static ConfigEntry<TextAnchor> AbilityBarAnchor;
@@ -554,6 +555,10 @@ internal class ELConfig {
         ShowEquippedAndHotbarItemsInSacrificeTab = BindClient(SectionInterface,
             "ShowEquippedAndHotbarItemsInSacrificeTab", false,
             "If set to false, hides the items that are equipped or on your hotbar in the Sacrifice items list.");
+        ShowStorageCounts = BindClient(SectionInterface, "Show Storage Counts", true,
+            "Shows, after each material cost at the enchanting table, how many of it are available from " +
+            "storage outside your inventory, such as a craft-from-containers mod (as a green +N). Hover " +
+            "the material for the full line.");
         UIAudioVolumeAdjustment = BindClient(SectionInterface, "AudioVolumeAdjustment", 1.0f,
             "Multiplies the crafting UI sound volume by this percentage [0.0-1.0].\n" +
             "1 = full UI sounds\n" +

@@ -76,6 +76,11 @@ public class InventoryManagement
         return count + API.CountProviderItems(item);
     }
 
+    public int CountProviderItem(ItemDrop.ItemData item)
+    {
+        return API.CountProviderItems(item.m_shared.m_name);
+    }
+
     public void GiveItem(string item, int amount)
     {
         Debug.Log($"Attempting to give item {item} with amount {amount}");
