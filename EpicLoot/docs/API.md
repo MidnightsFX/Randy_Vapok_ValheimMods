@@ -157,6 +157,38 @@ API.UnregisterInventoryProvider("my.plugin.guid");
 - `removeItem` / `removeExactItem` return how many they actually removed; returning more than requested is
   clamped.
 
+#### Saving items changed in place
+
+What `getItems` offers is also what the table may *change*: Enchant, Augment, Rune Etch, a Rune Extract in
+a Reduce mode, Set Etch, a Set Extract that strips the set, and Disenchant all rewrite the target item
+rather than consuming it. Epic Loot writes the change to your instance, but only you can save it where it
+lives. A vanilla chest does not save on its own here, and it re-reads its ZDO after anyone opens it, so an
+unsaved change is undone after the materials were spent (a disenchant also hands back the socketed stones
+first, so the revert duplicates them).
+
+```csharp
+API.RegisterInventoryProvider("my.plugin.guid", ...);           // first
+API.RegisterInventoryProviderSaveHandler("my.plugin.guid", item =>
+{
+    Container chest = FindContainerHolding(item);
+    if (chest == null || !chest.m_nview.IsOwner()) return false;  // Epic Loot logs that it may not last
+    chest.GetInventory().Changed();                                // Container.OnContainerChanged saves it
+    return true;
+});
+```
+
+- It runs on the frame of the change, right after Epic Loot re-checked (through `getItems`) that you still
+  offer the item. Before paying for an in-place change Epic Loot asks `getItems` again, so a container that
+  reloaded since the list was built fails that check instead of taking the materials.
+- **Do not reload the container before saving.** A reload (`Container.Load`) replaces every item instance
+  from the ZDO and discards the change you were handed.
+- Without a save handler your items are still offered for in-place changes, and the first one logs a
+  warning naming your id. Players can keep a provider's items to spending only by listing its id under the
+  server setting `Spend-Only Storage Mods` (Enchanting Table section), which defaults to
+  `Azumatt.AzuCraftyBoxes`. Listed providers still supply materials and runes and can have items
+  sacrificed or identified.
+- `GetRegisteredProviders()["InventorySave"]` lists the providers with a save handler.
+
 ### Equipment providers
 
 Contribute equipped items for magic effect resolution — extra equipment slots, quick slots, an equipped

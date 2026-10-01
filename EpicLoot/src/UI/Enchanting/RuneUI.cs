@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EpicLoot;
+using EpicLoot.Compatibility;
 using EpicLoot.CraftingV2;
 using EpicLoot.LegendarySystem;
 using UnityEngine;
@@ -71,6 +72,21 @@ namespace EpicLoot_UnityLib
         }
 
         private bool IsSetMode => _runeAction == RuneAction.SetExtract || _runeAction == RuneAction.SetEtch;
+
+        // Whether the current mode rewrites the selected item, rather than taking it or leaving it be. Such
+        // an item has to sit where that change is saved (InventoryManagement.IsEditable).
+        private bool EditsSelectedItem()
+        {
+            switch (_runeAction)
+            {
+                case RuneAction.Extract:
+                    return EnchantingUIController.RuneExtractEditsItem();
+                case RuneAction.SetExtract:
+                    return EnchantingUIController.SetExtractEditsItem();
+                default:
+                    return true;
+            }
+        }
 
         private class EnchantmentRow
         {
@@ -883,9 +899,13 @@ namespace EpicLoot_UnityLib
             ItemDrop.ItemData item = selectedItem.Item1.GetItem();
 
             // Everything below acts on the selection as it stands when the countdown ends, so check it
-            // still describes an item the player holds and, for the effect modes, an effect the rune tab
-            // may touch (and the one the cost was shown for). The set modes re-check their own rules.
-            if (item != _selectedItem || !InventoryManagement.Instance.GetAllItems().Contains(item) ||
+            // still describes an item the player holds (somewhere that saves the change, for a mode that
+            // rewrites it) and, for the effect modes, an effect the rune tab may touch (and the one the
+            // cost was shown for). The set modes re-check their own rules.
+            bool stillHeld = EditsSelectedItem()
+                ? InventoryManagement.Instance.IsEditable(item)
+                : InventoryManagement.Instance.GetAllItems().Contains(item);
+            if (item != _selectedItem || !stillHeld ||
                 (!IsSetMode && !EnchantingUIController.CanRunifyEffect(item.GetMagicItem(), _selectedEnchantmentIndex)))
             {
                 AbortMainAction("the selected item or enchantment is no longer valid");
@@ -927,6 +947,13 @@ namespace EpicLoot_UnityLib
 
         private bool ExtractSelectedEnchantment(ItemDrop.ItemData item, float costReduction, float powerModifier)
         {
+            // Favorited while the table was open. Only the modes that keep the item may still extract.
+            if (EnchantingUIController.GetRuneExtractMode() != RuneExtractMode.KeepItem && ItemFavorites.IsProtected(item))
+            {
+                AbortMainAction("the item is favorited");
+                return false;
+            }
+
             List<InventoryItemListElement> cost = EnchantingUIController.GetRuneExtractCost(item, _selectedRarity, costReduction);
             ItemDrop.ItemData RuneWithEnchant = EnchantingUIController.BuildEnchantedRune(item, _selectedEnchantmentIndex, powerModifier);
 
@@ -1064,6 +1091,13 @@ namespace EpicLoot_UnityLib
         // fail is checked, and a destroyed item is taken, before anything is charged or handed out.
         private bool ExtractSelectedSet(ItemDrop.ItemData item, float costReduction)
         {
+            // Favorited while the table was open; every set extract mode strips or destroys the item.
+            if (ItemFavorites.IsProtected(item))
+            {
+                AbortMainAction("the item is favorited");
+                return false;
+            }
+
             List<InventoryItemListElement> cost = EnchantingUIController.GetRuneSetExtractCost(item, _selectedRarity, costReduction);
             ItemDrop.ItemData setRune = EnchantingUIController.BuildSetRune(item);
             if (setRune == null)

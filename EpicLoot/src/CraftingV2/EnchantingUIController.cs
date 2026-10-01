@@ -1,5 +1,6 @@
 ﻿
 using EpicLoot.Biomes;
+using EpicLoot.Compatibility;
 using EpicLoot.Config;
 using EpicLoot.Crafting;
 using EpicLoot.Data;
@@ -295,6 +296,12 @@ namespace EpicLoot.CraftingV2
                         continue;
                     }
 
+                    // Not through RegisterSacrificeFilter: a veto there also cancels the disenchant bonus roll.
+                    if (ItemFavorites.IsProtected(item))
+                    {
+                        continue;
+                    }
+
                     List<ItemAmountConfig> products = EnchantCostsHelper.GetSacrificeProducts(item);
                     if (products != null)
                     {
@@ -492,9 +499,29 @@ namespace EpicLoot.CraftingV2
             return EpicLoot.GetRarityColorARGB(rarity);
         }
 
+        // The items an action may target. One that changes the item in place can only take items whose
+        // storage saves that change (InventoryManagement.GetEditableItems); one that consumes the item or
+        // leaves it alone may take anything the table can see.
+        private static List<ItemDrop.ItemData> GetTargetItems(bool editsItem)
+        {
+            return editsItem ? InventoryManagement.Instance.GetEditableItems() : InventoryManagement.Instance.GetAllItems();
+        }
+
+        // Keep and Destroy leave the item alone or take it; the Reduce modes rewrite it.
+        internal static bool RuneExtractEditsItem()
+        {
+            RuneExtractMode mode = GetRuneExtractMode();
+            return mode == RuneExtractMode.ReduceEnchants || mode == RuneExtractMode.ReduceEnchantsAndRarity;
+        }
+
+        internal static bool SetExtractEditsItem()
+        {
+            return GetRuneSetExtractMode() == RuneSetExtractMode.StripSet;
+        }
+
         internal static List<InventoryItemListElement> GetEnchantableItems()
         {
-            return InventoryManagement.Instance.GetAllItems()
+            return InventoryManagement.Instance.GetEditableItems()
                 .Where(item => !item.IsMagic() && EpicLoot.CanBeMagicItem(item))
                 .Select(item => new InventoryItemListElement() { Item = item })
                 .ToList();
@@ -611,6 +638,7 @@ namespace EpicLoot.CraftingV2
 
             // Maintain durability
             MagicItemEffects.ModifyDurability.SetDurabilityFraction(item, previousDurability);
+            InventoryManagement.Instance.CommitItemEdit(item);
 
             CraftSuccessDialog successDialog = CraftSuccessDialog.CreateForCurrentUI(EnchantingTableUI.instance.transform);
 
@@ -1014,14 +1042,14 @@ namespace EpicLoot.CraftingV2
         internal static List<InventoryItemListElement> GetUnidentifiedItems()
         {
             return InventoryManagement.Instance.GetAllItems()
-                .Where(item => item.IsMagic() && item.IsUnidentified())
+                .Where(item => item.IsMagic() && item.IsUnidentified() && !ItemFavorites.IsProtected(item))
                 .Select(item => new InventoryItemListElement() { Item = item })
                 .ToList();
         }
 
         internal static List<InventoryItemListElement> GetAugmentableItems()
         {
-            return InventoryManagement.Instance.GetAllItems()
+            return InventoryManagement.Instance.GetEditableItems()
                 .Where(item => item.CanBeAugmented() && item.IsRunestone() == false && !item.IsUnidentified())
                 .Select(item => new InventoryItemListElement() { Item = item })
                 .ToList();
@@ -1053,7 +1081,8 @@ namespace EpicLoot.CraftingV2
             }
 
             List<ItemDrop.ItemData> boundItems = InventoryManagement.Instance.GetBoundItems();
-            List<ItemDrop.ItemData> items = InventoryManagement.Instance.GetAllItems();
+            // allowBound is the etch list; an extract only changes the item in the Reduce modes.
+            List<ItemDrop.ItemData> items = GetTargetItems(allowBound || RuneExtractEditsItem());
 
             if (items != null)
             {
@@ -1061,6 +1090,13 @@ namespace EpicLoot.CraftingV2
                 {
                     if (!allowBound && !ELConfig.ShowEquippedAndHotbarItemsInSacrificeTab.Value &&
                         (item != null && item.m_equipped || boundItems.Contains(item)))
+                    {
+                        continue;
+                    }
+
+                    // Extract (the !allowBound list) degrades or destroys the item unless the mode keeps it;
+                    // etching does neither, so favorites stay listed there.
+                    if (!allowBound && GetRuneExtractMode() != RuneExtractMode.KeepItem && ItemFavorites.IsProtected(item))
                     {
                         continue;
                     }
@@ -1106,6 +1142,7 @@ namespace EpicLoot.CraftingV2
             IEnumerable<ItemDrop.ItemData> selectedItems = InventoryManagement.Instance.GetAllItems()
                 .Where(item => item.IsMagic() &&
                     item.IsRunestone() &&
+                    !ItemFavorites.IsProtected(item) &&
                     item.GetMagicItem().Effects.Any(e => availableEffectNames.Contains(e.EffectType)));
 
             List<InventoryItemListElement> returnList = new List<InventoryItemListElement>();
@@ -1183,11 +1220,17 @@ namespace EpicLoot.CraftingV2
             }
 
             List<ItemDrop.ItemData> boundItems = InventoryManagement.Instance.GetBoundItems();
-            foreach (ItemDrop.ItemData item in InventoryManagement.Instance.GetAllItems())
+            foreach (ItemDrop.ItemData item in GetTargetItems(SetExtractEditsItem()))
             {
                 // The same equipped/hotbar rule as a normal extract.
                 if (!ELConfig.ShowEquippedAndHotbarItemsInSacrificeTab.Value &&
                     (item != null && item.m_equipped || boundItems.Contains(item)))
+                {
+                    continue;
+                }
+
+                // Both set extract modes take the set off the item or destroy it.
+                if (ItemFavorites.IsProtected(item))
                 {
                     continue;
                 }
@@ -1210,14 +1253,17 @@ namespace EpicLoot.CraftingV2
                 return result;
             }
 
+            // The runes are spent, so they may come from anywhere the table can see; the targets are
+            // rewritten, so only from storage that saves the change.
             List<ItemDrop.ItemData> items = InventoryManagement.Instance.GetAllItems();
-            List<ItemDrop.ItemData> runes = items.Where(x => TryGetSetRuneSet(x, out _)).ToList();
+            // A favorited set rune is never consumed, so it cannot make an item etchable either.
+            List<ItemDrop.ItemData> runes = items.Where(x => TryGetSetRuneSet(x, out _) && !ItemFavorites.IsProtected(x)).ToList();
             if (runes.Count == 0)
             {
                 return result;
             }
 
-            foreach (ItemDrop.ItemData item in items)
+            foreach (ItemDrop.ItemData item in InventoryManagement.Instance.GetEditableItems())
             {
                 if (IsSetEtchTarget(item) && runes.Any(rune => TryResolveSetEtch(item, rune, out _, out _)))
                 {
@@ -1238,6 +1284,11 @@ namespace EpicLoot.CraftingV2
 
             foreach (ItemDrop.ItemData rune in InventoryManagement.Instance.GetAllItems())
             {
+                if (ItemFavorites.IsProtected(rune))
+                {
+                    continue;
+                }
+
                 if (TryResolveSetEtch(target, rune, out LegendarySetInfo set, out LegendaryInfo piece))
                 {
                     result.Add(new InventoryItemListElement()
@@ -1316,6 +1367,7 @@ namespace EpicLoot.CraftingV2
             magicItem.DisplayName = MagicItemNames.GetNameForItem(item, magicItem);
 
             API.WithChangeReason(API.ChangeReason.Rune, () => item.SaveMagicItem(magicItem));
+            InventoryManagement.Instance.CommitItemEdit(item);
             RefreshEquippedSetState(item);
         }
 
@@ -1338,6 +1390,7 @@ namespace EpicLoot.CraftingV2
         internal static void ApplySetEtch(ItemDrop.ItemData target, MagicItem result)
         {
             API.WithChangeReason(API.ChangeReason.Rune, () => target.SaveMagicItem(result));
+            InventoryManagement.Instance.CommitItemEdit(target);
             RefreshEquippedSetState(target);
 
             Game.instance.GetPlayerProfile().IncrementStat(PlayerStatType.Crafts);
@@ -1570,6 +1623,7 @@ namespace EpicLoot.CraftingV2
             {
                 item.Data().Remove<MagicItemComponent>();
                 API.RaiseMagicItemChanged(item, API.ChangeReason.Rune);
+                InventoryManagement.Instance.CommitItemEdit(item);
                 return;
             }
 
@@ -1582,6 +1636,7 @@ namespace EpicLoot.CraftingV2
             }
 
             API.WithChangeReason(API.ChangeReason.Rune, () => item.SaveMagicItem(magicItem));
+            InventoryManagement.Instance.CommitItemEdit(item);
         }
 
         // Whether the rune tab may extract or overwrite the effect at this index: it has to exist and
@@ -1662,6 +1717,7 @@ namespace EpicLoot.CraftingV2
         internal static void ApplyRuneEtch(ItemDrop.ItemData item, MagicItem etchedMagicItem)
         {
             API.WithChangeReason(API.ChangeReason.Rune, () => item.SaveMagicItem(etchedMagicItem));
+            InventoryManagement.Instance.CommitItemEdit(item);
 
             Game.instance.GetPlayerProfile().IncrementStat(PlayerStatType.Crafts);
             Gogan.LogEvent("Game", "RuneEnhanced", item.m_shared.m_name, 1);
@@ -1782,6 +1838,9 @@ namespace EpicLoot.CraftingV2
 
             magicItem.SetEffectAsAugmented(augmentindex);
             API.WithChangeReason(API.ChangeReason.Augment, () => item.SaveMagicItem(magicItem));
+            // Saved now as well as on completion: the augment is paid for here, and the choice dialog
+            // can be closed without picking.
+            InventoryManagement.Instance.CommitItemEdit(item);
 
             AugmentChoiceDialog choiceDialog = AugmentHelper.CreateAugmentChoiceDialog(true);
             choiceDialog.transform.SetParent(EnchantingTableUI.instance.transform);
@@ -1835,6 +1894,7 @@ namespace EpicLoot.CraftingV2
             }
 
             API.WithChangeReason(API.ChangeReason.Augment, () => item.SaveMagicItem(magicItem));
+            InventoryManagement.Instance.CommitItemEdit(item);
 
             Game.instance.GetPlayerProfile().IncrementStat(PlayerStatType.Crafts);
             Gogan.LogEvent("Game", "Augmented", item.m_shared.m_name, 1);
@@ -1846,10 +1906,12 @@ namespace EpicLoot.CraftingV2
         {
             List<ItemDrop.ItemData> boundItems = InventoryManagement.Instance.GetBoundItems();
 
-            return InventoryManagement.Instance.GetAllItems()
+            // Disenchanting strips the item in place and hands its socketed stones back, so an item whose
+            // storage cannot save the strip would come back enchanted and socketed: a duplication.
+            return InventoryManagement.Instance.GetEditableItems()
                 .Where(item => !item.m_equipped && !item.IsRunestone()  && (ELConfig.ShowEquippedAndHotbarItemsInSacrificeTab.Value ||
                     !boundItems.Contains(item)))
-                .Where(item => item.CanBeDisenchanted())
+                .Where(item => item.CanBeDisenchanted() && !ItemFavorites.IsProtected(item))
                 .Select(item => new InventoryItemListElement() { Item = item })
                 .ToList();
         }
@@ -1951,6 +2013,7 @@ namespace EpicLoot.CraftingV2
                 // Dropping the component does not write through SetMagicItem, so the change event has to
                 // be raised by hand here.
                 API.RaiseMagicItemChanged(item, API.ChangeReason.Disenchant);
+                InventoryManagement.Instance.CommitItemEdit(item);
             }
 
             return returnedItems;

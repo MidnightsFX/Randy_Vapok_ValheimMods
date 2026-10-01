@@ -38,16 +38,34 @@ namespace EpicLoot
                 inventory.SetHeight(rowsNeeded);
             }
 
-            foreach (var item in items)
+            // Every AddItem raises Inventory.Changed, and Container.OnContainerChanged answers each one with
+            // a full Save: the whole inventory serialized into a fresh ZDO byte array, bumping the data
+            // revision and queueing it to send. m_loading is the flag Container.Load holds for the same
+            // reason; hold it here and save once at the end.
+            var wasLoading = container.m_loading;
+            container.m_loading = true;
+            try
             {
-                if (inventory.AddItem(item))
+                foreach (var item in items)
                 {
-                    continue;
-                }
+                    if (inventory.AddItem(item))
+                    {
+                        continue;
+                    }
 
-                EpicLoot.LogWarning($"{container.m_name} is full; dropping {item.m_shared.m_name} beside it.");
-                ItemDrop.DropItem(item, item.m_stack, container.transform.position + Vector3.up,
-                    Quaternion.identity);
+                    EpicLoot.LogWarning($"{container.m_name} is full; dropping {item.m_shared.m_name} beside it.");
+                    ItemDrop.DropItem(item, item.m_stack, container.transform.position + Vector3.up,
+                        Quaternion.identity);
+                }
+            }
+            finally
+            {
+                container.m_loading = wasLoading;
+            }
+
+            if (!wasLoading && container.IsOwner())
+            {
+                container.Save();
             }
         }
     }
