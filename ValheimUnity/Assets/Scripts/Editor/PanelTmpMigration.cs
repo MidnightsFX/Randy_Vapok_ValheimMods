@@ -94,6 +94,21 @@ public static class PanelTmpMigration
             });
     }
 
+    [MenuItem("Mod/Migrations/DisenchantContent to TMP")]
+    public static void Disenchant()
+    {
+        Migrate("DisenchantContent", new string[0],
+            Concat(TabIcons,
+                ("GamepadHints/BottomRow/SelectButton/Icon", "JoyButtonA"),
+                ("GamepadHints/BottomRow/SortingButton/Icon", "JoyRStick"),
+                ("MainButton/Hint/Icon", "JoyButtonX")),
+            content =>
+            {
+                DisenchantUI ui = content.GetComponent<DisenchantUI>();
+                Require(ui.CostLabel);
+            });
+    }
+
     private static void Migrate(string content, string[] nestedPrefabs, (string path, string key)[] icons, Action<GameObject> verify)
     {
         foreach (string nested in nestedPrefabs)

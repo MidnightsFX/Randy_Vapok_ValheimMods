@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using EpicLoot.CraftingV2;
+using TMPro;
 using UnityEngine.UI;
 
 namespace EpicLoot_UnityLib
 {
     public class DisenchantUI : EnchantingTableUIPanelBase
     {
-        public Text CostLabel;
+        public TMP_Text CostLabel;
         public MultiSelectItemList CostList;
         public EnchantBonus BonusPanel;
 
