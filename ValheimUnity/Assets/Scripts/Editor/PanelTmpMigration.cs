@@ -225,6 +225,18 @@ public static class PanelTmpMigration
         Debug.Log("Controls migration done");
     }
 
+    [MenuItem("Mod/Migrations/Tab bar hints to glyphs")]
+    public static void TabBar()
+    {
+        Migrate("EnchantingUI", new string[0],
+            new[]
+            {
+                ("Panel/TabGamepadHints/LTrigger/LTrigger (1)", "JoyLTrigger"),
+                ("Panel/TabGamepadHints/RTrigger/RTrigger (1)", "JoyRTrigger"),
+            },
+            content => { });
+    }
+
     private static void Migrate(string content, string[] nestedPrefabs, (string path, string key)[] icons, Action<GameObject> verify)
     {
         foreach (string nested in nestedPrefabs)
