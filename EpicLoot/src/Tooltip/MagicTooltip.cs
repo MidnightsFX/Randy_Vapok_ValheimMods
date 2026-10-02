@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using EpicLoot.Crafting;
+using EpicLoot.LegendarySystem;
 using EpicLoot.ShardStones;
 
 namespace EpicLoot;
@@ -13,6 +15,11 @@ public partial class MagicTooltip(ItemDrop.ItemData item, MagicItem magicItem, i
 
     public string GetTooltip() {
         text.Clear();
+
+        if (item.IsSetRune()) {
+            AddSetRuneTooltip();
+            return text.ToString();
+        }
 
         //AddMagicDisplayName();
         AddMagicSetLabel();
@@ -108,14 +115,7 @@ public partial class MagicTooltip(ItemDrop.ItemData item, MagicItem magicItem, i
 
     private void AddMagicSetLabel() {
         if (item.IsMagicSetItem()) {
-            switch (item.GetRarity()) {
-                case ItemRarity.Legendary:
-                    text.Append($"<color={EpicLoot.GetSetItemColor()}>$mod_epicloot_legendarysetlabel</color>\n");
-                    break;
-                case ItemRarity.Mythic:
-                    text.Append($"<color={EpicLoot.GetSetItemColor()}>$mod_epicloot_mythicsetlabel</color>\n");
-                    break;
-            }
+            text.Append($"<color={EpicLoot.GetSetItemColor()}>{UniqueLegendaryHelper.GetSetLabelToken(item.GetRarity())}</color>\n");
         }
     }
 

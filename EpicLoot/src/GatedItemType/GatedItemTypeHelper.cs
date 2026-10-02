@@ -323,7 +323,7 @@ namespace EpicLoot.GatedItemType
                 List<string> potentialItems = new List<string>();
                 foreach (LootTable lt in ltcategory)
                 {
-                    potentialItems.AddRange(lt.Loot.Select(x => x.Item).Where(x => !LootDenyList.IsDenied(x)));
+                    potentialItems.AddRange(LootRoller.GetLevelOneLoot(lt).Select(x => x.Item).Where(x => !LootDenyList.IsDenied(x)));
                 }
 
                 if (potentialItems.Count == 0)

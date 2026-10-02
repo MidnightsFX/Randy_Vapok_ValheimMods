@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EpicLoot;
+using EpicLoot.Compatibility;
 using EpicLoot.Crafting;
 using EpicLoot.CraftingV2;
 using JetBrains.Annotations;
@@ -185,7 +186,9 @@ namespace EpicLoot_UnityLib
         private void IdentifyItems()
         {
             List<Tuple<IListElement, int>> selectedItems = AvailableItems.GetSelectedItems<IListElement>();
+            // Favorited while the table was open: leave it out rather than identify it away.
             List<Tuple<ItemDrop.ItemData, int>> unidentifiedItems = selectedItems
+                .Where(x => !ItemFavorites.IsProtected(x.Item1.GetItem()))
                 .Select(x => new Tuple<ItemDrop.ItemData, int>(x.Item1.GetItem(), x.Item2)).ToList();
             string filterType = IdentifyStyle.options[IdentifyStyle.value].text;
             Tuple<float, float> featureValues =
@@ -238,8 +241,10 @@ namespace EpicLoot_UnityLib
                 ItemDrop.ItemData sacrificed = selectedItem.Item1.GetItem();
                 int amount = selectedItem.Item2;
                 // Re-asked now rather than trusted from the list: an external filter (API
-                // RegisterSacrificeFilter) may have started vetoing the item during the countdown.
-                if (sacrificed == null || amount <= 0 || EnchantCostsHelper.GetSacrificeProducts(sacrificed) == null)
+                // RegisterSacrificeFilter) may have started vetoing the item during the countdown, or the
+                // player may have favorited it.
+                if (sacrificed == null || amount <= 0 || EnchantCostsHelper.GetSacrificeProducts(sacrificed) == null ||
+                    ItemFavorites.IsProtected(sacrificed))
                 {
                     continue;
                 }

@@ -1,15 +1,35 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a chance to not consume a crafting material when crafting
     public static class LuckyCraft {
+        // Player.ConsumeResources is also how vanilla charges for placing a build or cultivator piece, and
+        // how the temper panel pays; only the call made from DoCrafting is a craft.
+        private static bool _isCrafting;
+
+        [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.DoCrafting))]
+        private static class InventoryGui_DoCrafting_Patch {
+            [UsedImplicitly]
+            private static void Prefix() {
+                _isCrafting = true;
+            }
+
+            // A finalizer rather than a postfix, so an exception inside DoCrafting cannot leave the flag set
+            // and let the next piece placed skip its materials.
+            [UsedImplicitly]
+            private static System.Exception Finalizer(System.Exception __exception) {
+                _isCrafting = false;
+                return __exception;
+            }
+        }
+
         [HarmonyPatch(typeof(Player), nameof(Player.ConsumeResources))]
         private static class Player_ConsumeResources_Patch {
             [UsedImplicitly]
             private static void Prefix(Player __instance, ref Piece.Requirement[] requirements) {
-                if (requirements == null || __instance != Player.m_localPlayer) {
+                if (!_isCrafting || requirements == null || __instance != Player.m_localPlayer) {
                     return;
                 }
 

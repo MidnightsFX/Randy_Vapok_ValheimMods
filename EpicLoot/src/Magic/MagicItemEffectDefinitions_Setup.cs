@@ -111,6 +111,7 @@ namespace EpicLoot
         public static string FeatherFall = nameof(FeatherFall);
         public static string ModifyDiscoveryRadius = nameof(ModifyDiscoveryRadius);
         public static string FreeBuild = nameof(FreeBuild);
+        public static string GreenThumb = nameof(GreenThumb);
         public static string Comfortable = nameof(Comfortable);
         public static string ModifyLowHealth = nameof(ModifyLowHealth);
         public static string ModifyMovementSpeedLowHealth = nameof(ModifyMovementSpeedLowHealth);
@@ -131,7 +132,9 @@ namespace EpicLoot
         public static string Duelist = nameof(Duelist);
         public static string Immovable = nameof(Immovable);
         public static string ModifyStaggerDamage = nameof(ModifyStaggerDamage);
+        public static string CloseQuarter = nameof(CloseQuarter);
         public static string Luck = nameof(Luck);
+        public static string Prosperity = nameof(Prosperity);
         public static string ModifyParryWindow = nameof(ModifyParryWindow);
         public static string Slow = nameof(Slow);
         public static string FrostDamageAOE = nameof(FrostDamageAOE);

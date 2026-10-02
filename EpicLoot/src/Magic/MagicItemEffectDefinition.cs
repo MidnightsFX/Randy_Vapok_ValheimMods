@@ -2,6 +2,7 @@
 using EpicLoot.GatedItemType;
 using EpicLoot.General;
 using EpicLoot.LegendarySystem;
+using EpicLoot.MagicItemEffects;
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
@@ -664,10 +665,11 @@ namespace EpicLoot
 
         /// <summary>
         /// The value range an effect on an item rolls and tempers against. In order: an explicit
-        /// override (the shard preview passes a zero-width one on purpose), then the guaranteed-effect
-        /// Values block of the item's legendary/mythic when it has one, then the rarity table. Stock
-        /// legendaries.json gives no guaranteed effect a Values block, so a unique's effects normally
-        /// land on the rarity table too. Null means the effect carries no value at that rarity.
+        /// override (the shard preview passes a zero-width one on purpose), then the item's unique's
+        /// guaranteed effect at this rarity (its ValuesPerRarity entry, else its flat Values) when it
+        /// declares one, then the rarity table. Stock legendaries.json gives no guaranteed effect a
+        /// Values block, so a unique's effects normally land on the rarity table too. Null means the
+        /// effect carries no value at that rarity.
         /// </summary>
         public static MagicItemEffectDefinition.ValueDef GetRollRange(MagicItemEffectDefinition def,
             ItemRarity rarity, string legendaryID = null, MagicItemEffectDefinition.ValueDef valuesOverride = null)
@@ -685,7 +687,7 @@ namespace EpicLoot
             if (!string.IsNullOrEmpty(legendaryID))
             {
                 MagicItemEffectDefinition.ValueDef legendaryValues =
-                    UniqueLegendaryHelper.GetLegendaryEffectValues(legendaryID, def.Type);
+                    UniqueLegendaryHelper.GetLegendaryEffectValues(legendaryID, def.Type, rarity);
                 if (legendaryValues != null)
                 {
                     return legendaryValues;
@@ -728,15 +730,19 @@ namespace EpicLoot
                 magicItem.Effects.RemoveAt(ignoreEffectIndex);
             }
 
+            // A rune etch moves an effect some item already had instead of rolling a new one, so an effect
+            // family switched off in the config (health critical) only leaves the rolled pools.
+            bool rolling = !checkruneroll;
             var results = AllDefinitions.Values.Where(x => x.CheckRequirements(itemData, magicItem, checklootroll, checkaugment, checkruneroll) &&
-                !EnchantCostsHelper.EffectIsDeprecated(x)).ToList();
+                !EnchantCostsHelper.EffectIsDeprecated(x) && (!rolling || ModifyWithLowHealth.MayRoll(x.Type))).ToList();
 
             if (effect != null)
             {
                 magicItem.Effects.Insert(ignoreEffectIndex, effect);
                 if (AllDefinitions.TryGetValue(effect.EffectType, out var ignoredEffectDef))
                 {
-                    if (!results.Contains(ignoredEffectDef) && !EnchantCostsHelper.EffectIsDeprecated(ignoredEffectDef))
+                    if (!results.Contains(ignoredEffectDef) && !EnchantCostsHelper.EffectIsDeprecated(ignoredEffectDef) &&
+                        (!rolling || ModifyWithLowHealth.MayRoll(ignoredEffectDef.Type)))
                     {
                         results.Add(ignoredEffectDef);
                     }

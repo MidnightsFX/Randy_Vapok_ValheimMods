@@ -185,6 +185,16 @@ namespace EpicLoot_UnityLib
             }
 
             ItemDrop.ItemData item = selectedItem.Item1.GetItem();
+
+            // Checked before paying: the item may have left the inventory, or its chest reloaded and
+            // replaced it, since it was selected. An enchant only lasts on an item whose storage saves it.
+            if (!InventoryManagement.Instance.IsEditable(item))
+            {
+                Debug.LogWarning("[Enchant Item] Cancelled: the item is no longer held anywhere the change would be saved.");
+                RefreshAvailableItems();
+                return;
+            }
+
             List<InventoryItemListElement> cost = EnchantingUIController.GetEnchantCost(item, _rarity);
 
             Player player = Player.m_localPlayer;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using EpicLoot.Compendium;
 using EpicLoot.Config;
-using EpicLoot_UnityLib;
+using EpicLoot.Crafting;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
@@ -14,7 +14,7 @@ using Random = UnityEngine.Random;
 
 namespace EpicLoot;
 
-public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler {
+public class TemperPanel : MonoBehaviour {
     private static bool fontsLoaded;
     public static TemperPanel Instance;
     public static implicit operator bool(TemperPanel i) => i != null;
@@ -82,7 +82,6 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public bool isFirstChild = true;
 
     private RectTransform _rt;
-    private Vector2 _dragOffset;
 
     public void Awake() {
         Instance = this;
@@ -150,13 +149,19 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         transform.SetAsFirstSibling();
         isFirstChild = true;
 
-        // Cache the root RectTransform, make the background drag-receptive, and apply the
-        // saved position. The background click bubbles the drag up to this component.
+        // Cache the root RectTransform, apply the saved position and make the panel movable (Left Alt,
+        // or the corner handle). The frame stays a raycast target, so presses on the panel's empty
+        // areas stop at the panel.
         _rt = (RectTransform)transform;
         if (frame != null) {
             frame.raycastTarget = true;
         }
         ApplyConfiguredPosition();
+        TraderPanelDrag.Attach(_rt, position => {
+            // Persists automatically because cfg.SaveOnConfigSet is true.
+            ELConfig.TemperPanelPositionX.Value = position.x;
+            ELConfig.TemperPanelPositionY.Value = position.y;
+        });
     }
 
     public void ApplyConfiguredPosition() {
@@ -164,28 +169,6 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             return;
         }
         _rt.anchoredPosition = new Vector2(ELConfig.TemperPanelPositionX.Value, ELConfig.TemperPanelPositionY.Value);
-    }
-
-    public void OnBeginDrag(PointerEventData eventData) {
-        var parent = (RectTransform)_rt.parent;
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                parent, eventData.position, eventData.pressEventCamera, out var localPoint)) {
-            _dragOffset = _rt.anchoredPosition - localPoint;
-        }
-    }
-
-    public void OnDrag(PointerEventData eventData) {
-        var parent = (RectTransform)_rt.parent;
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                parent, eventData.position, eventData.pressEventCamera, out var localPoint)) {
-            _rt.anchoredPosition = localPoint + _dragOffset;
-        }
-    }
-
-    public void OnEndDrag(PointerEventData eventData) {
-        // Persists automatically because cfg.SaveOnConfigSet is true.
-        ELConfig.TemperPanelPositionX.Value = _rt.anchoredPosition.x;
-        ELConfig.TemperPanelPositionY.Value = _rt.anchoredPosition.y;
     }
 
     private void LocalizeTitles() {
@@ -447,7 +430,8 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
             .GetAllItems()
             // A rarity with no cost entry in adventuredata.json is not temperable, so its items never
             // reach the panel's list.
-            .Where(x => x.IsMagic() && x.IsShardStone() == false
+            // A set rune carries no effects, so there is nothing on it to temper.
+            .Where(x => x.IsMagic() && x.IsShardStone() == false && x.IsSetRune() == false
                         && TemperMan.IsTemperableRarity(x.GetMagicItem().Rarity))
             .ToList();
 
@@ -928,6 +912,21 @@ public class TemperPanel : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     // fontSharedMaterial setter never runs.
     public static void LoadFonts() {
         if (!fontsLoaded) {
+            // Otherwise a lookup cached as failed on an earlier open is handed straight back.
+            MagicFontManager.RetryFailedLookups();
+            bool applied = true;
+            TextMeshProUGUI[] textMeshPros = EpicAssets.TemperPanel.GetComponentsInChildren<TextMeshProUGUI>(true);
+            for (int i = 0; i < textMeshPros.Length; ++i) {
+                TextMeshProUGUI tmp = textMeshPros[i];
+                if (tmp.name == "Title") {
+                    applied &= MagicFontManager.Apply(tmp, MagicFontManager.TMP_FontOptions.NorseBoldOutline);
+                } else if (tmp.transform.parent.name == "gamepad_hint") {
+                    applied &= MagicFontManager.Apply(tmp, MagicFontManager.TMP_FontOptions.AveriaSansLibre);
+                } else {
+                    applied &= MagicFontManager.Apply(tmp, MagicFontManager.TMP_FontOptions.AveriaSansLibreOutline);
+                }
+            }
+
             // Only latched on success: StoreGui reopens call this again, so a lookup that missed
             // because the font was not loaded yet gets another go rather than sticking on the default.
             fontsLoaded = MagicFontManager.ApplyAll(EpicAssets.TemperPanel, tmp => {
