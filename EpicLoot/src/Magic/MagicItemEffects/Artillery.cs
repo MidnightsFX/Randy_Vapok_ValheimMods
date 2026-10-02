@@ -18,7 +18,8 @@ namespace EpicLoot.MagicItemEffects
 {
     // Artillery (set items only, NoRoll). The wearer's crossbow shots leave as lobbed fireballs: the Staff of
     // Embers projectile, arced to come down on the point the player aims at, dealing the shot's damage +value%
-    // to everything within value x RadiusPerValue metres of the impact.
+    // to everything within Radius metres of the impact. The rarity raises the damage; the radius is the same at
+    // every rarity.
     //
     // The fireball is still the crossbow's shot: the bolt is spent, its hit data (bolt and crossbow damage, skill,
     // status effects) is the one vanilla built, and the blast is a weapon strike, so on-hit enchantments proc on
@@ -34,13 +35,13 @@ namespace EpicLoot.MagicItemEffects
         public const float DefaultMaxDistance = 60f;       // metres; aiming further comes down at this range
         public const float DefaultGravity = 30f;           // metres/second^2 pulling the fireball down
         public const float DefaultArcHeight = 0.2f;        // apex height above the higher end, per metre of range
-        public const float DefaultRadiusPerValue = 0.04f;  // blast radius in metres per 1% of the effect value
+        public const float DefaultRadius = 2.5f;           // blast radius in metres
         public const float DefaultTripleShotSpread = 0.15f; // a triple shot's scatter, as a fraction of the range
 
         private const string MaxDistanceKey = "MaxDistance";
         private const string GravityKey = "Gravity";
         private const string ArcHeightKey = "ArcHeight";
-        private const string RadiusPerValueKey = "RadiusPerValue";
+        private const string RadiusKey = "Radius";
         private const string TripleShotSpreadKey = "TripleShotSpread";
 
         private const string FireballPrefab = "staff_fireball_projectile";
@@ -51,19 +52,19 @@ namespace EpicLoot.MagicItemEffects
         private static float MaxDistance => EffectConfig.GetClamped(MagicEffectType.Artillery, MaxDistanceKey, DefaultMaxDistance, 5f, 300f);
         private static float Gravity => Mathf.Max(1f, EffectConfig.Get(MagicEffectType.Artillery, GravityKey, DefaultGravity));
         private static float ArcHeight => Mathf.Max(0f, EffectConfig.Get(MagicEffectType.Artillery, ArcHeightKey, DefaultArcHeight));
-        private static float RadiusPerValue => Mathf.Max(0f, EffectConfig.Get(MagicEffectType.Artillery, RadiusPerValueKey, DefaultRadiusPerValue));
+        private static float Radius => Mathf.Max(0f, EffectConfig.Get(MagicEffectType.Artillery, RadiusKey, DefaultRadius));
         private static float TripleShotSpread => EffectConfig.GetClamped(MagicEffectType.Artillery, TripleShotSpreadKey, DefaultTripleShotSpread, 0f, 1f);
 
-        // Tooltip: "... +{0}% damage ... within {1}m" -- {1} follows the rolled value and a retune of RadiusPerValue.
+        // Tooltip: "... +{0}% damage ... within {1}m" -- {1} follows a retune of Radius.
         public static void RegisterDisplayValues()
         {
-            MagicItem.RegisterDisplayValues(MagicEffectType.Artillery, value => new object[] { value, GetRadius(value) });
+            MagicItem.RegisterDisplayValues(MagicEffectType.Artillery, value => new object[] { value, GetRadius() });
         }
 
         // Rounded to the centimetre so the tooltip shows the radius the blast actually uses.
-        private static float GetRadius(float value)
+        private static float GetRadius()
         {
-            return Mathf.Round(value * RadiusPerValue * 100f) / 100f;
+            return Mathf.Round(Radius * 100f) / 100f;
         }
 
         // The fireball FireProjectileBurst just instantiated in place of a bolt, until its Setup call.
@@ -149,7 +150,7 @@ namespace EpicLoot.MagicItemEffects
 
             projectile.m_vel = velocity;
             projectile.m_gravity = gravity;
-            projectile.m_aoe = GetRadius(value);
+            projectile.m_aoe = GetRadius();
             projectile.m_damage.Modify(1f + value / 100f);
             projectile.transform.rotation = Quaternion.LookRotation(velocity);
         }

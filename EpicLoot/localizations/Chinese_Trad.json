@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "這件魔法物品不會損壞，永遠不會破裂。",
   "mod_epicloot_me_indestructible_prefix1": "堅不可摧",
   "mod_epicloot_me_indestructible_suffix1": "堅不可摧",
-  "mod_epicloot_me_coinhoarder_display": "硬幣加權武器 +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "硬幣加權武器 {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "增加武器每種傷害類型 +<b><color=yellow>X</color></b>% 每 (999) 枚背包中的硬幣。超過 2k 枚硬幣後顯著遞減。",
   "mod_epicloot_me_coinhoarder_prefix1": "暴君的",
   "mod_epicloot_me_coinhoarder_suffix1": "財富",

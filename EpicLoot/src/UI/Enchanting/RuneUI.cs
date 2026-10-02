@@ -53,8 +53,8 @@ namespace EpicLoot_UnityLib
         private readonly List<ModeToggle> _modes = new List<ModeToggle>();
 
         // The two column titles, and what the prefab shipped in them, restored for the effect modes.
-        private Text _enchantHeader;
-        private Text _runesHeader;
+        private TMP_Text _enchantHeader;
+        private TMP_Text _runesHeader;
         private string _enchantHeaderDefault;
         private string _runesHeaderDefault;
 
@@ -196,9 +196,9 @@ namespace EpicLoot_UnityLib
             RegisterMode(_setExtractButton, RuneAction.SetExtract);
             _modes.Sort((a, b) => a.Toggle.transform.GetSiblingIndex().CompareTo(b.Toggle.transform.GetSiblingIndex()));
 
-            _enchantHeader = transform.Find("EnchantmentSelector/ProductsLabel")?.GetComponent<Text>();
+            _enchantHeader = transform.Find("EnchantmentSelector/ProductsLabel")?.GetComponent<TMP_Text>();
             _runesHeader = AvailableRunesWindow != null
-                ? AvailableRunesWindow.transform.Find("ProductsLabel")?.GetComponent<Text>()
+                ? AvailableRunesWindow.transform.Find("ProductsLabel")?.GetComponent<TMP_Text>()
                 : null;
             _enchantHeaderDefault = _enchantHeader != null ? _enchantHeader.text : null;
             _runesHeaderDefault = _runesHeader != null ? _runesHeader.text : null;
@@ -267,7 +267,7 @@ namespace EpicLoot_UnityLib
             toggle.SetIsOnWithoutNotify(false);
 
             // The panel root was localized before this tab woke, so the clone's label is set here.
-            foreach (Text label in clone.GetComponentsInChildren<Text>(true))
+            foreach (TMP_Text label in clone.GetComponentsInChildren<TMP_Text>(true))
             {
                 label.text = Localization.instance.Localize(labelToken);
             }
@@ -621,10 +621,10 @@ namespace EpicLoot_UnityLib
                 }
             }
 
-            Text label = row.GetComponentInChildren<Text>(true);
+            TMP_Text label = row.GetComponentInChildren<TMP_Text>(true);
             if (label != null)
             {
-                label.supportRichText = true;
+                label.richText = true;
                 label.text = Localization.instance.Localize(text);
             }
 
@@ -823,7 +823,7 @@ namespace EpicLoot_UnityLib
 
         // A null token puts back what the prefab shipped. Auga upper-cases these titles, so a replacement
         // follows the shipped text's casing.
-        private static void SetHeader(Text header, string shipped, string token)
+        private static void SetHeader(TMP_Text header, string shipped, string token)
         {
             if (header == null)
             {

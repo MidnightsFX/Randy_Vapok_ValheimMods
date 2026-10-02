@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Maģiskā priekšmetu nesabojās un nekad neizlūzīs.",
   "mod_epicloot_me_indestructible_prefix1": "Neiznīcināms",
   "mod_epicloot_me_indestructible_suffix1": "neiznīcināmība",
-  "mod_epicloot_me_coinhoarder_display": "Monētu sveramais ierocis +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Monētu sveramais ierocis {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Katras ierocu bojājuma veida palielināšana par +<b><color=yellow>X</color></b>% par (999) monētām inventārā. Spēcīgas samazināšanas pārpalikumi pēc 2k monētām.",
   "mod_epicloot_me_coinhoarder_prefix1": "Despota",
   "mod_epicloot_me_coinhoarder_suffix1": "Bagātība",

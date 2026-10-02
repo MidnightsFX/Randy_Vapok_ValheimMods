@@ -40,7 +40,7 @@ namespace EpicLoot;
 public sealed class EpicLoot : BaseUnityPlugin {
     public const string PluginId = "randyknapp.mods.epicloot";
     public const string DisplayName = "Epic Loot";
-    public const string Version = "0.14.14";
+    public const string Version = "0.15.0";
 
     private static string ConfigFileName = PluginId + ".cfg";
     private static string ConfigFileFullPath = BepInEx.Paths.ConfigPath + Path.DirectorySeparatorChar + ConfigFileName;
@@ -179,6 +179,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
         MagicItemEffects.OverwhelmingLaunch.RegisterDisplayValues();
         MagicItemEffects.Artillery.RegisterDisplayValues();
         MagicItemEffects.Assassin.RegisterDisplayValues();
+        MagicItemEffects.CoinHoarder.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;

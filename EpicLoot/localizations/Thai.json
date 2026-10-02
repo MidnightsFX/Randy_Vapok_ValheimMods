@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "ไอเท็มมาจิ้มไม่ใช้ความคงทนและจะไม่เสียหาย",
   "mod_epicloot_me_indestructible_prefix1": "ที่ทนทาน",
   "mod_epicloot_me_indestructible_suffix1": "ความทนทาน",
-  "mod_epicloot_me_coinhoarder_display": "อาวุธที่มีน้ำหนักเหรียญ +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "อาวุธที่มีน้ำหนักเหรียญ {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "เพิ่มความเสียหายของแต่ละชนิดของอาวุธเป็น +<b><color=yellow>X</color></b>% ต่อ (999) ของเหรียญในสต็อก มีการลดลงที่แข็งแกร่งหลังจาก 2k เหรียญ",
   "mod_epicloot_me_coinhoarder_prefix1": "พระมหากษัตริย์",
   "mod_epicloot_me_coinhoarder_suffix1": "ความร่ำรวย",

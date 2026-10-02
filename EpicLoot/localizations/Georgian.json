@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "სამეგრებელი ნივთი არ გამოიყურებს და არ დაიცვარებს.",
   "mod_epicloot_me_indestructible_prefix1": "უკრებო",
   "mod_epicloot_me_indestructible_suffix1": "უკრებო",
-  "mod_epicloot_me_coinhoarder_display": "მონეტების ხელით წარმოებული ობიექტი +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "მონეტების ხელით წარმოებული ობიექტი {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "ყველა ტიპის დავალები გაიზარდება +<b><color=yellow>X</color></b>% ყვილების რაოდენობის მიხედვით. ძლიერი დამატების დასაშვები 2k ყვილის შემდეგ.",
   "mod_epicloot_me_coinhoarder_prefix1": "ტირანტის",
   "mod_epicloot_me_coinhoarder_suffix1": "სიმინდი",

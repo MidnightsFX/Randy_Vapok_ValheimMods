@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Магічний предмет не використовує тривалість і ніколи не зламається.",
   "mod_epicloot_me_indestructible_prefix1": "Незнищенний",
   "mod_epicloot_me_indestructible_suffix1": "Незнищенність",
-  "mod_epicloot_me_coinhoarder_display": "Зброя з вагою монет +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Зброя з вагою монет {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Збільшити кожен тип пошкодження зброї на +<b><color=yellow>X</color></b>% за (999) монет в інвентарі. Сильне зменшення результатів після 2k монет.",
   "mod_epicloot_me_coinhoarder_prefix1": "Тиранії",
   "mod_epicloot_me_coinhoarder_suffix1": "Багатство",

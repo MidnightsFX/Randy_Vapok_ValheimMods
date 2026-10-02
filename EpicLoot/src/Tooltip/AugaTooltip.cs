@@ -314,7 +314,7 @@ public static class AugaTooltip
         damages.m_spirit += eitrImbueSpirit;
 
         bool all = magicItem.HasEffect(MagicEffectType.ModifyDamage, true) ||
-            Player.m_localPlayer.HasActiveMagicEffect(MagicEffectType.CoinHoarder, out float _) ||
+            CoinHoarder.GetDamageBonus(Player.m_localPlayer) > 0f ||
             magicItem.HasEffect(MagicEffectType.SpellSword);
         bool physical = all || magicItem.HasEffect(MagicEffectType.ModifyPhysicalDamage);
         bool elemental = all || magicItem.HasEffect(MagicEffectType.ModifyElementalDamage);

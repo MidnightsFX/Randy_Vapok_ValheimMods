@@ -52,8 +52,9 @@ namespace EpicLoot_UnityLib
         // The prefab is authored with one toggle per rarity of its day, and RefreshRarity casts a toggle's
         // index straight to ItemRarity. When the enum has outgrown the prefab (a bundle that predates a
         // rarity), the last toggle is cloned for each missing tier so every rarity stays selectable. The
-        // authored prefab is still the real fix; this only keeps an older bundle usable.
-        private void EnsureRarityButtons()
+        // authored prefab is still the real fix; this only keeps an older bundle usable. Idempotent; the Auga
+        // fixup calls it before Awake.
+        internal void EnsureRarityButtons()
         {
             if (RarityButtons == null || RarityButtons.Count == 0)
             {

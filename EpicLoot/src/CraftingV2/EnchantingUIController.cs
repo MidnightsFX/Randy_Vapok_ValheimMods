@@ -1907,7 +1907,9 @@ namespace EpicLoot.CraftingV2
                 magicItem.AugmentedEffectIndices.Remove(effectIndex);
             }
 
-            if (magicItem.Rarity == ItemRarity.Rare)
+            // A Rare's generated name comes from its effects; a unique or set piece, which may now be Rare
+            // too, keeps the name its legendary entry gave it.
+            if (magicItem.Rarity == ItemRarity.Rare && string.IsNullOrEmpty(magicItem.LegendaryID))
             {
                 magicItem.DisplayName = MagicItemNames.GetNameForItem(item, magicItem);
             }

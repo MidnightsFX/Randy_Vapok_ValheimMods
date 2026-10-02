@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Mágov predmet nevyužíva životnosť a nikdy sa nerozbije.",
   "mod_epicloot_me_indestructible_prefix1": "Neporušiteľný",
   "mod_epicloot_me_indestructible_suffix1": "Neporušiteľnosť",
-  "mod_epicloot_me_coinhoarder_display": "Zbraň s váhou mincí +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Zbraň s váhou mincí {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Zvýši každý typ poškodenia zbrane o +<b><color=yellow>X</color></b>% za (999) mincí v inventári. Silné klesajúce návraty po 2k minciach.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tyranov",
   "mod_epicloot_me_coinhoarder_suffix1": "Bohatstvo",

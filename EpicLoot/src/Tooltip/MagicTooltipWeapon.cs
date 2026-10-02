@@ -19,7 +19,7 @@ public partial class MagicTooltip {
         bool physDamage = magicItem.HasEffect(MagicEffectType.ModifyPhysicalDamage);
         bool elemDamage = magicItem.HasEffect(MagicEffectType.ModifyElementalDamage);
 
-        bool coinHoarderDamage = localPlayer.HasActiveMagicEffect(MagicEffectType.CoinHoarder, out float _cv);
+        bool coinHoarderDamage = CoinHoarder.GetDamageBonus(localPlayer) > 0f;
         bool spellswordDamage = magicItem.HasEffect(MagicEffectType.SpellSword);
 
         bool allCheck = allDamage || coinHoarderDamage || spellswordDamage;

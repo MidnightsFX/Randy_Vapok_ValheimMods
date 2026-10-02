@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "O item mágico não usa durabilidade e nunca quebrará.",
   "mod_epicloot_me_indestructible_prefix1": "Indestrutível",
   "mod_epicloot_me_indestructible_suffix1": "Indestrutibilidade",
-  "mod_epicloot_me_coinhoarder_display": "Arma Ponderada com Moedas +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Arma Ponderada com Moedas {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Aumenta cada tipo de dano da arma em +<b><color=yellow>X</color></b>% por (999) de moedas no inventário. Fortes retornos decrescentes após 2k moedas.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tirano",
   "mod_epicloot_me_coinhoarder_suffix1": "Riqueza",

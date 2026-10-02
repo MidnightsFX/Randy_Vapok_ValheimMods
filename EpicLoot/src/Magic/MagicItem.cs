@@ -421,9 +421,33 @@ namespace EpicLoot
             }
         }
 
+        // Per-effect readout of what an effect is doing for the local player right now, when that depends on
+        // more than the rolled value (CoinHoarder: the damage bonus at the coins carried). It is appended in
+        // brackets to a line showing one concrete value -- an item's own tooltip, the compendium's total of
+        // everything worn -- and never to the range and generic previews, which have no single value to
+        // evaluate it at. Kept out of the DisplayText providers because those must stay pure. The args
+        // provider returns null to append nothing.
+        private static readonly Dictionary<string, (string DisplayText, Func<float, object[]> Args)> LiveReadouts = new();
+
+        public static void RegisterLiveReadout(string effectType, string displayText, Func<float, object[]> args)
+        {
+            if (string.IsNullOrEmpty(effectType) || string.IsNullOrEmpty(displayText) || args == null)
+            {
+                return;
+            }
+            LiveReadouts[effectType] = (displayText, args);
+        }
+
         public static string GetEffectText(MagicItemEffectDefinition effectDef, float value)
         {
-            return FormatDisplayText(effectDef.DisplayText, GetDisplayArgs(effectDef.Type, value));
+            var text = FormatDisplayText(effectDef.DisplayText, GetDisplayArgs(effectDef.Type, value));
+            if (string.IsNullOrEmpty(effectDef.Type) || !LiveReadouts.TryGetValue(effectDef.Type, out var readout))
+            {
+                return text;
+            }
+
+            var readoutArgs = readout.Args(value);
+            return readoutArgs == null ? text : $"{text} ({FormatDisplayText(readout.DisplayText, readoutArgs)})";
         }
 
         // The {0},{1},... args for a range preview: each placeholder becomes that derived value's own

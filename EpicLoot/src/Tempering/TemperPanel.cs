@@ -5,6 +5,7 @@ using System.Text;
 using EpicLoot.Compendium;
 using EpicLoot.Config;
 using EpicLoot.Crafting;
+using EpicLoot_UnityLib;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
@@ -914,19 +915,6 @@ public class TemperPanel : MonoBehaviour {
         if (!fontsLoaded) {
             // Otherwise a lookup cached as failed on an earlier open is handed straight back.
             MagicFontManager.RetryFailedLookups();
-            bool applied = true;
-            TextMeshProUGUI[] textMeshPros = EpicAssets.TemperPanel.GetComponentsInChildren<TextMeshProUGUI>(true);
-            for (int i = 0; i < textMeshPros.Length; ++i) {
-                TextMeshProUGUI tmp = textMeshPros[i];
-                if (tmp.name == "Title") {
-                    applied &= MagicFontManager.Apply(tmp, MagicFontManager.TMP_FontOptions.NorseBoldOutline);
-                } else if (tmp.transform.parent.name == "gamepad_hint") {
-                    applied &= MagicFontManager.Apply(tmp, MagicFontManager.TMP_FontOptions.AveriaSansLibre);
-                } else {
-                    applied &= MagicFontManager.Apply(tmp, MagicFontManager.TMP_FontOptions.AveriaSansLibreOutline);
-                }
-            }
-
             // Only latched on success: StoreGui reopens call this again, so a lookup that missed
             // because the font was not loaded yet gets another go rather than sticking on the default.
             fontsLoaded = MagicFontManager.ApplyAll(EpicAssets.TemperPanel, tmp => {

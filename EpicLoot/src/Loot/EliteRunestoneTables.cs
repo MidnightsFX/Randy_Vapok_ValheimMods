@@ -36,6 +36,15 @@ namespace EpicLoot
         private static readonly List<LootTable> Added = new List<LootTable>();
 
         /// <summary>
+        /// True for one of these tables. Their chance is the same at every star level, so a creature
+        /// entry's own StarScaling must not apply to them (LootRoller.PlanRollAt).
+        /// </summary>
+        internal static bool IsEliteRunestoneTable(LootTable table)
+        {
+            return table != null && Added.Contains(table);
+        }
+
+        /// <summary>
         /// Called by LootRoller.Initialize right after the config's tables are loaded. Initialize has just
         /// emptied LootRoller.LootTables, so the previous tables are already gone.
         /// </summary>

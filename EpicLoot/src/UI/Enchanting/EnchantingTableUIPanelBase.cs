@@ -44,15 +44,7 @@ namespace EpicLoot_UnityLib
             if (MainButton != null)
             {
                 MainButton.onClick.AddListener(OnMainButtonClicked);
-                foreach (TMP_Text text in MainButton.GetComponentsInChildren<TMP_Text>(true))
-                {
-                    if (text.GetComponent<GamepadGlyph>() == null)
-                    {
-                        _buttonLabel = text;
-                        break;
-                    }
-                }
-
+                _buttonLabel = FindButtonLabel(MainButton);
                 _defaultButtonLabelText = _buttonLabel.text;
                 _mainButtonGamepadHint = FindGamepadHint(MainButton.transform);
             }
@@ -69,10 +61,22 @@ namespace EpicLoot_UnityLib
         public void ReplaceMainButton(Button button)
         {
             MainButton = button;
-            _buttonLabel = button.GetComponentInChildren<Text>();
-            _tmpButtonLabel = _buttonLabel == null ? button.GetComponentInChildren<TMP_Text>() : null;
-            _useTMP = _buttonLabel == null;
+            _buttonLabel = FindButtonLabel(button) ?? _buttonLabel;
             _mainButtonGamepadHint = FindGamepadHint(button.transform);
+        }
+
+        // The button's first text that is not its gamepad glyph.
+        private static TMP_Text FindButtonLabel(Button button)
+        {
+            foreach (TMP_Text text in button.GetComponentsInChildren<TMP_Text>(true))
+            {
+                if (text.GetComponent<GamepadGlyph>() == null)
+                {
+                    return text;
+                }
+            }
+
+            return null;
         }
 
         // Matches the prefab's glyph child by name: "Hint" in most panels, "Hint-1" in the ones with two.

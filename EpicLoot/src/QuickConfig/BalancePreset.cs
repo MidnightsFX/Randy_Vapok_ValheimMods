@@ -1,4 +1,5 @@
 using EpicLoot.Config;
+using EpicLoot.Patching;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,8 +49,32 @@ internal static class BalancePreset {
         staged.PresetPressed = name;
         // The rewrite on Save replaces the whole file, so edits staged against the old one are dropped
         // now rather than written over the fresh template.
-        staged.Reload(slot => slot is JsonSlot json && json.File == MagicEffectsFile);
+        ReloadMagicEffects(staged);
         return QuickConfigureTool.L("$mod_epicloot_cfg_preset_resets_effects");
+    }
+
+    /// <summary>
+    /// Re-reads the magiceffects.json values of <paramref name="config"/> from the live config. Effect
+    /// Tuning is one value over two files, and re-reading it brings back every effect, so its shard
+    /// effects keep what <paramref name="config"/> held: they live in shardstones.json, which neither a
+    /// preset nor the rewrite touches.
+    /// </summary>
+    internal static void ReloadMagicEffects(StagedConfig config) {
+        EffectConfigsValue before = config.Get<EffectConfigsValue>(QuickConfigBindings.EffectConfigsKey);
+        config.Reload(slot => slot is JsonSlot json && json.File == MagicEffectsFile);
+        EffectConfigsValue after = config.Get<EffectConfigsValue>(QuickConfigBindings.EffectConfigsKey);
+        if (before == null || after == null || ReferenceEquals(before, after)) { return; }
+
+        foreach (EffectConfigSet set in before.Effects.Values) {
+            if (set.Source == EffectSource.Shard && after.Effects.ContainsKey(set.Type)) {
+                after.Effects[set.Type] = set.Clone();
+            }
+        }
+    }
+
+    /// <summary>True when a patch file targets this config ("magiceffects", no extension).</summary>
+    internal static bool IsPatched(string configName) {
+        return FilePatching.PatchesPerFile.GetValues(configName, true).Count > 0;
     }
 
     /// <summary>True when Save must rewrite magiceffects.json: a preset was pressed, or the template changed (host only).</summary>
@@ -75,7 +100,13 @@ internal static class BalancePreset {
                 backupDir = ConfigVersionManager.BackupConfigFile(MagicEffectsConfigName);
             }
 
-            ELConfig.CreateBaseConfigurations(path, MagicEffectsFile);
+            // A file that patches target is the template plus those patches, rebuilt the way every launch
+            // rebuilds it; the bare template would drop patch-added effects until the next restart.
+            if (IsPatched(MagicEffectsConfigName)) {
+                FilePatching.LoadPatchedJSON(MagicEffectsConfigName);
+            } else {
+                ELConfig.CreateBaseConfigurations(path, MagicEffectsFile);
+            }
             string newText = File.ReadAllText(path);
             // This IS the mod's own content. A backed-up file was the player's, and the version
             // manager would keep it flagged as theirs if it saw that baseline; they chose to replace

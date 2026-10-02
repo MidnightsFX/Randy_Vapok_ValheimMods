@@ -115,6 +115,7 @@
     <None Include="Assets\X_RPGVFX\Auras pack\Shaders\Blend_CenterGlow.shader" />
     <None Include="Assets\X_RPGVFX\RPG VFX Bundle\Shaders\Blend_Normals.shader" />
     <None Include="Assets\ExternalLibraries\Mono.Cecil.dll" />
+    <None Include="Assets\ExternalLibraries\EpicLoot.dll" />
     <None Include="Assets\X_RPGVFX\RPG VFX Bundle\Prefabs\AOE spells\Readme.txt" />
     <None Include="Assets\ExternalLibraries\valheim\assembly_simplemeshcombine.dll" />
     <None Include="Assets\ExternalLibraries\valheim\assembly_sunshafts.dll" />
@@ -154,7 +155,6 @@
     <None Include="Assets\X_RPGVFX\RPG VFX Bundle\Scripts\Readme.txt" />
     <None Include="Assets\ExternalLibraries\valheim\Assembly-CSharp.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
-    <None Include="Assets\ExternalLibraries\EpicLoot.dll" />
     <None Include="Assets\ExternalLibraries\valheim\gui_framework.dll" />
     <None Include="Assets\ExternalLibraries\BepInEx.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
@@ -1292,12 +1292,12 @@
       <HintPath>Library\ScriptAssemblies\Unity.Collections.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.Burst">
-      <HintPath>Library\ScriptAssemblies\Unity.Burst.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.VisualStudio.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.VisualStudio.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Burst">
+      <HintPath>Library\ScriptAssemblies\Unity.Burst.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Rendering.LightTransport.Editor">

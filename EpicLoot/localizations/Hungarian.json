@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "A varázstárgy nem használ tartósságot és soha nem fog elromlani.",
   "mod_epicloot_me_indestructible_prefix1": "Elpusztíthatatlan",
   "mod_epicloot_me_indestructible_suffix1": "Elpusztíthatatlanság",
-  "mod_epicloot_me_coinhoarder_display": "Érmes Fegyver +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Érmes Fegyver {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Növelje a fegyver minden kártípusát +<b><color=yellow>X</color></b>%-kal minden (999) érme után az állományban. Erősen csökkenő megtérülés 2k érme után.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tiranusz",
   "mod_epicloot_me_coinhoarder_suffix1": "Vagyon",

@@ -183,6 +183,21 @@ internal sealed class StagedConfig {
         PresetPressed = other.PresetPressed;
     }
 
+    /// <summary>
+    /// Takes the other snapshot's value of every key whose slots all pass the filter. A key fed by several
+    /// slots (Effect Tuning spans two files) is only taken when every one of them passes, so a part that
+    /// was not written keeps its staged edits.
+    /// </summary>
+    internal void TakeFrom(StagedConfig other, Func<ConfigSlot, bool> filter) {
+        foreach (IGrouping<string, ConfigSlot> key in QuickConfigBindings.Slots.GroupBy(slot => slot.Key)) {
+            if (key.All(filter) == false) { continue; }
+            if (other.values.TryGetValue(key.Key, out object value)) {
+                values[key.Key] = CloneValue(value);
+                available.Add(key.Key);
+            }
+        }
+    }
+
     /// <summary>True when the slot's source was loaded at the last Snapshot/Reload.</summary>
     internal bool IsAvailable(string key) => available.Contains(key);
 
