@@ -46,25 +46,44 @@ namespace EpicLoot.CraftingV2
     public class EnchantingUIController : MonoBehaviour
     {
         /// <summary>
-        /// The mixer group Valheim routes its own GUI sounds through, resolved from the vanilla
-        /// sfx_gui_button source. Cached because it is looked up once per UI audio source and
-        /// GameObject.Find is not cheap; the group itself is an asset, so the reference survives
-        /// scene loads. Stays null until the GUI scene is up, and is retried until it resolves.
+        /// The mixer group Valheim routes its own GUI sounds through: the "GUI" group of AudioMan's
+        /// master mixer, which the vanilla sfx_gui_button prefab outputs to. The group is an asset and
+        /// AudioMan outlives scene loads, so it is resolved once. Stays null until AudioMan exists.
         /// </summary>
         private static AudioMixerGroup _uiMixerGroup;
+
+        private const string UIMixerGroupName = "GUI";
 
         /// <summary>Every UI audio source we manage, so a config change can be applied live.</summary>
         private static readonly List<AudioSource> UIAudioSources = new List<AudioSource>();
 
+        // Read off the mixer, never searched for in the scene. This used to be
+        // GameObject.Find("sfx_gui_button"), which can never match: ButtonSfx instantiates that prefab,
+        // so the scene only ever holds a short-lived "sfx_gui_button(Clone)". Every miss walked every
+        // active object, twice per UI audio source, and that was most of the hitch on opening the
+        // enchanting table or one of its tabs for the first time -- hundreds of milliseconds in a
+        // built-up world. Not taken from Jotunn's name cache either: a bundled copy of the mixer with
+        // vanilla group names can shadow the real one there.
         private static AudioMixerGroup GetUIMixerGroup()
         {
-            if (_uiMixerGroup == null)
+            if (_uiMixerGroup != null)
             {
-                GameObject uiSFX = GameObject.Find("sfx_gui_button");
-                AudioSource sfxSource = uiSFX != null ? uiSFX.GetComponent<AudioSource>() : null;
-                if (sfxSource != null)
+                return _uiMixerGroup;
+            }
+
+            AudioMixer masterMixer = AudioMan.instance != null ? AudioMan.instance.m_masterMixer : null;
+            if (masterMixer == null)
+            {
+                return null;
+            }
+
+            // Every group's path starts at the root "Master" group, so this lists all of them.
+            foreach (AudioMixerGroup group in masterMixer.FindMatchingGroups("Master"))
+            {
+                if (group.name == UIMixerGroupName)
                 {
-                    _uiMixerGroup = sfxSource.outputAudioMixerGroup;
+                    _uiMixerGroup = group;
+                    break;
                 }
             }
 

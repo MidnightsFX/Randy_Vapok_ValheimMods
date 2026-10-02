@@ -11,6 +11,7 @@ using EpicLoot.General;
 using EpicLoot.Magic;
 using EpicLoot.Magic.MagicItemEffects.Helpers;
 using EpicLoot.MagicItemEffects;
+using EpicLoot_UnityLib;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Jotunn.Configs;
@@ -133,6 +134,10 @@ public sealed class EpicLoot : BaseUnityPlugin {
 
         // Logs, from the buyer's side, a bounty or treasure map that has not appeared at its map circle.
         AdventureSpawnWatchdog.Create();
+
+        // Builds the enchanting table window hidden on each world's first spawn, behind the loading screen,
+        // so opening a table for the first time no longer stalls the game.
+        Game.m_playerInitialSpawn += EnchantingTableUI.PrepareForWorld;
 
         // Main file config watcher
         SetupWatcher();
@@ -465,7 +470,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
 
         PieceLoader.Register(new PieceLoader.BuildPiece {
             Name = "Enchanting Table",
-            Prefab = "piece_enchantingtable",
+            Prefab = EnchantingTable.PrefabName,
             Category = PieceCategories.Crafting,
             RequiresWorkbench = false,
             AllowedInDungeons = false,

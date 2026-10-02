@@ -201,6 +201,9 @@ internal static class QuickConfigBindings {
         BossExtraDrop("QueenDropMode", ELConfig.QueenDropMode, "QueenDropPlayerRange", ELConfig.QueenDropPlayerRange, "Queen");
         BossExtraDrop("FaderDropMode", ELConfig.FaderDropMode, "FaderDropPlayerRange", ELConfig.FaderDropPlayerRange, "Fader");
         BossExtraDrop("FrozenKingDropMode", ELConfig.FrozenKingDropMode, "FrozenKingDropPlayerRange", ELConfig.FrozenKingDropPlayerRange, "Frozen King");
+        Toggle("EliteRunestoneDrops", ELConfig.EliteRunestoneDrops, "Elite Runestone Drops", BindingScope.Server);
+        FloatSlider("EliteRunestoneDropChance", ELConfig.EliteRunestoneDropChance, "Elite Runestone Drop Chance", BindingScope.Server, 0f, 1f, 0.01f,
+            enabled: staged => staged.Get("EliteRunestoneDrops", ELConfig.EliteRunestoneDrops.Value));
 
         // --- 5. Shardstones & Runes ---
         Toggle("AllowDuplicateSocketedEffects", ELConfig.AllowDuplicateSocketedEffects, "Allow Duplicate Socketed Effects", BindingScope.Server);
@@ -413,12 +416,12 @@ internal static class QuickConfigBindings {
     }
 
     private static void FloatSlider(string key, ConfigEntry<float> entry, string name, BindingScope scope,
-        float min, float max, float step, Func<StagedConfig, bool> visible = null) {
+        float min, float max, float step, Func<StagedConfig, bool> visible = null, Func<StagedConfig, bool> enabled = null) {
         CfgSlotFor(key, entry);
         Add(new Binding {
             Key = key, DisplayName = name, Kind = BindingKind.Float, Scope = scope, Min = min, Max = max, Step = step,
             Tooltip = () => QuickConfigTooltip.Of(entry),
-            VisibleWhen = visible,
+            VisibleWhen = visible, EnabledWhen = enabled,
             Get = staged => staged.Get(key, entry.Value),
             Set = (staged, value) => staged.Set(key, Snap(ToFloat(value, entry.Value), min, max, step))
         });

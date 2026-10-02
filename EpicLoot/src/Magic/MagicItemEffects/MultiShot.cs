@@ -19,6 +19,10 @@ namespace EpicLoot.MagicItemEffects
         private enum PendingShotType { None, TripleBow, DoubleMagic }
         private static PendingShotType _pendingShot = PendingShotType.None;
 
+        // True while the local player's current attack fires a triple shot (rolled in OnAttackTrigger, before
+        // its bursts), for effects that change how each of its projectiles flies.
+        internal static bool IsTripleShotFiring => _pendingShot == PendingShotType.TripleBow;
+
         private static Dictionary<string, float> GetEffectConfig(string effectType)
         {
             if (MagicItemEffectDefinitions.AllDefinitions != null &&

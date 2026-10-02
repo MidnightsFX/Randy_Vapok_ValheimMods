@@ -1,5 +1,6 @@
 using BepInEx.Configuration;
 using EpicLoot.Config;
+using EpicLoot.General;
 using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
 using System.Collections.Generic;
@@ -47,6 +48,9 @@ namespace EpicLoot.MagicItemEffects
 
         private const string ThrowAttackItem = "SpearFlint";
         private const string SlamEffectItem = "SledgeDemolisher";
+
+        // The Demolisher slam's trigger effects (SledgeDemolisher's m_shared.m_triggerEffect), by prefab name.
+        private static readonly string[] SlamEffectPrefabs = { "fx_swing_camshake", "fx_sledge_demolisher_hit" };
 
         // Player-editable, so each gets a floor: a zero speed divides, a zero radius hits nothing.
         private static float MaxDistance => EffectConfig.GetClamped(MagicEffectType.OverwhelmingLaunch, MaxDistanceKey, DefaultMaxDistance, 1f, 200f);
@@ -357,6 +361,8 @@ namespace EpicLoot.MagicItemEffects
             _inFlightWeapon = weapon;
             _inFlightUntil = now + travelTime + hangTime + travelTime;
             _pendingSlam = new PendingSlam { Time = now + travelTime, Point = landing, Weapon = weapon, Damage = damage };
+            EpicLoot.Log($"[OverwhelmingLaunch] Released {weapon.m_shared.m_name}: lands at {landing} in {travelTime:0.00}s, " +
+                $"slam damage {damage.EpicLootGetTotalDamage():0.#}.");
 
             LaunchedWeaponVisual.Broadcast(player, weapon, leftHand, landing, travelTime, hangTime, travelTime);
         }
@@ -399,6 +405,34 @@ namespace EpicLoot.MagicItemEffects
             return end;
         }
 
+        // The Demolisher slam's shockwave, camera shake and sound at the landing point. Spawned by prefab name: going
+        // through the Demolisher item's m_triggerEffect (the call vanilla makes for its own swing) showed nothing in
+        // game. That list stays as the fallback should an update rename the prefabs. fx_sledge_demolisher_hit has a
+        // ZNetView, so the copy spawned here is what every other client sees.
+        private static int PlaySlamEffects(Player player, Vector3 center, out int itemEffectCount)
+        {
+            var itemEffects = ObjectDB.instance?.GetItemPrefab(SlamEffectItem)?.GetComponent<ItemDrop>()?.m_itemData.m_shared.m_triggerEffect;
+            itemEffectCount = itemEffects?.m_effectPrefabs?.Length ?? 0;
+
+            int spawned = 0;
+            var scene = ZNetScene.instance;
+            foreach (var name in SlamEffectPrefabs)
+            {
+                var prefab = scene != null ? scene.GetPrefab(name) : null;
+                if (prefab != null)
+                {
+                    Object.Instantiate(prefab, center, player.transform.rotation);
+                    spawned++;
+                }
+            }
+
+            if (spawned == 0 && itemEffects != null)
+            {
+                spawned = itemEffects.Create(center, player.transform.rotation, null, 1f, -1, player.GetZDOID()).Length;
+            }
+            return spawned;
+        }
+
         // Vanilla Attack.DoAreaAttack with the landing point as its origin, the Demolisher's effects and stagger,
         // and the launched weapon's snapshot damage.
         private static void DoSlam(Player player, PendingSlam slam)
@@ -408,12 +442,12 @@ namespace EpicLoot.MagicItemEffects
             var primary = weapon.m_shared.m_attack;
             var skill = weapon.m_shared.m_skillType;
 
-            var demolisher = ObjectDB.instance?.GetItemPrefab(SlamEffectItem)?.GetComponent<ItemDrop>();
-            demolisher?.m_itemData.m_shared.m_triggerEffect.Create(center, player.transform.rotation, null, 1f, -1, player.GetZDOID());
+            int effectsSpawned = PlaySlamEffects(player, center, out int itemEffectCount);
 
             float skillFactor = player.GetRandomSkillFactor(skill);
             float stagger = StaggerMultiplier;
             int hitCount = 0;
+            int damagedCount = 0;
             bool raiseSkill = false;
             float maxAdrenalineMultiplier = 0f;
 
@@ -520,6 +554,7 @@ namespace EpicLoot.MagicItemEffects
                     }
 
                     destructible.Damage(hit);
+                    damagedCount++;
                     if ((destructible.GetDestructibleType() & primary.m_skillHitType) != DestructibleType.None)
                     {
                         raiseSkill = true;
@@ -531,6 +566,8 @@ namespace EpicLoot.MagicItemEffects
                 HitSource.Exit(scope);
             }
 
+            EpicLoot.Log($"[OverwhelmingLaunch] Slam at {center}: {count} colliders, {damagedCount} damaged, " +
+                $"{effectsSpawned} effects spawned (the Demolisher item lists {itemEffectCount}).");
             if (hitCount == 0)
             {
                 return;

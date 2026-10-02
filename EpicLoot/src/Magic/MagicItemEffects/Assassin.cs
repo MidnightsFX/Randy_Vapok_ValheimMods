@@ -1,6 +1,8 @@
 using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace EpicLoot
 {
@@ -19,7 +21,7 @@ namespace EpicLoot.MagicItemEffects
     //
     // The strike is a real Attack (a clone of the weapon's primary, as Humanoid.StartAttack makes), so vanilla
     // handles the animation, the hit sweep and backstabs, and every on-hit enchantment procs. Holstering the weapon
-    // is how a player keeps it from firing.
+    // is how a player keeps it from firing. While the crosshair charges, AssassinChargeHud fills a ring around it.
     public static class Assassin
     {
         // All tunable in this effect's Config block in magiceffects.json, under these key names.
@@ -95,6 +97,21 @@ namespace EpicLoot.MagicItemEffects
         private static int BlockMask => _blockMask != 0 ? _blockMask : _blockMask = LayerMask.GetMask("Default",
             "static_solid", "Default_small", "piece", "vehicle", "character", "character_net", "character_ghost",
             "character_noenv");
+
+        // How far the hover on the current target has charged, 0 to 1, or -1 when nothing is charging. A finished
+        // charge reads 1 while it waits for the player to be free to strike.
+        internal static float ChargeProgress
+        {
+            get
+            {
+                if (_target == null || _owner == null || _owner != Player.m_localPlayer)
+                {
+                    return -1f;
+                }
+
+                return Mathf.Clamp01((Time.time - _hoverStart) / HoverTime);
+            }
+        }
 
         private static void SyncOwner(Player player)
         {
@@ -533,6 +550,147 @@ namespace EpicLoot.MagicItemEffects
                     __result = 0f;
                 }
             }
+        }
+
+        // Hud.Update rather than its UpdateCrosshair, which vanilla skips once there is no local player and would
+        // leave a ring on screen through death.
+        [HarmonyPatch(typeof(Hud), nameof(Hud.Update))]
+        private static class Hud_Update_Patch
+        {
+            [HarmonyPostfix]
+            private static void Postfix(Hud __instance) => AssassinChargeHud.Refresh(__instance);
+        }
+    }
+
+    // The charge ring: vanilla's bow-draw ring (Hud.m_crosshairBow) filling clockwise around the crosshair over a faint
+    // full track, with a label above it. Both are clones of vanilla's own crosshair widgets, so they follow the HUD's
+    // scaling, font and hiding; a UI mod that removed those widgets gets no ring.
+    internal static class AssassinChargeHud
+    {
+        private const string LabelToken = "$mod_epicloot_assassin_charge";
+        private const float RingSize = 56f;       // pixels; vanilla's ring is 150 drawn down to 22
+        private const float LabelGap = 4f;        // pixels between the ring and the label
+        private const float LabelFontSize = 16f;
+        private const float MinAlpha = 0.35f;     // a glance shows a faint ring; it brightens as it charges
+
+        private static readonly Color TrackColor = new Color(1f, 1f, 1f, 0.15f);
+        private static readonly Color ChargeColor = new Color(0.55f, 1f, 0.6f);
+
+        private static Hud _hud;
+        private static GameObject _root;
+        private static Image _fill;
+        private static TMP_Text _label;
+
+        internal static void Refresh(Hud hud)
+        {
+            if (_hud != hud)
+            {
+                _hud = hud;
+                Build(hud);
+            }
+
+            if (_root == null)
+            {
+                return;
+            }
+
+            float progress = Assassin.ChargeProgress;
+            bool show = progress >= 0f && hud.m_crosshair != null && hud.m_crosshair.gameObject.activeSelf;
+            if (_root.activeSelf != show)
+            {
+                _root.SetActive(show);
+                if (show && _label != null)
+                {
+                    // Set on each appearance, so a language change mid-game is picked up.
+                    _label.text = Localization.instance.Localize(LabelToken);
+                }
+            }
+
+            if (!show)
+            {
+                return;
+            }
+
+            var color = ChargeColor;
+            color.a = Mathf.Lerp(MinAlpha, 1f, progress);
+            _fill.fillAmount = progress;
+            _fill.color = color;
+            if (_label != null)
+            {
+                _label.color = color;
+            }
+        }
+
+        private static void Build(Hud hud)
+        {
+            _root = null;
+            _fill = null;
+            _label = null;
+
+            var bow = hud.m_crosshairBow;
+            if (bow == null)
+            {
+                return;
+            }
+
+            _root = new GameObject("EL_AssassinCharge", typeof(RectTransform));
+            var rect = (RectTransform)_root.transform;
+            rect.SetParent(bow.transform.parent, false);
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = ((RectTransform)bow.transform).anchoredPosition;
+            rect.sizeDelta = new Vector2(RingSize, RingSize);
+
+            var track = CloneRing(bow, rect, "Track");
+            track.color = TrackColor;
+
+            _fill = CloneRing(bow, rect, "Fill");
+            _fill.type = Image.Type.Filled;
+            _fill.fillMethod = Image.FillMethod.Radial360;
+            _fill.fillOrigin = (int)Image.Origin360.Top;
+            _fill.fillClockwise = true;
+            _fill.fillAmount = 0f;
+
+            var hoverName = hud.m_hoverName;
+            if (hoverName != null)
+            {
+                var labelObject = Object.Instantiate(hoverName.gameObject, rect, false);
+                labelObject.name = "Label";
+                _label = labelObject.GetComponent<TMP_Text>();
+                _label.text = "";
+                _label.fontSize = LabelFontSize;
+                _label.alignment = TextAlignmentOptions.Bottom;
+                _label.textWrappingMode = TextWrappingModes.NoWrap;
+                _label.raycastTarget = false;
+
+                var labelRect = (RectTransform)labelObject.transform;
+                labelRect.anchorMin = labelRect.anchorMax = new Vector2(0.5f, 1f);
+                labelRect.pivot = new Vector2(0.5f, 0f);
+                labelRect.anchoredPosition = new Vector2(0f, LabelGap);
+                labelRect.sizeDelta = new Vector2(300f, LabelFontSize * 2f);
+                labelRect.localScale = Vector3.one;
+            }
+
+            _root.SetActive(false);
+        }
+
+        // Stretched over the root at scale 1: vanilla rescales its own ring every frame of a bow draw.
+        private static Image CloneRing(Image bow, RectTransform parent, string name)
+        {
+            var ring = Object.Instantiate(bow.gameObject, parent, false);
+            ring.name = name;
+            ring.SetActive(true);
+
+            var ringRect = (RectTransform)ring.transform;
+            ringRect.anchorMin = Vector2.zero;
+            ringRect.anchorMax = Vector2.one;
+            ringRect.pivot = new Vector2(0.5f, 0.5f);
+            ringRect.anchoredPosition = Vector2.zero;
+            ringRect.sizeDelta = Vector2.zero;
+            ringRect.localScale = Vector3.one;
+
+            var image = ring.GetComponent<Image>();
+            image.raycastTarget = false;
+            return image;
         }
     }
 }

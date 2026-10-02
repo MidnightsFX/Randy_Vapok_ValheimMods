@@ -318,6 +318,9 @@ public static class QuickConfigPrefabBuilder
                 BossLine("QueenDropMode", "The Queen", "QueenDropPlayerRange"),
                 BossLine("FaderDropMode", "Fader", "FaderDropPlayerRange"),
                 BossLine("FrozenKingDropMode", "Frozen King", "FrozenKingDropPlayerRange"),
+                H("Elite runestone drops"),
+                T("EliteRunestoneDrops", "Elite Runestone Drops"),
+                S("EliteRunestoneDropChance", "Runestone Drop Chance"),
             },
             new[]
             {

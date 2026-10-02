@@ -110,6 +110,13 @@ It can tune its own loot without copying the template:
 
 An entry may also carry its own `StarScaling`, which wins field by field over the template's.
 
+**Elite runestones.** The server option `Elite Runestone Drops` (Balance section, also on Quick Configure's
+Loot Drops page) adds one more table to each elite template, `Tier3EliteMob` to `Tier9EliteMob`, while the
+game runs: one blank runestone of the biome's rarity (Magic in the Black Forest up to Mythic or Ancient in
+the Deep North) at `Elite Runestone Drop Chance`, the same at every star level. It is never written to
+`loottables.json`; `lootpreview` shows it, and a creature's own `Modifiers` apply to it as to its other
+tables.
+
 ## Checking a table
 
 The console command `lootpreview <creature or table> [maxLevel]` prints, for each level, the anchors used,

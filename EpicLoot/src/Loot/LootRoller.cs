@@ -145,6 +145,7 @@ namespace EpicLoot
           
             AddItemSets(lootConfig.ItemSets);
             AddLootTables(lootConfig.LootTables);
+            EliteRunestoneTables.OnLootTablesLoaded();
 
             // Initialize clears LootTables, so anything an external plugin registered through
             // API.AddLootTables has just been wiped. Same contract as the other config subsystems'
@@ -771,13 +772,13 @@ namespace EpicLoot
                 EpicLoot.Log($"Item: {itemName} - Rarity Count: {rarityLength} - Weight: {lootDrop.Weight}");
 
                 // A drop that is already a shard — rolled from an elite creature's bonus shard set or from a
-                // boss's shard table — must not be re-rolled into a biome shard, nor sacrificed for
-                // materials. The unidentified category needs no such guard: IsAllowedMagicItemType rejects
-                // a Material.
+                // boss's shard table — or a runestone (Elite Runestone Drops) must not be re-rolled into a
+                // biome shard, nor sacrificed for materials. The unidentified category needs no such guard:
+                // IsAllowedMagicItemType rejects a Material.
                 var isShardDrop = lootDrop.Item != null &&
                     lootDrop.Item.EndsWith(global::EpicLoot.ShardStones.Shards.ShardIndicator, StringComparison.Ordinal);
 
-                var dropType = SelectDropType(lootDrop, isShardDrop, cheatsActive);
+                var dropType = SelectDropType(lootDrop, isShardDrop || IsRunestoneDrop(lootDrop), cheatsActive);
                 EpicLoot.Log($"Drop type for {lootDrop.Item}: {dropType}");
 
                 var spawned = false;
@@ -809,7 +810,9 @@ namespace EpicLoot
         // that category. Categories this particular drop cannot become are left out of the roll entirely
         // rather than rolled and then rejected — an ineligible category in the pool would silently eat
         // the drop's chance of becoming any of the others.
-        private static LootDropType SelectDropType(LootDrop lootDrop, bool isShardDrop, bool cheatsActive)
+        // keepAsIs: the drop is a shard or a runestone, which stays itself rather than becoming a biome shard
+        // or sacrifice materials.
+        private static LootDropType SelectDropType(LootDrop lootDrop, bool keepAsIs, bool cheatsActive)
         {
             // Item spawn cheats asked for a specific thing; never substitute anything for it.
             if (cheatsActive)
@@ -820,7 +823,7 @@ namespace EpicLoot
             var candidates = new List<KeyValuePair<LootDropType, float>>();
             AddDropTypeCandidate(candidates, LootDropType.Item, ELConfig.ItemDropRatio.Value);
 
-            if (!isShardDrop)
+            if (!keepAsIs)
             {
                 AddDropTypeCandidate(candidates, LootDropType.ShardStone, ELConfig.ShardStoneDropRatio.Value);
                 AddDropTypeCandidate(candidates, LootDropType.Materials, ELConfig.MaterialsDropRatio.Value);
@@ -852,6 +855,18 @@ namespace EpicLoot
             {
                 candidates.Add(new KeyValuePair<LootDropType, float>(dropType, weight));
             }
+        }
+
+        private static bool IsRunestoneDrop(LootDrop lootDrop)
+        {
+            if (lootDrop.Item.IsNullOrWhiteSpace() || ObjectDB.instance == null)
+            {
+                return false;
+            }
+
+            var prefab = ObjectDB.instance.GetItemPrefab(lootDrop.Item);
+            var itemDrop = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
+            return itemDrop != null && itemDrop.m_itemData.IsRunestone();
         }
 
         // True when the drop names an equippable item, i.e. one an unidentified item could stand in for.
