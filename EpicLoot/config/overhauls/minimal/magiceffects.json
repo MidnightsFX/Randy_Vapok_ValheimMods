@@ -7496,7 +7496,8 @@
         "MaxDistance": 60,
         "Gravity": 30,
         "ArcHeight": 0.2,
-        "RadiusPerValue": 0.04
+        "RadiusPerValue": 0.04,
+        "TripleShotSpread": 0.15
       }
     },
     {

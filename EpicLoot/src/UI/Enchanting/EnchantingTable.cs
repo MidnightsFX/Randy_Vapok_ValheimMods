@@ -8,6 +8,7 @@ namespace EpicLoot_UnityLib
 {
     public class EnchantingTable : MonoBehaviour, Hoverable, Interactable
     {
+        public const string PrefabName = "piece_enchantingtable";
         public const float UseDistance = 2.7f;
         public const string DisplayNameLocID = "mod_epicloot_assets_enchantingtable";
         public const int FeatureUnavailableSentinel = -2;

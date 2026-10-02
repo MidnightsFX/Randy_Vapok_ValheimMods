@@ -126,6 +126,8 @@
     * The table now re-checks, before paying, that the item it is about to change is still where it was
 * API: `RegisterInventoryProviderSaveHandler` lets a mod that shows its storage at the table save the items the table changes there; DvergerAutomation uses it, so gear in its linked chests can be worked on in place
 * Fix for magic staff tooltips showing a hugely inflated health cost and leaving out the eitr cost, which now both reflect their cost-reducing enchantments
+* Fix for a long stutter when first opening the enchanting table or one of its tabs, worst in large bases
+* Elite creatures can now drop a runestone matching their biome, an optional server setting with an adjustable chance on Quick Configure's Loot Drops page
 
 
 **0.14.13**

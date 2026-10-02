@@ -119,6 +119,8 @@ internal class ELConfig {
     public static ConfigEntry<float> FaderDropPlayerRange;
     public static ConfigEntry<BossExtraDropMode> FrozenKingDropMode;
     public static ConfigEntry<float> FrozenKingDropPlayerRange;
+    public static ConfigEntry<bool> EliteRunestoneDrops;
+    public static ConfigEntry<float> EliteRunestoneDropChance;
     public static ConfigEntry<string> BalanceConfigurationType;
     public static ConfigEntry<bool> AutoAddEquipment;
     public static ConfigEntry<bool> AutoRemoveEquipmentNotFound;
@@ -475,6 +477,17 @@ internal class ELConfig {
         BindBossExtraDrop("Queen", "Majestic Carapaces", 5, out QueenDropMode, out QueenDropPlayerRange);
         BindBossExtraDrop("Fader", "Fader Relics", 5, out FaderDropMode, out FaderDropPlayerRange);
         BindBossExtraDrop("Frozen King", "Sacrificial Blood", 1, out FrozenKingDropMode, out FrozenKingDropPlayerRange);
+        EliteRunestoneDrops = BindServer(SectionBalance, "Elite Runestone Drops", false,
+            "When true, elite creatures (those on the Tier3EliteMob to Tier9EliteMob loot tables, such as " +
+            "trolls, abominations, fenrings and fuling brutes) also have a chance to drop a blank runestone of " +
+            "their biome's rarity, on top of their normal loot: Magic in the Black Forest, Rare in the Swamp, " +
+            "Epic in the Mountains, Legendary in the Plains and Mistlands, Mythic in the Ashlands, and Mythic " +
+            "or Ancient in the Deep North. Default: False.");
+        EliteRunestoneDropChance = BindServer(SectionBalance, "Elite Runestone Drop Chance", 0.1f,
+            "With Elite Runestone Drops on, the chance that an elite creature drops a runestone. " +
+            "It is the same at every star level, and Global Drop Rate Modifier applies to it as to all loot.\n" +
+            "Min = 0, Max = 1",
+            new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         // 3 - Sockets
         AllowDuplicateSocketedEffects = BindServer(SectionSockets, "Allow Duplicate Socketed Effects", false,
             "When false, an effect that is already socketed on an item cannot be socketed again.");
@@ -797,6 +810,8 @@ internal class ELConfig {
         EnchantingTableUpgradesActive.SettingChanged += (_, _) => EnchantingTableUI.UpdateUpgradeActivation();
         EnchantingTableActivatedTabs.SettingChanged += (_, _) => EnchantingTableUI.UpdateTabActivation();
         ShowQuickConfigButton.SettingChanged += (_, _) => QuickConfig.QuickConfigureTool.ApplyRegistration();
+        EliteRunestoneDrops.SettingChanged += (_, _) => EliteRunestoneTables.Refresh();
+        EliteRunestoneDropChance.SettingChanged += (_, _) => EliteRunestoneTables.Refresh();
         foreach (ConfigEntry<string> rarityColor in new[] {
             _magicRarityColor, _rareRarityColor, _epicRarityColor,
             _legendaryRarityColor, _mythicRarityColor, _ancientRarityColor }) {

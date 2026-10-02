@@ -25,6 +25,9 @@ namespace EpicLoot.MagicItemEffects
     // every target it touches. Only the projectile's owner simulates it (Projectile.FixedUpdate), so the arc,
     // gravity, blast radius and damage set on this client's instance are all there is to it; other clients see
     // the networked fireball fly.
+    //
+    // A triple shot (TripleBowShot) would put all three fireballs on one spot, since a crossbow has no spread, so
+    // each of its fireballs comes down at a random point within TripleShotSpread x range of the aim point instead.
     public static class Artillery
     {
         // All tunable in this effect's Config block in magiceffects.json, under these key names.
@@ -32,11 +35,13 @@ namespace EpicLoot.MagicItemEffects
         public const float DefaultGravity = 30f;           // metres/second^2 pulling the fireball down
         public const float DefaultArcHeight = 0.2f;        // apex height above the higher end, per metre of range
         public const float DefaultRadiusPerValue = 0.04f;  // blast radius in metres per 1% of the effect value
+        public const float DefaultTripleShotSpread = 0.15f; // a triple shot's scatter, as a fraction of the range
 
         private const string MaxDistanceKey = "MaxDistance";
         private const string GravityKey = "Gravity";
         private const string ArcHeightKey = "ArcHeight";
         private const string RadiusPerValueKey = "RadiusPerValue";
+        private const string TripleShotSpreadKey = "TripleShotSpread";
 
         private const string FireballPrefab = "staff_fireball_projectile";
         private const float MinArcHeight = 1f;       // a point-blank shot still rises this far
@@ -47,6 +52,7 @@ namespace EpicLoot.MagicItemEffects
         private static float Gravity => Mathf.Max(1f, EffectConfig.Get(MagicEffectType.Artillery, GravityKey, DefaultGravity));
         private static float ArcHeight => Mathf.Max(0f, EffectConfig.Get(MagicEffectType.Artillery, ArcHeightKey, DefaultArcHeight));
         private static float RadiusPerValue => Mathf.Max(0f, EffectConfig.Get(MagicEffectType.Artillery, RadiusPerValueKey, DefaultRadiusPerValue));
+        private static float TripleShotSpread => EffectConfig.GetClamped(MagicEffectType.Artillery, TripleShotSpreadKey, DefaultTripleShotSpread, 0f, 1f);
 
         // Tooltip: "... +{0}% damage ... within {1}m" -- {1} follows the rolled value and a retune of RadiusPerValue.
         public static void RegisterDisplayValues()
@@ -124,7 +130,12 @@ namespace EpicLoot.MagicItemEffects
 
             Vector3 from = projectile.transform.position;
             float gravity = Gravity;
-            Vector3 velocity = SolveArc(from, FindTarget(player), gravity);
+            Vector3 target = FindTarget(player);
+            if (MultiShot.IsTripleShotFiring)
+            {
+                target = Scatter(from, target);
+            }
+            Vector3 velocity = SolveArc(from, target, gravity);
 
             // Keep vanilla's sideways spread (accuracy, several projectiles per shot) by turning the arc as far as
             // the straight shot was turned away from the aim.
@@ -180,6 +191,15 @@ namespace EpicLoot.MagicItemEffects
                 end.y = ZoneSystem.instance.GetGroundHeight(end);
             }
             return end;
+        }
+
+        // A random point within TripleShotSpread x range of the target, level with it.
+        private static Vector3 Scatter(Vector3 from, Vector3 target)
+        {
+            Vector3 flat = target - from;
+            flat.y = 0f;
+            Vector2 offset = Random.insideUnitCircle * (flat.magnitude * TripleShotSpread);
+            return target + new Vector3(offset.x, 0f, offset.y);
         }
 
         // The launch velocity of a parabola from `from` to `to` under `gravity`, peaking ArcHeight x range above
