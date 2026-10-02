@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Het magische item gebruikt geen duurzaamheid en zal nooit breken.",
   "mod_epicloot_me_indestructible_prefix1": "Onverwoestbaar",
   "mod_epicloot_me_indestructible_suffix1": "Onverwoestbaarheid",
-  "mod_epicloot_me_coinhoarder_display": "Muntgewogen Wapen +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Muntgewogen Wapen {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Verhoog elk schadetype van wapen met +<b><color=yellow>X</color></b>% per (999) munten in inventaris. Sterk afnemende meeropbrengsten na 2k munten.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tiran's",
   "mod_epicloot_me_coinhoarder_suffix1": "Weelde",

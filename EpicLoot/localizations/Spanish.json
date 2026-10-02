@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "El objeto mágico no utiliza durabilidad y nunca se romperá.",
   "mod_epicloot_me_indestructible_prefix1": "Irrompible",
   "mod_epicloot_me_indestructible_suffix1": "Irrompibilidad",
-  "mod_epicloot_me_coinhoarder_display": "Arma Ponderada con Monedas +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Arma Ponderada con Monedas {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Aumenta cada tipo de daño del arma en +<b><color=yellow>X</color></b>% por (999) de monedas en el inventario. Fuertes retornos decrecientes después de 2k monedas.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tirano",
   "mod_epicloot_me_coinhoarder_suffix1": "Riqueza",

@@ -49,9 +49,10 @@ internal static class JsonConfigEdits {
 
     /// <summary>
     /// Writes every baseconfig file with a staged change, in apply order (magiceffects.json last).
-    /// Failures are collected per file; the other files are still written.
+    /// Failures are collected per file; the other files are still written, and listed in <paramref name="written"/>.
     /// </summary>
-    internal static void ApplyDirty(StagedConfig staged, StagedConfig baseline, List<string> failures, List<string> notes) {
+    internal static void ApplyDirty(StagedConfig staged, StagedConfig baseline, List<string> failures, List<string> notes,
+        HashSet<string> written) {
         foreach (string file in staged.DirtyJsonFiles(baseline)) {
             List<JsonSlot> dirty = staged.DirtyJsonSlots(file, baseline);
             bool ok = Edit(file, root => {
@@ -62,6 +63,14 @@ internal static class JsonConfigEdits {
             if (ok) {
                 EpicLoot.Log($"Quick Configure wrote {dirty.Count} value(s) to {file}.");
                 notes.Add(message);
+                written.Add(file);
+                // FilePatching rebuilds a patched file from the embedded default plus its patches on
+                // every launch, which replaces this edit just as it would a hand edit.
+                if (BalancePreset.IsPatched(Path.GetFileNameWithoutExtension(file))) {
+                    string patchedNote = $"{file} is rebuilt from its patch files at every launch, so this change lasts until the game restarts.";
+                    EpicLoot.LogWarningForce($"Quick Configure: {patchedNote}");
+                    notes.Add(patchedNote);
+                }
             } else {
                 failures.Add(message);
             }

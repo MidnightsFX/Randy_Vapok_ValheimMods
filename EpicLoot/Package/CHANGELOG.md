@@ -1,133 +1,49 @@
 **0.15.0**
-* Quick Configure: an in-game settings panel, opened from the Mod Config button on the main and pause menus
-    * Covers balance presets, features, loot and rarity tables, shardstones, enchanting, the merchant, bounties and the interface
-    * Hosts can also edit selected JSON config values, such as drop tables, bounty rewards, item gating and effect tunables
-    * Every row shows its config description on hover
-    * Replaces the first-run welcome panel with a setup wizard that opens once per user, not once per mod manager profile
-    * `Show Welcome Message` is replaced by `Welcome Wizard` (Auto, ShowNextLaunch or Never); a welcome you already closed stays closed
-    * The config update prompt now opens after the wizard instead of being skipped, and other mods' welcomes take turns with it
-    * The new client option `Show Quick Configure Button` hides the launcher entry
-* Item Favorite Framework support (optional)
-    * Items you favorite there, and anything in a favorited inventory slot, never show up in Sacrifice, Identify, Disenchant or Set Extract
-    * Rune Extract hides them too, unless its mode keeps the item; favorited runes are never offered for etching
-    * Favorited items get a star in the enchanting table and temper lists
-    * New client options `Respect Item Favorites` and `Show Favorite Stars`, both on by default
-* The new server option `Health Critical Enchantments` stops the enchantments that only work at critical health from rolling
-    * Covers every "(Health Critical)" effect, Instant Mead, Automatic Mead Consumption and Health Critical Threshold
-    * They stop coming from loot, identifying, enchanting and augmenting; items that already have one keep it, and it still works
-    * It is on Quick Configure's first page, with the drop mix and the enchantment and socket counts of each rarity
-* New server options for the late bosses' own drops when several players take part: `Moder Drop Mode` (Dragon Tears), `Yagluth Drop Mode` (Torn Spirit), `Queen Drop Mode` (Majestic Carapace), `Fader Drop Mode` (Fader Relic) and `Frozen King Drop Mode` (Sacrificial Blood)
-    * OneExtraPerNearbyPlayer (the default) adds one for each player after the first; MultiplyByNearbyPlayers drops the whole amount once per player; Default leaves the drop unchanged
-    * Each counts the players within its `... Drop Player Range` (default 100 m)
-* Loot tables scale with stars
-    * A table lists only a few anchor levels; each star past them adds drop chance, extra items, a shift toward the next tier's gear and better rarities, set by the table's `StarScaling`
-    * The shipped tier, elite and boss tables now use one or two levels each. 1★ and 2★ creatures drop close to what they did before, and creatures with more stars (from other mods) keep improving instead of stopping at level 6
-    * A creature's own entry can tune its loot without copying its template: `StarMultiplier` (how much its stars count) and `Modifiers` (drop rate, extra items, rarity)
-    * The new server option `Star Loot Scaling` sets how much stars count everywhere; 0 makes every creature drop its level 1 loot
-    * `DefaultStarScaling` in loottables.json covers tables that set no scaling of their own, such as other mods' tables
-    * A table can list `"Tier3Mob.*"` to roll another table at its own level; the elite tables use this
-    * Console: `lootpreview [creature] [maxLevel]` shows the drop chance, item mix and rarity split at each level
-* The flat loot table form (`Drops` and `Loot` directly on a table) is deprecated
-    * Flat tables become a level 1 entry when loaded, and an on-disk loottables.json holding them is converted once, after a backup
-    * Patches that write flat tables are converted after they run, with a warning naming the patch
-    * Patches that target a table's `.Loot` or `.Drops` are applied to its level 1 entry instead, with a warning giving the new path
-    * The chest tables use the new form; their loot is unchanged
-* Creatures without a loot table now get one
-    * The server (or single player) places each one by where it spawns and how tough it is for its biome, using the new `CreatureSorter` rules and per-biome `Creatures` tiers in itemsorter.json
-    * Creatures that other mods add drop magic loot without a patch. Their entries are marked `"Auto": true` and are sorted again on every world load; entries without the mark are never changed
-    * Pin or skip a creature under `CreatureSorter.Overrides`
-    * The new server option `Auto Add Creatures To Loot Tables` turns this off
-    * Each run writes creaturesorter-report.txt to the EpicLoot config folder. Console: `creaturesort` (`dry` to preview)
-* Vanilla creature loot reviewed
-    * 30 creatures that dropped no magic loot now have loot tables, among them the Swamp skeleton, the Ashlands Dvergr, lava and tar blobs, bats, sleeping and archer-less variants and Hildir's bosses
-    * Now elites, with their chance of shardstones: Bjorn, Fenring, Lox, Moose, Jotun warriors, the Elaking mole and the Deep North Dvergr
-    * Writhan drops Swamp elite loot instead of Ashlands loot; Wraiths drop the same as Draugr, Fenring cultists a tier higher and goblin shamans the same as goblins
-    * Deer, seals and frost wisps no longer drop magic loot
-* Quick Configure groups the drop tables under the biome their creatures live in
-* Loot validation at world load checks every level of every loot table, and never empties one
-* Fix for creatures placed inside a location, such as the memorial site's fallen warriors, dropping no magic loot
-* Fix for the Plains stone tower chest's magic loot, which pointed at a table that did not exist
-* Fix for chest-style loot tables causing an error on creatures with three or more stars
-* Less work when chests are nearby or their loot is rolled
-    * A chest, treasure map or gamble builds its magic loot directly instead of spawning and removing an object in the world for each item, and saves the chest once rather than after every item
-    * Loaded chests no longer look over every item they hold once a second, only when their contents change
-    * Mods that look through nearby chests (crafting from containers) no longer line every chest up for a loot roll
-* Fix for the Dvergr rogues' crossbows showing up as a second Arbalest in loot, the merchant and item gating
-    * They never drop, and are removed from existing configs at the next world load
-    * `Only Add Equipment With Recipes` now looks for a recipe that crafts the item itself, so creature weapons named after a craftable item are no longer added
-* The grappling hook is sorted as a tool instead of a bow, and moves from the Mistlands weapon loot to the tool loot
-* Lox hide counts as a Plains material when sorting gear, so the Lox armor set is sorted into Plains loot
-    * Gear already listed in iteminfo.json keeps its place
-* New magic effect: Prosperity, a chance for creatures slain and chests opened nearby to roll their magic loot an extra time
-    * Rolls on the same items and rarities as Luck, and an item cannot have both
-    * Every 100% is a guaranteed extra roll; nearby players' Prosperity adds together, up to `BonusRollsMax` extra rolls (default 3)
-    * Applies to creature kills, dungeon chests and treasure map chests, but not to Lucky Loot's bonus rolls, identifying or gambling
-    * A chest that receives more loot than it has room for grows extra rows instead of losing items
-* New magic effect: Green Thumb, rolls on the Cultivator and shortens the grow time of seeds and saplings you plant
-    * The bonus is set when the plant goes in and stays with it, whoever is nearby when it finishes growing
-    * Grow time is reduced by at most `Max` percent (default 75)
-    * Plants sown with it give off a faint green shimmer
-* New magic effect: Close Quarter, rolls on melee weapons and reduces how far their hits knock enemies back
-    * 20-30% at Magic, rising to 85-100% at Ancient, where enemies are not knocked back at all
-    * Only knockback is reduced; damage and stagger are unchanged, and the weapon's tooltip shows the reduced Knockback value
-* Set runes: the rune page has two new modes, Set Extract and Set Etch, for moving an item set from one item to another
-    * Set Extract turns a set piece's set into a set rune of the piece's rarity
-    * Set Etch makes another item a piece of that set; the item becomes whichever piece of the set it fits
-    * The target keeps its rarity and enchantments, and its rarity must be one the set drops at
-    * The set rune's tooltip lists the items it can be etched onto, the set's rarities and its bonuses
-    * Set Extract costs a blank runestone, Dust, Shards and bounty tokens; Set Etch uses up the set rune and costs Essence, Reagent and bounty tokens
-    * Materials match the item's rarity; Iron Bounty Tokens below Legendary, Gold from Legendary up, more at higher rarities. The new `RuneSetExtractCosts` and `RuneSetEtchCosts` sections of enchantcosts.json set the amounts
-    * The new server option `Set Rune Extract Mode` chooses whether the source item is kept without its set (StripSet, the default) or destroyed (DestroyItem); it is also on Quick Configure's Shardstones page
-* The compendium's set page lists each piece's skill requirement too, such as Axes for Ragnar's axe, and marks pieces with further requirements
-* Fix for the rune page's Etch button staying enabled after the selected rune was cleared
-* Fix for changing a rarity color in-game not recoloring the enchanting table's rarity buttons until the next login
-* Fix for Stagger Duration shortening the stagger on most creatures instead of lengthening it
-* Fix for Stagger Duration from projectiles not applying in multiplayer
-* Fix for bounty creatures losing their extra health after a reload or when another player's game took them over
-    * With StarLevelSystem, the bonus now stays on the creature
-    * Without StarLevelSystem, a bounty creature loaded at full health keeps its extra health
-* Fix for set tooltips listing some set pieces more than once
-* Fix for Lucky Craft saving materials when building, planting and tempering; it now only applies to crafting
-* Uniques and item sets are no longer tied to one rarity
-    * Each entry in legendaries.json takes a `Rarities` list and can roll at any rarity, including Ancient and below Legendary
-    * The Heimdall and Ragnar sets now drop at Legendary, Mythic and Ancient
-    * Set pieces worn at different rarities count toward the same set; each bonus uses the rarity that enough pieces reach
-    * Guaranteed effects and set bonuses can declare `ValuesPerRarity` alongside their flat `Values`
-    * `MythicItems` and `MythicSets` still load, so existing configs and patches keep working: a unique without `Rarities` rolls at its block's rarity, and a set without `Rarities` at the rarity of the block its pieces are in
-    * Config problems (missing set pieces, a piece in two sets, a unique defined twice with different contents) are reported in the log
-* Fix for a set roll on an item no set piece fits producing a plain legendary instead of rolling a unique
-* Fix for two copies of the same set piece counting as two pieces
-* Fix for set tooltips counting pieces differently from the bonuses actually applied
-* Fix for set bonus armor being recalculated on every armor check
-* Set items of every rarity are labelled as such in their tooltip
-* The compendium lists each set once, with its rarities and bonus values
-* Console: `magicsetitem [id] [item|random] [rarity|random]` replaces `magicitemlegendary` and `magicitemmythic`; `magicitemset` takes an optional rarity, or `random` for a different rarity per piece
-* Boss per-player drops now add to the boss's normal drop instead of replacing it: each player after the first adds one trophy, wishbone or crypt key
-    * A boss with no players in range still drops its normal trophy; previously it could drop none
-    * The Crypt Key and Wishbone drop mode and range settings now take effect; both previously followed the trophy settings
-    * Players who hide their map position no longer count as near a boss close to the world centre
-* Fix for the tempering panel's section titles not showing, with an error each time Hildir's store opened, when another mod loads a broken copy of Valheim's Norsebold font
-    * The compendium, Quick Configure and merchant panel use the same font lookup and no longer pick up such copies either
-* Fix for disenchanting and re-enchanting an item with a Durability bonus growing its durability without limit
-    * Disenchanting now keeps the item's durability percentage instead of leaving it above full
-    * Items that already have more durability than their maximum return to full the next time they are enchanted or disenchanted
-* Item tooltips now size to their content: `Tooltip Max Width` and `Tooltip Max Height` are upper limits instead of a fixed size
-    * Fix for tooltips floating away from the cursor near the screen edges, most noticeably with a large `Tooltip Max Height`
-    * The item name spans the tooltip's full width at any `Tooltip Max Width`, and the tooltip is never taller than the screen
-    * The Ctrl comparison tooltip sits beside the item's tooltip on the side away from the cursor, and follows the hovered item instead of keeping the first item's comparison
-    * Fix for the comparison tooltip not appearing when Ctrl was already held as the tooltip opened
-* The adventure trader and tempering panels now only move while the new client option `Trader Panel Drag Key` (default Left Alt) is held, so clicking them can no longer nudge them
-    * With the key held they can be dragged from anywhere, including over their lists and buttons
-    * A four-way arrow handle in each panel's top-right corner drags it without the key, and can't be dragged off screen
-    * Set the key to None to move the panels by the handle only; it is also on Quick Configure's Interface page
-* Fix for enchantments on items in nearby chests (shown at the enchanting table by AzuCraftyBoxes) reverting a moment later, after the materials were spent
-    * Enchanting, augmenting, etching, disenchanting, a reducing rune extract or a set strip changed only the chest's copy in memory, and the chest reloading undid it; a disenchant also handed back the socketed stones first, duplicating them
-    * The new server option `Spend-Only Storage Mods` (default `Azumatt.AzuCraftyBoxes`) lists mods whose stored items the table only spends: they still pay for materials and runes and can be sacrificed or identified, but take an item out of the chest to work on it
-    * The table now re-checks, before paying, that the item it is about to change is still where it was
-* API: `RegisterInventoryProviderSaveHandler` lets a mod that shows its storage at the table save the items the table changes there; DvergerAutomation uses it, so gear in its linked chests can be worked on in place
-* Fix for magic staff tooltips showing a hugely inflated health cost and leaving out the eitr cost, which now both reflect their cost-reducing enchantments
-* Fix for a long stutter when first opening the enchanting table or one of its tabs, worst in large bases
-* Elite creatures can now drop a runestone matching their biome, an optional server setting with an adjustable chance on Quick Configure's Loot Drops page
+- Adds Quick Configure, an in-game settings panel on the main and pause menus where hosts can also edit loot, bounty and effect values.
+- A one-time setup wizard replaces the old welcome panel, and the config update prompt and other mods' welcome popups now take turns with it.
+- Loot keeps improving with every star a creature has, and server admins can tune how much stars count and preview a creature's drops from the console.
+- Creatures added by other mods now drop magic loot suited to their biome and strength without needing a patch.
+- Many vanilla creatures that dropped no magic loot now do, several tougher ones count as elites, and harmless animals no longer drop it.
+- Elite creatures can optionally drop a runestone matching their biome.
+- Late-game bosses drop extra of their own boss items when several players take part, and extra trophies, wishbones and crypt keys now add to the normal drop.
+- Old-style loot tables are converted to the new format automatically with a backup, and the loot check at world load covers every level without ever emptying a table.
+- Uniques and item sets can now drop at any rarity, set pieces of different rarities count toward the same set, and set items say so in their tooltip.
+- Set runes let you extract an item set from one item and etch it onto another at the enchanting table.
+- New Wrath of the Thunderer set, whose full set lets you hurl your melee weapon to slam down where you aim.
+- New Trickster's Guile set, whose full set takes you behind an enemy you keep your aim on for a heavy strike.
+- New Dverger Arsenal set, whose full set turns your crossbow bolts into lobbed fireballs that explode where you aim.
+- New magic effect Prosperity gives creatures and chests near you a chance to roll their magic loot again.
+- New magic effect Green Thumb on the Cultivator makes the plants you sow grow faster.
+- New magic effect Close Quarter on melee weapons reduces how far your hits knock enemies back.
+- The grappling hook gets its own enchantments, Swift Reel and Long Line, and is treated as a tool rather than a weapon for loot and damage effects.
+- Adds optional Item Favorite Framework support, so favorited items are never offered for destruction at the enchanting table and show a star.
+- Project Auga support is back for Auga's latest Valheim release.
+- A new server option stops enchantments that only work at critical health from rolling.
+- The enchanting table uses Valheim's own fonts and controller button icons, and shows how much of each material is in nearby storage.
+- Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
+- Item tooltips now fit their content and stay beside the cursor, and the comparison tooltip follows the hovered item.
+- The trader and tempering panels only move while a key is held or by their corner handle, so clicking them no longer nudges them.
+- Storage mods can now let the enchanting table work on items directly in their chests.
+- The compendium lists each set once with its rarities, bonus values and each piece's requirements.
+- Lox armor is now sorted into Plains loot.
+- Console commands for spawning uniques and set pieces now take a rarity, and new ones spawn runestones with exact effects and force rare effects for testing.
+- Less stutter around chests, and when first opening the enchanting table or one of its tabs.
+- Fixes enchanting changes to items in nearby chests reverting after the materials were spent, which could also duplicate socketed stones.
+- Fixes some creatures and chests that dropped no magic loot, such as the fallen warriors at memorial sites and the Plains stone tower chest, and an error with chest-style tables on high-star creatures.
+- Fixes the Dvergr rogues' crossbows showing up as a second Arbalest in loot, the merchant and item gating.
+- Fixes the crypt key and wishbone drop settings being ignored, and players who hide their map position counting as near a boss.
+- Fixes Stagger Duration shortening staggers on most creatures and not working from projectiles in multiplayer.
+- Fixes bounty creatures losing their extra health after a reload or when another player's game took them over.
+- Fixes several set bonus problems, including duplicate pieces counting twice, tooltips miscounting pieces and a set roll sometimes giving a plain legendary.
+- Fixes disenchanting and re-enchanting an item with a durability bonus raising its durability without limit.
+- Fixes magic staff tooltips showing a wildly wrong health cost and leaving out the eitr cost.
+- Fixes panel text going missing when another mod ships a broken copy of Valheim's fonts.
+- Fixes the rested carry weight shardstone losing its comfort bonus.
+- Fixes the rune page's Etch button staying enabled with no rune selected, and rarity color changes not reaching the enchanting table's buttons until the next login.
+- Lucky Craft now only saves materials when crafting, not when building, planting or tempering.
+- Quick Draw no longer makes crossbows reload slower at high skill, and Triple Shot from a set only affects bows and crossbows.
+- Coin Weighted Weapon now shows the damage bonus it actually gives at the coins you carry, and weapon tooltips include it before the weapon is equipped.
+- Coin Weighted Weapon's bonus now rises smoothly with no sudden jump, higher rolls always give more, and server admins can tune how it grows.
 
 
 **0.14.13**

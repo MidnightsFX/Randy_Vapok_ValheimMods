@@ -173,8 +173,11 @@ namespace EpicLoot
                 .Where(t => t?.Auto == true && t.Object != null).Select(t => t.Object), StringComparer.Ordinal);
             HashSet<string> ownNames = new HashSet<string>(LootRoller.Config.LootTables
                 .Where(t => t != null && t.Auto != true && t.Object != null).Select(t => t.Object), StringComparer.Ordinal);
+            // An Auto entry's key holds its template's list; a table in it named after the creature itself
+            // came from somewhere else (the API) and is the creature's own.
             bool HasOwnTable(string name) => ownNames.Contains(name) ||
-                (LootRoller.LootTables.ContainsKey(name) && !autoNames.Contains(name));
+                (LootRoller.LootTables.TryGetValue(name, out List<LootTable> own) &&
+                 (!autoNames.Contains(name) || own.Any(t => t != null && t.Object == name && string.IsNullOrEmpty(t.RefObject))));
             bool TemplateExists(string name) => !autoNames.Contains(name) &&
                 LootRoller.LootTables.TryGetValue(name, out List<LootTable> tables) && tables.Count > 0;
 

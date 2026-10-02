@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Magiczny przedmiot nie zużywa wytrzymałości i nigdy nie złamie się.",
   "mod_epicloot_me_indestructible_prefix1": "Nieskończony",
   "mod_epicloot_me_indestructible_suffix1": "Nieskończoność",
-  "mod_epicloot_me_coinhoarder_display": "Broń obciążona monetami +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Broń obciążona monetami {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Zwiększa każdy rodzaj obrażeń broni o +<b><color=yellow>X</color></b>% za (999) monet w inwentarzu. Silne malejące względem po 2k monetach.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tyrant's",
   "mod_epicloot_me_coinhoarder_suffix1": "Bogactwo",

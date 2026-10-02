@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Det magiske genstand bruger ikke holdbarhed og vil aldrig gå i stykker.",
   "mod_epicloot_me_indestructible_prefix1": "Uopslidelig",
   "mod_epicloot_me_indestructible_suffix1": "Uopslidelighed",
-  "mod_epicloot_me_coinhoarder_display": "Møntvægtet Våben +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Møntvægtet Våben {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Øg hver skadetype af våben med +<b><color=yellow>X</color></b>% per (999) mønter i inventaret. Kraftigt aftagende afkast efter 2k mønter.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tyrants",
   "mod_epicloot_me_coinhoarder_suffix1": "Rigdom",

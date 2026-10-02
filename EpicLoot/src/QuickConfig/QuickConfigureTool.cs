@@ -528,6 +528,7 @@ internal static class QuickConfigureTool {
 
         List<string> failures = new List<string>();
         List<string> notes = new List<string>();
+        HashSet<string> writtenFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // 1. The .cfg entries, in one batch and one write. Only entries whose staged value differs
         //    from the baseline are set, so nothing that moved while the panel was open is clobbered.
@@ -556,12 +557,15 @@ internal static class QuickConfigureTool {
                     notes.Add(rewriteMessage);
                     staged.PresetPressed = null;
                     // The file is new; staged Effect Tuning values now come from it, not the old copy.
-                    staged.Reload(slot => slot is JsonSlot json && json.File == BalancePreset.MagicEffectsFile);
+                    // The baseline takes it too, so the fresh template is not written back over itself
+                    // as an edit; staged shard effects still differ from it and are saved below.
+                    BalancePreset.ReloadMagicEffects(staged);
+                    BalancePreset.ReloadMagicEffects(baseline);
                 } else {
                     failures.Add(rewriteMessage);
                 }
             }
-            JsonConfigEdits.ApplyDirty(staged, baseline, failures, notes);
+            JsonConfigEdits.ApplyDirty(staged, baseline, failures, notes, writtenFiles);
         } else {
             staged.PresetPressed = null;
         }
@@ -582,6 +586,11 @@ internal static class QuickConfigureTool {
         baseline = StagedConfig.Snapshot();
         if (failures.Count == 0) {
             staged.CopyFrom(baseline);
+        } else {
+            // Rows of a file that was written take what landed, which for a weight table is the
+            // rebalanced one: kept as typed, a retry would rebalance it against the new baseline and
+            // undo the edit.
+            staged.TakeFrom(baseline, slot => slot is JsonSlot json && writtenFiles.Contains(json.File));
         }
         RefreshAll();
 

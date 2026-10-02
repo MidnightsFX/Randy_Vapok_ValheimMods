@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "यह जादूई वस्त्र उर्जा का उपयोग नहीं करता है और कभी नहीं टूटेगा।",
   "mod_epicloot_me_indestructible_prefix1": "अनश्रय",
   "mod_epicloot_me_indestructible_suffix1": "अनश्रयता",
-  "mod_epicloot_me_coinhoarder_display": "सिक्का भार धारी हथियार +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "सिक्का भार धारी हथियार {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "हथियार के प्रत्येक हानिकारक प्रकार को +<b><color=yellow>X</color></b>% बढ़ाएं प्रति रुपया (999) रुपये के इन्वेंट्री में। 2k सिक्कों के बाद मजबूत कमी देखने को मिलती है।",
   "mod_epicloot_me_coinhoarder_prefix1": "शासक का",
   "mod_epicloot_me_coinhoarder_suffix1": "धन",

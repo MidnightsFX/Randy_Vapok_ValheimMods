@@ -3669,6 +3669,11 @@
           "Increment": 0.5
         }
       },
+      "Config": {
+        "LinearGrowth": 1,
+        "LinearCutoff": 1000,
+        "Scalar": 6.258
+      },
       "SelectionWeight": 10,
       "Prefixes": [
         "$mod_epicloot_me_coinhoarder_prefix1"
@@ -7524,7 +7529,7 @@
         "MaxDistance": 60,
         "Gravity": 30,
         "ArcHeight": 0.2,
-        "RadiusPerValue": 0.04,
+        "Radius": 2.5,
         "TripleShotSpread": 0.15
       }
     },

@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Taikatavara ei käytä kestävyyttä eikä koskaan rikkoudu.",
   "mod_epicloot_me_indestructible_prefix1": "Mahdoton tuhota",
   "mod_epicloot_me_indestructible_suffix1": "Mahdottomuus",
-  "mod_epicloot_me_coinhoarder_display": "Kolikkopainoinen ase +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Kolikkopainoinen ase {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Lisää aseen jokaista vahinkotyyppiä +<b><color=yellow>X</color></b>% per (999) kolikkoa varastossa. Voimakkaasti vähenevä tuotto yli 2k kolikkoa.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tyrannin",
   "mod_epicloot_me_coinhoarder_suffix1": "Varallisuus",

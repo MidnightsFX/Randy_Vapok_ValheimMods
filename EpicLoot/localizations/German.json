@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Der magische Gegenstand verbraucht keine Haltbarkeit und wird niemals brechen.",
   "mod_epicloot_me_indestructible_prefix1": "Unzerstörbar",
   "mod_epicloot_me_indestructible_suffix1": "Unzerstörbarkeit",
-  "mod_epicloot_me_coinhoarder_display": "Münzgewichtete Waffe +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Münzgewichtete Waffe {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Erhöht jeden Schadenstyp der Waffe um +<b><color=yellow>X</color></b>% pro (999) Münzen im Inventar. Starke abnehmende Renditen nach 2k Münzen.",
   "mod_epicloot_me_coinhoarder_prefix1": "Des Tyrannen",
   "mod_epicloot_me_coinhoarder_suffix1": "Reichtum",

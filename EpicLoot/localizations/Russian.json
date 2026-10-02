@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Предмет не имеет прочности и не может быть сломан.",
   "mod_epicloot_me_indestructible_prefix1": "Неразрушм.",
   "mod_epicloot_me_indestructible_suffix1": "неразрушимости",
-  "mod_epicloot_me_coinhoarder_display": "Урон от монет +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Урон от монет {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Увеличивает урон оружия на +<b><color=yellow>X</color></b>% за (999) монет в инвентаре. Уменьшение эффекта после 2000 монет.",
   "mod_epicloot_me_coinhoarder_prefix1": "Тирана",
   "mod_epicloot_me_coinhoarder_suffix1": "Богатства",

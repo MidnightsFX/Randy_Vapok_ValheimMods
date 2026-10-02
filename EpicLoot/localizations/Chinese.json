@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "魔法物品不消耗耐久度，永远不会破损。",
   "mod_epicloot_me_indestructible_prefix1": "不可摧毁",
   "mod_epicloot_me_indestructible_suffix1": "不可摧毁性",
-  "mod_epicloot_me_coinhoarder_display": "铸币武器 +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "铸币武器 {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "增加武器的每种伤害类型 +<b><color=yellow>X</color></b>%，每 (999) 个库存中的硬币。超过2k硬币后收益急剧减少。",
   "mod_epicloot_me_coinhoarder_prefix1": "暴君的",
   "mod_epicloot_me_coinhoarder_suffix1": "财富",

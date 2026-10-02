@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Магическият предмет не използва издръжливост и никога няма да се счупи.",
   "mod_epicloot_me_indestructible_prefix1": "Неразрушим",
   "mod_epicloot_me_indestructible_suffix1": "Неразрушимост",
-  "mod_epicloot_me_coinhoarder_display": "Оръжие с монети +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Оръжие с монети {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Увеличете всеки вид щета от оръжие с +<b><color=yellow>X</color></b>% за (999) монети в инвентара. Силно намалява след 2k монети.",
   "mod_epicloot_me_coinhoarder_prefix1": "Тираничен",
   "mod_epicloot_me_coinhoarder_suffix1": "Богатство",

@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Det magiske gjenstanden bruker ikke holdbarhet og vil aldri ødelegges.",
   "mod_epicloot_me_indestructible_prefix1": "Uødeleggelig",
   "mod_epicloot_me_indestructible_suffix1": "Uødeleggelighet",
-  "mod_epicloot_me_coinhoarder_display": "Myntvektet våpen +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Myntvektet våpen {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Øk hver skadetype av våpenet med +<b><farge=gul>X</farge></b>% per (999) mynter i inventaret. Sterk avtagende avkastning etter 2k mynter.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tyrant's",
   "mod_epicloot_me_coinhoarder_suffix1": "Rikdom",

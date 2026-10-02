@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Den magiska föremålet använder inte hållbarhet och kommer aldrig att gå sönder.",
   "mod_epicloot_me_indestructible_prefix1": "Oöverstiglig",
   "mod_epicloot_me_indestructible_suffix1": "Oöverstiglighet",
-  "mod_epicloot_me_coinhoarder_display": "Myntviktat Vapen +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Myntviktat Vapen {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Öka varje skadetyp av vapen med +<b><color=yellow>X</color></b>% per (999) mynt i inventeringen. Starkt avtagande avkastning efter 2k mynt.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tyranns",
   "mod_epicloot_me_coinhoarder_suffix1": "Rikedom",

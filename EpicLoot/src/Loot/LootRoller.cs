@@ -44,6 +44,10 @@ namespace EpicLoot
         // creature using it), which leaves this the only place that creature's own tuning lives.
         private static readonly Dictionary<string, LootTable> CreatureOverrides = new Dictionary<string, LootTable>();
 
+        // Keys whose list is currently another key's (a RefObject entry), so a table of the key's own never
+        // lands in the template's shared list.
+        private static readonly HashSet<string> _aliasKeys = new HashSet<string>();
+
         // Loot-config complaints that would otherwise repeat on every kill; reset on each (re)load.
         private static readonly HashSet<string> _warnedLootTables = new HashSet<string>();
 
@@ -139,6 +143,7 @@ namespace EpicLoot
             ItemSets.Clear();
             LootTables.Clear();
             CreatureOverrides.Clear();
+            _aliasKeys.Clear();
             _warnedLootTables.Clear();
             _warnedMissingSocketCounts.Clear();
             _warnedInvalidSocketCounts.Clear();
@@ -236,6 +241,15 @@ namespace EpicLoot
             var refKey = lootTable.RefObject;
             if (string.IsNullOrEmpty(refKey))
             {
+                // A table of the key's own (an API table for a creature that also has a RefObject entry,
+                // such as one the creature sorter wrote) replaces the alias. Appended, it would join the
+                // template's shared list and roll for every creature on that template.
+                if (_aliasKeys.Remove(key))
+                {
+                    LootTables[key] = new List<LootTable>();
+                    CreatureOverrides.Remove(key);
+                }
+
                 LootTables[key].Add(lootTable);
             }
             else
@@ -248,6 +262,7 @@ namespace EpicLoot
                 else
                 {
                     LootTables[key] = LootTables[refKey];
+                    _aliasKeys.Add(key);
                     if (lootTable.StarMultiplier != null || lootTable.Modifiers != null || lootTable.StarScaling != null)
                     {
                         CreatureOverrides[key] = lootTable;
@@ -417,7 +432,7 @@ namespace EpicLoot
         public static bool AnyItemSpawnCheatsActive()
         {
             return CheatRollingItem || CheatDisableGating || CheatForceMagicEffect ||
-                !string.IsNullOrEmpty(CheatForceLegendary) || !string.IsNullOrEmpty(CheatForceMythic) ||
+                !string.IsNullOrEmpty(CheatForceUniqueID) ||
                 CheatEffectCount > 0 || CheatEffectRarityTier > 0;
         }
 
@@ -1338,7 +1353,8 @@ namespace EpicLoot
         internal static LootRollPlan PlanRollAt(LootTable lootTable, float effectiveLevel, LootTable own,
             float inheritedRarityExtra)
         {
-            var scaling = LootScalingMath.MergeScaling(own?.StarScaling, lootTable.StarScaling,
+            var ownScaling = EliteRunestoneTables.IsEliteRunestoneTable(lootTable) ? null : own?.StarScaling;
+            var scaling = LootScalingMath.MergeScaling(ownScaling, lootTable.StarScaling,
                 Config?.DefaultStarScaling ?? LootScalingMath.CodeDefaultStarScaling);
 
             var dropsAnchor = LootScalingMath.FindAnchor(lootTable.LeveledLoot, effectiveLevel,

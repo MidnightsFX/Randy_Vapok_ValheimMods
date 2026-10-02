@@ -95,22 +95,11 @@ public static class PatchOnHoverFix
             Transform header = Utils.FindChild(ComparisonTT.transform, "Topic");
             header.GetComponent<TMP_Text>().text = Localization.instance.Localize(ComparisonTitleString);
             Transform contentt = Utils.FindChild(ComparisonTT.transform, "Text");
-            contentt.GetComponent<TextMeshProUGUI>().text = Localization.instance.Localize(ComparisonTooltipString);
-            MagicTextShimmer.Ensure(contentt.GetComponent<TMP_Text>());
-
-            // Offset the comparision tooltip to the right of the original tooltip
-            RectTransform tooltipTfm = (RectTransform)UITooltip.m_tooltip.transform;
-            Vector3[] compareCorners = new Vector3[4];
-            Vector3[] tooltipCorners = new Vector3[4];
-            RectTransform tooltipTransform = Utils.FindChild(UITooltip.m_tooltip.transform, "Canvas").GetComponent<RectTransform>();
-            tooltipTransform.GetWorldCorners(tooltipCorners);
-            scrollRT.GetWorldCorners(compareCorners);
-            scrollRT.anchoredPosition = new Vector2(tooltipTfm.anchoredPosition.x + MaxWidth, tooltipTfm.anchoredPosition.y);
-
-            // Offset calculation is needed to adjust the two canvases since they will have different heights
-            float xoffset = Mathf.Abs(tooltipCorners[0].y - tooltipCorners[1].y);
-            scrollRT.position = new Vector3(tooltipTransform.position.x + (xoffset / 2) + 5f, tooltipTransform.position.y, 0);
-            ComparisonAdded = true;
+            TMP_Text content = contentt.GetComponent<TMP_Text>();
+            content.text = Localization.instance.Localize(ComparisonTooltipString);
+            MagicTextShimmer.Ensure(content);
+            shownComparisonTitle = ComparisonTitleString;
+            shownComparisonText = ComparisonTooltipString;
         }
     }
 

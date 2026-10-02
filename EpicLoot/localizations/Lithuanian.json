@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Magiškas daiktas nenaudoja patvarumo ir niekada nesusilaužys.",
   "mod_epicloot_me_indestructible_prefix1": "Nesunaikinamas",
   "mod_epicloot_me_indestructible_suffix1": "nesunaikinamumas",
-  "mod_epicloot_me_coinhoarder_display": "Pinigų svertas ginklas +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Pinigų svertas ginklas {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Padidinti kiekvieno ginklo žalą +<b><color=yellow>X</color></b>% už (999) monetų inventoriuje. Stipriai mažėja nauda turint daugiau nei 2 tūkst. monetų.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tyrano",
   "mod_epicloot_me_coinhoarder_suffix1": "Turtas",

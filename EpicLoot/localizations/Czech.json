@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Magický předmět nepoužívá odolnost a nikdy se nerozbije.",
   "mod_epicloot_me_indestructible_prefix1": "Nerozbitný",
   "mod_epicloot_me_indestructible_suffix1": "Nerozbitnost",
-  "mod_epicloot_me_coinhoarder_display": "Mincemi zatížená zbraň +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Mincemi zatížená zbraň {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Zvýšit každý typ poškození zbraně o +<b><color=yellow>X</color></b>% za (999) mincí v inventáři. Silné klesající návraty po 2k mincích.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tyranův",
   "mod_epicloot_me_coinhoarder_suffix1": "Bohatství",

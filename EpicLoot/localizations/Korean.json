@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "마법 아이템은 내구성을 사용하지 않으며 절대로 깨지지 않습니다.",
   "mod_epicloot_me_indestructible_prefix1": "파괴불가",
   "mod_epicloot_me_indestructible_suffix1": "파괴불가능성",
-  "mod_epicloot_me_coinhoarder_display": "동전 가중 무기 +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "동전 가중 무기 {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "인벤토리의 (999) 동전 당 무기의 각 피해 유형을 +<b><color=yellow>X</color></b>%씩 증가시킵니다. 2천 개 동전 이상일 경우 엄청난 감소 효과가 있습니다.",
   "mod_epicloot_me_coinhoarder_prefix1": "폭군의",
   "mod_epicloot_me_coinhoarder_suffix1": "부",

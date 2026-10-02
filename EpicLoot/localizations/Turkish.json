@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "Sihirli eşya dayanıklılık kullanmaz ve asla kırılmaz.",
   "mod_epicloot_me_indestructible_prefix1": "Yıkılmaz",
   "mod_epicloot_me_indestructible_suffix1": "Yıkılmazlık",
-  "mod_epicloot_me_coinhoarder_display": "Para Ağırlıklı Silah +%{0:0.#}",
+  "mod_epicloot_me_coinhoarder_display": "Para Ağırlıklı Silah {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Envanterdeki her (999) paraya göre silahın her hasar türünü +%<b><color=yellow>X</color></b>% artırır. 2k para sonrası güçlü azalan getiri.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tiranın",
   "mod_epicloot_me_coinhoarder_suffix1": "Zenginliği",

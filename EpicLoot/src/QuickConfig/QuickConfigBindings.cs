@@ -907,8 +907,10 @@ internal static class QuickConfigBindings {
     // One staged value, two files: a slot per file feeds the same key, and each slot only counts
     // as dirty (and only writes) when the effects that belong to its file changed.
 
+    internal const string EffectConfigsKey = "json:magiceffects:EffectConfigs";
+
     private static void EffectConfigs() {
-        const string key = "json:magiceffects:EffectConfigs";
+        const string key = EffectConfigsKey;
         JsonSlot shard = JsonSlotFor(key, "shardstones.json", () => EffectConfigTables.Read(), null);
         shard.Default = (current, shipped) => current is EffectConfigsValue value ? EffectConfigTables.Shipped(value, shipped) : null;
         shard.Changed = (current, before) => ((EffectConfigsValue)current).PartChanged(before as EffectConfigsValue, EffectSource.Shard);

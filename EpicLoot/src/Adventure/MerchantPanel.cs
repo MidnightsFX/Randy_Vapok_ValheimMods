@@ -57,7 +57,9 @@ namespace EpicLoot.Adventure
         private readonly Currencies _currencies = new Currencies(-1);
         public static MerchantPanel Instance => _instance;
         // The button, not its label: a legacy Text normally, a TMP_Text once Auga has replaced the button.
-        private static Transform _acceptBountyButton;
+        // The button's own label: Auga's TMP one, else the prefab's legacy Text. Resolved before the gamepad
+        // hints are built, since their glyph is a TMP text under the same button.
+        private static Component _acceptBountyLabel;
         private static MerchantPanel _instance;
         private AudioSource _audioSource;
 
@@ -180,7 +182,9 @@ namespace EpicLoot.Adventure
                 EpicLootAuga.ReplaceButton(transform.Find("Bounties/AbandonBountyButton").GetComponent<Button>(), true);
             }
             
-            _acceptBountyButton = transform.Find("Bounties/AcceptBountyButton");
+            Transform acceptBountyButton = transform.Find("Bounties/AcceptBountyButton");
+            _acceptBountyLabel = acceptBountyButton == null ? null
+                : (Component)acceptBountyButton.GetComponentInChildren<TMP_Text>(true) ?? acceptBountyButton.GetComponentInChildren<Text>(true);
 
             Panels.Add(new SecretStashListPanel(this, buyListPrefab));
             Panels.Add(new GambleListPanel(this, buyListPrefab));
@@ -255,9 +259,9 @@ namespace EpicLoot.Adventure
 
         public static void SetAcceptBountyLabel(string label)
         {
-            if (_acceptBountyButton != null)
+            if (_acceptBountyLabel != null)
             {
-                EpicLootAuga.SetLabel(_acceptBountyButton, label);
+                EpicLootAuga.SetLabel(_acceptBountyLabel, label);
             }
         }
 

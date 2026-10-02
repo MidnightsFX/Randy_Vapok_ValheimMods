@@ -131,7 +131,8 @@ namespace EpicLoot
         private static void RollInternal(Container container, string containerName,
             List<LootTable> lootTables)
         {
-            var items = LootRoller.RollLootTable(lootTables, 1, container.m_piece.name,
+            // The clean prefab name: the roll looks the chest's own entry (Modifiers, StarScaling) up by it.
+            var items = LootRoller.RollLootTable(lootTables, 1, containerName,
                 container.transform.position);
             ContainerCapacity.AddItems(container, items);
 
@@ -183,19 +184,19 @@ namespace EpicLoot
                 return;
             }
 
-            if (!TryGetLootTables(container, out var containerName, out var lootTables))
-            {
-                Pending.Remove(container);
-                zdo.Set(PendingKeyHash, false);
-                return;
-            }
-
-            // We are about to write the flag and the inventory. Whoever is reading a chest's
+            // We are about to write the flag (and, below, the inventory). Whoever is reading a chest's
             // contents is standing at it, so the server's ZDOMan.ReleaseZDOS would hand us this ZDO
             // within a couple of seconds regardless; claiming now just removes that window.
             if (!nview.IsOwner())
             {
                 nview.ClaimOwnership();
+            }
+
+            if (!TryGetLootTables(container, out var containerName, out var lootTables))
+            {
+                Pending.Remove(container);
+                zdo.Set(PendingKeyHash, false);
+                return;
             }
 
             // Clear before anything that can re-enter, not merely before Roll. container.Load() below

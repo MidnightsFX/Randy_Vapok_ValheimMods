@@ -81,7 +81,9 @@ namespace EpicLoot.MagicItemEffects
         private static Character _target;
         private static float _hoverStart;
         private static float _lastSeen;
-        private static Attack _strike;    // the strike being started, for the eitr postfix
+        // The last strike started, for the eitr postfix: Attack.Start only checks eitr and Attack.Update spends it
+        // later, so it stays set past Start. It matches only that one Attack instance.
+        private static Attack _strike;
 
         private static int _groundMask;
         private static int _blockMask;
@@ -435,7 +437,7 @@ namespace EpicLoot.MagicItemEffects
 
             // No previous attack: the strike opens a combo rather than continuing one.
             _strike = attack;
-            bool started;
+            bool started = false;
             try
             {
                 started = attack.Start(player, player.m_body, player.m_zanim, player.m_animEvent, player.m_visEquipment,
@@ -443,7 +445,10 @@ namespace EpicLoot.MagicItemEffects
             }
             finally
             {
-                _strike = null;
+                if (!started)
+                {
+                    _strike = null;
+                }
             }
 
             if (!started)

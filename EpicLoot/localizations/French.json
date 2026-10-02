@@ -1508,7 +1508,7 @@
   "mod_epicloot_me_indestructible_desc": "L'objet magique n'utilise pas de durabilité et ne se cassera jamais.",
   "mod_epicloot_me_indestructible_prefix1": "Indestructible",
   "mod_epicloot_me_indestructible_suffix1": "Indestructibilité",
-  "mod_epicloot_me_coinhoarder_display": "Arme pondérée de pièces +{0:0.#}%",
+  "mod_epicloot_me_coinhoarder_display": "Arme pondérée de pièces {0:0.#}",
   "mod_epicloot_me_coinhoarder_desc": "Augmente chaque type de dégâts de l'arme de +<b><color=yellow>X</color></b> % par (999) de pièces dans l'inventaire. Fortes retombées après 2k pièces.",
   "mod_epicloot_me_coinhoarder_prefix1": "Tyrant's",
   "mod_epicloot_me_coinhoarder_suffix1": "Richesse",
