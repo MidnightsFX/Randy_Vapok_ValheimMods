@@ -35,7 +35,10 @@ namespace EpicLoot.MagicItemEffects
                     MagicEffectsHelper.HasActiveMagicEffectOnWeapon(
                         Player.m_localPlayer, weapon, MagicEffectType.SpellSword, out float effectValue))
                 {
-                    __result += GetAdditionalSpellswordAttackEitr(__instance.m_attackStamina);
+                    // Match the weapon skill reduction applied by Attack.GetAttackStamina.
+                    float skillFactor = character.GetSkillFactor(weapon.m_shared.m_skillType);
+                    float adjustedStamina = __instance.m_attackStamina * (1f - 0.33f * skillFactor);
+                    __result += GetAdditionalSpellswordAttackEitr(adjustedStamina);
                 }
             }
         }
