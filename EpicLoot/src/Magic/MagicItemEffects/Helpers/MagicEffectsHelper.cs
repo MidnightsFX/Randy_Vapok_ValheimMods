@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
@@ -151,10 +152,32 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
             return false;
         }
 
+        // Set-bonus-only totals share EquipmentEffectCache with the full per-effect totals, under their own key.
+        private static readonly Dictionary<string, string> _setEffectCacheKeys = new Dictionary<string, string>();
+
         public static float GetTotalActiveSetEffectValue(Player player, string effectType, float scale = 1.0f)
         {
-            var setEffects = player.GetAllActiveSetMagicEffects(effectType);
-            return setEffects.Count > 0 ? scale * setEffects.Sum(x => x.EffectValue) : 0;
+            if (player == null || effectType == null)
+            {
+                return 0;
+            }
+
+            // ModifyArmor reads this from every ItemData.GetArmor, so it is memoized like
+            // GetTotalActiveMagicEffectValue rather than re-walking the set tiers each call.
+            if (!_setEffectCacheKeys.TryGetValue(effectType, out string cacheKey))
+            {
+                cacheKey = "set|" + effectType;
+                _setEffectCacheKeys[effectType] = cacheKey;
+            }
+
+            if (!EquipmentEffectCache.TryGetValue(player, cacheKey, out float? cached))
+            {
+                var setEffects = player.GetAllActiveSetMagicEffects(effectType);
+                cached = setEffects.Count > 0 ? setEffects.Sum(x => x.EffectValue) : (float?)null;
+                EquipmentEffectCache.Store(player, cacheKey, cached);
+            }
+
+            return scale * (cached ?? 0);
         }
 
         // --- Shared guards/lookups for effect dispatchers -------------------------------------------

@@ -58,6 +58,67 @@ public class InventoryManagement
         return combined;
     }
 
+    // What an action that changes an item in place (enchant, augment, etch, a reducing extract, a set strip,
+    // disenchant) may target: GetAllItems less the providers listed under Spend-Only Storage Mods. Those
+    // never save such a change, so the item would revert when their storage reloads, after the materials
+    // were spent. Consuming actions keep using GetAllItems, since a removal is saved.
+    public List<ItemDrop.ItemData> GetEditableItems()
+    {
+        Inventory inventory = GetInventory();
+        if (inventory == null)
+        {
+            return null;
+        }
+
+        List<ItemDrop.ItemData> items = inventory.GetAllItems();
+        if (!API.AnyInventoryProviders)
+        {
+            return items;
+        }
+
+        List<ItemDrop.ItemData> combined = new List<ItemDrop.ItemData>(items);
+        API.AppendProviderItems(combined, forEditing: true);
+        return combined;
+    }
+
+    // Re-checked right before an in-place change is paid for: the item must still be somewhere that change
+    // can be saved. Providers are asked again, so a chest that reloaded since the list was built (replacing
+    // the instance) fails here instead of taking the materials.
+    public bool IsEditable(ItemDrop.ItemData item)
+    {
+        if (item == null)
+        {
+            return false;
+        }
+
+        Inventory inventory = GetInventory();
+        if (inventory != null && inventory.ContainsItem(item))
+        {
+            return true;
+        }
+
+        List<ItemDrop.ItemData> editable = GetEditableItems();
+        return editable != null && editable.Contains(item);
+    }
+
+    // Call after changing an item in place. The player's own inventory is saved with the character; an
+    // item a provider offered is handed back to that provider to save where it lives.
+    public void CommitItemEdit(ItemDrop.ItemData item)
+    {
+        if (item == null || !API.AnyInventoryProviders)
+        {
+            return;
+        }
+
+        Inventory inventory = GetInventory();
+        if (inventory != null && inventory.ContainsItem(item))
+        {
+            return;
+        }
+
+        API.SaveProviderItem(item);
+    }
+
     public bool HasItem(ItemDrop.ItemData item)
     {
         return CountItem(item.m_shared.m_name) >= item.m_stack;

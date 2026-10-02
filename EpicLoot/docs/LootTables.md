@@ -1,0 +1,184 @@
+# Loot tables
+
+`loottables.json` decides which magic items a creature or chest drops, how many, how often and at what
+rarity. The shipped copy is embedded in the mod and written to `<BepInEx>/config/EpicLoot/baseconfig/`;
+change it there, through a patch in `<BepInEx>/config/EpicLoot/patches/`, or from another mod through
+`API.AddLootTables` (see [API.md](API.md)).
+
+## A table
+
+```jsonc
+{
+  "Object": "Tier1Mob",
+  "StarScaling": { "DropChance": 0.057, "BonusDrops": 0, "RarityShift": 0.08, "RarityFalloff": 0.5, "MaxRarity": "Legendary" },
+  "LeveledLoot": [
+    {
+      "Level": 1,
+      "Drops": [ [0, 95], [1, 5] ],
+      "Loot": [
+        { "Item": "Tier0Everything", "Weight": 10, "WeightPerStar": -1.063, "Rarity": [ 75, 25, 0, 0, 0 ] },
+        { "Item": "Tier1Everything", "Weight": 1,  "WeightPerStar": 1.063,  "Rarity": [ 75, 25, 0, 0, 0 ] }
+      ]
+    },
+    { "Level": 5, "Drops": [ [0, 65], [1, 34], [2, 1] ], "Loot": [ ... ] }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `Object` | The creature or container prefab name, or a template name other tables refer to. Several tables may share an Object; each rolls on its own (the bosses have an item table and a shardstone table). |
+| `RefObject` | Makes this entry use another table's loot (see [Creature entries](#creature-entries)). |
+| `LeveledLoot` | The anchor levels (below). |
+| `StarScaling` | How the loot grows per star past an anchor (below). |
+| `Modifiers` | Star-independent adjustments (below). |
+| `StarMultiplier` | How much each star counts for this table; 1.5 makes a 2★ creature roll like a 3★ one. |
+| `Auto` | Set by the creature sorter on the entries it writes. Leave it alone, or remove it to keep an entry as it is. |
+
+### Levels are anchors
+
+A creature's level is its stars plus one: 0★ is level 1, 2★ is level 3. A roll uses the highest level at
+or below the creature's that has data, and StarScaling extrapolates the rest. `Drops` and `Loot` are
+anchored separately, so a level may set only one of them and take the other from below. A table needs a
+level 1 entry (or whichever level is its lowest) for creatures at that level to drop anything.
+
+- **`Drops`** is `[count, weight]` pairs: the chance of each number of drops. `[0, 95], [1, 5]` drops one
+  item 5% of the time.
+- **`Loot`** is the list each drop is picked from, by `Weight` (default 1), with replacement.
+
+### Loot entries
+
+| Field | Meaning |
+|---|---|
+| `Item` | A prefab name, an `ItemSets` name, or a reference to another table (below). |
+| `Weight` | Relative chance of this entry being picked. |
+| `WeightPerStar` | Added to `Weight` for every star past the anchor, never going below 0. This is how a template shifts toward the next tier's gear without another level. |
+| `Rarity` | Relative weights for Magic, Rare, Epic, Legendary, Mythic, Ancient, in that order. A shorter array leaves the rest at 0. An entry without one drops a plain item, unless the set or table it names supplies one. |
+| `RarityItems` | A per-rarity override of `Item`: the rolled rarity picks the prefab (used by shardstones). |
+
+**Table references.** `"Tier3Mob.2"` rolls from Tier3Mob's loot as a level 2 creature would. `"Tier3Mob.*"`
+rolls it at the level the referring table is being rolled at, which is how the elite templates take their
+gear from the normal ones at every level with a single entry. A referenced table uses its own StarScaling
+for its item mix and rarity.
+
+## Star scaling
+
+A creature rolls at an **effective level**: `1 + stars × StarMultiplier(creature) × StarMultiplier(table) ×
+Star Loot Scaling`. The last is the server option in the Balance section (default 1; 0 means stars never
+affect loot). The distance past each anchor is then scaled:
+
+| `StarScaling` field | Per star past the anchor |
+|---|---|
+| `DropChance` | Added to the chance of dropping anything (0.05 = five percentage points), keeping the shape of the counts. An anchor that never drops starts from one item. |
+| `BonusDrops` | Extra items on a roll that drops something. The whole part is guaranteed; the fraction is the chance of one more. |
+| `RarityShift` | The share of each rarity's weight promoted one tier, compounding per star. |
+| `RarityFalloff` | Scales `RarityShift` for each tier above the lowest one the entry rolls (default 1). A low falloff drains the bottom tier quickly while the top grows slowly. |
+| `MaxRarity` | Promotion never moves weight into a higher tier than this. |
+| `MaxDrops` | A cap on the item count after `BonusDrops`. |
+
+Each field is taken from the first place that sets it: the creature's own entry, then the table, then
+`DefaultStarScaling` at the top of `loottables.json` (for other mods' tables and anything that sets
+nothing). Write `0` to switch a field off rather than leaving it out; an omitted field falls through to the
+default. The boss shardstone tables set all three to 0 so they drop exactly as written.
+
+Promotion happens once per drop, before a `RarityItems` map picks its prefab, by whichever table supplied
+the rarity. Luck is applied afterwards, as before.
+
+### Modifiers
+
+`Modifiers` apply at every level, on a table or on a creature's entry:
+
+| Field | Effect |
+|---|---|
+| `DropRate` | Multiplies the odds of dropping anything, the same way `Global Drop Rate Modifier` does. Creature and table values multiply. |
+| `BonusDrops` | Extra items on every roll that drops something. Creature and table values add. |
+| `RarityShift` | One extra promotion step. Creature and table values add. |
+
+## Creature entries
+
+A creature usually points at a template:
+
+```json
+{ "Object": "Greydwarf", "RefObject": "Tier1Mob" }
+```
+
+It can tune its own loot without copying the template:
+
+```json
+{ "Object": "GoblinBrute", "RefObject": "Tier6EliteMob", "StarMultiplier": 1.5, "Modifiers": { "DropRate": 1.25 } }
+```
+
+An entry may also carry its own `StarScaling`, which wins field by field over the template's.
+
+**Elite runestones.** The server option `Elite Runestone Drops` (Balance section, also on Quick Configure's
+Loot Drops page) adds one more table to each elite template, `Tier3EliteMob` to `Tier9EliteMob`, while the
+game runs: one blank runestone of the biome's rarity (Magic in the Black Forest up to Mythic or Ancient in
+the Deep North) at `Elite Runestone Drop Chance`, the same at every star level. It is never written to
+`loottables.json`; `lootpreview` shows it, and a creature's own `Modifiers` apply to it as to its other
+tables.
+
+## Checking a table
+
+The console command `lootpreview <creature or table> [maxLevel]` prints, for each level, the anchors used,
+the chance of any drop, items per drop, the rarity split and the item mix, with the creature's own tuning
+and the Star Loot Scaling option applied.
+
+## The flat form (deprecated)
+
+Older tables put `Drops` and `Loot` directly on the table. That form only ever answered levels 1–3. It is
+converted to a level 1 entry wherever it appears:
+
+- **The on-disk file.** A `loottables.json` holding flat tables is converted once at startup, after a
+  backup to `baseconfig-backup/`.
+- **Patches.** A patch that writes a flat table is converted as soon as it runs, and the log names the
+  patch. A patch whose path targets a table's `.Loot` or `.Drops` is applied to
+  `.LeveledLoot[?(@.Level == 1)].Loot` (or `.Drops`) instead, again with a warning.
+- **The API** and a file edited while the game runs are converted in memory.
+
+A patch that picks one level (`LeveledLoot[?(@.Level == 4)]`) of a table that no longer has that level
+logs which levels the table does have.
+
+## The creature sorter
+
+Every creature without a loot table is given one when a world loads, on the server or in single player.
+The rules live in `itemsorter.json`:
+
+- **`BiomeSorterData.<biome>.Creatures`** is the biome's ladder: a `ReferenceHealth` and a template for
+  each class (`Weak`, `Normal`, `Strong`, `Elite`, `Boss`; a missing rung falls back to Normal).
+- **`CreatureSorter`** holds the rest: `HealthRatios` (Weak below 0.55× the reference, Strong from 1.5×,
+  Elite from 2.5×), the exclusions (`SkipPassive`, `ExcludeFactions`, `ExcludeNames` with `*` wildcards),
+  `VariantSuffixes`, `FactionBiomes`, `ScanLocations`, `ClassExtras` (extra `Modifiers` or
+  `StarMultiplier` per class; bosses get a large drop rate) and `Overrides`.
+
+A creature's biome comes from the strongest evidence found:
+
+1. its `Overrides` entry
+2. world spawn lists
+3. alternate-biome spawns
+4. raids that end with a boss kill
+5. being a variant of a placed creature (`Draugr_sleeping` goes where `Draugr` does)
+6. key-gated spawns and raids
+7. the locations that spawn it (loaded only if something is still unplaced)
+8. its drops, matched against `BiomeMaterials`
+9. its faction
+
+Its class comes from its base health against the biome's reference, or `Boss` for a boss.
+
+The sorter writes `{ "Object": ..., "RefObject": ..., "Auto": true }` entries into `loottables.json` and
+re-sorts or removes them on every world load. Entries without `"Auto"` are never touched, and neither are
+tables other mods add through the API.
+
+To place a creature yourself, add it under `CreatureSorter.Overrides`:
+
+```json
+"Overrides": {
+  "SomeModWolf": { "Biome": "Mountain", "Class": "Elite" },
+  "SomeModPet":  { "Skip": true },
+  "SomeModBoss": { "Template": "Tier7EliteMob" }
+}
+```
+
+Each run writes `creaturesorter-report.txt` to `<BepInEx>/config/EpicLoot/`, one line per creature with
+its biome, the evidence, its health ratio, class, template and result. In game, `creaturesort dry` shows the
+same without writing anything, and `creaturesort all` includes creatures that already have a table. The
+server option `Auto Add Creatures To Loot Tables` turns the sorter off.

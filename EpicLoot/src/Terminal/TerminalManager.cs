@@ -97,9 +97,8 @@ public static partial class TerminalManager
         {
             _ = new Command("magicitem", "spawn magic item: [rarity] [item] [amount] [effect count]", SpawnMagicItem, GetSpawnMagicItemOptions, alternates: "mi");
             _ = new Command("magicitemwitheffect", "spawn magic item with effect: [effect] [item]", SpawnMagicItemWithEffect, GetSpawnMagicItemWithEffectOptions, alternates: "mieffect");
-            _ = new Command("magicitemlegendary", "spawn legendary item: [legendaryID] [item]", SpawnLegendaryMagicItem, GetLegendaryOptions, alternates: "milegend");
-            _ = new Command("magicitemmythic", "spawn mythic item: [mythicID] [item]", SpawnMythicMagicItem, GetMythicOptions, alternates: "mimythic");
-            _ = new Command("magicitemset", "spawn magic item set: [setID]", SpawnMagicItemSet, GetMagicItemSetOptions, alternates: "miset");
+            _ = new Command("magicsetitem", "spawn a unique or set piece: [uniqueID] [item|random] [rarity|random]", SpawnSetItem, GetSetItemOptions);
+            _ = new Command("magicitemset", "spawn every piece of a set: [setID] [rarity|random]", SpawnMagicItemSet, GetMagicItemSetOptions, alternates: "miset");
             _ = new Command("checkstackquality", "show list of items that have a max stack size over 1 and max quality over 1", CheckStackQuality);
             _ = new Command("magicmats", "spawn all magic materials with half stack", SpawnMagicCraftingMaterials);
             _ = new Command("magicshards", "spawn all shardstones: [rarity] (random valid rarity per shard if omitted)", SpawnMagicShards, GetMagicShardOptions);
@@ -122,6 +121,8 @@ public static partial class TerminalManager
             _ = new Command("gotomerchant", "teleport to merchant: [merchant]", GoToMerchant, GetGoToOptions, alternates: "gotom");
             _ = new Command("globalkeys", "print active global keys", PrintGlobalKeys);
             _ = new Command("lootres", "print loot resolution: [creature] [level] [itemIndex]", PrintLootResolution, GetLootResolutionOptions);
+            _ = new Command("lootpreview", "print what a creature's or chest's loot tables roll per level after star scaling: [object] [maxLevel]", PrintLootPreview, GetLootPreviewOptions);
+            _ = new Command("creaturesort", "give creatures without a loot table one from itemsorter.json's rules: [dry|all] (dry/all preview only)", RunCreatureSort, GetCreatureSortOptions);
             _ = new Command("resetcooldowns", "reset ability cooldowns", ResetAbilityCooldowns);
             _ = new Command("debugluck", "print players luck factor in console", DebugLuck);
             _ = new Command("tooltipdebug", "write inventory item tooltips to disk", DebugTooltip);

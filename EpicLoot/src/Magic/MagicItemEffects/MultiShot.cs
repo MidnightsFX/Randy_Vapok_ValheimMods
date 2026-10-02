@@ -19,6 +19,10 @@ namespace EpicLoot.MagicItemEffects
         private enum PendingShotType { None, TripleBow, DoubleMagic }
         private static PendingShotType _pendingShot = PendingShotType.None;
 
+        // True while the local player's current attack fires a triple shot (rolled in OnAttackTrigger, before
+        // its bursts), for effects that change how each of its projectiles flies.
+        internal static bool IsTripleShotFiring => _pendingShot == PendingShotType.TripleBow;
+
         private static Dictionary<string, float> GetEffectConfig(string effectType)
         {
             if (MagicItemEffectDefinitions.AllDefinitions != null &&
@@ -71,7 +75,11 @@ namespace EpicLoot.MagicItemEffects
             }
 
             // If a weapon can have both magic effects applied to it this logic will need to be revised.
-            if (player.HasActiveMagicEffect(MagicEffectType.TripleBowShot, out float _))
+            // Triple shot is checked against the weapon too: from a set bonus it is worn on armour, and would
+            // otherwise triple a staff's shots or the grappling hook's.
+            var skill = __instance.GetWeapon().m_shared.m_skillType;
+            if ((skill == Skills.SkillType.Bows || skill == Skills.SkillType.Crossbows) &&
+                player.HasActiveMagicEffect(MagicEffectType.TripleBowShot, out float _))
             {
                 var cfg = GetEffectConfig(MagicEffectType.TripleBowShot);
                 if (RollChance(cfg))

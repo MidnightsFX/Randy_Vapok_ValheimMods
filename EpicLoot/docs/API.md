@@ -157,6 +157,38 @@ API.UnregisterInventoryProvider("my.plugin.guid");
 - `removeItem` / `removeExactItem` return how many they actually removed; returning more than requested is
   clamped.
 
+#### Saving items changed in place
+
+What `getItems` offers is also what the table may *change*: Enchant, Augment, Rune Etch, a Rune Extract in
+a Reduce mode, Set Etch, a Set Extract that strips the set, and Disenchant all rewrite the target item
+rather than consuming it. Epic Loot writes the change to your instance, but only you can save it where it
+lives. A vanilla chest does not save on its own here, and it re-reads its ZDO after anyone opens it, so an
+unsaved change is undone after the materials were spent (a disenchant also hands back the socketed stones
+first, so the revert duplicates them).
+
+```csharp
+API.RegisterInventoryProvider("my.plugin.guid", ...);           // first
+API.RegisterInventoryProviderSaveHandler("my.plugin.guid", item =>
+{
+    Container chest = FindContainerHolding(item);
+    if (chest == null || !chest.m_nview.IsOwner()) return false;  // Epic Loot logs that it may not last
+    chest.GetInventory().Changed();                                // Container.OnContainerChanged saves it
+    return true;
+});
+```
+
+- It runs on the frame of the change, right after Epic Loot re-checked (through `getItems`) that you still
+  offer the item. Before paying for an in-place change Epic Loot asks `getItems` again, so a container that
+  reloaded since the list was built fails that check instead of taking the materials.
+- **Do not reload the container before saving.** A reload (`Container.Load`) replaces every item instance
+  from the ZDO and discards the change you were handed.
+- Without a save handler your items are still offered for in-place changes, and the first one logs a
+  warning naming your id. Players can keep a provider's items to spending only by listing its id under the
+  server setting `Spend-Only Storage Mods` (Enchanting Table section), which defaults to
+  `Azumatt.AzuCraftyBoxes`. Listed providers still supply materials and runes and can have items
+  sacrificed or identified.
+- `GetRegisteredProviders()["InventorySave"]` lists the providers with a save handler.
+
 ### Equipment providers
 
 Contribute equipped items for magic effect resolution — extra equipment slots, quick slots, an equipped
@@ -272,16 +304,29 @@ bool   UpdateLootTables(string key, string json);
 ```
 
 `TryMakeMagicItem` is the one-call path: it reproduces the whole drop flow — effect selection, socket
-count, legendary/mythic assignment, randomized wear, display name — and raises both `LootRoll` and
+count, unique and set-piece assignment, randomized wear, display name — and raises both `LootRoll` and
 `OnLootGenerated`. Check `CanBeMagicItem` first. Passing an unknown `legendaryID`, or one whose
 requirements do not fit the item, **fails the roll** rather than silently downgrading it.
 
 To inspect before applying, use `RollMagicItemJson` then `ApplyMagicItemJson`.
 
+Uniques and sets are not tied to one rarity: each carries a `Rarities` list in `legendaries.json`, and any
+rarity can be enabled. `GetLegendaryIDs(rarity)` returns every unique and set piece enabled at that
+rarity (empty where none are). `AddLegendaryItem(type, json)` and `AddLegendarySet(type, json)` accept any
+rarity name; `type` is only the default for an entry whose json has no `Rarities`. `HasLegendarySet`
+reports the number of distinct pieces worn, and returns true once enough are worn for every set bonus, at
+any mix of rarities.
+
 `AddLootTables` returns an opaque key; pass it back to `UpdateLootTables` to replace what you added.
 Registrations are cached and re-applied whenever `loottables.json` reloads or a dedicated server pushes
 its copy, so they survive both. (`LootRoller.Initialize` clears the table map, which is why the re-apply
 matters — the same contract the content-registration endpoints have always had.)
+
+The JSON takes the same table shape as `loottables.json` — `LeveledLoot` levels plus the optional
+`StarScaling`, `Modifiers` and `StarMultiplier` — documented in [LootTables.md](LootTables.md). A table
+in the deprecated flat form (`Drops`/`Loot` directly on the table) is still accepted and converted to a
+level 1 entry, with a one-time warning in the log. A creature you give a table this way is never touched by
+the creature sorter, which only fills in creatures that have none.
 
 ---
 

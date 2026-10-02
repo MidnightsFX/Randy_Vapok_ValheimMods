@@ -63,6 +63,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             Opportunist_Character_RPC_Damage_Patch.ModifyIncoming(__instance, hit, attacker);
             RPC_TagCharacterOnHit_Character_RPC_Damage_Patch.TagStaggerDuration(__instance, hit, attacker);
             ModifyStaggerDamage_Character_Damage_Patch.ApplyStaggerModifier(__instance, hit, attacker);
+            CloseQuarter.ModifyOutgoingHit(hit, attacker);
 
             // NOTE: victim-side incoming-hit handlers (AutoMeads, OffSet, ReflectDamage) live on the
             // Character.RPC_Damage dispatcher instead -- Character.Damage runs on the attacker's client, so a

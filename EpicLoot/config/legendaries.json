@@ -387,7 +387,159 @@
       "ID": "RagnarLegs",
       "Name": "$mod_epicloot_l_ragnarlegs",
       "Description": "$mod_epicloot_l_ragnarlegs_desc",
-      "IsSetItem": true, 
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "ThorMaul",
+      "Name": "$mod_epicloot_l_thormaul",
+      "Description": "$mod_epicloot_l_thormaul_desc",
+      "EquipFx": "LightningAuraSledge",
+      "EquipFxMode": "EquipRoot",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "TwoHandedWeapon" ],
+        "AllowedSkillTypes": [ "Clubs" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "AddLightningDamage" }
+      ]
+    },
+    {
+      "ID": "ThorHelm",
+      "Name": "$mod_epicloot_l_thorhelm",
+      "Description": "$mod_epicloot_l_thorhelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "ThorChest",
+      "Name": "$mod_epicloot_l_thorchest",
+      "Description": "$mod_epicloot_l_thorchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "ThorLegs",
+      "Name": "$mod_epicloot_l_thorlegs",
+      "Description": "$mod_epicloot_l_thorlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "DvergerArsenalCrossbow",
+      "Name": "$mod_epicloot_l_dvergerarsenalcrossbow",
+      "Description": "$mod_epicloot_l_dvergerarsenalcrossbow_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "Bow" ],
+        "AllowedSkillTypes": [ "Crossbows" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "AddFireDamage" }
+      ]
+    },
+    {
+      "ID": "DvergerArsenalHelm",
+      "Name": "$mod_epicloot_l_dvergerarsenalhelm",
+      "Description": "$mod_epicloot_l_dvergerarsenalhelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "DvergerArsenalCloak",
+      "Name": "$mod_epicloot_l_dvergerarsenalcloak",
+      "Description": "$mod_epicloot_l_dvergerarsenalcloak_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "DvergerArsenalChest",
+      "Name": "$mod_epicloot_l_dvergerarsenalchest",
+      "Description": "$mod_epicloot_l_dvergerarsenalchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "LokiKnife",
+      "Name": "$mod_epicloot_l_lokiknife",
+      "Description": "$mod_epicloot_l_lokiknife_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "OneHandedWeapon" ],
+        "AllowedSkillTypes": [ "Knives" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyAttackSpeed" },
+        { "Type": "AddPoisonDamage" }
+      ]
+    },
+    {
+      "ID": "LokiHood",
+      "Name": "$mod_epicloot_l_lokihood",
+      "Description": "$mod_epicloot_l_lokihood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "LokiChest",
+      "Name": "$mod_epicloot_l_lokichest",
+      "Description": "$mod_epicloot_l_lokichest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "LokiLegs",
+      "Name": "$mod_epicloot_l_lokilegs",
+      "Description": "$mod_epicloot_l_lokilegs_desc",
+      "IsSetItem": true,
       "Requirements": {
         "AllowedItemTypes": [
           "Legs"
@@ -400,6 +552,7 @@
     {
       "ID": "Heimdall",
       "Name": "$mod_epicloot_set_heimdall",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
       "LegendaryIDs": [
         "HeimdallTowerShield",
         "HeimdallHelmet",
@@ -415,6 +568,7 @@
     {
       "ID": "Ragnar",
       "Name": "$mod_epicloot_set_ragnar",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
       "LegendaryIDs": [
         "RagnarBattleAxe",
         "RagnarCape",
@@ -426,6 +580,70 @@
         { "Count": 2, "Effect": { "Type": "ModifyHealthRegen", "Values": { "MinValue": 50, "MaxValue": 50, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Berserker" } },
         { "Count": 4, "Effect": { "Type": "FrostDamageAOE", "Values": { "MinValue": 40, "MaxValue": 40, "Increment": 1 } } }
+      ]
+    },
+    {
+      "ID": "Thor",
+      "Name": "$mod_epicloot_set_thor",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "ThorMaul",
+        "ThorHelm",
+        "ThorChest",
+        "ThorLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddLightningResistancePercentage", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "AddLightningDamage", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "OverwhelmingLaunch", "Values": { "MinValue": 50, "MaxValue": 50, "Increment": 1 } } }
+      ]
+    },
+    {
+      "ID": "DvergerArsenal",
+      "Name": "$mod_epicloot_set_dvergerarsenal",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "DvergerArsenalCrossbow",
+        "DvergerArsenalHelm",
+        "DvergerArsenalCloak",
+        "DvergerArsenalChest"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AmmoConservation", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddCrossbowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "QuickDraw", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "TripleBowShot" } },
+        { "Count": 4, "Effect": { "Type": "Artillery",
+          "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+            "Mythic": { "MinValue": 30, "MaxValue": 30, "Increment": 1 },
+            "Ancient": { "MinValue": 35, "MaxValue": 35, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Loki",
+      "Name": "$mod_epicloot_set_loki",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "LokiKnife",
+        "LokiHood",
+        "LokiChest",
+        "LokiLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "ModifyNoise", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "Opportunist", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "DodgeBuff", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyBackstab", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "Assassin",
+          "Values": { "MinValue": 200, "MaxValue": 200, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 200, "MaxValue": 200, "Increment": 1 },
+            "Mythic": { "MinValue": 225, "MaxValue": 225, "Increment": 1 },
+            "Ancient": { "MinValue": 250, "MaxValue": 250, "Increment": 1 }
+          } } }
       ]
     }
   ],
