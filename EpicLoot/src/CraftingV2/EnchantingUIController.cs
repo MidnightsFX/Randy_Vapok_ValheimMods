@@ -805,6 +805,7 @@ namespace EpicLoot.CraftingV2
                     input.m_stack < itemstack.Item2 || !heldItems.Contains(input))
                 {
                     EpicLoot.LogWarning("Identify cancelled: a selected item is no longer available. Nothing was consumed.");
+                    EnchantingTableUIPanelBase.NotifyItemsUnavailable(input);
                     return null;
                 }
             }
@@ -842,6 +843,7 @@ namespace EpicLoot.CraftingV2
             // provider that no longer holds the stack), and a stack that yields nothing costs nothing.
             List<ItemDrop.ItemData> identifiedItems = new List<ItemDrop.ItemData>();
             List<Tuple<ItemDrop.ItemData, int>> removedStacks = new List<Tuple<ItemDrop.ItemData, int>>();
+            List<ItemDrop.ItemData> unavailableItems = new List<ItemDrop.ItemData>();
             bool cameUpShort = false;
             for (int index = 0; index < items.Count; index++)
             {
@@ -850,6 +852,7 @@ namespace EpicLoot.CraftingV2
                 if (removed < itemstack.Item2)
                 {
                     cameUpShort = true;
+                    unavailableItems.Add(itemstack.Item1);
                     EpicLoot.LogWarningForce($"Identify: only {removed} of {itemstack.Item2} " +
                         $"{itemstack.Item1.m_shared.m_name} could be removed; identifying that many.");
                 }
@@ -860,6 +863,8 @@ namespace EpicLoot.CraftingV2
                     removedStacks.Add(new Tuple<ItemDrop.ItemData, int>(itemstack.Item1, removed));
                 }
             }
+
+            EnchantingTableUIPanelBase.NotifyItemsUnavailable(unavailableItems.ToArray());
 
             if (identifiedItems.Count == 0)
             {

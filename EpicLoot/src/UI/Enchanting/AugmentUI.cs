@@ -196,6 +196,7 @@ namespace EpicLoot_UnityLib
             if (!InventoryManagement.Instance.IsEditable(item))
             {
                 Debug.LogWarning("[Augment Item] Cancelled: the item is no longer held anywhere the change would be saved.");
+                NotifyItemsUnavailable(item);
                 Cancel();
                 AvailableItems.SetItems(EnchantingUIController.GetAugmentableItems().Cast<IListElement>().ToList());
                 DeselectAll();
@@ -210,6 +211,7 @@ namespace EpicLoot_UnityLib
                 if (!LocalPlayerCanAffordCost(cost))
                 {
                     Debug.LogError("[Augment Item] ERROR: Tried to augment item but could not afford the cost. This should not happen!");
+                    player.Message(MessageHud.MessageType.Center, "$msg_missingrequirement");
                     return;
                 }
 

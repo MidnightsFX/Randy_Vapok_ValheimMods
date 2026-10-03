@@ -340,38 +340,60 @@ namespace EpicLoot_UnityLib
                 ? EnchantingTableUI.instance.SourceTable.GetFeatureUnlockCost(feature)
                 : EnchantingTableUI.instance.SourceTable.GetFeatureUpgradeCost(feature);
 
-            bool canAfford = LocalPlayerCanAffordCost(cost);
-            if (canAfford)
+            Player player = Player.m_localPlayer;
+            List<ItemDrop.ItemData> paid = new List<ItemDrop.ItemData>();
+            if (!LocalPlayerCanAffordCost(cost) || (!player.NoCostCheat() && !TryPayCost(cost, paid)))
             {
-                int currentLevel = EnchantingTableUI.instance.SourceTable.GetFeatureLevel(feature);
-                EnchantingTableUI.instance.SourceTable.RequestTableUpgrade(feature, currentLevel +1, (success)=>
-                {
-                    if (!success)
-                    {
-                        Debug.LogError($"[Enchanting Upgrade] ERROR: " +
-                            $"Tried to upgrade ({feature}) to level ({currentLevel + 1}) but it failed!");
-                        return;
-                    }
-
-                    Player player = Player.m_localPlayer;
-                    if (!player.NoCostCheat())
-                    {
-                        if (!LocalPlayerCanAffordCost(cost))
-                        {
-                            Debug.LogError("[Augment Item] ERROR: Tried to augment item but could not afford the cost. " +
-                                "This should not happen!");
-                            return;
-                        }
-
-                        foreach (InventoryItemListElement costElement in cost)
-                        {
-                            InventoryManagement.Instance.RemoveItem(costElement.GetItem());
-                        }
-                    }
-
-                    Refresh();
-                });
+                Refund(paid);
+                player.Message(MessageHud.MessageType.Center, "$msg_missingrequirement");
+                Refresh();
+                return;
             }
+
+            int currentLevel = EnchantingTableUI.instance.SourceTable.GetFeatureLevel(feature);
+            EnchantingTableUI.instance.SourceTable.RequestTableUpgrade(feature, currentLevel +1, (success)=>
+            {
+                if (!success)
+                {
+                    Debug.LogError($"[Enchanting Upgrade] ERROR: " +
+                        $"Tried to upgrade ({feature}) to level ({currentLevel + 1}) but it failed!");
+                    Refund(paid);
+                }
+
+                Refresh();
+            });
+        }
+
+        private static bool TryPayCost(List<InventoryItemListElement> cost, List<ItemDrop.ItemData> paid)
+        {
+            foreach (InventoryItemListElement costElement in cost)
+            {
+                ItemDrop.ItemData costItem = costElement.GetItem();
+                int taken = InventoryManagement.Instance.RemoveItem(costItem);
+                if (taken > 0)
+                {
+                    ItemDrop.ItemData refund = costItem.Clone();
+                    refund.m_stack = taken;
+                    paid.Add(refund);
+                }
+
+                if (taken < costItem.m_stack)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static void Refund(List<ItemDrop.ItemData> paid)
+        {
+            foreach (ItemDrop.ItemData item in paid)
+            {
+                InventoryManagement.Instance.GiveItem(item);
+            }
+
+            paid.Clear();
         }
 
         public override void Lock()
