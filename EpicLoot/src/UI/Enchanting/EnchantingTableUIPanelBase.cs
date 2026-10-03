@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using EpicLoot;
 using EpicLoot.CraftingV2;
 using TMPro;
 using UnityEngine;
@@ -308,6 +310,27 @@ namespace EpicLoot_UnityLib
             }
 
             return true;
+        }
+
+        protected internal static void NotifyItemsUnavailable(params ItemDrop.ItemData[] items)
+        {
+            Player player = Player.m_localPlayer;
+            if (player == null || items == null)
+            {
+                return;
+            }
+
+            string names = string.Join(", ", items
+                .Where(x => x?.m_shared != null)
+                .Select(x => Localization.instance.Localize(x.GetDecoratedName()))
+                .Distinct());
+            if (names.Length == 0)
+            {
+                return;
+            }
+
+            player.Message(MessageHud.MessageType.Center,
+                Localization.instance.Localize("$mod_epicloot_item_unavailable", names));
         }
 
         protected static void GiveItemsToPlayer(List<InventoryItemListElement> sacrificeProducts)

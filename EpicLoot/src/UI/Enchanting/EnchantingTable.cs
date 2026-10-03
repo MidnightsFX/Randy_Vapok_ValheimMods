@@ -120,7 +120,13 @@ namespace EpicLoot_UnityLib
                     _upgradeRequests.Remove(request);
                     if (Player.m_localPlayer != null)
                     {
-                        if (toLevel == 0)
+                        if (!success)
+                        {
+                            Player.m_localPlayer.Message(MessageHud.MessageType.Center,
+                                Localization.instance.Localize("$mod_epicloot_upgradefailedmessage",
+                                EnchantingTableUpgrades.GetFeatureName(feature)));
+                        }
+                        else if (toLevel == 0)
                         {
                             Player.m_localPlayer.Message(MessageHud.MessageType.Center,
                                 Localization.instance.Localize("$mod_epicloot_unlockmessage",
