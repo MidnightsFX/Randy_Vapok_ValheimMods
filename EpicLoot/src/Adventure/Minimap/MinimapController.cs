@@ -37,6 +37,10 @@ public class MinimapController : MonoBehaviour
 
     private static readonly List<PanelLayout> VanillaPanelLayout = new();
 
+    private static readonly Color VanillaAreaFill = new Color32(255, 15, 0, 112);
+    private static readonly Color GoldAreaRim = new Color32(245, 218, 83, 255);
+    private static Sprite _goldAreaSprite;
+
     public virtual void Awake()
     {
         _minimap = GetComponent<Minimap>();
@@ -427,12 +431,7 @@ public class MinimapController : MonoBehaviour
                 string key = bounty.ID;
                 if (!BountyPins.ContainsKey(key))
                 {
-                    AreaPinInfo pinInfo = new AreaPinInfo
-                    {
-                        Position = bounty.Position + bounty.MinimapCircleOffset,
-                        Type = EpicLoot.BountyPinType,
-                        Name = Localization.instance.Localize("$mod_epicloot_bounties_minimappin", AdventureDataManager.GetBountyName(bounty))
-                    };
+                    AreaPinInfo pinInfo = CreateBountyPinInfo(bounty);
 
                     PinJob pinJob = new PinJob
                     {
@@ -459,6 +458,56 @@ public class MinimapController : MonoBehaviour
             }
         }
     }
+
+    public static AreaPinInfo CreateBountyPinInfo(BountyInfo bounty)
+    {
+        bool isGold = bounty.RewardGold > 0;
+
+        return new AreaPinInfo
+        {
+            Position = bounty.Position + bounty.MinimapCircleOffset,
+            Type = EpicLoot.BountyPinType,
+            Name = Localization.instance.Localize("$mod_epicloot_bounties_minimappin", AdventureDataManager.GetBountyName(bounty)),
+            Icon = AdventureDataManager.GetTrophyIconForMonster(bounty.Target.MonsterID, isGold),
+            AreaIcon = isGold ? GetGoldAreaSprite() : null
+        };
+    }
+
+    private static Sprite GetGoldAreaSprite()
+    {
+        if (_goldAreaSprite != null)
+        {
+            return _goldAreaSprite;
+        }
+
+        const int size = 128;
+        const float rimWidth = 5f;
+        float radius = size * 0.5f;
+        Vector2 center = new Vector2(radius, radius);
+        Color[] pixels = new Color[size * size];
+
+        for (int y = 0; y < size; ++y)
+        {
+            for (int x = 0; x < size; ++x)
+            {
+                float distance = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), center);
+                Color color = Color.Lerp(VanillaAreaFill, GoldAreaRim, Mathf.Clamp01(distance - (radius - rimWidth) + 0.5f));
+                color.a *= Mathf.Clamp01(radius - distance + 0.5f);
+                pixels[y * size + x] = color;
+            }
+        }
+
+        Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
+        {
+            wrapMode = TextureWrapMode.Clamp
+        };
+        texture.SetPixels(pixels);
+        texture.Apply();
+
+        _goldAreaSprite = Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f));
+        return _goldAreaSprite;
+    }
+
     private static void ToggleTreasureMaps(bool show)
     {
         if (Player.m_localPlayer == null)
@@ -586,9 +635,17 @@ public class MinimapController : MonoBehaviour
         //Add Area Pin
         newPin.Area = _minimap.AddPin(newPin.Position, Minimap.PinType.EventArea, string.Empty, false, false);
         newPin.Area.m_worldSize = AreaWorldSize;
+        if (newPin.AreaIcon != null)
+        {
+            newPin.Area.m_icon = newPin.AreaIcon;
+        }
 
         //Add Pin
         newPin.Pin = _minimap.AddPin(newPin.Position, newPin.Type, newPin.Name, false, false);
+        if (newPin.Icon != null)
+        {
+            newPin.Pin.m_icon = newPin.Icon;
+        }
 
         //Add Debug Pin
         if (pinJob.DebugMode)

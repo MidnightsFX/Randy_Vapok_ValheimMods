@@ -12,6 +12,8 @@ public class AreaPinInfo
     public Vector3 Position { get; set; }
     public Minimap.PinType Type { get; set; }
     public string Name { get; set; }
+    public Sprite Icon { get; set; }
+    public Sprite AreaIcon { get; set; }
     public bool Save { get; set; }
     public bool Checked { get; set; }
     public long OwnerId { get; set; }
