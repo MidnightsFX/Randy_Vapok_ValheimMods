@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EpicLoot.Biomes;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,6 +28,11 @@ public class MinimapController : MonoBehaviour
     /// inside it, so the map and the spawn cannot disagree about where the circle is.
     /// </summary>
     public static float AreaRadius => AreaWorldSize * 0.5f;
+
+    public const float PinDetailZoom = 0.1f;
+
+    private const float RewardIconSize = 20f;
+    private const float RewardRowGap = 2f;
 
     public static readonly Dictionary<Tuple<int, Heightmap.Biome>, AreaPinInfo> TreasureMapPins = new();
     public static readonly Dictionary<string, AreaPinInfo> BountyPins = new();
@@ -83,6 +89,100 @@ public class MinimapController : MonoBehaviour
         {
             ProcessMinimapPinTask(MinimapPinQueue.Dequeue());
         }
+
+        UpdatePinDetails();
+    }
+
+    private void UpdatePinDetails()
+    {
+        bool showPinDetails = _minimap.LargeZoom <= PinDetailZoom;
+
+        foreach (AreaPinInfo pinInfo in BountyPins.Values)
+        {
+            if (pinInfo.RewardRow != null)
+            {
+                if (pinInfo.RewardRow.activeSelf != showPinDetails)
+                {
+                    pinInfo.RewardRow.SetActive(showPinDetails);
+                }
+
+                continue;
+            }
+
+            if (!showPinDetails || pinInfo.Rewards == null || pinInfo.Rewards.Count == 0)
+            {
+                continue;
+            }
+
+            TMP_Text label = pinInfo.Pin?.m_NamePinData?.PinNameText;
+            if (label != null && label.gameObject.activeInHierarchy)
+            {
+                pinInfo.RewardRow = CreateRewardRow(label, pinInfo.Rewards);
+            }
+        }
+    }
+
+    private static GameObject CreateRewardRow(TMP_Text label, List<KeyValuePair<Sprite, int>> rewards)
+    {
+        label.ForceMeshUpdate();
+        Bounds textBounds = label.textBounds;
+
+        RectTransform row = CreateLayoutRow("EpicLootBountyRewards", label.rectTransform, 8f);
+        // TextMeshProUGUI.Awake warns about a missing default font unless one is already assigned, and Awake
+        // only waits for that while the hierarchy is inactive.
+        row.gameObject.SetActive(false);
+        row.anchorMin = label.rectTransform.pivot;
+        row.anchorMax = label.rectTransform.pivot;
+        row.pivot = new Vector2(0.5f, 1f);
+        row.anchoredPosition = new Vector2(textBounds.center.x, textBounds.min.y - RewardRowGap);
+
+        ContentSizeFitter fitter = row.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        foreach (KeyValuePair<Sprite, int> reward in rewards)
+        {
+            RectTransform entry = CreateLayoutRow("Reward", row, 2f);
+
+            Image icon = new GameObject("Icon", typeof(RectTransform)).AddComponent<Image>();
+            icon.transform.SetParent(entry, false);
+            icon.sprite = reward.Key;
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+
+            LayoutElement iconLayout = icon.gameObject.AddComponent<LayoutElement>();
+            iconLayout.preferredWidth = RewardIconSize;
+            iconLayout.preferredHeight = RewardIconSize;
+
+            TextMeshProUGUI count = new GameObject("Count", typeof(RectTransform)).AddComponent<TextMeshProUGUI>();
+            count.transform.SetParent(entry, false);
+            count.font = label.font;
+            count.fontSharedMaterial = label.fontSharedMaterial;
+            count.fontSize = label.fontSize;
+            count.color = label.color;
+            count.textWrappingMode = TextWrappingModes.NoWrap;
+            count.raycastTarget = false;
+            count.text = reward.Value.ToString();
+        }
+
+        row.gameObject.SetActive(true);
+        return row.gameObject;
+    }
+
+    private static RectTransform CreateLayoutRow(string name, RectTransform parent, float spacing)
+    {
+        GameObject row = new GameObject(name, typeof(RectTransform));
+        row.transform.SetParent(parent, false);
+
+        HorizontalLayoutGroup layout = row.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = spacing;
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+
+        return (RectTransform)row.transform;
     }
 
     private void OnDestroy()
@@ -469,8 +569,33 @@ public class MinimapController : MonoBehaviour
             Type = EpicLoot.BountyPinType,
             Name = Localization.instance.Localize("$mod_epicloot_bounties_minimappin", AdventureDataManager.GetBountyName(bounty)),
             Icon = AdventureDataManager.GetTrophyIconForMonster(bounty.Target.MonsterID, isGold),
-            AreaIcon = isGold ? GetGoldAreaSprite() : null
+            AreaIcon = isGold ? GetGoldAreaSprite() : null,
+            Rewards = GetBountyRewards(bounty)
         };
+    }
+
+    private static List<KeyValuePair<Sprite, int>> GetBountyRewards(BountyInfo bounty)
+    {
+        List<KeyValuePair<Sprite, int>> rewards = new();
+        AddBountyReward(rewards, "IronBountyToken", bounty.RewardIron);
+        AddBountyReward(rewards, "GoldBountyToken", bounty.RewardGold);
+        AddBountyReward(rewards, "Coins", bounty.RewardCoins);
+        return rewards;
+    }
+
+    private static void AddBountyReward(List<KeyValuePair<Sprite, int>> rewards, string itemName, int amount)
+    {
+        if (amount <= 0)
+        {
+            return;
+        }
+
+        GameObject prefab = ObjectDB.instance != null ? ObjectDB.instance.GetItemPrefab(itemName) : null;
+        ItemDrop itemDrop = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
+        if (itemDrop != null)
+        {
+            rewards.Add(new KeyValuePair<Sprite, int>(itemDrop.m_itemData.GetIcon(), amount));
+        }
     }
 
     private static Sprite GetGoldAreaSprite()
