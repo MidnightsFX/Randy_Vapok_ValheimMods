@@ -30,6 +30,7 @@ namespace EpicLoot_UnityLib
         public override void Awake()
         {
             base.Awake();
+            AvailableItems.AddEquippedSortMode();
             MagicTextShimmer.Ensure(AvailableEffectsText);
         }
 

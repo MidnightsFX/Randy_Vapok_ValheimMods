@@ -35,7 +35,7 @@ namespace EpicLoot_UnityLib
 
     public class MultiSelectItemList : MonoBehaviour, IGamepadFocusPane
     {
-        public enum SortMode { Rarity, Name, Quantity }
+        public enum SortMode { Rarity, Name, Quantity, Equipped }
 
         private static readonly Regex RichTextRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
 
@@ -498,9 +498,24 @@ namespace EpicLoot_UnityLib
                 case SortMode.Quantity:
                     return items.OrderByDescending(x => x.GetItem().m_stack)
                         .ThenBy(x => Localization.instance.Localize(x.GetItem().m_shared.m_name)).ToList();
+                case SortMode.Equipped:
+                    return EnchantingUIController.SortByEquipped(items);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
+        }
+
+        // The dropdown value is cast straight to SortMode, so this only lines up while the prefab's
+        // options are Rarity, Name, Quantity and Equipped is appended right after them.
+        public void AddEquippedSortMode()
+        {
+            if (SortByDropdown == null || SortByDropdown.options.Count != (int)SortMode.Equipped)
+            {
+                return;
+            }
+
+            SortByDropdown.options.Add(new TMP_Dropdown.OptionData(
+                Localization.instance.Localize("$mod_epicloot_enchanting_equipped")));
         }
 
         // The three selection getters below all skip filtered-out rows. Whatever they return is what

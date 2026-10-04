@@ -298,6 +298,15 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
+        internal static List<IListElement> SortByEquipped(List<IListElement> items)
+        {
+            List<ItemDrop.ItemData> boundItems = InventoryManagement.Instance.GetBoundItems();
+            return items.OrderByDescending(x => x.GetItem().m_equipped || boundItems.Contains(x.GetItem()))
+                .ThenBy(x => x.GetItem().HasRarity() ? x.GetItem().GetRarity() : (ItemRarity)(-1))
+                .ThenBy(x => Localization.instance.Localize(x.GetItem().GetDecoratedName()))
+                .ToList();
+        }
+
         internal static List<InventoryItemListElement> GetSacrificeItems()
         {
             Player player = Player.m_localPlayer;
