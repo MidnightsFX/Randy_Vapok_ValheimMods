@@ -872,6 +872,9 @@
       "Description": "$mod_epicloot_me_increasetreedrop_desc",
       "Requirements": {
         "NoRoll": true,
+        "AllowedSkillTypes": [
+          "Axes"
+        ],
         "ItemHasChopDamage": true
       },
       "ValuesPerRarity": {
