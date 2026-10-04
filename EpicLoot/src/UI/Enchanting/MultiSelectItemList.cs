@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using EpicLoot;
 using EpicLoot.CraftingV2;
 using TMPro;
 using UnityEngine;
@@ -54,12 +55,13 @@ namespace EpicLoot_UnityLib
 
         private bool _locked;
         private bool _hasGamepadFocus;
+        private ScrollRect _scrollRect;
         private ScrollRectEnsureVisible _scrollRectEnsureVisible;
 
         public void Awake()
         {
-            ScrollRect scrollRect = GetComponentInChildren<ScrollRect>();
-            _scrollRectEnsureVisible = scrollRect != null ? scrollRect.GetComponent<ScrollRectEnsureVisible>() : null;
+            _scrollRect = GetComponentInChildren<ScrollRect>();
+            _scrollRectEnsureVisible = _scrollRect != null ? _scrollRect.GetComponent<ScrollRectEnsureVisible>() : null;
 
             if (SelectAllToggle != null)
             {
@@ -205,6 +207,11 @@ namespace EpicLoot_UnityLib
             {
                 _scrollRectEnsureVisible.CenterOnItem((RectTransform)element.transform);
             }
+        }
+
+        public void ScrollWithRightStick()
+        {
+            GamepadScroll.ApplyRightStickY(_scrollRect);
         }
 
         private void OnFilterChanged(string _)

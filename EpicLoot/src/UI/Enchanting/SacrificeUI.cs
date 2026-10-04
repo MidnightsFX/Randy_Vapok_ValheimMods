@@ -152,7 +152,14 @@ namespace EpicLoot_UnityLib
         {
             base.Update();
 
-            if (_locked || !ZInput.IsGamepadActive() || !ZInput.GetButtonDown("JoyButtonY"))
+            if (_locked || !ZInput.IsGamepadActive())
+            {
+                return;
+            }
+
+            SacrificeProducts.ScrollWithRightStick();
+
+            if (!ZInput.GetButtonDown("JoyButtonY"))
             {
                 return;
             }
