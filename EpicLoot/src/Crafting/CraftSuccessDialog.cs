@@ -40,9 +40,11 @@ namespace EpicLoot.Crafting
             }
 
             if (ZInput.GetButtonDown("Inventory") || ZInput.GetButtonDown("JoyButtonB") ||
-                (ZInput.GetButtonDown("JoyButtonY") || ZInput.GetKeyDown(KeyCode.Escape)) ||
-                ZInput.GetButtonDown("JoyButtonA"))
+                ZInput.GetKeyDown(KeyCode.Escape) || ZInput.GetButtonDown("JoyButtonA"))
             {
+                // Update order against the panel underneath is not fixed: left unconsumed, the A that
+                // closes this is read again by the merchant panel as a second gamble purchase.
+                ZInput.ResetButtonStatus("JoyButtonA");
                 Close();
             }
         }
