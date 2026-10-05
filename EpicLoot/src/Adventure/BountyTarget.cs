@@ -14,6 +14,8 @@ namespace EpicLoot.Adventure
         // the bundled shim), so every later bounty creature goes straight to EpicLoot's own health multiplier.
         private static bool _starLevelsUnusable;
 
+        private static readonly List<BountyTarget> _instances = new List<BountyTarget>();
+
         private BountyInfo _bountyInfo;
         private string _monsterID;
         private bool _isAdd;
@@ -27,6 +29,7 @@ namespace EpicLoot.Adventure
             _character = GetComponent<Character>();
             _character.m_onDeath += OnDeath;
             _zdo = _character.m_nview.GetZDO();
+            _instances.Add(this);
 
             var beacon = gameObject.AddComponent<Beacon>();
             beacon.m_range = EpicLoot.GetAndvaranautRange();
@@ -52,11 +55,35 @@ namespace EpicLoot.Adventure
         [UsedImplicitly]
         public void OnDestroy()
         {
+            _instances.Remove(this);
+
             // TODO: save zdo data?
             if (_character != null)
             {
                 _character.m_onDeath -= OnDeath;
             }
+        }
+
+        public static Character FindClosestInRange(Vector3 point, float range)
+        {
+            Character closest = null;
+            var closestDistance = range;
+            foreach (var instance in _instances)
+            {
+                if (instance._bountyInfo == null || instance._character.IsDead())
+                {
+                    continue;
+                }
+
+                var distance = Vector3.Distance(point, instance.transform.position);
+                if (distance < closestDistance)
+                {
+                    closest = instance._character;
+                    closestDistance = distance;
+                }
+            }
+
+            return closest;
         }
 
         private bool HasBeenSetup()
