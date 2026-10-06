@@ -78,6 +78,17 @@ namespace EpicLoot.MagicItemEffects
             return lowHealthThreshold;
         }
 
+        public static float GetLowHealthDisplayPercent(Player player)
+        {
+            return Mathf.Round(Mathf.Clamp01(GetLowHealthPercentage(player)) * 1000f) / 10f;
+        }
+
+        public static bool PlayerHasHealthCriticalEffects(Player player)
+        {
+            return player != null && player.GetAllActiveMagicEffects().Exists(x =>
+                x.EffectType != MagicEffectType.ModifyLowHealth && IsHealthCriticalEffect(x.EffectType));
+        }
+
         // Expects the hit as it stands after the block, resistances and armor (see
         // SharedPlayerPostArmorDamagePatch), so it only applies what vanilla still does to it before the damage
         // lands: fire, poison and spirit are split off into damage over time, the rest is scaled by the world's

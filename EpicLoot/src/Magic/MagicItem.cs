@@ -401,6 +401,14 @@ namespace EpicLoot
                     return args;
                 }
             }
+
+            // {1} reads live player state yet ignores the value, so the generic and range probes below
+            // class it as a constant slot and print the real threshold.
+            if (ModifyWithLowHealth.IsHealthCriticalEffect(effectType))
+            {
+                return new object[] { value, ModifyWithLowHealth.GetLowHealthDisplayPercent(Player.m_localPlayer) };
+            }
+
             return new object[] { value };
         }
 
@@ -452,18 +460,12 @@ namespace EpicLoot
 
         // The {0},{1},... args for a range preview: each placeholder becomes that derived value's own
         // min-max range. A constant slot (min == max, e.g. a fixed "200") collapses to a single number
-        // rather than a range. A null value def (valueless effect) yields empty strings.
+        // rather than a range. A null value def (valueless effect) leaves the rolled slots empty.
         private static object[] GetRangeArgs(string effectType, MagicItemEffectDefinition.ValueDef values)
         {
             if (values == null)
             {
-                var count = GetDisplayArgs(effectType, 0f).Length;
-                var empties = new object[count];
-                for (var i = 0; i < count; i++)
-                {
-                    empties[i] = string.Empty;
-                }
-                return empties;
+                return GetGenericArgs(effectType, string.Empty);
             }
 
             var argsMin = GetDisplayArgs(effectType, values.MinValue);
