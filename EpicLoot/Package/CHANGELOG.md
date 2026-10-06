@@ -12,6 +12,7 @@
 - New Wrath of the Thunderer set, whose full set lets you hurl your melee weapon to slam down where you aim.
 - New Trickster's Guile set, whose full set takes you behind an enemy you keep your aim on for a heavy strike.
 - New Dverger Arsenal set, whose full set turns your crossbow bolts into lobbed fireballs that explode where you aim.
+- New Egil's Mark set, whose full set makes your arrows fly faster and hit harder at the cost of a much slower draw.
 - New magic effect Prosperity gives creatures and chests near you a chance to roll their magic loot again.
 - New magic effect Green Thumb on the Cultivator makes the plants you sow grow faster.
 - New magic effect Close Quarter on melee weapons reduces how far your hits knock enemies back.
@@ -19,6 +20,7 @@
 - Adds optional Item Favorite Framework support, so favorited items are never offered for destruction at the enchanting table and show a star.
 - Project Auga support is back for Auga's latest Valheim release.
 - A new server option stops enchantments that only work at critical health from rolling.
+- Loot tables can now give items as many enchantments as there are to roll.
 - The enchanting table uses Valheim's own fonts and controller button icons, and shows how much of each material is in nearby storage.
 - Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
 - Item tooltips now fit their content and stay beside the cursor, and the comparison tooltip follows the hovered item.
@@ -39,7 +41,9 @@
 - Fixes magic staff tooltips showing a wildly wrong health cost and leaving out the eitr cost.
 - Fixes panel text going missing when another mod ships a broken copy of Valheim's fonts.
 - Fixes the rested carry weight shardstone losing its comfort bonus.
+- Fixes Bulk Up being able to push health regeneration below zero.
 - Fixes the rune page's Etch button staying enabled with no rune selected, and rarity color changes not reaching the enchanting table's buttons until the next login.
+- Fixes the rune page's enchantment list spilling over the rune list on items with many enchantments, and controllers now keep the selected enchantment in view on the augment and rune pages.
 - Lucky Craft now only saves materials when crafting, not when building, planting or tempering.
 - Quick Draw no longer makes crossbows reload slower at high skill, and Triple Shot from a set only affects bows and crossbows.
 - Coin Weighted Weapon now shows the damage bonus it actually gives at the coins you carry, and weapon tooltips include it before the weapon is equipped.

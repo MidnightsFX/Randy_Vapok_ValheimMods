@@ -38,6 +38,10 @@ namespace EpicLoot_UnityLib
 
         private readonly List<EnchantmentRow> _enchantmentRows = new List<EnchantmentRow>();
         private EnchantmentColumn _enchantmentColumn;
+        private ScrollRectEnsureVisible _enchantListEnsureVisible;
+        // The frame a rebuild asked for the focused row to be scrolled into view, or -1. Served on a later
+        // frame, once the layout has placed the new rows.
+        private int _focusScrollRequestFrame = -1;
         private GameObject _rowFocusTemplate;
         private RuneAction _runeAction;
         private GameObject _successDialog;
@@ -140,6 +144,7 @@ namespace EpicLoot_UnityLib
                 int count = GetItemCount();
                 _focusIndex = focused && count > 0 ? Mathf.Clamp(tryFocusIndex, 0, count - 1) : -1;
                 _owner.RefreshEnchantmentFocus();
+                _owner.ScrollToFocusedRow();
             }
 
             // The rows are rebuilt whenever the selected item changes, which empties the column for a
@@ -161,6 +166,7 @@ namespace EpicLoot_UnityLib
 
                 _focusIndex = Mathf.Clamp(_focusIndex + step, 0, count - 1);
                 _owner.RefreshEnchantmentFocus();
+                _owner.ScrollToFocusedRow();
             }
 
             public void SubmitFocused()
@@ -186,6 +192,7 @@ namespace EpicLoot_UnityLib
 
             base.Awake();
 
+            MakeEnchantListScroll();
             BindSetModeButtons();
 
             // Only the toggle turning on selects: a group change also turns the previous one off, and
@@ -228,6 +235,81 @@ namespace EpicLoot_UnityLib
             if (strayHint != null)
             {
                 strayHint.gameObject.SetActive(false);
+            }
+        }
+
+        // The prefab's EnchantmentSelector ships its ScrollRect disabled, with no mask, and EnchantList a
+        // fixed height, so from about the eighth effect the rows spilled out of the column -- unclipped and
+        // still clickable -- over the rune list below. Rebuilt here as a clipped list that grows with its
+        // rows and scrolls. The viewport and components are only added when missing, so this is safe over
+        // a bundle that fixes the prefab.
+        private void MakeEnchantListScroll()
+        {
+            ScrollRect scroll = EnchantList != null ? EnchantList.GetComponentInParent<ScrollRect>(true) : null;
+            if (scroll == null)
+            {
+                return;
+            }
+
+            RectTransform selector = (RectTransform)scroll.transform;
+            if (scroll.viewport == null && EnchantList.parent == selector)
+            {
+                // Masked on a child, not on the selector itself: the column's header sits above the
+                // selector's rect and would be clipped. Stretched over the whole selector, because
+                // ScrollRectEnsureVisible measures against the ScrollRect's own rect.
+                GameObject viewportObject = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
+                viewportObject.layer = selector.gameObject.layer;
+                RectTransform viewport = (RectTransform)viewportObject.transform;
+                viewport.SetParent(selector, false);
+                viewport.anchorMin = Vector2.zero;
+                viewport.anchorMax = Vector2.one;
+                viewport.offsetMin = Vector2.zero;
+                viewport.offsetMax = Vector2.zero;
+                viewport.SetSiblingIndex(EnchantList.GetSiblingIndex());
+                EnchantList.SetParent(viewport, false);
+                scroll.viewport = viewport;
+            }
+
+            // Hung from the top so it grows downwards and a short list sits where it always did.
+            EnchantList.anchorMin = new Vector2(EnchantList.anchorMin.x, 1f);
+            EnchantList.anchorMax = new Vector2(EnchantList.anchorMax.x, 1f);
+            EnchantList.pivot = new Vector2(EnchantList.pivot.x, 1f);
+            EnchantList.anchoredPosition = new Vector2(EnchantList.anchoredPosition.x, 0f);
+
+            if (!EnchantList.TryGetComponent(out ContentSizeFitter fitter))
+            {
+                fitter = EnchantList.gameObject.AddComponent<ContentSizeFitter>();
+            }
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            scroll.content = EnchantList;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+            scroll.enabled = true;
+
+            // Added after the content is set: it reads the content and finds the mask when it initializes.
+            if (!scroll.TryGetComponent(out _enchantListEnsureVisible))
+            {
+                _enchantListEnsureVisible = scroll.gameObject.AddComponent<ScrollRectEnsureVisible>();
+            }
+        }
+
+        // Keeps the gamepad's row in view, the way the item and rune lists keep theirs.
+        private void ScrollToFocusedRow()
+        {
+            int focusIndex = _enchantmentColumn.GetFocusedIndex();
+            if (_enchantListEnsureVisible == null || !ZInput.IsGamepadActive() ||
+                focusIndex < 0 || focusIndex >= _enchantmentRows.Count)
+            {
+                return;
+            }
+
+            Toggle toggle = _enchantmentRows[focusIndex].Toggle;
+            if (toggle != null)
+            {
+                _enchantListEnsureVisible.CenterOnItem((RectTransform)toggle.transform);
             }
         }
 
@@ -360,6 +442,12 @@ namespace EpicLoot_UnityLib
             }
 
             RefreshEnchantmentFocus();
+
+            if (_focusScrollRequestFrame >= 0 && Time.frameCount > _focusScrollRequestFrame)
+            {
+                _focusScrollRequestFrame = -1;
+                ScrollToFocusedRow();
+            }
 
             if (!_locked && ZInput.IsGamepadActive() && ZInput.GetButtonDown("JoyButtonY"))
             {
@@ -658,6 +746,9 @@ namespace EpicLoot_UnityLib
             _enchantmentRows.Clear();
             _enchantmentColumn.ClampFocus();
             _selectedEnchantmentIndex = -1;
+
+            // Back to the top for the next item or mode.
+            EnchantList.anchoredPosition = new Vector2(EnchantList.anchoredPosition.x, 0f);
         }
 
         private void RefreshSelectableEnchantments()
@@ -706,6 +797,10 @@ namespace EpicLoot_UnityLib
 
             _enchantmentColumn.ClampFocus();
             RefreshEnchantmentFocus();
+
+            // ClampFocus keeps the old row index, which may now sit below the fold of a list that just
+            // went back to the top.
+            _focusScrollRequestFrame = Time.frameCount;
         }
 
         // Indexed off the tracked rows, not off EnchantList: a rebuild leaves the previous rows parented

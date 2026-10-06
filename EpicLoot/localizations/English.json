@@ -135,6 +135,8 @@
 
     "mod_epicloot_me_modifylowhealth_config_max": "Max Low Health Threshold",
     "mod_epicloot_me_artillery_config_tripleshotspread": "Triple Shot Scatter (x range)",
+    "mod_epicloot_me_sniper_config_speedpervalue": "Arrow Speed per Value (x)",
+    "mod_epicloot_me_sniper_config_drawtimepervalue": "Draw Time per Value (x)",
     "mod_epicloot_me_riches_config_coins": "Coin Value",
     "mod_epicloot_me_riches_config_amber": "Amber Value",
     "mod_epicloot_me_riches_config_amberpearl": "Amber Pearl Value",
@@ -1955,6 +1957,7 @@
     "mod_epicloot_set_me_artillery": "Artillery: Your crossbow fires lobbed fireballs that come down where you aim, dealing +{0}% damage to everything within {1}m of the impact.",
     "mod_epicloot_set_me_assassin": "Assassin: Keep your aim on an enemy within {2:0.#}m for {3:0.#} seconds with a melee weapon drawn to vanish and reappear behind it, striking for {0:0.#}% weapon damage. Cooldown: {1:0} seconds.",
     "mod_epicloot_assassin_charge": "Assassinate",
+    "mod_epicloot_set_me_sniper": "Sniper: Your arrows fly {1:0.##}x as fast and deal +{0:0.#}% damage, but your bow takes {2:0.##}x as long to draw.",
 
     "mod_epicloot_basicmagicnameformat": "Magic {0}",
     "mod_epicloot_fullnameformat": "{0}{1}{2}",
@@ -2241,12 +2244,21 @@
     "mod_epicloot_l_lokichest_desc": "Worn by one who has been mare, salmon and fly, it has never quite settled on a shape.",
     "mod_epicloot_l_lokilegs": "Sky-Treaders",
     "mod_epicloot_l_lokilegs_desc": "Made after the shoes in which the Sly One ran over air and sea, and they leave no footprint.",
+    "mod_epicloot_l_egilbow": "Kingsdread",
+    "mod_epicloot_l_egilbow_desc": "Egil drew before King Niðuðr with three arrows in hand: one for the apple on his son's head, and two for the king had he missed.",
+    "mod_epicloot_l_egilhood": "Wolfdale Hood",
+    "mod_epicloot_l_egilhood_desc": "Worn through seven winters in Ulfdalir.",
+    "mod_epicloot_l_egilcloak": "Feather-Hame",
+    "mod_epicloot_l_egilcloak_desc": "Egil fasten a cloud of feathers to fly over the ice and snow.",
+    "mod_epicloot_l_egillegs": "Eastward Striders",
+    "mod_epicloot_l_egillegs_desc": "With these, Egil left no tracks a hunter could follow.",
 
     "mod_epicloot_set_heimdall": "Heimdall's Legacy",
     "mod_epicloot_set_ragnar": "Ragnar's Fury",
     "mod_epicloot_set_thor": "Wrath of the Thunderer",
     "mod_epicloot_set_dvergerarsenal": "Dverger Arsenal",
     "mod_epicloot_set_loki": "The Trickster's Guile",
+    "mod_epicloot_set_egil": "Egil's Mark",
 
     "mod_epicloot_legendarysetlabel": "Legendary Set Item",
     "mod_epicloot_mythicsetlabel": "Mythic Set Item",

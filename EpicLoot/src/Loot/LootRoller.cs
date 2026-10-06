@@ -73,10 +73,6 @@ namespace EpicLoot
                 { ItemRarity.Ancient,   new[] { new[] { 1f, 20f }, new[] { 2f, 40f }, new[] { 3f, 30f }, new[] { 4f, 10f } } },
             };
 
-        // Ceiling on how many effects a MagicEffectsCount entry may ask for. A roll asks the effect pool
-        // for this many distinct effects, so a runaway config value would spin on a pool it cannot fill.
-        public const int MaxEffectCount = 12;
-
         // Mirrors the MagicEffectsCount block in config/loottables.json; used when that block is missing a
         // rarity, which is the normal case for a loottables.json written before a rarity was added and kept
         // by the player-changes check in FilePatching. Keep the two in sync.
@@ -1695,11 +1691,11 @@ namespace EpicLoot
                     continue;
                 }
 
-                // A roll asks the effect pool for this many distinct effects, so an out-of-range entry is
-                // dropped instead of trusted. A negative weight goes too, since WeightedRandomCollection
-                // would quietly skew the whole table.
+                // No upper bound: RollMagicItem stops once the item's eligible effect pool is used up, so
+                // a count larger than the pool just yields every effect that pool can give. A negative
+                // weight is dropped, since WeightedRandomCollection would quietly skew the whole table.
                 var count = (int)entry[0];
-                if (count < 0 || count > MaxEffectCount || entry[1] < 0)
+                if (count < 0 || entry[1] < 0)
                 {
                     droppedEntry = true;
                     continue;
@@ -1711,8 +1707,8 @@ namespace EpicLoot
             if (droppedEntry && _warnedInvalidEffectCounts.Add(rarity))
             {
                 EpicLoot.LogWarning($"MagicEffectsCount entries for {rarity} in loottables.json were " +
-                    $"ignored: each entry must be [count, weight] with a count between 0 and " +
-                    $"{MaxEffectCount} and a weight of 0 or more.");
+                    $"ignored: each entry must be [count, weight] with a count of 0 or more and a " +
+                    $"weight of 0 or more.");
             }
 
             var featureValues = useEnchantingUpgrades && EnchantingTableUI.instance && EnchantingTableUI.instance.SourceTable

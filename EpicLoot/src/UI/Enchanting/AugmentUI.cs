@@ -26,11 +26,13 @@ namespace EpicLoot_UnityLib
         private int _augmentIndex;
         private GameObject _choiceDialog;
         private List<Toggle> _AugmentSelectors = new List<Toggle>();
+        private ScrollRectEnsureVisible _enchantListEnsureVisible;
 
         public override void Awake()
         {
             base.Awake();
             MagicTextShimmer.Ensure(AvailableEffectsText);
+            _enchantListEnsureVisible = EnchantList.GetComponentInParent<ScrollRectEnsureVisible>(true);
         }
 
         [UsedImplicitly]
@@ -88,6 +90,12 @@ namespace EpicLoot_UnityLib
                             nextAugmentIndex = (nextAugmentIndex + 1) % activeAugmentCount;
                         }
                         _AugmentSelectors[nextAugmentIndex].isOn = true;
+
+                        // An item with many effects scrolls the list; keep the pick in view.
+                        if (_enchantListEnsureVisible != null)
+                        {
+                            _enchantListEnsureVisible.CenterOnItem((RectTransform)_AugmentSelectors[nextAugmentIndex].transform);
+                        }
                     }
                     ZInput.ResetButtonStatus("JoyButtonY");
                 }

@@ -546,6 +546,56 @@
         ]
       },
       "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "EgilBow",
+      "Name": "$mod_epicloot_l_egilbow",
+      "Description": "$mod_epicloot_l_egilbow_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "Bow" ],
+        "AllowedSkillTypes": [ "Bows" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "ModifyBackstab" }
+      ]
+    },
+    {
+      "ID": "EgilHood",
+      "Name": "$mod_epicloot_l_egilhood",
+      "Description": "$mod_epicloot_l_egilhood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "EgilCloak",
+      "Name": "$mod_epicloot_l_egilcloak",
+      "Description": "$mod_epicloot_l_egilcloak_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "EgilLegs",
+      "Name": "$mod_epicloot_l_egillegs",
+      "Description": "$mod_epicloot_l_egillegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
     }
   ],
   "LegendarySets": [
@@ -643,6 +693,30 @@
             "Legendary": { "MinValue": 200, "MaxValue": 200, "Increment": 1 },
             "Mythic": { "MinValue": 225, "MaxValue": 225, "Increment": 1 },
             "Ancient": { "MinValue": 250, "MaxValue": 250, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Egil",
+      "Name": "$mod_epicloot_set_egil",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "EgilBow",
+        "EgilHood",
+        "EgilCloak",
+        "EgilLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddBowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyDrawStaminaUse", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyBackstab", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "AddMovementSkills", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "Sniper",
+          "Values": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
+            "Mythic": { "MinValue": 45, "MaxValue": 45, "Increment": 1 },
+            "Ancient": { "MinValue": 50, "MaxValue": 50, "Increment": 1 }
           } } }
       ]
     }

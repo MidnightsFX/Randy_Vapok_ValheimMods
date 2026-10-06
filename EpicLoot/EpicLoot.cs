@@ -179,6 +179,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
         MagicItemEffects.OverwhelmingLaunch.RegisterDisplayValues();
         MagicItemEffects.Artillery.RegisterDisplayValues();
         MagicItemEffects.Assassin.RegisterDisplayValues();
+        MagicItemEffects.Sniper.RegisterDisplayValues();
         MagicItemEffects.CoinHoarder.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB

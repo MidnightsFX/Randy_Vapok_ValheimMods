@@ -7664,6 +7664,28 @@
         "CooldownPerValue": 0.8,
         "MinCooldown": 30
       }
+    },
+    {
+      "Type": "Sniper",
+      "DisplayText": "$mod_epicloot_set_me_sniper",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+        "Rare": { "MinValue": 30, "MaxValue": 30, "Increment": 1 },
+        "Epic": { "MinValue": 35, "MaxValue": 35, "Increment": 1 },
+        "Legendary": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
+        "Mythic": { "MinValue": 45, "MaxValue": 45, "Increment": 1 },
+        "Ancient": { "MinValue": 50, "MaxValue": 50, "Increment": 1 }
+      },
+      "Config": {
+        "SpeedPerValue": 0.05,
+        "DrawTimePerValue": 0.05
+      }
     }
   ]
 }
