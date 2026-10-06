@@ -863,8 +863,10 @@
     "mod_epicloot_effectsperlevel": "Upgrades:",
     "mod_epicloot_upgrademessage": "$1 upgraded to level $2",
     "mod_epicloot_unlockmessage": "$1 unlocked!",
+    "mod_epicloot_upgradefailedmessage": "$1 could not be upgraded",
     "mod_epicloot_bonus": "Bonus!",
     "mod_epicloot_storagecount": "$1 in storage",
+    "mod_epicloot_item_unavailable": "No longer available: $1",
 
     "mod_epicloot_featureinfo_none": "Select a feature from the list to the left to view upgrade options.",
     "mod_epicloot_featureinfo_sacrifice": "Sacrifice magic items and trophies, destroying them to produce enchanting materials.\n\nWhen upgraded, gain a chance to receive double the items normally gained from the sacrifice.",
@@ -887,6 +889,7 @@
     "mod_epicloot_enchanting_rarity": "Rarity",
     "mod_epicloot_enchanting_name": "Name",
     "mod_epicloot_enchanting_quantity": "Quantity",
+    "mod_epicloot_enchanting_equipped": "Equipped",
     "mod_epicloot_enchanting_selectall": "Select All",
     "mod_epicloot_enchanting_filter": "Filter...",
     "mod_epicloot_enchanting_select": "Select",

@@ -192,6 +192,7 @@ namespace EpicLoot_UnityLib
             if (!InventoryManagement.Instance.IsEditable(item))
             {
                 Debug.LogWarning("[Enchant Item] Cancelled: the item is no longer held anywhere the change would be saved.");
+                NotifyItemsUnavailable(item);
                 RefreshAvailableItems();
                 return;
             }
@@ -204,6 +205,7 @@ namespace EpicLoot_UnityLib
                 if (!LocalPlayerCanAffordCost(cost))
                 {
                     Debug.LogError("[Enchant Item] ERROR: Tried to enchant item but could not afford the cost. This should not happen!");
+                    player.Message(MessageHud.MessageType.Center, "$msg_missingrequirement");
                     return;
                 }
 

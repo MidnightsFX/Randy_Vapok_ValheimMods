@@ -826,6 +826,9 @@
       "DisplayText": "$mod_epicloot_me_increasetreedrop_display",
       "Description": "$mod_epicloot_me_increasetreedrop_desc",
       "Requirements": {
+        "AllowedSkillTypes": [
+          "Axes"
+        ],
         "ItemHasChopDamage": true
       },
       "ValuesPerRarity": {

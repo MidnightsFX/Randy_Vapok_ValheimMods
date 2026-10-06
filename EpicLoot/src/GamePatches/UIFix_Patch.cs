@@ -454,6 +454,8 @@ internal class TooltipBox : MonoBehaviour
 public class ScrollWheelHandler : MonoBehaviour
 {
     private ScrollRect _scrollRect = null;
+    private UITooltip _owner;
+    private bool _ownerIsInventoryItem;
 
     public void Awake()
     {
@@ -476,6 +478,11 @@ public class ScrollWheelHandler : MonoBehaviour
             return;
         }
 
+        if (ZInput.IsGamepadActive() && OwnerIsInventoryItem())
+        {
+            GamepadScroll.ApplyRightStickY(_scrollRect);
+        }
+
         // Get scroll wheel input regardless of pointer location.
         float scrollDelta = Input.GetAxis("Mouse ScrollWheel");
         if (!(Mathf.Abs(scrollDelta) > float.Epsilon))
@@ -486,5 +493,17 @@ public class ScrollWheelHandler : MonoBehaviour
         // Adjust the vertical scroll position.
         float newScrollPosition = _scrollRect.verticalNormalizedPosition + scrollDelta * 0.7f;
         _scrollRect.verticalNormalizedPosition = Mathf.Clamp01(newScrollPosition);
+    }
+
+    private bool OwnerIsInventoryItem()
+    {
+        UITooltip owner = UITooltip.m_current;
+        if (owner != _owner)
+        {
+            _owner = owner;
+            _ownerIsInventoryItem = owner != null && owner.GetComponentInParent<InventoryGrid>() != null;
+        }
+
+        return _ownerIsInventoryItem;
     }
 }

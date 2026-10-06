@@ -267,12 +267,12 @@ public class InventoryManagement
         return taken;
     }
 
-    public void RemoveItem(ItemDrop.ItemData item)
+    public int RemoveItem(ItemDrop.ItemData item)
     {
-        RemoveItem(item.m_shared.m_name, item.m_stack);
+        return RemoveItem(item.m_shared.m_name, item.m_stack);
     }
 
-    public void RemoveItem(string item, int amount)
+    public int RemoveItem(string item, int amount)
     {
         Inventory inventory = GetInventory();
 
@@ -287,8 +287,10 @@ public class InventoryManagement
         int shortfall = amount - taken;
         if (shortfall > 0)
         {
-            API.RemoveProviderItems(item, shortfall);
+            taken += API.RemoveProviderItems(item, shortfall);
         }
+
+        return taken;
     }
 
     public List<ItemDrop.ItemData> GetBoundItems()

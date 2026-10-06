@@ -22,8 +22,13 @@ namespace EpicLoot_UnityLib
         
 
         private static readonly List<EnchantingFeatureUpgradeRequest> _upgradeRequests = new();
+        private static readonly EnchantingFeature[] Features =
+            (EnchantingFeature[])Enum.GetValues(typeof(EnchantingFeature));
+
         private ZNetView _nview;
         private Player _interactingPlayer;
+        private readonly int[] _knownLevels = new int[Features.Length];
+        private uint _knownDataRevision;
 
         public bool Interact(Humanoid user, bool repeat, bool alt)
         {
@@ -54,6 +59,7 @@ namespace EpicLoot_UnityLib
             _nview.Register<ZDOID, int, int, bool>("el.TableUpgradeResponse", RPC_TableUpgradeResponse);
 
             InitFeatureLevels();
+            SyncFeatureLevels(raiseEvents: false);
 
             Refresh();
         }
@@ -120,7 +126,13 @@ namespace EpicLoot_UnityLib
                     _upgradeRequests.Remove(request);
                     if (Player.m_localPlayer != null)
                     {
-                        if (toLevel == 0)
+                        if (!success)
+                        {
+                            Player.m_localPlayer.Message(MessageHud.MessageType.Center,
+                                Localization.instance.Localize("$mod_epicloot_upgradefailedmessage",
+                                EnchantingTableUpgrades.GetFeatureName(feature)));
+                        }
+                        else if (toLevel == 0)
                         {
                             Player.m_localPlayer.Message(MessageHud.MessageType.Center,
                                 Localization.instance.Localize("$mod_epicloot_unlockmessage",
@@ -139,11 +151,45 @@ namespace EpicLoot_UnityLib
 
         public void Update()
         {
+            if (_nview != null && _nview.IsValid() && _nview.GetZDO().DataRevision != _knownDataRevision)
+            {
+                SyncFeatureLevels(raiseEvents: true);
+            }
+
             if (_interactingPlayer != null && EnchantingTableUI.instance != null &&
                 EnchantingTableUI.instance.isActiveAndEnabled && !InUseDistance(_interactingPlayer))
             {
                 EnchantingTableUI.Hide();
                 _interactingPlayer = null;
+            }
+        }
+
+        // Only the owner's SetFeatureLevel raises the level events. Every other client sees an upgrade
+        // arrive as a plain ZDO sync, so the levels are re-read whenever the ZDO's revision moves.
+        private void SyncFeatureLevels(bool raiseEvents)
+        {
+            _knownDataRevision = _nview.GetZDO().DataRevision;
+
+            bool anyChanged = false;
+            foreach (EnchantingFeature feature in Features)
+            {
+                int level = GetFeatureLevel(feature);
+                if (_knownLevels[(int)feature] == level)
+                {
+                    continue;
+                }
+
+                _knownLevels[(int)feature] = level;
+                anyChanged = true;
+                if (raiseEvents)
+                {
+                    OnFeatureLevelChanged?.Invoke(feature, level);
+                }
+            }
+
+            if (anyChanged && raiseEvents)
+            {
+                OnAnyFeatureLevelChanged?.Invoke();
             }
         }
 
@@ -281,6 +327,7 @@ namespace EpicLoot_UnityLib
 
             string featureName = feature.ToString();
             _nview.GetZDO().Set(FormatFeatureName(featureName), level+1);
+            _knownLevels[(int)feature] = level;
             OnFeatureLevelChanged?.Invoke(feature, level);
             OnAnyFeatureLevelChanged?.Invoke();
         }
