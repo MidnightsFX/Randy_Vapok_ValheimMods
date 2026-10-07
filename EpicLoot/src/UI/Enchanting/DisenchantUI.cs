@@ -45,6 +45,7 @@ namespace EpicLoot_UnityLib
             if (!InventoryManagement.Instance.IsEditable(item))
             {
                 UnityEngine.Debug.LogWarning("[Disenchant Item] Cancelled: the item is no longer held anywhere the change would be saved.");
+                NotifyItemsUnavailable(item);
                 RefreshAvailableItems();
                 return;
             }
@@ -52,6 +53,7 @@ namespace EpicLoot_UnityLib
             List<InventoryItemListElement> cost = EnchantingUIController.GetDisenchantCost(item);
             if (!LocalPlayerCanAffordCost(cost))
             {
+                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "$msg_missingrequirement");
                 return;
             }
 

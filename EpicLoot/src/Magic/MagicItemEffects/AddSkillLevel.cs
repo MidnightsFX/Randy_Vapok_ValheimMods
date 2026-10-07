@@ -78,6 +78,7 @@ namespace EpicLoot.MagicItemEffects
             check(MagicEffectType.AddMovementSkills, SkillType.Run, SkillType.Jump, SkillType.Swim, SkillType.Sneak);
             check(MagicEffectType.AddCrafterSkills, SkillType.Crafting, SkillType.Cooking);
             check(MagicEffectType.IncreaseMeleeSkills, Shards.IncreaseMeleeSkills.MeleeSkills);
+            check(MagicEffectType.IncreaseRangedSkills, src.Magic.MagicItemEffects.Shards.IncreaseRangedSkills.RangedSkills);
             SkillsAsSkills(MagicEffectType.BlockAsDodgeAsBlock, Shards.BlockAsDodgeAsBlock.type, Shards.BlockAsDodgeAsBlock.asType);
             SkillsAsSkills(MagicEffectType.BlockAsWoodCuttingAndPickaxes, Shards.BlockAsWoodCuttingAndPickaxes.type, Shards.BlockAsWoodCuttingAndPickaxes.asType);
 

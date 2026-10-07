@@ -596,6 +596,129 @@
         ]
       },
       "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "ElivagarHood",
+      "Name": "$mod_epicloot_l_elivagarhood",
+      "Description": "$mod_epicloot_l_elivagarhood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
+    },
+    {
+      "ID": "ElivagarRobe",
+      "Name": "$mod_epicloot_l_elivagarrobe",
+      "Description": "$mod_epicloot_l_elivagarrobe_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
+    },
+    {
+      "ID": "ElivagarLegs",
+      "Name": "$mod_epicloot_l_elivagarlegs",
+      "Description": "$mod_epicloot_l_elivagarlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
+    },
+    {
+      "ID": "ElivagarCape",
+      "Name": "$mod_epicloot_l_elivagarcape",
+      "Description": "$mod_epicloot_l_elivagarcape_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
+    },
+    {
+      "ID": "FylgjaBow",
+      "Name": "$mod_epicloot_l_fylgjabow",
+      "Description": "$mod_epicloot_l_fylgjabow_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "Bow" ],
+        "AllowedSkillTypes": [ "Bows" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "AmmoConservation" }
+      ]
+    },
+    {
+      "ID": "FylgjaWeapon",
+      "Name": "$mod_epicloot_l_fylgjaweapon",
+      "Description": "$mod_epicloot_l_fylgjaweapon_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "Swords", "Knives", "Axes", "Clubs", "Spears", "Polearms", "Sledges", "TwoHandAxes", "Fists" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "ModifyAttackStaminaUse" }
+      ]
+    },
+    {
+      "ID": "FylgjaHood",
+      "Name": "$mod_epicloot_l_fylgjahood",
+      "Description": "$mod_epicloot_l_fylgjahood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "FylgjaJerkin",
+      "Name": "$mod_epicloot_l_fylgjajerkin",
+      "Description": "$mod_epicloot_l_fylgjajerkin_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "FylgjaCape",
+      "Name": "$mod_epicloot_l_fylgjacape",
+      "Description": "$mod_epicloot_l_fylgjacape_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6
     }
   ],
   "LegendarySets": [
@@ -717,6 +840,54 @@
             "Legendary": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
             "Mythic": { "MinValue": 45, "MaxValue": 45, "Increment": 1 },
             "Ancient": { "MinValue": 50, "MaxValue": 50, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Elivagar",
+      "Name": "$mod_epicloot_set_elivagar",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "ElivagarHood",
+        "ElivagarRobe",
+        "ElivagarLegs",
+        "ElivagarCape"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "EnergeticEitr", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyEitrRegen", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "HeartyEitr", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "Frostwalker",
+          "Values": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
+            "Mythic": { "MinValue": 2.5, "MaxValue": 2.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 2, "MaxValue": 2, "Increment": 0.5 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Fylgja",
+      "Name": "$mod_epicloot_set_fylgja",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "FylgjaBow",
+        "FylgjaWeapon",
+        "FylgjaHood",
+        "FylgjaJerkin",
+        "FylgjaCape"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "IncreaseRangedSkills", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "IncreaseMeleeSkills", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "QuickDraw", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyAttackSpeed", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "SpiritAnimal",
+          "Values": { "MinValue": 100, "MaxValue": 100, "Increment": 5 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 100, "MaxValue": 100, "Increment": 5 },
+            "Mythic": { "MinValue": 115, "MaxValue": 115, "Increment": 5 },
+            "Ancient": { "MinValue": 130, "MaxValue": 130, "Increment": 5 }
           } } }
       ]
     }

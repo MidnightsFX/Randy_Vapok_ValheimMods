@@ -826,6 +826,9 @@
       "DisplayText": "$mod_epicloot_me_increasetreedrop_display",
       "Description": "$mod_epicloot_me_increasetreedrop_desc",
       "Requirements": {
+        "AllowedSkillTypes": [
+          "Axes"
+        ],
         "ItemHasChopDamage": true
       },
       "ValuesPerRarity": {
@@ -7578,6 +7581,54 @@
       "Config": {
         "SpeedPerValue": 0.05,
         "DrawTimePerValue": 0.05
+      }
+    },
+    {
+      "Type": "Frostwalker",
+      "DisplayText": "$mod_epicloot_set_me_frostwalker",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 4.5, "MaxValue": 4.5, "Increment": 0.5 },
+        "Rare": { "MinValue": 4, "MaxValue": 4, "Increment": 0.5 },
+        "Epic": { "MinValue": 3.5, "MaxValue": 3.5, "Increment": 0.5 },
+        "Legendary": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
+        "Mythic": { "MinValue": 2.5, "MaxValue": 2.5, "Increment": 0.5 },
+        "Ancient": { "MinValue": 2, "MaxValue": 2, "Increment": 0.5 }
+      },
+      "Config": {
+        "AshlandsDrainMultiplier": 3,
+        "MinEitr": 10,
+        "Radius": 3,
+        "ChunkSize": 4
+      }
+    },
+    {
+      "Type": "SpiritAnimal",
+      "DisplayText": "$mod_epicloot_set_me_spiritanimal",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 100, "MaxValue": 100, "Increment": 5 },
+        "Rare": { "MinValue": 100, "MaxValue": 100, "Increment": 5 },
+        "Epic": { "MinValue": 100, "MaxValue": 100, "Increment": 5 },
+        "Legendary": { "MinValue": 100, "MaxValue": 100, "Increment": 5 },
+        "Mythic": { "MinValue": 115, "MaxValue": 115, "Increment": 5 },
+        "Ancient": { "MinValue": 130, "MaxValue": 130, "Increment": 5 }
+      },
+      "Config": {
+        "Lifetime": 120,
+        "ReturnDelay": 30,
+        "CombatTimeout": 10,
+        "LeashDistance": 60
       }
     }
   ]

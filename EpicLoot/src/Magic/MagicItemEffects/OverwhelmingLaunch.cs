@@ -242,7 +242,7 @@ namespace EpicLoot.MagicItemEffects
         // hotkeys use. Refreshed on every key-down (rare), so a vanilla rebind is picked up without hooking it.
         private static readonly Dictionary<KeyCode, List<string>> CollidingButtons = new Dictionary<KeyCode, List<string>>();
 
-        private static void ConsumeKey(KeyCode key, bool refresh)
+        internal static void ConsumeKey(KeyCode key, bool refresh)
         {
             var zinput = ZInput.instance;
             if (zinput == null)

@@ -18,6 +18,10 @@
   "RestrictedItems": [
     "$item_tankard",
     "$item_tankard_odin",
+    "$item_dvergrtankard",
+    "$item_lantern",
+    "$item_lanternDN",
+    "$piece_hoodedlantern",
     "Unarmed",
     "CAPE TEST",
     "Cheat sword",
@@ -27,6 +31,10 @@
     "$item_pickaxe_stone",
     "Tankard",
     "TankardAnniversary",
+    "Tankard_dvergr",
+    "Lantern",
+    "Lantern_DN",
+    "Lantern_hooded",
     "DvergerArbalest"
   ],
   "ItemSets": [

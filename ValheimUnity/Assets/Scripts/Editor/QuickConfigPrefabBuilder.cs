@@ -287,6 +287,9 @@ public static class QuickConfigPrefabBuilder
                 S("SetItemDropChance", "Set Item Drop Chance"),
                 T("HealthCriticalEffectsEnabled", "Health Critical Enchantments"),
                 T("TransferMagicItemToCrafts", "Transfer Enchants to Crafted Items"),
+                // Only one of the two is shown at a time; the mod swaps them.
+                B("action:advanced:show", "$mod_epicloot_cfg_show_advanced", "The other pages: loot, shardstones, the enchanting table, adventure and more."),
+                B("action:advanced:hide", "$mod_epicloot_cfg_hide_advanced", "Back to this page only. Edits on the other pages are kept."),
             },
             new[]
             {

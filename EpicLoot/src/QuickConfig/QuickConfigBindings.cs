@@ -173,6 +173,13 @@ internal static class QuickConfigBindings {
             "How the four ratios above split each loot drop. They are relative weights, so only their " +
             "proportions matter; this line shows the resulting share of each category.");
         RarityCounts();
+        AdvancedPagesAction(QuickConfigureTool.ShowAdvancedKey, "$mod_epicloot_cfg_show_advanced", true,
+            "Adds the rest of the pages after this one: rarity, loot drops, shardstones and runes, the " +
+            "enchanting table, the merchant and bounties, interface, item colors, effect tuning and advanced. " +
+            "Remembered the next time the panel opens.");
+        AdvancedPagesAction(QuickConfigureTool.HideAdvancedKey, "$mod_epicloot_cfg_hide_advanced", false,
+            "Goes back to this page only. Edits already made on the other pages are kept, and Save still " +
+            "writes them. Remembered the next time the panel opens.");
 
         // --- 2. Features ---
         Toggle("_adventureModeEnabled", ELConfig._adventureModeEnabled, "Adventure Mode Enabled", BindingScope.Server);
@@ -612,6 +619,20 @@ internal static class QuickConfigBindings {
                 staged.Set(xKey, (float)xEntry.DefaultValue);
                 staged.Set(yKey, (float)yEntry.DefaultValue);
                 return $"{name}: staged. Save to apply.";
+            }
+        });
+    }
+
+    // Show / Hide Advanced Configs: one of the two is visible at a time, in the same place. Pressing it
+    // acts at once rather than staging anything, since it changes what the panel shows, not a setting.
+    private static void AdvancedPagesAction(string key, string name, bool show, string description) {
+        Add(new Binding {
+            Key = key, DisplayName = name, Kind = BindingKind.Action, Scope = BindingScope.Action,
+            VisibleWhen = _ => QuickConfigureTool.AdvancedPagesShown != show,
+            Tooltip = () => QuickConfigTooltip.Text(QuickConfigureTool.L(name), description),
+            Act = _ => {
+                QuickConfigureTool.SetAdvancedPagesShown(show);
+                return null;
             }
         });
     }

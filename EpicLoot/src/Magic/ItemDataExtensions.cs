@@ -260,7 +260,7 @@ public static class ItemDataExtensions
             return false;
         }
 
-        return itemData.IsMagic(out MagicItem magicItem) && magicItem.CanBeDisenchanted();
+        return itemData.IsMagic(out MagicItem magicItem) && !magicItem.IsUnidentified && magicItem.CanBeDisenchanted();
     }
 
     public static string GetSetID(this ItemDrop.ItemData itemData, out bool isMundane)

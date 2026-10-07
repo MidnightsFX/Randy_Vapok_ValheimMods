@@ -180,6 +180,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
         MagicItemEffects.Artillery.RegisterDisplayValues();
         MagicItemEffects.Assassin.RegisterDisplayValues();
         MagicItemEffects.Sniper.RegisterDisplayValues();
+        MagicItemEffects.Frostwalker.RegisterDisplayValues();
+        MagicItemEffects.SpiritAnimal.RegisterDisplayValues();
         MagicItemEffects.CoinHoarder.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
@@ -401,6 +403,11 @@ public sealed class EpicLoot : BaseUnityPlugin {
         // nothing at all, so they are load-bearing, not cosmetic.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.StrikeCausesLightning.RegisterVisualPrefab;
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.Trailblazer.RegisterVfxPrefab;
+        // The frost novas of the Frost Wave and Icy Retribution shards are networked clones of the fenring
+        // nova; every client must have them registered before a proc's ZDO arrives, or other players log a
+        // missing prefab hash and never see the nova.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.AdrenalineFrostWave.RegisterNovaPrefab;
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.ModerIcyRetribution.RegisterNovaPrefab;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         // legendaries.json problems are reported once every mod has registered its uniques and sets
         // through the API, so a set whose pieces another mod adds is not reported as broken.

@@ -120,29 +120,44 @@ namespace EpicLoot.MagicItemEffects
             // Record the damages value so it can be restored after changes
             __state = __instance.GetWeapon().m_shared.m_damages;
 
-            if (_pendingShot == PendingShotType.TripleBow)
+            bool modified = _pendingShot == PendingShotType.TripleBow
+                ? ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.TripleBowShot), 0.4f, 2f, 1.25f, 3)
+                : ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.DoubleMagicShot), 0.66f, 2f, 1.2f, 2);
+
+            if (!modified)
             {
-                ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.TripleBowShot), 0.4f, 2f, 1.25f, 3);
-            }
-            else
-            {
-                ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.DoubleMagicShot), 0.66f, 2f, 1.2f, 2);
+                __state = null;
             }
         }
 
         private static bool ModifyShot(ref Player player, ref Attack attack, Dictionary<string, float> configuration,
             float damage, float costScale, float accuracy, int projectiles)
         {
+            if (configuration != null && configuration.ContainsKey(COSTSCALE_KEY))
+            {
+                costScale = configuration[COSTSCALE_KEY];
+            }
+
+            // Paid first, so a proc the player cannot afford fires an ordinary shot and costs nothing extra.
+            if (!TryPayExtraCost(player, attack, costScale))
+            {
+                // A cost vanilla charges once per attack is refused once per attack; a per-burst one is retried
+                // each burst. Reset the projectiles in case an earlier burst of this attack was doubled.
+                if (!attack.m_perBurstResourceUsage)
+                {
+                    _pendingShot = PendingShotType.None;
+                }
+
+                attack.m_projectileAccuracy = attack.m_weapon.m_shared.m_attack.m_projectileAccuracy;
+                attack.m_projectiles = attack.m_weapon.m_shared.m_attack.m_projectiles;
+                return false;
+            }
+
             if (configuration != null)
             {
                 if (configuration.ContainsKey(DAMAGE_KEY))
                 {
                     damage = configuration[DAMAGE_KEY];
-                }
-
-                if (configuration.ContainsKey(COSTSCALE_KEY))
-                {
-                    costScale = configuration[COSTSCALE_KEY];
                 }
 
                 if (configuration.ContainsKey(ACCURACY_KEY))
@@ -159,8 +174,6 @@ namespace EpicLoot.MagicItemEffects
             HitData.DamageTypes weaponDamage = attack.GetWeapon().m_shared.m_damages;
             weaponDamage.Modify(damage);
             attack.GetWeapon().m_shared.m_damages = weaponDamage;
-
-            ModifyAttackCost(player, costScale, attack.GetAttackStamina(), attack.GetAttackEitr(), attack.GetAttackHealth());
 
             attack.m_projectileAccuracy = attack.m_weapon.m_shared.m_attack.m_projectileAccuracy * accuracy;
 
@@ -185,15 +198,52 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
-        public static void ModifyAttackCost(Player player, float scale, float stamcost, float eitrcost, float healthcost)
+        /// <summary>
+        /// Charges what the extra projectiles cost, if the player can pay it. CostScale is the whole attack's cost
+        /// multiplier (the description's "twice the eitr" is 2), and vanilla charges the first 1x itself, so only
+        /// CostScale - 1 is ours. Charging the full CostScale on top made a double shot cost three times.
+        ///
+        /// Vanilla charges its share once, as the attack starts (before any burst), or with m_perBurstResourceUsage
+        /// (Staff of Frost, ...) on every burst, checking and charging right after this prefix and Stop()ing the
+        /// attack when the player cannot pay. In the per-burst case the check has to cover both shares: charging
+        /// ours first left too little for vanilla's, so the eitr was taken and nothing was fired.
+        /// </summary>
+        private static bool TryPayExtraCost(Player player, Attack attack, float costScale)
         {
-            if (stamcost > 0) { player.UseStamina(stamcost * scale); }
-            if (eitrcost > 0) { player.UseEitr(eitrcost * scale); }
-            // Clamp to leave 1 HP, as vanilla does at both of its own attack-health spends (Attack.cs
-            // DoMeleeAttack / FireProjectileBurst): Character.UseHealth clamps to 0, not 1, so an unclamped
-            // charge here can take the player to 0 and kill them. This runs as a FireProjectileBurst PREFIX,
-            // so vanilla then charges its own (clamped) share in the same method -- ours is on top of that.
-            if (healthcost > 0) { player.UseHealth(Mathf.Min(player.GetHealth() - 1f, healthcost * scale)); }
+            bool perBurst = attack.m_perBurstResourceUsage;
+            if (!perBurst && attack.m_projectileBurstsFired > 0)
+            {
+                // Paid on this attack's first burst, matching vanilla's one charge per attack.
+                return true;
+            }
+
+            float extra = Mathf.Max(0f, costScale - 1f);
+            float stamina = attack.GetAttackStamina();
+            float eitr = attack.GetAttackEitr();
+            float extraStamina = stamina * extra;
+            float extraEitr = eitr * extra;
+
+            // UseStamina/UseEitr scale by the world's resource rates; vanilla's own HaveStamina/HaveEitr checks do not.
+            if (extraStamina > 0f && !player.HaveStamina((perBurst ? stamina : 0f) + extraStamina * Game.m_staminaRate))
+            {
+                return false;
+            }
+
+            if (extraEitr > 0f && !player.HaveEitr((perBurst ? eitr : 0f) + extraEitr * Game.m_eitrRate))
+            {
+                return false;
+            }
+
+            if (extraStamina > 0f) { player.UseStamina(extraStamina); }
+            if (extraEitr > 0f) { player.UseEitr(extraEitr); }
+
+            // Not gated, as vanilla does not gate its own. Clamp to leave 1 HP, as vanilla does at both of its own
+            // attack-health spends (Attack.cs DoMeleeAttack / FireProjectileBurst): Character.UseHealth clamps to 0,
+            // not 1, so an unclamped charge here can take the player to 0 and kill them.
+            float extraHealth = attack.GetAttackHealth() * extra;
+            if (extraHealth > 0f) { player.UseHealth(Mathf.Min(player.GetHealth() - 1f, extraHealth)); }
+
+            return true;
         }
     }
 

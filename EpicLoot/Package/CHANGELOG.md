@@ -13,6 +13,8 @@
 - New Trickster's Guile set, whose full set takes you behind an enemy you keep your aim on for a heavy strike.
 - New Dverger Arsenal set, whose full set turns your crossbow bolts into lobbed fireballs that explode where you aim.
 - New Egil's Mark set, whose full set makes your arrows fly faster and hit harder at the cost of a much slower draw.
+- New Rime of Élivágar set for mages, whose full set surrounds you with drifting snow and freezes the water beneath you so you can walk across it for a steady cost of Eitr.
+- New Fylgja's Bond set for rangers, whose full set binds a tamed creature as a spirit animal that fights beside you.
 - New magic effect Prosperity gives creatures and chests near you a chance to roll their magic loot again.
 - New magic effect Green Thumb on the Cultivator makes the plants you sow grow faster.
 - New magic effect Close Quarter on melee weapons reduces how far your hits knock enemies back.
@@ -39,8 +41,10 @@
 - Fixes several set bonus problems, including duplicate pieces counting twice, tooltips miscounting pieces and a set roll sometimes giving a plain legendary.
 - Fixes disenchanting and re-enchanting an item with a durability bonus raising its durability without limit.
 - Fixes magic staff tooltips showing a wildly wrong health cost and leaving out the eitr cost.
+- Fixes Double Magic Shot costing more eitr than described, and it now fires a normal shot instead of wasting eitr on a failed cast when you cannot afford the second.
 - Fixes panel text going missing when another mod ships a broken copy of Valheim's fonts.
 - Fixes the rested carry weight shardstone losing its comfort bonus.
+- Fixes the Dark Red shardstone's ranged skills bonus doing nothing.
 - Fixes Bulk Up being able to push health regeneration below zero.
 - Fixes the rune page's Etch button staying enabled with no rune selected, and rarity color changes not reaching the enchanting table's buttons until the next login.
 - Fixes the rune page's enchantment list spilling over the rune list on items with many enchantments, and controllers now keep the selected enchantment in view on the augment and rune pages.

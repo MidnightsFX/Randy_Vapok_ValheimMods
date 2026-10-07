@@ -152,7 +152,14 @@ namespace EpicLoot_UnityLib
         {
             base.Update();
 
-            if (_locked || !ZInput.IsGamepadActive() || !ZInput.GetButtonDown("JoyButtonY"))
+            if (_locked || !ZInput.IsGamepadActive())
+            {
+                return;
+            }
+
+            SacrificeProducts.ScrollWithRightStick();
+
+            if (!ZInput.GetButtonDown("JoyButtonY"))
             {
                 return;
             }
@@ -236,6 +243,7 @@ namespace EpicLoot_UnityLib
             Player player = Player.m_localPlayer;
             List<Tuple<ItemDrop.ItemData, int>> sacrificedItems = new List<Tuple<ItemDrop.ItemData, int>>();
             List<InventoryItemListElement> reclaimedSockets = new List<InventoryItemListElement>();
+            List<ItemDrop.ItemData> unavailableItems = new List<ItemDrop.ItemData>();
             foreach (Tuple<IListElement, int> selectedItem in selectedItems)
             {
                 ItemDrop.ItemData sacrificed = selectedItem.Item1.GetItem();
@@ -265,6 +273,11 @@ namespace EpicLoot_UnityLib
                 }
 
                 int removed = InventoryManagement.Instance.RemoveExactItem(sacrificed, amount);
+                if (removed < amount)
+                {
+                    unavailableItems.Add(sacrificed);
+                }
+
                 if (removed <= 0)
                 {
                     Debug.LogWarning($"[Sacrifice] {sacrificed.m_shared.m_name} could not be removed; skipped.");
@@ -297,6 +310,7 @@ namespace EpicLoot_UnityLib
 
             GiveItemsToPlayer(reclaimedSockets);
             GiveItemsToPlayer(sacrificeProducts);
+            NotifyItemsUnavailable(unavailableItems.ToArray());
 
             RefreshAvailableItems();
             AvailableItems.GiveFocus(true, 0);

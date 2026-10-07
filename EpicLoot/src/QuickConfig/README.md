@@ -40,7 +40,7 @@ open cleanly in an editor that has no mod DLLs at all. (Historically the editor 
 | `<field>.<part>` | one part of a composite entry | `AbilityKeyCodes.0`, `AbilityBarPosition.x` |
 | `Common.<Entry>` | a Common-layer entry on `Common.ModContext` | `Common.EnableDebugMode`, `Common.ConfigApplyDelay` |
 | `json:<file>:<path>` | a value in a baseconfig JSON (host only) | `json:adventuredata:Gamble.GamblesCount`, `json:loottables:RarityCounts`, `json:magiceffects:TripleBowShot.Chance`, `json:magiceffects:Riches` |
-| `action:<verb>:<arg>` | a button | `action:preset:balanced`, `action:reset:TraderPanelPosition`, `action:url:discord` |
+| `action:<verb>:<arg>` | a button | `action:preset:balanced`, `action:reset:TraderPanelPosition`, `action:url:discord`, `action:advanced:show` |
 | `readout:<name>` | code-fed text | `readout:dropmix`, `readout:template` |
 
 Unknown keys log one warning and the row is disabled. A registered key with no row is simply not shown.
@@ -104,6 +104,16 @@ Pages `Pages/Page_<Name>` (root stretched, named after the page id): one `Column
 columns, each with a `VerticalLayoutGroup`; children are nested instances of the row templates, each
 renamed to its key. Page order lives in code (`QuickConfigureTool.PageOrder`); a page prefab missing
 from the bundle is skipped with a warning.
+
+## Basic and advanced pages
+
+Only the basic pages (`QuickConfigureTool.BasicPages`: `Page_Welcome` in first-time setup, then
+`Page_Balance`) are in the Back/Next sequence until the player presses the `action:advanced:show` button;
+`action:advanced:hide` takes the others out again. Both are `Row_Button`s on the Balance page, in the same
+place, and code shows one at a time. Pressing one acts at once instead of staging anything: it writes the
+client `.cfg` entry `Show Advanced Quick Configure Pages`, so the choice is remembered. Edits on hidden pages
+stay staged and Save still writes them. When no basic page carries an `action:advanced:show` row, every page
+is shown, so a bundle without the button never strands the rest.
 
 ## Reset Page
 

@@ -39,6 +39,9 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
                 return true;
             }
 
+            // A spirit animal's effective health, and the combat signal for the local player being hit.
+            SpiritAnimal.ModifyIncoming(__instance, hit, attacker);
+
             // NOTE: Opportunist and the melee stagger-duration tagger moved to the attacker-side
             // dispatcher (SharedCharacterDamagePatch): they read the ATTACKER's magic effects, which
             // are empty here whenever a remote client owns the attacker.

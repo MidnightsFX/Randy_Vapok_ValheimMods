@@ -79,6 +79,8 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             if (!HitSource.IsBonusHit && !IsSelfInflicted(__instance, hit.GetAttacker())) {
                 ExecutionerCheckDamage_Character_Damage_Patch.ModifyOutgoingHit(__instance, hit);
             }
+            // Late, so a spirit's strength also scales the flat bonuses other mods' prefixes added.
+            SpiritAnimal.ModifyOutgoingHit(__instance, hit, hit.GetAttacker());
             // Last, so it sees fire/lightning that any earlier prefix converted into the hit.
             ElementalHitVariant.ModifyOutgoingHit(hit, hit.GetAttacker());
         }

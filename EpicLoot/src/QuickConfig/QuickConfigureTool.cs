@@ -28,6 +28,19 @@ internal static class QuickConfigureTool {
         "Page_EffectTuning", "Page_Advanced"
     };
 
+    /// <summary>
+    /// The pages shown until Show Advanced Configs is pressed: the welcome page in first-time setup, and
+    /// the Balance page. Every other page is advanced. They come first in <see cref="PageOrder"/>, so a
+    /// hidden page is always after every shown one.
+    /// </summary>
+    private static readonly HashSet<string> BasicPages = new HashSet<string>(StringComparer.Ordinal) {
+        "Page_Welcome", "Page_Balance"
+    };
+
+    /// <summary>The row keys of the Show / Hide Advanced Configs buttons (on the Balance page).</summary>
+    internal const string ShowAdvancedKey = "action:advanced:show";
+    internal const string HideAdvancedKey = "action:advanced:hide";
+
     private sealed class PageInstance {
         internal string Name;
         internal string Title;
@@ -37,7 +50,10 @@ internal static class QuickConfigureTool {
 
     // --- runtime state ---
     private static GameObject panelRoot;
+    // Every page that was built, and the ones in the Back/Next sequence; currentPage indexes the latter.
     private static List<PageInstance> pages;
+    private static List<PageInstance> shownPages;
+    private static bool advancedToggleMissing;
     private static int currentPage;
     private static bool tutorialMode;
     private static TMP_Text titleText;
@@ -237,6 +253,16 @@ internal static class QuickConfigureTool {
             return false;
         }
 
+        // A bundle whose basic pages have no Show Advanced Configs row would leave the other pages
+        // unreachable, so it gets every page.
+        advancedToggleMissing = true;
+        foreach (PageInstance page in pages) {
+            if (BasicPages.Contains(page.Name) && QuickConfigUi.FindChild(page.Root.transform, ShowAdvancedKey) != null) {
+                advancedToggleMissing = false;
+            }
+        }
+        UpdateShownPages();
+
         QuickConfigStyle.Apply(panelRoot);
         RefreshAll();
         return true;
@@ -265,24 +291,24 @@ internal static class QuickConfigureTool {
     }
 
     private static void ShowPage(int page) {
-        if (pages == null || pages.Count == 0) { return; }
-        currentPage = Mathf.Clamp(page, 0, pages.Count - 1);
-        for (int i = 0; i < pages.Count; i++) {
-            pages[i].Root.SetActive(i == currentPage);
+        if (shownPages == null || shownPages.Count == 0) { return; }
+        currentPage = Mathf.Clamp(page, 0, shownPages.Count - 1);
+        PageInstance shown = shownPages[currentPage];
+        foreach (PageInstance instance in pages) {
+            instance.Root.SetActive(instance == shown);
         }
         if (titleText != null) {
-            titleText.text = $"Epic Loot - {pages[currentPage].Title}  (Page {currentPage + 1} of {pages.Count})";
+            titleText.text = $"Epic Loot - {shown.Title}  (Page {currentPage + 1} of {shownPages.Count})";
         }
 
         if (backBtn != null) { backBtn.SetActive(currentPage > 0); }
-        bool last = currentPage == pages.Count - 1;
+        bool last = currentPage == shownPages.Count - 1;
         if (nextBtn != null) { nextBtn.SetActive(last == false); }
         if (finishBtn != null) { finishBtn.SetActive(last); }
         if (nextCaption != null) {
             nextCaption.text = L(tutorialMode && currentPage == 0 ? "$mod_epicloot_cfg_getstarted" : "$mod_epicloot_cfg_next");
         }
 
-        PageInstance shown = pages[currentPage];
         if (resetBtn != null) { resetBtn.SetActive(shown.Binder.ResettableKeys().Count > 0); }
         shown.Binder.Refresh();
         if (shown.Binder.HasReadOnlyRows && IsHost() == false) {
@@ -290,6 +316,38 @@ internal static class QuickConfigureTool {
         } else {
             SetStatus("", true);
         }
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    //  Advanced pages
+    // ------------------------------------------------------------------------------------------------
+
+    /// <summary>Whether every page is in the Back/Next sequence, or only <see cref="BasicPages"/>.</summary>
+    internal static bool AdvancedPagesShown => advancedToggleMissing
+        || ELConfig.ShowAdvancedQuickConfigPages == null || ELConfig.ShowAdvancedQuickConfigPages.Value;
+
+    // Pressed on the Balance page. It is a view preference rather than a staged setting, so it takes
+    // effect, and is written to the .cfg, at once. Edits on pages it hides stay staged and are saved.
+    internal static void SetAdvancedPagesShown(bool shown) {
+        if (ELConfig.ShowAdvancedQuickConfigPages != null) {
+            ELConfig.ShowAdvancedQuickConfigPages.Value = shown;
+        }
+        if (pages == null || shownPages == null) { return; }
+
+        PageInstance current = currentPage >= 0 && currentPage < shownPages.Count ? shownPages[currentPage] : null;
+        UpdateShownPages();
+        int index = current != null ? shownPages.IndexOf(current) : -1;
+        // A page that was just hidden comes after every page still shown.
+        ShowPage(index >= 0 ? index : shownPages.Count - 1);
+    }
+
+    private static void UpdateShownPages() {
+        bool all = AdvancedPagesShown;
+        shownPages = new List<PageInstance>();
+        foreach (PageInstance page in pages) {
+            if (all || BasicPages.Contains(page.Name)) { shownPages.Add(page); }
+        }
+        if (shownPages.Count == 0) { shownPages.AddRange(pages); }
     }
 
     private static void SetStatus(string message, bool ok) {
@@ -315,8 +373,8 @@ internal static class QuickConfigureTool {
 
     // Asks first: the reset replaces whatever this page has staged, saved or not.
     private static void OnResetPageClicked() {
-        if (pages == null || currentPage < 0 || currentPage >= pages.Count) { return; }
-        PageInstance page = pages[currentPage];
+        if (shownPages == null || currentPage < 0 || currentPage >= shownPages.Count) { return; }
+        PageInstance page = shownPages[currentPage];
         bool asked = QuickConfigConfirm.Show("$mod_epicloot_cfg_reset_title", "$mod_epicloot_cfg_reset_body",
             "$mod_epicloot_cfg_keep_editing", null, "$mod_epicloot_cfg_reset_confirm",
             onKeep: null,
@@ -425,6 +483,8 @@ internal static class QuickConfigureTool {
         }
         panelRoot = null;
         pages = null;
+        shownPages = null;
+        advancedToggleMissing = false;
         titleText = null;
         statusText = null;
         backBtn = null;

@@ -451,9 +451,11 @@ namespace EpicLoot_UnityLib
                 return;
             }
 
+            // A result dialog that closed itself on this press earlier in the frame has already used it.
             bool disallowClose = (Chat.instance != null && Chat.instance.HasFocus()) ||
                 Console.IsVisible() || Menu.IsVisible() || (TextViewer.instance != null &&
-                TextViewer.instance.IsVisible()) || Player.m_localPlayer.InCutscene();
+                TextViewer.instance.IsVisible()) || Player.m_localPlayer.InCutscene() ||
+                EpicLoot.Crafting.CraftSuccessDialog.ClosedByInputJustNow;
 
             if (disallowClose)
             {

@@ -69,6 +69,8 @@ internal class ELConfig {
     public static ConfigEntry<float> AbilityBarIconSpacing;
     public static ConfigEntry<KeyCode> OverwhelmingLaunchKey;
     public static ConfigEntry<KeyCode> OverwhelmingLaunchGamepadButton;
+    public static ConfigEntry<KeyCode> SpiritAnimalKey;
+    public static ConfigEntry<KeyCode> SpiritAnimalGamepadButton;
     public static ConfigEntry<float> SetItemDropChance;
     public static ConfigEntry<bool> HealthCriticalEffectsEnabled;
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
@@ -145,6 +147,7 @@ internal class ELConfig {
     public static ConfigEntry<float> TemperPanelPositionY;
     public static ConfigEntry<KeyCode> TraderPanelDragKey;
     public static ConfigEntry<bool> ShowQuickConfigButton;
+    public static ConfigEntry<bool> ShowAdvancedQuickConfigPages;
 
     public static ConfigEntry<RuneExtractMode> RuneExtractItemMode;
     public static ConfigEntry<RuneSetExtractMode> RuneSetExtractItemMode;
@@ -704,6 +707,10 @@ internal class ELConfig {
             "opens the Quick Configure panel: a paged editor over the settings most worlds change, " +
             "including a few values from the JSON configs. Turn off to hide the entry; the panel can " +
             "still be reached by other mods' launchers if they offer it. Applies without a restart.");
+        ShowAdvancedQuickConfigPages = BindClient(SectionInterface, "Show Advanced Quick Configure Pages", false,
+            "Whether the Quick Configure panel shows every page or only the Balance page (after the welcome " +
+            "page in first-time setup). The Show Advanced Configs and Hide Advanced Configs buttons on the " +
+            "Balance page set this, and the panel remembers it the next time it opens.");
 
         // 7 - Item Colors
         _magicRarityColor = BindClient(SectionItemColors, "Magic Rarity Color", "Blue",
@@ -773,6 +780,12 @@ internal class ELConfig {
         OverwhelmingLaunchGamepadButton = BindClient(SectionAbilities, "Overwhelming Launch Gamepad Button", KeyCode.None,
             "Gamepad button (JoystickButton0-19) for Overwhelming Launch. Unbound by default. Every gamepad " +
             "button already has a vanilla action, and that action is suppressed while a launchable weapon is held.");
+        SpiritAnimalKey = BindClient(SectionAbilities, "Spirit Animal Hotkey", KeyCode.Y,
+            "Key that binds the tamed creature under the crosshair as your spirit animal while the Spirit Animal " +
+            "set bonus is active. A confirmation is shown first. None disables the keyboard binding.");
+        SpiritAnimalGamepadButton = BindClient(SectionAbilities, "Spirit Animal Gamepad Button", KeyCode.None,
+            "Gamepad button (JoystickButton0-19) for binding a spirit animal. Unbound by default. While a tamed " +
+            "creature that can be bound is under the crosshair, the button's vanilla action is suppressed.");
 
         // 9 - Debug
         _loggingEnabled = BindClient(SectionDebug, "Logging Enabled", true, "Enable logging");

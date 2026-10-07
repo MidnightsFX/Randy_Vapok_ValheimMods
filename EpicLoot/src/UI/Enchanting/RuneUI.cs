@@ -1005,7 +1005,7 @@ namespace EpicLoot_UnityLib
             if (item != _selectedItem || !stillHeld ||
                 (!IsSetMode && !EnchantingUIController.CanRunifyEffect(item.GetMagicItem(), _selectedEnchantmentIndex)))
             {
-                AbortMainAction("the selected item or enchantment is no longer valid");
+                AbortMainAction("the selected item or enchantment is no longer valid", unavailable: stillHeld ? null : item);
                 return;
             }
 
@@ -1134,10 +1134,11 @@ namespace EpicLoot_UnityLib
         {
             ItemDrop.ItemData rune = AvailableRunes.GetSingleSelectedItem<InventoryItemListElement>()?.Item1.GetItem();
             string targetEffect = EnchantingUIController.GetSelectedEnchantmentNameByIndex(item, _selectedEnchantmentIndex);
-            if (rune == null || rune == item || !InventoryManagement.Instance.GetAllItems().Contains(rune) ||
+            bool runeHeld = rune != null && InventoryManagement.Instance.GetAllItems().Contains(rune);
+            if (!runeHeld || rune == item ||
                 !EnchantingUIController.GetApplyableRunesforItem(item, targetEffect).Any(x => x.GetItem() == rune))
             {
-                AbortMainAction("the selected rune is no longer available for this enchantment");
+                AbortMainAction("the selected rune is no longer available for this enchantment", unavailable: runeHeld ? null : rune);
                 return false;
             }
 
@@ -1260,10 +1261,11 @@ namespace EpicLoot_UnityLib
         private bool EtchSelectedSetRune(ItemDrop.ItemData item, float costReduction)
         {
             ItemDrop.ItemData rune = GetSelectedRune();
-            if (rune == null || rune == item || !InventoryManagement.Instance.GetAllItems().Contains(rune) ||
+            bool runeHeld = rune != null && InventoryManagement.Instance.GetAllItems().Contains(rune);
+            if (!runeHeld || rune == item ||
                 !EnchantingUIController.GetApplyableSetRunesForItem(item).Any(x => x.GetItem() == rune))
             {
-                AbortMainAction("the selected set rune is no longer available for this item");
+                AbortMainAction("the selected set rune is no longer available for this item", unavailable: runeHeld ? null : rune);
                 return false;
             }
 
@@ -1312,13 +1314,14 @@ namespace EpicLoot_UnityLib
         // A main action that could not go ahead: nothing was taken or changed. The panel is already
         // unlocked (DoMainAction cancels first); rebuild the lists so they show what is really there
         // now, and let the button state follow the fresh selection.
-        private void AbortMainAction(string reason, bool missingRequirements = false)
+        private void AbortMainAction(string reason, bool missingRequirements = false, ItemDrop.ItemData unavailable = null)
         {
             Debug.LogWarning($"[Rune] {_runeAction} cancelled: {reason}.");
             if (missingRequirements)
             {
                 Player.m_localPlayer?.Message(MessageHud.MessageType.Center, "$msg_missingrequirement");
             }
+            NotifyItemsUnavailable(unavailable);
             RefreshAvailableItems();
             _selectedEnchantmentIndex = -1;
             CostList.SetItems(new List<IListElement>());
