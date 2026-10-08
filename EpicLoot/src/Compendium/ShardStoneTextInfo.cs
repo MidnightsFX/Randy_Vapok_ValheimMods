@@ -77,15 +77,10 @@ public class ShardStoneTextInfo(string topic) : MagicTextInfo(topic)
                             $"<color={rarityColor}>{uniform}</color>");
                 AddDescription(content, uniformDesc);
             }
-
-            if (Shards.IsExclusive(def.Category))
-            {
-                content.Add($" <color={DimColor}>" +
-                            $"$mod_epicloot_shard_{Shards.ExclusiveCategorySlug(def.Category)}exclusive</color>");
-            }
         }
         else
         {
+            content.Add($" <color={DimColor}>$mod_epicloot_shard_supportedtypes</color>");
             // Ordered by the enum so the broad groups lead and the fine types follow, matching how a
             // shard actually resolves (fine type first, group as the fallback).
             foreach (KeyValuePair<ShardSlotCategory, ShardEffectDefinition> slot in
@@ -101,6 +96,12 @@ public class ShardStoneTextInfo(string topic) : MagicTextInfo(topic)
                             $"<color={rarityColor}>{effectName}</color>");
                 AddDescription(content, description);
             }
+        }
+
+        if (Shards.IsExclusive(def.Category))
+        {
+            content.Add($" <color={DimColor}>" +
+                        $"$mod_epicloot_shard_{Shards.ExclusiveCategorySlug(def.Category)}exclusive</color>");
         }
 
         // Trailing spacer between entries, as ExplainTextInfo does.

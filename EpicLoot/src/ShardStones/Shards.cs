@@ -143,6 +143,9 @@ namespace EpicLoot.ShardStones {
         // into (a "uniform" shard), instead of the per-item-type TypeEffects mapping below.
         public ShardEffectDefinition UniformEffect = null;
 
+        // Define only the supported gear types. New sockets require a matching effect and a value
+        // for the stone's rarity. Specific types override their broad group; omitted types with no
+        // group mapping are unsupported. Existing stones remain stored if a mapping is removed.
         public Dictionary<ShardSlotCategory, ShardEffectDefinition> TypeEffects = new Dictionary<ShardSlotCategory, ShardEffectDefinition>();
 
         public float GetValue(ShardSlotCategory category, ItemRarity rarity) {
