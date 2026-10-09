@@ -57,6 +57,7 @@ internal class ELConfig {
     public static ConfigEntry<BossDropMode> _bossTrophyDropMode;
     public static ConfigEntry<float> _bossTrophyDropPlayerRange;
     public static ConfigEntry<int> _andvaranautRange;
+    public static ConfigEntry<int> _bountyTrackerRange;
     public static ConfigEntry<bool> ShowEquippedAndHotbarItemsInSacrificeTab;
     public static ConfigEntry<bool> ShowStorageCounts;
     public static ConfigEntry<bool> RespectItemFavorites;
@@ -629,6 +630,9 @@ internal class ELConfig {
             "Set to false to disable. This will not actually remove active treasure maps or bounties from your save.");
         _andvaranautRange = BindServer(SectionAdventure, "Andvaranaut Range", 20,
             "Sets the range that Andvaranaut will activate to locate a treasure chest.");
+        _bountyTrackerRange = BindServer(SectionAdventure, "Bounty Tracker Range", 100,
+            "Sets the range at which Skuld's Thread draws its line to a bounty target or one of its minions. " +
+            "The line thins out with distance, so near the edge of the range only a few sparks show.");
         BossBountyMode = BindServer(SectionAdventure, "Gated Bounty Mode", GatedBountyMode.Unlimited,
             "Sets whether available bounties are ungated or gated by boss kills.");
         EnableLimitedBountiesInProgress = BindServer(SectionAdventure, "Enable Bounty Limit", false,

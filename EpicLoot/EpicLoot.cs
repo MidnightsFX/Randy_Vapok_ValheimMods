@@ -401,6 +401,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
         RegisterStatusEffects();
 
         PrefabManager.OnPrefabsRegistered += SetupAndvaranaut;
+        PrefabManager.OnPrefabsRegistered += SetupSkuldsThread;
         // Runs during ZNetScene setup, once the vanilla mixer is loaded, so the bundle prefabs that play sound
         // go through the game's volume sliders instead of playing at full volume.
         PrefabManager.OnPrefabsRegistered += ResolveAudioMixerMocks;
@@ -901,6 +902,62 @@ public sealed class EpicLoot : BaseUnityPlugin {
         PrefabManager.OnPrefabsRegistered -= SetupAndvaranaut;
     }
 
+    private static void SetupSkuldsThread() {
+        PrefabManager.OnPrefabsRegistered -= SetupSkuldsThread;
+
+        GameObject go = PrefabManager.Instance.CreateClonedPrefab("SkuldsThread", "LinenThread");
+        if (go == null) {
+            LogErrorForce("Could not clone LinenThread to create SkuldsThread.");
+            return;
+        }
+
+        var skuldsThread = go.GetComponent<ItemDrop>().m_itemData;
+        skuldsThread.m_dropPrefab = go;
+        skuldsThread.m_shared.m_icons = [CreateBlackenedIcon(skuldsThread.GetIcon())];
+
+        var tracker = ScriptableObject.CreateInstance<SE_BountyTracker>();
+        tracker.name = "SkuldsThread";
+        tracker.m_name = "$mod_epicloot_item_skuldsthread";
+        tracker.m_icon = skuldsThread.GetIcon();
+        tracker.m_tooltip = "$mod_epicloot_item_skuldsthread_tooltip";
+        tracker.m_startMessage = "$mod_epicloot_item_skuldsthread_startmsg";
+        ObjectDB.instance.m_StatusEffects.Add(tracker);
+
+        skuldsThread.m_shared.m_name = "$mod_epicloot_item_skuldsthread";
+        skuldsThread.m_shared.m_description = "$mod_epicloot_item_skuldsthread_desc";
+        skuldsThread.m_shared.m_itemType = ItemDrop.ItemData.ItemType.Utility;
+        skuldsThread.m_shared.m_maxStackSize = 1;
+        skuldsThread.m_shared.m_weight = 0.1f;
+        skuldsThread.m_shared.m_equipStatusEffect = tracker;
+
+        ItemManager.Instance.AddItem(new CustomItem(go, false));
+    }
+
+    private static Sprite CreateBlackenedIcon(Sprite source) {
+        Texture2D texture = source.texture;
+        Rect rect = source.textureRect;
+
+        RenderTexture target = RenderTexture.GetTemporary(texture.width, texture.height, 0,
+            RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+        Graphics.Blit(texture, target);
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = target;
+        Texture2D icon = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGBA32, false);
+        icon.ReadPixels(rect, 0, 0);
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(target);
+
+        Color[] pixels = icon.GetPixels();
+        for (int i = 0; i < pixels.Length; i++) {
+            float shade = pixels[i].grayscale * 0.25f;
+            pixels[i] = new Color(shade, shade, shade, pixels[i].a);
+        }
+
+        icon.SetPixels(pixels);
+        icon.Apply();
+        return Sprite.Create(icon, new Rect(0f, 0f, icon.width, icon.height), new Vector2(0.5f, 0.5f), source.pixelsPerUnit);
+    }
+
     // Legacy registration of an ObjectDB-visible "Paralyze" status effect. Nothing in the mod
     // consumes it -- Paralyze.cs applies its own EL_Paralyze prototype directly via SEMan -- but it
     // is kept for anything external that looks the effect up by hash. The old lookup used
@@ -1122,6 +1179,10 @@ public sealed class EpicLoot : BaseUnityPlugin {
 
     public static int GetAndvaranautRange() {
         return ELConfig._andvaranautRange.Value;
+    }
+
+    public static int GetBountyTrackerRange() {
+        return ELConfig._bountyTrackerRange.Value;
     }
 
     public static bool IsAdventureModeEnabled() {

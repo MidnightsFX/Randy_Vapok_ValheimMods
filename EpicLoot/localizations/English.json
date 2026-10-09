@@ -956,6 +956,10 @@
     "mod_epicloot_item_andvaranaut_tooltip": "Helps you find treasure chests from Haldor's maps. Move in the direction the pings get more intense.",
     "mod_epicloot_item_andvaranaut_startmsg": "You can sense gold\n(No, wait, just Haldor's treasure chests. Dammit Loki!)",
     "mod_epicloot_item_andvaranaut_type": "dwarven ring",
+    "mod_epicloot_item_skuldsthread": "Skuld's Thread",
+    "mod_epicloot_item_skuldsthread_desc": "A strand spun by the Norn of what is yet to come. Wear it and it pulls taut toward any nearby creature with a bounty on its head.",
+    "mod_epicloot_item_skuldsthread_tooltip": "Draws a line of sparks toward a nearby bounty target or its minions. The closer you are, the clearer the line.",
+    "mod_epicloot_item_skuldsthread_startmsg": "The thread stirs, seeking the doomed",
 
     "mod_epicloot_se_paralyze": "Paralyze",
     "mod_epicloot_se_shockingcharge": "Eikthyr's Charge",
