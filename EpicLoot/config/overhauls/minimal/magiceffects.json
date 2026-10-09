@@ -7669,6 +7669,47 @@
       }
     },
     {
+      "Type": "CoilingVenom",
+      "DisplayText": "$mod_epicloot_set_me_coilingvenom",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+        "Rare": { "MinValue": 30, "MaxValue": 30, "Increment": 1 },
+        "Epic": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
+        "Legendary": { "MinValue": 50, "MaxValue": 50, "Increment": 1 },
+        "Mythic": { "MinValue": 60, "MaxValue": 60, "Increment": 1 },
+        "Ancient": { "MinValue": 70, "MaxValue": 70, "Increment": 1 }
+      }
+    },
+    {
+      "Type": "NineSteps",
+      "DisplayText": "$mod_epicloot_set_me_ninesteps",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 145, "MaxValue": 145, "Increment": 1 },
+        "Rare": { "MinValue": 130, "MaxValue": 130, "Increment": 1 },
+        "Epic": { "MinValue": 115, "MaxValue": 115, "Increment": 1 },
+        "Legendary": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
+        "Mythic": { "MinValue": 85, "MaxValue": 85, "Increment": 1 },
+        "Ancient": { "MinValue": 70, "MaxValue": 70, "Increment": 1 }
+      },
+      "Config": {
+        "Steps": 9,
+        "StepInterval": 0.5,
+        "Slow": 40
+      }
+    },
+    {
       "Type": "Sniper",
       "DisplayText": "$mod_epicloot_set_me_sniper",
       "Requirements": {

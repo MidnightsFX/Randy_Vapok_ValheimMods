@@ -107,6 +107,7 @@ public static partial class TerminalManager
             _ = new Command("cheatgating", "toggle cheat gating", ToggleCheatGating);
             _ = new Command("cheatsockets", "forces the provided number of sockets to always roll onto drops", CheatSockets);
             _ = new Command("cheateffectrarity", "force rare effects to roll: [0-3] [all|first] (0 = off)", CheatEffectRarity, GetCheatEffectRarityOptions, alternates: "cheatrarity");
+            _ = new Command("settint", "preview an armor tint on yourself: <#rrggbb> [strength] [value] | shift <hue> <sat> <value> | demo [seconds] | off", SetTint, GetSetTintOptions);
             _ = new Command("testtreasuremap", "spawns treasure chests and adds to adventure map", TestTreasureMap, alternates: "testtm");
             _ = new Command("resettreasuremap", "removes all active treasure maps", ResetTreasureMap, alternates: "resettm");
             _ = new Command("debugtreasuremap", "toggle treasure map debug mode", DebugTreasureMap, alternates: "debugtm");

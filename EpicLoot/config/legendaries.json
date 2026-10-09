@@ -719,6 +719,56 @@
         ]
       },
       "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "JormungandrSpear",
+      "Name": "$mod_epicloot_l_jormungandrspear",
+      "Description": "$mod_epicloot_l_jormungandrspear_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "OneHandedWeapon" ],
+        "AllowedSkillTypes": [ "Spears" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "AddPoisonDamage" }
+      ]
+    },
+    {
+      "ID": "JormungandrHelm",
+      "Name": "$mod_epicloot_l_jormungandrhelm",
+      "Description": "$mod_epicloot_l_jormungandrhelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "JormungandrChest",
+      "Name": "$mod_epicloot_l_jormungandrchest",
+      "Description": "$mod_epicloot_l_jormungandrchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "JormungandrLegs",
+      "Name": "$mod_epicloot_l_jormungandrlegs",
+      "Description": "$mod_epicloot_l_jormungandrlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
     }
   ],
   "LegendarySets": [
@@ -816,6 +866,41 @@
             "Legendary": { "MinValue": 200, "MaxValue": 200, "Increment": 1 },
             "Mythic": { "MinValue": 225, "MaxValue": 225, "Increment": 1 },
             "Ancient": { "MinValue": 250, "MaxValue": 250, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Jormungandr",
+      "Name": "$mod_epicloot_set_jormungandr",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "FullSetFx": [
+        "Draugr_Elite/Visual/_draugr_base/Armature/Hips/Spine0/Spine1/flies",
+        "Draugr_Elite/Visual/_draugr_base/Armature/Hips/Spine0/Spine1/evil_smoke (1)",
+        "Draugr_Elite/Visual/_draugr_base/Armature/Hips/Spine0/Spine1/vfx_drippingwater"
+      ],
+      "ArmorTint": { "Color": "#2E7D32" },
+      "LegendaryIDs": [
+        "JormungandrSpear",
+        "JormungandrHelm",
+        "JormungandrChest",
+        "JormungandrLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddPoisonResistancePercentage", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "IncreaseAllPoisonDamageDone", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "CoilingVenom",
+          "Values": { "MinValue": 50, "MaxValue": 50, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 50, "MaxValue": 50, "Increment": 1 },
+            "Mythic": { "MinValue": 60, "MaxValue": 60, "Increment": 1 },
+            "Ancient": { "MinValue": 70, "MaxValue": 70, "Increment": 1 }
+          } } },
+        { "Count": 4, "Effect": { "Type": "NineSteps",
+          "Values": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
+            "Mythic": { "MinValue": 85, "MaxValue": 85, "Increment": 1 },
+            "Ancient": { "MinValue": 70, "MaxValue": 70, "Increment": 1 }
           } } }
       ]
     },

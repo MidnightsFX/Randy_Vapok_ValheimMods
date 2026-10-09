@@ -37,6 +37,7 @@ public static class ModifyDamage
         DamageIncreaseFromMovementPenalty.ModifyWeaponDamage(item, ref damage);
         IncreaseHarvestDamage.ModifyWeaponDamage(item, ref damage);
         ConvertPhysicalDamageToLightning.ModifyWeaponDamage(item, ref damage);
+        CoilingVenom.ModifyWeaponDamage(ref damage);
         IcyWeight.ModifyWeaponDamage(item, ref damage);
         ReduceArmorIncreaseDamage.ModifyWeaponDamage(item, ref damage);
         NecroticFire.ModifyWeaponDamage(item, ref damage);
