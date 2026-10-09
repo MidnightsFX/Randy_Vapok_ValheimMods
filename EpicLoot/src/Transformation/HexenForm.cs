@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EpicLoot.MagicItemEffects;
 using HarmonyLib;
 using UnityEngine;
 
@@ -18,6 +19,9 @@ public class HexenForm : MonoBehaviour
 
     private static readonly Dictionary<Character, HexenForm> ActiveForms = new();
 
+    // The hexen console command: a scale forces the form on, 0 forces it off, null lets the set decide.
+    public static float? DebugScale;
+
     public bool Active { get; private set; }
     public float Scale { get; private set; }
     public bool Flying => Active && _player.m_flying;
@@ -25,6 +29,7 @@ public class HexenForm : MonoBehaviour
     private Player _player;
     private ZNetView _nview;
     private float _pollTimer;
+    private float _drainPerSecond;
 
     private GameObject _visual;
     private ItemDrop.ItemData _blast;
@@ -72,11 +77,28 @@ public class HexenForm : MonoBehaviour
     {
         if (_nview == null || !_nview.IsValid()) return;
 
+        if (Flying && _nview.IsOwner()) DrainEitr(Time.deltaTime);
+
         _pollTimer += Time.deltaTime;
         if (_pollTimer < PollInterval) return;
         _pollTimer = 0f;
+        Refresh();
+    }
 
-        var scale = _nview.GetZDO().GetFloat(ZdoKey, 0f);
+    // The owner decides the form from the set (or the console override) and mirrors it to the ZDO; every
+    // client, the owner included, then follows the ZDO.
+    public void Refresh()
+    {
+        if (_nview == null || !_nview.IsValid()) return;
+
+        var zdo = _nview.GetZDO();
+        if (_nview.IsOwner())
+        {
+            var wanted = WantedScale();
+            if (!Mathf.Approximately(wanted, zdo.GetFloat(ZdoKey, 0f))) zdo.Set(ZdoKey, wanted);
+        }
+
+        var scale = zdo.GetFloat(ZdoKey, 0f);
         if (scale <= 0f)
         {
             if (Active) Revert();
@@ -87,19 +109,24 @@ public class HexenForm : MonoBehaviour
         }
     }
 
-    public bool Set(float scale)
+    private float WantedScale()
     {
-        if (_nview == null || !_nview.IsValid() || !_nview.IsOwner()) return false;
-
-        _nview.GetZDO().Set(ZdoKey, scale);
-        if (scale <= 0f)
-        {
-            Revert();
-            return true;
-        }
-
-        return Apply(scale);
+        var hasSet = _player.HasActiveMagicEffect(MagicEffectType.Hexen, out var drain);
+        _drainPerSecond = hasSet ? drain : Hexen.FallbackDrain;
+        if (DebugScale.HasValue) return DebugScale.Value;
+        return hasSet ? Hexen.Scale : 0f;
     }
+
+    // Taken from m_eitr directly, like Frostwalker, so the Eitr-use patches do not react to a per-frame
+    // drain. Regen is held off the way a cast does, so the drain is the whole cost of staying up.
+    private void DrainEitr(float dt)
+    {
+        _player.m_eitr = Mathf.Max(0f, _player.m_eitr - _drainPerSecond * Game.m_eitrRate * dt);
+        _player.m_eitrRegenTimer = Mathf.Max(_player.m_eitrRegenTimer, _player.m_eitrRegenDelay);
+    }
+
+    private bool CanTakeOff => _player.m_eitr >= Hexen.MinEitr;
+    private bool OutOfEitr => _player.m_eitr <= 0f;
 
     private bool Apply(float scale)
     {
@@ -265,11 +292,11 @@ public class HexenForm : MonoBehaviour
     private void UpdateFlightInput(bool descendHeld, bool ascendHeld)
     {
         var moveDir = _player.m_moveDir;
-        moveDir.y = (ascendHeld ? 1f : 0f) - (descendHeld ? 1f : 0f);
+        moveDir.y = OutOfEitr ? -1f : (ascendHeld ? 1f : 0f) - (descendHeld ? 1f : 0f);
         if (moveDir.sqrMagnitude > 1f) moveDir.Normalize();
         _player.m_moveDir = moveDir;
 
-        if (descendHeld && _player.IsOnGround()) _player.Land();
+        if ((descendHeld || OutOfEitr) && _player.IsOnGround()) _player.Land();
     }
 
     private static bool JumpHeld => ZInput.GetButton("Jump") || ZInput.GetButton("JoyJump");
@@ -391,7 +418,7 @@ public class HexenForm : MonoBehaviour
             var dodging = blockHold || __instance.m_blocking || __instance.IsCrouching() || __instance.m_crouchToggled || dodge;
             if (jump && !dodging)
             {
-                if (!__instance.m_flying && !__instance.IsSwimming()) __instance.TakeOff();
+                if (!__instance.m_flying && !__instance.IsSwimming() && form.CanTakeOff) __instance.TakeOff();
                 jump = false;
             }
         }

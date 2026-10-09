@@ -16,41 +16,58 @@ public static partial class TerminalManager
             return;
         }
 
-        float scale;
+        float? scale;
         if (args.Length < 2)
         {
-            scale = form.Active ? 0f : HexenForm.DefaultScale;
+            scale = HexenForm.DebugScale.HasValue ? null : HexenForm.DefaultScale;
+        }
+        else if (args[1].Equals("set", System.StringComparison.OrdinalIgnoreCase))
+        {
+            scale = null;
         }
         else if (args[1].Equals("off", System.StringComparison.OrdinalIgnoreCase))
         {
             scale = 0f;
         }
-        else if (!float.TryParse(args[1], NumberStyles.Float, CultureInfo.InvariantCulture, out scale) || scale <= 0f)
+        else if (!float.TryParse(args[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) || parsed <= 0f)
         {
-            Console.instance.Print("> Usage: hexen [off|scale] (scale is a multiplier on her native size, 1 = full Hexen)");
+            Console.instance.Print("> Usage: hexen [off|set|scale] (scale is a multiplier on her native size, 1 = full Hexen; set lets the set bonus decide)");
+            return;
+        }
+        else
+        {
+            scale = parsed;
+        }
+
+        HexenForm.DebugScale = scale;
+        form.Refresh();
+
+        if (!scale.HasValue)
+        {
+            Console.instance.Print(form.Active ? "> The set keeps you a Hexen" : "> Back to your own body");
             return;
         }
 
-        if (!form.Set(scale))
+        if (scale.Value <= 0f)
+        {
+            Console.instance.Print("> Back to your own body, set or not");
+            return;
+        }
+
+        if (!form.Active)
         {
             Console.instance.Print("> Could not become a Hexen; see the log");
             return;
         }
 
-        if (scale <= 0f)
-        {
-            Console.instance.Print("> Back to your own body");
-            return;
-        }
-
-        Console.instance.Print($"> You are a Hexen at {scale.ToString(CultureInfo.InvariantCulture)}x her size");
+        Console.instance.Print($"> You are a Hexen at {scale.Value.ToString(CultureInfo.InvariantCulture)}x her size");
         Console.instance.Print(">   attack: magic blast | secondary attack: lightning bolt");
-        Console.instance.Print(">   jump: take off, then hold jump/crouch to rise/sink; sink onto the ground to land");
+        Console.instance.Print(">   jump: take off, then hold jump/crouch to rise/sink; flight drains Eitr and you sink when it runs dry");
         Console.instance.Print(">   block+jump or sneak+jump: blink in the move direction");
     }
 
     private static List<string> GetHexenOptions(string[] args)
     {
-        return args.Length == 2 ? ["off", "0.6", "1"] : [];
+        return args.Length == 2 ? ["off", "set", "0.6", "1"] : [];
     }
 }

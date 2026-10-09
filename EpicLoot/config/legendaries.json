@@ -1330,6 +1330,69 @@
         ]
       },
       "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "GullveigStaff",
+      "Name": "$mod_epicloot_l_gullveigstaff",
+      "Description": "$mod_epicloot_l_gullveigstaff_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Staff"
+        ],
+        "AllowedSkillTypes": [
+          "ElementalMagic"
+        ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyMagicFireRate" },
+        { "Type": "ModifyEitrRegen" }
+      ]
+    },
+    {
+      "ID": "GullveigHood",
+      "Name": "$mod_epicloot_l_gullveighood",
+      "Description": "$mod_epicloot_l_gullveighood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
+    },
+    {
+      "ID": "GullveigRobe",
+      "Name": "$mod_epicloot_l_gullveigrobe",
+      "Description": "$mod_epicloot_l_gullveigrobe_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
+    },
+    {
+      "ID": "GullveigCape",
+      "Name": "$mod_epicloot_l_gullveigcape",
+      "Description": "$mod_epicloot_l_gullveigcape_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
     }
   ],
   "LegendarySets": [
@@ -1822,6 +1885,33 @@
             "Legendary": { "MinValue": 16, "MaxValue": 16, "Increment": 1 },
             "Mythic": { "MinValue": 14, "MaxValue": 14, "Increment": 1 },
             "Ancient": { "MinValue": 12, "MaxValue": 12, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Gullveig",
+      "Name": "$mod_epicloot_set_gullveig",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "ArmorTint": { "Color": "#6A1B9A" },
+      "LegendaryIDs": [
+        "GullveigStaff",
+        "GullveigHood",
+        "GullveigRobe",
+        "GullveigCape"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddElementalMagicSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyEitrRegen", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "Interconnected", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 }, "ValuesPerRarity": {
+          "Legendary": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+          "Mythic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+          "Ancient": { "MinValue": 30, "MaxValue": 30, "Increment": 1 }
+          } } },
+        { "Count": 3, "Effect": { "Type": "ModifyAttackEitrUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "Hexen", "Values": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 }, "ValuesPerRarity": {
+          "Legendary": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
+          "Mythic": { "MinValue": 2.5, "MaxValue": 2.5, "Increment": 0.5 },
+          "Ancient": { "MinValue": 2, "MaxValue": 2, "Increment": 0.5 }
           } } }
       ]
     }

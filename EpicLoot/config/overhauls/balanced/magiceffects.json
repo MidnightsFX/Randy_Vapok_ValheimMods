@@ -7677,6 +7677,28 @@
       }
     },
     {
+      "Type": "Hexen",
+      "DisplayText": "$mod_epicloot_set_me_hexen",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 6, "MaxValue": 6, "Increment": 0.5 },
+        "Rare": { "MinValue": 5, "MaxValue": 5, "Increment": 0.5 },
+        "Epic": { "MinValue": 4, "MaxValue": 4, "Increment": 0.5 },
+        "Legendary": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
+        "Mythic": { "MinValue": 2.5, "MaxValue": 2.5, "Increment": 0.5 },
+        "Ancient": { "MinValue": 2, "MaxValue": 2, "Increment": 0.5 }
+      },
+      "Config": {
+        "Scale": 0.6,
+        "MinEitr": 10
+      }
+    },
+    {
       "Type": "Sniper",
       "DisplayText": "$mod_epicloot_set_me_sniper",
       "Requirements": {
