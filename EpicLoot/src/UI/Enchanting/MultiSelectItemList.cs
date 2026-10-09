@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using EpicLoot;
 using EpicLoot.CraftingV2;
 using TMPro;
@@ -36,8 +35,6 @@ namespace EpicLoot_UnityLib
     public class MultiSelectItemList : MonoBehaviour, IGamepadFocusPane
     {
         public enum SortMode { Rarity, Name, Quantity, Equipped }
-
-        private static readonly Regex RichTextRegex = new Regex(@"<[^>]*>", RegexOptions.Compiled);
 
         public bool Multiselect = true;
         public bool Filterable = true;
@@ -81,9 +78,33 @@ namespace EpicLoot_UnityLib
             if (FilterByText != null)
             {
                 FilterByText.onValueChanged.AddListener(OnFilterChanged);
+                SetupFilterTooltip();
             }
 
             Refresh();
+        }
+
+        // The box is too narrow for the search syntax in its placeholder, so it is explained on hover.
+        private void SetupFilterTooltip()
+        {
+            GameObject filterObject = FilterByText.gameObject;
+            UITooltip tooltip = filterObject.GetComponent<UITooltip>();
+            if (tooltip == null)
+            {
+                tooltip = filterObject.AddComponent<UITooltip>();
+            }
+
+            if (EpicLoot.EpicLoot.HasAuga)
+            {
+                Auga.API.Tooltip_MakeSimpleTooltip(filterObject);
+            }
+            else
+            {
+                // The text-only tooltip vanilla uses on the trader's buy button.
+                tooltip.m_tooltipPrefab = StoreGui.instance.m_buyButton.GetComponent<UITooltip>().m_tooltipPrefab;
+            }
+
+            tooltip.Set(string.Empty, "$mod_epicloot_enchanting_filter_tooltip");
         }
 
         public void Update()
@@ -235,11 +256,7 @@ namespace EpicLoot_UnityLib
             if (!Filterable || FilterByText == null || ListContainer == null)
                 return;
 
-            string filterText = FilterByText.text;
-            bool filterIsEmpty = string.IsNullOrEmpty(filterText) || string.IsNullOrWhiteSpace(filterText);
-
-            string[] filterParts = filterIsEmpty ? Array.Empty<string>() :
-                filterText.Split(new []{' '}, StringSplitOptions.RemoveEmptyEntries);
+            ItemSearchFilter.Query query = ItemSearchFilter.Parse(FilterByText.text);
             int elementCount = ListContainer.childCount;
 
             for (int i = 0; i < elementCount; ++i)
@@ -250,24 +267,9 @@ namespace EpicLoot_UnityLib
                     continue;
                 }
 
-                // A row with no name label can't be matched against, so never hide it.
-                bool nameMatches = filterIsEmpty || element.ItemName == null;
-                if (!nameMatches)
-                {
-                    // Strip rich text tags from item name
-                    string itemName = RichTextRegex.Replace(element.ItemName.text ?? string.Empty, string.Empty);
-
-                    foreach (string part in filterParts)
-                    {
-                        if (itemName.IndexOf(part, StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            nameMatches = true;
-                            break;
-                        }
-                    }
-                }
-
-                element.gameObject.SetActive(nameMatches);
+                string itemName = element.ItemName == null ? null : ItemSearchFilter.StripRichText(element.ItemName.text);
+                bool matches = ItemSearchFilter.Matches(query, itemName, element.GetEnchantmentSearchNames);
+                element.gameObject.SetActive(matches);
             }
         }
 

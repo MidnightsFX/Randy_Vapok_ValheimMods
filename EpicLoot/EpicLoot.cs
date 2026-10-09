@@ -182,6 +182,17 @@ public sealed class EpicLoot : BaseUnityPlugin {
         MagicItemEffects.Sniper.RegisterDisplayValues();
         MagicItemEffects.Frostwalker.RegisterDisplayValues();
         MagicItemEffects.SpiritAnimal.RegisterDisplayValues();
+        MagicItemEffects.Earthshaker.RegisterDisplayValues();
+        MagicItemEffects.ConjuredArrows.RegisterDisplayValues();
+        MagicItemEffects.DeepWell.RegisterDisplayValues();
+        MagicItemEffects.EitrBarrier.RegisterDisplayValues();
+        MagicItemEffects.EitrInfusion.RegisterDisplayValues();
+        MagicItemEffects.QuarryMark.RegisterDisplayValues();
+        MagicItemEffects.HelsHarvest.RegisterDisplayValues();
+        MagicItemEffects.Vanish.RegisterDisplayValues();
+        MagicItemEffects.Firebrand.RegisterDisplayValues();
+        MagicItemEffects.LifeSiphon.RegisterDisplayValues();
+        MagicItemEffects.KineticQuake.RegisterDisplayValues();
         MagicItemEffects.CoinHoarder.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
@@ -408,6 +419,14 @@ public sealed class EpicLoot : BaseUnityPlugin {
         // missing prefab hash and never see the nova.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.AdrenalineFrostWave.RegisterNovaPrefab;
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.Shards.ModerIcyRetribution.RegisterNovaPrefab;
+        // The Conjured Arrows set bonus fires a networked glowing copy of the frost arrow, so it is registered
+        // the same way, along with the off-inventory ammo item it is shot from.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.ConjuredArrows.RegisterPrefabs;
+        // The Eitr Barrier's purple bubble and its hit and break fx are networked recoloured copies of the Staff of
+        // Protection's, so other players see them too.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.EitrBarrier.RegisterPrefabs;
+        // Hel's Harvest raises thralls, a networked copy of the summoned skeleton under its own name.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.HelsHarvest.RegisterPrefabs;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         // legendaries.json problems are reported once every mod has registered its uniques and sets
         // through the API, so a set whose pieces another mod adds is not reported as broken.

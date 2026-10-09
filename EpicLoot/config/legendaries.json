@@ -719,6 +719,567 @@
         ]
       },
       "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "FreyjaSpear",
+      "Name": "$mod_epicloot_l_freyjaspear",
+      "Description": "$mod_epicloot_l_freyjaspear_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "Spears" ],
+        "AllowedSkillTypes": [ "Spears" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "ModifyAttackStaminaUse" }
+      ]
+    },
+    {
+      "ID": "FreyjaHelm",
+      "Name": "$mod_epicloot_l_freyjahelm",
+      "Description": "$mod_epicloot_l_freyjahelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "FreyjaChest",
+      "Name": "$mod_epicloot_l_freyjachest",
+      "Description": "$mod_epicloot_l_freyjachest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "FreyjaCloak",
+      "Name": "$mod_epicloot_l_freyjacloak",
+      "Description": "$mod_epicloot_l_freyjacloak_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "BolthornCrossbow",
+      "Name": "$mod_epicloot_l_bolthorncrossbow",
+      "Description": "$mod_epicloot_l_bolthorncrossbow_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "Bow" ],
+        "AllowedSkillTypes": [ "Crossbows" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "AddPiercingDamage" }
+      ]
+    },
+    {
+      "ID": "BolthornHelm",
+      "Name": "$mod_epicloot_l_bolthornhelm",
+      "Description": "$mod_epicloot_l_bolthornhelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "BolthornChest",
+      "Name": "$mod_epicloot_l_bolthornchest",
+      "Description": "$mod_epicloot_l_bolthornchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "BolthornLegs",
+      "Name": "$mod_epicloot_l_bolthornlegs",
+      "Description": "$mod_epicloot_l_bolthornlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HeidrBow",
+      "Name": "$mod_epicloot_l_heidrbow",
+      "Description": "$mod_epicloot_l_heidrbow_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "Bow" ],
+        "AllowedSkillTypes": [ "Bows" ],
+        "ExcludedItemNames": [ "$item_graplinghook" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "AddFrostDamage" },
+        { "Type": "ModifyElementalDamage" }
+      ]
+    },
+    {
+      "ID": "HeidrHood",
+      "Name": "$mod_epicloot_l_heidrhood",
+      "Description": "$mod_epicloot_l_heidrhood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HeidrRobe",
+      "Name": "$mod_epicloot_l_heidrrobe",
+      "Description": "$mod_epicloot_l_heidrrobe_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HeidrMantle",
+      "Name": "$mod_epicloot_l_heidrmantle",
+      "Description": "$mod_epicloot_l_heidrmantle_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "MimirHood",
+      "Name": "$mod_epicloot_l_mimirhood",
+      "Description": "$mod_epicloot_l_mimirhood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "MimirRobe",
+      "Name": "$mod_epicloot_l_mimirrobe",
+      "Description": "$mod_epicloot_l_mimirrobe_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "MimirLegs",
+      "Name": "$mod_epicloot_l_mimirlegs",
+      "Description": "$mod_epicloot_l_mimirlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "MimirCape",
+      "Name": "$mod_epicloot_l_mimircape",
+      "Description": "$mod_epicloot_l_mimircape_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "EinherjarSword",
+      "Name": "$mod_epicloot_l_einherjarsword",
+      "Description": "$mod_epicloot_l_einherjarsword_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "OneHandedWeapon", "TwoHandedWeapon" ],
+        "AllowedSkillTypes": [ "Swords" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyParry" },
+        { "Type": "ModifyElementalDamage" }
+      ]
+    },
+    {
+      "ID": "EinherjarHelm",
+      "Name": "$mod_epicloot_l_einherjarhelm",
+      "Description": "$mod_epicloot_l_einherjarhelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
+    },
+    {
+      "ID": "EinherjarChest",
+      "Name": "$mod_epicloot_l_einherjarchest",
+      "Description": "$mod_epicloot_l_einherjarchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
+    },
+    {
+      "ID": "EinherjarLegs",
+      "Name": "$mod_epicloot_l_einherjarlegs",
+      "Description": "$mod_epicloot_l_einherjarlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseEitr" }
+      ]
+    },
+    {
+      "ID": "UllrHuntBow",
+      "Name": "$mod_epicloot_l_ullrhuntbow",
+      "Description": "$mod_epicloot_l_ullrhuntbow_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "Bow" ],
+        "AllowedSkillTypes": [ "Bows" ],
+        "ExcludedItemNames": [ "$item_graplinghook" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "QuickDraw" }
+      ]
+    },
+    {
+      "ID": "UllrHood",
+      "Name": "$mod_epicloot_l_ullrhood",
+      "Description": "$mod_epicloot_l_ullrhood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "UllrChest",
+      "Name": "$mod_epicloot_l_ullrchest",
+      "Description": "$mod_epicloot_l_ullrchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "UllrLegs",
+      "Name": "$mod_epicloot_l_ullrlegs",
+      "Description": "$mod_epicloot_l_ullrlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HelStaff",
+      "Name": "$mod_epicloot_l_helstaff",
+      "Description": "$mod_epicloot_l_helstaff_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "Staff" ],
+        "AllowedSkillTypes": [ "BloodMagic" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifySummonDamage" },
+        { "Type": "ModifySummonHealth" }
+      ]
+    },
+    {
+      "ID": "HelHood",
+      "Name": "$mod_epicloot_l_helhood",
+      "Description": "$mod_epicloot_l_helhood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HelRobe",
+      "Name": "$mod_epicloot_l_helrobe",
+      "Description": "$mod_epicloot_l_helrobe_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HelMantle",
+      "Name": "$mod_epicloot_l_helmantle",
+      "Description": "$mod_epicloot_l_helmantle_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HuldraKnife",
+      "Name": "$mod_epicloot_l_huldraknife",
+      "Description": "$mod_epicloot_l_huldraknife_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "OneHandedWeapon" ],
+        "AllowedSkillTypes": [ "Knives" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyBackstab" },
+        { "Type": "Opportunist" }
+      ]
+    },
+    {
+      "ID": "HuldraHood",
+      "Name": "$mod_epicloot_l_huldrahood",
+      "Description": "$mod_epicloot_l_huldrahood_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HuldraChest",
+      "Name": "$mod_epicloot_l_huldrachest",
+      "Description": "$mod_epicloot_l_huldrachest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HuldraCape",
+      "Name": "$mod_epicloot_l_huldracape",
+      "Description": "$mod_epicloot_l_huldracape_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "SurtrWeapon",
+      "Name": "$mod_epicloot_l_surtrweapon",
+      "Description": "$mod_epicloot_l_surtrweapon_desc",
+      "EquipFx": "FireAura",
+      "EquipFxMode": "EquipRoot",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [ "TwoHandedWeapon" ],
+        "AllowedSkillTypes": [ "Axes", "Swords" ]
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyPhysicalDamage" },
+        { "Type": "AddFireDamage" }
+      ]
+    },
+    {
+      "ID": "SurtrHelm",
+      "Name": "$mod_epicloot_l_surtrhelm",
+      "Description": "$mod_epicloot_l_surtrhelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "SurtrChest",
+      "Name": "$mod_epicloot_l_surtrchest",
+      "Description": "$mod_epicloot_l_surtrchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "SurtrLegs",
+      "Name": "$mod_epicloot_l_surtrlegs",
+      "Description": "$mod_epicloot_l_surtrlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HelCourtHelm",
+      "Name": "$mod_epicloot_l_helcourthelm",
+      "Description": "$mod_epicloot_l_helcourthelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HelCourtChest",
+      "Name": "$mod_epicloot_l_helcourtchest",
+      "Description": "$mod_epicloot_l_helcourtchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HelCourtLegs",
+      "Name": "$mod_epicloot_l_helcourtlegs",
+      "Description": "$mod_epicloot_l_helcourtlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HelCourtCape",
+      "Name": "$mod_epicloot_l_helcourtcape",
+      "Description": "$mod_epicloot_l_helcourtcape_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shoulder"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HrungnirShield",
+      "Name": "$mod_epicloot_l_hrungnirshield",
+      "Description": "$mod_epicloot_l_hrungnirshield_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shield"
+        ],
+        "ItemHasNoParryPower": true
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyBlockPower" },
+        { "Type": "ModifyBlockForce" }
+      ]
+    },
+    {
+      "ID": "HrungnirHelm",
+      "Name": "$mod_epicloot_l_hrungnirhelm",
+      "Description": "$mod_epicloot_l_hrungnirhelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HrungnirChest",
+      "Name": "$mod_epicloot_l_hrungnirchest",
+      "Description": "$mod_epicloot_l_hrungnirchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "HrungnirLegs",
+      "Name": "$mod_epicloot_l_hrungnirlegs",
+      "Description": "$mod_epicloot_l_hrungnirlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
     }
   ],
   "LegendarySets": [
@@ -888,6 +1449,294 @@
             "Legendary": { "MinValue": 100, "MaxValue": 100, "Increment": 5 },
             "Mythic": { "MinValue": 115, "MaxValue": 115, "Increment": 5 },
             "Ancient": { "MinValue": 130, "MaxValue": 130, "Increment": 5 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Freyja",
+      "Name": "$mod_epicloot_set_freyja",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "FreyjaSpear",
+        "FreyjaHelm",
+        "FreyjaChest",
+        "FreyjaCloak"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddSpearsSkill", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddPiercingResistancePercentage", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "DoubleJump" } },
+        { "Count": 3, "Effect": { "Type": "ModifyJumpStaminaUse", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "Earthshaker",
+          "Values": { "MinValue": 200, "MaxValue": 200, "Increment": 50 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 200, "MaxValue": 200, "Increment": 50 },
+            "Mythic": { "MinValue": 250, "MaxValue": 250, "Increment": 50 },
+            "Ancient": { "MinValue": 300, "MaxValue": 300, "Increment": 50 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Bolthorn",
+      "Name": "$mod_epicloot_set_bolthorn",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "BolthornCrossbow",
+        "BolthornHelm",
+        "BolthornChest",
+        "BolthornLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddCrossbowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyProjectileSpeed", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "QuickDraw", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyStaggerDamage", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "PiercingBolts",
+          "Values": { "MinValue": 75, "MaxValue": 75, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 75, "MaxValue": 75, "Increment": 1 },
+            "Mythic": { "MinValue": 85, "MaxValue": 85, "Increment": 1 },
+            "Ancient": { "MinValue": 95, "MaxValue": 95, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Heidr",
+      "Name": "$mod_epicloot_set_heidr",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "HeidrBow",
+        "HeidrHood",
+        "HeidrRobe",
+        "HeidrMantle"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddElementalMagicSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyEitrRegen", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ElementalArchery" } },
+        { "Count": 4, "Effect": { "Type": "ConjuredArrows",
+          "Values": { "MinValue": 80, "MaxValue": 80, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 80, "MaxValue": 80, "Increment": 1 },
+            "Mythic": { "MinValue": 90, "MaxValue": 90, "Increment": 1 },
+            "Ancient": { "MinValue": 100, "MaxValue": 100, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Mimir",
+      "Name": "$mod_epicloot_set_mimir",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "MimirHood",
+        "MimirRobe",
+        "MimirLegs",
+        "MimirCape"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "IncreaseEitr", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ConvertHealthToEitr", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "DeepWell", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "EitrLeech", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "EitrBarrier",
+          "Values": { "MinValue": 1, "MaxValue": 1, "Increment": 0.1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 1, "MaxValue": 1, "Increment": 0.1 },
+            "Mythic": { "MinValue": 1.1, "MaxValue": 1.1, "Increment": 0.1 },
+            "Ancient": { "MinValue": 1.2, "MaxValue": 1.2, "Increment": 0.1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Einherjar",
+      "Name": "$mod_epicloot_set_einherjar",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "EinherjarSword",
+        "EinherjarHelm",
+        "EinherjarChest",
+        "EinherjarLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "EitrWeave", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "SpellSword", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "EitrLeech", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "Interconnected",
+          "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+            "Mythic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+            "Ancient": { "MinValue": 30, "MaxValue": 30, "Increment": 1 }
+          } } },
+        { "Count": 4, "Effect": { "Type": "AddAllSkills", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "EitrInfusion",
+          "Values": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
+            "Mythic": { "MinValue": 45, "MaxValue": 45, "Increment": 1 },
+            "Ancient": { "MinValue": 50, "MaxValue": 50, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Ullr",
+      "Name": "$mod_epicloot_set_ullr",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "UllrHuntBow",
+        "UllrHood",
+        "UllrChest",
+        "UllrLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddBowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddAxesSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "Interconnected",
+          "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+            "Mythic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+            "Ancient": { "MinValue": 30, "MaxValue": 30, "Increment": 1 }
+          } } },
+        { "Count": 3, "Effect": { "Type": "ModifySprintStaminaUse", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "QuarryMark",
+          "Values": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
+            "Mythic": { "MinValue": 125, "MaxValue": 125, "Increment": 1 },
+            "Ancient": { "MinValue": 150, "MaxValue": 150, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Hel",
+      "Name": "$mod_epicloot_set_hel",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "HelStaff",
+        "HelHood",
+        "HelRobe",
+        "HelMantle"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddBloodMagicSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyAttackHealthUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "Interconnected",
+          "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+            "Mythic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+            "Ancient": { "MinValue": 30, "MaxValue": 30, "Increment": 1 }
+          } } },
+        { "Count": 3, "Effect": { "Type": "LifeSteal", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "HelsHarvest",
+          "Values": { "MinValue": 2, "MaxValue": 2, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 2, "MaxValue": 2, "Increment": 1 },
+            "Mythic": { "MinValue": 3, "MaxValue": 3, "Increment": 1 },
+            "Ancient": { "MinValue": 4, "MaxValue": 4, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Huldra",
+      "Name": "$mod_epicloot_set_huldra",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "HuldraKnife",
+        "HuldraHood",
+        "HuldraChest",
+        "HuldraCape"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddKnivesSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddCrossbowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "Interconnected",
+          "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+            "Mythic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+            "Ancient": { "MinValue": 30, "MaxValue": 30, "Increment": 1 }
+          } } },
+        { "Count": 3, "Effect": { "Type": "ModifyDodgeStaminaUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "Vanish",
+          "Values": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
+            "Mythic": { "MinValue": 4, "MaxValue": 4, "Increment": 0.5 },
+            "Ancient": { "MinValue": 5, "MaxValue": 5, "Increment": 0.5 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Surtr",
+      "Name": "$mod_epicloot_set_surtr",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "SurtrWeapon",
+        "SurtrHelm",
+        "SurtrChest",
+        "SurtrLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "IncreaseHeatResistance", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddFireResistancePercentage", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "AddFireDamage", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "Executioner", "Values": { "MinValue": 100, "MaxValue": 100, "Increment": 5 } } },
+        { "Count": 4, "Effect": { "Type": "Firebrand",
+          "Values": { "MinValue": 75, "MaxValue": 75, "Increment": 25 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 75, "MaxValue": 75, "Increment": 25 },
+            "Mythic": { "MinValue": 100, "MaxValue": 100, "Increment": 25 },
+            "Ancient": { "MinValue": 125, "MaxValue": 125, "Increment": 25 }
+          } } }
+      ]
+    },
+    {
+      "ID": "HelCourt",
+      "Name": "$mod_epicloot_set_helcourt",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "HelCourtHelm",
+        "HelCourtChest",
+        "HelCourtLegs",
+        "HelCourtCape"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "ModifyAttackHealthUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddBloodMagicSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "LifeSteal", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "Bloodlust" } },
+        { "Count": 4, "Effect": { "Type": "LifeSiphon",
+          "Values": { "MinValue": 4, "MaxValue": 4, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 4, "MaxValue": 4, "Increment": 1 },
+            "Mythic": { "MinValue": 5, "MaxValue": 5, "Increment": 1 },
+            "Ancient": { "MinValue": 6, "MaxValue": 6, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Hrungnir",
+      "Name": "$mod_epicloot_set_hrungnir",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "LegendaryIDs": [
+        "HrungnirShield",
+        "HrungnirHelm",
+        "HrungnirChest",
+        "HrungnirLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "ModifyBlockPower", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddBlockingSkill", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyBlockStaminaUse", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ReflectDamage", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "KineticQuake",
+          "Values": { "MinValue": 16, "MaxValue": 16, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 16, "MaxValue": 16, "Increment": 1 },
+            "Mythic": { "MinValue": 14, "MaxValue": 14, "Increment": 1 },
+            "Ancient": { "MinValue": 12, "MaxValue": 12, "Increment": 1 }
           } } }
       ]
     }

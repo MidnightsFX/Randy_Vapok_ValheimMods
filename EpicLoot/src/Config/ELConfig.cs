@@ -71,6 +71,11 @@ internal class ELConfig {
     public static ConfigEntry<KeyCode> OverwhelmingLaunchGamepadButton;
     public static ConfigEntry<KeyCode> SpiritAnimalKey;
     public static ConfigEntry<KeyCode> SpiritAnimalGamepadButton;
+    public static ConfigEntry<KeyCode> EarthshakerKey;
+    public static ConfigEntry<KeyCode> EarthshakerGamepadButton;
+    public static ConfigEntry<bool> ShowOwnFalconWings;
+    public static ConfigEntry<KeyCode> EitrInfusionKey;
+    public static ConfigEntry<KeyCode> EitrInfusionGamepadButton;
     public static ConfigEntry<float> SetItemDropChance;
     public static ConfigEntry<bool> HealthCriticalEffectsEnabled;
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
@@ -421,6 +426,7 @@ internal class ELConfig {
             "Weighed against Item Drop Ratio, Items Unidentified Drop Ratio and Materials Drop Ratio.\n" +
             "0 = no shard stones drop from normal loot. Elite creature and boss shard drops come " +
             "from the loot tables directly and are not affected by this setting.\n" +
+            "Shard stones, runestones and enchanting materials a loot table names always drop as themselves.\n" +
             "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         ItemsUnidentifiedDropRatio = BindServer(SectionBalance, "Items Unidentified Drop Ratio", 0.1f,
             "Relative weight for a loot drop being an unidentified item.\n" +
@@ -433,6 +439,7 @@ internal class ELConfig {
             "Relative weight for a loot drop being magic crafting materials instead of the item " +
             "itself, as though that item had been sacrificed.\n" +
             "Weighed against Item Drop Ratio, Shard Stone Drop Ratio and Items Unidentified Drop Ratio.\n" +
+            "Shard stones, runestones and enchanting materials a loot table names always drop as themselves.\n" +
             "0 = no materials drop.\n" +
             "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         SetItemDropChance = BindServer(SectionBalance, "Set Item Drop Chance", 0.15f,
@@ -786,6 +793,25 @@ internal class ELConfig {
         SpiritAnimalGamepadButton = BindClient(SectionAbilities, "Spirit Animal Gamepad Button", KeyCode.None,
             "Gamepad button (JoystickButton0-19) for binding a spirit animal. Unbound by default. While a tamed " +
             "creature that can be bound is under the crosshair, the button's vanilla action is suppressed.");
+        EarthshakerKey = BindClient(SectionAbilities, "Earthshaker Hotkey", KeyCode.T,
+            "Key that dives and slams the ground while the Earthshaker set bonus is active and you are in the air. " +
+            "Shares T with Overwhelming Launch, since no one can wear both full sets. While airborne with the set, " +
+            "the key does only this: whatever vanilla action shares it (T is the emote wheel) is suppressed. " +
+            "None disables the keyboard binding.");
+        EarthshakerGamepadButton = BindClient(SectionAbilities, "Earthshaker Gamepad Button", KeyCode.None,
+            "Gamepad button (JoystickButton0-19) for Earthshaker. Unbound by default. Every gamepad button already " +
+            "has a vanilla action, and that action is suppressed while you are airborne with the set.");
+        ShowOwnFalconWings = BindClient(SectionAbilities, "Show Own Falcon Wings", true,
+            "Show the dark wings of the Freyja's Falcon set on your own character. Turn off if they block your view; " +
+            "other players still see them.");
+        EitrInfusionKey = BindClient(SectionAbilities, "Eitr Infusion Hotkey", KeyCode.T,
+            "Key that pours your eitr into your weapon while the Eitr Infusion set bonus is active. Shares T with " +
+            "Overwhelming Launch and Earthshaker, since no one can wear two of those full sets. While the full set is " +
+            "worn, the key does only this: whatever vanilla action shares it (T is the emote wheel) is suppressed. " +
+            "None disables the keyboard binding.");
+        EitrInfusionGamepadButton = BindClient(SectionAbilities, "Eitr Infusion Gamepad Button", KeyCode.None,
+            "Gamepad button (JoystickButton0-19) for Eitr Infusion. Unbound by default. Every gamepad button already " +
+            "has a vanilla action, and that action is suppressed while the full set is worn.");
 
         // 9 - Debug
         _loggingEnabled = BindClient(SectionDebug, "Logging Enabled", true, "Enable logging");

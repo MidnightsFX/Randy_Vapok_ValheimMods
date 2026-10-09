@@ -1,5 +1,6 @@
 using EpicLoot.Biomes;
 using EpicLoot.Magic;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,9 +12,9 @@ namespace EpicLoot.QuickConfig;
 /// <summary>
 /// One editable drop target of loottables.json: a tier template or boss at one creature level, or a
 /// chest. Amount is the Drops table (how many items drop, count:weight), Rarity the per-rarity weights
-/// the target's Loot entries carry, one entry per rarity (index = rarity). Either is null when the file
-/// has none. Identity is Object + Occurrence (a boss's item table and shard table share the Object
-/// name) + Level.
+/// the target's Loot entries carry (BiomeDropTables.RarityTargets says which), one entry per rarity
+/// (index = rarity). Either is null when the file has none. Identity is Object + Occurrence (a boss's
+/// item table and shard table share the Object name) + Level.
 /// </summary>
 internal sealed class BiomeDropRow {
     internal string Biome = BiomeDropTables.Other;
@@ -23,7 +24,7 @@ internal sealed class BiomeDropRow {
     internal string Label = "";
     internal List<WeightEntry> Amount;
     internal List<WeightEntry> Rarity;
-    /// <summary>True when the target's Loot entries carry different Rarity arrays; the first is shown.</summary>
+    /// <summary>True when the entries the row covers carry different Rarity arrays; the first is shown.</summary>
     internal bool Mixed;
     /// <summary>Length of the first Rarity array in the file (5 or 6), so a write can keep a 5-wide file 5-wide.</summary>
     internal int RarityLength;
@@ -84,6 +85,7 @@ internal static class BiomeDropTables {
             list.Add(table.Object);
         }
 
+        HashSet<string> keyedSets = RarityKeyedSets(config.ItemSets);
         List<BiomeDropRow> rows = new List<BiomeDropRow>();
         Dictionary<string, int> occurrences = new Dictionary<string, int>(StringComparer.Ordinal);
         foreach (LootTable table in tables) {
@@ -104,7 +106,7 @@ internal static class BiomeDropTables {
                 string label = singleLevel
                     ? $"{table.Object}{suffix}{CreatureList(creatures)}"
                     : $"{table.Object} · level {def.Level}{suffix}{CreatureList(creatures)}";
-                rows.Add(MakeRow(biome, table.Object, occurrence, def.Level, def.Drops, def.Loot, label));
+                rows.Add(MakeRow(biome, table.Object, occurrence, def.Level, def.Drops, def.Loot, label, keyedSets));
             }
         }
 
@@ -117,15 +119,17 @@ internal static class BiomeDropTables {
             .ToList();
     }
 
-    private static BiomeDropRow MakeRow(string biome, string obj, int occurrence, int? level, float[][] drops, LootDrop[] loot, string label) {
+    private static BiomeDropRow MakeRow(string biome, string obj, int occurrence, int? level, float[][] drops, LootDrop[] loot,
+        string label, HashSet<string> keyedSets) {
         BiomeDropRow row = new BiomeDropRow {
             Biome = biome, Object = obj, Occurrence = occurrence, Level = level, Label = label,
             Amount = drops != null ? WeightTable.FromRows(drops) : null
         };
         float[] first = null;
         if (loot != null) {
-            foreach (LootDrop entry in loot) {
-                if (entry?.Rarity == null) { continue; }
+            List<LootDrop> targets = RarityTargets(loot, entry => entry.Rarity != null,
+                entry => IsRarityKeyed(entry.Item, entry.RarityItems != null && entry.RarityItems.Count > 0, keyedSets));
+            foreach (LootDrop entry in targets) {
                 if (first == null) {
                     first = entry.Rarity;
                     row.RarityLength = entry.Rarity.Length;
@@ -301,6 +305,47 @@ internal static class BiomeDropTables {
     // ------------------------------------------------------------------------------------------------
     //  Rarity weights
     // ------------------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Which of a target's Loot entries its Rarity row covers: those carrying a Rarity array, less the
+    /// rarity-keyed ones. A keyed entry's Rarity picks the item itself (a shardstone's grade, the tier
+    /// of EnchantingMats), so taking the gear's spread would change what drops. A target holding only
+    /// keyed entries (a boss's shard table) is all of them, so it stays editable. The read and the
+    /// write both go through here so they always agree.
+    /// </summary>
+    internal static List<T> RarityTargets<T>(IEnumerable<T> entries, Func<T, bool> hasRarity, Func<T, bool> keyed) where T : class {
+        List<T> carrying = entries.Where(entry => entry != null && hasRarity(entry)).ToList();
+        List<T> plain = carrying.Where(entry => keyed(entry) == false).ToList();
+        return plain.Count > 0 ? plain : carrying;
+    }
+
+    /// <summary>An entry with its own RarityItems map, or one naming a set whose members carry one.</summary>
+    internal static bool IsRarityKeyed(string item, bool ownMap, HashSet<string> keyedSets) {
+        return ownMap || (item != null && keyedSets.Contains(item));
+    }
+
+    /// <summary>The ItemSets with a member carrying a RarityItems map (EnchantingMats, the ShardT sets).</summary>
+    internal static HashSet<string> RarityKeyedSets(IEnumerable<LootItemSet> sets) {
+        HashSet<string> names = new HashSet<string>(StringComparer.Ordinal);
+        foreach (LootItemSet set in sets ?? Enumerable.Empty<LootItemSet>()) {
+            if (set?.Name == null || set.Loot == null) { continue; }
+            if (set.Loot.Any(member => member?.RarityItems != null && member.RarityItems.Count > 0)) { names.Add(set.Name); }
+        }
+        return names;
+    }
+
+    /// <summary>The same, read from loottables.json's ItemSets array.</summary>
+    internal static HashSet<string> RarityKeyedSets(JArray sets) {
+        HashSet<string> names = new HashSet<string>(StringComparer.Ordinal);
+        foreach (JObject set in sets?.OfType<JObject>() ?? Enumerable.Empty<JObject>()) {
+            string name = (string)set["Name"];
+            if (name == null || set["Loot"] is JArray loot == false) { continue; }
+            if (loot.OfType<JObject>().Any(HasRarityItems)) { names.Add(name); }
+        }
+        return names;
+    }
+
+    internal static bool HasRarityItems(JObject entry) => entry["RarityItems"] is JObject map && map.HasValues;
 
     private static float[] Padded(float[] rarity) {
         float[] padded = new float[Rarities.Count];

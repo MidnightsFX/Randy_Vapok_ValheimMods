@@ -13,7 +13,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
     //    ModifyResistance reduces it (previously done with Priority.High).
     //  * The postfix runs the on-damage-taken reactions (slow, adrenaline, boss retributions), for hits that
     //    landed: not for one AvoidDamageTaken cancelled, nor one vanilla discards itself.
-    //  * The resource-spending mitigations (EitrShield, Coinplated) and AutoMeads are not here: they run from
+    //  * The resource-spending mitigations (EitrBarrier, EitrShield, Coinplated) and AutoMeads are not here: they run from
     //    SharedPlayerPostArmorDamagePatch below, once the hit has been through the bubble, block and armor.
     //
     // The prefix runs before vanilla's own checks, so it first asks whether vanilla will discard the hit
@@ -63,6 +63,10 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             // waste a reflect. ReflectDamage runs last (it reflects the hit after these reductions).
             OffSetAttack.ReduceIncomingHit(__instance, hit);
             ReflectiveDamage_Character_Damage_Patch.OnIncomingHit(__instance, hit);
+
+            // Reads the ATTACKER's mirrored value and siphons the target here, on its owner, before vanilla's
+            // ApplyDamage, so the hit that siphons also heals.
+            LifeSiphon.OnHitLanding(__instance, hit, attacker);
 
             __state = true;
             return true;
@@ -124,7 +128,9 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
                 return;
             }
 
-            // EitrShield first, so eitr is drained before the purse.
+            // The Eitr Barrier set bonus takes the hit from eitr before anything else does; EitrShield then covers its
+            // share of whatever the barrier could not, so eitr is drained before the purse.
+            EitrBarrier.ModifyIncoming(__instance, hit);
             EitrShield.ModifyIncoming(__instance, hit);
             Coinplated.ModifyIncoming(__instance, hit);
             // Last: it judges the damage that will actually land.

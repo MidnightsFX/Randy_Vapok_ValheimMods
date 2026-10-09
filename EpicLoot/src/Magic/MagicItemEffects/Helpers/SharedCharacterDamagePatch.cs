@@ -57,6 +57,9 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             if (!strike) {
                 return;
             }
+            // Before Opportunist: a sneak attack from hiding uses the hit's backstab bonus up, so Opportunist and
+            // vanilla's own backstab cannot apply it again.
+            Vanish.ModifyOutgoingHit(__instance, hit, attacker);
             // Attacker-side reads that used to live (incorrectly) on the RPC_Damage dispatcher:
             // both read the local attacker's magic effects; the stagger tagger routes its write to
             // the target's owner.
@@ -64,6 +67,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             RPC_TagCharacterOnHit_Character_RPC_Damage_Patch.TagStaggerDuration(__instance, hit, attacker);
             ModifyStaggerDamage_Character_Damage_Patch.ApplyStaggerModifier(__instance, hit, attacker);
             CloseQuarter.ModifyOutgoingHit(hit, attacker);
+            QuarryMark.ModifyOutgoingHit(__instance, hit, attacker);
 
             // NOTE: victim-side incoming-hit handlers (AutoMeads, OffSet, ReflectDamage) live on the
             // Character.RPC_Damage dispatcher instead -- Character.Damage runs on the attacker's client, so a
@@ -112,6 +116,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
                 StaggerOnDamageTaken_Character_Damage_Patch.OnDamageDealt(__instance, hit, attacker);
                 HealthGainPerXDamageDone.OnDamageDealt(hit, attacker);
                 LifeGainOnHit.OnDamageDealt(hit, attacker);
+                QuarryMark.OnDamageDealt(__instance, hit, attacker);
             }
             // Keyed on the damage type or the kill, so a bonus hit earns these too.
             GainAdrenalineWhenApplyingPoison.OnDamageDealt(__instance, hit, attacker);

@@ -1120,7 +1120,8 @@ internal static class QuickConfigBindings {
                 "Save, the chances you did not change are raised or lowered to make up the rest. Creatures inherit " +
                 "their tier template (Tier1Mob, Tier3EliteMob...), so editing the template changes every creature " +
                 "listed beside it. A table marked (mixed) has entries with different rarity weights: the first is " +
-                "shown, and saving applies it to all of that table's entries. Auto Add Equipment's loot-list " +
+                "shown, and saving applies it to all of that table's entries. Entries whose rarity picks the item, " +
+                "such as shardstones and enchanting materials, keep their own. Auto Add Equipment's loot-list " +
                 "validation rewrites loottables.json but keeps these values."),
             Get = staged => staged.Get(key, new List<BiomeDropRow>()),
             Set = (staged, value) => { if (value is List<BiomeDropRow> rows) { staged.Set(key, rows); } },

@@ -260,12 +260,15 @@ namespace EpicLoot
                     float currentZdoHeadHunter = zdo.GetFloat(Headhunter.ZdoValueKey);
                     // Prosperity is read wherever loot rolls: the creature's or chest's owner.
                     float currentZdoProsperity = zdo.GetFloat(Prosperity.ZdoValueKey);
+                    // Life Siphon is read by the owner of whatever this player hits.
+                    float currentZdoLifeSiphon = zdo.GetFloat(MagicItemEffects.LifeSiphon.ZdoValueKey);
 
                     int currentLuck = (int)player.GetTotalActiveMagicEffectValue(MagicEffectType.Luck);
                     int currentRiches = (int)player.GetTotalActiveMagicEffectValue(MagicEffectType.Riches);
                     float currentLuckyLoot = player.GetTotalActiveMagicEffectValue(MagicEffectType.LuckyLoot);
                     float currentHeadHunter = player.GetTotalActiveMagicEffectValue(MagicEffectType.HeadHunter);
                     float currentProsperity = player.GetTotalActiveMagicEffectValue(MagicEffectType.Prosperity);
+                    float currentLifeSiphon = player.GetTotalActiveMagicEffectValue(MagicEffectType.LifeSiphon);
 
                     if (currentLuck != currentZdoLuck)
                     {
@@ -290,6 +293,11 @@ namespace EpicLoot
                     if (currentProsperity != currentZdoProsperity)
                     {
                         zdo.Set(Prosperity.ZdoValueKey, currentProsperity);
+                    }
+
+                    if (currentLifeSiphon != currentZdoLifeSiphon)
+                    {
+                        zdo.Set(MagicItemEffects.LifeSiphon.ZdoValueKey, currentLifeSiphon);
                     }
                 }
             }
