@@ -28,6 +28,7 @@
 - New Surtr's Brand set for two-handed axes and swords, whose full set makes your combo finishers and secondary attacks erupt in Brenna's fire.
 - New Hel's Court armor set for blood fighters, whose full set drains enemies so they cannot heal while every player striking them heals.
 - New Hrungnir's Stand set for tower shields, whose full set stores charge from your blocks and releases a rock shockwave on the next one.
+- New Coils of the World Serpent set for spear fighters, which turns part of your physical damage into venom that ignores resistance and, as a full set, dooms heavily envenomed enemies to walk nine steps and fall dead.
 - Lifesteal and Bloodletting from a set bonus now work with any weapon.
 - New magic effect Prosperity gives creatures and chests near you a chance to roll their magic loot again.
 - New magic effect Green Thumb on the Cultivator makes the plants you sow grow faster.
