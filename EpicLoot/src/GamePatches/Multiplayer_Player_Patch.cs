@@ -225,12 +225,16 @@ namespace EpicLoot
         [HarmonyPatch]
         public static class WatchMultiplayerMagicEffects_Player_Patch
         {
+            // The cache is reset first: EquipItem unequips the item it displaces from inside its own body, and that
+            // UnequipItem's postfix fills the cache for the loadout without the new item, which this postfix would
+            // otherwise read back.
             [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.EquipItem))]
             [HarmonyPostfix]
             public static void EquipItem_Postfix(Humanoid __instance)
             {
                 if (__instance is Player player)
                 {
+                    EquipmentEffectCache.Reset(player);
                     UpdateRichesAndLuck(player);
                 }
             }
@@ -241,6 +245,7 @@ namespace EpicLoot
             {
                 if (__instance is Player player)
                 {
+                    EquipmentEffectCache.Reset(player);
                     UpdateRichesAndLuck(player);
                 }
             }

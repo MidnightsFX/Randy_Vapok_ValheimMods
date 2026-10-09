@@ -429,6 +429,9 @@ namespace EpicLoot.MagicItemEffects
             Vector3 up = Vector3.up * HitHeight;
             int damaged = 0;
 
+            // The first step waits a frame too: it would otherwise deal its damage inside the player's own blocked hit
+            // (this postfix runs within RPC_Damage), on a frame that already carries the release.
+            yield return null;
             for (int i = 0; i < points.Count; i++)
             {
                 if (i > 0)
@@ -563,6 +566,8 @@ namespace EpicLoot.MagicItemEffects
                 yield break;
             }
 
+            // From the next frame, like the damage: the release frame already carries the block, the sound and the shake.
+            yield return null;
             for (int i = 0; i < points.Count; i++)
             {
                 if (i > 0)
@@ -570,15 +575,25 @@ namespace EpicLoot.MagicItemEffects
                     yield return new WaitForSeconds(interval);
                 }
 
-                GameObject fx = LocalFx.Spawn(prefab, points[i], rotation, scale, lifetime: LocalFxLifetime);
-                if (fx != null)
+                LocalFx.Spawn(prefab, points[i], rotation, scale, lifetime: LocalFxLifetime, noCameraShake: true);
+            }
+        }
+
+        // World load (SetEffectWarmup): the copies the wave and the rocks spawn from.
+        internal static void WarmupFx()
+        {
+            foreach (string name in EruptionFxPrefabs)
+            {
+                GameObject eruption = FindFxPrefab(name, logMissing: false);
+                if (eruption != null)
                 {
-                    foreach (CamShaker shaker in fx.GetComponentsInChildren<CamShaker>(true))
-                    {
-                        Object.DestroyImmediate(shaker);
-                    }
+                    LocalFx.Prewarm(eruption, scaled: !Mathf.Approximately(FxScale, 1f), noCameraShake: true);
+                    break;
                 }
             }
+
+            LocalFx.Prewarm(FindFxPrefab(EruptionSfxPrefab, logMissing: false), scaled: false);
+            LocalFx.Prewarm(FindFxPrefab(RockPuffFxPrefab, logMissing: false), scaled: true);
         }
 
         internal static void SpawnRockPuff(Vector3 position)
@@ -712,10 +727,20 @@ namespace EpicLoot.MagicItemEffects
                 target = 0;
             }
 
-            bool puff = _player != null && !_player.IsDead();
-            while (_rocks.Count > target)
+            // Rocks break with a puff only on a release. A player leaving (out of range, logged out, through a portal) has
+            // lost its ZDO by now, and Player.IsDead reads false without one, so that is checked first. The puffs are
+            // one rock a frame rather than all five on the release frame.
+            bool puff = _player != null && _player.m_nview != null && _player.m_nview.IsValid() && !_player.IsDead();
+            if (puff && _rocks.Count > target)
             {
-                RemoveRock(_rocks.Count - 1, puff);
+                RemoveRock(_rocks.Count - 1, true);
+            }
+            else
+            {
+                while (_rocks.Count > target)
+                {
+                    RemoveRock(_rocks.Count - 1, false);
+                }
             }
 
             while (_rocks.Count < target)
@@ -835,6 +860,8 @@ namespace EpicLoot.MagicItemEffects
         private static readonly Color ChargeColor = new Color(0.78f, 0.55f, 0.25f);
         private static readonly Color ArmedColor = new Color(1f, 0.8f, 0.35f);
         private static readonly Color SlowColor = new Color(0.45f, 0.3f, 0.12f);
+        private static readonly int VisibleParam = Animator.StringToHash("Visible");
+        private static readonly int FlashParam = Animator.StringToHash("Flash");
 
         private static Hud _hud;
         private static RectTransform _root;
@@ -866,7 +893,7 @@ namespace EpicLoot.MagicItemEffects
                 KineticQuake.TryGetLocalState(player, out charges, out needed);
             if (_animator != null)
             {
-                _animator.SetBool("Visible", show);
+                _animator.SetBool(VisibleParam, show);
             }
 
             if (!show)
@@ -878,7 +905,7 @@ namespace EpicLoot.MagicItemEffects
             bool armed = charges >= needed;
             if (armed && !_wasArmed && _animator != null)
             {
-                _animator.SetTrigger("Flash");
+                _animator.SetTrigger(FlashParam);
             }
             _wasArmed = armed;
 
@@ -949,7 +976,7 @@ namespace EpicLoot.MagicItemEffects
             _text = FindCounterpart<TMP_Text>(source, _root, hud.m_adrenalineText);
             if (_animator != null)
             {
-                _animator.SetBool("Visible", false);
+                _animator.SetBool(VisibleParam, false);
             }
         }
 

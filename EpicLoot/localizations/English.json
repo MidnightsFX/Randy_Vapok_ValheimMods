@@ -2029,6 +2029,7 @@
     "mod_epicloot_spiritanimal_refuse_cannotfight": "{0} cannot follow you or fight, so it cannot become your fylgja.",
     "mod_epicloot_spiritanimal_refuse_spirit": "{0} is already a spirit.",
     "mod_epicloot_spiritanimal_refuse_otherplayer": "{0} is following someone else.",
+    "mod_epicloot_spiritanimal_refuse_warded": "{0} is inside a ward you have no access to.",
     "mod_epicloot_spiritanimal_refuse_summoned": "{0} is a summoned creature and cannot become your fylgja.",
     "mod_epicloot_spiritanimal_refuse_ridden": "{0} is being ridden.",
     "mod_epicloot_spiritanimal_refuse_items": "{0} is carrying items. Empty it first.",

@@ -33,7 +33,7 @@
 - New magic effect Green Thumb on the Cultivator makes the plants you sow grow faster.
 - New magic effect Close Quarter on melee weapons reduces how far your hits knock enemies back.
 - The grappling hook gets its own enchantments, Swift Reel and Long Line, and is treated as a tool rather than a weapon for loot and damage effects.
-- The enchanting table's search boxes can now find items by their enchantments. (@enchant)
+- The enchanting table's search boxes can now find items by their enchantments.
 - Adds optional Item Favorite Framework support, so favorited items are never offered for destruction at the enchanting table and show a star.
 - Project Auga support is back for Auga's latest Valheim release.
 - A new server option stops enchantments that only work at critical health from rolling.

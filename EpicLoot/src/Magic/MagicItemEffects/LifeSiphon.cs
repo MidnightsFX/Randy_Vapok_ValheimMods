@@ -1,6 +1,5 @@
 using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
-using Jotunn.Managers;
 using System;
 using UnityEngine;
 
@@ -189,14 +188,13 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
-            LifeSiphonAura existing = target.GetComponentInChildren<LifeSiphonAura>();
-            if (existing != null)
+            if (LifeSiphonAura.TryGet(target, out LifeSiphonAura existing))
             {
                 existing.Extend(until);
                 return;
             }
 
-            GameObject prefab = PrefabManager.Instance.GetPrefab(AuraPrefab);
+            GameObject prefab = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(AuraPrefab) : null;
             if (prefab == null)
             {
                 if (!_auraMissingLogged)
@@ -234,15 +232,44 @@ namespace EpicLoot.MagicItemEffects
         private const float CheckInterval = 0.5f;
         private const float FadeTime = 2f;
 
+        // Each siphoned character's aura on this client, so a refresh finds it without searching the character.
+        private static readonly System.Collections.Generic.Dictionary<Character, LifeSiphonAura> Auras =
+            new System.Collections.Generic.Dictionary<Character, LifeSiphonAura>();
+
         private Character _target;
         private long _until;
         private float _destroyAt = -1f;
+
+        internal static bool TryGet(Character target, out LifeSiphonAura aura)
+        {
+            return Auras.TryGetValue(target, out aura) && aura != null;
+        }
 
         public void Begin(Character target, long until)
         {
             _target = target;
             _until = until;
+            Auras[target] = this;
             InvokeRepeating(nameof(Check), CheckInterval, CheckInterval);
+        }
+
+        private void OnDestroy()
+        {
+            if (_target != null && Auras.TryGetValue(_target, out LifeSiphonAura aura) && aura == this)
+            {
+                Auras.Remove(_target);
+            }
+            else
+            {
+                // The character went first: drop whatever no longer has one.
+                foreach (var pair in new System.Collections.Generic.List<System.Collections.Generic.KeyValuePair<Character, LifeSiphonAura>>(Auras))
+                {
+                    if (pair.Key == null || pair.Value == this)
+                    {
+                        Auras.Remove(pair.Key);
+                    }
+                }
+            }
         }
 
         public void Extend(long until)

@@ -427,6 +427,9 @@ public sealed class EpicLoot : BaseUnityPlugin {
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.EitrBarrier.RegisterPrefabs;
         // Hel's Harvest raises thralls, a networked copy of the summoned skeleton under its own name.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.HelsHarvest.RegisterPrefabs;
+        // After every RegisterPrefabs above: builds what the set effects would otherwise build on first use (wings,
+        // snow, ice, fx copies) and compiles their code, behind the loading screen instead of mid-fight.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.SetEffectWarmup.OnPrefabsRegistered;
         ItemManager.OnItemsRegistered += SetupStatusEffects;
         // legendaries.json problems are reported once every mod has registered its uniques and sets
         // through the API, so a set whose pieces another mod adds is not reported as broken.

@@ -190,6 +190,20 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
+        // World load (SetEffectWarmup): the local copies a mark and its use play from.
+        internal static void WarmupAtLoad(bool drawn)
+        {
+            if (!drawn || ZNetScene.instance == null)
+            {
+                return;
+            }
+
+            foreach (var name in new[] { MarkFxPrefab, ConsumeFxPrefab, ConsumeCritFxPrefab })
+            {
+                LocalFx.Prewarm(ZNetScene.instance.GetPrefab(name), scaled: false);
+            }
+        }
+
         private static void SpawnLocalFx(string name, Vector3 position)
         {
             var prefab = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(name) : null;

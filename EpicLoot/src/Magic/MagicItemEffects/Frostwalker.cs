@@ -136,6 +136,39 @@ namespace EpicLoot.MagicItemEffects
                 1f, LiquidType.Water);
         }
 
+        private static readonly Collider[] VolumeHits = new Collider[8];
+        private static int _waterVolumeMask;
+
+        // The sea's volume at a spot, as SampleSurface finds it, or null.
+        internal static WaterVolume FindWaterVolume(Vector3 position)
+        {
+            if (_waterVolumeMask == 0)
+            {
+                _waterVolumeMask = LayerMask.GetMask("WaterVolume");
+            }
+
+            var point = new Vector3(position.x, ZoneSystem.instance.m_waterLevel, position.z);
+            int count = Physics.OverlapSphereNonAlloc(point, 0f, VolumeHits, _waterVolumeMask);
+            for (int i = 0; i < count; i++)
+            {
+                if (VolumeHits[i].TryGetComponent(out WaterVolume volume) && volume.GetLiquidType() == LiquidType.Water)
+                {
+                    return volume;
+                }
+            }
+            return null;
+        }
+
+        // World load (SetEffectWarmup): the floe copy and the snow emitter every client draws from.
+        internal static void WarmupAtLoad(bool drawn)
+        {
+            if (drawn)
+            {
+                FloeTemplate.Get();
+                FrostwalkerSnow.Prewarm();
+            }
+        }
+
         public static string GetSecondsLeftText()
         {
             Player player = Player.m_localPlayer;
@@ -622,10 +655,13 @@ namespace EpicLoot.MagicItemEffects
         private const float YawWobble = 4f;             // degrees either side of the cell's quarter turn
         private const float MaxDrop = 0.035f;           // per-cell height offset below the ice line, against z-fighting
         private const int MaxCachedCells = 4096;
+        private const int MaxSpawnsPerFrame = 4;        // new chunks start at size 0, so spreading them never shows
+        private const int MaxPooled = 48;               // melted chunks kept for reuse rather than destroyed
 
         private sealed class Chunk
         {
             public GameObject Root;
+            public WaterVolume Volume;  // the sea under the cell, so its surface is read without a physics query
             public Vector3 Center;
             public Quaternion Rotation;
             public float Drop;
@@ -647,7 +683,9 @@ namespace EpicLoot.MagicItemEffects
         private readonly Dictionary<Player, Walker> _walkers = new Dictionary<Player, Walker>();
         private readonly List<Vector2Int> _melted = new List<Vector2Int>();
         private readonly List<Player> _gone = new List<Player>();
+        private readonly Stack<GameObject> _pool = new Stack<GameObject>();
         private float _chunkSize;
+        private int _spawnBudget;
 
         // One per game scene: it is a scene object, so a logout takes it and every chunk with it.
         public static void Ensure()
@@ -689,6 +727,7 @@ namespace EpicLoot.MagicItemEffects
                 chunk.Target = 0f;
             }
 
+            _spawnBudget = MaxSpawnsPerFrame;
             AskForIce(chunkSize, dt);
             GrowAndMelt(dt);
         }
@@ -790,7 +829,8 @@ namespace EpicLoot.MagicItemEffects
                     Vector2Int cell = new Vector2Int(x, z);
                     if (!_chunks.TryGetValue(cell, out Chunk chunk))
                     {
-                        if (!IsWet(cell, center))
+                        // A few new chunks a frame: the rest are asked for again on the next one.
+                        if (_spawnBudget <= 0 || !IsWet(cell, center))
                         {
                             continue;
                         }
@@ -800,6 +840,7 @@ namespace EpicLoot.MagicItemEffects
                         {
                             continue;
                         }
+                        _spawnBudget--;
                     }
 
                     chunk.Target = Mathf.Max(chunk.Target, target);
@@ -807,12 +848,19 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
-        // Cached per cell: the sea floor does not move. Cleared whenever the cache grows past a few thousand cells.
+        // Cached per cell: the sea floor does not move. Cleared whenever the cache grows past a few thousand cells. A
+        // cell in a zone this client has not loaded (a remote walker at the edge of its area) has no water volume and
+        // no terrain yet, so it is left out without being cached, and read once the zone loads.
         private bool IsWet(Vector2Int cell, Vector3 center)
         {
             if (_wetCells.TryGetValue(cell, out bool wet))
             {
                 return wet;
+            }
+
+            if (!ZoneSystem.instance.IsZoneLoaded(center))
+            {
+                return false;
             }
 
             if (_wetCells.Count >= MaxCachedCells)
@@ -846,12 +894,35 @@ namespace EpicLoot.MagicItemEffects
                 Drop = ((hash >> 10) & 255) / 255f * MaxDrop,
             };
 
-            chunk.Root = Instantiate(template, center, chunk.Rotation);
-            chunk.Root.name = "EL_FrostwalkerChunk";
+            if (_pool.Count > 0)
+            {
+                chunk.Root = _pool.Pop();
+                chunk.Root.transform.rotation = chunk.Rotation;
+            }
+            else
+            {
+                chunk.Root = Instantiate(template, center, chunk.Rotation);
+                chunk.Root.name = "EL_FrostwalkerChunk";
+            }
+
+            chunk.Volume = Frostwalker.FindWaterVolume(center);
             Place(chunk);
             chunk.Root.SetActive(true);
             _chunks[cell] = chunk;
             return chunk;
+        }
+
+        private void Recycle(GameObject root)
+        {
+            if (_pool.Count < MaxPooled)
+            {
+                root.SetActive(false);
+                _pool.Push(root);
+            }
+            else
+            {
+                Destroy(root);
+            }
         }
 
         private void GrowAndMelt(float dt)
@@ -871,7 +942,7 @@ namespace EpicLoot.MagicItemEffects
                     : Mathf.Max(chunk.Target, chunk.Size - MeltRate * dt);
                 if (chunk.Size <= 0f)
                 {
-                    Destroy(chunk.Root);
+                    Recycle(chunk.Root);
                     _melted.Add(entry.Key);
                     continue;
                 }
@@ -890,7 +961,9 @@ namespace EpicLoot.MagicItemEffects
         private void Place(Chunk chunk)
         {
             float scale = _chunkSize * Overlap / (2f * FloeTemplate.HalfWidth) * chunk.Size;
-            float surface = Frostwalker.SampleSurface(chunk.Center);
+            float surface = chunk.Volume != null
+                ? chunk.Volume.GetWaterSurface(new Vector3(chunk.Center.x, ZoneSystem.instance.m_waterLevel, chunk.Center.z))
+                : Frostwalker.SampleSurface(chunk.Center);
             if (surface < -1000f)
             {
                 surface = ZoneSystem.instance.m_waterLevel;
@@ -914,6 +987,15 @@ namespace EpicLoot.MagicItemEffects
                 }
             }
             _chunks.Clear();
+
+            foreach (GameObject pooled in _pool)
+            {
+                if (pooled != null)
+                {
+                    Destroy(pooled);
+                }
+            }
+            _pool.Clear();
         }
     }
 
@@ -939,6 +1021,11 @@ namespace EpicLoot.MagicItemEffects
 
         private static Material _material;
         private static bool _materialMissing;
+
+        // The configured emitter every player's snow is copied from, kept inactive. Setting up a ParticleSystem's
+        // modules one by one costs far more than copying a finished one, and every client did it per wearer.
+        private static GameObject _templateRoot;
+        private static GameObject _template;
 
         private Player _player;
         private ParticleSystem _emitter;
@@ -995,19 +1082,50 @@ namespace EpicLoot.MagicItemEffects
             return zdo != null && zdo.GetBool(Frostwalker.SnowZdoHash);
         }
 
-        // Built inactive and configured before it ever wakes, so it never plays a frame with Unity's defaults.
         private ParticleSystem BuildEmitter()
         {
+            GameObject template = GetTemplate();
+            if (template == null)
+            {
+                return null;
+            }
+
+            GameObject copy = Instantiate(template, transform, false);
+            copy.name = template.name;
+            return copy.GetComponent<ParticleSystem>();
+        }
+
+        // World load (SetEffectWarmup).
+        internal static void Prewarm()
+        {
+            GetTemplate();
+        }
+
+        // Built under an inactive root and configured before it ever wakes, so no copy plays a frame with Unity's
+        // defaults.
+        private static GameObject GetTemplate()
+        {
+            if (_template != null)
+            {
+                return _template;
+            }
+
             Material material = GetMaterial();
             if (material == null)
             {
                 return null;
             }
 
+            if (_templateRoot == null)
+            {
+                _templateRoot = new GameObject("EL_FrostwalkerSnowTemplate");
+                _templateRoot.SetActive(false);
+                DontDestroyOnLoad(_templateRoot);
+            }
+
             GameObject root = new GameObject("EL_FrostwalkerSnow");
-            root.SetActive(false);
             root.layer = LayerMask.NameToLayer("effect");
-            root.transform.SetParent(transform, false);
+            root.transform.SetParent(_templateRoot.transform, false);
 
             ParticleSystem emitter = root.AddComponent<ParticleSystem>();
 
@@ -1052,14 +1170,15 @@ namespace EpicLoot.MagicItemEffects
             color.color = new ParticleSystem.MinMaxGradient(fade);
 
             // Landing kills a flake's speed but not its life, so it rests where it fell until it fades. Characters are
-            // left out, so flakes fall through players rather than piling on their heads.
+            // left out, so flakes fall through players rather than piling on their heads. Medium quality caches what
+            // it finds instead of casting for every flake every frame, resting ones included.
             ParticleSystem.CollisionModule collision = emitter.collision;
             collision.enabled = true;
             collision.type = ParticleSystemCollisionType.World;
             collision.mode = ParticleSystemCollisionMode.Collision3D;
             collision.collidesWith = LayerMask.GetMask("Default", "static_solid", "Default_small", "piece", "terrain",
                 "vehicle", "Water");
-            collision.quality = ParticleSystemCollisionQuality.High;
+            collision.quality = ParticleSystemCollisionQuality.Medium;
             collision.dampen = 1f;
             collision.bounce = 0f;
             collision.lifetimeLoss = 0f;
@@ -1071,8 +1190,8 @@ namespace EpicLoot.MagicItemEffects
             flakeRenderer.shadowCastingMode = ShadowCastingMode.Off;
             flakeRenderer.receiveShadows = false;
 
-            root.SetActive(true);
-            return emitter;
+            _template = root;
+            return _template;
         }
 
         // Shared with the vanilla effect, so it is only ever read, never modified.

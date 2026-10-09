@@ -154,7 +154,8 @@ namespace EpicLoot.MagicItemEffects
         private static float _fallDamageGuardUntil;
 
         private static readonly HashSet<string> MissingFxLogged = new HashSet<string>();
-        private static readonly RaycastHit[] CastHits = new RaycastHit[16];
+        // Unordered results, so room for clutter (a crowd, a building's pieces) without dropping the nearest surface.
+        private static readonly RaycastHit[] CastHits = new RaycastHit[64];
         private static readonly Collider[] SlamHits = new Collider[256];   // a long fall makes a wide slam
         private static readonly HashSet<GameObject> SlamHitSet = new HashSet<GameObject>();
 
@@ -714,6 +715,7 @@ namespace EpicLoot.MagicItemEffects
                 damaged++;
             }
 
+            SlamHitSet.Clear();
             EpicLoot.Log($"[Earthshaker] Slam at {center}: {count} colliders, {damaged} damaged for {damage:0.#} " +
                 $"in {radius:0.#} m.");
         }
@@ -750,6 +752,32 @@ namespace EpicLoot.MagicItemEffects
         private static void SpawnLocalFx(GameObject prefab, Vector3 position, float scale)
         {
             LocalFx.Spawn(prefab, position, Quaternion.identity, scale, lifetime: LocalFxLifetime);
+        }
+
+        // World load (SetEffectWarmup): the slam's local copies, at the base radius and scaled, and the wings' assets.
+        internal static void WarmupAtLoad(bool drawn)
+        {
+            if (!drawn)
+            {
+                return;
+            }
+
+            foreach (var name in SlamFxPrefabs)
+            {
+                var prefab = FindFxPrefab(name, logMissing: false);
+                if (prefab != null)
+                {
+                    LocalFx.Prewarm(prefab, scaled: false);
+                    LocalFx.Prewarm(prefab, scaled: true);
+                    break;
+                }
+            }
+
+            var feathers = FindFxPrefab(FeatherFxPrefab, logMissing: false);
+            LocalFx.Prewarm(feathers, scaled: false);
+            LocalFx.Prewarm(feathers, scaled: true);
+
+            FreyjaWings.Prewarm();
         }
 
         // Every client, the diver included, at the slam's size: the ground slam, the feathers, and a camera shake
@@ -1049,6 +1077,11 @@ namespace EpicLoot.MagicItemEffects
         private static bool _assetsFailed;
         private static bool _boneMissingLogged;
 
+        // The rig every player's wings are copied from, kept inactive: one Instantiate per player instead of building
+        // ~110 objects. Instantiate remaps each renderer's bones to the copy's own transforms.
+        private static GameObject _templateRoot;
+        private static Transform _templateAnchor;
+
         private Player _player;
         private bool _built;
         private bool _failed;
@@ -1069,6 +1102,11 @@ namespace EpicLoot.MagicItemEffects
         private float _beat;
         private float _prevVelocityY;
         private float _lastFlapSound;
+
+        // The pose last written to the rig; an unchanged pose (standing, a held glide) is not written again.
+        private float _appliedSpread = float.NaN;
+        private float _appliedTuck = float.NaN;
+        private float _appliedFlap = float.NaN;
 
         private void Awake()
         {
@@ -1134,6 +1172,18 @@ namespace EpicLoot.MagicItemEffects
 
             if (!_built || !_visible)
             {
+                // Your own wings hidden (Show Own Falcon Wings): the flaps the owner plays for everyone still sound.
+                if (IsLocal && Earthshaker.LocalPlayerHasSet)
+                {
+                    UpdatePose(Time.deltaTime);
+                }
+                return;
+            }
+
+            // The spine the wings hang from is gone (a mod rebuilt the model): rebuilt on the next frame.
+            if (_spine2 == null)
+            {
+                Teardown();
                 return;
             }
 
@@ -1141,9 +1191,22 @@ namespace EpicLoot.MagicItemEffects
             PlaceAnchor();
             if (_right.Renderer.isVisible || _left.Renderer.isVisible)
             {
-                ApplyPose(_right);
-                ApplyPose(_left);
+                ApplyPose();
             }
+        }
+
+        private void Teardown()
+        {
+            if (_anchor != null)
+            {
+                Destroy(_anchor.gameObject);
+            }
+
+            _anchor = null;
+            _right = null;
+            _left = null;
+            _built = false;
+            _visible = false;
         }
 
         // Vanilla eases a remote player's visual toward the synced tilt at 50 degrees per second, too slow to show a
@@ -1262,10 +1325,20 @@ namespace EpicLoot.MagicItemEffects
             _anchor.SetPositionAndRotation(_spine2.position + rotation * AnchorOffset, rotation);
         }
 
-        private void ApplyPose(Wing wing)
+        // The same local rotations for both wings: the left one is mirrored by its root's negative scale.
+        private void ApplyPose()
         {
             float s = _spread;
             float k = _tuck;
+            if (s == _appliedSpread && k == _appliedTuck && _flapAngle == _appliedFlap)
+            {
+                return;
+            }
+
+            _appliedSpread = s;
+            _appliedTuck = k;
+            _appliedFlap = _flapAngle;
+
             var frames = PoseFrames;
             for (int i = 0; i < SegmentCount; i++)
             {
@@ -1275,23 +1348,31 @@ namespace EpicLoot.MagicItemEffects
 
             // The flap raises and lowers the whole wing at the shoulder, with a little more bend at the elbow.
             var flap = Quaternion.AngleAxis(_flapAngle, Vector3.forward);
-            wing.Segments[Arm].localRotation = flap * frames[Arm];
-            wing.Segments[Forearm].localRotation = Quaternion.Inverse(frames[Arm]) *
-                Quaternion.AngleAxis(_flapAngle * 0.4f, Vector3.forward) * frames[Forearm];
-            wing.Segments[Hand].localRotation = Quaternion.Inverse(frames[Forearm]) * frames[Hand];
+            var arm = flap * frames[Arm];
+            var forearm = Quaternion.Inverse(frames[Arm]) * Quaternion.AngleAxis(_flapAngle * 0.4f, Vector3.forward) *
+                frames[Forearm];
+            var hand = Quaternion.Inverse(frames[Forearm]) * frames[Hand];
+            _right.Segments[Arm].localRotation = arm;
+            _left.Segments[Arm].localRotation = arm;
+            _right.Segments[Forearm].localRotation = forearm;
+            _left.Segments[Forearm].localRotation = forearm;
+            _right.Segments[Hand].localRotation = hand;
+            _left.Segments[Hand].localRotation = hand;
 
             for (int i = 0; i < _feathers.Length; i++)
             {
                 var def = _feathers[i];
                 float angle = Mathf.Lerp(Mathf.Lerp(def.Fold, def.Spread, s), def.Tuck, k);
-                wing.Feathers[i].localRotation = Quaternion.Euler(0f, -angle, 0f);
+                var rotation = Quaternion.Euler(0f, -angle, 0f);
+                _right.Feathers[i].localRotation = rotation;
+                _left.Feathers[i].localRotation = rotation;
             }
         }
 
         private void Build()
         {
             var visual = _player.m_visual;
-            if (visual == null || !EnsureAssets())
+            if (visual == null || !EnsureTemplate())
             {
                 _failed = true;
                 return;
@@ -1313,13 +1394,22 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
-            _anchor = new GameObject("EL_FalconWings").transform;
-            _anchor.SetParent(visual.transform, false);
-            _right = BuildWing(_anchor, 1f);
-            _left = BuildWing(_anchor, -1f);
+            _anchor = Instantiate(_templateAnchor.gameObject, visual.transform, false).transform;
+            _anchor.name = _templateAnchor.name;
+            _right = WingFrom(_anchor.Find("RightWing"));
+            _left = WingFrom(_anchor.Find("LeftWing"));
+            if (_right == null || _left == null)
+            {
+                Destroy(_anchor.gameObject);
+                _anchor = null;
+                _failed = true;
+                return;
+            }
+
             SetLayer(_anchor, visual.layer);
             _right.Renderer.enabled = false;
             _left.Renderer.enabled = false;
+            _appliedSpread = float.NaN;
             _built = true;
 
             // VisEquipment collects the LOD renderers only when the equipment changes; add ours now.
@@ -1327,6 +1417,61 @@ namespace EpicLoot.MagicItemEffects
             {
                 _player.m_visEquipment.UpdateLodgroup();
             }
+        }
+
+        // A copy's wing, read back from its renderer's bones: the segments first, then the feathers, as BuildWing
+        // ordered them.
+        private static Wing WingFrom(Transform root)
+        {
+            var renderer = root != null ? root.GetComponent<SkinnedMeshRenderer>() : null;
+            var bones = renderer != null ? renderer.bones : null;
+            if (bones == null || bones.Length != SegmentCount + _feathers.Length)
+            {
+                return null;
+            }
+
+            var wing = new Wing
+            {
+                Root = root,
+                Segments = new Transform[SegmentCount],
+                Feathers = new Transform[_feathers.Length],
+                Renderer = renderer,
+            };
+            System.Array.Copy(bones, 0, wing.Segments, 0, SegmentCount);
+            System.Array.Copy(bones, SegmentCount, wing.Feathers, 0, _feathers.Length);
+            return wing;
+        }
+
+        // World load (SetEffectWarmup), so neither the first player to show wings nor any later one builds them.
+        internal static void Prewarm()
+        {
+            EnsureTemplate();
+        }
+
+        private static bool EnsureTemplate()
+        {
+            if (_templateAnchor != null)
+            {
+                return true;
+            }
+
+            if (!EnsureAssets())
+            {
+                return false;
+            }
+
+            if (_templateRoot == null)
+            {
+                _templateRoot = new GameObject("EL_FalconWingsTemplate");
+                _templateRoot.SetActive(false);
+                DontDestroyOnLoad(_templateRoot);
+            }
+
+            _templateAnchor = new GameObject("EL_FalconWings").transform;
+            _templateAnchor.SetParent(_templateRoot.transform, false);
+            BuildWing(_templateAnchor, 1f);
+            BuildWing(_templateAnchor, -1f);
+            return true;
         }
 
         private static Transform FindBone(Transform visual, string name, Animator animator, HumanBodyBones fallback)
@@ -1412,7 +1557,7 @@ namespace EpicLoot.MagicItemEffects
             _feathers = BuildFeatherTable();
             _segmentLengths = new[] { ArmLength, ForearmLength, HandLength };
             _segmentPoses = BuildSegmentPoses();
-            _material = BuildMaterial(BuildFeatherTexture());
+            _material = BuildMaterial();
             if (_material == null)
             {
                 _assetsFailed = true;
@@ -1420,6 +1565,8 @@ namespace EpicLoot.MagicItemEffects
                 return false;
             }
 
+            // Only once there is a material to carry it.
+            SetTexture(_material, "_MainTex", BuildFeatherTexture());
             _mesh = BuildMesh(_feathers);
             return true;
         }
@@ -1573,7 +1720,7 @@ namespace EpicLoot.MagicItemEffects
         // The Fallen Valkyrie's material carries the creature shader with alpha test and two-sided rendering
         // already switched on; only its textures change. Textures go on the material itself, since MaterialMan
         // replaces every property block on the player's renderers.
-        private static Material BuildMaterial(Texture2D texture)
+        private static Material BuildMaterial()
         {
             Material source = null;
             var prefab = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab("FallenValkyrie") : null;
@@ -1607,7 +1754,6 @@ namespace EpicLoot.MagicItemEffects
             }
 
             material.name = "EL_FalconWings";
-            SetTexture(material, "_MainTex", texture);
             SetTexture(material, "_BumpMap", null);
             SetTexture(material, "_EmissionMap", null);
             SetTexture(material, "_MetallicGlossMap", null);

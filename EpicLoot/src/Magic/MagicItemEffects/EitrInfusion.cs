@@ -203,17 +203,23 @@ namespace EpicLoot.MagicItemEffects
                 _infusedUntil = now;
             }
 
-            float seconds = eitr / (EitrPerSecond * EitrRate);
-            _infusedUntil += seconds;
+            float perSecond = EitrPerSecond * EitrRate;
+            float seconds = eitr / perSecond;
             float cap = MaxSeconds;
             if (cap > 0f)
             {
-                _infusedUntil = Mathf.Min(_infusedUntil, now + cap);
+                // Only what fits under the cap is poured; the rest stays in the pool.
+                seconds = Mathf.Clamp(now + cap - _infusedUntil, 0f, seconds);
+                if (infused && seconds <= 0f)
+                {
+                    return;     // already full
+                }
             }
+            _infusedUntil += seconds;
 
             // Taken from m_eitr directly, as Frostwalker and the Eitr Barrier do: UseEitr's EpicLoot patches would treat
             // the pour as a spell cast (HealthOnEitrUse, EitrUseGivesAdrenaline).
-            player.m_eitr = 0f;
+            player.m_eitr = Mathf.Max(0f, eitr - seconds * perSecond);
             PauseEitrRegen(player);
 
             if (infused)
@@ -223,7 +229,7 @@ namespace EpicLoot.MagicItemEffects
             // Also on a top-up, in case something cleared the indicator while the infusion ran on.
             ShowIndicator(player);
 
-            EpicLoot.Log($"[EitrInfusion] {(infused ? "Topped up" : "Started")} with {eitr:0.#} eitr: +{seconds:0.#} s " +
+            EpicLoot.Log($"[EitrInfusion] {(infused ? "Topped up" : "Started")} with {seconds * perSecond:0.#} eitr: +{seconds:0.#} s " +
                 $"({SecondsLeft:0.#} s left), element {_element}.");
         }
 

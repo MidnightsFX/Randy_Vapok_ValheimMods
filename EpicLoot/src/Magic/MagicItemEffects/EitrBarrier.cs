@@ -28,8 +28,10 @@ namespace EpicLoot.MagicItemEffects
     //
     // The purple bubble is the status effect's start effect, like vanilla's Staff of Protection: a recoloured copy of
     // vfx_StaffShield. The copy keeps its ZNetView and ZSyncTransform, so other players see it follow the wearer, and
-    // vanilla removes it with the status effect. The hit and break fx are networked copies too. All three are
-    // registered in ZNetScene on every client each world load, so a ZDO for one never arrives unrecognised.
+    // vanilla removes it with the status effect. The break fx is a networked copy too. All three copies are registered
+    // in ZNetScene on every client each world load, so a ZDO for one never arrives unrecognised. The hit fx, up to
+    // five a second under damage over time, is an RPC instead: each client plays a local copy, and no hit creates a
+    // ZDO.
     public static class EitrBarrier
     {
         // Both tunable in this effect's Config block in magiceffects.json, under these key names.
@@ -67,6 +69,11 @@ namespace EpicLoot.MagicItemEffects
         private static bool _iconMissingLogged;
         private static readonly HashSet<string> MissingLogged = new HashSet<string>();
         private static float _nextHitFx;
+        private const string HitFxRpc = "el-ebhit";
+
+        // The HUD text, rebuilt only when the number changes (the HUD asks every frame).
+        private static int _iconTextValue = -1;
+        private static string _iconText = "";
 
         // Player-editable, so each is kept in a sane range. A zero cooldown would give the broken status effect a zero
         // ttl, which vanilla treats as "never expires".
@@ -94,7 +101,18 @@ namespace EpicLoot.MagicItemEffects
             }
 
             float perEitr = player.GetTotalActiveMagicEffectValue(MagicEffectType.EitrBarrier);
-            return perEitr > 0f ? Mathf.FloorToInt(player.m_eitr * perEitr / EitrRate).ToString() : "";
+            if (perEitr <= 0f)
+            {
+                return "";
+            }
+
+            int value = Mathf.FloorToInt(player.m_eitr * perEitr / EitrRate);
+            if (value != _iconTextValue)
+            {
+                _iconTextValue = value;
+                _iconText = value.ToString();
+            }
+            return _iconText;
         }
 
         // Invoked by SharedPlayerPostArmorDamagePatch (victim side, local player), before the shard EitrShield, so the
@@ -206,8 +224,31 @@ namespace EpicLoot.MagicItemEffects
 
             // Damage over time carries no point or direction.
             Vector3 point = hit.m_point != Vector3.zero ? hit.m_point : player.GetCenterPoint();
-            Quaternion rotation = hit.m_dir.sqrMagnitude > 0.001f ? Quaternion.LookRotation(-hit.m_dir) : Quaternion.identity;
-            Object.Instantiate(_hitFx, point, rotation);
+            Vector3 facing = hit.m_dir.sqrMagnitude > 0.001f ? -hit.m_dir : Vector3.zero;
+            if (player.m_nview != null && player.m_nview.IsValid())
+            {
+                player.m_nview.InvokeRPC(ZNetView.Everybody, HitFxRpc, point, facing);
+            }
+        }
+
+        private static void OnHitFxRpc(Vector3 point, Vector3 facing)
+        {
+            if (_hitFx == null || (ZNet.instance != null && ZNet.instance.IsDedicated()))
+            {
+                return;
+            }
+
+            Quaternion rotation = facing.sqrMagnitude > 0.001f ? Quaternion.LookRotation(facing) : Quaternion.identity;
+            LocalFx.Spawn(_hitFx, point, rotation);
+        }
+
+        // World load (SetEffectWarmup), after RegisterPrefabs: the local copy the hit fx plays from.
+        internal static void WarmupAtLoad(bool drawn)
+        {
+            if (drawn)
+            {
+                LocalFx.Prewarm(_hitFx, scaled: false);
+            }
         }
 
         // The same flags as vanilla's Staff_shield start effect: attached to the player, scaled to its radius.
@@ -266,11 +307,12 @@ namespace EpicLoot.MagicItemEffects
             return _broken;
         }
 
-        // A null icon would render as an invisible HUD entry, so with neither icon found the barrier stays down.
+        // A null icon would render as an invisible HUD entry, so with neither icon found the barrier stays down. Not
+        // looked for again once it was missing: Tick asks every frame while the barrier could rise.
         private static Sprite GetIcon()
         {
             ObjectDB objectDB = ObjectDB.instance;
-            if (objectDB == null)
+            if (objectDB == null || _iconMissingLogged)
             {
                 return null;
             }
@@ -477,6 +519,17 @@ namespace EpicLoot.MagicItemEffects
                 {
                     Tick(__instance);
                 }
+            }
+        }
+
+        // Every player carries the hit fx RPC; every client plays it.
+        [HarmonyPatch(typeof(Player), nameof(Player.Awake))]
+        private static class Player_Awake_Patch
+        {
+            [HarmonyPostfix]
+            private static void Postfix(Player __instance)
+            {
+                __instance.m_nview?.Register<Vector3, Vector3>(HitFxRpc, (sender, point, facing) => OnHitFxRpc(point, facing));
             }
         }
     }

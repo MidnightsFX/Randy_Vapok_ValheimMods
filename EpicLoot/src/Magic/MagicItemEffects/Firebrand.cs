@@ -62,8 +62,9 @@ namespace EpicLoot.MagicItemEffects
         private const int ThirdSwing = 2;
 
         // The swing that last erupted. Berserkir swings three and four carry two Hit events, so DoMeleeAttack runs
-        // twice for them; every swing is a fresh Attack clone, so the reference tells a repeat apart.
-        private static Attack _lastNovaAttack;
+        // twice for them; every swing is a fresh Attack clone, so the reference tells a repeat apart. Held weakly, so
+        // the last swing does not keep a logged-out player's objects alive.
+        private static readonly System.WeakReference<Attack> LastNovaAttack = new System.WeakReference<Attack>(null);
         private static readonly HashSet<string> MissingPrefabLogged = new HashSet<string>();
 
         // Tooltip: "... within {1}m for {0}% of your weapon's damage. Your secondary attack erupts for {2}%."
@@ -95,7 +96,7 @@ namespace EpicLoot.MagicItemEffects
         {
             Player player = Player.m_localPlayer;
             if (player == null || __instance.m_character != player || player.m_currentAttack != __instance ||
-                __instance == _lastNovaAttack)
+                (LastNovaAttack.TryGetTarget(out Attack last) && last == __instance))
             {
                 return;
             }
@@ -117,7 +118,7 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
-            _lastNovaAttack = __instance;
+            LastNovaAttack.SetTarget(__instance);
             Erupt(player, weapon, value / 100f * power);
         }
 

@@ -73,6 +73,19 @@ namespace EpicLoot.MagicItemEffects
         private static bool _flagPublished;
         private static readonly List<Character> Thralls = new List<Character>();
 
+        // Kills credited faster than thralls rise (an area attack, a chain): raised one at a time, and only the newest
+        // that fit under the cap, so a multi-kill does not spawn skeletons only to crumble them in the same frame.
+        private const float RaiseInterval = 0.2f;
+        private const float RaiseMaxAge = 5f;       // a kill this old raises nothing; the fight has moved on
+        private struct RaiseRequest
+        {
+            public Vector3 Position;
+            public float Yaw;
+            public float Time;
+        }
+        private static readonly List<RaiseRequest> PendingRaises = new List<RaiseRequest>();
+        private static float _nextRaiseAt;
+
         // Tooltip: "... rise as thralls that fight for you for {1} seconds ... Up to {0} at once ..."
         public static void RegisterDisplayValues()
         {
@@ -89,6 +102,7 @@ namespace EpicLoot.MagicItemEffects
             _owner = player;
             _flagPublished = false;
             Thralls.Clear();
+            PendingRaises.Clear();
         }
 
         // Written only on change, so the ZDO revision moves once per change rather than every frame.
@@ -168,7 +182,7 @@ namespace EpicLoot.MagicItemEffects
             return null;
         }
 
-        // The credited player's own client.
+        // The credited player's own client: queued, and raised from Player.Update (ProcessRaises).
         private static void OnRaiseRpc(Player player, Vector3 position, float yaw)
         {
             if (player != Player.m_localPlayer || player.IsDead() ||
@@ -178,6 +192,35 @@ namespace EpicLoot.MagicItemEffects
             }
 
             SyncOwner(player);
+            PendingRaises.Add(new RaiseRequest { Position = position, Yaw = yaw, Time = Time.time });
+            int cap = Mathf.Max(1, Mathf.RoundToInt(value));
+            if (PendingRaises.Count > cap)
+            {
+                PendingRaises.RemoveRange(0, PendingRaises.Count - cap);
+            }
+        }
+
+        private static void ProcessRaises(Player player)
+        {
+            if (PendingRaises.Count == 0 || Time.time < _nextRaiseAt)
+            {
+                return;
+            }
+
+            RaiseRequest request = PendingRaises[0];
+            PendingRaises.RemoveAt(0);
+            if (Time.time - request.Time > RaiseMaxAge || player.IsDead() ||
+                !player.HasActiveMagicEffect(MagicEffectType.HelsHarvest, out float value))
+            {
+                return;
+            }
+
+            _nextRaiseAt = Time.time + RaiseInterval;
+            Raise(player, request.Position, request.Yaw, value);
+        }
+
+        private static void Raise(Player player, Vector3 position, float yaw, float value)
+        {
             Thralls.RemoveAll(thrall => thrall == null || thrall.IsDead());
             int cap = Mathf.Max(1, Mathf.RoundToInt(value));
             while (Thralls.Count >= cap)
@@ -442,6 +485,7 @@ namespace EpicLoot.MagicItemEffects
                 {
                     SyncOwner(__instance);
                     PublishFlag(__instance);
+                    ProcessRaises(__instance);
                 }
             }
         }

@@ -77,6 +77,8 @@ namespace EpicLoot.MagicItemEffects
         private const float FlyerLift = 2f;
         private const float SpawnRayUp = 2f;
         private const float SpawnRayLength = 6f;
+        private const float NoSpotRetryDelay = 2f;  // no place to rise: try again after this many seconds
+        private const float VanishedRetryDelay = 3f; // removed without dying (despawn or limit mods): wait this long
 
         private enum State
         {
@@ -96,6 +98,11 @@ namespace EpicLoot.MagicItemEffects
 
         private static bool _popupOpen;
         private static Character _bindTarget;
+
+        // Work moved off the frame that summons or binds, done on the next local tick: the summon's fx and HUD
+        // indicator, and the profile save after a bind.
+        private static bool _summonFxPending;
+        private static bool _profileSavePending;
 
         // The parsed record, re-parsed whenever the stored string changes (ValheimEnforcer replaces the dictionary).
         private static string _recordSource;
@@ -179,11 +186,39 @@ namespace EpicLoot.MagicItemEffects
             _spirit = null;
             _lastCombat = float.NegativeInfinity;
             _bindTarget = null;
+            _summonFxPending = false;
+            _profileSavePending = false;
             ClosePopup();
             _recordSource = null;
             _record = null;
             _recordUnreadable = false;
             _problemMessaged = false;
+        }
+
+        // ---- warm-up (SetEffectWarmup) -----------------------------------------------------------------------------
+
+        // World load, behind the loading screen.
+        internal static void WarmupAtLoad(bool drawn)
+        {
+            SpiritRecord.Warmup();
+            SpiritAnimalVisual.ResetCache();
+            if (drawn)
+            {
+                SpiritAnimalVisual.GetBaseMaterial();
+            }
+        }
+
+        // The local player's spawn: the saved spirit is read, and its materials made, before the first fight.
+        internal static void WarmupForPlayer(Player player, bool drawn)
+        {
+            SyncOwner(player);
+            GetLifeIndicator();
+            GetReturnIndicator();
+            var record = GetRecord(player, out bool _);
+            if (drawn && record != null && ZNetScene.instance != null)
+            {
+                SpiritAnimalVisual.Prewarm(ZNetScene.instance.GetPrefab(record.PrefabHash));
+            }
         }
 
         // ---- the record -------------------------------------------------------------------------------------------
@@ -225,6 +260,7 @@ namespace EpicLoot.MagicItemEffects
         private static void OnLocalPlayerUpdate(Player player)
         {
             SyncOwner(player);
+            RunDeferredWork(player);
 
             if (_popupOpen)
             {
@@ -251,12 +287,16 @@ namespace EpicLoot.MagicItemEffects
                 case State.Active:
                     if (_spirit == null || _spirit.m_nview == null || !_spirit.m_nview.IsValid())
                     {
-                        // Unloaded or removed by the safety net; nothing to wait for.
+                        // Unloaded or removed by something else (the safety net, a despawn or creature-limit mod). A
+                        // short wait rather than an immediate re-summon, or a mod that keeps removing it would have a
+                        // creature spawned every frame.
                         _spirit = null;
-                        _state = State.Idle;
+                        _state = State.Returning;
+                        _returnAt = now + VanishedRetryDelay;
                         RemoveIndicator(player, _lifeIndicator);
                     }
                     else if (player.IsDead() || now >= _expireAt ||
+                        !player.HasActiveMagicEffect(MagicEffectType.SpiritAnimal, out float _) ||
                         Vector3.Distance(player.transform.position, _spirit.transform.position) > LeashDistance)
                     {
                         Fade(_spirit);
@@ -334,7 +374,15 @@ namespace EpicLoot.MagicItemEffects
             float lifetime = Lifetime;
             try
             {
-                Vector3 position = FindSpawnPoint(player, prefab, record);
+                if (!TryFindSpawnPoint(player, prefab, record, out Vector3 position))
+                {
+                    // Nowhere to stand (deep water, Frostwalker ice, off a ledge): rising at the player's feet would drop
+                    // a non-swimmer into the sea, so wait for the player to move.
+                    _state = State.Returning;
+                    _returnAt = Time.time + NoSpotRetryDelay;
+                    return;
+                }
+
                 Vector3 facing = player.transform.forward;
                 facing.y = 0f;
                 Quaternion rotation = facing.sqrMagnitude > 0.0001f ? Quaternion.LookRotation(facing.normalized) : Quaternion.identity;
@@ -357,11 +405,53 @@ namespace EpicLoot.MagicItemEffects
             _spiritValue = value;
             _expireAt = Time.time + lifetime;
             _state = State.Active;
-            RemoveIndicator(player, _returnIndicator);
-            ShowIndicator(player, GetLifeIndicator(), lifetime);
-            PlayFx(SummonFx, spirit.transform.position, spirit.transform.rotation);
+            // The fx and HUD indicator follow on the next frame: the creature's own Instantiate is already a heavy one.
+            _summonFxPending = true;
             EpicLoot.Log($"[SpiritAnimal] summoned '{record.PrefabName}' (level {record.Level}) at {value}% strength.");
         }
+
+        private static void RunDeferredWork(Player player)
+        {
+            if (_summonFxPending)
+            {
+                _summonFxPending = false;
+                if (_state == State.Active && _spirit != null && _spirit.m_nview != null && _spirit.m_nview.IsValid())
+                {
+                    RemoveIndicator(player, _returnIndicator);
+                    ShowIndicator(player, GetLifeIndicator(), Mathf.Max(1f, _expireAt - Time.time));
+                    PlayFx(SummonFx, _spirit.transform.position, _spirit.transform.rotation);
+                }
+            }
+            else if (_profileSavePending)
+            {
+                _profileSavePending = false;
+                SaveCharacter();
+            }
+        }
+
+        // m_customData only reaches disk on a profile save (every 30 minutes, on sleep, on logout), and the world has
+        // already lost the creature, so a crash before then would lose the bind. Vanilla's save also serializes the
+        // whole explored map (millions of cells, then compressed), which is what makes it a long freeze; the map is
+        // left to the next regular save, and the profile keeps the copy from the last one.
+        private static void SaveCharacter()
+        {
+            if (Game.instance == null || Player.m_localPlayer == null)
+            {
+                return;
+            }
+
+            SkipMapSave = true;
+            try
+            {
+                Game.instance.SavePlayerProfile(setLogoutPoint: false);
+            }
+            finally
+            {
+                SkipMapSave = false;
+            }
+        }
+
+        private static bool SkipMapSave;
 
         // ZNetView.Awake's new-object branch, with the data written before Instantiate as ZNetScene.CreateObject does.
         private static Character Spawn(SpiritRecord record, GameObject prefab, Vector3 position, Quaternion rotation,
@@ -454,10 +544,10 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
-        // A spot behind or beside the player the creature fits into and can be seen from, else the player's feet.
+        // A spot behind or beside the player the creature fits into and can be seen from.
         private static readonly float[] SpawnAngles = { 150f, -150f, 120f, -120f, 180f, 90f, -90f, 60f, -60f };
 
-        private static Vector3 FindSpawnPoint(Player player, GameObject prefab, SpiritRecord record)
+        private static bool TryFindSpawnPoint(Player player, GameObject prefab, SpiritRecord record, out Vector3 position)
         {
             var character = prefab.GetComponent<Character>();
             bool flyer = character != null && character.m_flying;
@@ -497,10 +587,22 @@ namespace EpicLoot.MagicItemEffects
                     continue;
                 }
 
-                return flyer ? spot + Vector3.up * FlyerLift : spot;
+                position = flyer ? spot + Vector3.up * FlyerLift : spot;
+                return true;
             }
 
-            return flyer ? origin + Vector3.up * FlyerLift : origin;
+            // Nowhere around the player (a tight corridor, a crowd): their own spot, if that is ground the creature can
+            // stand on. A flyer needs no ground and rises above them.
+            if (flyer)
+            {
+                position = origin + Vector3.up * FlyerLift;
+                return true;
+            }
+
+            position = origin;
+            return Physics.Raycast(origin + Vector3.up * SpawnRayUp, Vector3.down, out var below, SpawnRayLength, GroundMask,
+                    QueryTriggerInteraction.Ignore) &&
+                (swimmer || Floating.GetLiquidLevel(below.point) <= below.point.y + MaxWaterDepth);
         }
 
         private static bool Fits(Player player, Vector3 spot, float radius, float height)
@@ -672,6 +774,12 @@ namespace EpicLoot.MagicItemEffects
                 return "$mod_epicloot_spiritanimal_refuse_otherplayer";
             }
 
+            // Someone else's tame told to stay follows nobody, so the check above passes it; their ward protects it.
+            if (!PrivateArea.CheckAccess(target.transform.position, 0f, flash: false))
+            {
+                return "$mod_epicloot_spiritanimal_refuse_warded";
+            }
+
             if (tameable != null && tameable.HaveRider())
             {
                 return "$mod_epicloot_spiritanimal_refuse_ridden";
@@ -803,9 +911,8 @@ namespace EpicLoot.MagicItemEffects
             ZNetScene.instance.Destroy(target.gameObject);
 
             SaveRecord(player, record);
-            // m_customData only reaches disk on a profile save (every 30 minutes, on sleep, on logout). The world has
-            // already lost the creature, so a crash before then would lose the bind.
-            Game.instance?.SavePlayerProfile(setLogoutPoint: false);
+            // Saved on the next frame, off this one's capture and destroy (see SaveCharacter).
+            _profileSavePending = true;
 
             player.Message(MessageHud.MessageType.Center, Format("$mod_epicloot_spiritanimal_bound", name));
             EpicLoot.Log($"[SpiritAnimal] bound '{record.PrefabName}' (level {record.Level}).");
@@ -965,6 +1072,14 @@ namespace EpicLoot.MagicItemEffects
 
         // ---- patches ------------------------------------------------------------------------------------------------
 
+        // The bind's save leaves the explored map to the next regular save (see SaveCharacter).
+        [HarmonyPatch(typeof(Minimap), nameof(Minimap.SaveMapData))]
+        private static class Minimap_SaveMapData_Patch
+        {
+            [HarmonyPrefix]
+            private static bool Prefix() => !SkipMapSave;
+        }
+
         [HarmonyPatch(typeof(Player), nameof(Player.Update))]
         private static class Player_Update_Patch
         {
@@ -1116,7 +1231,8 @@ namespace EpicLoot.MagicItemEffects
             [HarmonyPrefix]
             private static bool Prefix(Character __instance)
             {
-                if (__instance is Player || __instance.IsDead() || __instance.GetHealth() > 0f || !IsSpirit(__instance))
+                // Runs for every owned creature every physics step: the cheap spirit lookup first.
+                if (!SpiritAnimalVisual.IsSpiritInstance(__instance) || __instance.IsDead() || __instance.GetHealth() > 0f)
                 {
                     return true;
                 }
@@ -1163,12 +1279,30 @@ namespace EpicLoot.MagicItemEffects
                 var player = Player.m_localPlayer;
                 if (player == null || BindKeysUnbound() || !__instance.IsTamed() ||
                     !player.HasActiveMagicEffect(MagicEffectType.SpiritAnimal, out float _) ||
-                    GetRefusal(player, __instance) != null)
+                    !CanBindHovered(player, __instance))
                 {
                     return;
                 }
 
                 __result += "\n[<color=yellow><b>" + KeyLabel() + "</b></color>] " + Localize("$mod_epicloot_spiritanimal_bind_hint");
+            }
+
+            // Hover text is rebuilt every frame; the refusal walks the creature's containers, so it is re-checked a few
+            // times a second rather than each frame.
+            private const float RecheckInterval = 0.25f;
+            private static Character _checked;
+            private static float _recheckAt;
+            private static bool _canBind;
+
+            private static bool CanBindHovered(Player player, Character target)
+            {
+                if (target != _checked || Time.time >= _recheckAt)
+                {
+                    _checked = target;
+                    _recheckAt = Time.time + RecheckInterval;
+                    _canBind = GetRefusal(player, target) == null;
+                }
+                return _canBind;
             }
         }
 
@@ -1298,6 +1432,9 @@ namespace EpicLoot.MagicItemEffects
                     {
                         set.Add(name.GetStableHashCode());
                     }
+                    // BaseAI's spawn time ("spawntime"; the "SpawnTime"/"spawn_time" names above are vanilla's retired
+                    // ones): the original's tick, possibly from another world's clock.
+                    set.Add(ZDOVars.s_spawnTime);
                     foreach (var pair in new[] { ZDOVars.s_zdoidUser, ZDOVars.s_zdoidRodOwner, ZDOVars.s_sessionCatchID,
                         ZDOVars.s_toRemoveTarget, ZDOVars.s_toRemoveSpawnID, ZDOVars.s_toRemoveParentID })
                     {
@@ -1350,6 +1487,22 @@ namespace EpicLoot.MagicItemEffects
                 Copy(strings, record._strings, skip);
                 Copy(bytes, record._bytes, skip);
                 return record;
+            }
+
+            // A dry run of every generic path on empty data, so the first bind or summon of a session does not compile
+            // the seven list types' copies, writers and readers.
+            internal static void Warmup()
+            {
+                var record = new SpiritRecord();
+                var skip = Blocked;
+                Copy(new List<KeyValuePair<int, float>>(), record._floats, skip);
+                Copy(new List<KeyValuePair<int, Vector3>>(), record._vec3s, skip);
+                Copy(new List<KeyValuePair<int, Quaternion>>(), record._quats, skip);
+                Copy(new List<KeyValuePair<int, int>>(), record._ints, skip);
+                Copy(new List<KeyValuePair<int, long>>(), record._longs, skip);
+                Copy(new List<KeyValuePair<int, string>>(), record._strings, skip);
+                Copy(new List<KeyValuePair<int, byte[]>>(), record._bytes, skip);
+                TryParse(record.Serialize(), out _);
             }
 
             private static void Copy<T>(List<KeyValuePair<int, T>> source, List<KeyValuePair<int, T>> target, HashSet<int> skip)
@@ -1484,17 +1637,69 @@ namespace EpicLoot.MagicItemEffects
 
         private static Material _baseMaterial;
         private static bool _baseMissingLogged;
-        private static readonly Dictionary<(Texture, Texture), Material> Materials = new Dictionary<(Texture, Texture), Material>();
+        // Keyed by the source's texture pair and its tiling. Cleared on each world load (ResetCache), so textures a mod
+        // makes per creature do not pile up materials across sessions.
+        private static readonly Dictionary<(Texture, Texture, Vector4), Material> Materials =
+            new Dictionary<(Texture, Texture, Vector4), Material>();
+        private static readonly HashSet<Material> SpiritMaterials = new HashSet<Material>();
+
+        // Every live spirit on this client, for the hot-path check in Character.CheckDeath.
+        private static readonly HashSet<Character> Instances = new HashSet<Character>();
 
         private Character _character;
         private bool _drawn;
         private float _watchUntil;
         private float _nextWatch;
 
+        internal static bool IsSpiritInstance(Character character) => character != null && Instances.Contains(character);
+
         private void Awake()
         {
             _character = GetComponent<Character>();
             _drawn = SystemInfo.graphicsDeviceType != GraphicsDeviceType.Null;
+            if (_character != null)
+            {
+                Instances.Add(_character);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            Instances.Remove(_character);
+        }
+
+        internal static void ResetCache()
+        {
+            Materials.Clear();
+            SpiritMaterials.Clear();
+            _baseMaterial = null;
+            _baseMissingLogged = false;
+        }
+
+        // The materials a spirit of this prefab will need, made ahead of its first summon.
+        internal static void Prewarm(GameObject prefab)
+        {
+            var baseMaterial = GetBaseMaterial();
+            if (prefab == null || baseMaterial == null)
+            {
+                return;
+            }
+
+            foreach (var renderer in prefab.GetComponentsInChildren<Renderer>(true))
+            {
+                if (!(renderer is SkinnedMeshRenderer) && !(renderer is MeshRenderer))
+                {
+                    continue;
+                }
+
+                foreach (var source in renderer.sharedMaterials)
+                {
+                    if (source != null && source.renderQueue < 3000 && !SpiritMaterials.Contains(source))
+                    {
+                        GetSpiritMaterial(baseMaterial, source);
+                    }
+                }
+            }
         }
 
         // Every component has woken by now, so the ones that would misbehave can be found and removed.
@@ -1573,7 +1778,7 @@ namespace EpicLoot.MagicItemEffects
                 for (int i = 0; i < materials.Length; i++)
                 {
                     var source = materials[i];
-                    if (source == null || source.renderQueue >= 3000 || source.name.Contains(MarkerSuffix))
+                    if (source == null || source.renderQueue >= 3000 || SpiritMaterials.Contains(source))
                     {
                         continue;
                     }
@@ -1589,23 +1794,27 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
-        // One per texture pair, so a summon every two minutes does not leak a material each time.
+        // One per texture pair and tiling, so a summon every two minutes does not leak a material each time.
         private static Material GetSpiritMaterial(Material baseMaterial, Material source)
         {
-            Texture main = source.HasProperty(MainTex) ? source.GetTexture(MainTex) : null;
+            bool hasMain = source.HasProperty(MainTex);
+            Texture main = hasMain ? source.GetTexture(MainTex) : null;
             Texture bump = source.HasProperty(BumpMap) ? source.GetTexture(BumpMap) : null;
-            var key = (main, bump);
+            Vector2 scale = hasMain ? source.GetTextureScale(MainTex) : Vector2.one;
+            Vector2 offset = hasMain ? source.GetTextureOffset(MainTex) : Vector2.zero;
+            var key = (main, bump, new Vector4(scale.x, scale.y, offset.x, offset.y));
             if (Materials.TryGetValue(key, out var material) && material != null)
             {
                 return material;
             }
 
             material = new Material(baseMaterial) { name = baseMaterial.name + MarkerSuffix };
+            SpiritMaterials.Add(material);
             if (main != null && material.HasProperty(MainTex))
             {
                 material.SetTexture(MainTex, main);
-                material.SetTextureScale(MainTex, source.GetTextureScale(MainTex));
-                material.SetTextureOffset(MainTex, source.GetTextureOffset(MainTex));
+                material.SetTextureScale(MainTex, scale);
+                material.SetTextureOffset(MainTex, offset);
             }
             if (material.HasProperty(SkinBumpMap))
             {
@@ -1621,7 +1830,7 @@ namespace EpicLoot.MagicItemEffects
             return material;
         }
 
-        private static Material GetBaseMaterial()
+        internal static Material GetBaseMaterial()
         {
             if (_baseMaterial != null)
             {
