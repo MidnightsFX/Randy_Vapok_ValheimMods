@@ -82,6 +82,12 @@ namespace EpicLoot.MagicItemEffects
             SkillsAsSkills(MagicEffectType.BlockAsDodgeAsBlock, Shards.BlockAsDodgeAsBlock.type, Shards.BlockAsDodgeAsBlock.asType);
             SkillsAsSkills(MagicEffectType.BlockAsWoodCuttingAndPickaxes, Shards.BlockAsWoodCuttingAndPickaxes.type, Shards.BlockAsWoodCuttingAndPickaxes.asType);
 
+            if (skillType != SkillType.None && skillType != SkillType.All)
+            {
+                increase += (int) player.GetTotalActiveMagicEffectValue(MagicEffectType.AddAllSkills);
+            }
+            increase += Interconnected.GetBonusLevels(player, skillType);
+
             return increase;
         }
     }
@@ -177,6 +183,7 @@ namespace EpicLoot.MagicItemEffects
         [UsedImplicitly]
         private static void Postfix(SkillsDialog __instance, Player player)
         {
+            EpicLoot.Log($"[Interconnected] Skills panel: {Interconnected.Describe(player)}");
             var allSkills = player.m_skills.GetSkillList();
             var elementList = new List<GameObject>();
             if (EpicLoot.HasAuga)

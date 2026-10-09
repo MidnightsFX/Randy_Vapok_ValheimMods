@@ -62,6 +62,51 @@ and a boss shard may be worn together, one of each, and never two uniques.
 | **Firewalker** | Epic | Trailblazer |
 | **Stormcaller** | Epic | StrikeCausesLightning |
 
+## Shards for selected gear types
+
+A shard can support any subset of equipment types. In its `shardstones.json` definition,
+omit `UniformEffect` and put only the supported types in `TypeEffects`. Each entry can grant
+a different effect. Using the same effect in several entries limits that shared effect to those types.
+
+For example, the following definition body supports helmets and chest armor only:
+
+```json
+{
+  "Category": "Core",
+  "Rarities": ["Epic"],
+  "TypeEffects": {
+    "Head": {
+      "EffectType": "IncreaseHealth",
+      "ValuesPerRarity": { "Epic": 10 }
+    },
+    "Chest": {
+      "EffectType": "PercentHealth",
+      "ValuesPerRarity": { "Epic": 5 }
+    }
+  }
+}
+```
+
+This illustrates an existing or separately registered shard's definition. It does not register a new
+shard ID, item, icon, or loot entry. Effect IDs must have a registered effect implementation.
+When reusing an effect ID, keep its shared definition and tuning consistent with its other uses.
+
+- Broad groups are `MeleeWeapon`, `RangedWeapon`, `MagicWeapon`, `Shield`, and `Armor`.
+- Specific types such as `Swords`, `Bucklers`, `Head`, and `Chest` override their broad group.
+- `Trinket` and `Utility` are standalone types.
+- An omitted type is supported only if its broad group has an effect.
+- The selected effect must define a value for the stone's rarity. A value of zero is valid.
+- A specific mapping without a value at that rarity does not fall back to the broad group.
+- New insertions and swaps reject unsupported equipment with a message. They do not consume the stone.
+- `UniformEffect` still grants one effect across all gear types and takes priority over `TypeEffects`.
+- Category rules are independent of gear support. A gear-specific `Unique` shard still counts toward
+  the one-equipped-Unique limit, and a `Boss` shard counts toward its separate limit.
+
+Existing socketed stones remain stored if a configuration change removes their effect mapping.
+Their effect becomes inactive when socket values are recomputed. Existing removal rules still apply.
+Opening or saving the socket inventory does not delete those stones. They cannot be newly inserted
+into unsupported equipment.
+
 ## Effect reference
 
 Every effect the shard grid above actually grants, with its in-game tooltip and description lifted verbatim from

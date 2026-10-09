@@ -239,9 +239,10 @@ internal static class JsonConfigEdits {
     /// <summary>
     /// Writes one drop target of loottables.json: the Drops table of the N-th LootTables element named
     /// row.Object (its LeveledLoot element with row.Level when the row is leveled), and the Rarity
-    /// weights onto every Loot entry of that target that already carries a Rarity array. Entries
-    /// without one (shard sets) and everything else in the table are left alone. The caller passes the
-    /// tables already rebalanced; a null one is not written.
+    /// weights onto the Loot entries the row covers (BiomeDropTables.RarityTargets): those already
+    /// carrying a Rarity array, less the rarity-keyed ones whose Rarity picks the item. Entries without
+    /// one and everything else in the table are left alone. The caller passes the tables already
+    /// rebalanced; a null one is not written.
     /// </summary>
     internal static void SetBiomeDrops(JObject root, BiomeDropRow row, List<WeightEntry> amount, List<WeightEntry> rarity) {
         if (root["LootTables"] is JArray tables == false) {
@@ -274,10 +275,11 @@ internal static class JsonConfigEdits {
         if (rarity != null && target["Loot"] is JArray loot) {
             float[] weights = WeightTable.ToWeights(rarity, Rarities.Count);
             int length = BiomeDropTables.WriteLength(weights, row.RarityLength);
-            foreach (JToken token in loot) {
-                if (token is JObject entry && entry["Rarity"] is JArray) {
-                    entry["Rarity"] = new JArray(weights.Take(length).Select(Number));
-                }
+            HashSet<string> keyedSets = BiomeDropTables.RarityKeyedSets(root["ItemSets"] as JArray);
+            List<JObject> targets = BiomeDropTables.RarityTargets(loot.OfType<JObject>(), entry => entry["Rarity"] is JArray,
+                entry => BiomeDropTables.IsRarityKeyed((string)entry["Item"], BiomeDropTables.HasRarityItems(entry), keyedSets));
+            foreach (JObject entry in targets) {
+                entry["Rarity"] = new JArray(weights.Take(length).Select(Number));
             }
         }
     }

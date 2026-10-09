@@ -15,9 +15,10 @@ namespace EpicLoot
 namespace EpicLoot.MagicItemEffects
 {
     // Frostwalker (4-piece Rime of Elivagar set bonus, NoRoll). The water freezes under the wearer so they can walk on
-    // it, draining value Eitr per second (AshlandsDrainMultiplier times that over the boiling sea) with natural Eitr
-    // regen paused. Wading out to knee depth or swimming freezes it. Crouching on the ice, or running dry, breaks it, and
-    // it stays broken until the wearer is back on solid ground or presses crouch again while swimming.
+    // it, draining value Eitr per second (AshlandsDrainMultiplier times that over the boiling sea). Natural Eitr regen is
+    // paused on the ice and in the water alike, so breaking through to swim is no way to refill. Wading out to knee depth
+    // or swimming freezes it. Crouching on the ice, or running dry, breaks it, and it stays broken until the wearer is
+    // back on solid ground or presses crouch again while swimming.
     //
     // The ice is a real collider rather than patched physics: one invisible box under the local player, on the Water
     // layer, excluded from everything but the "character" layer. Vanilla counts any contact below the capsule as ground,
@@ -170,6 +171,14 @@ namespace EpicLoot.MagicItemEffects
             float depth = player.m_cashedInLiquidDepth;
             float swimThreshold = player.m_swimDepth - 0.4f;
             _swimTime = depth > swimThreshold ? _swimTime + dt : 0f;
+
+            // No natural regen in the water either, or crouching through the ice to swim would refill the pool for free
+            // before climbing back on. This is vanilla's own test, so wading counts too; on the ice the depth is held at
+            // 0 and HoldUp pauses regen itself.
+            if (hasEffect && player.InWater())
+            {
+                PauseEitrRegen(player);
+            }
 
             // Fresh contacts from the last physics step, not IsOnGround or m_lastGroundCollider: both keep reporting the
             // ice for 0.2 s after it is gone, which would end Sunk and refreeze the player the instant they broke it.
@@ -331,7 +340,7 @@ namespace EpicLoot.MagicItemEffects
             bool boiling = !(WorldGenerator.GetAshlandsOceanGradient(pos) < 0f);
             _drainPerSecond = drain * Game.m_eitrRate * (boiling ? AshlandsDrainMultiplier : 1f);
             player.m_eitr = Mathf.Max(0f, player.m_eitr - _drainPerSecond * dt);
-            player.m_eitrRegenTimer = Mathf.Max(player.m_eitrRegenTimer, player.m_eitrRegenDelay);
+            PauseEitrRegen(player);
 
             // The liquid level vanilla compares against is refreshed once per rendered frame and can trail the ice.
             if (pos.y >= _top - DryFeetTolerance)
@@ -340,6 +349,12 @@ namespace EpicLoot.MagicItemEffects
             }
 
             ShowIndicator(player);
+        }
+
+        // Holds natural regen off the way a spell cast does (RPC_UseEitr restarts the same timer), without spending any.
+        private static void PauseEitrRegen(Player player)
+        {
+            player.m_eitrRegenTimer = Mathf.Max(player.m_eitrRegenTimer, player.m_eitrRegenDelay);
         }
 
         private static void Unfreeze(Player player, bool shatter)

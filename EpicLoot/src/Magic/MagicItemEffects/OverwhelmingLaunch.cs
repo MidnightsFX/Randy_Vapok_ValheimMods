@@ -4,7 +4,6 @@ using EpicLoot.General;
 using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 namespace EpicLoot
@@ -81,6 +80,11 @@ namespace EpicLoot.MagicItemEffects
         private static float _inFlightUntil;
         private static PendingSlam _pendingSlam;
         private static bool _missingPrefabLogged;
+
+        // "Launch [T]" in the combat key hints, shown while a launchable weapon is held.
+        private static readonly SetAbilityKeyHint LaunchHint = new SetAbilityKeyHint("EL_OverwhelmingLaunch",
+            "$mod_epicloot_overwhelminglaunch_hint", () => GetLaunchWeapon(Player.m_localPlayer) != null,
+            () => ELConfig.OverwhelmingLaunchKey, () => ELConfig.OverwhelmingLaunchGamepadButton);
 
         private static int _landMask;
         private static readonly RaycastHit[] RayHits = new RaycastHit[32];
@@ -681,7 +685,7 @@ namespace EpicLoot.MagicItemEffects
         private static class KeyHints_UpdateHints_Patch
         {
             [HarmonyPostfix]
-            private static void Postfix(KeyHints __instance) => LaunchKeyHint.Refresh(__instance);
+            private static void Postfix(KeyHints __instance) => LaunchHint.Refresh(__instance);
         }
     }
 
@@ -829,118 +833,6 @@ namespace EpicLoot.MagicItemEffects
             {
                 _hiddenHandModel.SetActive(true);
             }
-        }
-    }
-
-    // The "Launch [T]" entry in the combat key hints, cloned from vanilla's Block entry in both the keyboard and the
-    // gamepad rows, so vanilla's own layout and keyboard/gamepad switching carry it.
-    internal static class LaunchKeyHint
-    {
-        private const string LabelToken = "$mod_epicloot_overwhelminglaunch_hint";
-
-        private static KeyHints _hints;
-        private static GameObject _keyboardEntry;
-        private static GameObject _gamepadEntry;
-        private static KeyCode _keyboardShownKey = KeyCode.None;
-        private static KeyCode _gamepadShownKey = KeyCode.None;
-
-        internal static void Refresh(KeyHints hints)
-        {
-            if (hints.m_combatHints == null || !hints.m_combatHints.activeSelf)
-            {
-                return;
-            }
-
-            if (_hints != hints)
-            {
-                _hints = hints;
-                _keyboardEntry = CloneEntry(hints.m_secondaryAttackKB, "Block");
-                _gamepadEntry = CloneEntry(hints.m_secondaryAttackGP, "Text - Block");
-                _keyboardShownKey = KeyCode.None;
-                _gamepadShownKey = KeyCode.None;
-            }
-
-            bool launchable = OverwhelmingLaunch.GetLaunchWeapon(Player.m_localPlayer) != null;
-            var key = launchable ? ELConfig.OverwhelmingLaunchKey?.Value ?? KeyCode.None : KeyCode.None;
-            var button = launchable ? ELConfig.OverwhelmingLaunchGamepadButton?.Value ?? KeyCode.None : KeyCode.None;
-
-            if (_keyboardEntry != null && key != _keyboardShownKey)
-            {
-                _keyboardShownKey = key;
-                if (key != KeyCode.None)
-                {
-                    SetKeyboardText(_keyboardEntry, ZInput.KeyCodeToDisplayName(key));
-                }
-                _keyboardEntry.SetActive(key != KeyCode.None);
-            }
-
-            if (_gamepadEntry != null && button != _gamepadShownKey)
-            {
-                _gamepadShownKey = button;
-                if (button != KeyCode.None)
-                {
-                    var text = _gamepadEntry.GetComponentInChildren<TMP_Text>(true);
-                    if (text != null)
-                    {
-                        text.text = $"{Localization.instance.Localize(LabelToken)} <mspace=0.6em> {GamepadGlyph(button)}</mspace>";
-                    }
-                }
-                _gamepadEntry.SetActive(button != KeyCode.None);
-            }
-        }
-
-        // The template is the Block entry beside vanilla's secondary-attack hint; a UI mod that restructured the
-        // row simply gets no launch hint.
-        private static GameObject CloneEntry(GameObject secondaryAttackHint, string templateName)
-        {
-            var template = secondaryAttackHint != null ? secondaryAttackHint.transform.parent?.Find(templateName) : null;
-            if (template == null)
-            {
-                return null;
-            }
-
-            var entry = Object.Instantiate(template.gameObject, template.parent, false);
-            entry.name = "EL_OverwhelmingLaunch";
-            entry.transform.SetSiblingIndex(template.GetSiblingIndex());
-            entry.SetActive(false);
-            return entry;
-        }
-
-        // A keyboard entry is a "Text" label plus the key in "key_bkg/Key".
-        private static void SetKeyboardText(GameObject entry, string keyText)
-        {
-            foreach (var text in entry.GetComponentsInChildren<TMP_Text>(true))
-            {
-                text.text = text.name == "Key" ? keyText : Localization.instance.Localize(LabelToken);
-            }
-        }
-
-        // Vanilla draws gamepad buttons as sprites; borrow the glyph of whichever vanilla gamepad button is bound to
-        // the same control.
-        private static string GamepadGlyph(KeyCode button)
-        {
-            var zinput = ZInput.instance;
-            if (zinput != null)
-            {
-                string path = ZInput.KeyCodeToPath(button);
-                foreach (var pair in zinput.m_buttons)
-                {
-                    var def = pair.Value;
-                    if (def?.ButtonAction == null || def.ButtonAction.bindings.Count == 0 ||
-                        def.Source != ZInput.InputSource.Gamepad || def.GetActionPath(effective: true) != path)
-                    {
-                        continue;
-                    }
-
-                    string glyph = zinput.GetBoundKeyString(pair.Key, emptyStringOnMissing: true);
-                    if (!string.IsNullOrEmpty(glyph))
-                    {
-                        return glyph;
-                    }
-                }
-            }
-
-            return ZInput.KeyCodeToDisplayName(button);
         }
     }
 }

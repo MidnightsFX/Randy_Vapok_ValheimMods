@@ -102,6 +102,7 @@ namespace EpicLoot
         public static string AddBloodMagicSkill = nameof(AddBloodMagicSkill);
         public static string AddMovementSkills = nameof(AddMovementSkills);
         public static string AddCrafterSkills = nameof(AddCrafterSkills);
+        public static string AddAllSkills = nameof(AddAllSkills);
         public static string ModifyStaggerDuration = nameof(ModifyStaggerDuration);
         public static string QuickLearner = nameof(QuickLearner);
         public static string RecallWeapon = nameof(RecallWeapon);

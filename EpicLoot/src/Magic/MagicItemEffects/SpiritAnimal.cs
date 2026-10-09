@@ -1476,6 +1476,11 @@ namespace EpicLoot.MagicItemEffects
         private static readonly int MainTex = Shader.PropertyToID("_MainTex");
         private static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
         private static readonly int SkinBumpMap = Shader.PropertyToID("_SkinBumpMap");
+        private static readonly int TintColor = Shader.PropertyToID("_TintColor");
+
+        // The shader's only colour input (an HDR tint; the material's _Color and _EmissiveColor are leftovers it never
+        // reads). The Spirit Caller's spirits use (3, 0.64, 1.18); the ranger's fylgja glows green at that brightness.
+        private static readonly Color SpiritTint = new Color(0.64f, 3f, 0.8f, 1f);
 
         private static Material _baseMaterial;
         private static bool _baseMissingLogged;
@@ -1606,6 +1611,10 @@ namespace EpicLoot.MagicItemEffects
             {
                 // The wolf's normal map would not fit another creature's UVs.
                 material.SetTexture(SkinBumpMap, bump);
+            }
+            if (material.HasProperty(TintColor))
+            {
+                material.SetColor(TintColor, SpiritTint);
             }
 
             Materials[key] = material;

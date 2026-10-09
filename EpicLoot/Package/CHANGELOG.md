@@ -5,6 +5,8 @@
 - Creatures added by other mods now drop magic loot suited to their biome and strength without needing a patch.
 - Many vanilla creatures that dropped no magic loot now do, several tougher ones count as elites, and harmless animals no longer drop it.
 - Elite creatures can optionally drop a runestone matching their biome.
+- Loot tables can pick from an item set by the rarity they roll, and the enchanting material and runestone sets now work this way.
+- Enchanting materials named by a loot table always drop as themselves, and Quick Configure no longer overwrites the rarity of shardstone and similar loot entries.
 - Late-game bosses drop extra of their own boss items when several players take part, and extra trophies, wishbones and crypt keys now add to the normal drop.
 - Old-style loot tables are converted to the new format automatically with a backup, and the loot check at world load covers every level without ever emptying a table.
 - Uniques and item sets can now drop at any rarity, set pieces of different rarities count toward the same set, and set items say so in their tooltip.
@@ -15,10 +17,23 @@
 - New Egil's Mark set, whose full set makes your arrows fly faster and hit harder at the cost of a much slower draw.
 - New Rime of Élivágar set for mages, whose full set surrounds you with drifting snow and freezes the water beneath you so you can walk across it for a steady cost of Eitr.
 - New Fylgja's Bond set for rangers, whose full set binds a tamed creature as a spirit animal that fights beside you.
+- New Freyja's Falcon set for spear fighters, whose full set gives you dark wings and lets you dive from the air to slam the ground.
+- New Bölþorn's Bane set, whose full set sends your crossbow bolts through every creature in their path.
+- New Heiðr's Seiðr set for mages who use a bow, which trains Elemental Magic with your bow and, as a full set, fires arrows conjured from Eitr.
+- New Mímir's Well set for mages, which trades health for a deep pool of Eitr and, as a full set, wraps you in a barrier that takes damage from your Eitr before your health.
+- New Einherjar set for spellswords, whose full set pours your Eitr into your weapon for a spell of extra damage.
+- New Ullr's Hunt set for archers, whose full set lets your arrows mark creatures for a heavy axe or polearm hit.
+- New Hel's Covenant set for blood mages, whose full set raises creatures slain by you or your summons as thralls that fight for you.
+- New Huldufólk set for rogues, whose full set lets you vanish in smoke when you dodge near enemies and strike from hiding.
+- New Surtr's Brand set for two-handed axes and swords, whose full set makes your combo finishers and secondary attacks erupt in Brenna's fire.
+- New Hel's Court armor set for blood fighters, whose full set drains enemies so they cannot heal while every player striking them heals.
+- New Hrungnir's Stand set for tower shields, whose full set stores charge from your blocks and releases a rock shockwave on the next one.
+- Lifesteal and Bloodletting from a set bonus now work with any weapon.
 - New magic effect Prosperity gives creatures and chests near you a chance to roll their magic loot again.
 - New magic effect Green Thumb on the Cultivator makes the plants you sow grow faster.
 - New magic effect Close Quarter on melee weapons reduces how far your hits knock enemies back.
 - The grappling hook gets its own enchantments, Swift Reel and Long Line, and is treated as a tool rather than a weapon for loot and damage effects.
+- The enchanting table's search boxes can now find items by their enchantments. (@enchant)
 - Adds optional Item Favorite Framework support, so favorited items are never offered for destruction at the enchanting table and show a star.
 - Project Auga support is back for Auga's latest Valheim release.
 - A new server option stops enchantments that only work at critical health from rolling.

@@ -785,13 +785,14 @@ namespace EpicLoot
                 EpicLoot.Log($"Item: {itemName} - Rarity Count: {rarityLength} - Weight: {lootDrop.Weight}");
 
                 // A drop that is already a shard — rolled from an elite creature's bonus shard set or from a
-                // boss's shard table — or a runestone (Elite Runestone Drops) must not be re-rolled into a
-                // biome shard, nor sacrificed for materials. The unidentified category needs no such guard:
-                // IsAllowedMagicItemType rejects a Material.
+                // boss's shard table — a runestone (Elite Runestone Drops) or an enchanting material (a
+                // rarity-keyed set such as EnchantingMats) must not be re-rolled into a biome shard, nor
+                // sacrificed for materials: the table picked exactly this item, often by its rarity. The
+                // unidentified category needs no such guard: IsAllowedMagicItemType rejects a Material.
                 var isShardDrop = lootDrop.Item != null &&
                     lootDrop.Item.EndsWith(global::EpicLoot.ShardStones.Shards.ShardIndicator, StringComparison.Ordinal);
 
-                var dropType = SelectDropType(lootDrop, isShardDrop || IsRunestoneDrop(lootDrop), cheatsActive);
+                var dropType = SelectDropType(lootDrop, isShardDrop || IsEnchantingMaterialDrop(lootDrop), cheatsActive);
                 EpicLoot.Log($"Drop type for {lootDrop.Item}: {dropType}");
 
                 var spawned = false;
@@ -823,8 +824,8 @@ namespace EpicLoot
         // that category. Categories this particular drop cannot become are left out of the roll entirely
         // rather than rolled and then rejected — an ineligible category in the pool would silently eat
         // the drop's chance of becoming any of the others.
-        // keepAsIs: the drop is a shard or a runestone, which stays itself rather than becoming a biome shard
-        // or sacrifice materials.
+        // keepAsIs: the drop is a shard, a runestone or an enchanting material, which stays itself rather
+        // than becoming a biome shard or sacrifice materials.
         private static LootDropType SelectDropType(LootDrop lootDrop, bool keepAsIs, bool cheatsActive)
         {
             // Item spawn cheats asked for a specific thing; never substitute anything for it.
@@ -870,7 +871,8 @@ namespace EpicLoot
             }
         }
 
-        private static bool IsRunestoneDrop(LootDrop lootDrop)
+        // Runestones and the Dust/Essence/Reagent materials, i.e. what the enchanting table consumes.
+        private static bool IsEnchantingMaterialDrop(LootDrop lootDrop)
         {
             if (lootDrop.Item.IsNullOrWhiteSpace() || ObjectDB.instance == null)
             {
@@ -879,7 +881,8 @@ namespace EpicLoot
 
             var prefab = ObjectDB.instance.GetItemPrefab(lootDrop.Item);
             var itemDrop = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
-            return itemDrop != null && itemDrop.m_itemData.IsRunestone();
+            return itemDrop != null &&
+                (itemDrop.m_itemData.IsRunestone() || itemDrop.m_itemData.IsMagicCraftingMaterial());
         }
 
         // True when the drop names an equippable item, i.e. one an unidentified item could stand in for.
