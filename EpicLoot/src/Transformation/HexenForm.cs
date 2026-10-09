@@ -348,6 +348,34 @@ public class HexenForm : MonoBehaviour
         }
     }
 
+    // UpdateRotation turns the whole root toward m_moveDir, which flight input gives a vertical
+    // component, so climbing pitched her face-up as if walking a wall. Only the horizontal part
+    // steers; pure ascent or descent keeps her current heading.
+    [HarmonyPatch(typeof(Character), nameof(Character.UpdateRotation))]
+    private static class Character_UpdateRotation_Patch
+    {
+        private static bool Prefix(Character __instance, ref float __result, ref Vector3 __state)
+        {
+            if (!TryGet(__instance, out var form) || !form.Flying) return true;
+
+            __state = __instance.m_moveDir;
+            var flat = new Vector3(__state.x, 0f, __state.z);
+            if (flat.sqrMagnitude < 0.0001f)
+            {
+                __result = 0f;
+                return false;
+            }
+
+            __instance.m_moveDir = flat;
+            return true;
+        }
+
+        private static void Postfix(Character __instance, Vector3 __state)
+        {
+            if (TryGet(__instance, out var form) && form.Flying) __instance.m_moveDir = __state;
+        }
+    }
+
     [HarmonyPatch(typeof(Player), nameof(Player.SetControls))]
     private static class Player_SetControls_Patch
     {
