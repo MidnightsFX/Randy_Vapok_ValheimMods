@@ -54,12 +54,42 @@ level 1 entry (or whichever level is its lowest) for creatures at that level to 
 | `Weight` | Relative chance of this entry being picked. |
 | `WeightPerStar` | Added to `Weight` for every star past the anchor, never going below 0. This is how a template shifts toward the next tier's gear without another level. |
 | `Rarity` | Relative weights for Magic, Rare, Epic, Legendary, Mythic, Ancient, in that order. A shorter array leaves the rest at 0. An entry without one drops a plain item, unless the set or table it names supplies one. |
-| `RarityItems` | A per-rarity override of `Item`: the rolled rarity picks the prefab (used by shardstones). |
+| `RarityItems` | A per-rarity override of `Item`: the rolled rarity picks a prefab, a set or a table reference (used by shardstones and the sets below). |
 
 **Table references.** `"Tier3Mob.2"` rolls from Tier3Mob's loot as a level 2 creature would. `"Tier3Mob.*"`
 rolls it at the level the referring table is being rolled at, which is how the elite templates take their
 gear from the normal ones at every level with a single entry. A referenced table uses its own StarScaling
 for its item mix and rarity.
+
+**Rarity-keyed sets.** A set whose entry carries a `RarityItems` map drops by rarity. `EnchantingMats`
+maps each rarity to that tier's materials:
+
+```json
+{
+  "Name": "EnchantingMats",
+  "Loot": [
+    { "Item": "Tier0Mats", "Rarity": [ 1, 1, 1, 1, 1, 1 ],
+      "RarityItems": { "Magic": "Tier0Mats", "Rare": "Tier1Mats", "Epic": "Tier2Mats", "Legendary": "Tier3Mats", "Mythic": "Tier4Mats", "Ancient": "Tier5Mats" } }
+  ]
+}
+```
+
+so a table entry
+
+```json
+{ "Item": "EnchantingMats", "Weight": 1, "Rarity": [ 50, 41, 7, 2, 0, 0 ] }
+```
+
+drops Magic materials half the time, Rare 41% and so on, in place of one weighted entry per tier.
+`EnchantingRunestones` does the same for blank runestones.
+
+- Stars promote the entry's `Rarity` and luck weighs it before it picks, so starred creatures drop
+  higher tiers.
+- A rarity the map lacks uses the nearest one it has, so map every rarity the entry can reach.
+- An entry with no `Rarity` of its own uses the set's. Both shipped sets then pick every tier evenly.
+- Shardstones, runestones and enchanting materials a table names always drop as themselves; the drop
+  ratios never turn them into something else.
+- Quick Configure's Loot Drops page leaves these entries' `Rarity` alone when you edit a table's rarity.
 
 ## Star scaling
 

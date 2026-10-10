@@ -67,6 +67,18 @@ namespace EpicLoot.LegendarySystem
         public List<ItemRarity> Rarities = new List<ItemRarity>();
         public List<string> LegendaryIDs = new List<string>();
         public List<SetBonusInfo> SetBonuses = new List<SetBonusInfo>();
+        public List<string> FullSetFx = new List<string>();
+        public ArmorTintInfo ArmorTint;
+    }
+
+    [Serializable]
+    public class ArmorTintInfo
+    {
+        public string Color;
+        public float Strength = 1f;
+        public float Hue;
+        public float Saturation;
+        public float Value;
     }
 
     [Serializable]

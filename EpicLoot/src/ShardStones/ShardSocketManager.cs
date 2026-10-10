@@ -37,8 +37,8 @@ namespace EpicLoot.ShardStones {
                 }
                 rarity = Shards.GetShardRarity(input);
 
-                // The shard's effect depends on the host item's type. A missing mapping is a valid,
-                // inert placement (effect stays null).
+                // Keep unsupported stones resolvable for existing socket saves and removal policies.
+                // New placements separately require an effect, including a value at this rarity.
                 var shardEffect = Shards.GetShardEffect(equipment, color);
                 if (shardEffect != null && shardEffect.ValuesPerRarity.TryGetValue(rarity, out var value)) {
                     effect = new MagicItemEffect(shardEffect.EffectType, value);
@@ -56,6 +56,24 @@ namespace EpicLoot.ShardStones {
             return false;
         }
 
+        // Both insertion and swaps use this gate. Do not apply it to saved-socket resolution:
+        // removing an effect mapping must not delete a stone already held in an item.
+        private static bool ResolvePlacementEffect(ItemDrop.ItemData equipment, ItemDrop.ItemData input,
+            out MagicItemEffect effect, out ShardType color, out ItemRarity rarity, out string reason) {
+            reason = null;
+            if (!ResolveSocketedEffect(equipment, input, out effect, out color, out rarity)) {
+                reason = "$mod_epicloot_socket_invalidinput";
+                return false;
+            }
+
+            if (color != ShardType.None && effect == null) {
+                reason = "$mod_epicloot_socket_shardunsupported";
+                return false;
+            }
+
+            return true;
+        }
+
         // Whether the given runestone/shard can be socketed into the given equipment.
         public static bool CanSocket(ItemDrop.ItemData equipment, ItemDrop.ItemData input, out string reason) {
             reason = null;
@@ -70,8 +88,7 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
-            if (!ResolveSocketedEffect(equipment, input, out var effect, out var color, out var rarity)) {
-                reason = "$mod_epicloot_socket_invalidinput";
+            if (!ResolvePlacementEffect(equipment, input, out var effect, out var color, out var rarity, out reason)) {
                 return false;
             }
 
@@ -80,11 +97,6 @@ namespace EpicLoot.ShardStones {
             // an unequipped item may freely receive the shard (the equip-time guard closes the loop).
             if (!CheckExclusiveCategory(equipment, color, SocketedColors(equipMagicItem.Sockets), out reason)) {
                 return false;
-            }
-
-            // A shard with no defined effect for this item type may still be socketed; it sits inert.
-            if (effect == null) {
-                return true;
             }
 
             if (!MagicItemEffectDefinitions.TryGet(effect.EffectType, out var def)) {
@@ -138,8 +150,7 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
-            if (!ResolveSocketedEffect(equipment, input, out var effect, out var color, out var rarity)) {
-                reason = "$mod_epicloot_socket_invalidinput";
+            if (!ResolvePlacementEffect(equipment, input, out var effect, out var color, out var rarity, out reason)) {
                 return false;
             }
 
@@ -151,11 +162,6 @@ namespace EpicLoot.ShardStones {
             }
             if (!CheckExclusiveCategory(equipment, color, coResidentColors, out reason)) {
                 return false;
-            }
-
-            // An inert shard (no effect for this item type) may always sit in a socket.
-            if (effect == null) {
-                return true;
             }
 
             if (!MagicItemEffectDefinitions.TryGet(effect.EffectType, out var def)) {

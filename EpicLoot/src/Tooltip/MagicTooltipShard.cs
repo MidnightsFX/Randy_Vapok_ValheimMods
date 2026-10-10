@@ -19,12 +19,6 @@ public partial class MagicTooltip
         if (def == null || (def.UniformEffect == null && def.TypeEffects.Count == 0))
         {
             text.AppendLine($"<color={magicColor}>$mod_epicloot_shard_noeffect</color>");
-            // Granting nothing is no protection under the blanket modes -- it would still occupy the
-            // socket for good, so the commitment has to be stated here too.
-            if (color != ShardType.None)
-            {
-                AppendBlanketRemovalWarning(ShardSocketManager.GetRemovalPolicy(color, null));
-            }
             return;
         }
 
@@ -32,8 +26,7 @@ public partial class MagicTooltip
 
         // Probing the policy with a null effect gives the rule that applies no matter what the shard
         // ends up granting -- i.e. the BreakAll/Permanent modes. When one of those is on, say so once
-        // up front instead of repeating a marker on every line, and note that it covers the slots not
-        // even listed below (those that grant nothing).
+        // up front instead of repeating a marker on every supported type's line.
         var blanket = ShardSocketManager.GetRemovalPolicy(color, null);
 
         // A uniform shard (e.g. a boss shard) grants one effect on every slot it is allowed into.
@@ -60,10 +53,11 @@ public partial class MagicTooltip
             return;
         }
 
+        text.AppendLine("<color=#c0c0c0ff>$mod_epicloot_shard_supportedtypes</color>");
         foreach (var pair in def.TypeEffects)
         {
             var effectDef = pair.Value;
-            if (!effectDef.ValuesPerRarity.TryGetValue(rarity, out var value))
+            if (effectDef == null || !effectDef.ValuesPerRarity.TryGetValue(rarity, out var value))
             {
                 continue;
             }
@@ -80,6 +74,11 @@ public partial class MagicTooltip
             AppendShardEffectDetails(effectMagicDef.Type, value, showDetails);
         }
 
+        if (Shards.IsExclusive(def.Category))
+        {
+            text.AppendLine($"<color={magicColor}>" +
+                $"$mod_epicloot_shard_{Shards.ExclusiveCategorySlug(def.Category)}exclusive</color>");
+        }
         AppendBlanketRemovalWarning(blanket);
     }
 
@@ -105,8 +104,7 @@ public partial class MagicTooltip
         }
     }
 
-    // States the commitment up front when the mode restricts every slot, including the ones that grant
-    // nothing and so never appear in the list above.
+    // States the commitment when the removal mode restricts every supported placement.
     private void AppendBlanketRemovalWarning(SocketRemoval blanket)
     {
         switch (blanket)

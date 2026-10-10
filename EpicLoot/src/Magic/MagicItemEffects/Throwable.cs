@@ -1,6 +1,11 @@
 ﻿using HarmonyLib;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace EpicLoot.MagicItemEffects
 {
@@ -102,6 +107,57 @@ namespace EpicLoot.MagicItemEffects
 
                 __instance.m_weapon.m_shared.m_triggerEffect = __state;
             }
+        }
+    }
+
+    [HarmonyPatch]
+    public static class Throwable_Projectile_HitData_Patch
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            yield return AccessTools.Method(typeof(Projectile), nameof(Projectile.OnHit));
+            yield return AccessTools.Method(typeof(Projectile), nameof(Projectile.DoAOE));
+        }
+
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            ConstructorInfo constructor = AccessTools.Constructor(typeof(HitData));
+            MethodInfo restoreToolTier = AccessTools.Method(typeof(Throwable_Projectile_HitData_Patch), nameof(RestoreToolTier));
+            List<CodeInstruction> result = new List<CodeInstruction>();
+            int matches = 0;
+            foreach (CodeInstruction instruction in instructions)
+            {
+                result.Add(instruction);
+                if (instruction.opcode == OpCodes.Newobj && Equals(instruction.operand, constructor))
+                {
+                    result.Add(new CodeInstruction(OpCodes.Dup));
+                    result.Add(new CodeInstruction(OpCodes.Ldarg_0));
+                    result.Add(new CodeInstruction(OpCodes.Call, restoreToolTier));
+                    ++matches;
+                }
+            }
+
+            if (matches == 0)
+            {
+                throw new InvalidOperationException("Throwable: projectile impact HitData creation was not found.");
+            }
+
+            return result;
+        }
+
+        private static void RestoreToolTier(HitData hit, Projectile projectile)
+        {
+            HitData originalHit = projectile.m_originalHitData;
+            if (originalHit == null || projectile.m_weapon == null ||
+                !projectile.m_weapon.HasMagicEffect(MagicEffectType.Throwable, includeSocketed: true))
+            {
+                return;
+            }
+
+            // Projectile impacts create fresh hit data and omit the weapon's tool tier.
+            // Keep the launch-time tier and world level for the normal resource checks.
+            hit.m_toolTier = originalHit.m_toolTier;
+            hit.m_itemWorldLevel = originalHit.m_itemWorldLevel;
         }
     }
 

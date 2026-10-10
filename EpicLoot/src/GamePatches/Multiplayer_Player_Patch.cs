@@ -1,4 +1,5 @@
 ﻿using EpicLoot.Data;
+using EpicLoot.LegendarySystem;
 using EpicLoot.Magic.MagicItemEffects;
 using EpicLoot.MagicItemEffects.Shards;
 using HarmonyLib;
@@ -107,6 +108,12 @@ namespace EpicLoot
 
                 timer[0] = 10f;
 
+                if (__instance == Player.m_localPlayer)
+                {
+                    SetAura.Publish(__instance);
+                    SetArmorTint.Publish(__instance);
+                }
+
                 if (__instance != null && __instance != Player.m_localPlayer &&
                     __instance.m_nview != null && __instance.m_nview.GetZDO() is ZDO zdo)
                 {
@@ -126,6 +133,8 @@ namespace EpicLoot
                     {
                         __instance.SetupVisEquipment(__instance.m_visEquipment, false);
                     }
+
+                    SetAura.Refresh(__instance);
                 }
             }
 
@@ -225,13 +234,19 @@ namespace EpicLoot
         [HarmonyPatch]
         public static class WatchMultiplayerMagicEffects_Player_Patch
         {
+            // The cache is reset first: EquipItem unequips the item it displaces from inside its own body, and that
+            // UnequipItem's postfix fills the cache for the loadout without the new item, which this postfix would
+            // otherwise read back.
             [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.EquipItem))]
             [HarmonyPostfix]
             public static void EquipItem_Postfix(Humanoid __instance)
             {
                 if (__instance is Player player)
                 {
+                    EquipmentEffectCache.Reset(player);
                     UpdateRichesAndLuck(player);
+                    SetAura.Publish(player);
+                    SetArmorTint.Publish(player);
                 }
             }
 
@@ -241,7 +256,10 @@ namespace EpicLoot
             {
                 if (__instance is Player player)
                 {
+                    EquipmentEffectCache.Reset(player);
                     UpdateRichesAndLuck(player);
+                    SetAura.Publish(player);
+                    SetArmorTint.Publish(player);
                 }
             }
 
@@ -260,12 +278,15 @@ namespace EpicLoot
                     float currentZdoHeadHunter = zdo.GetFloat(Headhunter.ZdoValueKey);
                     // Prosperity is read wherever loot rolls: the creature's or chest's owner.
                     float currentZdoProsperity = zdo.GetFloat(Prosperity.ZdoValueKey);
+                    // Life Siphon is read by the owner of whatever this player hits.
+                    float currentZdoLifeSiphon = zdo.GetFloat(MagicItemEffects.LifeSiphon.ZdoValueKey);
 
                     int currentLuck = (int)player.GetTotalActiveMagicEffectValue(MagicEffectType.Luck);
                     int currentRiches = (int)player.GetTotalActiveMagicEffectValue(MagicEffectType.Riches);
                     float currentLuckyLoot = player.GetTotalActiveMagicEffectValue(MagicEffectType.LuckyLoot);
                     float currentHeadHunter = player.GetTotalActiveMagicEffectValue(MagicEffectType.HeadHunter);
                     float currentProsperity = player.GetTotalActiveMagicEffectValue(MagicEffectType.Prosperity);
+                    float currentLifeSiphon = player.GetTotalActiveMagicEffectValue(MagicEffectType.LifeSiphon);
 
                     if (currentLuck != currentZdoLuck)
                     {
@@ -290,6 +311,11 @@ namespace EpicLoot
                     if (currentProsperity != currentZdoProsperity)
                     {
                         zdo.Set(Prosperity.ZdoValueKey, currentProsperity);
+                    }
+
+                    if (currentLifeSiphon != currentZdoLifeSiphon)
+                    {
+                        zdo.Set(MagicItemEffects.LifeSiphon.ZdoValueKey, currentLifeSiphon);
                     }
                 }
             }

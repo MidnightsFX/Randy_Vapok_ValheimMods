@@ -322,6 +322,14 @@ namespace EpicLoot.Magic
 
             // entry of all of the currently defined meta sets as they are valid targets also
             List<string> metaItemSetNames = LootRoller.Config.ItemSets.Select(x => x.Name).ToList();
+            // Every table name up front: a reference to a table further down the file -- or a boss table's
+            // reference to its own level 1 -- is as valid as one to a table above it. ItemSets are checked
+            // against it too: a set member or a rarity-keyed set's map may name "Table.N" as well.
+            List<string> metaLootTables = LootRoller.Config.LootTables
+                .Where(x => !string.IsNullOrEmpty(x?.Object))
+                .Select(x => x.Object)
+                .Distinct()
+                .ToList();
             // List of all of the currently valid items so we can always determine if its at least valid
             List<string> validItems = [];
             foreach (ItemTypeInfo entry in foundByCategory.Values)
@@ -355,9 +363,9 @@ namespace EpicLoot.Magic
                         continue;
                     }
 
-                    if (IsValidLootEntryName(loot.Item, metaItemSetNames, null, validItems, magicMats))
+                    if (IsValidLootEntryName(loot.Item, metaItemSetNames, metaLootTables, validItems, magicMats))
                     {
-                        PruneRarityItems(loot, lis.Name, metaItemSetNames, null, validItems, magicMats);
+                        PruneRarityItems(loot, lis.Name, metaItemSetNames, metaLootTables, validItems, magicMats);
                         entries.Add(loot);
                         addedItems.Add(loot.Item);
                         continue;
@@ -415,13 +423,6 @@ namespace EpicLoot.Magic
             }
 
             EpicLoot.Log($"Checking loot tables for invalid entries.");
-            // Every table name up front: a reference to a table further down the file -- or a boss table's
-            // reference to its own level 1 -- is as valid as one to a table above it.
-            List<string> metaLootTables = LootRoller.Config.LootTables
-                .Where(x => !string.IsNullOrEmpty(x?.Object))
-                .Select(x => x.Object)
-                .Distinct()
-                .ToList();
             foreach (LootTable lt in LootRoller.Config.LootTables)
             {
                 if (lt == null)
@@ -859,7 +860,8 @@ namespace EpicLoot.Magic
         // "Object.Level" reference to another table, or any other real prefab -- which is what covers
         // shard stones and every non-equipment item a table may drop.
         //
-        // metaLootTables is null for the ItemSet pass, where table references are not a valid target.
+        // Both passes accept table references: ResolveLootDrop follows one from an ItemSet member or a
+        // rarity map as readily as from a table, so rejecting it here would delete a working entry.
         private static bool IsValidLootEntryName(string name, List<string> metaItemSetNames,
             List<string> metaLootTables, List<string> validItems, List<string> magicMats)
         {

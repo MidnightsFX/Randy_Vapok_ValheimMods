@@ -1106,10 +1106,10 @@ internal sealed class RowBinder {
     }
 
     // Enchanting table upgrade costs: pick a feature, and every level of it is shown at once, a Level
-    // block per level (its name, + for another item, then its items, each with Remove). The number of
-    // levels is the file's: each level also needs an UpgradeValues entry. When Items lays the blocks out
-    // with a GridLayoutGroup, its cell height follows the level with the most items, so no block spills
-    // into the one below it.
+    // block per level (its name, + for another item, then its items, each with Remove). The levels shown
+    // are Unlock up to the feature's staged max level (QuickConfigBindings.FitUpgradeLevels). When Items
+    // lays the blocks out with a GridLayoutGroup, its cell height follows the level with the most items,
+    // so no block spills into the one below it.
     private bool WireUpgradeCosts(BoundRow row) {
         Binding binding = row.Binding;
         ScrollRect items = QuickConfigUi.FindComponent<ScrollRect>(row.Root.transform, "Items");
@@ -1183,17 +1183,21 @@ internal sealed class RowBinder {
 
         row.Sync = () => {
             UpgradeCostsValue value = Value();
+            // The levels follow each feature's max level on the same page. Read-only (another machine's
+            // file), they are only cut to it: padding there would be an edit that cannot be saved.
+            if (row.ReadOnly == false) { QuickConfigBindings.FitUpgradeLevels(staged, value); }
             if (feature.HasValue == false || value.Get(feature.Value) == null) {
                 feature = value.Levels.Keys.OrderBy(f => f).Cast<EnchantingFeature?>().FirstOrDefault();
             }
             Caption(featureButton, feature.HasValue ? FeatureName(feature.Value) : "");
             List<List<CostEntry>> levels = (feature.HasValue ? value.Get(feature.Value) : null) ?? new List<List<CostEntry>>();
-            string signature = $"{feature}|{RuntimeHelpers.GetHashCode(levels)}|" + string.Join("|", levels.Select(level => level == null
+            int shown = feature.HasValue ? Math.Min(levels.Count, QuickConfigBindings.UpgradeLevelsShown(staged, feature.Value, levels.Count)) : 0;
+            string signature = $"{feature}|{shown}|{RuntimeHelpers.GetHashCode(levels)}|" + string.Join("|", levels.Take(shown).Select(level => level == null
                 ? "-"
                 : RuntimeHelpers.GetHashCode(level) + ":" + string.Join(",", level.Select(entry => $"{entry.Item}*{entry.Amount}"))));
-            blocks.Rebuild(Enumerable.Range(0, levels.Count).ToList(), signature, (block, index) => BindLevel(block, levels, index), row.Root);
+            blocks.Rebuild(Enumerable.Range(0, shown).ToList(), signature, (block, index) => BindLevel(block, levels, index), row.Root);
             if (grid != null) {
-                int most = levels.Count == 0 ? 0 : levels.Max(level => level?.Count ?? 0);
+                int most = shown == 0 ? 0 : levels.Take(shown).Max(level => level?.Count ?? 0);
                 grid.cellSize = new Vector2(grid.cellSize.x, blockHeight(Math.Max(1, most)));
             }
         };

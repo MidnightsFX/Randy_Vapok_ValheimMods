@@ -29,6 +29,13 @@ namespace EpicLoot.MagicItemEffects
         {
             public static bool Prefix(Character __instance)
             {
+                // An Earthshaker dive is committed: no air jump (it would spend a charge and blind the dive's
+                // landing check for 0.1 s) and no grapple re-pull. Checked first, ahead of everything below.
+                if (Earthshaker.IsDiving(__instance))
+                {
+                    return false;
+                }
+
                 if (Player.m_localPlayer == null || __instance != Player.m_localPlayer)
                 {
                     return true;

@@ -105,7 +105,8 @@ internal static class QuickConfigPicker {
         int shown = Mathf.Min(matches.Count, MaxVisible);
         for (int i = 0; i < shown; i++) {
             string option = matches[i];
-            GameObject entry = MakeEntry(option == current ? $"<color=#FFCB6B>{option}</color>" : option);
+            // Entry captions are orange like every button, so the current value is marked in Jotunn's ValheimYellow.
+            GameObject entry = MakeEntry(option == current ? $"<color=#FFE300>{option}</color>" : option);
             Button button = entry.GetComponent<Button>() ?? entry.GetComponentInChildren<Button>(true);
             QuickConfigUi.Wire(button, () => {
                 Action<string> callback = onPick;

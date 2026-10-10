@@ -41,12 +41,8 @@
     {
       "Name": "EnchantingMats",
       "Loot": [
-        { "Item": "Tier0Mats" },
-        { "Item": "Tier1Mats" },
-        { "Item": "Tier2Mats" },
-        { "Item": "Tier3Mats" },
-        { "Item": "Tier4Mats" },
-        { "Item": "Tier5Mats" }
+        { "Item": "Tier0Mats", "Rarity": [ 1, 1, 1, 1, 1, 1 ],
+          "RarityItems": { "Magic": "Tier0Mats", "Rare": "Tier1Mats", "Epic": "Tier2Mats", "Legendary": "Tier3Mats", "Mythic": "Tier4Mats", "Ancient": "Tier5Mats" } }
       ]
     },
     {
@@ -100,12 +96,8 @@
     {
       "Name": "EnchantingRunestones",
       "Loot": [
-        { "Item": "RunestoneMagic"      },
-        { "Item": "RunestoneRare"       },
-        { "Item": "RunestoneEpic"       },
-        { "Item": "RunestoneLegendary"  },
-        { "Item": "RunestoneMythic"     },
-        { "Item": "RunestoneAncient"    }
+        { "Item": "RunestoneMagic", "Rarity": [ 1, 1, 1, 1, 1, 1 ],
+          "RarityItems": { "Magic": "RunestoneMagic", "Rare": "RunestoneRare", "Epic": "RunestoneEpic", "Legendary": "RunestoneLegendary", "Mythic": "RunestoneMythic", "Ancient": "RunestoneAncient" } }
       ]
     },
     {

@@ -82,7 +82,9 @@ namespace EpicLoot.MagicItemEffects
                 player.HasActiveMagicEffect(MagicEffectType.TripleBowShot, out float _))
             {
                 var cfg = GetEffectConfig(MagicEffectType.TripleBowShot);
-                if (RollChance(cfg))
+                // Decided here, before vanilla takes the ammo: a proc the player cannot pay for fires an ordinary shot,
+                // and must not have taken the extra arrows first.
+                if (RollChance(cfg) && CanPayExtraCost(player, __instance, GetCostScale(cfg, 2f)))
                 {
                     _pendingShot = PendingShotType.TripleBow;
                     IsTripleShotActive = true;
@@ -130,13 +132,15 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
+        private static float GetCostScale(Dictionary<string, float> configuration, float fallback)
+        {
+            return configuration != null && configuration.ContainsKey(COSTSCALE_KEY) ? configuration[COSTSCALE_KEY] : fallback;
+        }
+
         private static bool ModifyShot(ref Player player, ref Attack attack, Dictionary<string, float> configuration,
             float damage, float costScale, float accuracy, int projectiles)
         {
-            if (configuration != null && configuration.ContainsKey(COSTSCALE_KEY))
-            {
-                costScale = configuration[COSTSCALE_KEY];
-            }
+            costScale = GetCostScale(configuration, costScale);
 
             // Paid first, so a proc the player cannot afford fires an ordinary shot and costs nothing extra.
             if (!TryPayExtraCost(player, attack, costScale))
@@ -217,6 +221,31 @@ namespace EpicLoot.MagicItemEffects
                 return true;
             }
 
+            if (!CanPayExtraCost(player, attack, costScale))
+            {
+                return false;
+            }
+
+            float extra = Mathf.Max(0f, costScale - 1f);
+            float extraStamina = attack.GetAttackStamina() * extra;
+            float extraEitr = attack.GetAttackEitr() * extra;
+
+            if (extraStamina > 0f) { player.UseStamina(extraStamina); }
+            if (extraEitr > 0f) { player.UseEitr(extraEitr); }
+
+            // Not gated, as vanilla does not gate its own. Clamp to leave 1 HP, as vanilla does at both of its own
+            // attack-health spends (Attack.cs DoMeleeAttack / FireProjectileBurst): Character.UseHealth clamps to 0,
+            // not 1, so an unclamped charge here can take the player to 0 and kill them.
+            float extraHealth = attack.GetAttackHealth() * extra;
+            if (extraHealth > 0f) { player.UseHealth(Mathf.Min(player.GetHealth() - 1f, extraHealth)); }
+
+            return true;
+        }
+
+        // The check half of TryPayExtraCost: whether the player has what the extra projectiles cost.
+        private static bool CanPayExtraCost(Player player, Attack attack, float costScale)
+        {
+            bool perBurst = attack.m_perBurstResourceUsage;
             float extra = Mathf.Max(0f, costScale - 1f);
             float stamina = attack.GetAttackStamina();
             float eitr = attack.GetAttackEitr();
@@ -229,21 +258,7 @@ namespace EpicLoot.MagicItemEffects
                 return false;
             }
 
-            if (extraEitr > 0f && !player.HaveEitr((perBurst ? eitr : 0f) + extraEitr * Game.m_eitrRate))
-            {
-                return false;
-            }
-
-            if (extraStamina > 0f) { player.UseStamina(extraStamina); }
-            if (extraEitr > 0f) { player.UseEitr(extraEitr); }
-
-            // Not gated, as vanilla does not gate its own. Clamp to leave 1 HP, as vanilla does at both of its own
-            // attack-health spends (Attack.cs DoMeleeAttack / FireProjectileBurst): Character.UseHealth clamps to 0,
-            // not 1, so an unclamped charge here can take the player to 0 and kill them.
-            float extraHealth = attack.GetAttackHealth() * extra;
-            if (extraHealth > 0f) { player.UseHealth(Mathf.Min(player.GetHealth() - 1f, extraHealth)); }
-
-            return true;
+            return !(extraEitr > 0f) || player.HaveEitr((perBurst ? eitr : 0f) + extraEitr * Game.m_eitrRate);
         }
     }
 

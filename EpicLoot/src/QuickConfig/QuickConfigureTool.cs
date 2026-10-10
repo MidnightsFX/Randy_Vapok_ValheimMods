@@ -23,8 +23,8 @@ internal static class QuickConfigureTool {
 
     /// <summary>Page prefabs in display order. Page_Welcome is only shown in tutorial mode.</summary>
     internal static readonly string[] PageOrder = {
-        "Page_Welcome", "Page_Balance", "Page_Rarity", "Page_LootDrops", "Page_Shardstones",
-        "Page_EnchantingTable", "Page_Merchant", "Page_Bounties", "Page_Interface", "Page_ItemColors",
+        "Page_Welcome", "Page_Balance", "Page_LootDrops", "Page_Shardstones", "Page_EnchantingTable",
+        "Page_Merchant", "Page_Bounties", "Page_Interface", "Page_ItemColors", "Page_Rarity",
         "Page_EffectTuning", "Page_Advanced"
     };
 

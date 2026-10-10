@@ -125,6 +125,13 @@ public partial class MagicTooltip {
     }
 
     private void AddEitrUse() {
+        // Conjured Arrows (a set bonus) makes every shot of a bow cost eitr. The figure is the attack's own cost
+        // call, so every modifier is already in it.
+        if (ConjuredArrows.TryGetShotCost(item, out float conjuredCost)) {
+            text.Append($"\n$item_eitruse: <color={magicColor}>{conjuredCost:0.#}</color>");
+            return;
+        }
+
         // TODO: place logic into helper method
         bool hasSpellSword = magicItem.HasEffect(MagicEffectType.SpellSword);
 

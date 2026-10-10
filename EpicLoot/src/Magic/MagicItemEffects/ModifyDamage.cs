@@ -37,6 +37,7 @@ public static class ModifyDamage
         DamageIncreaseFromMovementPenalty.ModifyWeaponDamage(item, ref damage);
         IncreaseHarvestDamage.ModifyWeaponDamage(item, ref damage);
         ConvertPhysicalDamageToLightning.ModifyWeaponDamage(item, ref damage);
+        CoilingVenom.ModifyWeaponDamage(ref damage);
         IcyWeight.ModifyWeaponDamage(item, ref damage);
         ReduceArmorIncreaseDamage.ModifyWeaponDamage(item, ref damage);
         NecroticFire.ModifyWeaponDamage(item, ref damage);
@@ -125,6 +126,9 @@ public static class ModifyDamage
                 player, item, MagicEffectType.AddPiercingDamage, 0.01f);
         }
 
+        // Added damage too, so the multipliers below scale it.
+        EitrInfusion.AddInfusedDamage(player, item, ref damages);
+
         // Then modify
 
         if (MagicEffectsHelper.HasActiveMagicEffectOnWeapon(player, item,
@@ -139,7 +143,7 @@ public static class ModifyDamage
             ModifyElementalDamage(ref damages, 1.0f + elementalDamageEffectValue);
         }
 
-        if (MagicEffectsHelper.HasActiveMagicEffectOnWeapon(player, item,
+        if (Spellsword.IsSpellswordWeapon(item) && MagicEffectsHelper.HasActiveMagicEffectOnWeapon(player, item,
             MagicEffectType.SpellSword, out float damageEffectValue, 0.01f))
         {
             modifyAll += damageEffectValue;

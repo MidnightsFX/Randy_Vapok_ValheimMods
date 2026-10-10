@@ -44,10 +44,16 @@ public static class QuickConfigPrefabBuilder
     private const float LabelW = 200f;
     private const float SmallButtonW = 40f;
 
-    private static readonly Color Beige = Hex("#CDBE91");
-    private static readonly Color Yellow = Hex("#FFE083");
-    private static readonly Color Orange = Hex("#FFB366");
-    private static readonly Color FieldText = Hex("#EDE3C9");
+    // The text palette of Star Level System's Quick Configure, which builds its panels with Jotunn's
+    // GUIManager: these are GUIManager.ValheimBeige/ValheimYellow/ValheimOrange, copied because this
+    // editor assembly does not reference Jotunn. Beige for setting labels and notes; yellow for titles,
+    // section and column headers; orange for button captions, the names of list entries and warnings;
+    // white for typed text with a grey placeholder, as Jotunn's input fields have.
+    private static readonly Color Beige = new Color(0.8529f, 0.725f, 0.5331f, 1f);
+    private static readonly Color Yellow = new Color(1f, 0.889f, 0f, 1f);
+    private static readonly Color Orange = new Color(1f, 0.631f, 0.235f, 1f);
+    private static readonly Color FieldText = Color.white;
+    private static readonly Color Placeholder = Color.grey;
     private static readonly Color Dim = new Color(0f, 0f, 0f, 0.45f);
     // item_background.png is a white sliced sprite meant to be tinted; untinted it reads as a white box.
     private static readonly Color DarkField = new Color(0.10f, 0.08f, 0.06f, 0.85f);
@@ -302,12 +308,6 @@ public static class QuickConfigPrefabBuilder
                 new RowDef("Row_RarityCounts", "json:loottables:RarityCounts", "Enchantments and sockets of", 356f),
             }),
 
-        new PageDef("Page_Rarity", "$mod_epicloot_cfg_page_rarity", new[]
-        {
-            H("Drops by biome"),
-            BD("json:loottables:LootTables", "Loot table", 560f),
-        }),
-
         new PageDef("Page_LootDrops", "$mod_epicloot_cfg_page_lootdrops",
             new[]
             {
@@ -487,6 +487,12 @@ public static class QuickConfigPrefabBuilder
             X("", "Pick a named colour or type a #hex value. The right-hand button picks the icon colour used for that rarity's crafting materials.", 44f),
         }),
 
+        new PageDef("Page_Rarity", "$mod_epicloot_cfg_page_rarity", new[]
+        {
+            H("Drops by biome"),
+            BD("json:loottables:LootTables", "Loot table", 560f),
+        }),
+
         new PageDef("Page_EffectTuning", "$mod_epicloot_cfg_page_effecttuning", new[]
         {
             C("GatedFreebuildMode", "Gated Freebuild Mode"),
@@ -497,19 +503,19 @@ public static class QuickConfigPrefabBuilder
 
         new PageDef("Page_Advanced", "$mod_epicloot_cfg_page_advanced", new[]
         {
-            H("Equipment auto-add"),
+            H("Auto-add equipment and creatures"),
             T("AutoAddEquipment", "Auto Add Equipment"),
             T("AutoRemoveEquipmentNotFound", "    Auto Remove Equipment Not Found"),
             T("OnlyAddEquipmentWithRecipes", "    Only Add Equipment With Recipes"),
             T("AutoAddRemoveEquipmentFromVendor", "    Add / Remove From Vendor"),
             T("AutoAddRemoveEquipmentFromLootLists", "    Add / Remove From Loot Lists"),
+            T("AutoAddCreaturesToLootTables", "Auto Add Creatures To Loot Tables"),
             H("Diagnostics"),
             T("_loggingEnabled", "Logging Enabled"),
             P("_logLevel", "Log Level"),
             T("EnableHotReloadPatches", "Enable Hot Reloading Patches"),
             T("AlwaysRefreshCoreConfigs", "Always Refresh Core Configs"),
             X("", "Always Refresh Core Configs overwrites every baseconfig file with the mod defaults on startup. This deletes any modifications to the core configs.", 40f),
-            T("VerifyPenaltyScalingCache", "Verify Penalty Scaling Cache"),
             T("Common.EnableDebugMode", "Debug Mode"),
             S("Common.ConfigApplyDelay", "Config Apply Delay"),
             T("AlwaysShowWelcomeMessage", "Show Welcome Wizard Next Launch"),
@@ -655,11 +661,11 @@ public static class QuickConfigPrefabBuilder
     private static void BuildBiomeCostsRow()
     {
         GameObject row = NewListRow("Row_BiomeCosts", 270f, "Biome costs", out Transform head, out Transform content);
-        AddLabel(head, "CostHead", "Coins", 12, Beige, flexible: false, preferredWidth: 80f).alignment = TextAlignmentOptions.MidlineRight;
-        AddLabel(head, "TokensHead", "Forest tokens", 12, Beige, flexible: false, preferredWidth: 100f).alignment = TextAlignmentOptions.MidlineRight;
+        AddLabel(head, "CostHead", "Coins", 12, Yellow, flexible: false, preferredWidth: 80f).alignment = TextAlignmentOptions.MidlineRight;
+        AddLabel(head, "TokensHead", "Forest tokens", 12, Yellow, flexible: false, preferredWidth: 100f).alignment = TextAlignmentOptions.MidlineRight;
 
         Transform item = NewListItem(content);
-        AddLabel(item, "Name", "Biome", 14, Beige, flexible: true, preferredWidth: 150f);
+        AddLabel(item, "Name", "Biome", 14, Orange, flexible: true, preferredWidth: 150f);
         MakeInputField(item, "Cost", 80f, 26f, TMP_InputField.ContentType.IntegerNumber, TextAlignmentOptions.MidlineRight);
         MakeInputField(item, "Tokens", 100f, 26f, TMP_InputField.ContentType.IntegerNumber, TextAlignmentOptions.MidlineRight);
 
@@ -856,7 +862,7 @@ public static class QuickConfigPrefabBuilder
         hh.childControlHeight = true;
         hh.childForceExpandWidth = false;
         hh.childForceExpandHeight = false;
-        AddLabel(headGo.transform, "Label", label, 15, Beige, flexible: true);
+        AddLabel(headGo.transform, "Label", label, 15, Orange, flexible: true);
         head = headGo.transform;
         return row;
     }
@@ -890,7 +896,7 @@ public static class QuickConfigPrefabBuilder
         hh.childControlHeight = true;
         hh.childForceExpandWidth = false;
         hh.childForceExpandHeight = false;
-        AddLabel(head.transform, "Label", label, 14, Beige, flexible: true);
+        AddLabel(head.transform, "Label", label, 14, Yellow, flexible: true);
         AddLabel(head.transform, "Total", "", 12, Orange, flexible: false, preferredWidth: 170f).alignment = TextAlignmentOptions.MidlineRight;
         if (openKeys)
         {
@@ -908,7 +914,7 @@ public static class QuickConfigPrefabBuilder
         }
         else
         {
-            AddLabel(item, "Name", "Rarity", 13, Beige, flexible: false, preferredWidth: 80f);
+            AddLabel(item, "Name", "Rarity", 13, Orange, flexible: false, preferredWidth: 80f);
         }
         MakeSlider(item, "Slider", 100f).GetComponent<LayoutElement>().flexibleWidth = 1f;
         MakeInputField(item, "Value", 44f, 24f, TMP_InputField.ContentType.IntegerNumber, TextAlignmentOptions.MidlineRight);
@@ -1372,7 +1378,7 @@ public static class QuickConfigPrefabBuilder
         RectTransform rt = (RectTransform)go.transform;
         rt.sizeDelta = new Vector2(w, h);
 
-        TextMeshProUGUI label = AddText(go.transform, "Text", text, fontSize, FieldText, TextAlignmentOptions.Center);
+        TextMeshProUGUI label = AddText(go.transform, "Text", text, fontSize, Orange, TextAlignmentOptions.Center);
         Stretch(label.gameObject);
         RectTransform lrt = label.rectTransform;
         if (w <= SmallButtonW)
@@ -1509,7 +1515,7 @@ public static class QuickConfigPrefabBuilder
         art.offsetMax = new Vector2(-8f, -3f);
         area.AddComponent<RectMask2D>();
 
-        TextMeshProUGUI placeholder = AddText(area.transform, "Placeholder", "", (int)Mathf.Max(11f, h * 0.5f), new Color(Beige.r, Beige.g, Beige.b, 0.5f), alignment);
+        TextMeshProUGUI placeholder = AddText(area.transform, "Placeholder", "", (int)Mathf.Max(11f, h * 0.5f), Placeholder, alignment);
         Stretch(placeholder.gameObject);
         placeholder.fontStyle = FontStyles.Italic;
         placeholder.overflowMode = TextOverflowModes.Overflow;
@@ -1658,11 +1664,6 @@ public static class QuickConfigPrefabBuilder
         Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
         if (sprite == null) { Debug.LogWarning("[QuickConfig] Sprite not found: " + path); }
         return sprite;
-    }
-
-    private static Color Hex(string hex)
-    {
-        return ColorUtility.TryParseHtmlString(hex, out Color c) ? c : Color.white;
     }
 
     // Asks each assembly for the one type by name rather than enumerating all of its types: a plugin
