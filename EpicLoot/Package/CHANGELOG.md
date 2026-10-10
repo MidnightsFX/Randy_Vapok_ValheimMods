@@ -1,75 +1,66 @@
 **0.15.0**
-- Adds Quick Configure, an in-game settings panel on the main and pause menus where hosts can also edit loot, bounty and effect values.
-- A one-time setup wizard replaces the old welcome panel, and the config update prompt and other mods' welcome popups now take turns with it.
-- Loot keeps improving with every star a creature has, and server admins can tune how much stars count and preview a creature's drops from the console.
-- Creatures added by other mods now drop magic loot suited to their biome and strength without needing a patch.
-- Many vanilla creatures that dropped no magic loot now do, several tougher ones count as elites, and harmless animals no longer drop it.
-- Elite creatures can optionally drop a runestone matching their biome.
-- Loot tables can pick from an item set by the rarity they roll, and the enchanting material and runestone sets now work this way.
-- Enchanting materials named by a loot table always drop as themselves, and Quick Configure no longer overwrites the rarity of shardstone and similar loot entries.
-- Late-game bosses drop extra of their own boss items when several players take part, and extra trophies, wishbones and crypt keys now add to the normal drop.
-- Old-style loot tables are converted to the new format automatically with a backup, and the loot check at world load covers every level without ever emptying a table.
-- Uniques and item sets can now drop at any rarity, set pieces of different rarities count toward the same set, and set items say so in their tooltip.
-- Set runes let you extract an item set from one item and etch it onto another at the enchanting table.
-- New Wrath of the Thunderer set, whose full set lets you hurl your melee weapon to slam down where you aim.
-- New Trickster's Guile set, whose full set takes you behind an enemy you keep your aim on for a heavy strike.
-- New Dverger Arsenal set, whose full set turns your crossbow bolts into lobbed fireballs that explode where you aim.
-- New Egil's Mark set, whose full set makes your arrows fly faster and hit harder at the cost of a much slower draw.
-- New Rime of Élivágar set for mages, whose full set surrounds you with drifting snow and freezes the water beneath you so you can walk across it for a steady cost of Eitr.
-- New Fylgja's Bond set for rangers, whose full set binds a tamed creature as a spirit animal that fights beside you.
-- New Freyja's Falcon set for spear fighters, whose full set gives you dark wings and lets you dive from the air to slam the ground.
-- New Bölþorn's Bane set, whose full set sends your crossbow bolts through every creature in their path.
-- New Heiðr's Seiðr set for mages who use a bow, which trains Elemental Magic with your bow and, as a full set, fires arrows conjured from Eitr.
-- New Mímir's Well set for mages, which trades health for a deep pool of Eitr and, as a full set, wraps you in a barrier that takes damage from your Eitr before your health.
-- New Einherjar set for spellswords, whose full set pours your Eitr into your weapon for a spell of extra damage.
-- New Ullr's Hunt set for archers, whose full set lets your arrows mark creatures for a heavy axe or polearm hit.
-- New Hel's Covenant set for blood mages, whose full set raises creatures slain by you or your summons as thralls that fight for you.
-- New Huldufólk set for rogues, whose full set lets you vanish in smoke when you dodge near enemies and strike from hiding.
-- New Surtr's Brand set for two-handed axes and swords, whose full set makes your combo finishers and secondary attacks erupt in Brenna's fire.
-- New Hel's Court armor set for blood fighters, whose full set drains enemies so they cannot heal while every player striking them heals.
-- New Hrungnir's Stand set for tower shields, whose full set stores charge from your blocks and releases a rock shockwave on the next one.
-- New Coils of the World Serpent set for spear fighters, which turns part of your physical damage into venom that ignores resistance and, as a full set, dooms heavily envenomed enemies to walk nine steps and fall dead.
-- New Gullveig's Rebirth set for elemental mages, whose full set makes you a Hexen for as long as you wear it: a Jotun Witch's body, magic blast and lightning bolt, and flight that burns Eitr and sinks you to the ground when it runs dry.
-- Wearing a full legendary set now tints your armor in the set's colors, and nine sets also wrap you in a matching aura, from Thor's lightning to the wraith smoke of Hel's Covenant.
-- Lifesteal and Bloodletting from a set bonus now work with any weapon.
-- New magic effect Prosperity gives creatures and chests near you a chance to roll their magic loot again.
-- New magic effect Green Thumb on the Cultivator makes the plants you sow grow faster.
-- New magic effect Close Quarter on melee weapons reduces how far your hits knock enemies back.
-- The grappling hook gets its own enchantments, Swift Reel and Long Line, and is treated as a tool rather than a weapon for loot and damage effects.
-- The enchanting table's search boxes can now find items by their enchantments.
-- Adds optional Item Favorite Framework support, so favorited items are never offered for destruction at the enchanting table and show a star.
-- Project Auga support is back for Auga's latest Valheim release.
-- A new server option stops enchantments that only work at critical health from rolling.
-- Loot tables can now give items as many enchantments as there are to roll.
-- The enchanting table uses Valheim's own fonts and controller button icons, and shows how much of each material is in nearby storage.
-- Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
-- Item tooltips now fit their content and stay beside the cursor, and the comparison tooltip follows the hovered item.
-- The trader and tempering panels only move while a key is held or by their corner handle, so clicking them no longer nudges them.
-- Storage mods can now let the enchanting table work on items directly in their chests.
-- The compendium lists each set once with its rarities, bonus values and each piece's requirements.
-- Lox armor is now sorted into Plains loot.
-- Console commands for spawning uniques and set pieces now take a rarity, and new ones spawn runestones with exact effects and force rare effects for testing.
-- Less stutter around chests, and when first opening the enchanting table or one of its tabs.
-- Fixes enchanting changes to items in nearby chests reverting after the materials were spent, which could also duplicate socketed stones.
-- Fixes some creatures and chests that dropped no magic loot, such as the fallen warriors at memorial sites and the Plains stone tower chest, and an error with chest-style tables on high-star creatures.
-- Fixes the Dvergr rogues' crossbows showing up as a second Arbalest in loot, the merchant and item gating.
-- Fixes the crypt key and wishbone drop settings being ignored, and players who hide their map position counting as near a boss.
-- Fixes Stagger Duration shortening staggers on most creatures and not working from projectiles in multiplayer.
-- Fixes bounty creatures losing their extra health after a reload or when another player's game took them over.
-- Fixes several set bonus problems, including duplicate pieces counting twice, tooltips miscounting pieces and a set roll sometimes giving a plain legendary.
-- Fixes disenchanting and re-enchanting an item with a durability bonus raising its durability without limit.
-- Fixes magic staff tooltips showing a wildly wrong health cost and leaving out the eitr cost.
-- Fixes Double Magic Shot costing more eitr than described, and it now fires a normal shot instead of wasting eitr on a failed cast when you cannot afford the second.
-- Fixes panel text going missing when another mod ships a broken copy of Valheim's fonts.
-- Fixes the rested carry weight shardstone losing its comfort bonus.
-- Fixes the Dark Red shardstone's ranged skills bonus doing nothing.
-- Fixes Bulk Up being able to push health regeneration below zero.
-- Fixes the rune page's Etch button staying enabled with no rune selected, and rarity color changes not reaching the enchanting table's buttons until the next login.
-- Fixes the rune page's enchantment list spilling over the rune list on items with many enchantments, and controllers now keep the selected enchantment in view on the augment and rune pages.
-- Lucky Craft now only saves materials when crafting, not when building, planting or tempering.
-- Quick Draw no longer makes crossbows reload slower at high skill, and Triple Shot from a set only affects bows and crossbows.
-- Coin Weighted Weapon now shows the damage bonus it actually gives at the coins you carry, and weapon tooltips include it before the weapon is equipped.
-- Coin Weighted Weapon's bonus now rises smoothly with no sudden jump, higher rolls always give more, and server admins can tune how it grows.
+
+Changes:
+* Sets overhaul!
+    * Sets can be configured to drop at any rarity, and set pieces of different rarities count toward the same set
+    * The rune feature can now extract and Etch sets from and to items
+* Adds Quick Configure, editable in game configs for most Epicloot options, and a 1 time setup tutorial
+* Improvements to the loot system (existing loot tables can be upgraded)
+    * new loot table format, with more control over what drops and how much
+    * Modded creatures are now automatically included in the loot tables
+* All Boss drops are now configuable, and the loot table changes are non-destructive
+* The enchanting table's search boxes can now find items by their enchantments.
+* Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
+* New Enchantments!
+    * Prosperity gives a chance for additional loot drops from creatures and chests
+    * Green Thumb on the Cultivator makes the plants you sow grow faster.
+    * Close Quarter on melee weapons reduces how far your hits knock enemies back.
+    * The grappling hook gets its own enchantments, Swift Reel and Long Line, and is treated as a tool rather than a weapon for loot and damage effects.
+
+Bugfixes:
+* Loot tables can now give items as many enchantments as there are to roll.
+* Item tooltips now fit their content and stay beside the cursor, and the comparison tooltip follows the hovered item.
+* The trader and tempering panels only move while a key is held or by their corner handle, so clicking them no longer nudges them.
+* Storage mods can now let the enchanting table work on items directly in their chests.
+* Lox armor is now sorted into Plains loot.
+* Less stutter around chests, and when first opening the enchanting table or one of its tabs.
+* Fixes the Dvergr rogues' crossbows showing up as a second Arbalest in loot, the merchant and item gating.
+* Fixes Stagger Duration shortening staggers on most creatures and not working from projectiles in multiplayer
+* Fixes bounty creatures losing their extra health after a reload or when another player's game took them over.
+* Fixes several set bonus problems, including duplicate pieces counting twice
+* Fixes disenchanting and re-enchanting an item with a durability bonus raising its durability without limit
+* Fixes magic staff tooltips showing a wildly wrong health cost and leaving out the eitr cost.
+* Fixes Double Magic Shot costing more eitr than described, fires a normal shot instead of wasting eitr on a failed cast
+* Fixes panel text going missing when another mod ships a broken copy of Valheim's fonts
+* Fixes the rested carry weight shardstone losing its comfort bonus
+* Fixes the Dark Red shardstone's ranged skills bonus doing nothing
+* Fixes Bulk Up being able to push health regeneration below zero
+* Lucky Craft now only saves materials when crafting, not when building, planting or tempering
+* Quick Draw no longer makes crossbows reload slower at high skill, and Triple Shot from a set only affects bows and crossbows
+* Coin Weighted Weapon now shows the damage bonus it actually gives at the coins you carry, and weapon tooltips include it before the weapon is equipped
+* Coin Weighted Weapon's bonus now rises smoothly with no sudden jump, higher rolls always give more
+
+New Sets:
+- Wrath of the Thunderer set, whose full set lets you hurl your melee weapon to slam down where you aim.
+- Trickster's Guile set, whose full set takes you behind an enemy you keep your aim on for a heavy strike.
+- Dverger Arsenal set, whose full set turns your crossbow bolts into lobbed fireballs that explode where you aim.
+- Egil's Mark set, whose full set makes your arrows fly faster and hit harder at the cost of a much slower draw.
+- Rime of Élivágar set for mages, whose full set surrounds you with drifting snow and freezes the water beneath you so you can walk across it for a steady cost of Eitr.
+- Fylgja's Bond set for rangers, whose full set binds a tamed creature as a spirit animal that fights beside you.
+- Freyja's Falcon set for spear fighters, whose full set gives you dark wings and lets you dive from the air to slam the ground.
+- Bölþorn's Bane set, whose full set sends your crossbow bolts through every creature in their path.
+- Heiðr's Seiðr set for mages who use a bow, which trains Elemental Magic with your bow and, as a full set, fires arrows conjured from Eitr.
+- Mímir's Well set for mages, which trades health for a deep pool of Eitr and, as a full set, wraps you in a barrier that takes damage from your Eitr before your health.
+- Einherjar set for spellswords, whose full set pours your Eitr into your weapon for a spell of extra damage.
+- Ullr's Hunt set for archers, whose full set lets your arrows mark creatures for a heavy axe or polearm hit.
+- Hel's Covenant set for blood mages, whose full set raises creatures slain by you or your summons as thralls that fight for you.
+- Huldufólk set for rogues, whose full set lets you vanish in smoke when you dodge near enemies and strike from hiding.
+- Surtr's Brand set for two-handed axes and swords, whose full set makes your combo finishers and secondary attacks erupt in Brenna's fire.
+- Hel's Court armor set for blood fighters, whose full set drains enemies so they cannot heal while every player striking them heals.
+- Hrungnir's Stand set for tower shields, whose full set stores charge from your blocks and releases a rock shockwave on the next one.
+- Coils of the World Serpent set for spear fighters, which turns part of your physical damage into venom that ignores resistance and, as a full set, dooms heavily envenomed enemies to walk nine steps and fall dead.
+- Gullveig's Rebirth set for elemental mages, whose full set makes you a Hexen for as long as you wear it: a Jotun Witch's body, magic blast and lightning bolt, and flight that burns Eitr and sinks you to the ground when it runs dry.
+
 
 
 **0.14.13**
