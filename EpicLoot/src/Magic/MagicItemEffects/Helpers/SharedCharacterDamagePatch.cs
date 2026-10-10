@@ -87,6 +87,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             SpiritAnimal.ModifyOutgoingHit(__instance, hit, hit.GetAttacker());
             // Last, so it sees fire/lightning that any earlier prefix converted into the hit.
             ElementalHitVariant.ModifyOutgoingHit(hit, hit.GetAttacker());
+            CoilingVenom.TagOutgoingHit(__instance, hit, hit.GetAttacker());
         }
 
         [HarmonyPostfix]

@@ -63,6 +63,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             // waste a reflect. ReflectDamage runs last (it reflects the hit after these reductions).
             OffSetAttack.ReduceIncomingHit(__instance, hit);
             ReflectiveDamage_Character_Damage_Patch.OnIncomingHit(__instance, hit);
+            CoilingVenom.OnIncomingHit(__instance, hit, attacker);
 
             // Reads the ATTACKER's mirrored value and siphons the target here, on its owner, before vanilla's
             // ApplyDamage, so the hit that siphons also heals.
@@ -80,6 +81,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             // On-damage-taken reactions.
             DamageTakenGivesAdrenaline.OnDamageTaken(__instance, hit);
             Bloodrage.OnDamageTaken(__instance, hit);
+            CoilingVenom.OnDamageTaken(__instance);
             // Retaliation needs someone to retaliate against: not a fall, lava, drowning or the like.
             if (hit.GetAttacker() != null) {
                 ElderForestsAid.OnDamageTaken(__instance, hit);

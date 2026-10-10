@@ -1,4 +1,5 @@
 ﻿using EpicLoot.Data;
+using EpicLoot.LegendarySystem;
 using EpicLoot.Magic.MagicItemEffects;
 using EpicLoot.MagicItemEffects.Shards;
 using HarmonyLib;
@@ -107,6 +108,12 @@ namespace EpicLoot
 
                 timer[0] = 10f;
 
+                if (__instance == Player.m_localPlayer)
+                {
+                    SetAura.Publish(__instance);
+                    SetArmorTint.Publish(__instance);
+                }
+
                 if (__instance != null && __instance != Player.m_localPlayer &&
                     __instance.m_nview != null && __instance.m_nview.GetZDO() is ZDO zdo)
                 {
@@ -126,6 +133,8 @@ namespace EpicLoot
                     {
                         __instance.SetupVisEquipment(__instance.m_visEquipment, false);
                     }
+
+                    SetAura.Refresh(__instance);
                 }
             }
 
@@ -236,6 +245,8 @@ namespace EpicLoot
                 {
                     EquipmentEffectCache.Reset(player);
                     UpdateRichesAndLuck(player);
+                    SetAura.Publish(player);
+                    SetArmorTint.Publish(player);
                 }
             }
 
@@ -247,6 +258,8 @@ namespace EpicLoot
                 {
                     EquipmentEffectCache.Reset(player);
                     UpdateRichesAndLuck(player);
+                    SetAura.Publish(player);
+                    SetArmorTint.Publish(player);
                 }
             }
 

@@ -179,6 +179,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
         MagicItemEffects.OverwhelmingLaunch.RegisterDisplayValues();
         MagicItemEffects.Artillery.RegisterDisplayValues();
         MagicItemEffects.Assassin.RegisterDisplayValues();
+        MagicItemEffects.NineSteps.RegisterDisplayValues();
+        MagicItemEffects.Hexen.RegisterDisplayValues();
         MagicItemEffects.Sniper.RegisterDisplayValues();
         MagicItemEffects.Frostwalker.RegisterDisplayValues();
         MagicItemEffects.SpiritAnimal.RegisterDisplayValues();

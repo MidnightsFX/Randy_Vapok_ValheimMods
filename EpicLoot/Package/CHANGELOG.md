@@ -28,6 +28,9 @@
 - New Surtr's Brand set for two-handed axes and swords, whose full set makes your combo finishers and secondary attacks erupt in Brenna's fire.
 - New Hel's Court armor set for blood fighters, whose full set drains enemies so they cannot heal while every player striking them heals.
 - New Hrungnir's Stand set for tower shields, whose full set stores charge from your blocks and releases a rock shockwave on the next one.
+- New Coils of the World Serpent set for spear fighters, which turns part of your physical damage into venom that ignores resistance and, as a full set, dooms heavily envenomed enemies to walk nine steps and fall dead.
+- New Gullveig's Rebirth set for elemental mages, whose full set makes you a Hexen for as long as you wear it: a Jotun Witch's body, magic blast and lightning bolt, and flight that burns Eitr and sinks you to the ground when it runs dry.
+- Wearing a full legendary set now tints your armor in the set's colors, and nine sets also wrap you in a matching aura, from Thor's lightning to the wraith smoke of Hel's Covenant.
 - Lifesteal and Bloodletting from a set bonus now work with any weapon.
 - New magic effect Prosperity gives creatures and chests near you a chance to roll their magic loot again.
 - New magic effect Green Thumb on the Cultivator makes the plants you sow grow faster.
