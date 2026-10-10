@@ -174,8 +174,8 @@ internal static class QuickConfigBindings {
             "proportions matter; this line shows the resulting share of each category.");
         RarityCounts();
         AdvancedPagesAction(QuickConfigureTool.ShowAdvancedKey, "$mod_epicloot_cfg_show_advanced", true,
-            "Adds the rest of the pages after this one: rarity, loot drops, shardstones and runes, the " +
-            "enchanting table, the merchant and bounties, interface, item colors, effect tuning and advanced. " +
+            "Adds the rest of the pages after this one: loot drops, shardstones and runes, the enchanting " +
+            "table, the merchant and bounties, interface, item colors, rarity, effect tuning and advanced. " +
             "Remembered the next time the panel opens.");
         AdvancedPagesAction(QuickConfigureTool.HideAdvancedKey, "$mod_epicloot_cfg_hide_advanced", false,
             "Goes back to this page only. Edits already made on the other pages are kept, and Save still " +
@@ -186,16 +186,14 @@ internal static class QuickConfigBindings {
         Toggle("EnchantingTableUpgradesActive", ELConfig.EnchantingTableUpgradesActive, "Enchanting Table Upgrades Active", BindingScope.Server);
         Flags("EnchantingTableActivatedTabs", ELConfig.EnchantingTableActivatedTabs, "Table Features Active", BindingScope.Server);
 
-        // --- 3. Rarity (loottables.json) ---
-        BiomeDrops();
-
-        // --- 4. Loot Drops ---
+        // --- 3. Loot Drops ---
         Toggle("AutoAddEquipment", ELConfig.AutoAddEquipment, "Auto Add Equipment", BindingScope.Server);
         Func<StagedConfig, bool> autoAddOn = staged => staged.Get("AutoAddEquipment", true);
         Toggle("AutoRemoveEquipmentNotFound", ELConfig.AutoRemoveEquipmentNotFound, "Auto Remove Equipment Not Found", BindingScope.Server, enabled: autoAddOn);
         Toggle("OnlyAddEquipmentWithRecipes", ELConfig.OnlyAddEquipmentWithRecipes, "Only Add Equipment With Recipes", BindingScope.Server, enabled: autoAddOn);
         Toggle("AutoAddRemoveEquipmentFromVendor", ELConfig.AutoAddRemoveEquipmentFromVendor, "Auto Add/Remove Equipment From Vendor", BindingScope.Server, enabled: autoAddOn);
         Toggle("AutoAddRemoveEquipmentFromLootLists", ELConfig.AutoAddRemoveEquipmentFromLootLists, "Auto Add/Remove Equipment From Loot Lists", BindingScope.Server, enabled: autoAddOn);
+        Toggle("AutoAddCreaturesToLootTables", ELConfig.AutoAddCreaturesToLootTables, "Auto Add Creatures To Loot Tables", BindingScope.Server);
         Toggle("TransferMagicItemToCrafts", ELConfig.TransferMagicItemToCrafts, "Transfer Enchants to Crafted Items", BindingScope.Server);
         BossDrop("_bossTrophyDropMode", ELConfig._bossTrophyDropMode, "Boss Trophy Drop Mode",
             "_bossTrophyDropPlayerRange", ELConfig._bossTrophyDropPlayerRange, "Boss Trophy Drop Player Range");
@@ -212,7 +210,7 @@ internal static class QuickConfigBindings {
         FloatSlider("EliteRunestoneDropChance", ELConfig.EliteRunestoneDropChance, "Elite Runestone Drop Chance", BindingScope.Server, 0f, 1f, 0.01f,
             enabled: staged => staged.Get("EliteRunestoneDrops", ELConfig.EliteRunestoneDrops.Value));
 
-        // --- 5. Shardstones & Runes ---
+        // --- 4. Shardstones & Runes ---
         Toggle("AllowDuplicateSocketedEffects", ELConfig.AllowDuplicateSocketedEffects, "Allow Duplicate Socketed Effects", BindingScope.Server);
         Toggle("AllowShardstoneDuplicateItemEffect", ELConfig.AllowShardstoneDuplicateItemEffect, "Allow Shardstone On Matching Item Effect", BindingScope.Server);
         Toggle("AllowRunestoneDuplicateItemEffect", ELConfig.AllowRunestoneDuplicateItemEffect, "Allow Runestone On Matching Item Effect", BindingScope.Server);
@@ -240,7 +238,7 @@ internal static class QuickConfigBindings {
             (root, value) => JsonConfigEdits.SetPath(root, "Global.Values.BloodBlockSelfDamagePercent", value),
             "Percent of the blocked damage the blood-block shard effects turn back on the wearer.");
 
-        // --- 6. Enchanting Table ---
+        // --- 5. Enchanting Table ---
         FloatSlider("TemperBaseChance", ELConfig.TemperBaseChance, "Temper Base Chance", BindingScope.Server, 0f, 1f, 0.01f);
         FloatSlider("TemperDecrement", ELConfig.TemperDecrement, "Temper Decrement Amount", BindingScope.Server, 0f, 1f, 0.01f);
         Toggle("TemperDestroysItem", ELConfig.TemperDestroysItem, "Temper Fail Destroys Item", BindingScope.Server);
@@ -251,21 +249,28 @@ internal static class QuickConfigBindings {
         foreach (EnchantingFeature feature in (EnchantingFeature[])Enum.GetValues(typeof(EnchantingFeature))) {
             EnchantingFeature f = feature;
             string defaultKey = $"json:enchantingupgrades:DefaultFeatureLevels.{f}";
-            string maxKey = $"json:enchantingupgrades:MaximumFeatureLevels.{f}";
+            string maxKey = MaxFeatureLevelKey(f);
             JsonInt(defaultKey, "enchantingupgrades.json", $"{f} default level", -1, 12,
                 () => FeatureLevel(EnchantingTableUpgrades.Config?.DefaultFeatureLevels, f),
                 (root, value) => JsonConfigEdits.SetPath(root, $"DefaultFeatureLevels.{f}", value),
                 $"The level the {f} feature starts at on a new enchanting table. -1 = locked until upgraded.",
                 staged => FeatureLevelError(staged, f, defaultKey, maxKey));
+            // Every level up to the max needs a cost and an UpgradeValues entry, so a raised max pads both.
             JsonInt(maxKey, "enchantingupgrades.json", $"{f} max level", -1, 12,
                 () => FeatureLevel(EnchantingTableUpgrades.Config?.MaximumFeatureLevels, f),
-                (root, value) => JsonConfigEdits.SetPath(root, $"MaximumFeatureLevels.{f}", value),
-                $"The highest level the {f} feature can be upgraded to. Cannot exceed the number of upgrade cost steps defined for it.",
+                (root, value) => {
+                    JsonConfigEdits.SetPath(root, $"MaximumFeatureLevels.{f}", value);
+                    JsonConfigEdits.EnsureUpgradeLevels(root, f, value + 1);
+                },
+                $"The highest level the {f} feature can be upgraded to. The upgrade costs below list one level " +
+                "per step up to it: raising it adds levels that start as a copy of the level below, and their " +
+                "bonus repeats the top level's until UpgradeValues is edited in the file. Lowering it hides the " +
+                "levels above, which stay in the file.",
                 staged => FeatureLevelError(staged, f, defaultKey, maxKey));
         }
         UpgradeCosts();
 
-        // --- 7. Adventure: Merchant ---
+        // --- 6. Adventure: Merchant ---
         IntSlider("_andvaranautRange", ELConfig._andvaranautRange, "Andvaranaut Range", BindingScope.Server, 5, 100);
         Toggle("RemovePurchasedGambles", ELConfig.RemovePurchasedGambles, "Remove Purchased Gambles", BindingScope.Server);
         JsonInt("json:adventuredata:SecretStash.RefreshInterval", "adventuredata.json", "Secret Stash Refresh (days)", 1, 30,
@@ -318,7 +323,7 @@ internal static class QuickConfigBindings {
             new TreasureMapConfig().ScaleRadiiToWorldSize);
         BiomeCosts();
 
-        // --- 8. Adventure: Bounties ---
+        // --- 7. Adventure: Bounties ---
         EnumCycle("BossBountyMode", ELConfig.BossBountyMode, "Gated Bounty Mode", BindingScope.Server);
         Toggle("EnableLimitedBountiesInProgress", ELConfig.EnableLimitedBountiesInProgress, "Enable Bounty Limit", BindingScope.Server);
         IntSlider("MaxInProgressBounties", ELConfig.MaxInProgressBounties, "Max Bounties Per Player", BindingScope.Server, 1, 20,
@@ -335,7 +340,7 @@ internal static class QuickConfigBindings {
             () => AdventureDataManager.Config?.Bounties?.AddsHealthMultiplier);
         Bounties();
 
-        // --- 9. Interface ---
+        // --- 8. Interface ---
         Toggle("UseGeneratedMagicItemNames", ELConfig.UseGeneratedMagicItemNames, "Use Generated Magic Item Names", BindingScope.Client);
         Toggle("KeepInventoryOpenOverItems", ELConfig.KeepInventoryOpenOverItems, "Keep Inventory Open Over Items", BindingScope.Client);
         Toggle("ShowRarityInRecipeList", ELConfig.ShowRarityInRecipeList, "Show Rarity In Recipe List", BindingScope.Client);
@@ -362,7 +367,7 @@ internal static class QuickConfigBindings {
         Vector2Part("AbilityBarPosition.y", ELConfig.AbilityBarPosition, "Ability Bar Position Y", false);
         FloatSlider("AbilityBarIconSpacing", ELConfig.AbilityBarIconSpacing, "Ability Bar Icon Spacing", BindingScope.Client, 0f, 40f, 1f);
 
-        // --- 10. Item Colors ---
+        // --- 9. Item Colors ---
         RarityColor("_magicRarityColor", ELConfig._magicRarityColor, "_magicMaterialIconColor", ELConfig._magicMaterialIconColor, "Magic");
         RarityColor("_rareRarityColor", ELConfig._rareRarityColor, "_rareMaterialIconColor", ELConfig._rareMaterialIconColor, "Rare");
         RarityColor("_epicRarityColor", ELConfig._epicRarityColor, "_epicMaterialIconColor", ELConfig._epicMaterialIconColor, "Epic");
@@ -370,6 +375,9 @@ internal static class QuickConfigBindings {
         RarityColor("_mythicRarityColor", ELConfig._mythicRarityColor, "_mythicMaterialIconColor", ELConfig._mythicMaterialIconColor, "Mythic");
         RarityColor("_ancientRarityColor", ELConfig._ancientRarityColor, "_ancientMaterialIconColor", ELConfig._ancientMaterialIconColor, "Ancient");
         HexColor("_setItemColor", ELConfig._setItemColor, "Set Item Color");
+
+        // --- 10. Rarity (loottables.json) ---
+        BiomeDrops();
 
         // --- 11. Effect Tuning ---
         EnumCycle("GatedFreebuildMode", ELConfig.GatedFreebuildMode, "Gated Freebuild Mode", BindingScope.Server);
@@ -380,7 +388,6 @@ internal static class QuickConfigBindings {
         EnumChoice("_logLevel", ELConfig._logLevel, "Log Level", BindingScope.Client);
         Toggle("EnableHotReloadPatches", ELConfig.EnableHotReloadPatches, "Enable Hot Reloading Patches", BindingScope.Server);
         Toggle("AlwaysRefreshCoreConfigs", ELConfig.AlwaysRefreshCoreConfigs, "Always Refresh Core Configs", BindingScope.Server);
-        Toggle("VerifyPenaltyScalingCache", ELConfig.VerifyPenaltyScalingCache, "Verify Penalty Scaling Cache", BindingScope.Client);
         if (ModContext.EnableDebugMode != null) {
             Toggle("Common.EnableDebugMode", ModContext.EnableDebugMode, "Debug Mode", BindingScope.Client);
         }
@@ -846,10 +853,12 @@ internal static class QuickConfigBindings {
             UpgradeCostsValue before = baselineValue as UpgradeCostsValue;
             foreach (KeyValuePair<EnchantingFeature, List<List<CostEntry>>> pair in current.Levels) {
                 List<List<CostEntry>> was = before?.Get(pair.Key);
+                // Levels added by raising the max land in the file first, with their UpgradeValues entry.
+                JsonConfigEdits.EnsureUpgradeLevels(root, pair.Key, pair.Value.Count);
                 for (int level = 0; level < pair.Value.Count; level++) {
                     List<CostEntry> cost = pair.Value[level];
-                    List<CostEntry> old = was != null && level < was.Count ? was[level] : null;
-                    if (cost == null || UpgradeCostsValue.SameLevel(cost, old)) { continue; }
+                    bool added = was == null || level >= was.Count;
+                    if (cost == null || (added == false && UpgradeCostsValue.SameLevel(cost, was[level]))) { continue; }
                     JsonConfigEdits.SetUpgradeCost(root, pair.Key, level, cost);
                 }
             }
@@ -858,10 +867,9 @@ internal static class QuickConfigBindings {
             Key = key, DisplayName = "Upgrade costs", Kind = BindingKind.UpgradeCosts, Scope = BindingScope.Json, HostOnly = true,
             Options = ItemPrefabNames,
             Tooltip = () => QuickConfigTooltip.Text("enchantingupgrades.json: UpgradeCosts",
-                "What each enchanting table upgrade costs: pick a feature and a level, then edit its items. " +
-                "Unlock is the cost of opening a feature that starts locked (default level -1). The number of " +
-                "levels is file-only, since each level also needs its UpgradeValues entry; the item picker lists " +
-                "every item of a loaded world."),
+                "What each enchanting table upgrade costs: pick a feature, then edit the items of each level. " +
+                "Unlock is the cost of opening a feature that starts locked (default level -1). The levels follow " +
+                "the feature's max level above; the item picker lists every item of a loaded world."),
             Get = staged => staged.Get(key, new UpgradeCostsValue()),
             Set = (staged, value) => { if (value is UpgradeCostsValue table) { staged.Set(key, table); } },
             Validate = staged => {
@@ -881,6 +889,35 @@ internal static class QuickConfigBindings {
     }
 
     internal static string UpgradeLevelName(int level) => level == 0 ? "Unlock" : $"Level {level}";
+
+    internal static string MaxFeatureLevelKey(EnchantingFeature feature) => $"json:enchantingupgrades:MaximumFeatureLevels.{feature}";
+
+    /// <summary>How many cost levels a feature shows: Unlock, then Level 1 to its staged max level.</summary>
+    internal static int UpgradeLevelsShown(StagedConfig staged, EnchantingFeature feature, int fallback) {
+        string key = MaxFeatureLevelKey(feature);
+        return staged.IsAvailable(key) ? Math.Max(0, staged.Get(key, 0) + 1) : fallback;
+    }
+
+    /// <summary>
+    /// Sizes each feature's cost levels to its staged max level. A missing level starts as a copy of the
+    /// one below, so a new level is never free. Levels above the max that the file has are kept, unseen,
+    /// so lowering the max loses nothing; ones added earlier in this session are dropped again, so
+    /// raising and then lowering the max is not an edit.
+    /// </summary>
+    internal static void FitUpgradeLevels(StagedConfig staged, UpgradeCostsValue value) {
+        EnchantingUpgradeCosts fileCosts = EnchantingTableUpgrades.Config?.UpgradeCosts;
+        foreach (KeyValuePair<EnchantingFeature, List<List<CostEntry>>> pair in value.Levels) {
+            List<List<CostEntry>> levels = pair.Value;
+            int shown = UpgradeLevelsShown(staged, pair.Key, levels.Count);
+            int inFile = fileCosts == null ? 0 : CostLevels(fileCosts, pair.Key)?.Count ?? 0;
+            int keep = Math.Max(shown, inFile);
+            if (levels.Count > keep) { levels.RemoveRange(keep, levels.Count - keep); }
+            while (levels.Count < shown) {
+                List<CostEntry> below = levels.Count > 0 ? levels[levels.Count - 1] : null;
+                levels.Add(below?.Select(entry => entry.Clone()).ToList() ?? new List<CostEntry>());
+            }
+        }
+    }
 
     private static UpgradeCostsValue ReadUpgradeCosts(EnchantingUpgradesConfig config) {
         EnchantingUpgradeCosts costs = config?.UpgradeCosts;
@@ -1283,15 +1320,8 @@ internal static class QuickConfigBindings {
     private static string FeatureLevelError(StagedConfig staged, EnchantingFeature feature, string defaultKey, string maxKey) {
         int defaultLevel = staged.Get(defaultKey, 0);
         int maxLevel = staged.Get(maxKey, 0);
-        int steps = UpgradeStepCount(feature);
         if (defaultLevel > maxLevel) { return $"{feature}: the default level must not exceed the max level."; }
-        if (steps >= 0 && maxLevel > steps) { return $"{feature}: the max level cannot exceed {steps}, the number of upgrade cost steps defined for it."; }
         return null;
-    }
-
-    private static int UpgradeStepCount(EnchantingFeature feature) {
-        EnchantingUpgradeCosts costs = EnchantingTableUpgrades.Config?.UpgradeCosts;
-        return costs == null ? -1 : CostLevels(costs, feature)?.Count ?? -1;
     }
 
     private static float? ShardGlobal(string name) {

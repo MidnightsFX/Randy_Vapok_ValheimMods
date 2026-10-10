@@ -35,13 +35,13 @@ RectTransform:
   - {fileID: 3024354913046057313}
   - {fileID: 2425562944305872181}
   - {fileID: 842041713834010802}
+  - {fileID: 3490103963269251301}
   - {fileID: 7806943708274981583}
   - {fileID: 5570545902096703433}
   - {fileID: 5829394141452620811}
   - {fileID: 5727198031402374612}
   - {fileID: 4745694777027270469}
   - {fileID: 3584594429712572008}
-  - {fileID: 3490103963269251301}
   - {fileID: 458263262123387549}
   - {fileID: 204551901487920538}
   - {fileID: 2988481045160048701}
@@ -1435,7 +1435,7 @@ PrefabInstance:
     - target: {fileID: 7494443232250330710, guid: bb7d9663c230fe14b9cfdc8313619e75,
         type: 3}
       propertyPath: m_text
-      value: Equipment auto-add
+      value: Auto-add equipment and creatures
       objectReference: {fileID: 0}
     - target: {fileID: 7494443232250330710, guid: bb7d9663c230fe14b9cfdc8313619e75,
         type: 3}
@@ -2126,7 +2126,7 @@ PrefabInstance:
     - target: {fileID: 2945052105361505126, guid: 3f335176329558249aa80556b12c4e7e,
         type: 3}
       propertyPath: m_text
-      value: Verify Penalty Scaling Cache
+      value: Auto Add Creatures To Loot Tables
       objectReference: {fileID: 0}
     - target: {fileID: 2945052105361505126, guid: 3f335176329558249aa80556b12c4e7e,
         type: 3}
@@ -2141,7 +2141,7 @@ PrefabInstance:
     - target: {fileID: 4095268796829841578, guid: 3f335176329558249aa80556b12c4e7e,
         type: 3}
       propertyPath: m_Name
-      value: VerifyPenaltyScalingCache
+      value: AutoAddCreaturesToLootTables
       objectReference: {fileID: 0}
     - target: {fileID: 6035875651530994151, guid: 3f335176329558249aa80556b12c4e7e,
         type: 3}

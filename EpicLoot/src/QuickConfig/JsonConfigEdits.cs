@@ -285,8 +285,30 @@ internal static class JsonConfigEdits {
     }
 
     /// <summary>
+    /// Grows UpgradeCosts.{feature} and UpgradeValues.{feature} in enchantingupgrades.json to at least
+    /// <paramref name="count"/> levels, each new level a copy of the last: the table reads both for every
+    /// level up to the max, and a missing value shows as NaN. Never shrinks either list, so levels above
+    /// a lowered max stay in the file.
+    /// </summary>
+    internal static void EnsureUpgradeLevels(JObject root, EnchantingFeature feature, int count) {
+        PadWithLast(root["UpgradeCosts"]?[feature.ToString()] as JArray, count, new JArray());
+        // A value list the file lacks or leaves empty has nothing to repeat; that is the file's problem.
+        if (root["UpgradeValues"]?[feature.ToString()] is JArray values && values.Count > 0) {
+            PadWithLast(values, count, null);
+        }
+    }
+
+    private static void PadWithLast(JArray levels, int count, JToken whenEmpty) {
+        if (levels == null) { return; }
+        while (levels.Count < count) {
+            JToken last = levels.Count > 0 ? levels[levels.Count - 1] : null;
+            levels.Add(last != null && last.Type != JTokenType.Null ? last.DeepClone() : whenEmpty?.DeepClone() ?? JValue.CreateNull());
+        }
+    }
+
+    /// <summary>
     /// Replaces one level's cost list of UpgradeCosts.{feature} in enchantingupgrades.json. The level
-    /// must exist: levels are added in the file together with their UpgradeValues, never here.
+    /// must exist: <see cref="EnsureUpgradeLevels"/> adds it, with its UpgradeValues entry.
     /// </summary>
     internal static void SetUpgradeCost(JObject root, EnchantingFeature feature, int level, List<CostEntry> cost) {
         if (root["UpgradeCosts"]?[feature.ToString()] is JArray levels == false) {
