@@ -17,6 +17,8 @@ namespace EpicLoot_UnityLib
 
         public GameObject EnchantingUIPrefab;
 
+        public EnchantingTableStash Stash { get; private set; }
+
         public event Action<EnchantingFeature, int> OnFeatureLevelChanged;
         public event Action OnAnyFeatureLevelChanged;
         
@@ -57,6 +59,7 @@ namespace EpicLoot_UnityLib
 
             _nview.Register<ZDOID, int, int>("el.TableUpgradeRequest", RPC_TableUpgradeRequest);
             _nview.Register<ZDOID, int, int, bool>("el.TableUpgradeResponse", RPC_TableUpgradeResponse);
+            Stash = new EnchantingTableStash(this, _nview);
 
             InitFeatureLevels();
             SyncFeatureLevels(raiseEvents: false);
@@ -155,6 +158,8 @@ namespace EpicLoot_UnityLib
             {
                 SyncFeatureLevels(raiseEvents: true);
             }
+
+            Stash?.Update();
 
             if (_interactingPlayer != null && EnchantingTableUI.instance != null &&
                 EnchantingTableUI.instance.isActiveAndEnabled && !InUseDistance(_interactingPlayer))
@@ -269,8 +274,13 @@ namespace EpicLoot_UnityLib
                 return FeatureUnavailableSentinel;
             }
 
-            return EnchantingTableUpgrades.Config.DefaultFeatureLevels.TryGetValue(feature, out int level) ?
-                level : FeatureUnavailableSentinel;
+            if (EnchantingTableUpgrades.Config.DefaultFeatureLevels.TryGetValue(feature, out int level))
+            {
+                return level;
+            }
+
+            // A server still on an enchantingupgrades.json from before Storage existed: locked, free to unlock.
+            return feature == EnchantingFeature.Storage ? FeatureLockedSentinel : FeatureUnavailableSentinel;
         }
 
         public void Reset()
@@ -395,10 +405,11 @@ namespace EpicLoot_UnityLib
                 EnchantingFeature.Augment => EnchantingTableUpgrades.Config.UpgradeValues.Augment,
                 EnchantingFeature.Disenchant => EnchantingTableUpgrades.Config.UpgradeValues.Disenchant,
                 EnchantingFeature.Rune => EnchantingTableUpgrades.Config.UpgradeValues.Rune,
+                EnchantingFeature.Storage => EnchantingTableUpgrades.Config.UpgradeValues.Storage,
                 _ => throw new ArgumentOutOfRangeException(nameof(feature), feature, null)
             };
 
-            if (level >= values.Count)
+            if (values == null || level >= values.Count)
             {
                 return new Tuple<float, float>(float.NaN, float.NaN);
             }

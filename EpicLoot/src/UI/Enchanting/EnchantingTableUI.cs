@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EpicLoot.Config;
 using EpicLoot.CraftingV2;
 using TMPro;
 using UnityEngine;
@@ -369,6 +370,11 @@ namespace EpicLoot_UnityLib
             }
 
             instance.SourceTable = source;
+            InventoryManagement.ActiveStash = source.Stash;
+            if (ELConfig.AutoDepositMaterials.Value && source.Stash != null && source.Stash.CanDeposit)
+            {
+                source.Stash.DepositAll();
+            }
 
             // On first creation the prefab is instantiated already-active, so every panel and tab
             // FeatureStatus ran OnEnable before SourceTable was assigned and skipped subscribing to
@@ -399,6 +405,7 @@ namespace EpicLoot_UnityLib
             instance.Root.SetActive(false);
             instance.Scrim.SetActive(false);
             instance.SourceTable = null;
+            InventoryManagement.ActiveStash = null;
         }
 
         public static bool IsVisible()

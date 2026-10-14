@@ -96,6 +96,11 @@ namespace EpicLoot.CraftingV2
                 {
                     AugaFixupMultiselectPrefab(augmentUI.CostList.ElementPrefab.gameObject);
                 }
+                else if (panelBase is StashUI stashUI)
+                {
+                    AugaFixupMultiselectPrefab(stashUI.MaterialsList.ElementPrefab.gameObject);
+                    AugaFixupMultiselectPrefab(stashUI.ShardstonesList.ElementPrefab.gameObject);
+                }
             }
 
             _hasBeenFixedUp.Add(ui.gameObject);

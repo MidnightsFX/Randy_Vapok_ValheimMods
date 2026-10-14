@@ -162,6 +162,28 @@ namespace EpicLoot_UnityLib
                 button.gameObject.SetActive(featureIsEnabled);
             }
 
+            // Awake selects every button in turn and ends on the last one, which the config may have hidden.
+            if (_selectedFeature >= 0 && !_featureButtons[_selectedFeature].gameObject.activeSelf)
+            {
+                List<MultiSelectItemListElement> available = GetAvailableButtons();
+                MultiSelectItemListElement fallback = available.Count > 0 ? available[available.Count - 1] : null;
+                _selectedFeature = fallback != null ? _featureButtons.IndexOf(fallback) : -1;
+                foreach (MultiSelectItemListElement button in _featureButtons)
+                {
+                    button.SuppressEvents = true;
+                    if (button == fallback)
+                    {
+                        button.SelectMaxQuantity(true);
+                    }
+                    else
+                    {
+                        button.Deselect(true);
+                    }
+
+                    button.SuppressEvents = false;
+                }
+            }
+
             RefreshGamepadFocus();
 
             if (_selectedFeature >= 0)

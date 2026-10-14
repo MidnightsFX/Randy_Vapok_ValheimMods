@@ -15,6 +15,9 @@ public class InventoryManagement
         get => _instance;
     }
 
+    // The storage of the enchanting table whose window is open; null otherwise.
+    internal static EnchantingTableStash ActiveStash;
+
     private void SendMessage(string message, int amount, Sprite icon)
     {
         Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft,
@@ -46,7 +49,7 @@ public class InventoryManagement
         }
 
         List<ItemDrop.ItemData> items = inventory.GetAllItems();
-        if (!API.AnyInventoryProviders)
+        if (!API.AnyInventoryProviders && ActiveStash == null)
         {
             return items;
         }
@@ -54,6 +57,11 @@ public class InventoryManagement
         // Inventory.GetAllItems hands back the live m_inventory list, so appending to it would inject
         // container items into the player's actual inventory. Copy first.
         List<ItemDrop.ItemData> combined = new List<ItemDrop.ItemData>(items);
+        if (ActiveStash != null)
+        {
+            combined.AddRange(ActiveStash.GetSnapshotItems());
+        }
+
         API.AppendProviderItems(combined);
         return combined;
     }
@@ -134,12 +142,17 @@ public class InventoryManagement
         Inventory inventory = GetInventory();
 
         int count = inventory == null ? 0 : inventory.CountItems(item);
-        return count + API.CountProviderItems(item);
+        return count + CountStashItems(item) + API.CountProviderItems(item);
     }
 
     public int CountProviderItem(ItemDrop.ItemData item)
     {
-        return API.CountProviderItems(item.m_shared.m_name);
+        return CountStashItems(item.m_shared.m_name) + API.CountProviderItems(item.m_shared.m_name);
+    }
+
+    private static int CountStashItems(string item)
+    {
+        return ActiveStash != null ? ActiveStash.GetCountBySharedName(item) : 0;
     }
 
     public void GiveItem(string item, int amount)
@@ -226,6 +239,11 @@ public class InventoryManagement
             return 0;
         }
 
+        if (ActiveStash != null && ActiveStash.TryGetSnapshotPrefab(item, out string stashPrefab))
+        {
+            return ActiveStash.Take(stashPrefab, amount);
+        }
+
         Inventory inventory = GetInventory();
 
         int taken = 0;
@@ -260,6 +278,11 @@ public class InventoryManagement
             int before = inventory.CountItems(item);
             inventory.RemoveItem(item, amount);
             taken = before - inventory.CountItems(item);
+        }
+
+        if (ActiveStash != null && amount - taken > 0)
+        {
+            taken += ActiveStash.TakeBySharedName(item, amount - taken);
         }
 
         int shortfall = amount - taken;
