@@ -962,6 +962,7 @@
     "mod_epicloot_storage_nothingtodeposit": "Nothing to deposit",
     "mod_epicloot_storage_full": "No room in storage for $1",
     "mod_epicloot_storage_cantremove": "Take the materials out of the table's storage first",
+    "mod_epicloot_storage_warded": "This table's storage is protected by a ward",
 
     "mod_epicloot_helheim": "Helheim",
 

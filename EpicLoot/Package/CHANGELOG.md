@@ -16,7 +16,7 @@ Changes:
 * Slotting runestones into shard slots can be turned off, which leaves runestones already slotted inactive but still removable.
 * Runestones that repeat an effect already on an item can be set to count for less with each copy.
 * The enchanting table's search boxes can now find items by their enchantments.
-* The enchanting table can store enchanting materials: the new Storage feature holds materials, blank runestones, shardstones, chisels and bounty tokens without taking inventory space, and every table feature spends straight from it. Existing configs need Storage added to Table Features Active to see it.
+* The enchanting table can store enchanting materials: the new Storage feature holds materials, blank runestones, shardstones, chisels and bounty tokens without taking inventory space, and every table feature spends straight from it. Storage follows ward access like a chest. Existing configs need Storage added to Table Features Active to see it.
 * Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
 * Tempering now costs a single iron or gold bounty token per attempt instead of materials.
 * A failed temper no longer lowers an enchantment unless the server turns that on, and then only the enchantment being tempered can drop.
