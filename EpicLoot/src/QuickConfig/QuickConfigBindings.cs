@@ -246,6 +246,7 @@ internal static class QuickConfigBindings {
             visible: staged => staged.Get("TemperDestroysItem", false));
         Toggle("ShowEnchantSelectionChance", ELConfig.ShowEnchantSelectionChance, "Show Enchant Selection Chance", BindingScope.Server);
         Toggle("ShowEquippedAndHotbarItemsInSacrificeTab", ELConfig.ShowEquippedAndHotbarItemsInSacrificeTab, "Show Equipped & Hotbar Items In Sacrifice Tab", BindingScope.Client);
+        Toggle("AutoDepositMaterials", ELConfig.AutoDepositMaterials, "Auto Deposit Materials", BindingScope.Client);
         foreach (EnchantingFeature feature in (EnchantingFeature[])Enum.GetValues(typeof(EnchantingFeature))) {
             EnchantingFeature f = feature;
             string defaultKey = $"json:enchantingupgrades:DefaultFeatureLevels.{f}";
@@ -941,6 +942,7 @@ internal static class QuickConfigBindings {
             EnchantingFeature.Augment => costs.Augment,
             EnchantingFeature.Disenchant => costs.Disenchant,
             EnchantingFeature.Rune => costs.Rune,
+            EnchantingFeature.Storage => costs.Storage,
             _ => null
         };
     }

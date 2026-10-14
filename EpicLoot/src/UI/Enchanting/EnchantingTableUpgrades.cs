@@ -11,7 +11,8 @@ namespace EpicLoot_UnityLib
         Enchant,
         Augment,
         Disenchant,
-        Rune
+        Rune,
+        Storage
     }
 
     [Serializable]
@@ -30,6 +31,7 @@ namespace EpicLoot_UnityLib
         public List<List<ItemAmount>> Augment;
         public List<List<ItemAmount>> Disenchant;
         public List<List<ItemAmount>> Rune;
+        public List<List<ItemAmount>> Storage;
     }
 
     [Serializable]
@@ -41,6 +43,7 @@ namespace EpicLoot_UnityLib
         public List<float[]> Augment;
         public List<float[]> Disenchant;
         public List<float[]> Rune;
+        public List<float[]> Storage;
     }
 
     [Serializable]
@@ -91,6 +94,8 @@ namespace EpicLoot_UnityLib
                     return "$mod_epicloot_disenchant";
                 case EnchantingFeature.Rune:
                     return "$mod_epicloot_runemanagement";
+                case EnchantingFeature.Storage:
+                    return "$mod_epicloot_storage";
                 default:
                     return "";
             }
@@ -112,6 +117,8 @@ namespace EpicLoot_UnityLib
                     return "$mod_epicloot_featureinfo_disenchant";
                 case EnchantingFeature.Rune:
                     return "$mod_epicloot_featureinfo_runes";
+                case EnchantingFeature.Storage:
+                    return "$mod_epicloot_featureinfo_storage";
                 default:
                     return "";
             }
@@ -141,12 +148,20 @@ namespace EpicLoot_UnityLib
                 case EnchantingFeature.Rune:
                     description = "$mod_epicloot_featureupgrade_runes";
                     break;
+                case EnchantingFeature.Storage:
+                    description = "$mod_epicloot_featureupgrade_storage";
+                    break;
                 default:
                     description = "";
                     break;
             }
 
             Tuple<float, float> values = table.GetFeatureValue(feature, level);
+            if (feature == EnchantingFeature.Storage && !(values.Item1 > 0))
+            {
+                return Localization.instance.Localize("$mod_epicloot_featureupgrade_storage_unlimited");
+            }
+
             return Localization.instance.Localize(description,
                 values.Item1.ToString(), values.Item2.ToString());
         }
@@ -168,6 +183,7 @@ namespace EpicLoot_UnityLib
                 EnchantingFeature.Augment => Config.UpgradeCosts.Augment,
                 EnchantingFeature.Disenchant => Config.UpgradeCosts.Disenchant,
                 EnchantingFeature.Rune => Config.UpgradeCosts.Rune,
+                EnchantingFeature.Storage => Config.UpgradeCosts.Storage,
                 _ => throw new ArgumentOutOfRangeException(nameof(feature), feature, null)
             };
 

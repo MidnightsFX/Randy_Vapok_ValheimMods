@@ -15,6 +15,8 @@ namespace EpicLoot_UnityLib
 
         public const string MainActionButton = "JoyButtonX";
 
+        protected virtual string MainActionInput => MainActionButton;
+
         public MultiSelectItemList AvailableItems;
         public Button MainButton;
         public GameObject LevelDisplay;
@@ -110,9 +112,9 @@ namespace EpicLoot_UnityLib
                 _mainButtonGamepadHint.SetActive(usable);
             }
 
-            if (usable && ZInput.GetButtonDown(MainActionButton))
+            if (usable && ZInput.GetButtonDown(MainActionInput))
             {
-                ZInput.ResetButtonStatus(MainActionButton);
+                ZInput.ResetButtonStatus(MainActionInput);
                 OnMainButtonClicked();
             }
         }
