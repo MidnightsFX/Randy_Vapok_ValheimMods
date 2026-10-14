@@ -371,7 +371,7 @@ namespace EpicLoot_UnityLib
 
             instance.SourceTable = source;
             InventoryManagement.ActiveStash = source.Stash;
-            if (ELConfig.AutoDepositMaterials.Value && source.Stash != null && source.Stash.CanDeposit)
+            if (ELConfig.AutoDepositMaterials.Value && source.Stash != null && source.Stash.CanDeposit && source.Stash.HasAccess())
             {
                 source.Stash.DepositAll();
             }

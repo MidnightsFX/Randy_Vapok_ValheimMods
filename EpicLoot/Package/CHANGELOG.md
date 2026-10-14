@@ -10,7 +10,7 @@ Changes:
     * Modded creatures are now automatically included in the loot tables
 * All Boss drops are now configuable, and the loot table changes are non-destructive
 * The enchanting table's search boxes can now find items by their enchantments.
-* The enchanting table can store enchanting materials: the new Storage feature holds materials, blank runestones, shardstones, chisels and bounty tokens without taking inventory space, and every table feature spends straight from it. Existing configs need Storage added to Table Features Active to see it.
+* The enchanting table can store enchanting materials: the new Storage feature holds materials, blank runestones, shardstones, chisels and bounty tokens without taking inventory space, and every table feature spends straight from it. Storage follows ward access like a chest. Existing configs need Storage added to Table Features Active to see it.
 * Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
 * New Enchantments!
     * Prosperity gives a chance for additional loot drops from creatures and chests

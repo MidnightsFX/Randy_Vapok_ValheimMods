@@ -20,6 +20,7 @@ namespace EpicLoot_UnityLib
         protected override string MainActionInput => "JoyRStick";
         private EnchantingTable _table;
         private EnchantingTableStash _stash;
+        private bool _hadAccess;
 
         protected override void OnSelectedItemsChanged()
         {
@@ -45,6 +46,7 @@ namespace EpicLoot_UnityLib
             {
                 _stash.OnChanged += Refresh;
                 _table.OnAnyFeatureLevelChanged += Refresh;
+                _stash.HasAccess(flash: true);
             }
 
             Refresh();
@@ -74,6 +76,11 @@ namespace EpicLoot_UnityLib
         public override void Update()
         {
             base.Update();
+
+            if (_stash != null && _stash.HasAccess() != _hadAccess)
+            {
+                Refresh();
+            }
 
             if (_locked || !ZInput.IsGamepadActive())
             {
@@ -110,19 +117,22 @@ namespace EpicLoot_UnityLib
             StyleCells();
 
             bool canDeposit = _stash != null && _stash.CanDeposit;
+            _hadAccess = _stash != null && _stash.HasAccess();
             if (CapacityLabel != null)
             {
                 int capacity = canDeposit ? _stash.Capacity : 0;
                 CapacityLabel.text = !canDeposit
                     ? Localization.instance.Localize("$mod_epicloot_storage_locked")
-                    : capacity > 0
-                        ? Localization.instance.Localize("$mod_epicloot_storage_capacity", capacity.ToString())
-                        : Localization.instance.Localize("$mod_epicloot_storage_unlimited");
+                    : !_hadAccess
+                        ? Localization.instance.Localize("$mod_epicloot_storage_warded")
+                        : capacity > 0
+                            ? Localization.instance.Localize("$mod_epicloot_storage_capacity", capacity.ToString())
+                            : Localization.instance.Localize("$mod_epicloot_storage_unlimited");
             }
 
             if (MainButton != null)
             {
-                MainButton.interactable = canDeposit && HasStashableItems();
+                MainButton.interactable = canDeposit && _hadAccess && HasStashableItems();
             }
         }
 

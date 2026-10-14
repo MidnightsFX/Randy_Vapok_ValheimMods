@@ -53,6 +53,8 @@ namespace EpicLoot_UnityLib
         private readonly Dictionary<ItemDrop.ItemData, string> _snapshotPrefabs = new Dictionary<ItemDrop.ItemData, string>();
         private uint _syncedRevision;
         private bool _everSynced;
+        private int _accessFrame = -1;
+        private bool _accessCached;
 
         public EnchantingTableStash(EnchantingTable table, ZNetView nview)
         {
@@ -95,9 +97,35 @@ namespace EpicLoot_UnityLib
             }
         }
 
+        /// <summary>
+        /// Whether a ward lets the local player at the stash. Asked of the game's own check rather than of
+        /// the ward list, so ward mods that patch it (Protective Wards' "permit everyone") keep their say.
+        /// </summary>
+        public bool HasAccess(bool flash = false)
+        {
+            if (_table == null)
+            {
+                return false;
+            }
+
+            if (flash)
+            {
+                _accessFrame = -1;
+                return PrivateArea.CheckAccess(_table.transform.position, 0f, flash: true);
+            }
+
+            if (_accessFrame != Time.frameCount)
+            {
+                _accessCached = PrivateArea.CheckAccess(_table.transform.position, 0f, flash: false);
+                _accessFrame = Time.frameCount;
+            }
+
+            return _accessCached;
+        }
+
         public int GetCount(string prefabName)
         {
-            return prefabName != null && _view.TryGetValue(prefabName, out int count) ? count : 0;
+            return HasAccess() && prefabName != null && _view.TryGetValue(prefabName, out int count) ? count : 0;
         }
 
         public int GetCountBySharedName(string sharedName)
@@ -107,13 +135,13 @@ namespace EpicLoot_UnityLib
 
         public IEnumerable<ItemDrop.ItemData> GetSnapshotItems()
         {
-            return _snapshots.Values;
+            return HasAccess() ? _snapshots.Values : (IEnumerable<ItemDrop.ItemData>)Array.Empty<ItemDrop.ItemData>();
         }
 
         public bool TryGetSnapshotPrefab(ItemDrop.ItemData item, out string prefabName)
         {
             prefabName = null;
-            return item != null && _snapshotPrefabs.TryGetValue(item, out prefabName);
+            return item != null && HasAccess() && _snapshotPrefabs.TryGetValue(item, out prefabName);
         }
 
         public int GetRoom(string prefabName)
@@ -151,6 +179,12 @@ namespace EpicLoot_UnityLib
             Inventory inventory = player != null ? player.GetInventory() : null;
             if (inventory == null || !CanDeposit)
             {
+                return;
+            }
+
+            if (!HasAccess(flash: true))
+            {
+                player.Message(MessageHud.MessageType.Center, "$mod_epicloot_storage_warded");
                 return;
             }
 
@@ -193,6 +227,12 @@ namespace EpicLoot_UnityLib
             Inventory inventory = player != null ? player.GetInventory() : null;
             if (inventory == null || !StashCatalog.TryGetByPrefab(prefabName, out StashItemKind kind))
             {
+                return;
+            }
+
+            if (!HasAccess(flash: true))
+            {
+                player.Message(MessageHud.MessageType.Center, "$mod_epicloot_storage_warded");
                 return;
             }
 
