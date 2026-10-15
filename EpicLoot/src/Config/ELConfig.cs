@@ -78,6 +78,7 @@ internal class ELConfig {
     public static ConfigEntry<KeyCode> EitrInfusionGamepadButton;
     public static ConfigEntry<float> SetItemDropChance;
     public static ConfigEntry<bool> HealthCriticalEffectsEnabled;
+    public static ConfigEntry<bool> AllowRuneSocketing;
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
     public static ConfigEntry<bool> AllowShardstoneDuplicateItemEffect;
     public static ConfigEntry<bool> AllowRunestoneDuplicateItemEffect;
@@ -501,7 +502,13 @@ internal class ELConfig {
             "Min = 0, Max = 1",
             new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         // 3 - Sockets
-        AllowDuplicateSocketedEffects = BindServer(SectionSockets, "Allow Duplicate Socketed Effects", false,
+        AllowRuneSocketing = BindServer(SectionSockets, "Allow Rune Socketing", true,
+            "When true, etched runestones can be slotted into shard slots.\n" +
+            "When false, no runestone can be slotted. Runestones already in a slot stay there but grant " +
+            "nothing, and can always be taken out (whatever Rune Removal Mode says), but not put back. " +
+            "Turning this back on restores their effects.\n" +
+            "Default: true.");
+        AllowDuplicateSocketedEffects =BindServer(SectionSockets, "Allow Duplicate Socketed Effects", false,
             "When false, an effect that is already socketed on an item cannot be socketed again.");
         AllowShardstoneDuplicateItemEffect = BindServer(SectionSockets, "Allow Shardstone On Matching Item Effect", false,
             "When true, a shardstone may be socketed even when the item already has that same effect from being enchanted/rolled.");
@@ -519,7 +526,8 @@ internal class ELConfig {
             "Default: BreakValueless.");
         RuneSocketRemovalMode = BindServer(SectionSockets, "Rune Removal Mode", RuneSocketMode.Free,
             "Controls whether a runestone can be taken back out of a socket once it has been placed. " +
-            "Runes can always be inserted; this only affects removal.\n" +
+            "This only affects removal, and only while Allow Rune Socketing is on; while it is off, " +
+            "every slotted rune can be freely removed.\n" +
             "Free = runes can be freely removed and moved to another item.\n" +
             "Break = a socketed rune must be broken to be removed, destroying it.\n" +
             "Permanent = a socketed rune is permanent; it can be neither removed nor broken, and no " +
@@ -863,6 +871,7 @@ internal class ELConfig {
         ShowQuickConfigButton.SettingChanged += (_, _) => QuickConfig.QuickConfigureTool.ApplyRegistration();
         EliteRunestoneDrops.SettingChanged += (_, _) => EliteRunestoneTables.Refresh();
         EliteRunestoneDropChance.SettingChanged += (_, _) => EliteRunestoneTables.Refresh();
+        AllowRuneSocketing.SettingChanged += (_, _) => ShardSocketManager.OnRuneSocketingChanged();
         foreach (ConfigEntry<string> rarityColor in new[] {
             _magicRarityColor, _rareRarityColor, _epicRarityColor,
             _legendaryRarityColor, _mythicRarityColor, _ancientRarityColor }) {
@@ -1222,11 +1231,13 @@ internal class ELConfig {
     /// The files to reload, with extension ("loottables.json"). Null reloads every registered file;
     /// an empty collection reloads none.
     /// </param>
-    internal static void ReloadBaseConfigsFromDisk(ICollection<string> fileNames) {
+    /// <returns>The files that could not be read back, whose previous contents stay in effect.</returns>
+    internal static List<string> ReloadBaseConfigsFromDisk(ICollection<string> fileNames) {
+        List<string> failed = new List<string>();
         if (!ConfigFileReloader.OwnsConfigOnDisk()) {
             EpicLoot.Log($"Not reloading {(fileNames == null ? "the baseconfig files" : string.Join(", ", fileNames))}: " +
                 "this client is connected to a server whose configs are in effect. They are read after disconnecting.");
-            return;
+            return failed;
         }
 
         string baseConfigDir = GetOverhaulDirectoryPath();
@@ -1235,11 +1246,14 @@ internal class ELConfig {
                 continue;
             }
 
-            reloadFromDisk();
+            if (!reloadFromDisk()) {
+                failed.Add(fileName);
+            }
             // What is on disk is now what is in memory, so the scheduler must not apply it a second
             // time. Recorded even when the read failed, matching the scheduler's own once-per-edit rule.
             ConfigFileReloader.MarkApplied(Path.Combine(baseConfigDir, fileName));
         }
+        return failed;
     }
 
     /// <summary>
@@ -1464,6 +1478,13 @@ internal class ELConfig {
         return ApplyClientConfig<MaterialConversionsConfig>("shardstoneconversions.json", package, ShardStoneConversions.Initialize);
     }
 
+    /// <summary>
+    /// Raised on a client after a server-pushed baseconfig file ("loottables.json") is applied to the live
+    /// config. Quick Configure waits on it after a server admin's save, since the push, not the server's
+    /// reply, is what brings the saved values into this game.
+    /// </summary>
+    internal static event Action<string> ServerConfigApplied;
+
     // One guard for every server-pushed config: a payload that fails to parse (or deserializes to
     // null -- JsonConvert returns null for the literal "null" WITHOUT throwing) is ignored with an
     // error, keeping whatever config is currently loaded. Passing the null through used to clear
@@ -1480,6 +1501,11 @@ internal class ELConfig {
             ConfigFileReloader.MarkDirty(Path.Combine(GetOverhaulDirectoryPath(), name));
             // Forced: at the default log level this is the only sign on a client that a push arrived.
             EpicLoot.LogForce($"Applied server-pushed {name}.");
+            try {
+                ServerConfigApplied?.Invoke(name);
+            } catch (Exception e) {
+                EpicLoot.LogErrorForce($"A handler of the server-pushed {name} failed: {e}");
+            }
         }
         yield return null;
     }

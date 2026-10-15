@@ -305,7 +305,7 @@ namespace EpicLoot.MagicItemEffects
             Quaternion yaw = Quaternion.LookRotation(facing.normalized);
 
             PlayFx(origin + Vector3.up, yaw);
-            MovePlayer(player, point, yaw);
+            MagicEffectsHelper.MovePlayer(player, point, yaw);
             AimAt(player, target, yaw);
             PlayFx(point + Vector3.up, yaw);
 
@@ -379,28 +379,6 @@ namespace EpicLoot.MagicItemEffects
             }
 
             return true;
-        }
-
-        private static void MovePlayer(Player player, Vector3 point, Quaternion yaw)
-        {
-            player.transform.SetPositionAndRotation(point, yaw);
-            var body = player.m_body;
-            if (body != null)
-            {
-                body.position = point;
-                body.rotation = yaw;
-                body.linearVelocity = Vector3.zero;
-            }
-
-            // Fall damage would otherwise count from the height the player left.
-            player.m_maxAirAltitude = point.y;
-            Physics.SyncTransforms();
-
-            // The camera glides after a move under 20 m; a teleport should cut.
-            if (GameCamera.instance != null)
-            {
-                GameCamera.instance.m_playerPos = point;
-            }
         }
 
         // Turns the view, and with it the swing (Attack.Start faces the look yaw, the melee sweep pitches with the

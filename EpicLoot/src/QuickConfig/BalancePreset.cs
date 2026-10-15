@@ -8,7 +8,8 @@ namespace EpicLoot.QuickConfig;
 
 /// <summary>
 /// The three balance presets the old welcome panel offered, applied to the STAGED values only; the
-/// overhaul rewrite of magiceffects.json happens on Save, on the host, after the .cfg batch.
+/// overhaul rewrite of magiceffects.json happens on Save, after the .cfg batch, on the host or (for a
+/// server admin) on the server.
 /// </summary>
 internal static class BalancePreset {
     internal const string MagicEffectsFile = "magiceffects.json";
@@ -77,9 +78,9 @@ internal static class BalancePreset {
         return FilePatching.PatchesPerFile.GetValues(configName, true).Count > 0;
     }
 
-    /// <summary>True when Save must rewrite magiceffects.json: a preset was pressed, or the template changed (host only).</summary>
+    /// <summary>True when Save must rewrite magiceffects.json: a preset was pressed, or the template changed (host or server admin).</summary>
     internal static bool NeedsOverhaulRewrite(StagedConfig staged, StagedConfig baseline) {
-        if (staged == null || baseline == null || QuickConfigBindings.IsHost() == false) { return false; }
+        if (staged == null || baseline == null || QuickConfigBindings.CanEditFiles() == false) { return false; }
         if (staged.PresetPressed != null) { return true; }
         return staged.Get("BalanceConfigurationType", "balanced") != baseline.Get("BalanceConfigurationType", "balanced");
     }
@@ -87,7 +88,8 @@ internal static class BalancePreset {
     /// <summary>
     /// Rewrites baseconfig/magiceffects.json from the embedded overhaul the (already saved) Balance
     /// Template names, records it as the mod's own content, and reloads it. With backupFirst the
-    /// current file is copied to baseconfig-backup/ first; the caller has asked the player by then.
+    /// current file is copied to baseconfig-backup/ first; the host has asked the player by then, and a
+    /// server backs up a hand-edited file for a remote admin without asking.
     /// </summary>
     internal static bool ApplyOverhaulRewrite(bool backupFirst, out string message) {
         message = "";

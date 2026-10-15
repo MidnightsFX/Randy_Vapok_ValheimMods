@@ -336,6 +336,7 @@ public static class QuickConfigPrefabBuilder
             new[]
             {
                 H("Socket rules"),
+                T("AllowRuneSocketing", "Allow Rune Socketing"),
                 T("AllowDuplicateSocketedEffects", "Allow Duplicate Socketed Effects"),
                 T("AllowShardstoneDuplicateItemEffect", "Shardstone On Matching Item Effect"),
                 T("AllowRunestoneDuplicateItemEffect", "Runestone On Matching Item Effect"),

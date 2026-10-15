@@ -23,6 +23,7 @@ namespace EpicLoot.LegendarySystem
             public string SetID = "";
             public int OverrideVersion;
             public bool Dirty;
+            public bool Tinted;
         }
 
         private static readonly ConditionalWeakTable<VisEquipment, TintState> States = new ConditionalWeakTable<VisEquipment, TintState>();
@@ -88,6 +89,14 @@ namespace EpicLoot.LegendarySystem
                 tint = set.ArmorTint;
             }
 
+            // Nothing to apply and nothing of ours to undo, so leave the materials alone. This is also what keeps
+            // non-player users of the player rig out (the Deep North Shadow): they never carry a set ID.
+            if (tint == null && !state.Tinted)
+            {
+                return;
+            }
+
+            state.Tinted = tint != null;
             string key = tint == null ? null : TintKey(tint);
 
             // Chest and leg items paint their cloth into the body material's _ChestTex/_LegsTex, which the
@@ -101,7 +110,9 @@ namespace EpicLoot.LegendarySystem
 
             foreach (Renderer renderer in ArmorRenderers(vis))
             {
-                foreach (Material material in renderer.materials)
+                // Only tinting needs the renderer's own material copies; a tinted texture to undo can only sit on a
+                // copy made here, which sharedMaterials already returns.
+                foreach (Material material in tint != null ? renderer.materials : renderer.sharedMaterials)
                 {
                     if (material == null)
                     {
@@ -110,10 +121,7 @@ namespace EpicLoot.LegendarySystem
 
                     foreach (int slot in TextureSlots)
                     {
-                        if (material.HasProperty(slot))
-                        {
-                            TintSlot(material, slot, null, tint, key);
-                        }
+                        TintSlot(material, slot, null, tint, key);
                     }
                 }
             }
@@ -126,6 +134,12 @@ namespace EpicLoot.LegendarySystem
 
         private static void TintSlot(Material material, int texID, Texture empty, ArmorTintInfo tint, string key)
         {
+            // GetTexture logs a Unity error for a slot the shader lacks.
+            if (!material.HasProperty(texID))
+            {
+                return;
+            }
+
             Texture current = material.GetTexture(texID);
             if (current == null)
             {

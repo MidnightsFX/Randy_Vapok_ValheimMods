@@ -16,6 +16,26 @@ namespace EpicLoot.ShardStones {
     // Core socketing logic, independent of any UI. Socketed effects are stored on the equipment's
     // MagicItem (MagicItem.Sockets) and applied through the normal effect pipeline.
     public static class ShardSocketManager {
+        // Allow Rune Socketing. Null-safe because MagicItem reads it on every effect sum, and a MagicItem
+        // can be read before ELConfig has bound anything (or in a harness that never binds it).
+        public static bool RuneSocketingEnabled => ELConfig.AllowRuneSocketing == null || ELConfig.AllowRuneSocketing.Value;
+
+        // Rune sockets flip between granting and inert with nothing written to the items, so the memoized
+        // totals and everything derived from them on equip (abilities, the loot-effect ZDO mirror) are
+        // stale until rebuilt. Fires on the server push too: Jotunn applies synced values through
+        // BoxedValue, which raises SettingChanged.
+        public static void OnRuneSocketingChanged() {
+            EquipmentEffectCache.ResetAll();
+
+            var player = Player.m_localPlayer;
+            if (player == null) {
+                return;
+            }
+
+            player.GetComponent<Abilities.AbilityController>()?.UpdatePlayerAbilities();
+            Multiplayer_Player_Patch.WatchMultiplayerMagicEffects_Player_Patch.UpdateRichesAndLuck(player);
+        }
+
         // Resolves the effect a socketable input yields when placed into the given equipment.
         // Returns true when the input is a valid socketable; on true, `effect` may still be null for an
         // inert shard (one with no defined effect for the equipment's item type), while `color` and
@@ -71,6 +91,11 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
+            if (color == ShardType.None && !RuneSocketingEnabled) {
+                reason = "$mod_epicloot_socket_runesdisabled";
+                return false;
+            }
+
             return true;
         }
 
@@ -122,10 +147,11 @@ namespace EpicLoot.ShardStones {
                 }
             }
 
+            // A rune sitting inert (rune socketing off) grants nothing, so it blocks nothing either.
             var occupants = new List<SocketOccupant>();
             foreach (var socket in equipMagicItem.Sockets) {
                 if (socket != null) {
-                    occupants.Add(new SocketOccupant(socket.ShardType, socket.Effect));
+                    occupants.Add(new SocketOccupant(socket.ShardType, socket.IsActive() ? socket.Effect : null));
                 }
             }
             if (!CheckDuplicateEffect(color, effect, occupants, out reason)) {
@@ -185,7 +211,8 @@ namespace EpicLoot.ShardStones {
             foreach (var other in coResident) {
                 if (other != null &&
                     ResolveSocketedEffect(equipment, other, out var otherEffect, out var otherColor, out _)) {
-                    occupants.Add(new SocketOccupant(otherColor, otherEffect));
+                    var inertRune = otherColor == ShardType.None && !RuneSocketingEnabled;
+                    occupants.Add(new SocketOccupant(otherColor, inertRune ? null : otherEffect));
                 }
             }
             if (!CheckDuplicateEffect(color, effect, occupants, out reason)) {
@@ -363,6 +390,12 @@ namespace EpicLoot.ShardStones {
         // immediately.
         public static SocketRemoval GetRemovalPolicy(ShardType color, MagicItemEffect effect) {
             if (color == ShardType.None) {
+                // With rune socketing off a slotted rune grants nothing, so it owes no commitment:
+                // the player can always take it back out, whatever the removal mode says.
+                if (!RuneSocketingEnabled) {
+                    return SocketRemoval.Free;
+                }
+
                 switch (ELConfig.RuneSocketRemovalMode.Value) {
                     case RuneSocketMode.Break:
                         return SocketRemoval.BreakOnly;

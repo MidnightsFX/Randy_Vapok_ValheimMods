@@ -108,7 +108,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
                     continue;
                 }
                 foreach (var socket in magicItem.Sockets) {
-                    if (socket?.Effect == null || socket.Effect.EffectType != MagicEffectType.IcyRetribution) {
+                    if (socket == null || !socket.IsActive() || socket.Effect.EffectType != MagicEffectType.IcyRetribution) {
                         continue;
                     }
                     if (!found || socket.SourceRarity > rarity) {

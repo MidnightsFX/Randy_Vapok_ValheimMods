@@ -65,10 +65,25 @@ internal static class QuickConfigureTool {
     private static TMP_Text nextCaption;
     private static bool discardArmed;
     private static bool overhaulBackupConfirmed;
+    // Locks the pages while the server answers a save.
+    private static CanvasGroup pagesGroup;
 
     // What the pages edit, and what was live when the panel opened (or was last saved).
     private static StagedConfig staged;
     private static StagedConfig baseline;
+
+    /// <summary>A save whose JSON changes the server is still answering, and what the panel already did for it.</summary>
+    private sealed class PendingSave {
+        internal int Generation;
+        internal bool CloseAfter;
+        internal int CfgWritten;
+        internal List<string> Failures;
+        internal List<string> Notes;
+    }
+
+    private static PendingSave pendingSave;
+    // Counts the panels opened, so a server answer can tell whether the panel that asked is still up.
+    private static int panelGeneration;
 
     internal static bool IsOpen => panelRoot != null;
 
@@ -78,6 +93,8 @@ internal static class QuickConfigureTool {
     }
 
     internal static void Init() {
+        // First, and on every machine: a dedicated server has no panel but answers a server admin's save.
+        QuickConfigServerSave.Init();
         // The corner button, the main-menu hook and the pause-menu patch belong to the shared launcher
         // in Common/src/Config/UI, so several mods share one button. See its README for the contract.
         ConfigUILauncher.Init();
@@ -170,6 +187,7 @@ internal static class QuickConfigureTool {
         if (GUIManager.IsHeadless() || GUIManager.Instance == null || GUIManager.CustomGUIFront == null) { return; }
         // Built fresh every time, so every widget starts from the current configuration.
         DestroyPanel();
+        panelGeneration++;
         tutorialMode = tutorial;
         staged = StagedConfig.Snapshot();
         baseline = StagedConfig.Snapshot();
@@ -208,6 +226,7 @@ internal static class QuickConfigureTool {
         titleText = QuickConfigUi.TextAt(panel, "Title");
         statusText = QuickConfigUi.TextAt(panel, "Status");
         Transform pagesContainer = QuickConfigUi.FindChild(panel, "Pages") ?? panel;
+        pagesGroup = pagesContainer.GetComponent<CanvasGroup>() ?? pagesContainer.gameObject.AddComponent<CanvasGroup>();
 
         Button close = QuickConfigUi.FindComponent<Button>(panel, "Close");
         if (close != null) {
@@ -219,7 +238,8 @@ internal static class QuickConfigureTool {
         backBtn = WireNav(panel, "Back", "$mod_epicloot_cfg_back", () => ShowPage(currentPage - 1),
             "The previous page. Moving between pages keeps your edits; only Save writes them.");
         WireNav(panel, "Save", "$mod_epicloot_cfg_save", OnSaveClicked,
-            "Writes every page's changes: the .cfg entries and, on the host, the JSON files behind them. The panel stays open.");
+            "Writes every page's changes: the .cfg entries and the JSON files behind them. A server admin's " +
+            "changes are sent to the server, which passes them on to every player. The panel stays open.");
         nextBtn = WireNav(panel, "Next", "$mod_epicloot_cfg_next", () => ShowPage(currentPage + 1),
             "The next page. Moving between pages keeps your edits; only Save writes them.");
         nextCaption = nextBtn != null ? QuickConfigUi.CaptionOf(nextBtn.GetComponent<Button>()) : null;
@@ -311,7 +331,9 @@ internal static class QuickConfigureTool {
 
         if (resetBtn != null) { resetBtn.SetActive(shown.Binder.ResettableKeys().Count > 0); }
         shown.Binder.Refresh();
-        if (shown.Binder.HasReadOnlyRows && IsHost() == false) {
+        if (pendingSave != null) {
+            SetStatus(L("$mod_epicloot_cfg_sending_to_server"), true);
+        } else if (shown.Binder.HasReadOnlyRows) {
             SetStatus(L("$mod_epicloot_cfg_readonly_offhost"), true);
         } else {
             SetStatus("", true);
@@ -373,7 +395,7 @@ internal static class QuickConfigureTool {
 
     // Asks first: the reset replaces whatever this page has staged, saved or not.
     private static void OnResetPageClicked() {
-        if (shownPages == null || currentPage < 0 || currentPage >= shownPages.Count) { return; }
+        if (shownPages == null || currentPage < 0 || currentPage >= shownPages.Count || pendingSave != null) { return; }
         PageInstance page = shownPages[currentPage];
         bool asked = QuickConfigConfirm.Show("$mod_epicloot_cfg_reset_title", "$mod_epicloot_cfg_reset_body",
             "$mod_epicloot_cfg_keep_editing", null, "$mod_epicloot_cfg_reset_confirm",
@@ -492,6 +514,7 @@ internal static class QuickConfigureTool {
         finishBtn = null;
         resetBtn = null;
         nextCaption = null;
+        pagesGroup = null;
         tutorialMode = false;
         textFocusedLastFrame = false;
         discardArmed = false;
@@ -542,10 +565,18 @@ internal static class QuickConfigureTool {
         TrySave(closeAfter: true);
     }
 
-    // A preset over a hand-edited magiceffects.json asks first; the save resumes from the prompt.
+    // A preset over a hand-edited magiceffects.json asks first; the save resumes from the prompt. Only the
+    // host is asked: a server admin's rewrite happens on the server, which backs its own file up.
     private static void TrySave(bool closeAfter) {
         if (staged == null || baseline == null) { return; }
-        if (overhaulBackupConfirmed == false
+        // The server is still answering the last Save. Its answer finishes this one too, closing the
+        // panel afterwards when this asked to.
+        if (pendingSave != null) {
+            pendingSave.CloseAfter |= closeAfter;
+            SetStatus(L("$mod_epicloot_cfg_sending_to_server"), true);
+            return;
+        }
+        if (IsHost() && overhaulBackupConfirmed == false
             && BalancePreset.NeedsOverhaulRewrite(staged, baseline)
             && ConfigVersionManager.IsPlayerModified(BalancePreset.MagicEffectsConfigName)) {
             bool shown = QuickConfigConfirm.Show("$mod_epicloot_cfg_backup_confirm_title", "$mod_epicloot_cfg_backup_confirm_body",
@@ -561,29 +592,39 @@ internal static class QuickConfigureTool {
             overhaulBackupConfirmed = true;
         }
 
-        if (SaveStaged(out string message)) {
-            if (closeAfter) {
-                ClosePanel();
-            } else {
-                string saved = L("$mod_epicloot_cfg_saved");
-                SetStatus(string.IsNullOrEmpty(message) ? saved : saved + " " + message, true);
-            }
+        SaveOutcome outcome = SaveStaged(closeAfter, out string message);
+        if (outcome == SaveOutcome.Sending) {
+            SetStatus(message, true);
         } else {
-            SetStatus(L("$mod_epicloot_cfg_saving_failed") + " " + message, false);
+            ReportSave(outcome == SaveOutcome.Saved, message, closeAfter);
         }
     }
 
-    // Applies everything staged. Returns false with the reasons when anything was refused; the panel
-    // stays open with the edits intact either way, since a half-applied save closing its window is how
-    // an admin ends up believing it landed. On success the message carries the notes.
-    private static bool SaveStaged(out string message) {
+    private static void ReportSave(bool saved, string message, bool closeAfter) {
+        if (saved == false) {
+            SetStatus(L("$mod_epicloot_cfg_saving_failed") + " " + message, false);
+        } else if (closeAfter) {
+            ClosePanel();
+        } else {
+            string text = L("$mod_epicloot_cfg_saved");
+            SetStatus(string.IsNullOrEmpty(message) ? text : text + " " + message, true);
+        }
+    }
+
+    private enum SaveOutcome { Saved, Failed, Sending }
+
+    // Applies everything staged. Fails with the reasons when anything was refused; the panel stays
+    // open with the edits intact either way, since a half-applied save closing its window is how an
+    // admin ends up believing it landed. On success the message carries the notes. A server admin's
+    // JSON changes go to the server, and the save finishes in OnServerSaveFinished (Sending).
+    private static SaveOutcome SaveStaged(bool closeAfter, out string message) {
         message = "";
-        if (staged == null || baseline == null) { return false; }
+        if (staged == null || baseline == null) { return SaveOutcome.Failed; }
 
         string invalid = staged.ValidationError();
         if (invalid != null) {
             message = invalid;
-            return false;
+            return SaveOutcome.Failed;
         }
 
         List<string> failures = new List<string>();
@@ -609,8 +650,12 @@ internal static class QuickConfigureTool {
             }
         }
 
-        // 2. Host only: the balance preset's overhaul rewrite, then each changed JSON file
-        //    (magiceffects.json last, so a rewrite never races an edit of the same file).
+        // 2. The balance preset's overhaul rewrite, then each changed JSON file (magiceffects.json last,
+        //    so a rewrite never races an edit of the same file). The host writes its own; a server
+        //    admin's are sent to the server after the .cfg push below, so the server already has the
+        //    new Balance Template when it rewrites magiceffects.json.
+        string serverRewrite = null;
+        bool sendToServer = false;
         if (IsHost()) {
             if (BalancePreset.NeedsOverhaulRewrite(staged, baseline)) {
                 if (BalancePreset.ApplyOverhaulRewrite(overhaulBackupConfirmed, out string rewriteMessage)) {
@@ -626,6 +671,11 @@ internal static class QuickConfigureTool {
                 }
             }
             JsonConfigEdits.ApplyDirty(staged, baseline, failures, notes, writtenFiles);
+        } else if (QuickConfigBindings.CanEditFiles()) {
+            if (BalancePreset.NeedsOverhaulRewrite(staged, baseline)) {
+                serverRewrite = BalancePreset.Normalize(staged.Get("BalanceConfigurationType", "balanced"));
+            }
+            sendToServer = serverRewrite != null || staged.DirtyJsonFiles(baseline).Count > 0;
         } else {
             staged.PresetPressed = null;
         }
@@ -640,9 +690,40 @@ internal static class QuickConfigureTool {
 
         overhaulBackupConfirmed = false;
 
-        // 4. What was just written is now the live configuration, so it is the new point unsaved
-        //    changes are measured from. Rows that failed to write keep their staged values and stay
-        //    marked unsaved.
+        if (sendToServer) {
+            PendingSave pending = new PendingSave {
+                Generation = panelGeneration,
+                CloseAfter = closeAfter,
+                CfgWritten = written,
+                Failures = failures,
+                Notes = notes
+            };
+            if (QuickConfigServerSave.Begin(staged, baseline, serverRewrite, result => OnServerSaveFinished(pending, result))) {
+                pendingSave = pending;
+                if (pagesGroup != null) { pagesGroup.interactable = false; }
+                message = L("$mod_epicloot_cfg_sending_to_server");
+                return SaveOutcome.Sending;
+            }
+            failures.Add("The JSON settings could not be sent to the server.");
+        }
+
+        return CompleteSave(failures, notes, writtenFiles, written, serverRewritten: false, out message)
+            ? SaveOutcome.Saved
+            : SaveOutcome.Failed;
+    }
+
+    // 4. What was just written is now the live configuration, so it is the new point unsaved changes
+    //    are measured from. Rows that failed to write keep their staged values and stay marked unsaved.
+    private static bool CompleteSave(List<string> failures, List<string> notes, ICollection<string> writtenFiles,
+        int cfgWritten, bool serverRewritten, out string message) {
+        // The server rewrote magiceffects.json: staged Effect Tuning values now come from the new file,
+        // as they do right after the host's own rewrite. Only matters for a save that failed in part,
+        // since a complete one takes everything below.
+        if (serverRewritten) {
+            staged.PresetPressed = null;
+            BalancePreset.ReloadMagicEffects(staged);
+        }
+
         baseline = StagedConfig.Snapshot();
         if (failures.Count == 0) {
             staged.CopyFrom(baseline);
@@ -659,8 +740,31 @@ internal static class QuickConfigureTool {
             return false;
         }
 
-        EpicLoot.Log($"Quick Configure applied and saved the configuration ({written} .cfg entries).");
+        EpicLoot.Log($"Quick Configure applied and saved the configuration ({cfgWritten} .cfg entries).");
         message = string.Join(" ", notes);
         return true;
+    }
+
+    // The server has answered a server admin's save, and the files it wrote have been pushed back here.
+    private static void OnServerSaveFinished(PendingSave pending, ServerSaveResult result) {
+        if (pendingSave == pending) { pendingSave = null; }
+        List<string> failures = new List<string>(pending.Failures);
+        failures.AddRange(result.Failures);
+        List<string> notes = new List<string>(pending.Notes);
+        notes.AddRange(result.Notes);
+
+        // The panel that asked was closed (or another opened since): say how it went on the HUD instead.
+        if (IsOpen == false || pending.Generation != panelGeneration || staged == null) {
+            bool ok = failures.Count == 0;
+            string text = "Epic Loot: " + L(ok ? "$mod_epicloot_cfg_saved" : "$mod_epicloot_cfg_saving_failed") + " " +
+                string.Join(" ", ok ? notes : failures);
+            if (ok) { EpicLoot.Log(text); } else { EpicLoot.LogWarningForce(text); }
+            if (MessageHud.instance != null) { MessageHud.instance.ShowMessage(MessageHud.MessageType.TopLeft, text); }
+            return;
+        }
+
+        if (pagesGroup != null) { pagesGroup.interactable = true; }
+        bool saved = CompleteSave(failures, notes, result.Written, pending.CfgWritten, result.Rewritten, out string message);
+        ReportSave(saved, message, pending.CloseAfter);
     }
 }

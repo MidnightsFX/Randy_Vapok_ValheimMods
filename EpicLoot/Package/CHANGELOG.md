@@ -5,10 +5,14 @@ Changes:
     * Sets can be configured to drop at any rarity, and set pieces of different rarities count toward the same set
     * The rune feature can now extract and Etch sets from and to items
 * Adds Quick Configure, editable in game configs for most Epicloot options, and a 1 time setup tutorial
+* Server admins can change every Quick Configure setting from their own game, and the server passes the changes on to every player.
 * Improvements to the loot system (existing loot tables can be upgraded)
     * new loot table format, with more control over what drops and how much
     * Modded creatures are now automatically included in the loot tables
 * All Boss drops are now configuable, and the loot table changes are non-destructive
+* Eikthyr and Black Forest creatures and chests no longer drop wooden shields, and troll armor is now part of the regular Black Forest armor loot.
+* Unique shardstones and Brokkr's Gift drop twice as often.
+* Slotting runestones into shard slots can be turned off, which leaves runestones already slotted inactive but still removable.
 * The enchanting table's search boxes can now find items by their enchantments.
 * Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
 * New Enchantments!
@@ -20,9 +24,13 @@ Changes:
 Bugfixes:
 * Loot tables can now give items as many enchantments as there are to roll.
 * Item tooltips now fit their content and stay beside the cursor, and the comparison tooltip follows the hovered item.
+* The effect lists on the Augment and Rune tabs now use one text size and show long effects in full.
 * The trader and tempering panels only move while a key is held or by their corner handle, so clicking them no longer nudges them.
 * Storage mods can now let the enchanting table work on items directly in their chests.
 * Lox armor is now sorted into Plains loot.
+* Materials refunded from a destroyed enchanting table follow the game's latest reset of cheat flags.
+* Ashlands elites no longer drop Deep North shardstones.
+* Brokkr's Gift drops are no longer swapped for shardstones or sacrifice materials.
 * Less stutter around chests, and when first opening the enchanting table or one of its tabs.
 * Fixes the Dvergr rogues' crossbows showing up as a second Arbalest in loot, the merchant and item gating.
 * Fixes Stagger Duration shortening staggers on most creatures and not working from projectiles in multiplayer
@@ -35,6 +43,8 @@ Bugfixes:
 * Fixes the rested carry weight shardstone losing its comfort bonus
 * Fixes the Dark Red shardstone's ranged skills bonus doing nothing
 * Fixes Bulk Up being able to push health regeneration below zero
+* Fixes Apportation never moving you to your thrown weapon
+* Fixes a flood of sound warnings when travelling through a portal with TargetPortal.
 * Lucky Craft now only saves materials when crafting, not when building, planting or tempering
 * Quick Draw no longer makes crossbows reload slower at high skill, and Triple Shot from a set only affects bows and crossbows
 * Coin Weighted Weapon now shows the damage bonus it actually gives at the coins you carry, and weapon tooltips include it before the weapon is equipped

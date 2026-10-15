@@ -74,6 +74,14 @@ namespace EpicLoot
             SourcePrefab = sourcePrefab;
             SourceRarity = sourceRarity;
         }
+
+        // Whether this socket currently grants its effect. A runestone socket sits inert while Allow Rune
+        // Socketing is off; nothing is written to the item, so turning it back on restores the effect.
+        // A method rather than a property so the item JSON never picks it up.
+        public bool IsActive()
+        {
+            return Effect != null && (ShardType != ShardType.None || ShardSocketManager.RuneSocketingEnabled);
+        }
     }
 
     [Serializable]
@@ -204,7 +212,13 @@ namespace EpicLoot
                     // Inline the socketed item's own icon, resolved from its source prefab
                     var iconTag = ShardTooltipSprites.GetSpriteTag(socket.SourcePrefab);
                     var removalTag = GetSocketRemovalTag(socket);
-                    if (socket.Effect != null)
+                    if (socket.Effect != null && !socket.IsActive())
+                    {
+                        // A rune held inert by Allow Rune Socketing: still listed, so the player can see
+                        // what it would grant and that it is not granting it.
+                        tooltip.AppendLine($"  <color=#808080>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, false)} $mod_epicloot_socket_tip_runeinactive</color>");
+                    }
+                    else if (socket.Effect != null)
                     {
                         tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socket.Effect, socket.SourceRarity, false)}</color>{GetSocketStackTag(socket)}{removalTag}");
                         if (showRange)
@@ -296,7 +310,7 @@ namespace EpicLoot
         public int GetOpenSocketCount() => Mathf.Max(0, SocketCount - Sockets.Count);
         public bool HasSockets() => SocketCount > 0;
         public bool HasOpenSocket() => GetOpenSocketCount() > 0;
-        public IEnumerable<MagicItemEffect> GetSocketedEffects() => Sockets.Where(x => x?.Effect != null).Select(x => x.Effect);
+        public IEnumerable<MagicItemEffect> GetSocketedEffects() => Sockets.Where(x => x != null && x.IsActive()).Select(x => x.Effect);
 
         // includeSocketed defaults to false so all crafting/bookkeeping reads (loot roll, augment,
         // rune-extract, disenchant, requirements/exclusivity, names) stay rolled-only. Effect
@@ -338,10 +352,10 @@ namespace EpicLoot
             {
                 for (int i = 0; i < Sockets.Count; i++)
                 {
-                    MagicItemEffect effect = Sockets[i]?.Effect;
-                    if (effect != null && effect.EffectType == effectType)
+                    SocketedEffect socket = Sockets[i];
+                    if (socket != null && socket.IsActive() && socket.Effect.EffectType == effectType)
                     {
-                        total += effect.EffectValue;
+                        total += socket.Effect.EffectValue;
                     }
                 }
             }
@@ -355,7 +369,7 @@ namespace EpicLoot
             {
                 return true;
             }
-            if (includeSocketed && Sockets.Exists(x => x?.Effect != null && x.Effect.EffectType == effectType))
+            if (includeSocketed && Sockets.Exists(x => x != null && x.IsActive() && x.Effect.EffectType == effectType))
             {
                 return true;
             }

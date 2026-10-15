@@ -35,7 +35,7 @@ internal sealed class RowBinder {
     private readonly Action<string> onEdited;
     private readonly List<BoundRow> rows = new List<BoundRow>();
 
-    /// <summary>True when the page holds a row the current player may only look at (JSON rows off-host).</summary>
+    /// <summary>True when the page holds a row the current player may only look at (JSON rows for a non-admin off-host).</summary>
     internal bool HasReadOnlyRows { get; private set; }
 
     /// <summary>The keys a page reset stages: every row the player may edit, and the icon index a colour row carries.</summary>
@@ -157,7 +157,7 @@ internal sealed class RowBinder {
             Binding = binding,
             Root = root,
             Group = root.GetComponent<CanvasGroup>() ?? root.AddComponent<CanvasGroup>(),
-            ReadOnly = binding.HostOnly && QuickConfigBindings.IsHost() == false
+            ReadOnly = binding.EditsFiles && QuickConfigBindings.CanEditFiles() == false
         };
 
         bool wired;

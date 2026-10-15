@@ -10,9 +10,11 @@ using System.Linq;
 namespace EpicLoot.QuickConfig;
 
 /// <summary>
-/// Host-only edits to the on-disk baseconfig JSON files. Each edit parses the file to a JObject,
-/// changes only the tokens the panel staged, writes it back indented and re-reads it through
-/// <see cref="ELConfig.ReloadBaseConfigsFromDisk"/> (which also pushes it to connected peers).
+/// Edits to the baseconfig JSON files. Each edit parses the file to a JObject, changes only the tokens
+/// the panel staged (<see cref="ApplyStaged"/>), writes it back indented and re-reads it through
+/// <see cref="ELConfig.ReloadBaseConfigsFromDisk"/> (which also pushes it to connected peers). The host
+/// edits its own files here; a server admin runs the same <see cref="ApplyStaged"/> over the server's
+/// copy and sends the result to the server (<see cref="QuickConfigServerSave"/>).
 ///
 /// These writes NEVER call <see cref="ConfigVersionManager.RecordWrittenContent"/>: what the panel
 /// writes is the player's own configuration. Stamping it as the mod's output would tell the next
@@ -54,20 +56,14 @@ internal static class JsonConfigEdits {
     internal static void ApplyDirty(StagedConfig staged, StagedConfig baseline, List<string> failures, List<string> notes,
         HashSet<string> written) {
         foreach (string file in staged.DirtyJsonFiles(baseline)) {
-            List<JsonSlot> dirty = staged.DirtyJsonSlots(file, baseline);
-            bool ok = Edit(file, root => {
-                foreach (JsonSlot slot in dirty) {
-                    slot.Apply(root, staged.GetRaw(slot.Key), baseline?.GetRaw(slot.Key));
-                }
-            }, out string message);
+            int changed = 0;
+            bool ok = Edit(file, root => changed = ApplyStaged(root, file, staged, baseline), out string message);
             if (ok) {
-                EpicLoot.Log($"Quick Configure wrote {dirty.Count} value(s) to {file}.");
+                EpicLoot.Log($"Quick Configure wrote {changed} value(s) to {file}.");
                 notes.Add(message);
                 written.Add(file);
-                // FilePatching rebuilds a patched file from the embedded default plus its patches on
-                // every launch, which replaces this edit just as it would a hand edit.
-                if (BalancePreset.IsPatched(Path.GetFileNameWithoutExtension(file))) {
-                    string patchedNote = $"{file} is rebuilt from its patch files at every launch, so this change lasts until the game restarts.";
+                string patchedNote = PatchedNote(file);
+                if (patchedNote != null) {
                     EpicLoot.LogWarningForce($"Quick Configure: {patchedNote}");
                     notes.Add(patchedNote);
                 }
@@ -75,6 +71,28 @@ internal static class JsonConfigEdits {
                 failures.Add(message);
             }
         }
+    }
+
+    /// <summary>
+    /// Applies every staged change to one file onto its parsed JSON: only the values that differ from
+    /// the baseline, each through its slot's writer. Returns how many slots were written.
+    /// </summary>
+    internal static int ApplyStaged(JObject root, string file, StagedConfig staged, StagedConfig baseline) {
+        List<JsonSlot> dirty = staged.DirtyJsonSlots(file, baseline);
+        foreach (JsonSlot slot in dirty) {
+            slot.Apply(root, staged.GetRaw(slot.Key), baseline?.GetRaw(slot.Key));
+        }
+        return dirty.Count;
+    }
+
+    /// <summary>
+    /// The note for an edit to a file that patch files target, or null. FilePatching rebuilds such a file
+    /// from the embedded default plus its patches on every launch, which replaces this edit just as it
+    /// would a hand edit. Asked of the machine that wrote the file, since the patches are its own.
+    /// </summary>
+    internal static string PatchedNote(string file) {
+        if (BalancePreset.IsPatched(Path.GetFileNameWithoutExtension(file)) == false) { return null; }
+        return $"{file} is rebuilt from its patch files at every launch, so this change lasts until the game restarts.";
     }
 
     // --- JObject helpers -------------------------------------------------------------------------

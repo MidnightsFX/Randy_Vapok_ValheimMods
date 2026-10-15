@@ -39,7 +39,7 @@ open cleanly in an editor that has no mod DLLs at all. (Historically the editor 
 | `<ELConfig static field>` | a BepInEx entry on `EpicLoot.Config.ELConfig` | `GlobalDropRateModifier`, `_adventureModeEnabled`, `ShowQuickConfigButton` |
 | `<field>.<part>` | one part of a composite entry | `AbilityKeyCodes.0`, `AbilityBarPosition.x` |
 | `Common.<Entry>` | a Common-layer entry on `Common.ModContext` | `Common.EnableDebugMode`, `Common.ConfigApplyDelay` |
-| `json:<file>:<path>` | a value in a baseconfig JSON (host only) | `json:adventuredata:Gamble.GamblesCount`, `json:loottables:RarityCounts`, `json:magiceffects:TripleBowShot.Chance`, `json:magiceffects:Riches` |
+| `json:<file>:<path>` | a value in a baseconfig JSON (host or server admin) | `json:adventuredata:Gamble.GamblesCount`, `json:loottables:RarityCounts`, `json:magiceffects:TripleBowShot.Chance`, `json:magiceffects:Riches` |
 | `action:<verb>:<arg>` | a button | `action:preset:balanced`, `action:reset:TraderPanelPosition`, `action:url:discord`, `action:advanced:show` |
 | `readout:<name>` | code-fed text | `readout:dropmix`, `readout:template` |
 
@@ -140,4 +140,29 @@ label can be switched to a token later. Page titles, nav buttons, the welcome te
   `ELConfig.ReloadBaseConfigsFromDisk`. They **never** call `ConfigVersionManager.RecordWrittenContent`:
   panel edits are the player's work, and stamping them as the mod's would let the next update overwrite
   them silently. The Balance preset rewrite from the embedded overhaul *does* record itself.
-- JSON rows and the preset buttons are read-only off-host.
+- JSON rows and the preset buttons are editable by the host and by a server admin
+  (`QuickConfigBindings.CanEditFiles`: Jotunn's `PlayerIsAdmin` off-host), read-only for anyone else.
+  The shared launcher only shows the panel to those two anyway.
+
+## Saving as a server admin
+
+A server admin's `.cfg` changes travel through Jotunn's config sync as before. Their JSON changes are
+written on the server by `QuickConfigServerSave`, over one CustomRPC (`epicloot_quickconfig_RPC`):
+
+1. The `.cfg` batch is applied and pushed first, so the server already has a new Balance Template.
+2. **Fetch**: the client asks for the server's current text of every file with a staged change.
+3. The client applies the staged changes to that text with the host's own code
+   (`JsonConfigEdits.ApplyStaged`, the slots' writers) and sends each edited file back with a hash of
+   the text it edited. With a preset pressed, it asks for the magiceffects.json rewrite instead of
+   sending edits to that file, as the host drops them.
+4. **Write**: the server checks the sender against its admin list (vanilla `ZNet.IsAdmin` on the peer's
+   host name) and that each file still hashes the same, then rewrites magiceffects.json if asked (backing
+   up a hand-edited one; there is no one to ask), writes the files in `StagedConfig.JsonFileOrder` and
+   reloads them, which pushes them to every connected player. A file that will not load is put back.
+5. The save completes when the server's reply **and** the push of every file it wrote have arrived
+   (`ELConfig.ServerConfigApplied`), since only the push puts the saved values in the admin's game.
+   Until then the pages are locked and Save waits; a closed panel gets the outcome on the HUD.
+
+The server only checks, writes and reloads; it never builds the panel's bindings. File names from the
+client are checked against `StagedConfig.JsonFileOrder` before they become paths. Each step times out
+(20 s for a reply, 15 s for the push), so a lost answer never leaves the panel locked.

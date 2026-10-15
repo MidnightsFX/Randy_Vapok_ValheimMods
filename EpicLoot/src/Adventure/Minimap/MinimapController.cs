@@ -50,29 +50,11 @@ public class MinimapController : MonoBehaviour
     public virtual void Awake()
     {
         _minimap = GetComponent<Minimap>();
-
-        if (!_minimap.m_icons.Exists(x => x.m_name == EpicLoot.TreasureMapPinType))
-        {
-            _minimap.m_icons.Add(new Minimap.SpriteData
-            {
-                m_name = EpicLoot.TreasureMapPinType,
-                m_icon = EpicAssets.MapIconTreasureMap
-            });
-        }
-
-        if (!_minimap.m_icons.Exists(x => x.m_name == EpicLoot.BountyPinType))
-        {
-            _minimap.m_icons.Add(new Minimap.SpriteData
-            {
-                m_name = EpicLoot.BountyPinType,
-                m_icon = EpicAssets.MapIconBounty
-            });
-        }
     }
 
     private void Start()
     {
-        EnsureVisibleIconTypeCapacity();
+        RegisterPinTypes();
         SetupPinFilters();
         RefreshAdventurePinFilters();
     }
@@ -154,8 +136,11 @@ public class MinimapController : MonoBehaviour
             iconLayout.preferredWidth = RewardIconSize;
             iconLayout.preferredHeight = RewardIconSize;
 
-            TextMeshProUGUI count = new GameObject("Count", typeof(RectTransform)).AddComponent<TextMeshProUGUI>();
-            count.transform.SetParent(entry, false);
+            // Parented before the text is added, so its Awake waits for the inactive row. A new GameObject starts
+            // active at the scene root, where Awake would run (and warn) before the font below is set.
+            GameObject countObject = new GameObject("Count", typeof(RectTransform));
+            countObject.transform.SetParent(entry, false);
+            TextMeshProUGUI count = countObject.AddComponent<TextMeshProUGUI>();
             count.font = label.font;
             count.fontSharedMaterial = label.fontSharedMaterial;
             count.fontSize = label.fontSize;
@@ -198,25 +183,36 @@ public class MinimapController : MonoBehaviour
         VanillaPanelLayout.Clear();
     }
 
-    private void EnsureVisibleIconTypeCapacity()
+    /// <summary>
+    /// Appends the bounty and treasure map pin types to the end of the filter array, as TargetPortal, Jewelcrafting
+    /// and VentureValheim do with theirs. The fixed 800/801 used before padded the array with ~780 unused slots,
+    /// and mods that walk every slot paid for each: TargetPortal toggles them all when its portal map opens and
+    /// again when it closes, and every vanilla ToggleIconFilter spawns a gamepad vibration sound, so each portal
+    /// trip spawned ~1600 of them and flooded the log with "Ran out of virtual channels".
+    /// </summary>
+    private void RegisterPinTypes()
     {
-        int required = (int)EpicLoot.TreasureMapPinType + 1;
+        bool[] current = _minimap.m_visibleIconTypes ?? Enumerable.Repeat(true, Enum.GetValues(typeof(Minimap.PinType)).Length).ToArray();
 
-        if (_minimap.m_visibleIconTypes != null && _minimap.m_visibleIconTypes.Length >= required)
-        {
-            return;
-        }
+        EpicLoot.BountyPinType = (Minimap.PinType)current.Length;
+        EpicLoot.TreasureMapPinType = (Minimap.PinType)(current.Length + 1);
 
-        bool[] resized = new bool[required];
-
-        for (int index = 0; index < resized.Length; ++index)
-        {
-            resized[index] = _minimap.m_visibleIconTypes == null ||
-                             index >= _minimap.m_visibleIconTypes.Length ||
-                             _minimap.m_visibleIconTypes[index];
-        }
-
+        bool[] resized = new bool[current.Length + 2];
+        Array.Copy(current, resized, current.Length);
+        resized[(int)EpicLoot.BountyPinType] = true;
+        resized[(int)EpicLoot.TreasureMapPinType] = true;
         _minimap.m_visibleIconTypes = resized;
+
+        _minimap.m_icons.Add(new Minimap.SpriteData
+        {
+            m_name = EpicLoot.BountyPinType,
+            m_icon = EpicAssets.MapIconBounty
+        });
+        _minimap.m_icons.Add(new Minimap.SpriteData
+        {
+            m_name = EpicLoot.TreasureMapPinType,
+            m_icon = EpicAssets.MapIconTreasureMap
+        });
     }
 
     private void SetupPinFilters()

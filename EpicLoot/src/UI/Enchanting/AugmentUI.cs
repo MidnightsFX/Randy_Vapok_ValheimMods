@@ -34,6 +34,7 @@ namespace EpicLoot_UnityLib
             AvailableItems.AddEquippedSortMode();
             MagicTextShimmer.Ensure(AvailableEffectsText);
             _enchantListEnsureVisible = EnchantList.GetComponentInParent<ScrollRectEnsureVisible>(true);
+            EffectListRow.FitRowsToList(EnchantList);
         }
 
         [UsedImplicitly]
@@ -303,6 +304,7 @@ namespace EpicLoot_UnityLib
                     enchantmentElement.text = effect.Item1;
                     MagicTextShimmer.Ensure(enchantmentElement);
                 }
+                EffectListRow.Fit(enchantmentListElement, enchantmentElement);
 
                 if (effect.Item2 == false)
                 {

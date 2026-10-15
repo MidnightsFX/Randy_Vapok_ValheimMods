@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
 {
@@ -222,6 +223,45 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
         public static ItemDrop.ItemData GetActiveWeapon(Player player)
         {
             return HitSource.FiringWeapon ?? Attack_Patch.ActiveAttack?.m_weapon ?? player?.GetCurrentWeapon();
+        }
+
+        /// <summary>
+        /// Teleports the player to <paramref name="point"/>, turning it to <paramref name="rotation"/> when one is
+        /// given. The player's rigidbody interpolates, and Unity drops a transform change on an interpolated body
+        /// unless Physics.SyncTransforms follows it, so the body is moved too, as vanilla's UnderWorldCheck does.
+        /// Setting only the transform left the player where they were.
+        /// </summary>
+        public static void MovePlayer(Player player, Vector3 point, Quaternion? rotation = null)
+        {
+            if (rotation.HasValue)
+            {
+                player.transform.SetPositionAndRotation(point, rotation.Value);
+            }
+            else
+            {
+                player.transform.position = point;
+            }
+
+            var body = player.m_body;
+            if (body != null)
+            {
+                body.position = point;
+                if (rotation.HasValue)
+                {
+                    body.rotation = rotation.Value;
+                }
+                body.linearVelocity = Vector3.zero;
+            }
+
+            // Fall damage would otherwise count from the height the player left.
+            player.m_maxAirAltitude = point.y;
+            Physics.SyncTransforms();
+
+            // The camera glides after a move under 20 m; a teleport should cut.
+            if (GameCamera.instance != null)
+            {
+                GameCamera.instance.m_playerPos = point;
+            }
         }
 
         /// <summary>

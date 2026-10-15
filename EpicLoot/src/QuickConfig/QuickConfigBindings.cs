@@ -7,6 +7,7 @@ using EpicLoot.CraftingV2;
 using EpicLoot.GatedItemType;
 using EpicLoot.ShardStones;
 using EpicLoot_UnityLib;
+using Jotunn.Managers;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -54,8 +55,11 @@ internal sealed class Binding {
     internal Func<StagedConfig, string> Readout;
     /// <summary>Colour rows: the key of the Int binding that holds the crafting-material icon index.</summary>
     internal string IconKey;
-    /// <summary>Read-only off-host (JSON rows and the preset buttons write files only the host owns).</summary>
-    internal bool HostOnly;
+    /// <summary>
+    /// Writes baseconfig files (JSON rows and the preset buttons): read-only for a player who may not
+    /// change the files in effect, see <see cref="QuickConfigBindings.CanEditFiles"/>.
+    /// </summary>
+    internal bool EditsFiles;
 
     internal string TooltipText() {
         try { return Tooltip?.Invoke() ?? ""; } catch (Exception) { return ""; }
@@ -99,6 +103,21 @@ internal static class QuickConfigBindings {
 
     internal static bool IsHost() {
         return ZNet.instance == null || ZNet.instance.IsServer();
+    }
+
+    /// <summary>True on a client connected to someone else's server whose admin list holds this player.</summary>
+    internal static bool IsRemoteAdmin() {
+        return ZNet.instance != null && ZNet.instance.IsServer() == false
+            && SynchronizationManager.Instance != null && SynchronizationManager.Instance.PlayerIsAdmin;
+    }
+
+    /// <summary>
+    /// Whether this player may change the baseconfig files in effect (the JSON rows and the balance
+    /// presets): the host writes its own, a server admin's are written on the server
+    /// (<see cref="QuickConfigServerSave"/>).
+    /// </summary>
+    internal static bool CanEditFiles() {
+        return IsHost() || IsRemoteAdmin();
     }
 
     private static void Ensure() {
@@ -147,8 +166,8 @@ internal static class QuickConfigBindings {
                 DisplayName = "$mod_epicloot_cfg_preset_" + name,
                 Kind = BindingKind.Action,
                 Scope = BindingScope.Action,
-                HostOnly = true,
-                VisibleWhen = _ => IsHost(),
+                EditsFiles = true,
+                VisibleWhen = _ => CanEditFiles(),
                 Tooltip = () => QuickConfigTooltip.Text($"Balance preset: {name}",
                     "Sets the Balance Template and the four drop ratios to this preset. On Save, " +
                     "magiceffects.json is rewritten from the preset's template and the Effect Tuning " +
@@ -160,7 +179,7 @@ internal static class QuickConfigBindings {
             "Balance Template", "The overhaul variant of magiceffects.json in use (balanced, minimal or legendary). " +
             "Pick a preset above to change it; the file is rewritten from that template on Save.");
         TextChoice("BalanceConfigurationType", ELConfig.BalanceConfigurationType, "Balance Template", BindingScope.Server,
-            () => BalancePreset.Names, BalancePreset.Normalize, visible: _ => IsHost() == false);
+            () => BalancePreset.Names, BalancePreset.Normalize, visible: _ => CanEditFiles() == false);
         FloatSlider("GlobalDropRateModifier", ELConfig.GlobalDropRateModifier, "Global Drop Rate Modifier", BindingScope.Server, 0f, 4f, 0.05f);
         EnumCycle("_gatedItemTypeModeConfig", ELConfig._gatedItemTypeModeConfig, "Item Drop Limits", BindingScope.Server);
         FloatSlider("SetItemDropChance", ELConfig.SetItemDropChance, "Set Item Drop Chance", BindingScope.Server, 0f, 1f, 0.01f);
@@ -211,11 +230,16 @@ internal static class QuickConfigBindings {
             enabled: staged => staged.Get("EliteRunestoneDrops", ELConfig.EliteRunestoneDrops.Value));
 
         // --- 4. Shardstones & Runes ---
+        // The two rune rows below only mean anything while runes can be slotted.
+        Func<StagedConfig, bool> runeSocketing = staged => staged.Get("AllowRuneSocketing", ELConfig.AllowRuneSocketing.Value);
+        Toggle("AllowRuneSocketing", ELConfig.AllowRuneSocketing, "Allow Rune Socketing", BindingScope.Server);
         Toggle("AllowDuplicateSocketedEffects", ELConfig.AllowDuplicateSocketedEffects, "Allow Duplicate Socketed Effects", BindingScope.Server);
         Toggle("AllowShardstoneDuplicateItemEffect", ELConfig.AllowShardstoneDuplicateItemEffect, "Allow Shardstone On Matching Item Effect", BindingScope.Server);
-        Toggle("AllowRunestoneDuplicateItemEffect", ELConfig.AllowRunestoneDuplicateItemEffect, "Allow Runestone On Matching Item Effect", BindingScope.Server);
+        Toggle("AllowRunestoneDuplicateItemEffect", ELConfig.AllowRunestoneDuplicateItemEffect, "Allow Runestone On Matching Item Effect", BindingScope.Server,
+            enabled: runeSocketing);
         EnumCycle("ShardSocketRemovalMode", ELConfig.ShardSocketRemovalMode, "Shard Removal Mode", BindingScope.Server);
-        EnumCycle("RuneSocketRemovalMode", ELConfig.RuneSocketRemovalMode, "Rune Removal Mode", BindingScope.Server);
+        EnumCycle("RuneSocketRemovalMode", ELConfig.RuneSocketRemovalMode, "Rune Removal Mode", BindingScope.Server,
+            enabled: runeSocketing);
         EnumCycle("ShardStackingMode", ELConfig.ShardStackingMode, "Shard Stack Mode", BindingScope.Server);
         FloatSlider("ShardStackDecayFactor", ELConfig.ShardStackDecayFactor, "Shard Stack Decay Factor", BindingScope.Server, 0f, 1f, 0.01f,
             visible: staged => staged.Get("ShardStackingMode", ShardStackMode.Diminishing) == ShardStackMode.Diminishing);
@@ -454,17 +478,20 @@ internal static class QuickConfigBindings {
     }
 
     // An enum shown as a cycle button (six members or fewer) or a picker; the widget decides.
-    private static void EnumCycle<T>(string key, ConfigEntry<T> entry, string name, BindingScope scope) where T : struct, Enum {
-        EnumChoice(key, entry, name, scope);
+    private static void EnumCycle<T>(string key, ConfigEntry<T> entry, string name, BindingScope scope,
+        Func<StagedConfig, bool> enabled = null) where T : struct, Enum {
+        EnumChoice(key, entry, name, scope, enabled);
     }
 
-    private static void EnumChoice<T>(string key, ConfigEntry<T> entry, string name, BindingScope scope) where T : struct, Enum {
+    private static void EnumChoice<T>(string key, ConfigEntry<T> entry, string name, BindingScope scope,
+        Func<StagedConfig, bool> enabled = null) where T : struct, Enum {
         CfgSlotFor(key, entry);
         string[] names = Enum.GetNames(typeof(T));
         Add(new Binding {
             Key = key, DisplayName = name, Kind = BindingKind.Enum, Scope = scope,
             Options = () => names,
             Tooltip = () => QuickConfigTooltip.Of(entry),
+            EnabledWhen = enabled,
             Get = staged => staged.Get(key, entry.Value).ToString(),
             Set = (staged, value) => {
                 if (value is string text && Enum.TryParse(text.Trim(), true, out T parsed)) { staged.Set(key, parsed); }
@@ -718,7 +745,7 @@ internal static class QuickConfigBindings {
         JsonSlot slot = JsonSlotFor(key, file, () => read(), (root, value) => write(root, (float)value));
         slot.Default = (_, shipped) => shipped.Token(file, JsonPath(key)) is JValue token ? token.ToObject<float>() : null;
         Add(new Binding {
-            Key = key, DisplayName = name, Kind = BindingKind.Float, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = name, Kind = BindingKind.Float, Scope = BindingScope.Json, EditsFiles = true,
             Min = min, Max = max, Step = step,
             Tooltip = () => QuickConfigTooltip.Text(JsonTooltipKey(key), description),
             Get = staged => staged.Get(key, min),
@@ -732,7 +759,7 @@ internal static class QuickConfigBindings {
         JsonSlot slot = JsonSlotFor(key, file, () => read(), (root, value) => write(root, (int)value));
         slot.Default = (_, shipped) => shipped.Token(file, JsonPath(key)) is JValue token ? token.ToObject<int>() : null;
         Add(new Binding {
-            Key = key, DisplayName = name, Kind = BindingKind.Int, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = name, Kind = BindingKind.Int, Scope = BindingScope.Json, EditsFiles = true,
             Min = min, Max = max, Step = 1f,
             Tooltip = () => QuickConfigTooltip.Text(JsonTooltipKey(key), description),
             Get = staged => staged.Get(key, min),
@@ -747,7 +774,7 @@ internal static class QuickConfigBindings {
         JsonSlot slot = JsonSlotFor(key, file, () => read(), (root, value) => write(root, (bool)value));
         slot.Default = (_, shipped) => shipped.Token(file, JsonPath(key)) is JValue token ? token.ToObject<bool>() : shippedDefault;
         Add(new Binding {
-            Key = key, DisplayName = name, Kind = BindingKind.Bool, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = name, Kind = BindingKind.Bool, Scope = BindingScope.Json, EditsFiles = true,
             Tooltip = () => QuickConfigTooltip.Text(JsonTooltipKey(key), description),
             Get = staged => staged.Get(key, false),
             Set = (staged, value) => staged.Set(key, value is bool b && b)
@@ -796,7 +823,7 @@ internal static class QuickConfigBindings {
             return value;
         };
         Add(new Binding {
-            Key = key, DisplayName = "Rarity", Kind = BindingKind.RarityCounts, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = "Rarity", Kind = BindingKind.RarityCounts, Scope = BindingScope.Json, EditsFiles = true,
             Options = () => Rarities.All.Select(rarity => rarity.ToString()).ToList(),
             Tooltip = () => QuickConfigTooltip.Text("loottables.json: MagicEffectsCount, SocketCounts",
                 "How many enchantments and shard sockets an item of each rarity rolls. Each line is a possible " +
@@ -864,7 +891,7 @@ internal static class QuickConfigBindings {
             }
         };
         Add(new Binding {
-            Key = key, DisplayName = "Upgrade costs", Kind = BindingKind.UpgradeCosts, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = "Upgrade costs", Kind = BindingKind.UpgradeCosts, Scope = BindingScope.Json, EditsFiles = true,
             Options = ItemPrefabNames,
             Tooltip = () => QuickConfigTooltip.Text("enchantingupgrades.json: UpgradeCosts",
                 "What each enchanting table upgrade costs: pick a feature, then edit the items of each level. " +
@@ -979,7 +1006,7 @@ internal static class QuickConfigBindings {
         overhaul.WriteWithBaseline = (root, current, before) => WriteEffectConfigs(root, (EffectConfigsValue)current, before as EffectConfigsValue, EffectSource.Overhaul);
 
         Add(new Binding {
-            Key = key, DisplayName = "Effect Configs", Kind = BindingKind.EffectConfigs, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = "Effect Configs", Kind = BindingKind.EffectConfigs, Scope = BindingScope.Json, EditsFiles = true,
             Options = ItemPrefabNames,
             Tooltip = () => QuickConfigTooltip.Text("Effect configs",
                 "The per-effect tunables (Config block) of every loaded magic effect. Overhaul effects are " +
@@ -1037,7 +1064,7 @@ internal static class QuickConfigBindings {
             return value;
         };
         Add(new Binding {
-            Key = key, DisplayName = "Bounty Targets", Kind = BindingKind.Bounties, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = "Bounty Targets", Kind = BindingKind.Bounties, Scope = BindingScope.Json, EditsFiles = true,
             Options = BountyTables.MonsterNames,
             Tooltip = () => QuickConfigTooltip.Text("adventuredata.json: Bounties.Targets",
                 "The creatures the bounty board can post per biome, with the rewards paid per kill: iron " +
@@ -1094,7 +1121,7 @@ internal static class QuickConfigBindings {
             return value;
         };
         Add(new Binding {
-            Key = key, DisplayName = "Treasure Map Costs", Kind = BindingKind.BiomeCosts, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = "Treasure Map Costs", Kind = BindingKind.BiomeCosts, Scope = BindingScope.Json, EditsFiles = true,
             Tooltip = () => QuickConfigTooltip.Text("adventuredata.json: TreasureMap.BiomeInfo",
                 "What Haldor charges for a treasure map into each biome. Cost is in coins; -1 means no map " +
                 "is offered for that biome. Forest tokens is the token price paid alongside the coins. The " +
@@ -1149,7 +1176,7 @@ internal static class QuickConfigBindings {
             }
         };
         Add(new Binding {
-            Key = key, DisplayName = "Biome Drops", Kind = BindingKind.BiomeDrops, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = "Biome Drops", Kind = BindingKind.BiomeDrops, Scope = BindingScope.Json, EditsFiles = true,
             Tooltip = () => QuickConfigTooltip.Text("loottables.json: LootTables",
                 "Per biome and loot table, how many magic items a creature or chest drops and at which rarity. " +
                 "Drop amount lists each possible number of items with its chance in percent (0 items 95%, 1 item 5%); " +
@@ -1214,7 +1241,7 @@ internal static class QuickConfigBindings {
             }
         };
         Add(new Binding {
-            Key = key, DisplayName = "Item Categories", Kind = BindingKind.ItemCategories, Scope = BindingScope.Json, HostOnly = true,
+            Key = key, DisplayName = "Item Categories", Kind = BindingKind.ItemCategories, Scope = BindingScope.Json, EditsFiles = true,
             Options = ItemPrefabNames,
             KeyOptions = BossKeyOptions,
             Tooltip = () => QuickConfigTooltip.Text("iteminfo.json: ItemInfo",

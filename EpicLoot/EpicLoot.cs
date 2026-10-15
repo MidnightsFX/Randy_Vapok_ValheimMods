@@ -81,8 +81,12 @@ public sealed class EpicLoot : BaseUnityPlugin {
     };
 
     public static bool AlwaysDropCheat = false;
-    public const Minimap.PinType BountyPinType = (Minimap.PinType)800;
-    public const Minimap.PinType TreasureMapPinType = (Minimap.PinType)801;
+    /// <summary>
+    /// The bounty and treasure map pin types: the next free slots at the end of the minimap's filter array, taken
+    /// each time a map starts (<see cref="Adventure.MinimapController"/>). -1, which matches no pin, until then.
+    /// </summary>
+    public static Minimap.PinType BountyPinType { get; internal set; } = (Minimap.PinType)(-1);
+    public static Minimap.PinType TreasureMapPinType { get; internal set; } = (Minimap.PinType)(-1);
     /// <summary>Project Auga is installed and its API is attached; set in Awake, see <see cref="InitializeAuga"/>.</summary>
     public static bool HasAuga;
 

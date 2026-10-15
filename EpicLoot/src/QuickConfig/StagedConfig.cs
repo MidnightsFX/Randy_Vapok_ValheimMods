@@ -227,12 +227,12 @@ internal sealed class StagedConfig {
 
     /// <summary>The first validation failure across every bound row, or null when everything can be saved.</summary>
     internal string ValidationError() {
-        bool host = QuickConfigBindings.IsHost();
+        bool canEditFiles = QuickConfigBindings.CanEditFiles();
         foreach (Binding binding in QuickConfigBindings.All) {
             if (binding.Validate == null || IsAvailable(binding.Key) == false) { continue; }
-            // A row this machine cannot edit (JSON off-host) must not block the save with a value the
-            // server chose.
-            if (binding.HostOnly && host == false) { continue; }
+            // A row this player cannot edit (JSON for a non-admin off-host) must not block the save with
+            // a value the server chose.
+            if (binding.EditsFiles && canEditFiles == false) { continue; }
             string error;
             try {
                 error = binding.Validate(this);

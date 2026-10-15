@@ -28,10 +28,12 @@ namespace EpicLoot.CraftingV2
                 return;
             }
 
-            // Vanilla flags every drop of a piece that was placed with the no-cost cheat.
+            // Vanilla flags every drop of a piece that was placed with the no-cost cheat. Read the flag through
+            // vanilla's IsCheated: since 1.0.20 s_cheated holds a revision number, and the old bool value of 1
+            // left on pieces from earlier builds no longer counts, so GetBool would still flag those refunds.
             var nview = __instance.GetComponent<ZNetView>();
             bool cheated = nview != null && nview.IsValid() &&
-                nview.GetZDO().GetBool(ZDOVars.s_cheated) && !PlayerProfile.s_bypassCheatChecks;
+                nview.GetZDO().IsCheated() && !PlayerProfile.s_bypassCheatChecks;
             Vector3 dropPosition = __instance.transform.position +
                 Vector3.up * __instance.m_returnResourceHeightOffset;
 

@@ -193,6 +193,7 @@ namespace EpicLoot_UnityLib
             base.Awake();
 
             MakeEnchantListScroll();
+            EffectListRow.FitRowsToList(EnchantList);
             BindSetModeButtons();
 
             // Only the toggle turning on selects: a group change also turns the previous one off, and
@@ -715,6 +716,7 @@ namespace EpicLoot_UnityLib
                 label.richText = true;
                 label.text = Localization.instance.Localize(text);
             }
+            EffectListRow.Fit(row, label);
 
             row.SetActive(true);
         }
@@ -778,6 +780,7 @@ namespace EpicLoot_UnityLib
                     enchantmentElement.text = effect.Item1;
                     MagicTextShimmer.Ensure(enchantmentElement);
                 }
+                EffectListRow.Fit(enchantmentListElement, enchantmentElement);
 
                 // Dimming the row was all that marked an effect with CanBeRunified off, and it could
                 // still be selected, extracted and overwritten. Same treatment as the augment tab.
