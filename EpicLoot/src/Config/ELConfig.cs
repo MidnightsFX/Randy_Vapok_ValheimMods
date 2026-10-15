@@ -96,7 +96,11 @@ internal class ELConfig {
     public static ConfigEntry<float> LegendaryGiftSuccessChance;
     public static ConfigEntry<float> MythicGiftSuccessChance;
     public static ConfigEntry<float> AncientGiftSuccessChance;
-    public static ConfigEntry<KeyCode> SocketOverlayModifier;
+    public static ConfigEntry<KeyCode> SocketOverlayKey;
+    public static ConfigEntry<bool> AlwaysRequireSocketOverlayKey;
+    /// <summary>What Socket Overlay Key was called, and the default it had then; see MigrateSocketOverlayKey.</summary>
+    private const string LegacySocketOverlayModifierKey = "Socket Overlay Modifier";
+    private const KeyCode LegacySocketOverlayModifierDefault = KeyCode.LeftAlt;
     public static ConfigEntry<float> GlobalDropRateModifier;
     public static ConfigEntry<float> StarLootScaling;
     public static ConfigEntry<bool> DeferChestLootRoll;
@@ -298,6 +302,7 @@ internal class ELConfig {
         ReadPreviousConfigValues();
         CreateConfigValues();
         MigrateWelcomeWizard();
+        MigrateSocketOverlayKey();
         ApplyPreviousConfigValues();
         // After the migration, so restoring a saved value does not fire a handler into a UI that Awake
         // has not built yet.
@@ -601,11 +606,16 @@ internal class ELConfig {
             "Percent chance that an Ancient Brokkr's Gift adds its slots. On a failed roll the gift is " +
             "still consumed and nothing is added.\n" +
             "Min = 0, Max = 100", new AcceptableValueRange<float>(0f, 100f));
-        SocketOverlayModifier = BindClient(SectionSockets, "Socket Overlay Modifier", KeyCode.LeftAlt,
+        SocketOverlayKey = BindClient(SectionSockets, "Socket Overlay Key", KeyCode.LeftControl,
             "Hold this key with Use to open the shard slots of an item that another mod has turned " +
             "into a container (a backpack, a quiver). Plain Use opens that mod's container instead, " +
-            "since that is the gesture it already advertises. Items with no such container ignore " +
-            "this setting and open their shard slots on plain Use as usual.");
+            "since that is the gesture it already advertises. Other items open their shard slots on " +
+            "plain Use, unless 'Always Require Socket Overlay Key' is on.");
+        AlwaysRequireSocketOverlayKey = BindClient(SectionSockets, "Always Require Socket Overlay Key", false,
+            "Require the Socket Overlay Key with Use to open the shard slots of every item, not only " +
+            "items another mod has turned into a container. Plain Use over an item is then left to the " +
+            "game and other mods. Turn this on if another mod also uses Use, or the same key, over " +
+            "inventory items.");
 
         // 4 - Enchanting Table
         EnchantingTableUpgradesActive = BindServer(SectionEnchanting, "Upgrades Active", true,
@@ -982,6 +992,27 @@ internal class ELConfig {
         if (PreviousRawSections.TryGetValue(location, out List<string> sections)) {
             foreach (string section in sections) {
                 ConfigUIFirstRun.TakeLegacyEntry(cfg, section, LegacyWelcomeMessageKey, out _);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Retires "Socket Overlay Modifier" in favour of <see cref="SocketOverlayKey"/>. Its old default, LeftAlt, is
+    /// part of other mods' inventory hotkeys (NewtCraftHub eats food on Alt+E), so a file still holding it gets the
+    /// new default instead; any other key was the player's own choice and is carried over. The old line is taken
+    /// out of every section it was found under, so it is not written back and this runs once. Must run before
+    /// <see cref="ApplyPreviousConfigValues"/>, which clears the snapshot this reads.
+    /// </summary>
+    private static void MigrateSocketOverlayKey() {
+        string location = $"{SectionSockets}::{LegacySocketOverlayModifierKey}";
+        if (PreviousConfigValues.TryGetValue(location, out string previous)
+            && Enum.TryParse(previous, true, out KeyCode chosen) && chosen != LegacySocketOverlayModifierDefault) {
+            SocketOverlayKey.Value = chosen;
+        }
+
+        if (PreviousRawSections.TryGetValue(location, out List<string> sections)) {
+            foreach (string section in sections) {
+                ConfigUIFirstRun.TakeLegacyEntry(cfg, section, LegacySocketOverlayModifierKey, out _);
             }
         }
     }

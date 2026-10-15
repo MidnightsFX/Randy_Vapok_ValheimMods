@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Text;
-using EpicLoot.Compatibility;
 using EpicLoot.Config;
 using EpicLoot.Crafting;
+using EpicLoot.ShardStones;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -42,16 +42,17 @@ public static class MagicTooltipPatches
         // glyphs while a gamepad is active (Localization looks up "Joy" + the binding name), which is
         // exactly when this branch is taken.
         // An item another mod turned into a container answers plain Use by opening that container, so
-        // the socket overlay sits behind a modifier there and the hint has to say so. That modifier has
-        // no $KEY_ binding of its own, so its name goes in raw ("LeftAlt + E").
+        // the socket overlay sits behind the Socket Overlay Key there (or on every item, when the player
+        // asked for that) and the hint has to say so. That key has no $KEY_ binding of its own, so its
+        // name goes in raw ("LeftControl + E").
         string keys;
         if (ZInput.IsGamepadActive())
         {
             keys = "$KEY_RTrigger + $KEY_ButtonX";
         }
-        else if (ForeignItemContainers.HasContainer(item))
+        else if (SocketsUI.RequiresSocketOverlayKey(item))
         {
-            keys = $"{ELConfig.SocketOverlayModifier.Value} + $KEY_Use";
+            keys = $"{ELConfig.SocketOverlayKey.Value} + $KEY_Use";
         }
         else
         {

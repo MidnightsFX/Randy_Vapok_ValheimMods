@@ -49,6 +49,7 @@ Bugfixes:
 * Quick Draw no longer makes crossbows reload slower at high skill, and Triple Shot from a set only affects bows and crossbows
 * Coin Weighted Weapon now shows the damage bonus it actually gives at the coins you carry, and weapon tooltips include it before the weapon is equipped
 * Coin Weighted Weapon's bonus now rises smoothly with no sudden jump, higher rolls always give more
+* Shard slots on backpacks and quivers now open with Ctrl held instead of Alt, so other mods' Alt hotkeys no longer get in the way, and players can choose to need it for every item.
 
 New Sets:
 - Wrath of the Thunderer set, whose full set lets you hurl your melee weapon to slam down where you aim.
