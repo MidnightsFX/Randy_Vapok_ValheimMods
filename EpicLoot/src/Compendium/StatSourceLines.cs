@@ -13,6 +13,20 @@ public static class StatSourceLines
 
     public static string Grey(string text) => $"<color={SourceColor}>{text}</color>";
 
+    // Every effect type a section asks sources for during one page build. The Misc list shows the
+    // effects on the player's gear that nothing asked for, so a row that was not built (no weapon
+    // held, no blocker, no contributing effect) hands its effects back to Misc instead of hiding them.
+    private static readonly HashSet<string> _shown = new();
+    public static IReadOnlyCollection<string> Shown => _shown;
+    public static void BeginBuild() => _shown.Clear();
+    public static void MarkShown(string effectType)
+    {
+        if (!string.IsNullOrEmpty(effectType))
+        {
+            _shown.Add(effectType);
+        }
+    }
+
     public static bool IsDormant(string effectType) =>
         ModifyWithLowHealth.IsHealthCriticalEffect(effectType) && !ModifyWithLowHealth.PlayerHasLowHealth(Player.m_localPlayer);
 
@@ -31,6 +45,7 @@ public static class StatSourceLines
             yield break;
         }
 
+        MarkShown(effectType);
         foreach (ItemDrop.ItemData item in player.GetMagicEquipment())
         {
             if (include != null && !include(item))

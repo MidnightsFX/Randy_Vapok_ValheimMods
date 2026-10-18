@@ -31,8 +31,18 @@ public static class PlayerExtensions
         return player.GetMagicEquipment();
     }
 
+    // While set, totals for this one effect type read as absent. The compendium measures what each effect
+    // contributes to a weapon by re-running GetDamage with the effect suppressed; checked before the cache so
+    // nothing cached is ever the suppressed value.
+    public static string SuppressedEffectType;
+
     public static List<MagicItemEffect> GetAllActiveMagicEffects(this Player player, string effectType = null)
     {
+        if (effectType != null && effectType == SuppressedEffectType)
+        {
+            return new List<MagicItemEffect>();
+        }
+
         IEnumerable<MagicItemEffect> equipEffects = player.GetMagicEquipment()
             .Where(x => x.IsMagic())
             .SelectMany(x => x.GetMagicItem().GetEffects(effectType, includeSocketed: true));
@@ -85,6 +95,11 @@ public static class PlayerExtensions
     public static float GetTotalActiveMagicEffectValue(this Player player, string effectType,
         float scale = 1.0f, ItemDrop.ItemData ignoreThisItem = null)
     {
+        if (effectType == SuppressedEffectType)
+        {
+            return 0f;
+        }
+
         // TryGetValue/Store rather than the Func overload: this runs several times per fixed tick from
         // GetMaxCarryWeight, ModifyStaminaRegen and GetArmor, and the closure that overload's delegate
         // captures would be allocated on every one of those calls even though nearly all of them hit.

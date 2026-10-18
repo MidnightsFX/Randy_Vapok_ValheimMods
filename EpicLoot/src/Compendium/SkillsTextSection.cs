@@ -19,26 +19,6 @@ public static class SkillsTextSection
         MagicEffectType.Inspiration, MagicEffectType.IncreaseHarvestXPGain, MagicEffectType.IncreaseXPGainFromMovementPenalty,
     };
 
-    public static IEnumerable<string> Covered
-    {
-        get
-        {
-            foreach (SkillType type in (SkillType[])Enum.GetValues(typeof(SkillType)))
-            {
-                foreach (string effect in EffectsFor(type))
-                {
-                    yield return effect;
-                }
-            }
-
-            yield return MagicEffectType.QuickLearner;
-            foreach (string effect in XpExtras)
-            {
-                yield return effect;
-            }
-        }
-    }
-
     public static void Build(MagicPages instance)
     {
         Player player = Player.m_localPlayer;

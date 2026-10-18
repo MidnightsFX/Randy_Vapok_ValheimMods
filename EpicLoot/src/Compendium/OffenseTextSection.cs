@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EpicLoot.LegendarySystem;
 using EpicLoot.MagicItemEffects;
 using EpicLoot.MagicItemEffects.Shards;
 using UnityEngine;
@@ -36,50 +37,6 @@ public static class OffenseTextSection
         new DamageRow { Key = "$inventory_chop", Get = x => x.m_chop, AddEffect = MagicEffectType.AddSlashingDamage, Physical = true },
         new DamageRow { Key = "$inventory_pickaxe", Get = x => x.m_pickaxe, AddEffect = MagicEffectType.AddPiercingDamage, Physical = true },
     };
-
-    private static readonly string[] WholeWeaponEffects =
-    {
-        MagicEffectType.ModifyDamage, MagicEffectType.ModifyDamageLowHealth, MagicEffectType.SpellSword,
-        MagicEffectType.CoinHoarder, MagicEffectType.DodgeBuff, MagicEffectType.EitrInfusion,
-        MagicEffectType.EitrImbueAttack, MagicEffectType.IncreaseDamageDuringDaytime,
-        MagicEffectType.IncreaseDamageDuringNighttime, MagicEffectType.DamageBonusFromPlayerWeight,
-        MagicEffectType.DamageIncreaseFromMovementPenalty, MagicEffectType.IncreaseHarvestDamage,
-        MagicEffectType.ConvertPhysicalDamageToLightning, MagicEffectType.CoilingVenom, MagicEffectType.IcyWeight,
-        MagicEffectType.ReduceArmorIncreaseDamage, MagicEffectType.NecroticFire,
-    };
-
-    public static IEnumerable<string> Covered
-    {
-        get
-        {
-            foreach (DamageRow row in DamageRows)
-            {
-                if (row.AddEffect != null)
-                {
-                    yield return row.AddEffect;
-                }
-            }
-
-            foreach (string effect in WholeWeaponEffects)
-            {
-                yield return effect;
-            }
-
-            string[] others =
-            {
-                MagicEffectType.ModifyPhysicalDamage, MagicEffectType.ModifyElementalDamage, MagicEffectType.ModifyAttackSpeed,
-                MagicEffectType.ModifyAttackSpeedLowHealth, MagicEffectType.ModifyStaggerDamage, MagicEffectType.ModifyStaggerDuration,
-                MagicEffectType.ModifyBackstab, MagicEffectType.ModifyAttackStaminaUse, MagicEffectType.Bloodlust,
-                MagicEffectType.ModifyAttackEitrUse, MagicEffectType.ConjuredArrows, MagicEffectType.ModifyAttackHealthUse,
-                MagicEffectType.ModifyDrawStaminaUse, MagicEffectType.CloseQuarter, MagicEffectType.LifeSteal,
-                MagicEffectType.LifeStealLowHealth,
-            };
-            foreach (string effect in others)
-            {
-                yield return effect;
-            }
-        }
-    }
 
     public static void Build(MagicPages instance)
     {
@@ -159,14 +116,26 @@ public static class OffenseTextSection
         table.Finish();
     }
 
+    private class EffectSource
+    {
+        public float Value;
+        public readonly List<string> Names = new();
+    }
+
     private static void AddDamageRows(Player player, MagicTextTable table, ItemDrop.ItemData weapon, MagicItem magicItem,
         Func<ItemDrop.ItemData, bool> include)
     {
         HitData.DamageTypes baseDamage = weapon.Clone().GetDamage();
-        HitData.DamageTypes total = weapon.GetDamage();
-        if (magicItem != null)
+        HitData.DamageTypes total = Measure(weapon, magicItem, null);
+
+        // Each effect's share of every damage type is the difference GetDamage shows with that one effect
+        // suppressed, so conversions and multipliers are attributed without knowing how they work.
+        Dictionary<string, EffectSource> sources = CollectSources(player, include);
+        Dictionary<string, HitData.DamageTypes> contributions = new();
+        foreach (string effectType in sources.Keys)
         {
-            total.m_spirit += EitrImbueAttack.GetSpiritBonus(magicItem, total);
+            HitData.DamageTypes without = Measure(weapon, magicItem, effectType);
+            contributions[effectType] = Diff(total, without);
         }
 
         List<DamageRow> shown = new();
@@ -195,39 +164,138 @@ public static class OffenseTextSection
 
         foreach (DamageRow row in shown)
         {
-            List<string> detail = new();
-            if (row.AddEffect != null)
-            {
-                detail.AddRange(StatSourceLines.GetMagicSources(player, row.AddEffect, include));
-            }
-
-            detail.AddRange(StatSourceLines.GetMagicSources(player,
-                row.Physical ? MagicEffectType.ModifyPhysicalDamage : MagicEffectType.ModifyElementalDamage, include));
-            if (combatRows <= 1)
-            {
-                AddWholeWeaponSources(player, detail, include);
-            }
-
             float baseValue = row.Get(baseDamage);
             float totalValue = row.Get(total);
+            List<string> detail = ContributionLines(sources, contributions, row.Get);
             AddRow(table, row.Key, Whole(baseValue), totalValue - baseValue, Whole(totalValue), detail, x => Signed(x), true);
         }
 
         if (combatRows > 1)
         {
-            List<string> detail = new();
-            AddWholeWeaponSources(player, detail, include);
+            List<string> detail = ContributionLines(sources, contributions, x => CombatSum(x, shown));
             AddRow(table, "$mod_epicloot_offense_totaldamage", Whole(baseSum), totalSum - baseSum, Whole(totalSum), detail,
                 x => Signed(x), true);
         }
     }
 
-    private static void AddWholeWeaponSources(Player player, List<string> detail, Func<ItemDrop.ItemData, bool> include)
+    private static HitData.DamageTypes Measure(ItemDrop.ItemData weapon, MagicItem magicItem, string suppressed)
     {
-        foreach (string effectType in WholeWeaponEffects)
+        PlayerExtensions.SuppressedEffectType = suppressed;
+        try
         {
-            detail.AddRange(StatSourceLines.GetMagicSources(player, effectType, include));
+            HitData.DamageTypes damage = weapon.GetDamage();
+            if (magicItem != null && suppressed != MagicEffectType.EitrImbueAttack)
+            {
+                damage.m_spirit += EitrImbueAttack.GetSpiritBonus(magicItem, damage);
+            }
+
+            return damage;
         }
+        finally
+        {
+            PlayerExtensions.SuppressedEffectType = null;
+        }
+    }
+
+    private static Dictionary<string, EffectSource> CollectSources(Player player, Func<ItemDrop.ItemData, bool> include)
+    {
+        Dictionary<string, EffectSource> sources = new();
+        void Add(string effectType, float value, string name)
+        {
+            if (!sources.TryGetValue(effectType, out EffectSource source))
+            {
+                source = new EffectSource();
+                sources.Add(effectType, source);
+            }
+
+            source.Value += value;
+            if (!source.Names.Contains(name))
+            {
+                source.Names.Add(name);
+            }
+        }
+
+        foreach (ItemDrop.ItemData item in player.GetMagicEquipment())
+        {
+            if (!include(item))
+            {
+                continue;
+            }
+
+            foreach (MagicItemEffect effect in item.GetMagicItem().GetEffects(null, includeSocketed: true))
+            {
+                Add(effect.EffectType, effect.EffectValue, item.GetDecoratedName());
+            }
+        }
+
+        foreach (LegendarySetProgress progress in SetBonusEvaluator.GetEquippedSetProgress(player))
+        {
+            foreach (SetBonusInfo bonus in progress.Set.SetBonuses)
+            {
+                ItemRarity? tier = bonus.Effect == null ? null : progress.GetTier(bonus);
+                if (tier.HasValue)
+                {
+                    Add(bonus.Effect.Type, SetBonusEvaluator.GetBonusValue(bonus, tier.Value), progress.Set.Name);
+                }
+            }
+        }
+
+        return sources;
+    }
+
+    private static List<string> ContributionLines(Dictionary<string, EffectSource> sources,
+        Dictionary<string, HitData.DamageTypes> contributions, Func<HitData.DamageTypes, float> get)
+    {
+        List<(float delta, string line)> lines = new();
+        foreach (KeyValuePair<string, HitData.DamageTypes> entry in contributions)
+        {
+            float delta = get(entry.Value);
+            if (Mathf.Abs(delta) < 0.05f)
+            {
+                continue;
+            }
+
+            StatSourceLines.MarkShown(entry.Key);
+            EffectSource source = sources[entry.Key];
+            MagicItemEffectDefinition definition = MagicItemEffectDefinitions.Get(entry.Key);
+            string text = definition != null ? MagicItem.GetEffectText(definition, source.Value) : entry.Key;
+            lines.Add((delta, StatSourceLines.Grey($"{Signed(delta, "0.#")}  {text} ({string.Join(", ", source.Names)})")));
+        }
+
+        lines.Sort((a, b) => Mathf.Abs(b.delta).CompareTo(Mathf.Abs(a.delta)));
+        return lines.ConvertAll(x => x.line);
+    }
+
+    private static float CombatSum(HitData.DamageTypes damage, List<DamageRow> rows)
+    {
+        float sum = 0f;
+        foreach (DamageRow row in rows)
+        {
+            if (row.Combat)
+            {
+                sum += row.Get(damage);
+            }
+        }
+
+        return sum;
+    }
+
+    private static HitData.DamageTypes Diff(HitData.DamageTypes a, HitData.DamageTypes b)
+    {
+        return new HitData.DamageTypes
+        {
+            m_damage = a.m_damage - b.m_damage,
+            m_blunt = a.m_blunt - b.m_blunt,
+            m_slash = a.m_slash - b.m_slash,
+            m_pierce = a.m_pierce - b.m_pierce,
+            m_chop = a.m_chop - b.m_chop,
+            m_pickaxe = a.m_pickaxe - b.m_pickaxe,
+            m_fire = a.m_fire - b.m_fire,
+            m_frost = a.m_frost - b.m_frost,
+            m_lightning = a.m_lightning - b.m_lightning,
+            m_poison = a.m_poison - b.m_poison,
+            m_spirit = a.m_spirit - b.m_spirit,
+        };
     }
 
     private static void AddAttackSpeed(Player player, MagicTextTable table)
@@ -401,6 +469,7 @@ public static class OffenseTextSection
 
     private static IEnumerable<string> WeaponSources(MagicItem magicItem, ItemDrop.ItemData weapon, string effectType)
     {
+        StatSourceLines.MarkShown(effectType);
         if (magicItem == null)
         {
             yield break;

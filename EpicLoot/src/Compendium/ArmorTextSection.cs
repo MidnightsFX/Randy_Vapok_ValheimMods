@@ -13,15 +13,6 @@ public static class ArmorTextSection
     private const string Dash = "<color=#808080ff>-</color>";
     private const float ParryWindowSeconds = 0.25f;
 
-    public static readonly string[] Covered =
-    {
-        MagicEffectType.ModifyArmor, MagicEffectType.ModifyArmorLowHealth, MagicEffectType.ModifyBlockPower,
-        MagicEffectType.ModifyBlockPowerLowHealth, MagicEffectType.Duelist, MagicEffectType.ModifyParry,
-        MagicEffectType.ModifyParryLowHealth, MagicEffectType.ModifyBlockForce, MagicEffectType.ModifyParryWindow,
-        MagicEffectType.ModifyBlockStaminaUse, MagicEffectType.AvoidDamageTaken, MagicEffectType.AvoidDamageTakenLowHealth,
-        MagicEffectType.ReflectDamage, MagicEffectType.StaggerOnDamageTaken,
-    };
-
     public static void Build(MagicPages instance)
     {
         Player player = Player.m_localPlayer;

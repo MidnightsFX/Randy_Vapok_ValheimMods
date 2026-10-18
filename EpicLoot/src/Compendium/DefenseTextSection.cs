@@ -23,20 +23,6 @@ public static class DefenseTextSection
         HitData.DamageType.Spirit,
     };
 
-    public static IEnumerable<string> Covered
-    {
-        get
-        {
-            foreach (HitData.DamageType type in DamageTypes)
-            {
-                yield return ModifyResistance.GetResistanceEffect(type);
-                yield return ModifyResistance.GetGroupResistanceEffect(type);
-            }
-
-            yield return ModifyResistance.GetResistanceEffect(HitData.DamageType.Chop);
-        }
-    }
-
     public static void Build(MagicPages instance)
     {
         Player player = Player.m_localPlayer;

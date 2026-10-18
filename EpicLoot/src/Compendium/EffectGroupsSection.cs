@@ -32,6 +32,15 @@ public static class EffectGroupsSection
             MagicEffectType.LifeGainOnHit, MagicEffectType.HealthGainPerXDamageDone, MagicEffectType.EitrLeech,
             MagicEffectType.StaminaOnKill, MagicEffectType.IncreaseAllPoisonDamageDone, MagicEffectType.PhysToFire,
             MagicEffectType.PhysToFrost, MagicEffectType.PhysToLightning, MagicEffectType.PhysToPoison, MagicEffectType.PoisonToTrueDamage,
+            MagicEffectType.ModifyDamage, MagicEffectType.ModifyDamageLowHealth, MagicEffectType.ModifyPhysicalDamage,
+            MagicEffectType.ModifyElementalDamage, MagicEffectType.AddBluntDamage, MagicEffectType.AddSlashingDamage,
+            MagicEffectType.AddPiercingDamage, MagicEffectType.AddFireDamage, MagicEffectType.AddFrostDamage,
+            MagicEffectType.AddLightningDamage, MagicEffectType.AddPoisonDamage, MagicEffectType.AddSpiritDamage,
+            MagicEffectType.SpellSword, MagicEffectType.CoinHoarder, MagicEffectType.DodgeBuff, MagicEffectType.EitrInfusion,
+            MagicEffectType.EitrImbueAttack, MagicEffectType.IncreaseDamageDuringDaytime, MagicEffectType.IncreaseDamageDuringNighttime,
+            MagicEffectType.DamageBonusFromPlayerWeight, MagicEffectType.DamageIncreaseFromMovementPenalty,
+            MagicEffectType.IncreaseHarvestDamage, MagicEffectType.ConvertPhysicalDamageToLightning, MagicEffectType.CoilingVenom,
+            MagicEffectType.IcyWeight, MagicEffectType.ReduceArmorIncreaseDamage, MagicEffectType.NecroticFire,
         }),
         ("$mod_epicloot_effects_onblock", new[]
         {
@@ -103,12 +112,6 @@ public static class EffectGroupsSection
         MagicEffectType.ModifyDurability, MagicEffectType.Indestructible, MagicEffectType.Weightless, MagicEffectType.ReduceWeight,
     };
 
-    private static readonly HashSet<string> Tabled = new(DefenseTextSection.Covered
-        .Concat(VitalsTextSection.Covered)
-        .Concat(ArmorTextSection.Covered)
-        .Concat(OffenseTextSection.Covered)
-        .Concat(SkillsTextSection.Covered)
-        .Where(x => !string.IsNullOrEmpty(x)));
 
     private static readonly Dictionary<string, string> CategoryOf = Categories
         .SelectMany(c => c.Effects.Select(e => (e, c.Category)))
@@ -152,7 +155,7 @@ public static class EffectGroupsSection
         Dictionary<string, List<string>> byCategory = new();
         foreach (string effectType in byEffect.Keys)
         {
-            if (Tabled.Contains(effectType) || Hidden.Contains(effectType))
+            if (StatSourceLines.Shown.Contains(effectType) || Hidden.Contains(effectType))
             {
                 continue;
             }

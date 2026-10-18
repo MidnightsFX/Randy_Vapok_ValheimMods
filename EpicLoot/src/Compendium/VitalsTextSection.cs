@@ -63,27 +63,6 @@ public static class VitalsTextSection
         MagicEffectType.RemoveSpeedPenalty, MagicEffectType.ModifyMovementSpeedLowHealth,
     };
 
-    public static IEnumerable<string> Covered
-    {
-        get
-        {
-            string[] primaries =
-            {
-                MagicEffectType.IncreaseHealth, MagicEffectType.IncreaseStamina, MagicEffectType.IncreaseEitr,
-                MagicEffectType.AddHealthRegen, MagicEffectType.ModifyHealthRegen, MagicEffectType.ModifyStaminaRegen,
-                MagicEffectType.ModifyEitrRegen, MagicEffectType.AddCarryWeight, MagicEffectType.ModifyMovementSpeed,
-            };
-            foreach (string[] list in new[] { primaries, HealthPoolExtras, StaminaPoolExtras, EitrPoolExtras, HealthRegenExtras,
-                         StaminaRegenExtras, EitrRegenExtras, CarryWeightExtras, MovementExtras })
-            {
-                foreach (string effect in list)
-                {
-                    yield return effect;
-                }
-            }
-        }
-    }
-
     public static void Build(MagicPages instance)
     {
         Player player = Player.m_localPlayer;

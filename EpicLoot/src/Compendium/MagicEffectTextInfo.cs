@@ -9,6 +9,7 @@ public class MagicEffectTextInfo(string topic) : MagicTextInfo(topic)
             return;
         }
 
+        StatSourceLines.BeginBuild();
         VitalsTextSection.Build(instance);
         OffenseTextSection.Build(instance);
         DefenseTextSection.Build(instance);
