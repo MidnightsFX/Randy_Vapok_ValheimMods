@@ -30,7 +30,7 @@ public class MagicPages : MonoBehaviour
     public static bool Collapsed;
 
     private const float COLLAPSE_BUTTON_WIDTH = 150f;
-    private const float COLLAPSE_BUTTON_SPACING = 16f;
+    private const float COLLAPSE_BUTTON_SPACING = 10f;
     public MagicTextList MagicPagesTextArea;
     public GameObject compendiumTextArea;
     [CanBeNull] public MagicTextElement TitleElement;
@@ -112,19 +112,19 @@ public class MagicPages : MonoBehaviour
         RectTransform closeButtonRect = closeButtonImg.GetComponent<RectTransform>();
         Search = new MagicSearchField(frame);
 
-        // Calculate the Seach bar position
-        float spacing = 30f;
-        float buttonEdge = closeButtonRect.position.x + (closeButtonRect.rect.width / 2); // Button is centered
-
-        // Placed in the frame's own space: the close button's world position cannot be mixed with rect widths,
-        // which are in canvas units. Left of the close button and narrower than it, so it clears the topic
-        // list; between the close button and the search bar when that gap is too small.
+        // Everything below is measured in the frame's own space: the close button's world position cannot be
+        // mixed with rect widths, which are in canvas units. The search bar runs from the close button to the
+        // text area; the collapse toggle goes left of the close button, narrower than it so it clears the topic
+        // list, or between the close button and the search bar when that gap is too small.
+        float spacing = 16f;
         RectTransform frameRect = (RectTransform)frame;
         Vector2 frameOrigin = frameRect.rect.center;
         Vector3 closeCenter = frameRect.InverseTransformPoint(closeButtonRect.TransformPoint(closeButtonRect.rect.center));
         float closeWidth = closeButtonRect.rect.width;
+        float height = closeButtonRect.rect.height;
         float closeLeft = closeCenter.x - closeWidth / 2f;
         float closeRight = closeCenter.x + closeWidth / 2f;
+        float boxLeft = frameRect.InverseTransformPoint(textAreaRect.TransformPoint(new Vector3(textAreaRect.rect.xMin, 0f, 0f))).x;
         float listRight = frameRect.rect.xMin;
         RectTransform listRoot = GetComponent<TextsDialog>()?.m_listRoot;
         if (listRoot != null)
@@ -133,29 +133,30 @@ public class MagicPages : MonoBehaviour
             listRight = frameRect.InverseTransformPoint(listRect.TransformPoint(new Vector3(listRect.rect.xMax, 0f, 0f))).x;
         }
 
-        float toggleWidth = Mathf.Min(closeWidth * 0.6f, closeLeft - listRight - 2f * COLLAPSE_BUTTON_SPACING);
+        float toggleWidth = Mathf.Min(closeWidth * 0.6f, closeLeft - listRight - 2f * spacing);
         float toggleCenterX;
+        float searchLeft = closeRight + spacing;
         if (toggleWidth >= 90f)
         {
-            toggleCenterX = closeLeft - COLLAPSE_BUTTON_SPACING - toggleWidth / 2f;
+            toggleCenterX = closeLeft - spacing - toggleWidth / 2f;
         }
         else
         {
             toggleWidth = closeWidth * 0.6f;
-            toggleCenterX = closeRight + COLLAPSE_BUTTON_SPACING + toggleWidth / 2f;
-            buttonEdge = frameRect.TransformPoint(new Vector3(closeRight + 2f * COLLAPSE_BUTTON_SPACING + toggleWidth, 0f, 0f)).x;
+            toggleCenterX = closeRight + spacing + toggleWidth / 2f;
+            searchLeft = toggleCenterX + toggleWidth / 2f + spacing;
         }
 
         CollapseAll = new MagicCollapseButton(frame, ToggleCollapsed);
         CollapseAll.SetBackground(closeButtonImg);
-        CollapseAll.SetSize(toggleWidth, closeButtonRect.rect.height);
+        CollapseAll.SetSize(toggleWidth, height);
         CollapseAll.Dock(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
             new Vector2(toggleCenterX - frameOrigin.x, closeCenter.y - frameOrigin.y));
-        float boxEdge = textAreaRect.position.x; // Box is anchored to the bottom right
-        float width = boxEdge - buttonEdge - spacing;
-        float height = closeButtonRect.rect.height;
-        Vector3 position = new Vector3(buttonEdge + (width / 2) + spacing, closeButtonRect.position.y);
-        Search.SetPosition(position);
+
+        float searchRight = boxLeft - spacing;
+        float width = Mathf.Max(searchRight - searchLeft, 120f);
+        Search.Dock(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(searchLeft + width / 2f - frameOrigin.x, closeCenter.y - frameOrigin.y));
         Search.SetSize(width, height);
 
         Search.SetBackground(closeButtonImg);

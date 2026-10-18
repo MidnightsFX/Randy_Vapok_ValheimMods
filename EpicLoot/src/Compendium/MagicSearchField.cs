@@ -84,6 +84,15 @@ public class MagicSearchField
 
     public void SetPosition(Vector2 pos) => _rect.position = pos;
 
+    public void Dock(Vector2 anchor, Vector2 pivot, Vector2 anchoredPosition)
+    {
+        _rect.anchorMin = _rect.anchorMax = anchor;
+        _rect.pivot = pivot;
+        _rect.localScale = Vector3.one;
+        _rect.localRotation = Quaternion.identity;
+        _rect.anchoredPosition3D = new Vector3(anchoredPosition.x, anchoredPosition.y, 0f);
+    }
+
     public void SetSize(float x, float y)
     {
         _rect.sizeDelta = new Vector2(x, y);
