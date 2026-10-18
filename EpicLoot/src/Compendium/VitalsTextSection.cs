@@ -11,7 +11,6 @@ public static class VitalsTextSection
     private const string WorseColor = "#ff8a8aff";
     private const string NeutralColor = "#c0c0c0ff";
     private const string Dash = "<color=#808080ff>-</color>";
-    private const float HealthRegenInterval = 10f;
 
     private delegate void StatusRegen(StatusEffect effect, ref float multiplier);
     private delegate void ManagerRegen(SEMan manager, ref float multiplier);
@@ -164,7 +163,7 @@ public static class VitalsTextSection
         {
             if (food.m_item.m_shared.m_foodRegen > 0f)
             {
-                detail.Add(Grey($"{food.m_item.m_shared.m_name} {PerSecond(food.m_item.m_shared.m_foodRegen / HealthRegenInterval)}"));
+                detail.Add(Grey($"{food.m_item.m_shared.m_name} {PerTick(food.m_item.m_shared.m_foodRegen)}"));
             }
         }
 
@@ -173,15 +172,15 @@ public static class VitalsTextSection
         float totalMultiplier = 1f;
         player.GetSEMan().ModifyHealthRegen(ref totalMultiplier);
         float flat = player.GetTotalActiveMagicEffectValue(MagicEffectType.AddHealthRegen);
-        float basePerSecond = foodRegen * vanillaMultiplier / HealthRegenInterval;
-        float totalPerSecond = foodRegen > 0f ? (foodRegen + flat) * totalMultiplier / HealthRegenInterval : 0f;
+        float baseRegen = foodRegen * vanillaMultiplier;
+        float totalRegen = foodRegen > 0f ? (foodRegen + flat) * totalMultiplier : 0f;
 
         float remainder = totalMultiplier - vanillaMultiplier -
             ModifyPlayerRegen.GetModifyRegenValue(player, MagicEffectType.ModifyHealthRegen);
         AddMagicDetail(player, detail, new[] { MagicEffectType.AddHealthRegen, MagicEffectType.ModifyHealthRegen },
             HealthRegenExtras, remainder, 0.005f, SignedPercent);
-        AddRow(table, "$mod_epicloot_vitals_healthregen", PerSecond(basePerSecond), totalPerSecond - basePerSecond,
-            PerSecond(totalPerSecond), detail, x => Signed(x, "0.0"));
+        AddRow(table, "$mod_epicloot_vitals_healthregen", PerTick(baseRegen), totalRegen - baseRegen,
+            PerTick(totalRegen), detail, x => Signed(x, "0.#"));
     }
 
     private static void AddRegenMultiplier(Player player, MagicTextTable table, string name, string effectType,
@@ -306,6 +305,6 @@ public static class VitalsTextSection
         return value < 0f ? $"-{text}" : $"+{text}";
     }
 
-    private static string PerSecond(float value) =>
-        string.Format(Localization.instance.Localize("$mod_epicloot_vitals_persecond"), value.ToString("0.0"));
+    private static string PerTick(float value) =>
+        string.Format(Localization.instance.Localize("$mod_epicloot_vitals_pertick"), value.ToString("0.#"));
 }

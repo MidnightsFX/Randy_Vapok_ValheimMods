@@ -989,6 +989,7 @@
     "mod_epicloot_vitals_basevalue": "Base",
     "mod_epicloot_vitals_other": "Other effects",
     "mod_epicloot_vitals_persecond": "{0}/s",
+    "mod_epicloot_vitals_pertick": "{0}/tick",
     "mod_epicloot_offense": "Offense",
     "mod_epicloot_offense_totaldamage": "Total damage",
     "mod_epicloot_offense_attackspeed": "Attack speed",
