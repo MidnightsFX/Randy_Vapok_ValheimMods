@@ -325,55 +325,6 @@ namespace EpicLoot
             return _boldTmpFont;
         }
 
-        public static Button ReplaceVerticalLargeTab(Button button)
-        {
-            var newButtonPrefab = EpicLoot.LoadAsset<GameObject>("EnchantingTabAuga");
-            if (newButtonPrefab == null)
-            {
-                return button;
-            }
-
-            var newButton = Object.Instantiate(newButtonPrefab, button.transform.parent);
-            newButton.name = button.name;
-            var siblingIndex = button.transform.GetSiblingIndex();
-
-            var oldRt = (RectTransform)button.transform;
-            var rt = (RectTransform)newButton.transform;
-            rt.anchorMin = oldRt.anchorMin;
-            rt.anchorMax = oldRt.anchorMax;
-            rt.pivot = oldRt.pivot;
-            rt.anchoredPosition = oldRt.anchoredPosition;
-            rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, oldRt.rect.width);
-
-            newButton.transform.Find("Text").GetComponent<TMP_Text>().text = button.transform.Find("Text").GetComponent<TMP_Text>().text;
-            newButton.transform.Find("Image").GetComponent<Image>().sprite = button.transform.Find("Image").GetComponent<Image>().sprite;
-            FixFonts(newButton);
-
-            var featureStatus = newButton.GetComponent<FeatureStatus>();
-            var otherFeatureStatus = button.GetComponent<FeatureStatus>();
-            if (otherFeatureStatus == null && featureStatus != null)
-            {
-                Object.DestroyImmediate(featureStatus);
-            }
-
-            if (featureStatus != null && otherFeatureStatus != null)
-            {
-                featureStatus.Feature = otherFeatureStatus.Feature;
-                featureStatus.Refresh();
-            }
-
-            // TabHandler hooks its buttons in its own Start, which may already have run: the event carries its
-            // listener over. Config can have switched the tab off, and TabActivation finds tabs by name.
-            var newTabButton = newButton.GetComponent<Button>();
-            newTabButton.onClick = button.onClick;
-            button.onClick = new Button.ButtonClickedEvent();
-            newButton.SetActive(button.gameObject.activeSelf);
-
-            Object.DestroyImmediate(button.gameObject);
-            newButton.transform.SetSiblingIndex(siblingIndex);
-            return newTabButton;
-        }
-
         public static void FixupScrollbar(Scrollbar scrollbar)
         {
             var background = scrollbar.GetComponent<Image>();

@@ -19,13 +19,8 @@ namespace EpicLoot.CraftingV2
                 return;
 
             var root = ui.Root;
-            EpicLootAuga.ReplaceBackground(root, true);
-
-            foreach (var tabData in ui.TabHandler.m_tabs)
-            {
-                var newButton = EpicLootAuga.ReplaceVerticalLargeTab(tabData.m_button);
-                tabData.m_button = newButton;
-            }
+            EpicLootAuga.ReplaceBackground(root.transform.Find("Background").gameObject, true);
+            EpicLootAuga.FixFonts(ui.TabHandler.gameObject);
 
             foreach (var panelBase in ui.Panels)
             {

@@ -30,6 +30,7 @@ namespace EpicLoot_UnityLib
         // How many frames IsVisible still answers true after the window hides, so the press that closed it
         // is not read again as opening the pause menu.
         private const int HiddenGraceFrames = 2;
+        private const float TabHintGap = 4f;
 
         private int _hiddenFrames;
         private GameObject[] _gamepadHintContainers = Array.Empty<GameObject>();
@@ -162,8 +163,14 @@ namespace EpicLoot_UnityLib
             Transform panel = enchantingUI.transform.Find("Panel");
             if (existingBackground != null & panel != null)
             {
-                Image image = existingBackground.GetComponent<Image>();
-                panel.GetComponent<Image>().material = image.material;
+                Material material = existingBackground.GetComponent<Image>().material;
+                foreach (Image image in panel.GetComponentsInChildren<Image>(true))
+                {
+                    if (image.name == "Background" || image.name == "Plaque" || image.name == "ActiveTabBridge")
+                    {
+                        image.material = material;
+                    }
+                }
             }
         }
 
@@ -177,6 +184,12 @@ namespace EpicLoot_UnityLib
                 if (fs != null)
                 {
                     fs.Refresh();
+                }
+
+                UITooltip tooltip = tab.m_button.gameObject.GetComponent<UITooltip>();
+                if (tooltip != null && tooltip.m_tooltipPrefab == null)
+                {
+                    EnchantingUIController.MakeFeatureUnlockTooltip(tooltip.gameObject);
                 }
             }
 
@@ -250,7 +263,7 @@ namespace EpicLoot_UnityLib
             RectTransform lastTab = null;
             foreach (RectTransform tab in tabs)
             {
-                if (!tab.gameObject.activeSelf)
+                if (!tab.gameObject.activeSelf || tab.GetComponent<Button>() == null)
                 {
                     continue;
                 }
@@ -270,12 +283,12 @@ namespace EpicLoot_UnityLib
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(tabs);
 
-            float firstTabTop = hints.InverseTransformPoint(firstTab.TransformPoint(0, firstTab.rect.yMax, 0)).y;
-            float lastTabBottom = hints.InverseTransformPoint(lastTab.TransformPoint(0, lastTab.rect.yMin, 0)).y;
+            float firstTabLeft = hints.InverseTransformPoint(firstTab.TransformPoint(firstTab.rect.xMin, 0, 0)).x;
+            float lastTabRight = hints.InverseTransformPoint(lastTab.TransformPoint(lastTab.rect.xMax, 0, 0)).x;
+            float gap = leftHint.rect.width * 0.5f + TabHintGap;
 
-            Vector3 position = rightHint.localPosition;
-            position.y = lastTabBottom + (firstTabTop - leftHint.localPosition.y);
-            rightHint.localPosition = position;
+            leftHint.localPosition = new Vector3(firstTabLeft - gap, leftHint.localPosition.y, 0);
+            rightHint.localPosition = new Vector3(lastTabRight + gap, rightHint.localPosition.y, 0);
         }
 
         // TabHandler's own cycling skips tabs whose button is null, not ones config has deactivated, so it
