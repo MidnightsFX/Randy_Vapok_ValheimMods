@@ -66,13 +66,13 @@ public class MagicSearchField
     public void EnableGlow(bool enable) => _glow.enabled = enable && _hasGlow;
 
     /// <summary>Centres the field along the top edge of its parent, <paramref name="margin"/> below it.</summary>
-    public void DockTop(float width, float height, float margin)
+    public void DockTop(float width, float height, float margin, float xOffset = 0f)
     {
         _rect.anchorMin = _rect.anchorMax = new Vector2(0.5f, 1f);
         _rect.pivot = new Vector2(0.5f, 1f);
         _rect.localScale = Vector3.one;
         _rect.localRotation = Quaternion.identity;
-        _rect.anchoredPosition3D = new Vector3(0f, -margin, 0f);
+        _rect.anchoredPosition3D = new Vector3(xOffset, -margin, 0f);
         SetSize(width, height);
     }
 
