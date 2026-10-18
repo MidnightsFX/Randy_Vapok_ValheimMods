@@ -1133,8 +1133,6 @@
       "ID": "SurtrWeapon",
       "Name": "$mod_epicloot_l_surtrweapon",
       "Description": "$mod_epicloot_l_surtrweapon_desc",
-      "EquipFx": "FireAura",
-      "EquipFxMode": "EquipRoot",
       "IsSetItem": true,
       "Requirements": {
         "AllowedItemTypes": [ "TwoHandedWeapon" ],
@@ -1273,6 +1271,58 @@
       "ID": "HrungnirLegs",
       "Name": "$mod_epicloot_l_hrungnirlegs",
       "Description": "$mod_epicloot_l_hrungnirlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "SvalinnShield",
+      "Name": "$mod_epicloot_l_svalinnshield",
+      "Description": "$mod_epicloot_l_svalinnshield_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Shield"
+        ],
+        "ItemHasParryPower": true
+      },
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyBlockPower" },
+        { "Type": "ModifyParry" }
+      ]
+    },
+    {
+      "ID": "SvalinnHelm",
+      "Name": "$mod_epicloot_l_svalinnhelm",
+      "Description": "$mod_epicloot_l_svalinnhelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "SvalinnChest",
+      "Name": "$mod_epicloot_l_svalinnchest",
+      "Description": "$mod_epicloot_l_svalinnchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "SvalinnLegs",
+      "Name": "$mod_epicloot_l_svalinnlegs",
+      "Description": "$mod_epicloot_l_svalinnlegs_desc",
       "IsSetItem": true,
       "Requirements": {
         "AllowedItemTypes": [
@@ -1440,7 +1490,7 @@
       "Name": "$mod_epicloot_set_thor",
       "Rarities": [ "Legendary", "Mythic", "Ancient" ],
       "FullSetFx": [
-        "Eikthyr/Visual/Armature/Root2/Pelvis/Spine/Spine1/Spine2/Neck/Neck1/Head/Sparcs",
+        "Eikthyr/Visual/Armature/Root2/Pelvis/Spine/Spine1/Spine2/Neck/Neck1/Head/Sparcs@0.1",
         "AxeBerzerkrLightning/attach/Lightning",
         "AxeBerzerkrLightning/attach/Clouds"
       ],
@@ -1552,6 +1602,7 @@
       "ID": "Egil",
       "Name": "$mod_epicloot_set_egil",
       "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "WeaponGlow": { "Color": "#FFC23A", "Alpha": 0.35, "Rate": 60, "Size": 0.9, "Speed": 0.12, "Glints": 5, "GlintColor": "#FFE9A8", "LightIntensity": 1.0, "LightRange": 2.5 },
       "LegendaryIDs": [
         "EgilBow",
         "EgilHood",
@@ -1564,11 +1615,11 @@
         { "Count": 3, "Effect": { "Type": "ModifyBackstab", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "AddMovementSkills", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "Sniper",
-          "Values": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
+          "Values": { "MinValue": 0.8, "MaxValue": 0.8, "Increment": 0.1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
-            "Mythic": { "MinValue": 45, "MaxValue": 45, "Increment": 1 },
-            "Ancient": { "MinValue": 50, "MaxValue": 50, "Increment": 1 }
+            "Legendary": { "MinValue": 0.8, "MaxValue": 0.8, "Increment": 0.1 },
+            "Mythic": { "MinValue": 1, "MaxValue": 1, "Increment": 0.1 },
+            "Ancient": { "MinValue": 1.2, "MaxValue": 1.2, "Increment": 0.1 }
           } } }
       ]
     },
@@ -1604,6 +1655,8 @@
       "ID": "Fylgja",
       "Name": "$mod_epicloot_set_fylgja",
       "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "WeaponGlow": { "Color": "#5CD65C", "Speed": 0.03, "Accent": "BowAshlandsRoot/attach/RootFang/vfx", "AccentColor": "#8CFF7A", "LightIntensity": 0.6 },
+      "BodyAura": { "Preset": "FallingLeaves", "Color": "#6FCF4A", "Color2": "#B5E86A" },
       "LegendaryIDs": [
         "FylgjaBow",
         "FylgjaWeapon",
@@ -1687,6 +1740,8 @@
         "Eitr/attach/sparcs_world"
       ],
       "ArmorTint": { "Color": "#3E3A8C" },
+      "HandGlow": { "Color": "#8FD8FF", "Alpha": 0.3, "Rate": 25, "Size": 0.6, "Speed": 0.05, "Glints": 3, "GlintColor": "#E6F7FF", "Accent": "SwordMistwalker/attach/Mistwalker/Particle System", "AccentScale": 0.5, "LightIntensity": 0.5, "LightRange": 1.5 },
+      "DrawArrow": { "Model": "EL_ConjuredArrow_projectile/model", "Length": 0.9, "Color": "#9FDFFF", "Alpha": 0.35, "Rate": 60, "Size": 0.5, "Accent": "SwordMistwalker/attach/Mistwalker/Particle System", "AccentScale": 0.4, "LightIntensity": 0.8, "LightRange": 2 },
       "LegendaryIDs": [
         "HeidrBow",
         "HeidrHood",
@@ -1726,11 +1781,11 @@
         { "Count": 3, "Effect": { "Type": "DeepWell", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "EitrLeech", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "EitrBarrier",
-          "Values": { "MinValue": 1, "MaxValue": 1, "Increment": 0.1 },
+          "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 1, "MaxValue": 1, "Increment": 0.1 },
-            "Mythic": { "MinValue": 1.1, "MaxValue": 1.1, "Increment": 0.1 },
-            "Ancient": { "MinValue": 1.2, "MaxValue": 1.2, "Increment": 0.1 }
+            "Legendary": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+            "Mythic": { "MinValue": 30, "MaxValue": 30, "Increment": 1 },
+            "Ancient": { "MinValue": 35, "MaxValue": 35, "Increment": 1 }
           } } }
       ]
     },
@@ -1851,13 +1906,19 @@
             "Mythic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
             "Ancient": { "MinValue": 30, "MaxValue": 30, "Increment": 1 }
           } } },
-        { "Count": 3, "Effect": { "Type": "ModifyDodgeStaminaUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
-        { "Count": 4, "Effect": { "Type": "Vanish",
+        { "Count": 3, "Effect": { "Type": "Vanish",
           "Values": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
           "ValuesPerRarity": {
             "Legendary": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
             "Mythic": { "MinValue": 4, "MaxValue": 4, "Increment": 0.5 },
             "Ancient": { "MinValue": 5, "MaxValue": 5, "Increment": 0.5 }
+          } } },
+        { "Count": 4, "Effect": { "Type": "ModifyBackstab",
+          "Values": { "MinValue": 150, "MaxValue": 150, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 150, "MaxValue": 150, "Increment": 1 },
+            "Mythic": { "MinValue": 200, "MaxValue": 200, "Increment": 1 },
+            "Ancient": { "MinValue": 250, "MaxValue": 250, "Increment": 1 }
           } } }
       ]
     },
@@ -1866,6 +1927,7 @@
       "Name": "$mod_epicloot_set_surtr",
       "Rarities": [ "Legendary", "Mythic", "Ancient" ],
       "ArmorTint": { "Color": "#C1440E" },
+      "WeaponGlow": { "Color": "#FF6A1F", "Alpha": 0.3, "Rate": 40, "Accent": "SwordDyrnwyn/attach/Burny vfx", "LightIntensity": 1.2, "LightRange": 3 },
       "LegendaryIDs": [
         "SurtrWeapon",
         "SurtrHelm",
@@ -1933,6 +1995,30 @@
             "Legendary": { "MinValue": 16, "MaxValue": 16, "Increment": 1 },
             "Mythic": { "MinValue": 14, "MaxValue": 14, "Increment": 1 },
             "Ancient": { "MinValue": 12, "MaxValue": 12, "Increment": 1 }
+          } } }
+      ]
+    },
+    {
+      "ID": "Svalinn",
+      "Name": "$mod_epicloot_set_svalinn",
+      "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+      "ArmorTint": { "Color": "#C9A23F" },
+      "LegendaryIDs": [
+        "SvalinnShield",
+        "SvalinnHelm",
+        "SvalinnChest",
+        "SvalinnLegs"
+      ],
+      "SetBonuses": [
+        { "Count": 2, "Effect": { "Type": "AddBlockingSkill", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyBlockStaminaUse", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ReduceStaggerTaken", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
+        { "Count": 4, "Effect": { "Type": "ShieldThrow",
+          "Values": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
+            "Mythic": { "MinValue": 125, "MaxValue": 125, "Increment": 1 },
+            "Ancient": { "MinValue": 150, "MaxValue": 150, "Increment": 1 }
           } } }
       ]
     },

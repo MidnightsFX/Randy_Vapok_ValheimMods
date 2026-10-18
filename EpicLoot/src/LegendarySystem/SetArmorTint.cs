@@ -47,7 +47,7 @@ namespace EpicLoot.LegendarySystem
             }
 
             string setID = "";
-            foreach (LegendarySetProgress progress in SetBonusEvaluator.GetEquippedSetProgress(player))
+            foreach (LegendarySetProgress progress in SetBonusEvaluator.GetVisibleSetProgress(player))
             {
                 if (progress.IsFull && progress.Set.ArmorTint != null)
                 {

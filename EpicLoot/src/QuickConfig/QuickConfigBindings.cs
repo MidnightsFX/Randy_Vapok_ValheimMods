@@ -265,6 +265,7 @@ internal static class QuickConfigBindings {
         // --- 5. Enchanting Table ---
         FloatSlider("TemperBaseChance", ELConfig.TemperBaseChance, "Temper Base Chance", BindingScope.Server, 0f, 1f, 0.01f);
         FloatSlider("TemperDecrement", ELConfig.TemperDecrement, "Temper Decrement Amount", BindingScope.Server, 0f, 1f, 0.01f);
+        Toggle("TemperFailDowngrades", ELConfig.TemperFailDowngrades, "Temper Fail Downgrades Effect", BindingScope.Server);
         Toggle("TemperDestroysItem", ELConfig.TemperDestroysItem, "Temper Fail Destroys Item", BindingScope.Server);
         FloatSlider("TemperChanceToDestroy", ELConfig.TemperChanceToDestroy, "Temper Destroy Chance", BindingScope.Server, 0f, 1f, 0.01f,
             visible: staged => staged.Get("TemperDestroysItem", false));

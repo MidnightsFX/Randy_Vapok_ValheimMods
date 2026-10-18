@@ -18,7 +18,9 @@ namespace EpicLoot.MagicItemEffects
     // Earthshaker (4-piece Freyja's Falcon set bonus). A hotkey pressed in mid-air dives the player toward where they
     // aim, at least MinDiveAngle below the horizon, steering after the aim at a limited turn rate, and on touching
     // down slams an area: the effect value as damage, half blunt and half pierce, raised by the inventory's weight
-    // over a threshold and by how far the player fell. The area, and the impact's look, grow with the fall too.
+    // over a threshold and by how far the player fell. The area, and the impact's look, grow with the fall too. A dive
+    // can start at any height, but one begun with less than MinHeight of clear air below deals LowDivePenalty percent
+    // less damage.
     //
     // The dive runs on the diver's client. Every physics step the velocity is forced along the dive direction (an
     // UpdateMotion postfix, the last motion code in Character.CustomFixedUpdate) and a capsule cast looks one step
@@ -34,6 +36,7 @@ namespace EpicLoot.MagicItemEffects
         // All tunable in this effect's Config block in magiceffects.json, under these key names.
         public const float DefaultRadius = 5f;
         public const float DefaultMinHeight = 3f;
+        public const float DefaultLowDivePenalty = 50f;     // percent less damage from a dive begun under MinHeight
         public const float DefaultStaminaCost = 25f;
         public const float DefaultDiveSpeed = 30f;
         public const float DefaultMinDiveAngle = 45f;
@@ -53,6 +56,7 @@ namespace EpicLoot.MagicItemEffects
         private const string FallPerRadiusMetreKey = "FallPerRadiusMetre";
         private const string MaxRadiusKey = "MaxRadius";
         private const string MinHeightKey = "MinHeight";
+        private const string LowDivePenaltyKey = "LowDivePenalty";
         private const string StaminaCostKey = "StaminaCost";
         private const string DiveSpeedKey = "DiveSpeed";
         private const string MinDiveAngleKey = "MinDiveAngle";
@@ -71,6 +75,7 @@ namespace EpicLoot.MagicItemEffects
         private static float FallPerRadiusMetre => Get(FallPerRadiusMetreKey, DefaultFallPerRadiusMetre, 1f, 1000f);
         private static float MaxRadius => Get(MaxRadiusKey, DefaultMaxRadius, 0f, 200f);
         private static float MinHeight => Get(MinHeightKey, DefaultMinHeight, 0f, 50f);
+        private static float LowDivePenalty => Get(LowDivePenaltyKey, DefaultLowDivePenalty, 0f, 100f);
         private static float StaminaCost => Get(StaminaCostKey, DefaultStaminaCost, 0f, 200f);
         private static float DiveSpeed => Get(DiveSpeedKey, DefaultDiveSpeed, 10f, 80f);
         private static float MinDiveAngle => Get(MinDiveAngleKey, DefaultMinDiveAngle, 0f, 90f);
@@ -124,7 +129,7 @@ namespace EpicLoot.MagicItemEffects
             MagicItem.RegisterDisplayValues(MagicEffectType.Earthshaker, value => new object[]
             {
                 value, Radius, MinHeight, StaminaCost, WeightPerPercent, WeightThreshold, MaxWeightBonus,
-                FallBonusPerMetre, FallThreshold, FallPerRadiusMetre
+                FallBonusPerMetre, FallThreshold, FallPerRadiusMetre, LowDivePenalty
             });
         }
 
@@ -144,6 +149,7 @@ namespace EpicLoot.MagicItemEffects
         private static Vector3 _diveDir;
         private static float _diveSpeed;
         private static float _diveValue;
+        private static bool _lowDive;              // begun with less than MinHeight of clear air below
         private static float _peakY;               // highest point of this flight, jump climb included
         private static float _diveStartTime;
         private static Vector3 _progressPosition;
@@ -285,13 +291,6 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
-            if (!HasClearance(player, MinHeight))
-            {
-                player.Message(MessageHud.MessageType.Center,
-                    Localization.instance.Localize("$mod_epicloot_earthshaker_toolow"));
-                return;
-            }
-
             float cost = StaminaCost;
             if (cost > 0f)
             {
@@ -303,7 +302,7 @@ namespace EpicLoot.MagicItemEffects
                 player.UseStamina(cost);
             }
 
-            StartDive(player, value);
+            StartDive(player, value, !HasClearance(player, MinHeight));
         }
 
         // Clear air under the feet: nothing solid within the height (a sphere the width of the body, cast down), and
@@ -360,12 +359,13 @@ namespace EpicLoot.MagicItemEffects
             return DiveDirection(slid, slid, minAngle);
         }
 
-        private static void StartDive(Player player, float value)
+        private static void StartDive(Player player, float value, bool low)
         {
             var body = player.m_body;
             _diveDir = DiveDirection(player.GetLookDir(), player.transform.forward, MinDiveAngle);
             _diveSpeed = DiveSpeed;
             _diveValue = value;
+            _lowDive = low;
             _peakY = Mathf.Max(player.m_maxAirAltitude, body.position.y);
             _diving = true;
             _landPending = false;
@@ -382,7 +382,7 @@ namespace EpicLoot.MagicItemEffects
             SpawnNetworkedFx(DiveFxPrefab, body.position, player.transform.rotation);
             PublishDive(player, true);
             EpicLoot.Log($"[Earthshaker] Dive from {body.position.y - _peakY:+0.#;-0.#;0} m below the peak, " +
-                $"heading {_diveDir}, base damage {value:0.#}.");
+                $"heading {_diveDir}, base damage {value:0.#}{(low ? ", too low for full damage" : "")}.");
         }
 
         private static void FaceHeading(Player player)
@@ -554,6 +554,11 @@ namespace EpicLoot.MagicItemEffects
             float multiplier = 1f + (weightBonus + fallBonus) / 100f;
             float damage = _diveValue * multiplier;
             float radius = SlamRadius(fall);
+            // Damage only: the impact still looks and reaches as far as the fall says.
+            if (_lowDive)
+            {
+                damage *= 1f - LowDivePenalty / 100f;
+            }
 
             // This landing is never a fall: vanilla still meets the ground a step or two later and measures from
             // m_maxAirAltitude.
@@ -561,7 +566,8 @@ namespace EpicLoot.MagicItemEffects
             _fallDamageGuardUntil = Time.time + FallDamageGuardTime;
 
             EpicLoot.Log($"[Earthshaker] Landed: fell {fall:0.#} m (+{fallBonus:0.#}%), carrying {weight:0.#} " +
-                $"(+{weightBonus:0.#}%), x{multiplier:0.##} -> {damage:0.#} damage in {radius:0.#} m.");
+                $"(+{weightBonus:0.#}%), x{multiplier:0.##}{(_lowDive ? $", -{LowDivePenalty:0.#}% for a low dive" : "")} -> " +
+                $"{damage:0.#} damage in {radius:0.#} m.");
             DoSlam(player, arrival + Vector3.up * SlamCenterHeight, groundPoint, damage, multiplier, radius);
         }
 

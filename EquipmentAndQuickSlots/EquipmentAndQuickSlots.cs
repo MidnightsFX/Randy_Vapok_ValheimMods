@@ -22,7 +22,7 @@ namespace EquipmentAndQuickSlots {
     [BepInIncompatibility("com.bruce.valheim.comfyquickslots")]
     public class EquipmentAndQuickSlots : BaseUnityPlugin {
         public const string PluginId = "randyknapp.mods.equipmentandquickslots";
-        public const string Version = "3.1.4";
+        public const string Version = "3.2.0";
 
         public static Sprite PaperdollMale;
         public static Sprite PaperdollFemale;
@@ -61,6 +61,7 @@ namespace EquipmentAndQuickSlots {
 
         private void Update() {
             var player = Player.m_localPlayer;
+            GamepadQuickSlots.UsePending(player);
             if (player == null)
                 return;
 

@@ -69,6 +69,12 @@ namespace EpicLoot.LegendarySystem
         public List<SetBonusInfo> SetBonuses = new List<SetBonusInfo>();
         public List<string> FullSetFx = new List<string>();
         public ArmorTintInfo ArmorTint;
+        // Code-built visuals while the full set is worn (SetVisuals): a glow fitted to the weapon in hand, the same kind
+        // of glow on both hands, an arrow on the string while a bow is drawn, and an aura around the wearer. All optional.
+        public WeaponGlowInfo WeaponGlow;
+        public WeaponGlowInfo HandGlow;
+        public DrawArrowInfo DrawArrow;
+        public BodyAuraInfo BodyAura;
     }
 
     [Serializable]
@@ -79,6 +85,50 @@ namespace EpicLoot.LegendarySystem
         public float Hue;
         public float Saturation;
         public float Value;
+    }
+
+    // Every field is optional and kept in range where it is read (SetVisuals); these are the defaults.
+    [Serializable]
+    public class WeaponGlowInfo
+    {
+        public string Color = "#FFFFFF";
+        public float Alpha = 0.3f;               // each glow particle's opacity
+        public float Rate = 40f;                 // glow particles a second
+        public float Size = 1f;                  // multiplies the glow particles' 0.1-0.28 m
+        public float Speed;                      // metres a second the glow drifts out from the weapon
+        public float Glints;                     // star glints a second (0 for none)
+        public string GlintColor;                // defaults to a paler Color
+        public string Accent;                    // "Prefab/child/path": vanilla particles laid along the weapon too
+        public string AccentColor;               // recolours the accent; left as it is when unset
+        public float AccentScale = 1f;
+        public float LightIntensity = 0.8f;
+        public float LightRange = 2.5f;
+    }
+
+    // Every field is optional and kept in range where it is read (SetDrawArrow); these are the defaults.
+    [Serializable]
+    public class DrawArrowInfo
+    {
+        public string Model = "ArrowFrost/model"; // "Prefab/child/path": the arrow mesh shown on the string, as it is
+        public float Length = 0.9f;               // metres, the arrow scaled to it (0 keeps the model's own size)
+        public string Color = "#FFFFFF";          // the glow particles along it
+        public float Alpha = 0.3f;
+        public float Rate = 60f;
+        public float Size = 0.5f;                 // multiplies the glow particles' 0.1-0.28 m
+        public string Accent;                     // "Prefab/child/path": vanilla particles laid along the arrow too
+        public string AccentColor;                // recolours the accent; left as it is when unset
+        public float AccentScale = 1f;
+        public float LightIntensity = 0.8f;
+        public float LightRange = 2f;
+    }
+
+    [Serializable]
+    public class BodyAuraInfo
+    {
+        public string Preset;                    // the code-built aura: "FallingLeaves"
+        public string Color = "#FFFFFF";         // each particle is tinted between Color and Color2
+        public string Color2;
+        public float Density = 1f;               // multiplies how many particles it makes
     }
 
     [Serializable]

@@ -4,6 +4,7 @@ Changes:
 * Sets overhaul!
     * Sets can be configured to drop at any rarity, and set pieces of different rarities count toward the same set
     * The rune feature can now extract and Etch sets from and to items
+* Set visual effects keep showing while a set weapon is stowed on your back, but the set bonuses still need it in hand.
 * Adds Quick Configure, editable in game configs for most Epicloot options, and a 1 time setup tutorial
 * Server admins can change every Quick Configure setting from their own game, and the server passes the changes on to every player.
 * Improvements to the loot system (existing loot tables can be upgraded)
@@ -15,6 +16,10 @@ Changes:
 * Slotting runestones into shard slots can be turned off, which leaves runestones already slotted inactive but still removable.
 * The enchanting table's search boxes can now find items by their enchantments.
 * Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
+* Tempering now costs a single iron or gold bounty token per attempt instead of materials.
+* A failed temper no longer lowers an enchantment unless the server turns that on, and then only the enchantment being tempered can drop.
+* The temper panel shows the chance to downgrade, and its destroy chance is now the real chance per attempt.
+* Bounties now pay double the coins and bounty tokens.
 * New Enchantments!
     * Prosperity gives a chance for additional loot drops from creatures and chests
     * Green Thumb on the Cultivator makes the plants you sow grow faster.
@@ -35,6 +40,7 @@ Bugfixes:
 * Fixes the Dvergr rogues' crossbows showing up as a second Arbalest in loot, the merchant and item gating.
 * Fixes Stagger Duration shortening staggers on most creatures and not working from projectiles in multiplayer
 * Fixes bounty creatures losing their extra health after a reload or when another player's game took them over.
+* Fixes bounty rewards claimed with a full inventory dropping a single coin or token instead of the full reward.
 * Fixes several set bonus problems, including duplicate pieces counting twice
 * Fixes disenchanting and re-enchanting an item with a durability bonus raising its durability without limit
 * Fixes magic staff tooltips showing a wildly wrong health cost and leaving out the eitr cost.
@@ -42,6 +48,7 @@ Bugfixes:
 * Fixes panel text going missing when another mod ships a broken copy of Valheim's fonts
 * Fixes the rested carry weight shardstone losing its comfort bonus
 * Fixes the Dark Red shardstone's ranged skills bonus doing nothing
+* The Light Green shardstone's resting health regeneration now only works while you are actively resting, not for as long as you are Rested.
 * Fixes Bulk Up being able to push health regeneration below zero
 * Fixes Apportation never moving you to your thrown weapon
 * Fixes a flood of sound warnings when travelling through a portal with TargetPortal.
@@ -52,23 +59,24 @@ Bugfixes:
 * Shard slots on backpacks and quivers now open with Ctrl held instead of Alt, so other mods' Alt hotkeys no longer get in the way, and players can choose to need it for every item.
 
 New Sets:
-- Wrath of the Thunderer set, whose full set lets you hurl your melee weapon to slam down where you aim.
+- Wrath of the Thunderer set, whose full set lets you hurl your melee weapon, even mid-swing, to slam down where you aim.
 - Trickster's Guile set, whose full set takes you behind an enemy you keep your aim on for a heavy strike.
 - Dverger Arsenal set, whose full set turns your crossbow bolts into lobbed fireballs that explode where you aim.
-- Egil's Mark set, whose full set makes your arrows fly faster and hit harder at the cost of a much slower draw.
+- Egil's Mark set, whose full set makes your arrows fly faster and hit harder the further they travel, at the cost of a much slower draw.
 - Rime of Élivágar set for mages, whose full set surrounds you with drifting snow and freezes the water beneath you so you can walk across it for a steady cost of Eitr.
 - Fylgja's Bond set for rangers, whose full set binds a tamed creature as a spirit animal that fights beside you.
-- Freyja's Falcon set for spear fighters, whose full set gives you dark wings and lets you dive from the air to slam the ground.
+- Freyja's Falcon set for spear fighters, whose full set gives you dark wings and lets you dive from any height to slam the ground, at full force from high enough up.
 - Bölþorn's Bane set, whose full set sends your crossbow bolts through every creature in their path.
 - Heiðr's Seiðr set for mages who use a bow, which trains Elemental Magic with your bow and, as a full set, fires arrows conjured from Eitr.
-- Mímir's Well set for mages, which trades health for a deep pool of Eitr and, as a full set, wraps you in a barrier that takes damage from your Eitr before your health.
+- Mímir's Well set for mages, which trades health for a deep pool of Eitr and, as a full set, wraps you in a barrier that takes part of every hit from your Eitr before your armor.
 - Einherjar set for spellswords, whose full set pours your Eitr into your weapon for a spell of extra damage.
 - Ullr's Hunt set for archers, whose full set lets your arrows mark creatures for a heavy axe or polearm hit.
-- Hel's Covenant set for blood mages, whose full set raises creatures slain by you or your summons as thralls that fight for you.
-- Huldufólk set for rogues, whose full set lets you vanish in smoke when you dodge near enemies and strike from hiding.
+- Hel's Covenant set for blood mages, whose full set raises creatures slain by you or your summons as thralls of the same star level that fight for you.
+- Huldufólk set for rogues, which lets you vanish in smoke when you dodge near enemies and, as a full set, makes your sneak attacks far deadlier.
 - Surtr's Brand set for two-handed axes and swords, whose full set makes your combo finishers and secondary attacks erupt in Brenna's fire.
 - Hel's Court armor set for blood fighters, whose full set drains enemies so they cannot heal while every player striking them heals.
 - Hrungnir's Stand set for tower shields, whose full set stores charge from your blocks and releases a rock shockwave on the next one.
+- Svalinn's Arc set for bucklers and round shields, whose full set throws your shield through enemies and back, hitting harder the more damage you have blocked.
 - Coils of the World Serpent set for spear fighters, which turns part of your physical damage into venom that ignores resistance and, as a full set, dooms heavily envenomed enemies to walk nine steps and fall dead.
 - Gullveig's Rebirth set for elemental mages, whose full set makes you a Hexen for as long as you wear it: a Jotun Witch's body, magic blast and lightning bolt, and flight that burns Eitr and sinks you to the ground when it runs dry.
 

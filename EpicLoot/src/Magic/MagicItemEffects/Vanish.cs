@@ -13,10 +13,14 @@ namespace EpicLoot
 
 namespace EpicLoot.MagicItemEffects
 {
-    // Vanish (4-piece Huldufólk set bonus, NoRoll). A dodge roll with an alerted enemy within Radius, off cooldown,
+    // Vanish (3-piece Huldufólk set bonus, NoRoll). A dodge roll with an alerted enemy within Radius, off cooldown,
     // drops a cloud of smoke: enemies within Radius lose track of the wearer, who stays unseen and unheard for the
     // effect value in seconds. The wearer's next hit from hiding, with any weapon, is a sneak attack. Cooldown seconds
-    // must pass before the next.
+    // must pass before the next, counted from the vanish.
+    //
+    // The cooldown is the EL_VanishCooldown status effect: Vanish is ready exactly when that is gone, so whatever ends it
+    // (its timer, death, a cleanse) readies Vanish too, and the HUD never disagrees. Only when its icon is missing, and so
+    // there is no status effect, does a plain timer stand in.
     //
     // Hiding uses vanilla's own senses. AI on every machine reads a player's stealth and noise from the player's ZDO,
     // so the wearer's client holds both at 0 (Player.UpdateStealth and Character.RPC_AddNoise are held off) and no
@@ -51,6 +55,7 @@ namespace EpicLoot.MagicItemEffects
         private const string HiddenName = "EL_Vanished";
         private const string CooldownName = "EL_VanishCooldown";
         private static readonly int HiddenHash = HiddenName.GetStableHashCode();
+        private static readonly int CooldownHash = CooldownName.GetStableHashCode();
         private const string IconStatusEffect = "SetEffect_TrollArmor";
         private const string FallbackIconItem = "HelmetTrollLeather";
 
@@ -61,7 +66,7 @@ namespace EpicLoot.MagicItemEffects
 
         // State for the local player only; SyncOwner drops it when the local player changes.
         private static Player _owner;
-        private static float _readyAt;
+        private static float _readyAt;             // only for when the cooldown status effect could not be made
         private static float _hiddenUntil;
         private static bool _sneakReady;
         private static bool _restoreStealth;
@@ -92,7 +97,7 @@ namespace EpicLoot.MagicItemEffects
         {
             SyncOwner(player);
             float now = Time.time;
-            if (now < _readyAt || !player.HasActiveMagicEffect(MagicEffectType.Vanish, out float seconds) || seconds <= 0f)
+            if (IsCoolingDown(player, now) || !player.HasActiveMagicEffect(MagicEffectType.Vanish, out float seconds) || seconds <= 0f)
             {
                 return;
             }
@@ -104,6 +109,11 @@ namespace EpicLoot.MagicItemEffects
             }
 
             StartHiding(player, seconds, radius);
+        }
+
+        private static bool IsCoolingDown(Player player, float now)
+        {
+            return GetOrCreateCooldown() != null ? player.GetSEMan().HaveStatusEffect(CooldownHash) : now < _readyAt;
         }
 
         // Alerted is synced to every client through the creature's ZDO; whom it is hunting is not, so an alerted enemy

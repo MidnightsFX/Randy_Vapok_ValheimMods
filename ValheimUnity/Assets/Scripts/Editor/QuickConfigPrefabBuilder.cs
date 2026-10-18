@@ -214,7 +214,7 @@ public static class QuickConfigPrefabBuilder
     private static RowDef F(string key, string label) => new RowDef("Row_TextField", key, label);
     private static RowDef FL(string key, string label) => new RowDef("Row_Flags", key, label, RowH * 2f + 4f);
     private static RowDef B(string key, string text, string label = "") => new RowDef("Row_Button", key, label, 0f, text);
-    private static RowDef H(string label) => new RowDef("Row_Header", "", label);
+    private static RowDef H(string label, float height = 0f) => new RowDef("Row_Header", "", label, height);
     private static RowDef X(string key, string text, float height = 44f) => new RowDef("Row_Text", key, text, height);
     private static RowDef Col(string key, string label) => new RowDef("Row_Color", key, label);
     private static RowDef L(string key, string label) => new RowDef("Row_ListEditor", key, label, 300f);
@@ -395,7 +395,6 @@ public static class QuickConfigPrefabBuilder
             {
                 H("Merchant"),
                 T("_adventureModeEnabled", "Adventure Mode Enabled"),
-                S("_andvaranautRange", "Andvaranaut Range"),
                 T("RemovePurchasedGambles", "Remove Purchased Gambles"),
                 S("json:adventuredata:SecretStash.RefreshInterval", "Secret Stash Refresh (days)"),
                 H("Gambling"),
@@ -404,20 +403,25 @@ public static class QuickConfigPrefabBuilder
                 S("json:adventuredata:Gamble.ForestTokenGamblesCount", "Forest Token Gambles"),
                 S("json:adventuredata:Gamble.IronBountyGamblesCount", "Iron Token Gambles"),
                 S("json:adventuredata:Gamble.GoldBountyGamblesCount", "Gold Token Gambles"),
-                H("Tempering"),
+                // 4 px shorter than a normal header: with every Tempering row shown the column needs 600
+                // of its 602 px. The rows beside it on the right are the biome cost list, so nothing misaligns.
+                H("Tempering", RowH - 4f),
                 S("TemperBaseChance", "Temper Base Chance"),
                 S("TemperDecrement", "Temper Decrement Amount"),
+                T("TemperFailDowngrades", "Temper Fail Downgrades Effect"),
                 T("TemperDestroysItem", "Temper Fail Destroys Item"),
                 S("TemperChanceToDestroy", "Temper Destroy Chance"),
             },
             new[]
             {
                 H("Treasure maps"),
-                S("json:adventuredata:TreasureMap.RefreshInterval", "Treasure Map Refresh (days)"),
+                S("json:adventuredata:TreasureMap.RefreshInterval", "Map Refresh (days)"),
                 S("json:adventuredata:TreasureMap.StartRadiusMin", "Start Radius Min"),
                 S("json:adventuredata:TreasureMap.StartRadiusMax", "Start Radius Max"),
                 S("json:adventuredata:TreasureMap.MinimapAreaRadius", "Map Circle Radius"),
                 T("json:adventuredata:TreasureMap.ScaleRadiiToWorldSize", "Scale Radii To World Size"),
+                // Andvaranaut finds treasure map chests; it sits here so the left column has room for Tempering.
+                S("_andvaranautRange", "Andvaranaut Range"),
                 BC("json:adventuredata:TreasureMap.BiomeInfo", "Map cost per biome"),
             }),
 

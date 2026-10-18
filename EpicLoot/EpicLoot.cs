@@ -199,6 +199,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
         MagicItemEffects.Firebrand.RegisterDisplayValues();
         MagicItemEffects.LifeSiphon.RegisterDisplayValues();
         MagicItemEffects.KineticQuake.RegisterDisplayValues();
+        MagicItemEffects.ShieldThrow.RegisterDisplayValues();
         MagicItemEffects.CoinHoarder.RegisterDisplayValues();
 
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
@@ -433,6 +434,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.EitrBarrier.RegisterPrefabs;
         // Hel's Harvest raises thralls, a networked copy of the summoned skeleton under its own name.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.HelsHarvest.RegisterPrefabs;
+        // Firebrand's nova visual is a networked copy of Brenna's that goes off at once rather than after her wind-up.
+        PrefabManager.OnPrefabsRegistered += MagicItemEffects.Firebrand.RegisterPrefabs;
         // After every RegisterPrefabs above: builds what the set effects would otherwise build on first use (wings,
         // snow, ice, fx copies) and compiles their code, behind the loading screen instead of mid-fight.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.SetEffectWarmup.OnPrefabsRegistered;

@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using EpicLoot.LegendarySystem;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -9,9 +10,10 @@ namespace EpicLoot.MagicItemEffects
 {
     // Does at world load, behind the loading screen, what the set effects would otherwise do the first time they show
     // (hitch profiles put each of those at 50 ms to a second): the wings' texture, mesh and template rig, the snow
-    // emitter and ice floe templates, the local fx copies, the spirit animal's materials. It also compiles every set
-    // effect's code up front: a method's first call is when Mono compiles it, and a set effect's first activation runs
-    // dozens of methods for the first time at once.
+    // emitter and ice floe templates, the eitr infusion's auras, the sets' weapon and hand glows, drawn arrows and body
+    // auras, Sniper's charge, arrow and impact, the local fx copies, the spirit animal's materials. It
+    // also compiles every set effect's code up front: a method's first call is when Mono compiles it, and a set
+    // effect's first activation runs dozens of methods for the first time at once.
     internal static class SetEffectWarmup
     {
         // The set effects' own types; their nested types (patches, lambdas, coroutines) come along.
@@ -21,11 +23,14 @@ namespace EpicLoot.MagicItemEffects
             typeof(KineticQuakeHud), typeof(Firebrand), typeof(Frostwalker), typeof(SE_Frostwalker),
             typeof(FrostwalkerIceField), typeof(FrostwalkerSnow), typeof(FloeTemplate), typeof(SpiritAnimal),
             typeof(SpiritAnimalVisual), typeof(EitrBarrier), typeof(SE_EitrBarrier), typeof(EitrInfusion),
-            typeof(SE_EitrInfusion), typeof(HelsHarvest), typeof(Vanish), typeof(LifeSiphon), typeof(LifeSiphonAura),
+            typeof(SE_EitrInfusion), typeof(EitrInfusionAura), typeof(AuraFade), typeof(HelsHarvest), typeof(Vanish), typeof(LifeSiphon), typeof(LifeSiphonAura),
             typeof(QuarryMark), typeof(QuarryMarker), typeof(ConjuredArrows), typeof(ElementalArchery),
             typeof(PiercingBolts), typeof(Interconnected), typeof(DeepWell), typeof(ConvertHealthToEitr), typeof(Sniper),
+            typeof(SniperVisuals), typeof(SniperCharge), typeof(SniperArrowFx), typeof(SniperArrowMarker), typeof(LightPulse),
             typeof(OverwhelmingLaunch), typeof(LaunchedWeaponVisual), typeof(Artillery), typeof(Assassin),
-            typeof(AssassinChargeHud), typeof(LocalFx), typeof(SetAbilityKeyHint),
+            typeof(AssassinChargeHud), typeof(LocalFx), typeof(SetAbilityKeyHint), typeof(WeaponAuraKit),
+            typeof(SetVisuals), typeof(FallingLeaves), typeof(SetDrawArrow), typeof(ShieldThrow),
+            typeof(ThrownShieldVisual), typeof(SetGaugeBar), typeof(ReduceStaggerTaken),
         };
 
         private static bool _compiled;
@@ -49,7 +54,10 @@ namespace EpicLoot.MagicItemEffects
             });
             Run(nameof(QuarryMark), () => QuarryMark.WarmupAtLoad(drawn));
             Run(nameof(EitrBarrier), () => EitrBarrier.WarmupAtLoad(drawn));
+            Run(nameof(EitrInfusion), () => EitrInfusion.WarmupAtLoad(drawn));
             Run(nameof(SpiritAnimal), () => SpiritAnimal.WarmupAtLoad(drawn));
+            Run(nameof(SniperVisuals), () => SniperVisuals.WarmupAtLoad(drawn));
+            Run(nameof(SetVisuals), () => SetVisuals.WarmupAtLoad(drawn));
             long assets = timer.ElapsedMilliseconds;
 
             int compiled = 0;

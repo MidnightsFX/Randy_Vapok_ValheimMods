@@ -30,8 +30,11 @@ namespace EpicLoot.MagicItemEffects
     // vanilla turns the fire into burning over time. The nova is a bonus hit (see HitSource): crits, lifesteal,
     // Executioner and the other strike effects come from the swing, not from it.
     //
-    // Both prefabs are vanilla networked prefabs already in ZNetScene, so the attacking client spawns each once and
-    // everyone sees the nova. Only the Aoe's owner deals its damage, and the visual's TimedDestruction removes it for all.
+    // Both are networked prefabs in ZNetScene, so the attacking client spawns each once and everyone sees the nova. Only
+    // the Aoe's owner deals its damage, and the visual's TimedDestruction removes it for all. The blast is vanilla's,
+    // and hits at once. The visual is a copy of vanilla's (fx_EL_FirebrandNova, registered on every client at world load):
+    // Brenna's holds every part back for 1.5 s, to land with her attack animation, and fades its light in over 1.8 s,
+    // so on a player it went off well after the blast. The copy starts after ChargeSeconds instead.
     [HarmonyPatch]
     public static class Firebrand
     {
@@ -52,6 +55,13 @@ namespace EpicLoot.MagicItemEffects
 
         private const string NovaFxPrefab = "fx_fireskeleton_nova";
         private const string NovaAoePrefab = "skeleton_firenova_aoe";
+        public const string QuickNovaFxPrefab = "fx_EL_FirebrandNova";
+
+        // How long the copied nova visual takes to go off, where Brenna's takes 1.5 s; its light fades in in proportion.
+        private const float ChargeSeconds = 0.1f;
+
+        private static GameObject _container;       // disabled parent that keeps the template from Awaking
+        private static GameObject _quickNovaFx;
 
         // Brenna's attack spawns its blast at her hips, raised and pushed forward a little; a player's hips sit about
         // a metre up.
@@ -157,7 +167,7 @@ namespace EpicLoot.MagicItemEffects
             Vector3 position = playerTransform.position + Vector3.up * NovaHeight + playerTransform.forward * NovaForward;
             Quaternion rotation = playerTransform.rotation;
 
-            GameObject fxPrefab = FindPrefab(NovaFxPrefab);
+            GameObject fxPrefab = _quickNovaFx != null ? _quickNovaFx : FindPrefab(NovaFxPrefab);
             if (fxPrefab != null)
             {
                 Object.Instantiate(fxPrefab, position, rotation);
@@ -201,6 +211,103 @@ namespace EpicLoot.MagicItemEffects
 
             // Damage the effect deals on its own, not a weapon strike (see HitSource).
             HitSource.MarkBonusSource(spawned);
+        }
+
+        // Hooked to PrefabManager.OnPrefabsRegistered (a ZNetScene.Awake postfix on every client and the server, each
+        // world load). The copy is built once and kept across worlds; later loads only re-inject it.
+        public static void RegisterPrefabs()
+        {
+            ZNetScene zns = ZNetScene.instance;
+            if (zns == null)
+            {
+                return;
+            }
+
+            if (_quickNovaFx == null)
+            {
+                _quickNovaFx = BuildQuickNovaFx(zns);
+            }
+            if (_quickNovaFx == null)
+            {
+                return;
+            }
+
+            if (!zns.m_prefabs.Contains(_quickNovaFx))
+            {
+                zns.m_prefabs.Add(_quickNovaFx);
+            }
+            zns.m_namedPrefabs[QuickNovaFxPrefab.GetStableHashCode()] = _quickNovaFx;
+        }
+
+        // Every particle system's start delay and the sound's delay brought down to ChargeSeconds, the light's fade-in
+        // shortened by as much, and the light's life and the self-destruct timer by the time saved.
+        private static GameObject BuildQuickNovaFx(ZNetScene zns)
+        {
+            GameObject source = zns.GetPrefab(NovaFxPrefab);
+            if (source == null)
+            {
+                return null;    // Erupt logs the missing prefab when it is first needed
+            }
+
+            if (_container == null)
+            {
+                _container = new GameObject("EL_FirebrandContainer");
+                _container.SetActive(false);
+                Object.DontDestroyOnLoad(_container);
+            }
+
+            // Under the disabled container nothing on the copy Awakes, while activeSelf stays true: remote clients
+            // build it from this template and never call SetActive on it.
+            GameObject template = Object.Instantiate(source, _container.transform);
+            template.name = QuickNovaFxPrefab;
+
+            float saved = 0f;
+            foreach (ParticleSystem system in template.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                ParticleSystem.MainModule main = system.main;
+                float delay = MaxDelay(main.startDelay);
+                if (delay > ChargeSeconds)
+                {
+                    main.startDelay = ChargeSeconds;
+                    saved = Mathf.Max(saved, delay - ChargeSeconds);
+                }
+            }
+
+            foreach (ZSFX sound in template.GetComponentsInChildren<ZSFX>(true))
+            {
+                sound.m_minDelay = Mathf.Min(sound.m_minDelay, ChargeSeconds);
+                sound.m_maxDelay = Mathf.Min(sound.m_maxDelay, ChargeSeconds);
+            }
+
+            float speedUp = saved > 0f ? ChargeSeconds / (ChargeSeconds + saved) : 1f;
+            foreach (LightFlicker light in template.GetComponentsInChildren<LightFlicker>(true))
+            {
+                light.m_fadeInDuration *= speedUp;
+                if (light.m_ttl > 0f)
+                {
+                    light.m_ttl = Mathf.Max(light.m_fadeInDuration + light.m_fadeDuration, light.m_ttl - saved);
+                }
+            }
+
+            foreach (TimedDestruction timed in template.GetComponentsInChildren<TimedDestruction>(true))
+            {
+                timed.m_timeout = Mathf.Max(1f, timed.m_timeout - saved);
+            }
+
+            return template;
+        }
+
+        private static float MaxDelay(ParticleSystem.MinMaxCurve curve)
+        {
+            switch (curve.mode)
+            {
+                case ParticleSystemCurveMode.Constant:
+                    return curve.constant;
+                case ParticleSystemCurveMode.TwoConstants:
+                    return curve.constantMax;
+                default:
+                    return curve.curveMultiplier;
+            }
         }
 
         private static GameObject FindPrefab(string name)

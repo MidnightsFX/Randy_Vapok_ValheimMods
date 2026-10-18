@@ -3,6 +3,7 @@ using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace EpicLoot
 {
@@ -29,6 +30,12 @@ namespace EpicLoot.MagicItemEffects
     // so Modify Elemental/Physical Damage and the all-damage effects scale it, the weapon tooltip shows it, and it
     // reaches every weapon hit (EpicLoot's own bonus hits never read GetDamage). It is computed on the attacker and
     // travels inside the hit.
+    //
+    // The look follows Leslie's Infusion (EpicLootLeslieAlphaTest). Every pour plays the Dundr staff's recharge, eitr
+    // channelled into the weapon, in full: no attack, block or roll until it ends, and a press made while it cannot
+    // start waits for it. A press without enough eitr shrugs. The HUD icon is the matching vanilla elemental sword's. While infused with the set sword in hand, the sword carries an aura on
+    // every client (EitrInfusionAura): a glow in the element's colour, the element's own particles and a light. The
+    // owner mirrors only the element to its player ZDO; each client draws the aura and plays its ignite sound itself.
     public static class EitrInfusion
     {
         public enum Element
@@ -66,6 +73,23 @@ namespace EpicLoot.MagicItemEffects
         private const string FallbackIconItem = "MeadEitrMinor";
         private const string TopUpSfx = "sfx_Potion_eitr_minor";
 
+        // The element each client draws on a player's sword, mirrored to the player ZDO: 0 for none, else the element
+        // + 1. Written only on change.
+        internal static readonly int AuraZdoHash = "el-einf".GetStableHashCode();
+        internal const int ElementCount = 4;
+
+        // The Dundr staff's recharge. Both of its states are minor actions, which refuse attacks and blocks.
+        private const string CastAnimation = "recharge_lightningstaff";
+        private const string CastDoneTrigger = CastAnimation + "_done";
+        private const float CastSeconds = 1f;
+        private const float PressBufferSeconds = 0.5f;  // how long a press waits to be castable, as vanilla queues attacks
+        private const string ShrugEmote = "shrug";
+
+        // Indexed by Element: the HUD icon's item, and the sound each client plays as the aura appears.
+        private static readonly string[] ElementIconItems = { null, "SwordDyrnwyn", "SwordMistwalker", "SwordNiedhoggLightning" };
+        private static readonly string[] IgniteSfx = { null, "sfx_FireAddFuel", "sfx_Frost_Start", "sfx_weapons_lightning_enable" };
+        private static readonly Sprite[] ElementIcons = new Sprite[ElementCount];
+
         private static StatusEffect _indicator;
         private static bool _iconMissingLogged;
         private static readonly HashSet<string> MissingFxLogged = new HashSet<string>();
@@ -89,6 +113,9 @@ namespace EpicLoot.MagicItemEffects
         private static bool _hasSet;
         private static float _infusedUntil;
         private static Element _element;
+        private static int _publishedAura = -1;
+        private static float _castUntil;                // 0 while not casting
+        private static float _pressedUntil;             // 0 when no press is waiting
 
         public static bool IsInfused => _owner != null && _owner == Player.m_localPlayer && Time.time < _infusedUntil;
 
@@ -107,6 +134,9 @@ namespace EpicLoot.MagicItemEffects
             _hasSet = false;
             _infusedUntil = 0f;
             _element = Element.None;
+            _publishedAura = -1;
+            _castUntil = 0f;
+            _pressedUntil = 0f;
         }
 
         private static bool CanShowHint(Player player)
@@ -132,6 +162,14 @@ namespace EpicLoot.MagicItemEffects
             SyncOwner(player);
             _hasSet = player.HasActiveMagicEffect(MagicEffectType.EitrInfusion, out float _);
 
+            HandleKey(player);
+            RunPendingPress(player);
+            UpdateCast(player);
+            PublishAura(player);
+        }
+
+        private static void HandleKey(Player player)
+        {
             var key = Bound(ELConfig.EitrInfusionKey);
             var button = Bound(ELConfig.EitrInfusionGamepadButton);
             bool keyDown = KeyDown(key);
@@ -150,7 +188,44 @@ namespace EpicLoot.MagicItemEffects
                 OverwhelmingLaunch.ConsumeKey(button, refresh: true);
             }
 
+            _pressedUntil = Time.time + PressBufferSeconds;
+        }
+
+        // Every pour comes with the full cast, so a press made mid-swing, mid-roll or mid-stagger waits for the wearer
+        // to be free, and is dropped if that takes longer than the buffer.
+        private static void RunPendingPress(Player player)
+        {
+            if (_pressedUntil <= 0f)
+            {
+                return;
+            }
+
+            if (Time.time > _pressedUntil || !_hasSet || player.IsDead())
+            {
+                _pressedUntil = 0f;
+                return;
+            }
+
+            if (!CanCast(player))
+            {
+                return;
+            }
+
+            _pressedUntil = 0f;
             TryInfuse(player);
+        }
+
+        // A block does not stop it: the cast drops the guard, as the staff's own recharge does. A cast already
+        // running takes a further pour, which lengthens it.
+        private static bool CanCast(Player player)
+        {
+            if (_castUntil > 0f)
+            {
+                return true;
+            }
+
+            return player.m_zanim != null && !player.InAttack() && !player.InDodge() && !player.IsStaggering() &&
+                !player.InMinorAction() && !player.IsAttached() && !player.IsSwimming();
         }
 
         // Keys whose vanilla action is read in the fixed step (attack, block, jump -- mostly a concern for the gamepad
@@ -192,6 +267,12 @@ namespace EpicLoot.MagicItemEffects
                 {
                     player.Message(MessageHud.MessageType.Center,
                         Localization.instance.Localize("$mod_epicloot_eitrinfusion_noeitr", MinEitr.ToString("0")));
+
+                    // Standing still only: vanilla stops an emote as soon as you move.
+                    if (player.m_moveDir == Vector3.zero)
+                    {
+                        player.StartEmote(ShrugEmote);
+                    }
                 }
                 return;
             }
@@ -228,6 +309,7 @@ namespace EpicLoot.MagicItemEffects
             }
             // Also on a top-up, in case something cleared the indicator while the infusion ran on.
             ShowIndicator(player);
+            StartCast(player);
 
             EpicLoot.Log($"[EitrInfusion] {(infused ? "Topped up" : "Started")} with {seconds * perSecond:0.#} eitr: +{seconds:0.#} s " +
                 $"({SecondsLeft:0.#} s left), element {_element}.");
@@ -256,6 +338,91 @@ namespace EpicLoot.MagicItemEffects
         private static void PauseEitrRegen(Player player)
         {
             player.m_eitrRegenTimer = Mathf.Max(player.m_eitrRegenTimer, player.m_eitrRegenDelay);
+        }
+
+        // Only reached through CanCast. ZSyncAnimation carries it to every client. The wearer is committed: nothing
+        // ends it early, and while it plays vanilla refuses attacks and blocks, and Player_UpdateDodge_Patch holds back
+        // rolls. Walking and jumping stay free, as in the staff's own recharge.
+        private static void StartCast(Player player)
+        {
+            if (_castUntil > 0f)
+            {
+                _castUntil = Time.time + CastSeconds;
+                return;
+            }
+
+            if (player.InEmote())
+            {
+                player.StopEmote();
+            }
+
+            player.m_zanim.SetBool(CastAnimation, true);
+            _castUntil = Time.time + CastSeconds;
+        }
+
+        // Ends the cast on time, with vanilla's finishing pose. An attack or roll pressed in its last half second is
+        // still in vanilla's queue and comes out after it.
+        private static void UpdateCast(Player player)
+        {
+            if (_castUntil <= 0f || Time.time < _castUntil)
+            {
+                return;
+            }
+
+            _castUntil = 0f;
+            player.m_zanim.SetBool(CastAnimation, false);
+            if (!player.IsDead())
+            {
+                player.m_zanim.SetTrigger(CastDoneTrigger);
+            }
+        }
+
+        // Written only on change, so the ZDO revision moves once per change rather than every frame.
+        private static void PublishAura(Player player)
+        {
+            int aura = IsInfused && _hasSet ? (int)_element + 1 : 0;
+            if (aura == _publishedAura)
+            {
+                return;
+            }
+
+            ZDO zdo = player.m_nview != null && player.m_nview.IsValid() ? player.m_nview.GetZDO() : null;
+            if (zdo == null)
+            {
+                return;
+            }
+
+            _publishedAura = aura;
+            zdo.Set(AuraZdoHash, aura);
+        }
+
+        // Each client's own copy (LocalFx), as the aura appears there; some of these have no ZNetView to share.
+        internal static void PlayIgnite(Element element, Vector3 position)
+        {
+            string name = IgniteSfx[(int)element];
+            GameObject prefab = name != null ? FindFxPrefab(name) : null;
+            if (prefab != null)
+            {
+                LocalFx.Spawn(prefab, position, Quaternion.identity);
+            }
+        }
+
+        // World load (SetEffectWarmup): the aura templates and the local copies of the ignite sounds.
+        internal static void WarmupAtLoad(bool drawn)
+        {
+            if (!drawn)
+            {
+                return;
+            }
+
+            EitrInfusionAura.BuildTemplates();
+            foreach (string name in IgniteSfx)
+            {
+                if (name != null)
+                {
+                    LocalFx.Prewarm(FindFxPrefab(name), scaled: false);
+                }
+            }
         }
 
         // Called from ModifyDamage.ApplyMagicDamageModifiers, after the added damage and before the multipliers.
@@ -319,7 +486,7 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
-        // AddStatusEffect clones the prototype; the copy's name carries the locked element for the HUD.
+        // AddStatusEffect clones the prototype; the copy's name and icon carry the locked element for the HUD.
         private static void ShowIndicator(Player player)
         {
             SEMan seMan = player.GetSEMan();
@@ -338,7 +505,24 @@ namespace EpicLoot.MagicItemEffects
             if (added != null)
             {
                 added.m_name = IndicatorToken(_element);
+                Sprite icon = GetElementIcon(_element);
+                if (icon != null)
+                {
+                    added.m_icon = icon;
+                }
             }
+        }
+
+        // The matching vanilla elemental sword's icon; null for plain eitr, which keeps the indicator's own.
+        private static Sprite GetElementIcon(Element element)
+        {
+            int index = (int)element;
+            if (ElementIcons[index] == null && ElementIconItems[index] != null)
+            {
+                ElementIcons[index] = ObjectDB.instance?.GetItemPrefab(ElementIconItems[index])?.GetComponent<ItemDrop>()?
+                    .m_itemData.GetIcon();
+            }
+            return ElementIcons[index];
         }
 
         private static string IndicatorToken(Element element)
@@ -353,8 +537,8 @@ namespace EpicLoot.MagicItemEffects
         }
 
         // A null icon would render as an invisible HUD entry, so a missing icon logs once and shows nothing. The eitr
-        // mead's own start effects (attached glow and sound, both networked) play on the wearer when it is added, and
-        // vanilla removes them when it ends.
+        // mead's start sound (networked) plays on the wearer when it is added. Its potion swirl is left out: the cast
+        // and the blade aura already show the infusion.
         private static StatusEffect GetOrCreateIndicator()
         {
             if (_indicator != null)
@@ -382,7 +566,6 @@ namespace EpicLoot.MagicItemEffects
             se.m_ttl = 0f;      // never expires on its own; IsDone removes it
 
             var startEffects = new List<EffectList.EffectData>();
-            AddEffect(startEffects, "vfx_Potion_eitr_minor", attach: true);
             AddEffect(startEffects, "sfx_Potion_eitr_minor", attach: false);
             if (startEffects.Count > 0)
             {
@@ -434,6 +617,20 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
+        // Every player on every client carries the aura; a headless server draws nothing.
+        [HarmonyPatch(typeof(Player), nameof(Player.Awake))]
+        private static class Player_Awake_Patch
+        {
+            [HarmonyPostfix]
+            private static void Postfix(Player __instance)
+            {
+                if (SystemInfo.graphicsDeviceType != GraphicsDeviceType.Null)
+                {
+                    __instance.gameObject.AddComponent<EitrInfusionAura>();
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.FixedUpdate))]
         private static class PlayerController_FixedUpdate_Patch
         {
@@ -444,6 +641,33 @@ namespace EpicLoot.MagicItemEffects
                 if (player != null && player == Player.m_localPlayer)
                 {
                     OnLocalPlayerFixedUpdate(player);
+                }
+            }
+        }
+
+        // No roll starts during the cast. Vanilla starts a queued roll only while its timer is above zero, so the timer is
+        // hidden from it for the step and then given back, still counting down: the rest of UpdateDodge (dodge
+        // invincibility, the end of a roll) runs as usual, and a roll pressed late in the cast comes out after it.
+        [HarmonyPatch(typeof(Player), nameof(Player.UpdateDodge))]
+        private static class Player_UpdateDodge_Patch
+        {
+            [HarmonyPrefix]
+            private static void Prefix(Player __instance, out float __state)
+            {
+                __state = float.NaN;
+                if (_castUntil > 0f && ReferenceEquals(__instance, _owner))
+                {
+                    __state = __instance.m_queuedDodgeTimer;
+                    __instance.m_queuedDodgeTimer = 0f;
+                }
+            }
+
+            [HarmonyPostfix]
+            private static void Postfix(Player __instance, float dt, float __state)
+            {
+                if (!float.IsNaN(__state))
+                {
+                    __instance.m_queuedDodgeTimer = __state - dt;
                 }
             }
         }
@@ -481,6 +705,190 @@ namespace EpicLoot.MagicItemEffects
         public override bool IsDone()
         {
             return !EitrInfusion.IsInfused;
+        }
+    }
+
+    // The infused sword as every client sees it, on every player: from the element the owner mirrors to its ZDO, an
+    // aura on the hand model of the weapon in hand. A re-equip makes a new hand model, so the aura is rebuilt on it, and
+    // when the infusion ends it fades (AuraFade). The ignite sound plays as the aura appears, except for an infusion
+    // already running when this client first sees the player.
+    //
+    // An aura is a glow in the element's colour, the element's own particles and a light, copied from vanilla prefabs
+    // into one inactive template per element at load and fitted to the weapon by WeaponAuraKit.
+    public class EitrInfusionAura : MonoBehaviour
+    {
+        private const float FadeSeconds = 3f;          // the longest particle lifetime here, so a fade cuts none off
+        private const float QuietSeconds = 1f;         // an infusion seen this soon after the component starts is old
+
+        // Indexed by EitrInfusion.Element.
+        private static readonly Color[] Colors =
+        {
+            new Color(0.55f, 0.4f, 1f),                // eitr
+            new Color(1f, 0.5f, 0.15f),                // fire
+            new Color(0.45f, 0.85f, 1f),               // frost, Mistwalker's blue
+            new Color(0.6f, 0.7f, 1f),                 // lightning
+        };
+        private static readonly float[] LightIntensities = { 0.8f, 1.2f, 0.8f, 1f };
+        private const float LightRange = 3f;
+
+        // The glow: the upgrade glow's particles, recoloured and sized like Mistwalker's frost.
+        private const float GlowMinSize = 0.1f;
+        private const float GlowMaxSize = 0.28f;
+        private const float GlowAlpha = 0.3f;
+        private const float GlowRate = 40f;
+        private const float EitrGlowRate = 70f;        // plain eitr has no other particles, so its glow is denser
+
+        // The element's own particles, from Leslie's sources: the particle systems under Branch in Prefab (all but the
+        // prefab root's own when Branch is null), sized by Scale. The first source found is used. Fire prefers
+        // Dyrnwyn's blade flames, which are the torch's flames laid along a sword.
+        private struct AccentSource
+        {
+            public readonly string Prefab;
+            public readonly string Branch;
+            public readonly float Scale;
+
+            public AccentSource(string prefab, string branch, float scale)
+            {
+                Prefab = prefab;
+                Branch = branch;
+                Scale = scale;
+            }
+        }
+
+        private static readonly AccentSource[][] Accents =
+        {
+            new AccentSource[0],
+            new[] { new AccentSource("SwordDyrnwyn", "Burny vfx", 1f), new AccentSource("Torch", "fx_Torch_Carried", 0.6f) },
+            new[] { new AccentSource("vfx_Freezing", null, 0.3f) },
+            new[] { new AccentSource("fx_Lightning", null, 0.3f) },
+        };
+
+        private static GameObject _templateRoot;
+        private static readonly GameObject[] Templates = new GameObject[EitrInfusion.ElementCount];
+
+        private Player _player;
+        private int _shown;
+        private GameObject _weapon;
+        private GameObject _aura;
+        private float _startTime;
+
+        private void Awake()
+        {
+            _player = GetComponent<Player>();
+            _startTime = Time.time;
+        }
+
+        private void LateUpdate()
+        {
+            int state = GetState();
+            Transform hand = null;
+            GameObject weapon = state > 0 ? WeaponAuraKit.GetWeaponModel(_player.m_visEquipment, out hand) : null;
+            if (state == _shown && weapon == _weapon)
+            {
+                return;
+            }
+
+            var element = (EitrInfusion.Element)(state - 1);
+            bool ignite = state > 0 && state != _shown && Time.time - _startTime >= QuietSeconds;
+            _shown = state;
+            _weapon = weapon;
+
+            if (_aura != null)
+            {
+                _aura.AddComponent<AuraFade>().Begin(FadeSeconds);
+            }
+            _aura = weapon != null ? Attach(weapon, hand, element) : null;
+
+            if (ignite)
+            {
+                EitrInfusion.PlayIgnite(element, weapon != null ? weapon.transform.position : _player.GetCenterPoint());
+            }
+        }
+
+        // The main-menu preview player has no ZDO, so it never shows an aura.
+        private int GetState()
+        {
+            ZDO zdo = _player != null && _player.m_nview != null ? _player.m_nview.GetZDO() : null;
+            if (zdo == null || _player.IsDead())
+            {
+                return 0;
+            }
+
+            int state = zdo.GetInt(EitrInfusion.AuraZdoHash);
+            return state > 0 && state <= EitrInfusion.ElementCount ? state : 0;
+        }
+
+        // World load (SetEffectWarmup), or the first aura should that have failed. Vanilla prefabs don't change, so the
+        // templates are kept for the session.
+        internal static void BuildTemplates()
+        {
+            if (_templateRoot != null || ZNetScene.instance == null)
+            {
+                return;
+            }
+
+            _templateRoot = new GameObject("EL_EitrInfusionAuras");
+            _templateRoot.SetActive(false);
+            DontDestroyOnLoad(_templateRoot);
+
+            ParticleSystem glow = WeaponAuraKit.FindGlowSource();
+            if (glow == null)
+            {
+                EpicLoot.LogWarning("[EitrInfusion] found no weapon with an upgrade glow to copy; auras show without one.");
+            }
+
+            for (int i = 0; i < Templates.Length; i++)
+            {
+                Templates[i] = BuildTemplate((EitrInfusion.Element)i, glow);
+            }
+        }
+
+        // Root, then a frame placed where the weapon's emitter is, holding the particle systems and the light. Inactive,
+        // so a copy is fitted to its weapon before any of it plays.
+        private static GameObject BuildTemplate(EitrInfusion.Element element, ParticleSystem glowSource)
+        {
+            int index = (int)element;
+            Transform frame = WeaponAuraKit.NewTemplate(_templateRoot.transform, $"EL_EitrInfusionAura_{element}", out GameObject root);
+
+            if (glowSource != null)
+            {
+                WeaponAuraKit.AddGlow(glowSource, frame, Colors[index], GlowAlpha, GlowMinSize, GlowMaxSize,
+                    element == EitrInfusion.Element.None ? EitrGlowRate : GlowRate);
+            }
+
+            bool accented = Accents[index].Length == 0;
+            foreach (AccentSource source in Accents[index])
+            {
+                if (CopyAccent(source, frame))
+                {
+                    accented = true;
+                    break;
+                }
+            }
+            if (!accented)
+            {
+                EpicLoot.LogWarning($"[EitrInfusion] found none of the {element} aura's particles; it shows the glow only.");
+            }
+
+            WeaponAuraKit.AddLight(frame, Colors[index], LightIntensities[index], LightRange);
+
+            root.SetActive(false);
+            return root;
+        }
+
+        // Lifetimes are kept as they are: Dyrnwyn's flare is one long-lived particle, which AuraFade clears instead.
+        private static bool CopyAccent(AccentSource source, Transform frame)
+        {
+            GameObject prefab = WeaponAuraKit.FindPrefab(source.Prefab);
+            Transform branch = prefab == null ? null : source.Branch == null ? prefab.transform : WeaponAuraKit.FindDeep(prefab.transform, source.Branch);
+            return WeaponAuraKit.CopyBranch(branch, frame, source.Scale, includeRoot: false, clampLifetime: false).Count > 0;
+        }
+
+        private static GameObject Attach(GameObject weapon, Transform hand, EitrInfusion.Element element)
+        {
+            BuildTemplates();
+            GameObject template = Templates[(int)element];
+            return template != null ? WeaponAuraKit.AttachFitted(template, weapon, hand) : null;
         }
     }
 }

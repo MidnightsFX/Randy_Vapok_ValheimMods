@@ -406,11 +406,11 @@ namespace EpicLoot
         }
 
         /// <summary>
-        /// A drop's ItemData made from its prefab without instantiating it: the clone and m_dropPrefab
-        /// vanilla's DropTable gives chest contents, plus the ItemData half of what EpicLoot's
+        /// A drop's ItemData made from its prefab without instantiating it: the clone, m_dropPrefab and
+        /// world level vanilla's DropTable gives chest contents, plus the ItemData half of what EpicLoot's
         /// ItemDrop.Awake postfixes do to a spawned drop, since no Awake runs here.
         /// </summary>
-        private static ItemDrop.ItemData CreateLootItemData(GameObject prefab)
+        internal static ItemDrop.ItemData CreateLootItemData(GameObject prefab)
         {
             var prefabDrop = prefab.GetComponent<ItemDrop>();
             if (prefabDrop == null || prefabDrop.m_itemData == null)
@@ -420,6 +420,9 @@ namespace EpicLoot
 
             var itemData = prefabDrop.m_itemData.Clone();
             itemData.m_dropPrefab = prefab;
+            // The prefab's copy keeps the world level it was built with, not this world's, and items of
+            // different world levels never stack together.
+            itemData.m_worldLevel = Game.m_worldLevel;
             itemData.InitializeCustomData();
             Crafting.ItemDrop_Awake_Patch.InitializeItemData(itemData, out _);
             return itemData;

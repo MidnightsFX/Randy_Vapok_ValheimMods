@@ -17,13 +17,15 @@ namespace EpicLoot.MagicItemEffects
 {
     // HelsHarvest (4-piece Hel's Covenant set bonus, NoRoll). While the set staff is in hand, a creature killed by the
     // wearer or by one of the wearer's summons rises at its corpse as a thrall: a friendly skeleton that follows and
-    // fights for Lifetime seconds, stronger with the wearer's Blood Magic skill (as Dead Raiser's skeletons are). At
-    // most the effect value are up at once; a new one makes the oldest crumble. A thrall's own kills raise more.
+    // fights for Lifetime seconds, at the star level of the creature it rose from and stronger with the wearer's Blood
+    // Magic skill (as Dead Raiser's skeletons are). At most the effect value are up at once; a new one makes the oldest
+    // crumble. A thrall's own kills raise more.
     //
     // Who made the kill is only known where the victim dies: OnDeath runs on the victim's owner, which may be another
     // client or the dedicated server, and m_lastHit is only set there. So a Character.OnDeath prefix on the owner works
     // out the credited player -- the attacker itself, or the player whose summon it was -- and sends that player's own
-    // client an RPC, which raises the thrall there, so the thralls are always owned by the player they follow. A player
+    // client an RPC with the corpse's place and level, which raises the thrall there, so the thralls are always owned by
+    // the player they follow. A player
     // whose client has the full set says so in a ZDO flag, so kills by anyone else cost no RPC.
     //
     // A summon's owner is recorded on its ZDO ("el-sumby") when a staff spawns it (SpawnAbility.SetupAoe, called once
@@ -59,7 +61,7 @@ namespace EpicLoot.MagicItemEffects
         private const string RaiseRpc = "el-helraise";
 
         // StarLevelSystem's own keys (common/DataObjects.cs), written as bools before Instantiate, as SpiritAnimal does:
-        // they keep its spawn multiplication from cloning a thrall and its levelling from changing one.
+        // they keep its spawn multiplication from cloning a thrall and its levelling from changing the level it rose with.
         private static readonly int SlsSpawnMultHash = "SLS_MULT".GetStableHashCode();
         private static readonly int SlsSpawnManagedHash = "SLS_EXTMGD".GetStableHashCode();
         private static readonly int SlsNoSleepHash = "SLS_NOSLEEP".GetStableHashCode();
@@ -81,6 +83,7 @@ namespace EpicLoot.MagicItemEffects
         {
             public Vector3 Position;
             public float Yaw;
+            public int Level;
             public float Time;
         }
         private static readonly List<RaiseRequest> PendingRaises = new List<RaiseRequest>();
@@ -141,7 +144,7 @@ namespace EpicLoot.MagicItemEffects
 
             Vector3 position = victim.transform.position;
             float yaw = victim.transform.rotation.eulerAngles.y;
-            credited.m_nview.InvokeRPC(RaiseRpc, position, yaw);
+            credited.m_nview.InvokeRPC(RaiseRpc, position, yaw, victim.GetLevel());
         }
 
         private static Player SummonerOf(Character summon)
@@ -183,7 +186,7 @@ namespace EpicLoot.MagicItemEffects
         }
 
         // The credited player's own client: queued, and raised from Player.Update (ProcessRaises).
-        private static void OnRaiseRpc(Player player, Vector3 position, float yaw)
+        private static void OnRaiseRpc(Player player, Vector3 position, float yaw, int level)
         {
             if (player != Player.m_localPlayer || player.IsDead() ||
                 !player.HasActiveMagicEffect(MagicEffectType.HelsHarvest, out float value))
@@ -192,7 +195,7 @@ namespace EpicLoot.MagicItemEffects
             }
 
             SyncOwner(player);
-            PendingRaises.Add(new RaiseRequest { Position = position, Yaw = yaw, Time = Time.time });
+            PendingRaises.Add(new RaiseRequest { Position = position, Yaw = yaw, Level = level, Time = Time.time });
             int cap = Mathf.Max(1, Mathf.RoundToInt(value));
             if (PendingRaises.Count > cap)
             {
@@ -216,10 +219,10 @@ namespace EpicLoot.MagicItemEffects
             }
 
             _nextRaiseAt = Time.time + RaiseInterval;
-            Raise(player, request.Position, request.Yaw, value);
+            Raise(player, request.Position, request.Yaw, request.Level, value);
         }
 
-        private static void Raise(Player player, Vector3 position, float yaw, float value)
+        private static void Raise(Player player, Vector3 position, float yaw, int level, float value)
         {
             Thralls.RemoveAll(thrall => thrall == null || thrall.IsDead());
             int cap = Mathf.Max(1, Mathf.RoundToInt(value));
@@ -253,7 +256,7 @@ namespace EpicLoot.MagicItemEffects
             Character thrall = null;
             try
             {
-                thrall = Spawn(prefab, position, Quaternion.Euler(0f, yaw, 0f), player);
+                thrall = Spawn(prefab, position, Quaternion.Euler(0f, yaw, 0f), player, level);
             }
             catch (Exception e)
             {
@@ -271,7 +274,7 @@ namespace EpicLoot.MagicItemEffects
             {
                 Object.Instantiate(fx, position, Quaternion.identity);
             }
-            EpicLoot.Log($"[HelsHarvest] A thrall rises ({Thralls.Count}/{cap}).");
+            EpicLoot.Log($"[HelsHarvest] A level {thrall.GetLevel()} thrall rises ({Thralls.Count}/{cap}).");
         }
 
         // A thrall is always owned by the client that raised it, so it is killed here, as its own timer would.
@@ -291,7 +294,8 @@ namespace EpicLoot.MagicItemEffects
         }
 
         // ZNetView.Awake's new-object branch, with the data written before Instantiate as ZNetScene.CreateObject does.
-        private static Character Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Player player)
+        // The level is read in Character.Awake, so health, damage and the star visuals all follow it.
+        private static Character Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Player player, int level)
         {
             var prefabView = prefab.GetComponent<ZNetView>();
             int hash = prefab.name.GetStableHashCode();
@@ -303,7 +307,7 @@ namespace EpicLoot.MagicItemEffects
             zdo.SetPrefab(hash);          // before Instantiate: an unset prefab reads as an invalid ZDO
             zdo.SetRotation(rotation);
 
-            zdo.Set(ZDOVars.s_level, 1);
+            zdo.Set(ZDOVars.s_level, Mathf.Max(1, level));
             zdo.Set(ZDOVars.s_tamed, true);
             zdo.Set(ZDOVars.s_sleeping, false);
             zdo.Set(ZDOVars.s_despawnInDay, false);
@@ -497,8 +501,8 @@ namespace EpicLoot.MagicItemEffects
             [HarmonyPostfix]
             private static void Postfix(Player __instance)
             {
-                __instance.m_nview?.Register<Vector3, float>(RaiseRpc,
-                    (sender, position, yaw) => OnRaiseRpc(__instance, position, yaw));
+                __instance.m_nview?.Register<Vector3, float, int>(RaiseRpc,
+                    (sender, position, yaw, level) => OnRaiseRpc(__instance, position, yaw, level));
             }
         }
     }

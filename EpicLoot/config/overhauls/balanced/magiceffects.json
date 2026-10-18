@@ -7582,7 +7582,8 @@
         "HangTime": 0.2,
         "Radius": 4,
         "StaggerMultiplier": 2,
-        "CostScale": 3
+        "CostScale": 3,
+        "ThrowAnimationSpeed": 1.3
       }
     },
     {
@@ -7708,16 +7709,17 @@
       "CanBeDisenchanted": false,
       "CanBeRunified": false,
       "ValuesPerRarity": {
-        "Magic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
-        "Rare": { "MinValue": 30, "MaxValue": 30, "Increment": 1 },
-        "Epic": { "MinValue": 35, "MaxValue": 35, "Increment": 1 },
-        "Legendary": { "MinValue": 40, "MaxValue": 40, "Increment": 1 },
-        "Mythic": { "MinValue": 45, "MaxValue": 45, "Increment": 1 },
-        "Ancient": { "MinValue": 50, "MaxValue": 50, "Increment": 1 }
+        "Magic": { "MinValue": 0.5, "MaxValue": 0.5, "Increment": 0.1 },
+        "Rare": { "MinValue": 0.6, "MaxValue": 0.6, "Increment": 0.1 },
+        "Epic": { "MinValue": 0.7, "MaxValue": 0.7, "Increment": 0.1 },
+        "Legendary": { "MinValue": 0.8, "MaxValue": 0.8, "Increment": 0.1 },
+        "Mythic": { "MinValue": 1, "MaxValue": 1, "Increment": 0.1 },
+        "Ancient": { "MinValue": 1.2, "MaxValue": 1.2, "Increment": 0.1 }
       },
       "Config": {
-        "SpeedPerValue": 0.05,
-        "DrawTimePerValue": 0.05
+        "SpeedBonusPerValue": 1.25,
+        "DrawTimeBonusPerValue": 1.25,
+        "MinDistance": 15
       }
     },
     {
@@ -7790,6 +7792,7 @@
         "FallPerRadiusMetre": 15,
         "MaxRadius": 0,
         "MinHeight": 3,
+        "LowDivePenalty": 50,
         "StaminaCost": 25,
         "DiveSpeed": 30,
         "MinDiveAngle": 45,
@@ -7902,16 +7905,17 @@
       "CanBeDisenchanted": false,
       "CanBeRunified": false,
       "ValuesPerRarity": {
-        "Magic": { "MinValue": 0.7, "MaxValue": 0.7, "Increment": 0.1 },
-        "Rare": { "MinValue": 0.8, "MaxValue": 0.8, "Increment": 0.1 },
-        "Epic": { "MinValue": 0.9, "MaxValue": 0.9, "Increment": 0.1 },
-        "Legendary": { "MinValue": 1, "MaxValue": 1, "Increment": 0.1 },
-        "Mythic": { "MinValue": 1.1, "MaxValue": 1.1, "Increment": 0.1 },
-        "Ancient": { "MinValue": 1.2, "MaxValue": 1.2, "Increment": 0.1 }
+        "Magic": { "MinValue": 10, "MaxValue": 10, "Increment": 1 },
+        "Rare": { "MinValue": 15, "MaxValue": 15, "Increment": 1 },
+        "Epic": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
+        "Legendary": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
+        "Mythic": { "MinValue": 30, "MaxValue": 30, "Increment": 1 },
+        "Ancient": { "MinValue": 35, "MaxValue": 35, "Increment": 1 }
       },
       "Config": {
         "Cooldown": 5,
-        "MinEitr": 5
+        "MinEitr": 5,
+        "DamagePerEitr": 1
       }
     },
     {
@@ -8110,6 +8114,51 @@
         "StaggerMultiplier": 2,
         "MaxStepRise": 2.5,
         "FxScale": 0.5
+      }
+    },
+    {
+      "Type": "ShieldThrow",
+      "DisplayText": "$mod_epicloot_set_me_shieldthrow",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Legendary": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
+        "Mythic": { "MinValue": 125, "MaxValue": 125, "Increment": 1 },
+        "Ancient": { "MinValue": 150, "MaxValue": 150, "Increment": 1 }
+      },
+      "Config": {
+        "MaxDistance": 15,
+        "ProjectileSpeed": 30,
+        "HangTime": 0.1,
+        "ThrowAnimationSpeed": 1.3,
+        "StaggerMultiplier": 1.5,
+        "HitRadius": 0.75,
+        "StaminaCost": 20,
+        "MaxGaugeBonusPercent": 300,
+        "GaugeCapacity": 5,
+        "GaugeDecayDelay": 10,
+        "GaugeDecayRate": 20,
+        "PushForce": 40
+      }
+    },
+    {
+      "Type": "ReduceStaggerTaken",
+      "DisplayText": "$mod_epicloot_me_reducestaggertaken_display",
+      "Description": "$mod_epicloot_me_reducestaggertaken_desc",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Legendary": { "MinValue": 30, "MaxValue": 30, "Increment": 1 },
+        "Mythic": { "MinValue": 30, "MaxValue": 30, "Increment": 1 },
+        "Ancient": { "MinValue": 30, "MaxValue": 30, "Increment": 1 }
       }
     }
   ]

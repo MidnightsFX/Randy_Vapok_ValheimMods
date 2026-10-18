@@ -110,8 +110,7 @@ namespace EpicLoot
 
                 if (__instance == Player.m_localPlayer)
                 {
-                    SetAura.Publish(__instance);
-                    SetArmorTint.Publish(__instance);
+                    SetLooks.Publish(__instance);
                 }
 
                 if (__instance != null && __instance != Player.m_localPlayer &&
@@ -245,8 +244,7 @@ namespace EpicLoot
                 {
                     EquipmentEffectCache.Reset(player);
                     UpdateRichesAndLuck(player);
-                    SetAura.Publish(player);
-                    SetArmorTint.Publish(player);
+                    SetLooks.Publish(player);
                 }
             }
 
@@ -258,8 +256,7 @@ namespace EpicLoot
                 {
                     EquipmentEffectCache.Reset(player);
                     UpdateRichesAndLuck(player);
-                    SetAura.Publish(player);
-                    SetArmorTint.Publish(player);
+                    SetLooks.Publish(player);
                 }
             }
 

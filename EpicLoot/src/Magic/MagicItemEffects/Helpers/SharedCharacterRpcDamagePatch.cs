@@ -13,8 +13,9 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
     //    ModifyResistance reduces it (previously done with Priority.High).
     //  * The postfix runs the on-damage-taken reactions (slow, adrenaline, boss retributions), for hits that
     //    landed: not for one AvoidDamageTaken cancelled, nor one vanilla discards itself.
-    //  * The resource-spending mitigations (EitrBarrier, EitrShield, Coinplated) and AutoMeads are not here: they run from
-    //    SharedPlayerPostArmorDamagePatch below, once the hit has been through the bubble, block and armor.
+    //  * The resource-spending mitigations (EitrShield, Coinplated) and AutoMeads are not here: they run from
+    //    SharedPlayerPostArmorDamagePatch below, once the hit has been through the bubble, block and armor. The Eitr
+    //    Barrier set bonus is not here either: like vanilla's bubble, its status effect takes its share of the raw hit.
     //
     // The prefix runs before vanilla's own checks, so it first asks whether vanilla will discard the hit
     // (WillLand) -- otherwise a dodged hit, one from a despawned attacker or a PvP-off hit still spent
@@ -130,9 +131,8 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
                 return;
             }
 
-            // The Eitr Barrier set bonus takes the hit from eitr before anything else does; EitrShield then covers its
-            // share of whatever the barrier could not, so eitr is drained before the purse.
-            EitrBarrier.ModifyIncoming(__instance, hit);
+            // EitrShield covers its share before Coinplated, so eitr is drained before the purse. (The Eitr Barrier set
+            // bonus already took its share of the raw hit, from SE_EitrBarrier.OnDamaged.)
             EitrShield.ModifyIncoming(__instance, hit);
             Coinplated.ModifyIncoming(__instance, hit);
             // Last: it judges the damage that will actually land.

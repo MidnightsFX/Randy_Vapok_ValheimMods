@@ -28,6 +28,10 @@ namespace EpicLoot.MagicItemEffects
     // animation, facing, stamina check and in-attack lockout. Its trigger is intercepted: nothing is fired, the
     // landing point is picked and the slam is scheduled, and the slam itself runs on this client like vanilla's
     // own area attack (Character.Damage routes each hit to the target's owner).
+    //
+    // The throw cuts a swing short: pressed mid-attack, it stops that attack and goes straight into the throw
+    // animation, which plays ThrowAnimationSpeed times as fast as vanilla's (on every client, since the animator's
+    // speed is synced).
     public static class OverwhelmingLaunch
     {
         // All tunable in this effect's Config block in magiceffects.json, under these key names.
@@ -37,6 +41,7 @@ namespace EpicLoot.MagicItemEffects
         public const float DefaultRadius = 4f;             // the Demolisher slam's m_attackRayWidth
         public const float DefaultStaggerMultiplier = 2f;  // the Demolisher slam's m_staggerMultiplier
         public const float DefaultCostScale = 3f;          // times the weapon's primary attack cost
+        public const float DefaultThrowAnimationSpeed = 1.3f;  // times vanilla's spear throw
 
         private const string MaxDistanceKey = "MaxDistance";
         private const string ProjectileSpeedKey = "ProjectileSpeed";
@@ -44,9 +49,15 @@ namespace EpicLoot.MagicItemEffects
         private const string RadiusKey = "Radius";
         private const string StaggerMultiplierKey = "StaggerMultiplier";
         private const string CostScaleKey = "CostScale";
+        private const string ThrowAnimationSpeedKey = "ThrowAnimationSpeed";
 
         private const string ThrowAttackItem = "SpearFlint";
         private const string SlamEffectItem = "SledgeDemolisher";
+
+        // The player animator's state for the spear throw (an Any State transition on the "spear_throw" trigger), and
+        // how long the cut from an interrupted swing into it takes: the trigger's own transition time.
+        private static readonly int ThrowStateHash = Animator.StringToHash("spear_throw");
+        private const float InterruptCrossFade = 0.1f;
 
         // The Demolisher slam's trigger effects (SledgeDemolisher's m_shared.m_triggerEffect), by prefab name.
         private static readonly string[] SlamEffectPrefabs = { "fx_swing_camshake", "fx_sledge_demolisher_hit" };
@@ -58,6 +69,7 @@ namespace EpicLoot.MagicItemEffects
         private static float Radius => Mathf.Max(0.5f, EffectConfig.Get(MagicEffectType.OverwhelmingLaunch, RadiusKey, DefaultRadius));
         private static float StaggerMultiplier => Mathf.Max(0f, EffectConfig.Get(MagicEffectType.OverwhelmingLaunch, StaggerMultiplierKey, DefaultStaggerMultiplier));
         private static float CostScale => Mathf.Max(0f, EffectConfig.Get(MagicEffectType.OverwhelmingLaunch, CostScaleKey, DefaultCostScale));
+        private static float ThrowAnimationSpeed => EffectConfig.GetClamped(MagicEffectType.OverwhelmingLaunch, ThrowAnimationSpeedKey, DefaultThrowAnimationSpeed, 0.25f, 4f);
 
         // Tooltip: "... weapon damage +{0}% ... Costs {1}x a normal attack" -- {1} follows a retune of CostScale.
         public static void RegisterDisplayValues()
@@ -76,6 +88,7 @@ namespace EpicLoot.MagicItemEffects
         // State for the local player only; SyncOwner drops it when the local player changes (respawn, logout).
         private static Player _owner;
         private static Attack _launchAttack;       // the windup, from Attack.Start until its trigger
+        private static Attack _throwAttack;        // the same attack, kept for its whole animation (the speed-up)
         private static ItemDrop.ItemData _inFlightWeapon;
         private static float _inFlightUntil;
         private static PendingSlam _pendingSlam;
@@ -105,6 +118,7 @@ namespace EpicLoot.MagicItemEffects
 
             _owner = player;
             _launchAttack = null;
+            _throwAttack = null;
             _inFlightWeapon = null;
             _inFlightUntil = 0f;
             _pendingSlam = null;
@@ -285,13 +299,16 @@ namespace EpicLoot.MagicItemEffects
         private static void TryStartLaunch(Player player, ItemDrop.ItemData weapon)
         {
             // One launch at a time, even with another weapon swapped in: the state holds a single flight and slam.
-            if (_pendingSlam != null || Time.time < _inFlightUntil ||
-                player.InAttack() || player.InDodge() || !player.CanMove() ||
+            // Any other attack in progress is cut short.
+            if (_pendingSlam != null || Time.time < _inFlightUntil || IsThrowing(player) ||
+                player.InDodge() || !player.CanMove() ||
                 player.IsKnockedBack() || player.IsStaggering() || player.InMinorAction() ||
                 player.IsSwimming() || player.IsAttached() || player.InPlaceMode())
             {
                 return;
             }
+
+            bool interrupting = player.InAttack();
 
             var template = ObjectDB.instance?.GetItemPrefab(ThrowAttackItem)?.GetComponent<ItemDrop>();
             if (template == null)
@@ -331,8 +348,57 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
+            _throwAttack = attack;
             player.m_currentAttack = attack;
             player.m_lastCombatTimer = 0f;
+            if (interrupting)
+            {
+                CutToThrow(player, attack);
+            }
+        }
+
+        // From Attack.Start until the throw animation ends (the release happens part way through).
+        private static bool IsThrowing(Player player)
+        {
+            return _throwAttack != null && player.m_currentAttack == _throwAttack && !_throwAttack.IsDone() && player.InAttack();
+        }
+
+        // The trigger alone would let the swing finish its own exit transition first, and in that gap vanilla, seeing
+        // no attack animation, would end the throw before it began. So the animator is sent straight into the throw,
+        // and the trigger is taken back here so the throw does not start over once the cut is done; other clients play
+        // the trigger, which only shows the throw a moment later there. The swing's animation speed (attack speed
+        // effects, a hit's freeze frame) is dropped too, so the throw's own speed is worked out afresh. Shield Throw's
+        // windup (the same spear throw) uses it too.
+        internal static void CutToThrow(Player player, Attack throwAttack)
+        {
+            Animator animator = player.m_animator;
+            if (animator == null || !animator.HasState(0, ThrowStateHash))
+            {
+                return;
+            }
+
+            animator.CrossFadeInFixedTime(ThrowStateHash, InterruptCrossFade, 0);
+            animator.ResetTrigger(throwAttack.m_attackAnimation);
+            if (player.m_animEvent != null)
+            {
+                player.m_animEvent.m_pauseTimer = 0f;
+            }
+            animator.speed = 1f;
+        }
+
+        // A swing cut short can still fire its own trigger while it fades out; that is the swing's, not the throw's.
+        internal static bool IsFromInterruptedSwing(Player player)
+        {
+            Animator animator = player.m_animator;
+            return animator != null && animator.IsInTransition(0) &&
+                animator.GetCurrentAnimatorStateInfo(0).shortNameHash != ThrowStateHash &&
+                animator.GetNextAnimatorStateInfo(0).shortNameHash == ThrowStateHash;
+        }
+
+        // The throw's speed-up, through the same manager as the attack speed effects (which multiply it further).
+        private static double ModifyThrowSpeed(Character character, double speed)
+        {
+            return _owner != null && ReferenceEquals(character, _owner) && IsThrowing(_owner) ? speed * ThrowAnimationSpeed : speed;
         }
 
         // The windup's animation trigger: the weapon leaves the hand.
@@ -650,9 +716,32 @@ namespace EpicLoot.MagicItemEffects
                     return true;
                 }
 
+                // Swallowed, and the throw's own trigger still to come.
+                if (__instance.m_character is Player player && IsFromInterruptedSwing(player))
+                {
+                    return false;
+                }
+
                 _launchAttack = null;
                 Release(__instance);
                 return false;
+            }
+        }
+
+        // Added once, like the attack speed effects' handler.
+        [HarmonyPatch(typeof(Game), nameof(Game.Awake))]
+        private static class Game_Awake_Patch
+        {
+            private static bool _speedHandlerAdded;
+
+            [HarmonyPostfix]
+            private static void Postfix()
+            {
+                if (!_speedHandlerAdded)
+                {
+                    _speedHandlerAdded = true;
+                    AnimationSpeedManager.Add(ModifyThrowSpeed);
+                }
             }
         }
 

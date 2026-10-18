@@ -704,7 +704,8 @@ public class TemperPanel : MonoBehaviour {
             temperData.OnFail();
         }
 
-        selectedItemElement._magicItem = temperData.GetUpdatedMagicItem();
+        // Read back from the item: a failure that does not downgrade leaves it unwritten.
+        selectedItemElement._magicItem = selectedItemElement._item.GetMagicItem();
         selectedItemElement.uiTooltip.m_text = selectedItemElement._item.GetTooltip();
         FillEnchantmentList(selectedEnchantmentElement._effect.EffectType);
 
@@ -727,8 +728,11 @@ public class TemperPanel : MonoBehaviour {
             sb.AppendLine($"$mod_epicloot_increment: <color=yellow>{temperData.selectedValues.Increment}</color>");
             sb.AppendLine($"$mod_epicloot_successchance: <color=yellow>{temperData.probability * 100.0f:F2}</color>%");
             sb.AppendLine($"$mod_epicloot_criticalsuccess: <color=yellow>{temperData.GetCriticalSuccessChance() * 100.0f:F2}</color>%");
+            if (TemperData.CAN_DOWNGRADE) {
+                sb.AppendLine($"$mod_epicloot_downgradechance: <color=yellow>{temperData.GetDowngradeChance() * 100.0f:F2}</color>%");
+            }
             if (TemperData.CAN_DESTROY_ITEM) {
-                sb.AppendLine($"$mod_epicloot_criticalfail: <color=yellow>{TemperData.DESTROY_CHANCE * 100.0f:F2}</color>%");
+                sb.AppendLine($"$mod_epicloot_criticalfail: <color=yellow>{temperData.GetDestroyChance() * 100.0f:F2}</color>%");
             }
             infoTooltip.SetText(Localization.instance.Localize(sb.ToString()));
         }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -6,7 +7,9 @@ namespace EpicLoot.LegendarySystem
 {
     public static class SetAura
     {
+        // The full set the wearer shows, by ID, for every client to draw: this aura, and SetVisuals' glow and aura.
         private const string ZdoKey = "el-aura";
+        internal static readonly int ZdoHash = ZdoKey.GetStableHashCode();
 
         private class AuraState
         {
@@ -26,21 +29,27 @@ namespace EpicLoot.LegendarySystem
             }
 
             string setID = "";
-            foreach (LegendarySetProgress progress in SetBonusEvaluator.GetEquippedSetProgress(player))
+            foreach (LegendarySetProgress progress in SetBonusEvaluator.GetVisibleSetProgress(player))
             {
-                if (progress.IsFull && progress.Set.FullSetFx?.Count > 0)
+                if (progress.IsFull && HasVisuals(progress.Set))
                 {
                     setID = progress.Set.ID;
                     break;
                 }
             }
 
-            if (zdo.GetString(ZdoKey) != setID)
+            if (zdo.GetString(ZdoHash) != setID)
             {
-                zdo.Set(ZdoKey, setID);
+                zdo.Set(ZdoHash, setID);
             }
 
             Refresh(player);
+        }
+
+        public static bool HasVisuals(LegendarySetInfo set)
+        {
+            return set != null && (set.FullSetFx?.Count > 0 || set.WeaponGlow != null || set.HandGlow != null ||
+                set.DrawArrow != null || set.BodyAura != null);
         }
 
         public static void Refresh(Player player)
@@ -50,7 +59,7 @@ namespace EpicLoot.LegendarySystem
                 return;
             }
 
-            string setID = zdo.GetString(ZdoKey);
+            string setID = zdo.GetString(ZdoHash);
             AuraState state = States.GetOrCreateValue(player);
             if (state.SetID == setID)
             {
@@ -86,11 +95,21 @@ namespace EpicLoot.LegendarySystem
 
         private static GameObject Attach(Player player, string fx)
         {
-            // "Prefab/child/path" takes a child of the prefab, for effects that only exist inside a creature's rig.
-            int slash = fx.IndexOf('/');
-            string prefabName = slash > 0 ? fx.Substring(0, slash) : fx;
+            // "Prefab/child/path" takes a child of the prefab, for effects that only exist inside a creature's rig. A
+            // trailing "@0.5" draws it that much closer around the wearer (see Spread).
+            string path = fx;
+            float spread = 1f;
+            int at = fx.LastIndexOf('@');
+            if (at > 0 && float.TryParse(fx.Substring(at + 1), NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed))
+            {
+                path = fx.Substring(0, at);
+                spread = Mathf.Clamp(parsed, 0.05f, 10f);
+            }
+
+            int slash = path.IndexOf('/');
+            string prefabName = slash > 0 ? path.Substring(0, slash) : path;
             GameObject prefab = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(prefabName) : null;
-            Transform child = prefab != null && slash > 0 ? prefab.transform.Find(fx.Substring(slash + 1)) : null;
+            Transform child = prefab != null && slash > 0 ? prefab.transform.Find(path.Substring(slash + 1)) : null;
             GameObject source = slash > 0 ? child?.gameObject : prefab;
             if (source == null)
             {
@@ -123,7 +142,34 @@ namespace EpicLoot.LegendarySystem
                 Object.Destroy(timed);
             }
 
+            if (!Mathf.Approximately(spread, 1f))
+            {
+                Spread(instance.transform, spread);
+            }
+
             return instance;
+        }
+
+        // Pulls an effect in towards (or pushes it out from) its middle: every emitter's shape and every part's offset
+        // from the effect's root scale by factor, while the particles keep their size and speed. A creature's effect
+        // brought onto a player can spread far wider than the player (Eikthyr's antler sparks reach about 2 m out).
+        private static void Spread(Transform root, float factor)
+        {
+            foreach (Transform part in root.GetComponentsInChildren<Transform>(true))
+            {
+                if (part != root)
+                {
+                    part.localPosition *= factor;
+                }
+            }
+
+            foreach (ParticleSystem system in root.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                ParticleSystem.ShapeModule shape = system.shape;
+                shape.position *= factor;
+                shape.scale *= factor;
+                shape.radius *= factor;
+            }
         }
     }
 }

@@ -76,6 +76,8 @@ internal class ELConfig {
     public static ConfigEntry<bool> ShowOwnFalconWings;
     public static ConfigEntry<KeyCode> EitrInfusionKey;
     public static ConfigEntry<KeyCode> EitrInfusionGamepadButton;
+    public static ConfigEntry<KeyCode> ShieldThrowKey;
+    public static ConfigEntry<KeyCode> ShieldThrowGamepadButton;
     public static ConfigEntry<float> SetItemDropChance;
     public static ConfigEntry<bool> HealthCriticalEffectsEnabled;
     public static ConfigEntry<bool> AllowRuneSocketing;
@@ -163,6 +165,7 @@ internal class ELConfig {
     public static ConfigEntry<RuneSetExtractMode> RuneSetExtractItemMode;
     public static ConfigEntry<string> SpendOnlyStorageMods;
 
+    public static ConfigEntry<bool> TemperFailDowngrades;
     public static ConfigEntry<bool> TemperDestroysItem;
     public static ConfigEntry<float> TemperChanceToDestroy;
     public static ConfigEntry<float> TemperBaseChance;
@@ -628,8 +631,12 @@ internal class ELConfig {
             "Base chance to temper item when below max value. When effect value is at max, the chance is at the base. If value is above max value, the chance is reduces by the decrement chance. Default value: 0.5");
         TemperDecrement = BindServer(SectionEnchanting, "Temper Decrement Amount", 0.15f,
             "Decrement amount when effect value is above max value. Does not apply if value is below max value. Decrement amount is multiplied by the increment amount the value is above max value. Default value: 0.15");
+        TemperFailDowngrades = BindServer(SectionEnchanting, "Temper Fail Downgrades Effect", false,
+            "When tempering fails, the enchantment being tempered drops by one increment, never below the " +
+            "lowest roll for the item's rarity. No other enchantment on the item is touched. If False, a " +
+            "failed temper only costs the payment. Default value: False");
         TemperDestroysItem = BindServer(SectionEnchanting, "Temper Fail Destroys Item", false,
-            "When tempering fails, the item will be destroyed. If False, the item will be returned intact. Default value: False");
+            "When tempering fails, the item may be destroyed (see Temper Destroy Chance). If False, a failed temper never destroys the item. Default value: False");
         TemperChanceToDestroy = BindServer(SectionEnchanting, "Temper Destroy Chance", 0.5f,
             "If Fail Destroys Item is enabled, Destroy Chance rolls if item should be destroyed. Default value: 0.5");
         SpendOnlyStorageMods = BindServer(SectionEnchanting, "Spend-Only Storage Mods", "Azumatt.AzuCraftyBoxes",
@@ -830,6 +837,14 @@ internal class ELConfig {
         EitrInfusionGamepadButton = BindClient(SectionAbilities, "Eitr Infusion Gamepad Button", KeyCode.None,
             "Gamepad button (JoystickButton0-19) for Eitr Infusion. Unbound by default. Every gamepad button already " +
             "has a vanilla action, and that action is suppressed while the full set is worn.");
+        ShieldThrowKey = BindClient(SectionAbilities, "Shield Throw Hotkey", KeyCode.T,
+            "Key that throws your shield while the Shield Throw set bonus is active and a shield is in your hand. " +
+            "Shares T with Overwhelming Launch, Earthshaker and Eitr Infusion, since no one can wear two of those full " +
+            "sets. While that is true the key does only this: whatever vanilla action shares it (T is the emote wheel) " +
+            "is suppressed. None disables the keyboard binding.");
+        ShieldThrowGamepadButton = BindClient(SectionAbilities, "Shield Throw Gamepad Button", KeyCode.None,
+            "Gamepad button (JoystickButton0-19) for Shield Throw. Unbound by default. Every gamepad button already " +
+            "has a vanilla action, and that action is suppressed while the full set is worn with a shield in hand.");
 
         // 9 - Debug
         _loggingEnabled = BindClient(SectionDebug, "Logging Enabled", true, "Enable logging");

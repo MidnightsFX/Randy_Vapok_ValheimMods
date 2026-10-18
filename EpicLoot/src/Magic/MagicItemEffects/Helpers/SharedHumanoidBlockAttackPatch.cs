@@ -17,6 +17,8 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
     //    numbers were mitigated post RPC_Damage.
     //  * Kinetic Quake uses both halves: the prefix reads whether it is armed before the block, and its postfix
     //    handler runs ahead of the __result gate so its per-block state always clears.
+    //  * Shield Throw does the same: the prefix starts measuring the local player's block (its HitData.BlockDamage
+    //    prefix reads the amount blocked) and the ungated postfix call stops it.
     //
 
     // Harmony patch for all other actual block interactions.
@@ -26,12 +28,14 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
         [HarmonyPrefix]
         private static void PreBlockPatch(Humanoid __instance, Character attacker, HitData hit) {
             KineticQuake.BeforeBlock(__instance);
+            ShieldThrow.BeforeBlock(__instance);
         }
 
         [HarmonyPostfix]
         private static void PostBlockPatch(Humanoid __instance, Character attacker, HitData hit, bool __result) {
             // Does its own local-player gate, and must see failed blocks too.
             KineticQuake.AfterBlock(__instance, attacker, __result);
+            ShieldThrow.AfterBlock(__instance);
 
             if (!__result) { return; }
 

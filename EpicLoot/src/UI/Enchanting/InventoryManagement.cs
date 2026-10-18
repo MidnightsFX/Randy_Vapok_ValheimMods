@@ -145,15 +145,24 @@ public class InventoryManagement
     public void GiveItem(string item, int amount)
     {
         Debug.Log($"Attempting to give item {item} with amount {amount}");
-        Inventory inventory = GetInventory();
-        if (inventory != null)
+        if (amount <= 0)
         {
-            AddItem(ref inventory, item, amount);
+            return;
         }
-        else
+
+        GameObject prefab = ObjectDB.instance.GetItemPrefab(item);
+        ItemDrop.ItemData itemData = prefab != null ? LootRoller.CreateLootItemData(prefab) : null;
+        if (itemData == null)
         {
-            DropItem(item, amount);
+            Debug.LogWarning($"Could not give item {item}: no such item prefab");
+            return;
         }
+
+        // Not vanilla's Inventory.AddItem(name, ...): when the inventory fills, that drops a bare prefab
+        // (a stack of one) and still returns the item as added, so a full player claiming bounties got one
+        // coin or token per reward. The ItemData path adds what fits and drops the rest at its real size.
+        itemData.m_stack = amount;
+        GiveItem(itemData);
     }
 
     public bool GiveItem(ItemDrop.ItemData item)
@@ -180,16 +189,6 @@ public class InventoryManagement
         return true;
     }
 
-    private void AddItem(ref Inventory inventory, string item, int amount)
-    {
-        ItemDrop.ItemData result = inventory.AddItem(item, amount, 1, 0, 0, string.Empty, cheated: false);
-
-        if (result == null)
-        {
-            DropItem(item, amount);
-        }
-    }
-
     private void AddItem(ref Inventory inventory, ItemDrop.ItemData item)
     {
         if (inventory.AddItem(item))
@@ -199,27 +198,6 @@ public class InventoryManagement
         else
         {
             DropItem(item);
-        }
-    }
-
-    private void DropItem(string item, int amount)
-    {
-        Debug.Log($"Attempting to drop item {item} with amount {amount}");
-        Player player = Player.m_localPlayer;
-        GameObject prefab = ObjectDB.instance.GetItemPrefab(item);
-
-        if (prefab != null)
-        {
-            GameObject go = GameObject.Instantiate(prefab,
-                player.transform.position + player.transform.forward + player.transform.up,
-                player.transform.rotation);
-
-            ItemDrop itemdrop = go.GetComponent<ItemDrop>();
-            itemdrop.SetStack(amount);
-            itemdrop.GetComponent<Rigidbody>().linearVelocity = Vector3.up * 5f;
-
-            SendMessage($"$msg_dropped {itemdrop.m_itemData.m_shared.m_name}",
-                itemdrop.m_itemData.m_stack, itemdrop.m_itemData.GetIcon());
         }
     }
 

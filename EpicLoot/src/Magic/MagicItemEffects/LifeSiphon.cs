@@ -34,7 +34,8 @@ namespace EpicLoot.MagicItemEffects
     //
     // The aura is a local copy of vanilla's tar drip (vfx_Tared) tinted dark red on every client, announced by an RPC
     // from the owner when a siphon starts and every AuraResendSeconds while it is kept up, for players who came into
-    // range since. Each copy then follows the target's ZDO and fades when the siphon ends.
+    // range since. Each copy then follows the target's ZDO and fades when the siphon ends. Of the drip, only its falling
+    // tar drops are kept (KeepOnlyDrops).
     public static class LifeSiphon
     {
         // Tunable in this effect's Config block in magiceffects.json, under this key name.
@@ -58,8 +59,10 @@ namespace EpicLoot.MagicItemEffects
         private static readonly long AuraResendTicks = TimeSpan.FromSeconds(AuraResendSeconds).Ticks;
 
         private const string AuraPrefab = "vfx_Tared";
+        private const string DropSystem = "tardrop";    // the one part of the drip the aura keeps
         private static readonly Color AuraTint = new Color(0.4f, 0.02f, 0.03f);
         private static bool _auraMissingLogged;
+        private static bool _dropsMissingLogged;
 
         // Tooltip: "Your hits drain a foe for {1} seconds ... heals for {0}% of the damage dealt."
         public static void RegisterDisplayValues()
@@ -213,6 +216,7 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
+            KeepOnlyDrops(fx);
             foreach (ParticleSystem particles in fx.GetComponentsInChildren<ParticleSystem>(true))
             {
                 ParticleSystem.MainModule main = particles.main;
@@ -222,6 +226,48 @@ namespace EpicLoot.MagicItemEffects
             }
 
             fx.AddComponent<LifeSiphonAura>().Begin(target, until);
+        }
+
+        // Only the tar drops are kept, to keep the screen quiet in a fight: the hit spray, the cloud, the splashes and
+        // the flow (with the splats it stamps on the ground) all go, at once so the tint loop never sees them. The
+        // root's own system emits nothing and holds the rest, so it stays. Should an update rename the drops, nothing
+        // but the splats is taken, rather than leaving no aura at all.
+        private static void KeepOnlyDrops(GameObject fx)
+        {
+            Transform drops = fx.transform.Find(DropSystem);
+            if (drops == null || drops.GetComponent<ParticleSystem>() == null)
+            {
+                if (!_dropsMissingLogged)
+                {
+                    _dropsMissingLogged = true;
+                    EpicLoot.LogWarning($"[LifeSiphon] {AuraPrefab} has no '{DropSystem}'; siphoned targets show its full drip.");
+                }
+                RemoveSplats(fx);
+                return;
+            }
+
+            for (int i = fx.transform.childCount - 1; i >= 0; i--)
+            {
+                Transform child = fx.transform.GetChild(i);
+                if (child != drops && child.GetComponentInChildren<ParticleSystem>(true) != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(child.gameObject);
+                }
+            }
+        }
+
+        // vfx_Tared's drops stamp a flat splat wherever they land: a ParticleDecal on the dripping system emits into a
+        // world-aligned decal system. Both go, the splat system at once so the tint loop never sees it.
+        private static void RemoveSplats(GameObject fx)
+        {
+            foreach (ParticleDecal decal in fx.GetComponentsInChildren<ParticleDecal>(true))
+            {
+                if (decal.m_decalSystem != null && decal.m_decalSystem.transform.IsChildOf(fx.transform))
+                {
+                    UnityEngine.Object.DestroyImmediate(decal.m_decalSystem.gameObject);
+                }
+                UnityEngine.Object.DestroyImmediate(decal);
+            }
         }
     }
 

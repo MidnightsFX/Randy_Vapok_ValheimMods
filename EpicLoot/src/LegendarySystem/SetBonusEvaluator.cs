@@ -79,15 +79,31 @@ namespace EpicLoot.LegendarySystem
         /// equipment.</summary>
         public static List<LegendarySetProgress> GetEquippedSetProgress(Player player)
         {
-            List<LegendarySetProgress> result = new List<LegendarySetProgress>();
+            return player == null ? new List<LegendarySetProgress>() : CollectSetProgress(player.GetMagicEquipment());
+        }
+
+        /// <summary>Progress for the set's looks only (SetAura, SetVisuals, SetArmorTint): the equipped items plus the
+        /// hand items stowed on the back (R, Humanoid.HideHandItems), so putting a set weapon away keeps the look.
+        /// Never use this for bonuses: a stowed item is unequipped, and its bonuses stop with it.</summary>
+        public static List<LegendarySetProgress> GetVisibleSetProgress(Player player)
+        {
             if (player == null)
             {
-                return result;
+                return new List<LegendarySetProgress>();
             }
 
+            List<ItemDrop.ItemData> items = player.GetMagicEquipment();
+            items.Add(player.m_hiddenLeftItem);
+            items.Add(player.m_hiddenRightItem);
+            return CollectSetProgress(items);
+        }
+
+        private static List<LegendarySetProgress> CollectSetProgress(IEnumerable<ItemDrop.ItemData> items)
+        {
+            List<LegendarySetProgress> result = new List<LegendarySetProgress>();
             Dictionary<string, LegendarySetProgress> bySet = null;
             int anonymous = 0;
-            foreach (ItemDrop.ItemData item in player.GetMagicEquipment())
+            foreach (ItemDrop.ItemData item in items)
             {
                 if (item == null || !item.IsMagic(out MagicItem magicItem) || string.IsNullOrEmpty(magicItem.SetID))
                 {

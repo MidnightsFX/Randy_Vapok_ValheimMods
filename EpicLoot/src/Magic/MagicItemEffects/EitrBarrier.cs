@@ -14,17 +14,19 @@ namespace EpicLoot
 
 namespace EpicLoot.MagicItemEffects
 {
-    // EitrBarrier (4-piece Mimir's Well set bonus, NoRoll). While the barrier is up, incoming damage is taken from eitr
-    // before health, absorbing value damage per point of eitr. When eitr runs dry, from a hit or from casting, the
-    // barrier collapses for Cooldown seconds and comes back once there is MinEitr again. Not the Cyan shard's
-    // EitrShield, which spends eitr on a fixed share of every hit and has no barrier.
+    // EitrBarrier (4-piece Mimir's Well set bonus, NoRoll). While the barrier is up, the effect value in percent of every
+    // hit is taken from eitr instead, at DamagePerEitr damage per point of eitr, and the rest goes on to the block,
+    // resistances, armor and health as usual. When eitr runs dry, from a hit or from casting, the barrier collapses for
+    // Cooldown seconds and comes back once there is MinEitr again. Not the Cyan shard's EitrShield, which spends eitr
+    // on what is left of a hit after armor and has no barrier.
     //
     // The barrier being up IS the EL_EitrBarrier status effect on the local player, and being broken is the
     // EL_EitrBarrierBroken cooldown, so no static state can go stale on death or a world change. A Player.Update
-    // postfix raises, breaks and drops it. The absorb runs from SharedPlayerPostArmorDamagePatch, after vanilla's
-    // own bubble, block, resistances and armor, so eitr only pays for damage that would land. The eitr is taken from
-    // m_eitr directly, as Frostwalker does, because UseEitr's EpicLoot patches would treat every hit as a spell cast
-    // (HealthOnEitrUse would heal on it, EitrUseGivesAdrenaline would pay out).
+    // postfix raises, breaks and drops it. The absorb is the status effect's own OnDamaged, as vanilla's Staff of
+    // Protection bubble absorbs: RPC_Damage calls it on the victim's owner once the hit is known to land and the
+    // world's difficulty scaling is in, before the block, resistances and armor, so the barrier takes its share of the
+    // raw hit. The eitr is taken from m_eitr directly, as Frostwalker does, because UseEitr's EpicLoot patches would
+    // treat every hit as a spell cast (HealthOnEitrUse would heal on it, EitrUseGivesAdrenaline would pay out).
     //
     // The purple bubble is the status effect's start effect, like vanilla's Staff of Protection: a recoloured copy of
     // vfx_StaffShield. The copy keeps its ZNetView and ZSyncTransform, so other players see it follow the wearer, and
@@ -34,12 +36,14 @@ namespace EpicLoot.MagicItemEffects
     // ZDO.
     public static class EitrBarrier
     {
-        // Both tunable in this effect's Config block in magiceffects.json, under these key names.
+        // All tunable in this effect's Config block in magiceffects.json, under these key names.
         public const float DefaultCooldown = 5f;    // seconds the barrier stays down after collapsing
         public const float DefaultMinEitr = 5f;     // eitr needed to raise it again, so it does not flicker during regen
+        public const float DefaultDamagePerEitr = 1f;
 
         private const string CooldownKey = "Cooldown";
         private const string MinEitrKey = "MinEitr";
+        private const string DamagePerEitrKey = "DamagePerEitr";
 
         private const float EmptyEitr = 0.5f;       // less than this counts as run dry
         private const float HitFxInterval = 0.2f;   // damage over time and flurries would otherwise spawn fx every tick
@@ -81,14 +85,16 @@ namespace EpicLoot.MagicItemEffects
             CooldownKey, DefaultCooldown, 0.1f, 600f);
         private static float MinEitr => EffectConfig.GetClamped(MagicEffectType.EitrBarrier,
             MinEitrKey, DefaultMinEitr, EmptyEitr, 1000f);
+        private static float DamagePerEitr => EffectConfig.GetClamped(MagicEffectType.EitrBarrier,
+            DamagePerEitrKey, DefaultDamagePerEitr, 0.1f, 100f);
 
         // The world's eitr cost modifier applies to the barrier as it does to spells.
         private static float EitrRate => Game.m_eitrRate > 0f ? Game.m_eitrRate : 1f;
 
-        // Tooltip: "... absorbing {0} damage per Eitr. It collapses for {1}s whenever your Eitr runs dry."
+        // Tooltip: "... takes {0}% of every hit from your Eitr ..., {2} damage per Eitr. It collapses for {1}s ..."
         public static void RegisterDisplayValues()
         {
-            MagicItem.RegisterDisplayValues(MagicEffectType.EitrBarrier, value => new object[] { value, Cooldown });
+            MagicItem.RegisterDisplayValues(MagicEffectType.EitrBarrier, value => new object[] { value, Cooldown, DamagePerEitr });
         }
 
         // The damage the barrier can still take at the local player's current eitr: the HUD icon's text.
@@ -100,13 +106,12 @@ namespace EpicLoot.MagicItemEffects
                 return "";
             }
 
-            float perEitr = player.GetTotalActiveMagicEffectValue(MagicEffectType.EitrBarrier);
-            if (perEitr <= 0f)
+            if (player.GetTotalActiveMagicEffectValue(MagicEffectType.EitrBarrier) <= 0f)
             {
                 return "";
             }
 
-            int value = Mathf.FloorToInt(player.m_eitr * perEitr / EitrRate);
+            int value = Mathf.FloorToInt(player.m_eitr * DamagePerEitr / EitrRate);
             if (value != _iconTextValue)
             {
                 _iconTextValue = value;
@@ -115,17 +120,18 @@ namespace EpicLoot.MagicItemEffects
             return _iconText;
         }
 
-        // Invoked by SharedPlayerPostArmorDamagePatch (victim side, local player), before the shard EitrShield, so the
-        // barrier drains eitr first. A hit it cannot cover in full passes the rest on to health.
-        public static void ModifyIncoming(Player player, HitData hit)
+        // SE_EitrBarrier.OnDamaged, on the local player while the barrier is up. Vanilla is walking the status effect list
+        // at this point, so a hit that drains the last eitr leaves the collapse to the next Tick, a frame later.
+        internal static void Absorb(Player player, HitData hit, Character attacker)
         {
-            if (hit == null || player != Player.m_localPlayer || !player.GetSEMan().HaveStatusEffect(BarrierHash))
+            if (hit == null || player == null || player != Player.m_localPlayer ||
+                SharedCharacterRpcDamagePatch.IsSelfInflicted(player, hit, attacker))
             {
                 return;
             }
 
-            float perEitr = player.GetTotalActiveMagicEffectValue(MagicEffectType.EitrBarrier);
-            if (perEitr <= 0f)
+            float percent = Mathf.Clamp(player.GetTotalActiveMagicEffectValue(MagicEffectType.EitrBarrier), 0f, 100f);
+            if (percent <= 0f)
             {
                 return;
             }
@@ -136,8 +142,9 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
+            float perEitr = DamagePerEitr;
             float rate = EitrRate;
-            float absorbed = Mathf.Min(total, player.m_eitr * perEitr / rate);
+            float absorbed = Mathf.Min(total * percent / 100f, player.m_eitr * perEitr / rate);
             if (absorbed <= 0f)
             {
                 return;
@@ -147,15 +154,10 @@ namespace EpicLoot.MagicItemEffects
             // Holds natural regen off the way a spell cast does (RPC_UseEitr restarts the same timer).
             player.m_eitrRegenTimer = Mathf.Max(player.m_eitrRegenTimer, player.m_eitrRegenDelay);
 
-            // Fire and poison are still in the hit here (vanilla splits them into damage over time next), so those
-            // shrink too. A fully absorbed hit shows no damage number and adds no stagger: ApplyDamage skips it.
+            // Every damage type shrinks alike, fire and poison included (vanilla splits them into damage over time
+            // later). At 100% a fully absorbed hit shows no damage number and adds no stagger: ApplyDamage skips it.
             hit.m_damage.Modify(1f - absorbed / total);
             PlayHitFx(player, hit);
-
-            if (player.m_eitr < EmptyEitr)
-            {
-                Break(player);
-            }
         }
 
         private static void Tick(Player player)
@@ -535,12 +537,17 @@ namespace EpicLoot.MagicItemEffects
     }
 
     // HUD entry while the barrier is up; its icon text is the damage it can still take. The purple bubble is its start
-    // effect.
+    // effect, and it takes its share of each hit itself (EitrBarrier.Absorb).
     public class SE_EitrBarrier : StatusEffect
     {
         public override string GetIconText()
         {
             return EitrBarrier.GetIconText();
+        }
+
+        public override void OnDamaged(HitData hit, Character attacker)
+        {
+            EitrBarrier.Absorb(m_character as Player, hit, attacker);
         }
     }
 }
