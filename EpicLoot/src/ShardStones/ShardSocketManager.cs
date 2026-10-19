@@ -20,11 +20,14 @@ namespace EpicLoot.ShardStones {
         // can be read before ELConfig has bound anything (or in a harness that never binds it).
         public static bool RuneSocketingEnabled => ELConfig.AllowRuneSocketing == null || ELConfig.AllowRuneSocketing.Value;
 
-        // Rune sockets flip between granting and inert with nothing written to the items, so the memoized
-        // totals and everything derived from them on equip (abilities, the loot-effect ZDO mirror) are
-        // stale until rebuilt. Fires on the server push too: Jotunn applies synced values through
-        // BoxedValue, which raises SettingChanged.
-        public static void OnRuneSocketingChanged() {
+        // Rune Diminishing Returns, null-safe for the same reason.
+        public static bool RuneDiminishingEnabled => ELConfig.RuneDiminishingReturns != null && ELConfig.RuneDiminishingReturns.Value;
+
+        // Rune sockets flip between granting and inert (Allow Rune Socketing) or change strength (Rune
+        // Diminishing Returns) with nothing written to the items, so the memoized totals and everything
+        // derived from them on equip (abilities, the loot-effect ZDO mirror) are stale until rebuilt. Fires
+        // on the server push too: Jotunn applies synced values through BoxedValue, which raises SettingChanged.
+        public static void OnRuneSocketRulesChanged() {
             EquipmentEffectCache.ResetAll();
 
             var player = Player.m_localPlayer;
@@ -294,7 +297,8 @@ namespace EpicLoot.ShardStones {
         // decay. Idempotent: each value is rebuilt from the config base rather than scaled from whatever
         // is already stored, so running it after any socket change can never compound decay -- which is
         // what lets removal promote the survivors back up. Runestone sockets are left alone; their
-        // effect is fixed when the rune goes in rather than derived from the host item.
+        // effect is fixed when the rune goes in rather than derived from the host item, and their
+        // diminishing returns are applied on read (GetRuneStackMultiplier).
         //
         // Values are baked into the socket (the whole effect pipeline and every tooltip read them from
         // there), so this must run on every path that adds, removes or re-hosts a socket.
@@ -364,6 +368,65 @@ namespace EpicLoot.ShardStones {
                     socket.Effect.EffectValue = (float)Math.Round(baseValues[group[rank]] * multiplier, 2);
                 }
             }
+        }
+
+        // The share of its own value the runestone in socket `index` grants under Rune Diminishing Returns.
+        // Everything else on the item granting the same effect ranks ahead of it -- rolled effects and
+        // shard sockets -- and the item's runes of that effect rank among themselves strongest first, the
+        // same ordering shard stacking uses, so the result does not depend on slotting order. The rune at
+        // rank R is worth (factor ^ R). 1 for a shard socket, and for a rune nothing else on the item repeats.
+        //
+        // Worked out on read (MagicItem.GetSocketEffect) rather than baked into the socket the way
+        // RecomputeSocketValues bakes shard decay: a rune's stored effect IS the rune -- it is what
+        // ReconstructShardItem hands back, and what crafting transfers and tempering copy -- and its rank
+        // depends on the rolled effects, which change (augment, temper) without any socket path running.
+        public static float GetRuneStackMultiplier(MagicItem magicItem, int index) {
+            if (!RuneDiminishingEnabled) {
+                return 1f;
+            }
+
+            var socket = magicItem.Sockets[index];
+            if (socket?.Effect == null || socket.ShardType != ShardType.None) {
+                return 1f;
+            }
+
+            var effectType = socket.Effect.EffectType;
+            var rank = 0;
+            foreach (var rolled in magicItem.Effects) {
+                if (rolled.EffectType == effectType) {
+                    rank++;
+                }
+            }
+
+            for (var i = 0; i < magicItem.Sockets.Count; i++) {
+                var other = magicItem.Sockets[i];
+                if (i == index || other?.Effect == null || other.Effect.EffectType != effectType) {
+                    continue;
+                }
+
+                if (other.ShardType != ShardType.None || RuneRanksAhead(other, i, socket, index)) {
+                    rank++;
+                }
+            }
+
+            // A yes/no grant has nothing to decay; reducing it would only put a misleading "(50% strength)"
+            // on a line that works in full. Checked last: it is the one lookup here.
+            if (rank == 0 || MagicItemEffectDefinitions.IsValuelessEffect(effectType)) {
+                return 1f;
+            }
+
+            return Mathf.Pow(ELConfig.RuneStackDecayFactor.Value, rank);
+        }
+
+        // Strongest first; rarity then socket index break ties, as in RecomputeSocketValues.
+        private static bool RuneRanksAhead(SocketedEffect a, int aIndex, SocketedEffect b, int bIndex) {
+            if (a.Effect.EffectValue != b.Effect.EffectValue) {
+                return a.Effect.EffectValue > b.Effect.EffectValue;
+            }
+            if (a.SourceRarity != b.SourceRarity) {
+                return a.SourceRarity > b.SourceRarity;
+            }
+            return aIndex < bIndex;
         }
 
         // Socket indices grouped by shard color, covering only the sockets RecomputeSocketValues

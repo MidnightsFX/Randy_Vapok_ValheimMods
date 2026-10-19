@@ -70,6 +70,8 @@ namespace EpicLoot
                 EpicLoot.Log($"Rolling on loot table: {characterName} (lvl {level}), " +
                     $"spawned {loot.Count} items at drop point({dropPoint}).");
                 DropItems(loot, dropPoint);
+                // After DropItems, on this machine, which spawned the drops and so owns them.
+                Compatibility.ItemFavorites.RequestLootRolls(loot, characterName, dropPoint);
                 foreach (GameObject l in loot)
                 {
                     ItemDrop.ItemData itemData = l.GetComponent<ItemDrop>().m_itemData;

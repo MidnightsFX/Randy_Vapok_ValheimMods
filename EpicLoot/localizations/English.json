@@ -2622,5 +2622,9 @@
     "mod_epicloot_cfg_preset_resets_effects": "Preset staged. Saving rewrites magiceffects.json from the template and reloads the Effect Tuning rows from it; any Effect Tuning edits were dropped.",
     "mod_epicloot_cfg_backup_confirm_title": "Replace magiceffects.json?",
     "mod_epicloot_cfg_backup_confirm_body": "magiceffects.json has been edited by hand. Applying the preset replaces it with the template. The current file is backed up to baseconfig-backup first.",
-    "mod_epicloot_cfg_backup_continue": "Back up & replace"
+    "mod_epicloot_cfg_backup_continue": "Back up & replace",
+    "mod_epicloot_wishlist_rarity": "Minimum rarity",
+    "mod_epicloot_wishlist_unique": "Unique item",
+    "mod_epicloot_wishlist_set": "Set",
+    "mod_epicloot_wishlist_effects": "Must have effects"
 }

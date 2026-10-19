@@ -344,6 +344,8 @@ public static class QuickConfigPrefabBuilder
                 C("RuneSocketRemovalMode", "Rune Removal Mode"),
                 C("ShardStackingMode", "Shard Stack Mode"),
                 S("ShardStackDecayFactor", "Shard Stack Decay Factor"),
+                T("RuneDiminishingReturns", "Rune Diminishing Returns"),
+                S("RuneStackDecayFactor", "Rune Stack Decay Factor"),
                 C("RuneExtractItemMode", "Rune Extract Mode"),
                 C("RuneSetExtractItemMode", "Set Rune Extract Mode"),
             },

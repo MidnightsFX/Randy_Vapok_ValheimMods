@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Bootstrap;
 using EpicLoot.Config;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -213,6 +216,142 @@ public static class ItemFavorites
         }
 
         return Delegate.CreateDelegate(typeof(T), method, throwOnBindFailure: false) as T;
+    }
+
+    // ---------------------------------------------------------------------------------------------------
+    // Wishlists and loot rolls (the framework's API 3). Bound separately from the favorites above, and each
+    // endpoint on its own, so an older framework still gives favorites and simply none of this.
+    // ---------------------------------------------------------------------------------------------------
+
+    private delegate bool StartRollFn(ItemDrop drop, string playerIdsJson, string optionsJson, ref string rollId, ref string error);
+
+    private static bool _lootResolved;
+    private static Func<bool> _isRollingAvailable;
+    private static StartRollFn _startRoll;
+    private static Func<Vector3, float, string> _getPlayerIdsNearJson;
+
+    /// <summary>
+    /// Registers Epic Loot's wishlist conditions (rarity, unique, set, effects) and its magic item names with
+    /// the framework. Call once from Awake: the framework loads first, since Epic Loot soft-depends on it.
+    /// </summary>
+    public static void RegisterLootIntegration()
+    {
+        if (!Chainloader.PluginInfos.ContainsKey(PluginGuid))
+        {
+            return;
+        }
+
+        try
+        {
+            Type api = Type.GetType(ApiTypeName, throwOnError: false);
+            if (api == null)
+            {
+                return;
+            }
+
+            var register = Bind<Func<string, Func<string, string>, Func<ItemDrop.ItemData, string, bool>, Func<string, string>,
+                Func<ItemDrop.ItemData, string>, bool>>(api, "RegisterWishlistProvider");
+            if (register != null)
+            {
+                register(ItemFavoritesWishlist.ProviderId, ItemFavoritesWishlist.GetSchema, ItemFavoritesWishlist.Matches,
+                    ItemFavoritesWishlist.Describe, ItemFavoritesWishlist.Suggest);
+                EpicLoot.Log("Registered Epic Loot's wishlist conditions with Item Favorite Framework.");
+            }
+
+            var addNames = Bind<Action<Func<ItemDrop.ItemData, string>>>(api, "AddItemNameProvider");
+            addNames?.Invoke(ItemFavoritesWishlist.DisplayName);
+        }
+        catch (Exception e)
+        {
+            EpicLoot.LogWarningForce($"Could not register Epic Loot's wishlist conditions with Item Favorite Framework: {e.Message}");
+        }
+    }
+
+    private static void ResolveLoot()
+    {
+        if (_lootResolved)
+        {
+            return;
+        }
+
+        _lootResolved = true;
+        if (!Chainloader.PluginInfos.ContainsKey(PluginGuid))
+        {
+            return;
+        }
+
+        Type api = Type.GetType(ApiTypeName, throwOnError: false);
+        if (api == null)
+        {
+            return;
+        }
+
+        _isRollingAvailable = Bind<Func<bool>>(api, "IsRollingAvailable");
+        _startRoll = Bind<StartRollFn>(api, "StartRoll");
+        _getPlayerIdsNearJson = Bind<Func<Vector3, float, string>>(api, "GetPlayerIdsNearJson");
+    }
+
+    /// <summary>
+    /// Hands the magic items a creature just dropped to the framework's need/greed/pass roll, among the
+    /// players near the drop, when the server asks for that (Request Loot Rolls) and runs rolls. Call on the
+    /// machine that spawned the drops, right after spawning them.
+    /// </summary>
+    public static void RequestLootRolls(List<GameObject> loot, string characterName, Vector3 dropPoint)
+    {
+        if (loot == null || loot.Count == 0 || !ELConfig.RequestLootRolls.Value)
+        {
+            return;
+        }
+
+        ResolveLoot();
+        if (_startRoll == null || _getPlayerIdsNearJson == null || _isRollingAvailable == null || !_isRollingAvailable())
+        {
+            return;
+        }
+
+        try
+        {
+            GameObject creature = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(characterName) : null;
+            Character character = creature != null ? creature.GetComponent<Character>() : null;
+            if (ELConfig.LootRollBossesOnly.Value && (character == null || !character.IsBoss()))
+            {
+                return;
+            }
+
+            string members = _getPlayerIdsNearJson(dropPoint, ELConfig.LootRollPlayerRange.Value);
+            if (JArray.Parse(members).Count < ELConfig.LootRollMinimumPlayers.Value)
+            {
+                return;
+            }
+
+            string label = character != null ? Localization.instance.Localize(character.m_name) : characterName;
+            var options = new JObject
+            {
+                ["label"] = label,
+                ["source"] = "epicloot",
+                ["groupId"] = $"epicloot-{characterName}-{DateTime.UtcNow.Ticks}"
+            }.ToString(Formatting.None);
+
+            foreach (GameObject go in loot)
+            {
+                ItemDrop drop = go != null ? go.GetComponent<ItemDrop>() : null;
+                if (drop == null || !drop.m_itemData.IsMagic(out MagicItem magicItem) || magicItem.Rarity < ELConfig.LootRollMinimumRarity.Value)
+                {
+                    continue;
+                }
+
+                string rollId = "";
+                string error = "";
+                if (!_startRoll(drop, members, options, ref rollId, ref error))
+                {
+                    EpicLoot.Log($"No loot roll for {drop.m_itemData.m_shared.m_name}: {error}.");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            EpicLoot.LogWarningForce($"Starting loot rolls failed: {e.Message}");
+        }
     }
 
     private static void ReportFailure(Exception e)

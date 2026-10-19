@@ -61,6 +61,11 @@ internal class ELConfig {
     public static ConfigEntry<bool> ShowStorageCounts;
     public static ConfigEntry<bool> RespectItemFavorites;
     public static ConfigEntry<bool> ShowFavoriteStars;
+    public static ConfigEntry<bool> RequestLootRolls;
+    public static ConfigEntry<ItemRarity> LootRollMinimumRarity;
+    public static ConfigEntry<bool> LootRollBossesOnly;
+    public static ConfigEntry<float> LootRollPlayerRange;
+    public static ConfigEntry<int> LootRollMinimumPlayers;
     public static ConfigEntry<bool> _adventureModeEnabled;
     public static readonly ConfigEntry<string>[] AbilityKeyCodes = new ConfigEntry<string>[AbilityController.AbilitySlotCount];
     public static ConfigEntry<TextAnchor> AbilityBarAnchor;
@@ -91,6 +96,8 @@ internal class ELConfig {
     // Named ...StackingMode for the same shadowing reason as ShardSocketRemovalMode above.
     public static ConfigEntry<ShardStackMode> ShardStackingMode;
     public static ConfigEntry<float> ShardStackDecayFactor;
+    public static ConfigEntry<bool> RuneDiminishingReturns;
+    public static ConfigEntry<float> RuneStackDecayFactor;
     public static ConfigEntry<bool> AllowGiftOnItemsWithSlots;
     public static ConfigEntry<int> LegendaryGiftSlotsAdded;
     public static ConfigEntry<int> MythicGiftSlotsAdded;
@@ -380,6 +387,19 @@ internal class ELConfig {
             "their biome and how tough they are by the CreatureSorter rules in itemsorter.json. The entries it " +
             "writes into loottables.json are marked \"Auto\": true and are re-sorted every time a world loads; " +
             "entries without that mark are never touched. Runs on the server (or in single player) only.");
+        RequestLootRolls = BindServer(SectionGeneral, "Request Loot Rolls", false,
+            "When Item Favorite Framework runs on the server with its loot rolls turned on, magic items a creature " +
+            "drops go to a need/greed/pass roll among the players nearby instead of to whoever grabs them first.");
+        LootRollMinimumRarity = BindServer(SectionGeneral, "Loot Roll Minimum Rarity", ItemRarity.Epic,
+            "Only magic items of this rarity or better are rolled for.");
+        LootRollBossesOnly = BindServer(SectionGeneral, "Loot Rolls Bosses Only", false,
+            "Only roll for items bosses drop.");
+        LootRollPlayerRange = BindServer(SectionGeneral, "Loot Roll Player Range", 50f,
+            "Players this close to the drop, in metres, take part in its roll.",
+            new AcceptableValueRange<float>(5f, 200f));
+        LootRollMinimumPlayers = BindServer(SectionGeneral, "Loot Roll Minimum Players", 2,
+            "A roll only happens when at least this many players are in range; otherwise the drop is free as usual.",
+            new AcceptableValueRange<int>(1, 10));
 
         // 2 - Balance
         BalanceConfigurationType = BindServer(SectionBalance, "Balance Template", "Default",
@@ -560,6 +580,23 @@ internal class ELConfig {
             "a quarter, an eighth, and so on down the stack.\n" +
             "0 = additional shards of a color contribute nothing.\n" +
             "1 = no decay (equivalent to Shard Stack Mode = Full).\n" +
+            "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
+        RuneDiminishingReturns = BindServer(SectionSockets, "Rune Diminishing Returns", true,
+            "When true, a slotted runestone whose effect the item already has -- rolled on the item, from a " +
+            "shardstone, or from another runestone -- contributes only a decayed fraction of its value " +
+            "(see Rune Stack Decay Factor). Such a rune can only be slotted while Allow Duplicate Socketed " +
+            "Effects or Allow Runestone On Matching Item Effect allows it. The runestone itself is not " +
+            "changed: taken back out, it has its full value again.\n" +
+            "Runes whose effect has no rarity-scaled value (Warmth, for example) are never reduced.\n" +
+            "Default: true.");
+        RuneStackDecayFactor = BindServer(SectionSockets, "Rune Stack Decay Factor", 0.5f,
+            "Under Rune Diminishing Returns, the share of its value each repeated runestone contributes. " +
+            "The item's own rolled effect and any shardstone granting the same effect count first, then " +
+            "the item's runestones of that effect, strongest first; the rune at rank R is worth " +
+            "(factor ^ R) of its normal value. With 0.5, a rune repeating an effect the item already rolled " +
+            "is worth half, a second such rune a quarter, and so on.\n" +
+            "0 = repeated runes contribute nothing.\n" +
+            "1 = no decay (equivalent to Rune Diminishing Returns off).\n" +
             "Min = 0, Max = 1", new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         RuneExtractItemMode = BindServer(SectionSockets, "Rune Extract Mode", RuneExtractMode.ReduceEnchants,
             "Controls what happens to the source item when a rune is extracted from it.\n" +
@@ -896,7 +933,9 @@ internal class ELConfig {
         ShowQuickConfigButton.SettingChanged += (_, _) => QuickConfig.QuickConfigureTool.ApplyRegistration();
         EliteRunestoneDrops.SettingChanged += (_, _) => EliteRunestoneTables.Refresh();
         EliteRunestoneDropChance.SettingChanged += (_, _) => EliteRunestoneTables.Refresh();
-        AllowRuneSocketing.SettingChanged += (_, _) => ShardSocketManager.OnRuneSocketingChanged();
+        AllowRuneSocketing.SettingChanged += (_, _) => ShardSocketManager.OnRuneSocketRulesChanged();
+        RuneDiminishingReturns.SettingChanged += (_, _) => ShardSocketManager.OnRuneSocketRulesChanged();
+        RuneStackDecayFactor.SettingChanged += (_, _) => ShardSocketManager.OnRuneSocketRulesChanged();
         foreach (ConfigEntry<string> rarityColor in new[] {
             _magicRarityColor, _rareRarityColor, _epicRarityColor,
             _legendaryRarityColor, _mythicRarityColor, _ancientRarityColor }) {

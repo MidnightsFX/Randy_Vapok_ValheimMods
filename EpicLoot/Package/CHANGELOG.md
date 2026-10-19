@@ -14,6 +14,7 @@ Changes:
 * Eikthyr and Black Forest creatures and chests no longer drop wooden shields, and troll armor is now part of the regular Black Forest armor loot.
 * Unique shardstones and Brokkr's Gift drop twice as often.
 * Slotting runestones into shard slots can be turned off, which leaves runestones already slotted inactive but still removable.
+* Runestones that repeat an effect already on an item can be set to count for less with each copy.
 * The enchanting table's search boxes can now find items by their enchantments.
 * Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
 * Tempering now costs a single iron or gold bounty token per attempt instead of materials.

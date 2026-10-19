@@ -230,7 +230,7 @@ internal static class QuickConfigBindings {
             enabled: staged => staged.Get("EliteRunestoneDrops", ELConfig.EliteRunestoneDrops.Value));
 
         // --- 4. Shardstones & Runes ---
-        // The two rune rows below only mean anything while runes can be slotted.
+        // The rune rows below only mean anything while runes can be slotted.
         Func<StagedConfig, bool> runeSocketing = staged => staged.Get("AllowRuneSocketing", ELConfig.AllowRuneSocketing.Value);
         Toggle("AllowRuneSocketing", ELConfig.AllowRuneSocketing, "Allow Rune Socketing", BindingScope.Server);
         Toggle("AllowDuplicateSocketedEffects", ELConfig.AllowDuplicateSocketedEffects, "Allow Duplicate Socketed Effects", BindingScope.Server);
@@ -243,6 +243,10 @@ internal static class QuickConfigBindings {
         EnumCycle("ShardStackingMode", ELConfig.ShardStackingMode, "Shard Stack Mode", BindingScope.Server);
         FloatSlider("ShardStackDecayFactor", ELConfig.ShardStackDecayFactor, "Shard Stack Decay Factor", BindingScope.Server, 0f, 1f, 0.01f,
             visible: staged => staged.Get("ShardStackingMode", ShardStackMode.Diminishing) == ShardStackMode.Diminishing);
+        Toggle("RuneDiminishingReturns", ELConfig.RuneDiminishingReturns, "Rune Diminishing Returns", BindingScope.Server,
+            enabled: runeSocketing);
+        FloatSlider("RuneStackDecayFactor", ELConfig.RuneStackDecayFactor, "Rune Stack Decay Factor", BindingScope.Server, 0f, 1f, 0.01f,
+            visible: staged => staged.Get("RuneDiminishingReturns", ELConfig.RuneDiminishingReturns.Value), enabled: runeSocketing);
         EnumCycle("RuneExtractItemMode", ELConfig.RuneExtractItemMode, "Rune Extract Mode", BindingScope.Server);
         EnumCycle("RuneSetExtractItemMode", ELConfig.RuneSetExtractItemMode, "Set Rune Extract Mode", BindingScope.Server);
         Toggle("AllowGiftOnItemsWithSlots", ELConfig.AllowGiftOnItemsWithSlots, "Allow Brokkr Gift On Items With Slots", BindingScope.Server);

@@ -132,6 +132,9 @@ public sealed class EpicLoot : BaseUnityPlugin {
         LootTableLoaded?.Invoke();
         RegisterMagicEffectEvents();
 
+        // Wishlist conditions and magic item names for Item Favorite Framework, when it is installed.
+        Compatibility.ItemFavorites.RegisterLootIntegration();
+
         // Scheduled (non-per-frame) effect drivers, on their own DontDestroyOnLoad objects.
         MagicItemEffects.Shards.PoisonAdrenalinePulse.Create();
         MagicItemEffects.Shards.StormFuryPulse.Create();
