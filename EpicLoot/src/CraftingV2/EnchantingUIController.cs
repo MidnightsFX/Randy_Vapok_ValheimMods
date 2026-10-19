@@ -32,7 +32,8 @@ namespace EpicLoot.CraftingV2
         Disenchant = 1 << 4,
         //Helheim = 1 << 5,
         Upgrade = 1 << 6,
-        Rune = 1 << 7
+        Rune = 1 << 7,
+        Storage = 1 << 8
     }
 
     public enum RuneActions
@@ -179,6 +180,9 @@ namespace EpicLoot.CraftingV2
                     break;
                 case EnchantingFeature.Rune:
                     tabEnum = EnchantingTabs.Rune;
+                    break;
+                case EnchantingFeature.Storage:
+                    tabEnum = EnchantingTabs.Storage;
                     break;
             }
 
