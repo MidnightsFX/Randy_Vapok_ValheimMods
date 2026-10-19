@@ -118,6 +118,11 @@ public static class EffectGroupsSection
         .GroupBy(x => x.e)
         .ToDictionary(g => g.Key, g => g.First().Category);
 
+    public static IEnumerable<string> CategoryNames => Categories.Select(x => x.Category).Concat(new[] { OtherCategory });
+
+    public static string GetCategory(string effectType) =>
+        CategoryOf.TryGetValue(effectType, out string found) ? found : OtherCategory;
+
     public static void Build(MagicPages instance)
     {
         Player player = Player.m_localPlayer;
@@ -160,7 +165,7 @@ public static class EffectGroupsSection
                 continue;
             }
 
-            string category = CategoryOf.TryGetValue(effectType, out string found) ? found : OtherCategory;
+            string category = GetCategory(effectType);
             if (!byCategory.TryGetValue(category, out List<string> list))
             {
                 list = new List<string>();
@@ -177,7 +182,7 @@ public static class EffectGroupsSection
 
         instance.MagicPagesTextArea.Add("");
         instance.MagicPagesTextArea.Add($"<size={MagicPages.LARGE_FONT_SIZE}>$mod_epicloot_misc_header</size>");
-        foreach (string category in Categories.Select(x => x.Category).Concat(new[] { OtherCategory }))
+        foreach (string category in CategoryNames)
         {
             if (!byCategory.TryGetValue(category, out List<string> effectTypes))
             {
