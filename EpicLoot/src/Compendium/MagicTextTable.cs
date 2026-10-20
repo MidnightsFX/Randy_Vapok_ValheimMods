@@ -145,7 +145,7 @@ public class MagicTextTable : IMagicTextPart
 
     private MagicTextElement CreateCell(Transform line, string text, int column, int fontSize, bool allowOutline)
     {
-        MagicTextElement cell = _template.Create(text, line);
+        MagicTextElement cell = _template.Create(text, line, false);
         cell.SetFontSize(fontSize);
         cell.SetAlignment(_columns[column].Alignment);
         cell.EnableOutline(allowOutline && _columns[column].Outline);
@@ -209,6 +209,9 @@ public class MagicTextTable : IMagicTextPart
         private readonly RectTransform _arrow;
         private readonly Button _button;
         private readonly List<MagicTextElement> _texts = new();
+        private readonly IList<string> _detailLines;
+        private readonly string[] _detailSearchText;
+        private bool _detailBuilt;
         private bool _expanded;
 
         public bool Visible { get; private set; } = true;
@@ -274,23 +277,14 @@ public class MagicTextTable : IMagicTextPart
             ConfigureVertical(detailLayout, Mathf.RoundToInt(PadX + DetailIndent));
             detailLayout.padding.bottom = Mathf.RoundToInt(DetailBottomPad);
 
-            float detailWidth = table._rect.sizeDelta.x - PadX - DetailIndent;
-            float detailHeight = detail.Count > 0 ? DetailBottomPad : 0f;
-            foreach (string text in detail)
-            {
-                MagicTextElement element = table._template.Create(text, _detail);
-                element.SetFontSize(DetailFontSize);
-                element.Fit(detailWidth, 18f);
-                _texts.Add(element);
-                detailHeight += element.GetHeight();
-            }
-
-            _detail.sizeDelta = new Vector2(_detail.sizeDelta.x, detailHeight);
+            _detailLines = detail;
+            _detailSearchText = detail.Select(MagicTextElement.ToSearchText).ToArray();
             _expanded = expanded;
             ApplyExpanded();
         }
 
-        public bool IsMatch(string loweredQuery) => _texts.Any(x => x.IsMatch(loweredQuery));
+        public bool IsMatch(string loweredQuery) =>
+            _texts.Any(x => x.IsMatch(loweredQuery)) || _detailSearchText.Any(x => x.Contains(loweredQuery));
 
         public void SetStriped(bool striped)
         {
@@ -311,9 +305,31 @@ public class MagicTextTable : IMagicTextPart
 
         public float GetHeight() => _container.sizeDelta.y;
 
+        private void BuildDetail()
+        {
+            if (_detailBuilt)
+            {
+                return;
+            }
+
+            _detailBuilt = true;
+            float detailWidth = _table._rect.sizeDelta.x - PadX - DetailIndent;
+            float detailHeight = DetailBottomPad;
+            foreach (string text in _detailLines)
+            {
+                MagicTextElement element = _table._template.Create(text, _detail, false);
+                element.SetFontSize(DetailFontSize);
+                element.Fit(detailWidth, 18f);
+                _texts.Add(element);
+                detailHeight += element.GetHeight();
+            }
+
+            _detail.sizeDelta = new Vector2(_detail.sizeDelta.x, detailHeight);
+        }
+
         private void Toggle()
         {
-            if (_detail.childCount == 0)
+            if (_detailLines.Count == 0)
             {
                 return;
             }
@@ -325,7 +341,7 @@ public class MagicTextTable : IMagicTextPart
 
         public void SetExpanded(bool expanded)
         {
-            if (_detail.childCount == 0 || _expanded == expanded)
+            if (_detailLines.Count == 0 || _expanded == expanded)
             {
                 return;
             }
@@ -336,6 +352,11 @@ public class MagicTextTable : IMagicTextPart
 
         private void ApplyExpanded()
         {
+            if (_expanded)
+            {
+                BuildDetail();
+            }
+
             _detail.gameObject.SetActive(_expanded);
             _arrow.localRotation = Quaternion.Euler(0f, 0f, _expanded ? 0f : 90f);
             float height = _line.sizeDelta.y + (_expanded ? _detail.sizeDelta.y : 0f);
