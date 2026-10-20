@@ -128,7 +128,7 @@ public static class ArmorTextSection
         float extraMs = player.GetTotalActiveMagicEffectValue(MagicEffectType.ModifyParryWindow);
         float baseMs = ParryWindowSeconds * 1000f;
         AddRow(table, "$mod_epicloot_armor_parrywindow", Millis(baseMs), extraMs, Millis(baseMs + extraMs), detail,
-            x => Signed(x) + " ms", true);
+            x => string.Format(Localization.instance.Localize("$mod_epicloot_armor_ms"), Signed(x)), true);
     }
 
     private static void AddBlockStamina(Player player, MagicTextTable table)

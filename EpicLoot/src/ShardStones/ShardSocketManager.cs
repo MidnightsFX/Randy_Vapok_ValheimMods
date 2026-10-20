@@ -161,6 +161,10 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
+            if (!CheckSocketExclusivity(effect, occupants, equipMagicItem.Rarity, out reason)) {
+                return false;
+            }
+
             return true;
         }
 
@@ -222,6 +226,10 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
+            if (!CheckSocketExclusivity(effect, occupants, equipMagicItem.Rarity, out reason)) {
+                return false;
+            }
+
             return true;
         }
 
@@ -269,6 +277,25 @@ namespace EpicLoot.ShardStones {
                 // a socket. Same notion of "valueless" the BreakValueless removal mode uses.
                 if (MagicItemEffectDefinitions.IsValuelessEffect(effect.EffectType)) {
                     reason = "$mod_epicloot_socket_nostackbinary";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Two different socketed effects that either definition marks exclusive may not share an item, the
+        // rule rolled effects already follow: a Fire rune and a Frost rune, say. The same effect twice is
+        // CheckDuplicateEffect's call. Exclusion against the rolled effects is CheckRequirements'.
+        private static bool CheckSocketExclusivity(MagicItemEffect effect, List<SocketOccupant> occupants,
+            ItemRarity rarity, out string reason) {
+            reason = null;
+
+            foreach (var occupant in occupants) {
+                if (occupant.Effect != null &&
+                    MagicItemEffectRequirements.EffectsExclude(effect.EffectType, occupant.Effect.EffectType)) {
+                    var effectText = MagicItem.GetEffectText(occupant.Effect, rarity, false);
+                    reason = $"$mod_epicloot_socket_conflict: {effectText}";
                     return false;
                 }
             }
@@ -625,7 +652,9 @@ namespace EpicLoot.ShardStones {
 
         // Whether the configured input type may socket an effect the item already carries as a rolled
         // effect. color != None => shardstone; color == None => runestone. Each type has its own toggle.
-        private static bool AllowMatchingItemEffect(ShardType color) {
+        // Also read the other way round, for a rolled effect joining a matching socket
+        // (MagicItemEffectDefinitions.GetAvailableEffects).
+        internal static bool AllowMatchingItemEffect(ShardType color) {
             return color != ShardType.None
                 ? ELConfig.AllowShardstoneDuplicateItemEffect.Value
                 : ELConfig.AllowRunestoneDuplicateItemEffect.Value;

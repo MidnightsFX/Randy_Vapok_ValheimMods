@@ -1165,15 +1165,11 @@ namespace EpicLoot.CraftingV2
                 return new List<InventoryItemListElement>() { };
             }
 
-            bool valuelessEffect = false;
-            if (magicItem.Effects.Count > 0 && selectedEffect != "")
-            {
-                MagicItemEffectDefinition currentEffectDef = MagicItemEffectDefinitions.Get(selectedEnchant.First().EffectType);
-                valuelessEffect = currentEffectDef.GetValuesForRarity(rarity) == null;
-            }
-
+            // The replaced effect is left out of the checks even when it has no value (passing -1 for one
+            // kept it, so a rune could replace Throwable with Recall); GetAvailableEffects only offers it
+            // back when it has a value to re-roll.
             List<MagicItemEffectDefinition> availableEffects = MagicItemEffectDefinitions.GetAvailableEffects(
-                item.Extended(), item.GetMagicItem(), valuelessEffect ? -1 : selectedEnchantIndex, checkruneroll: true);
+                item.Extended(), item.GetMagicItem(), selectedEnchantIndex, checkruneroll: true);
             List<string> availableEffectNames = availableEffects.Select(x => x.Type).ToList();
 
             IEnumerable<ItemDrop.ItemData> selectedItems = InventoryManagement.Instance.GetAllItems()
@@ -1549,8 +1545,10 @@ namespace EpicLoot.CraftingV2
 
             MagicItemComponent magicItemComponent = newItem.Data().GetOrCreate<MagicItemComponent>();
 
-            // We might need to rethink how power modifier is checked and applied here
-            if (!float.IsNaN(powerModifier) && powerModifier < 999f && powerModifier > 0 && effect.EffectValue > 1)
+            // We might need to rethink how power modifier is checked and applied here. "Has a value" is the
+            // definition's call, not the number's: a value test (> 1) skipped real rolls of 1 or less.
+            if (!float.IsNaN(powerModifier) && powerModifier < 999f && powerModifier > 0 &&
+                !MagicItemEffectDefinitions.IsValuelessEffect(effect.EffectType))
             {
                 runeEffect.EffectValue = effect.EffectValue * powerModifier;
                 // TryGet, not the raw dictionary index (which threw KeyNotFound for a removed content
@@ -1827,15 +1825,10 @@ namespace EpicLoot.CraftingV2
             ItemRarity rarity = magicItem.Rarity;
             string rarityColor = EpicLoot.GetRarityColor(rarity);
 
-            bool valuelessEffect = false;
-            if (augmentindex >= 0 && augmentindex < magicItem.Effects.Count)
-            {
-                MagicItemEffectDefinition currentEffectDef = MagicItemEffectDefinitions.Get(magicItem.Effects[augmentindex].EffectType);
-                valuelessEffect = currentEffectDef.GetValuesForRarity(rarity) == null;
-            }
-
+            // The replaced effect is left out of the checks even when it has no value; GetAvailableEffects
+            // only offers it back when it has a value to re-roll.
             List<MagicItemEffectDefinition> availableEffects = MagicItemEffectDefinitions.GetAvailableEffects(
-                item.Extended(), item.GetMagicItem(), valuelessEffect ? -1 : augmentindex);
+                item.Extended(), item.GetMagicItem(), augmentindex);
 
             float totalSelectionWeight = availableEffects.Sum(x => x.SelectionWeight);
 

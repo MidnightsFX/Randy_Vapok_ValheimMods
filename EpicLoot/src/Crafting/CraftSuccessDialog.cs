@@ -234,6 +234,12 @@ namespace EpicLoot.Crafting
             dialog.Description.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 460);
             dialog.Icon = Instantiate(inventoryGui.m_recipeIcon, dialog.Frame);
 
+            // The crafting panel disables these three templates while it has no recipe selected, and a copy
+            // keeps that state, which left the dialog with a blank name, description or icon.
+            dialog.NameText.enabled = true;
+            dialog.Description.enabled = true;
+            dialog.Icon.enabled = true;
+
             var scrollview = ConvertToScrollingDescription(dialog.Description, dialog.Frame);
             var svrt = (RectTransform)scrollview.transform;
             svrt.SetSiblingIndex(1);

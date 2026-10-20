@@ -101,7 +101,7 @@ namespace EpicLoot.GatedItemType
                     if (itemsByBoss.ContainsKey(itemByBoss.Key))
                     {
                         EpicLoot.Log($"Merging [{itemByBoss.Key}] entries, duplicates will be removed.");
-                        itemsByBoss[itemByBoss.Key].Union(allowedItems).ToList();
+                        itemsByBoss[itemByBoss.Key] = itemsByBoss[itemByBoss.Key].Union(allowedItems).ToList();
                     }
                     else
                     {

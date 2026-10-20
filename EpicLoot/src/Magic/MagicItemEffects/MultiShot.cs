@@ -19,6 +19,11 @@ namespace EpicLoot.MagicItemEffects
         private enum PendingShotType { None, TripleBow, DoubleMagic }
         private static PendingShotType _pendingShot = PendingShotType.None;
 
+        // The attack whose current burst fires the extra projectiles, and the share of damage each of them
+        // deals. Set for the length of one FireProjectileBurst.
+        private static Attack _scaledBurstAttack;
+        private static float _scaledBurstDamage = 1f;
+
         // True while the local player's current attack fires a triple shot (rolled in OnAttackTrigger, before
         // its bursts), for effects that change how each of its projectiles flies.
         internal static bool IsTripleShotFiring => _pendingShot == PendingShotType.TripleBow;
@@ -102,12 +107,11 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
-        // Note: the ref HitData.DamageTypes? __state is set to null if no changes are made
         [HarmonyPatch(typeof(Attack), nameof(Attack.FireProjectileBurst))]
         [HarmonyPrefix]
-        public static void Attack_FireProjectileBurst_Prefix(Attack __instance, ref HitData.DamageTypes? __state)
+        public static void Attack_FireProjectileBurst_Prefix(Attack __instance)
         {
-            __state = null;
+            _scaledBurstAttack = null;
             if (_pendingShot == PendingShotType.None)
             {
                 return;
@@ -119,16 +123,13 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
-            // Record the damages value so it can be restored after changes
-            __state = __instance.GetWeapon().m_shared.m_damages;
-
-            bool modified = _pendingShot == PendingShotType.TripleBow
-                ? ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.TripleBowShot), 0.4f, 2f, 1.25f, 3)
-                : ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.DoubleMagicShot), 0.66f, 2f, 1.2f, 2);
-
-            if (!modified)
+            if (_pendingShot == PendingShotType.TripleBow)
             {
-                __state = null;
+                ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.TripleBowShot), 0.4f, 2f, 1.25f, 3);
+            }
+            else
+            {
+                ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.DoubleMagicShot), 0.66f, 2f, 1.2f, 2);
             }
         }
 
@@ -175,9 +176,11 @@ namespace EpicLoot.MagicItemEffects
                 }
             }
 
-            HitData.DamageTypes weaponDamage = attack.GetWeapon().m_shared.m_damages;
-            weaponDamage.Modify(damage);
-            attack.GetWeapon().m_shared.m_damages = weaponDamage;
+            // Applied to each projectile's own HitData as vanilla builds it (Attack_ModifyDamage_Postfix), so the
+            // whole hit is cut. Scaling the weapon's base m_damages left its upgrades, world level and the ammo
+            // at full strength.
+            _scaledBurstAttack = attack;
+            _scaledBurstDamage = damage;
 
             attack.m_projectileAccuracy = attack.m_weapon.m_shared.m_attack.m_projectileAccuracy * accuracy;
 
@@ -187,19 +190,27 @@ namespace EpicLoot.MagicItemEffects
             return true;
         }
 
+        // Attack.ModifyDamage runs once per projectile inside FireProjectileBurst, on the finished HitData
+        // (weapon with its upgrades and world level, plus the ammo), just before it is handed to the projectile.
+        [HarmonyPatch(typeof(Attack), nameof(Attack.ModifyDamage))]
+        [HarmonyPostfix]
+        public static void Attack_ModifyDamage_Postfix(Attack __instance, HitData hitData)
+        {
+            if (_scaledBurstAttack != null && __instance == _scaledBurstAttack && hitData != null)
+            {
+                hitData.m_damage.Modify(_scaledBurstDamage);
+            }
+        }
+
         /// <summary>
-        /// Restore the attack damages to previous state if changed by the prefix. A finalizer, not a
-        /// postfix: m_shared is shared by every weapon of that kind, so an exception mid-burst would
-        /// otherwise leave all of them at the reduced damage until the game restarts.
+        /// Ends the burst's damage scaling. A finalizer, not a postfix, so an exception mid-burst cannot leave
+        /// it applying to the attack's later hits.
         /// </summary>
         [HarmonyPatch(typeof(Attack), nameof(Attack.FireProjectileBurst))]
         [HarmonyFinalizer]
-        public static void Attack_FireProjectileBurst_Finalizer(Attack __instance, HitData.DamageTypes? __state)
+        public static void Attack_FireProjectileBurst_Finalizer()
         {
-            if (__state != null)
-            {
-                __instance.GetWeapon().m_shared.m_damages = __state.Value;
-            }
+            _scaledBurstAttack = null;
         }
 
         /// <summary>

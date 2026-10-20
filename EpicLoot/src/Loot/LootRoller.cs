@@ -2089,11 +2089,10 @@ namespace EpicLoot
 
             var rarity = magicItem.Rarity;
             var currentEffect = magicItem.Effects[effectIndex];
-            
 
-            var valuelessEffect = MagicItemEffectDefinitions.IsValuelessEffect(currentEffect.EffectType);
-            var availableEffects = MagicItemEffectDefinitions.GetAvailableEffects(item, magicItem, valuelessEffect ? 
-                -1 : effectIndex);
+            // The effect being replaced is left out of the candidate checks, valueless or not; GetAvailableEffects
+            // only offers it back when it has a value to re-roll.
+            var availableEffects = MagicItemEffectDefinitions.GetAvailableEffects(item, magicItem, effectIndex);
 
             var augmentChoices = 2;
             var featureValues = EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(EnchantingFeature.Augment);
@@ -2151,19 +2150,23 @@ namespace EpicLoot
             }
         }
 
+        // Player-ZDO key holding the local player's Luck, mirrored by Multiplayer_Player_Patch.UpdateRichesAndLuck.
+        // A float: diminishing shard stacking gives fractional totals, which the old int key "el-luk" truncated.
+        public const string LuckZdoValueKey = "el-luck";
+
         public static float GetLuckFactor(Vector3 fromPoint)
         {
             var luckFactor = EpicLoot.GetWorldLuckFactor();
             var players = new List<Player>();
             Player.GetPlayersInRange(fromPoint, 100f, players);
 
-            if (players.Count > 0)
+            foreach (var player in players)
             {
-                var totalLuckFactor = players
-                    .Select(x => x.m_nview.GetZDO().GetInt("el-luk") * 0.01f)
-                    .DefaultIfEmpty(0)
-                    .Sum();
-                luckFactor += totalLuckFactor;
+                var zdo = player?.m_nview?.GetZDO();
+                if (zdo != null)
+                {
+                    luckFactor += zdo.GetFloat(LuckZdoValueKey) * 0.01f;
+                }
             }
 
             return luckFactor;
@@ -2178,7 +2181,7 @@ namespace EpicLoot
                 var index = 0;
                 foreach (var player in players)
                 {
-                    Debug.LogWarning($"{index++}: {player?.m_name}: {player?.m_nview?.GetZDO()?.GetInt("el-luk")}");
+                    Debug.LogWarning($"{index++}: {player?.m_name}: {player?.m_nview?.GetZDO()?.GetFloat(LuckZdoValueKey)}");
                 }
             }
         }

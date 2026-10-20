@@ -172,6 +172,7 @@ public static class DefenseTextSection
             case HitData.DamageModifier.SlightlyResistant: return "$inventory_slightlyresistant";
             case HitData.DamageModifier.Resistant: return "$inventory_resistant";
             case HitData.DamageModifier.VeryResistant: return "$inventory_veryresistant";
+            case HitData.DamageModifier.SlightlyWeak: return "$inventory_slightlyweak";
             case HitData.DamageModifier.Weak: return "$inventory_weak";
             case HitData.DamageModifier.VeryWeak: return "$inventory_veryweak";
             case HitData.DamageModifier.Immune: return "$inventory_immune";

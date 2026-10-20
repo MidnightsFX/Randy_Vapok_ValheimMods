@@ -226,8 +226,13 @@ namespace EpicLoot
                         tooltip.AppendLine($"  <color={socketColor}>{iconTag} {GetEffectText(socketEffect, socket.SourceRarity, false)}</color>{GetSocketStackTag(GetSocketStackMultiplier(socketIndex))}{removalTag}");
                         if (showRange)
                         {
+                            // A shardstone's value is fixed by the shard grid, not rolled, so it has no range to
+                            // show; the rarity's roll range read as though it did. A runestone keeps its range.
+                            var fixedValue = socket.ShardType != ShardType.None
+                                ? new MagicItemEffectDefinition.ValueDef { MinValue = socketEffect.EffectValue, MaxValue = socketEffect.EffectValue }
+                                : null;
                             tooltip.Append($"<color=#c0c0c0ff>");
-                            tooltip.Append(GetEffectDetailBlock(socketEffect, socket.SourceRarity, null, null, "     "));
+                            tooltip.Append(GetEffectDetailBlock(socketEffect, socket.SourceRarity, null, fixedValue, "     "));
                             tooltip.Append($"</color>");
                         }
                     }

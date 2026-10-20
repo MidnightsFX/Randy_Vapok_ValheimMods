@@ -25,10 +25,11 @@ namespace EpicLoot_UnityLib
         public ItemRarity Rarity;
         public ShardType Color;
 
+        // Built as loot is, so the item carries this world's level: a bare prefab clone keeps the prefab's,
+        // and in a New Game+ world that never stacks with the same material already carried.
         public ItemDrop.ItemData CreateItem(int stack)
         {
-            ItemDrop.ItemData item = Prefab.GetComponent<ItemDrop>().m_itemData.Clone();
-            item.m_dropPrefab = Prefab;
+            ItemDrop.ItemData item = LootRoller.CreateLootItemData(Prefab);
             item.m_stack = stack;
             return item;
         }

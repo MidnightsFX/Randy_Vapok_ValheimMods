@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using EpicLoot.MagicItemEffects;
@@ -87,7 +88,8 @@ public static class VitalsTextSection
         AddRegenMultiplier(player, table, "$mod_epicloot_vitals_eitrregen", MagicEffectType.ModifyEitrRegen,
             EitrRegenExtras,
             (StatusEffect effect, ref float m) => effect.ModifyEitrRegen(ref m),
-            (SEMan manager, ref float m) => manager.ModifyEitrRegen(ref m));
+            (SEMan manager, ref float m) => manager.ModifyEitrRegen(ref m),
+            item => item.m_shared.m_eitrRegenModifier);
         AddCarryWeight(player, table);
         AddMovement(player, table);
         table.Finish();
@@ -163,7 +165,7 @@ public static class VitalsTextSection
     }
 
     private static void AddRegenMultiplier(Player player, MagicTextTable table, string name, string effectType,
-        string[] extras, StatusRegen statusRegen, ManagerRegen managerRegen)
+        string[] extras, StatusRegen statusRegen, ManagerRegen managerRegen, Func<ItemDrop.ItemData, float> gearRegen = null)
     {
         List<string> detail = new();
         float vanillaMultiplier = AddStatusLines(player, detail, statusRegen);
@@ -171,6 +173,16 @@ public static class VitalsTextSection
         managerRegen(player.GetSEMan(), ref totalMultiplier);
 
         float remainder = totalMultiplier - vanillaMultiplier - ModifyPlayerRegen.GetModifyRegenValue(player, effectType);
+
+        // Vanilla adds the worn gear's own regen modifier after the status effects (eitr only, in
+        // Player.UpdateStats), so it is part of the base.
+        if (gearRegen != null)
+        {
+            float gear = AddGearLines(player, detail, gearRegen);
+            vanillaMultiplier += gear;
+            totalMultiplier += gear;
+        }
+
         AddMagicDetail(player, detail, new[] { effectType }, extras, remainder, 0.005f, SignedPercent);
         AddRow(table, name, Percent(vanillaMultiplier), totalMultiplier - vanillaMultiplier, Percent(totalMultiplier),
             detail, SignedPercent);
@@ -191,6 +203,26 @@ public static class VitalsTextSection
         }
 
         return vanillaMultiplier;
+    }
+
+    // The slots Player.GetEquipmentEitrRegenModifier sums.
+    private static float AddGearLines(Player player, List<string> detail, Func<ItemDrop.ItemData, float> gearRegen)
+    {
+        float total = 0f;
+        foreach (ItemDrop.ItemData item in new[] { player.m_chestItem, player.m_legItem, player.m_helmetItem,
+            player.m_shoulderItem, player.m_leftItem, player.m_rightItem, player.m_utilityItem })
+        {
+            float value = item != null ? gearRegen(item) : 0f;
+            if (Mathf.Approximately(value, 0f))
+            {
+                continue;
+            }
+
+            total += value;
+            detail.Add(Grey($"{item.m_shared.m_name} {SignedPercent(value)}"));
+        }
+
+        return total;
     }
 
     private static void AddCarryWeight(Player player, MagicTextTable table)

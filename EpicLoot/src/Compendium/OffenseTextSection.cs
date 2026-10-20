@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EpicLoot.LegendarySystem;
 using EpicLoot.MagicItemEffects;
 using EpicLoot.MagicItemEffects.Shards;
+using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using UnityEngine;
 
 namespace EpicLoot.Compendium;
@@ -107,12 +108,12 @@ public static class OffenseTextSection
         AddAttackSpeed(player, table);
         AddStagger(player, table, weapon, otherWeapon);
         AddLifeSteal(player, table, otherWeapon);
-        AddBackstab(table, weapon, magicItem);
-        AddStamina(player, table, weapon, magicItem);
-        AddEitr(player, table, weapon, magicItem);
-        AddHealth(player, table, weapon, magicItem);
+        AddBackstab(player, table, weapon, include);
+        AddStamina(player, table, weapon, include);
+        AddEitr(player, table, weapon, include);
+        AddHealth(player, table, weapon, include);
         AddDrawStamina(player, table, weapon, magicItem);
-        AddKnockback(player, table, weapon, magicItem);
+        AddKnockback(player, table, weapon, include);
         table.Finish();
     }
 
@@ -347,19 +348,21 @@ public static class OffenseTextSection
         AddRow(table, "$mod_epicloot_offense_lifesteal", Percent(0f), total, Percent(total), detail, SignedPercent, true);
     }
 
-    private static void AddBackstab(MagicTextTable table, ItemDrop.ItemData weapon, MagicItem magicItem)
+    private static void AddBackstab(Player player, MagicTextTable table, ItemDrop.ItemData weapon,
+        Func<ItemDrop.ItemData, bool> include)
     {
         float baseValue = weapon.m_shared.m_backstabBonus;
-        float total = baseValue * (1f + WeaponEffect(magicItem, MagicEffectType.ModifyBackstab));
+        float total = baseValue * (1f + WeaponEffect(player, weapon, MagicEffectType.ModifyBackstab));
         List<string> detail = new();
-        detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.ModifyBackstab));
+        detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.ModifyBackstab, include));
         AddRow(table, "$item_backstab", Times(baseValue), total - baseValue, Times(total), detail, x => Signed(x, "0.#") + "x", true);
     }
 
-    private static void AddStamina(Player player, MagicTextTable table, ItemDrop.ItemData weapon, MagicItem magicItem)
+    private static void AddStamina(Player player, MagicTextTable table, ItemDrop.ItemData weapon,
+        Func<ItemDrop.ItemData, bool> include)
     {
         float baseValue = weapon.m_shared.m_attack.m_attackStamina;
-        bool bloodlust = magicItem != null && magicItem.HasEffect(MagicEffectType.Bloodlust);
+        bool bloodlust = Bloodlust.HasBloodlust(player, weapon, weapon.m_shared.m_attack);
         if (baseValue <= 0f && !bloodlust)
         {
             return;
@@ -372,24 +375,26 @@ public static class OffenseTextSection
         }
         else
         {
-            total = (1f - WeaponEffect(magicItem, MagicEffectType.ModifyAttackStaminaUse)) * baseValue;
-            if (magicItem != null && magicItem.HasEffect(MagicEffectType.SpellSword))
+            total = (1f - WeaponEffect(player, weapon, MagicEffectType.ModifyAttackStaminaUse)) * baseValue;
+            if (HasSpellsword(player, weapon))
             {
                 total = Spellsword.GetSpellswordAttackStamina(total);
             }
         }
 
         List<string> detail = new();
-        detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.ModifyAttackStaminaUse));
-        detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.Bloodlust));
-        detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.SpellSword));
+        detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.ModifyAttackStaminaUse, include));
+        detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.Bloodlust, include));
+        detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.SpellSword, include));
         AddRow(table, "$item_staminause", Decimal(baseValue), total - baseValue, Decimal(total), detail, x => Signed(x, "0.#"), false);
     }
 
-    private static void AddEitr(Player player, MagicTextTable table, ItemDrop.ItemData weapon, MagicItem magicItem)
+    private static void AddEitr(Player player, MagicTextTable table, ItemDrop.ItemData weapon,
+        Func<ItemDrop.ItemData, bool> include)
     {
         float baseValue = weapon.m_shared.m_attack.m_attackEitr;
-        bool spellsword = magicItem != null && magicItem.HasEffect(MagicEffectType.SpellSword);
+        // An Eitr Infusion waives Spellsword's extra eitr while it lasts, as it does in game.
+        bool spellsword = HasSpellsword(player, weapon) && !EitrInfusion.IsInfused;
         List<string> detail = new();
         float total;
         if (ConjuredArrows.TryGetShotCost(weapon, out float conjuredCost))
@@ -410,31 +415,34 @@ public static class OffenseTextSection
                 cost += Spellsword.GetAdditionalSpellswordAttackEitr(weapon.m_shared.m_attack.m_attackStamina);
             }
 
-            total = (1f - WeaponEffect(magicItem, MagicEffectType.ModifyAttackEitrUse)) * cost;
-            detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.ModifyAttackEitrUse));
-            detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.SpellSword));
+            total = (1f - WeaponEffect(player, weapon, MagicEffectType.ModifyAttackEitrUse)) * cost;
+            detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.ModifyAttackEitrUse, include));
+            detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.SpellSword, include));
         }
 
         AddRow(table, "$item_eitruse", Decimal(baseValue), total - baseValue, Decimal(total), detail, x => Signed(x, "0.#"), false);
     }
 
-    private static void AddHealth(Player player, MagicTextTable table, ItemDrop.ItemData weapon, MagicItem magicItem)
+    private static void AddHealth(Player player, MagicTextTable table, ItemDrop.ItemData weapon,
+        Func<ItemDrop.ItemData, bool> include)
     {
         float baseValue = weapon.m_shared.m_attack.m_attackHealth;
-        bool bloodlust = magicItem != null && magicItem.HasEffect(MagicEffectType.Bloodlust);
+        bool bloodlust = Bloodlust.HasBloodlust(player, weapon, weapon.m_shared.m_attack);
         if (baseValue <= 0f && !bloodlust)
         {
             return;
         }
 
         float cost = bloodlust ? Bloodlust.GetBloodlustHealth(baseValue, weapon.m_shared.m_attack.m_attackStamina) : baseValue;
-        float total = ModifyAttackCosts.GetEffectPercentage(WeaponEffect(magicItem, MagicEffectType.ModifyAttackHealthUse)) * cost;
+        float total = ModifyAttackCosts.GetEffectPercentage(WeaponEffect(player, weapon, MagicEffectType.ModifyAttackHealthUse)) * cost;
         List<string> detail = new();
-        detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.ModifyAttackHealthUse));
-        detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.Bloodlust));
+        detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.ModifyAttackHealthUse, include));
+        detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.Bloodlust, include));
         AddRow(table, "$item_healthuse", Decimal(baseValue), total - baseValue, Decimal(total), detail, x => Signed(x, "0.#"), false);
     }
 
+    // Matches ModifyDrawStamina: the bow's own enchantments, plus set bonuses on the bow the player holds.
+    // Other worn items do not count here, unlike the attack costs.
     private static void AddDrawStamina(Player player, MagicTextTable table, ItemDrop.ItemData weapon, MagicItem magicItem)
     {
         float baseValue = weapon.m_shared.m_attack.m_drawStaminaDrain;
@@ -443,14 +451,18 @@ public static class OffenseTextSection
             return;
         }
 
-        float total = (1f - WeaponEffect(magicItem, MagicEffectType.ModifyDrawStaminaUse)) * baseValue;
+        float modifier = (magicItem?.GetTotalEffectValue(MagicEffectType.ModifyDrawStaminaUse, 0.01f) ?? 0f) +
+            MagicEffectsHelper.GetTotalActiveSetEffectValue(player, MagicEffectType.ModifyDrawStaminaUse, 0.01f);
+        float total = (1f - Mathf.Clamp(modifier, 0f, 1f)) * baseValue;
         List<string> detail = new();
-        detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.ModifyDrawStaminaUse));
+        detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.ModifyDrawStaminaUse,
+            x => x == weapon));
         AddRow(table, "$item_staminahold", PerSecond(baseValue), total - baseValue, PerSecond(total), detail,
             x => Signed(x, "0.#"), false);
     }
 
-    private static void AddKnockback(Player player, MagicTextTable table, ItemDrop.ItemData weapon, MagicItem magicItem)
+    private static void AddKnockback(Player player, MagicTextTable table, ItemDrop.ItemData weapon,
+        Func<ItemDrop.ItemData, bool> include)
     {
         float baseValue = weapon.m_shared.m_attackForce;
         if (baseValue <= 0f)
@@ -458,29 +470,20 @@ public static class OffenseTextSection
             return;
         }
 
-        float total = magicItem != null ? CloseQuarter.GetKnockback(weapon, magicItem) : baseValue;
+        float total = baseValue * (1f - Mathf.Clamp01(WeaponEffect(player, weapon, MagicEffectType.CloseQuarter)));
         List<string> detail = new();
-        detail.AddRange(WeaponSources(magicItem, weapon, MagicEffectType.CloseQuarter));
+        detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.CloseQuarter, include));
         AddRow(table, "$item_knockback", Decimal(baseValue), total - baseValue, Decimal(total), detail, x => Signed(x, "0.#"), true);
     }
 
-    private static float WeaponEffect(MagicItem magicItem, string effectType) =>
-        magicItem?.GetTotalEffectValue(effectType, 0.01f) ?? 0f;
+    // What the game charges or grants this weapon: every worn item and active set bonus, less the weapon in the
+    // other hand, as the cost, backstab and Close Quarter patches read it.
+    private static float WeaponEffect(Player player, ItemDrop.ItemData weapon, string effectType) =>
+        MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(player, weapon, effectType, 0.01f);
 
-    private static IEnumerable<string> WeaponSources(MagicItem magicItem, ItemDrop.ItemData weapon, string effectType)
-    {
-        StatSourceLines.MarkShown(effectType);
-        if (magicItem == null)
-        {
-            yield break;
-        }
-
-        foreach (MagicItemEffect effect in magicItem.GetEffects(effectType, includeSocketed: true))
-        {
-            yield return StatSourceLines.Source(effectType,
-                $"{MagicItem.GetEffectText(effect, weapon.GetRarity(), false)} ({weapon.GetDecoratedName()})");
-        }
-    }
+    private static bool HasSpellsword(Player player, ItemDrop.ItemData weapon) =>
+        Spellsword.IsSpellswordWeapon(weapon) &&
+        MagicEffectsHelper.HasActiveMagicEffectOnWeapon(player, weapon, MagicEffectType.SpellSword, out _);
 
     private static void AddRow(MagicTextTable table, string name, string baseText, float magicDelta, string totalText,
         List<string> detail, Func<float, string> formatDelta, bool higherIsBetter)

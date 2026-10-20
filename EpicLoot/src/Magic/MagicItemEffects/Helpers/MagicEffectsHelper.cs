@@ -269,8 +269,11 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
         /// attacker's client. When this client owns the target, Character.Damage has already run RPC_Damage
         /// synchronously (ZRoutedRpc handles a call to its own peer immediately), so the health is post-hit and
         /// is read as-is -- subtracting the hit again refunded Wager on hits that left the target alive. A
-        /// remote target has not taken the hit yet, so its owner's resistance, armor and difficulty scaling are
-        /// estimated here; fire, poison and spirit arrive as damage over time and never kill on the hit itself.
+        /// remote target has not taken the hit yet, so its owner's sneak-attack bonus, stagger bonus, resistance
+        /// (of the weak spot struck, if any), armor and difficulty scaling are estimated here, in RPC_Damage's
+        /// order; fire, poison and spirit arrive as damage over time and never kill on the hit itself. Two things
+        /// the owner knows and this client cannot: a creature's five-minute sneak-attack cooldown (a calm creature
+        /// is taken to allow one) and a remote player's armor (their gear is not synced here).
         /// </summary>
         public static bool IsLethalHit(Character target, HitData hit)
         {
@@ -285,13 +288,21 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
             }
 
             HitData estimate = hit.Clone();
-            estimate.ApplyResistance(target.GetDamageModifiers(), out _);
+            BaseAI baseAI = target.GetBaseAI();
+            Character attacker = hit.GetAttacker();
+            if (baseAI != null && !baseAI.IsAlerted() && estimate.m_backstabBonus > 1f &&
+                (!ZoneSystem.instance.GetGlobalKey(GlobalKeys.PassiveMobs) || attacker == null ||
+                    !baseAI.CanSeeTarget(attacker)))
+            {
+                estimate.ApplyModifier(estimate.m_backstabBonus);
+            }
+            if (!target.IsPlayer() && target.IsStaggering())
+            {
+                estimate.ApplyModifier(2f);
+            }
+            estimate.ApplyResistance(target.GetDamageModifiers(target.GetWeakSpot(estimate.m_weakSpot)), out _);
             if (!target.IsPlayer())
             {
-                if (target.IsStaggering())
-                {
-                    estimate.ApplyModifier(2f);
-                }
                 if (Game.m_worldLevel > 0)
                 {
                     estimate.ApplyArmor(Game.m_worldLevel * Game.instance.m_worldLevelEnemyBaseAC);

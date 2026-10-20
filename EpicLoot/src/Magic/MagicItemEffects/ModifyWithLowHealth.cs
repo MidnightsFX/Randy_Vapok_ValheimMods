@@ -110,5 +110,21 @@ namespace EpicLoot.MagicItemEffects
 
             return currentHealth - instantDamage < lowHealthPercentage;
         }
+
+        // A damage-over-time tick (burning, poison, smoke) as Character.ApplyDamage is handed it: unlike a hit it
+        // lands whole, fire and poison included, scaled only by the world's damage-taken rate.
+        public static bool PlayerWillBecomeHealthCriticalFromTick(Player player, HitData hit)
+        {
+            if (PlayerHasLowHealth(player))
+            {
+                return true;
+            }
+
+            float lowHealthPercentage = Mathf.Min(ModifyWithLowHealth.GetLowHealthPercentage(player), 1.0f) * player.GetMaxHealth();
+            float typedDamage = hit.m_damage.GetTotalDamage();
+            float damage = typedDamage * Game.m_localDamgeTakenRate + (hit.GetTotalDamage() - typedDamage);
+
+            return player.GetHealth() - damage < lowHealthPercentage;
+        }
     }
 }

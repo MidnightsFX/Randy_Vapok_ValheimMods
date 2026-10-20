@@ -60,8 +60,14 @@ namespace EpicLoot.MagicItemEffects
 
         private static bool AttackHasBloodlust(Attack attack)
         {
-            return attack.m_character is Player player &&
-                (WeaponHasBloodlust(attack.m_weapon) || SetGrantsBloodlust(player, attack));
+            return attack.m_character is Player player && HasBloodlust(player, attack.m_weapon, attack);
+        }
+
+        // Separate from the Attack so the compendium can ask it of a held weapon's primary attack, whose
+        // template has no m_weapon until it is swung.
+        internal static bool HasBloodlust(Player player, ItemDrop.ItemData weapon, Attack attack)
+        {
+            return WeaponHasBloodlust(weapon) || SetGrantsBloodlust(player, weapon, attack);
         }
 
         /// <summary>
@@ -73,14 +79,13 @@ namespace EpicLoot.MagicItemEffects
         /// bonuses count -- a Bloodlust rolled on another item still changes nothing but its own weapon, for the
         /// reason above.
         /// </summary>
-        private static bool SetGrantsBloodlust(Player player, Attack attack)
+        private static bool SetGrantsBloodlust(Player player, ItemDrop.ItemData weapon, Attack attack)
         {
             if (MagicEffectsHelper.GetTotalActiveSetEffectValue(player, MagicEffectType.Bloodlust) <= 0f)
             {
                 return false;
             }
 
-            ItemDrop.ItemData weapon = attack.m_weapon;
             if (weapon == null || attack.m_attackStamina <= 0f || attack.m_attackEitr > 0f)
             {
                 return false;

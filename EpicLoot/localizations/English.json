@@ -1,4 +1,4 @@
-﻿{
+{
     "el_welcome_thank_you": "Thank you for playing",
     "el_welcome_version": "Epic Loot ",
     "el_welcome_content_pt1": "We hope you enjoy Epic loot! Epic loot is maintained by a community of modders and dedicated players, thank you to everyone that has contributed!",
@@ -486,6 +486,8 @@
     "mod_epicloot_shard_Yagluth": "Yagluth",
     "mod_epicloot_shard_Queen": "Queen",
     "mod_epicloot_shard_Fader": "Fader",
+
+    "mod_epicloot_me_unknown_display": "Unknown enchantment",
 
     "mod_epicloot_me_damagetakengivesadrenaline_display": "Gain {0} Adrenaline When Damaged",
     "mod_epicloot_me_damagetakengivesadrenaline_desc": "Gain {0} adrenaline each time you take damage.",

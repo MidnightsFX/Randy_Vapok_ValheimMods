@@ -59,6 +59,26 @@ Bugfixes:
 * Coin Weighted Weapon now shows the damage bonus it actually gives at the coins you carry, and weapon tooltips include it before the weapon is equipped
 * Coin Weighted Weapon's bonus now rises smoothly with no sudden jump, higher rolls always give more
 * Shard slots on backpacks and quivers now open with Ctrl held instead of Alt, so other mods' Alt hotkeys no longer get in the way, and players can choose to need it for every item.
+* Fixes an error when an area attack hit a creature that had just died, which could stop the attack hitting the rest of the group, and enchantments no longer trigger on such hits.
+* Fixes the Leather Belt and the craftable rings vanishing when dropped on a dedicated server.
+* Fixes Modify Noise making you slightly louder instead of quieter.
+* Riches now gives treasure more often the stronger it is, instead of at the same rate at any strength.
+* Luck, Riches and Lucky Loot now count in full and update as soon as you socket, unsocket or augment a worn item.
+* Lucky Loot no longer multiplies creatures dropped by others, such as elite blobs, and stays within its limit per kill.
+* Rune extraction power now also applies to small enchantment values.
+* Enchantments that rule each other out can no longer end up together through augmenting, rune etching or slotting runestones and shardstones.
+* Replacing an enchantment such as Throwable now treats it as gone, so it can no longer bring in Recall without Throwable or block choices that only clashed with it.
+* Item tooltips now show the weight of the stack you hold instead of a full stack.
+* Parry bonuses no longer apply to early blocks with shields that cannot parry, such as tower shields.
+* A refused Air Jump no longer uses up a jump, and the stamina check now uses your real jump cost.
+* Fixes an error that could cut short area damage from enchantments when a hit spawned a creature, such as bats.
+* Bountiful Harvest now works on every plant in multiplayer, not only those your own game controls.
+* Meads Cooldown now works together with Instant Mead and Potion Efficacy.
+* Indestructible armor no longer wears down unseen and shows as broken once the enchantment is gone.
+* Triple Shot and Double Magic Shot now lower each projectile's whole damage, including weapon upgrades and arrows, as described.
+* Enchanting table upgrades that get no answer, for example because the table's owner left, now refund their cost.
+* Item gating no longer loses items when the same boss is listed more than once for an item type.
+* Fixes slotted shardstone tooltips showing a roll range, unknown enchantments showing blank lines, and blank names or icons in the crafting result window.
 
 New Sets:
 - Wrath of the Thunderer set, whose full set lets you hurl your melee weapon, even mid-swing, to slam down where you aim.

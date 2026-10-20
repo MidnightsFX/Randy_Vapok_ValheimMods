@@ -169,7 +169,8 @@ public partial class MagicTooltip(ItemDrop.ItemData item, MagicItem magicItem, i
 
         if (item.m_shared.m_maxStackSize > 1) {
             float nonStackedWeight = item.GetNonStackedWeight();
-            float weight = item.GetWeight(item.m_shared.m_maxStackSize);
+            // The stack as it is, as vanilla's tooltip shows it, not a full one.
+            float weight = item.GetWeight();
             text.Append($"\n$item_weight: <color={weightColor}>{nonStackedWeight:0.0} ({weight:0.0} $item_total)</color>");
         } else {
             float weight = item.GetWeight();

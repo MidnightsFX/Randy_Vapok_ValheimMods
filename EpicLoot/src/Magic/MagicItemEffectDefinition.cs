@@ -3,6 +3,7 @@ using EpicLoot.GatedItemType;
 using EpicLoot.General;
 using EpicLoot.LegendarySystem;
 using EpicLoot.MagicItemEffects;
+using EpicLoot.ShardStones;
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
@@ -118,6 +119,45 @@ namespace EpicLoot
                 ExcludedItemTypes.Contains(typeName);
         }
 
+        // Whether two different effects may not share an item: either definition lists the other among its
+        // ExclusiveEffectTypes. The configs carry one-sided pairs (every damage effect lists
+        // ModifyDamageLowHealth, which does not list them back), so both sides are read.
+        public static bool EffectsExclude(string effectType, string otherType)
+        {
+            if (effectType == null || otherType == null || effectType == otherType)
+            {
+                return false;
+            }
+
+            return ListsAsExclusive(effectType, otherType) || ListsAsExclusive(otherType, effectType);
+        }
+
+        // The first effect in `effects`, other than `effectType` itself, whose definition lists `effectType`
+        // as exclusive; null when there is none.
+        public static string FindEffectExcluding(IEnumerable<MagicItemEffect> effects, string effectType)
+        {
+            if (effectType == null || effects == null)
+            {
+                return null;
+            }
+
+            foreach (var effect in effects)
+            {
+                if (effect != null && effect.EffectType != effectType && ListsAsExclusive(effect.EffectType, effectType))
+                {
+                    return effect.EffectType;
+                }
+            }
+
+            return null;
+        }
+
+        private static bool ListsAsExclusive(string effectType, string listedType)
+        {
+            return MagicItemEffectDefinitions.TryGet(effectType, out var def) &&
+                def.Requirements?.ExclusiveEffectTypes?.Contains(listedType) == true;
+        }
+
         public bool CheckRequirements([NotNull] ItemDrop.ItemData itemData, [NotNull] MagicItem magicItem, string magicEffectType = null, bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false, bool checkItemTypeGating = true)
         {
             return CheckRequirements(itemData, magicItem, out _, out _, magicEffectType, checklootroll, checkaugmentroll, checkruneroll, checkItemTypeGating);
@@ -142,17 +182,24 @@ namespace EpicLoot
                 return false;
             }
 
-            if (ExclusiveSelf && magicItem.HasEffect(magicEffectType))
+            // A different effect that excludes this one, checked before the same-effect rule so a caller that
+            // waives "the item already has this effect" (shard socketing) still sees it. Exclusion is mutual:
+            // an effect already on the item that lists this one blocks it as well, even when this effect's
+            // own list does not name it back.
+            var conflict = ExclusiveEffectTypes?.FirstOrDefault(t => t != magicEffectType && magicItem.HasEffect(t))
+                ?? FindEffectExcluding(magicItem.Effects, magicEffectType);
+            if (conflict != null)
             {
                 failure = RequirementFailure.ConflictingEffect;
-                conflictEffectType = magicEffectType;
+                conflictEffectType = conflict;
                 return false;
             }
 
-            if (ExclusiveEffectTypes?.Count > 0 && magicItem.HasAnyEffect(ExclusiveEffectTypes))
+            if ((ExclusiveSelf || ExclusiveEffectTypes?.Contains(magicEffectType) == true) &&
+                magicItem.HasEffect(magicEffectType))
             {
                 failure = RequirementFailure.ConflictingEffect;
-                conflictEffectType = ExclusiveEffectTypes.FirstOrDefault(t => magicItem.HasEffect(t));
+                conflictEffectType = magicEffectType;
                 return false;
             }
 
@@ -628,9 +675,9 @@ namespace EpicLoot
         }
 
         /// <summary>
-        /// Never null: an unknown type gets a synthesized stand-in (NoRoll, blank display text, generic
-        /// value ranges) so display code cannot NRE on an effect whose definition was removed. Anything
-        /// that acts on the definition rather than showing it should use <see cref="TryGet"/>.
+        /// Never null: an unknown type gets a synthesized stand-in (NoRoll, no value ranges, a display text
+        /// naming the raw type and value) so display code cannot NRE on an effect whose definition was
+        /// removed. Anything that acts on the definition rather than showing it should use <see cref="TryGet"/>.
         /// </summary>
         public static MagicItemEffectDefinition Get(string type)
         {
@@ -645,15 +692,13 @@ namespace EpicLoot
             if (!FallbackDefinitions.TryGetValue(key, out effectDef))
             {
                 EpicLoot.LogWarning($"Enchantment definition missing for: {type}");
+                // The line names the raw type and the stored value: a blank DisplayText left an empty tooltip
+                // line, and the made-up per-rarity ranges this used to carry were shown as the effect's range.
+                // ValueDefs stay null, which every reader treats as "no range". Braces in the type are escaped
+                // for the string.Format the display text goes through.
+                string escapedType = key.Replace("{", "{{").Replace("}", "}}");
                 effectDef = new MagicItemEffectDefinition() {
-                    ValuesPerRarity = new MagicItemEffectDefinition.ValuesPerRarityDef() {
-                        Magic = new MagicItemEffectDefinition.ValueDef() { Increment = 1, MaxValue = 10, MinValue = 1 },
-                        Rare = new MagicItemEffectDefinition.ValueDef() { Increment = 2, MaxValue = 15, MinValue = 1 },
-                        Epic = new MagicItemEffectDefinition.ValueDef() { Increment = 3, MaxValue = 20, MinValue = 1 },
-                        Legendary = new MagicItemEffectDefinition.ValueDef() { Increment = 4, MaxValue = 25, MinValue = 1 },
-                        Mythic = new MagicItemEffectDefinition.ValueDef() { Increment = 5, MaxValue = 30, MinValue = 1 },
-                        Ancient = new MagicItemEffectDefinition.ValueDef() { Increment = 6, MaxValue = 35, MinValue = 1 }
-                    },
+                    DisplayText = $"$mod_epicloot_me_unknown_display {escapedType} ({{0:0.##}})",
                     Requirements = new MagicItemEffectRequirements() { NoRoll = true },
                     Type = type,
                 };
@@ -734,12 +779,17 @@ namespace EpicLoot
             // family switched off in the config (health critical) only leaves the rolled pools.
             bool rolling = !checkruneroll;
             var results = AllDefinitions.Values.Where(x => x.CheckRequirements(itemData, magicItem, checklootroll, checkaugment, checkruneroll) &&
+                FitsSocketedEffects(x, magicItem) &&
                 !EnchantCostsHelper.EffectIsDeprecated(x) && (!rolling || ModifyWithLowHealth.MayRoll(x.Type))).ToList();
 
             if (effect != null)
             {
                 magicItem.Effects.Insert(ignoreEffectIndex, effect);
-                if (AllDefinitions.TryGetValue(effect.EffectType, out var ignoredEffectDef))
+                // The replaced effect is offered back as a re-roll of its own value, so not when it has no value
+                // at this rarity: that "re-roll" would change nothing. It is still left out of the checks above
+                // either way, since it is the one being replaced.
+                if (AllDefinitions.TryGetValue(effect.EffectType, out var ignoredEffectDef) &&
+                    ignoredEffectDef.ValuesPerRarity?.GetValueDefForRarity(magicItem.Rarity) != null)
                 {
                     if (!results.Contains(ignoredEffectDef) && !EnchantCostsHelper.EffectIsDeprecated(ignoredEffectDef) &&
                         (!rolling || ModifyWithLowHealth.MayRoll(ignoredEffectDef.Type)))
@@ -750,6 +800,44 @@ namespace EpicLoot
             }
 
             return results;
+        }
+
+        // Whether a rolled effect of this definition may join the item's active socketed effects. Sockets
+        // are kept through an augment or rune etch, so the exclusivity rules count them as well: a different
+        // effect either side excludes is refused, and the same effect follows the setting that lets a stone
+        // join a matching rolled effect, read from the other side.
+        private static bool FitsSocketedEffects(MagicItemEffectDefinition candidate, MagicItem magicItem)
+        {
+            if (magicItem.Sockets == null || magicItem.Sockets.Count == 0)
+            {
+                return true;
+            }
+
+            var requirements = candidate.Requirements;
+            var exclusiveSelf = requirements != null &&
+                (requirements.ExclusiveSelf || requirements.ExclusiveEffectTypes?.Contains(candidate.Type) == true);
+            foreach (var socket in magicItem.Sockets)
+            {
+                if (socket == null || !socket.IsActive())
+                {
+                    continue;
+                }
+
+                var socketedType = socket.Effect.EffectType;
+                if (socketedType == candidate.Type)
+                {
+                    if (exclusiveSelf && !ShardSocketManager.AllowMatchingItemEffect(socket.ShardType))
+                    {
+                        return false;
+                    }
+                }
+                else if (MagicItemEffectRequirements.EffectsExclude(candidate.Type, socketedType))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

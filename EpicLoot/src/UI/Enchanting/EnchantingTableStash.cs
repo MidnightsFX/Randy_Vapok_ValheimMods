@@ -21,14 +21,24 @@ namespace EpicLoot_UnityLib
     /// Every change is a delta sent to the owner, who clamps it to what the stash holds and to the capacity,
     /// writes the result and answers with what was actually applied. Until the answer and the ZDO sync
     /// arrive, the delta is shown as pending so the table's own view stays immediate.
+    ///
+    /// A change is re-sent until it is answered. Vanilla drops a routed RPC without a word when the peer it
+    /// was addressed to has left, or no longer has the table loaded, which is how ownership usually moves
+    /// (the owner walked away). A deposit has already left the inventory by then, so a single send lost it.
+    /// The owner keeps a short log of the changes it applied on the ZDO, so a repeat of one it already
+    /// applied, to it or to whoever owns the table next, is answered from the log instead of applied twice.
     /// </summary>
     public class EnchantingTableStash
     {
         private const string ZdoKey = "el.et.stash";
+        private const string AppliedLogKey = "el.et.stash.applied";
         private const int SerializationVersion = 1;
         private const string ChangeRpc = "el.StashChange";
         private const string ChangeResultRpc = "el.StashChangeResult";
-        private const float RequestTimeoutSeconds = 10f;
+        private const float RetrySeconds = 2f;
+        private const float RequestTimeoutSeconds = 30f;
+        // Longer than a request is retried for, so the log still has every change a repeat can name.
+        private const double AppliedLogSeconds = 60.0;
 
         private static int _lastRequestId;
 
@@ -38,8 +48,17 @@ namespace EpicLoot_UnityLib
             public Dictionary<string, int> Deltas;
             public Action<Dictionary<string, int>> OnApplied;
             public float SentAt;
+            public float LastSentAt;
             public bool Confirmed;
             public uint ConfirmedRevision;
+        }
+
+        private class AppliedChange
+        {
+            public long Sender;
+            public int RequestId;
+            public double Time;
+            public Dictionary<string, int> Applied;
         }
 
         public event Action OnChanged;
@@ -167,7 +186,38 @@ namespace EpicLoot_UnityLib
                 Sync();
             }
 
-            if (_requests.RemoveAll(x => !x.Confirmed && Time.time - x.SentAt > RequestTimeoutSeconds) > 0)
+            if (_requests.Count == 0)
+            {
+                return;
+            }
+
+            float now = Time.time;
+            bool droppedAny = false;
+            for (int i = _requests.Count - 1; i >= 0; --i)
+            {
+                Request request = _requests[i];
+                if (request.Confirmed)
+                {
+                    continue;
+                }
+
+                if (now - request.SentAt > RequestTimeoutSeconds)
+                {
+                    // Not refunded: the owner may have applied it and only the answers were lost, and handing a
+                    // deposit back then would duplicate it. Thirty seconds of unanswered repeats means the
+                    // connection itself is gone.
+                    Debug.LogWarning($"[EpicLoot] The enchanting table's storage never answered a change " +
+                        $"({DescribeDeltas(request.Deltas)}); giving up on it.");
+                    _requests.RemoveAt(i);
+                    droppedAny = true;
+                }
+                else if (now - request.LastSentAt > RetrySeconds)
+                {
+                    Transmit(request);
+                }
+            }
+
+            if (droppedAny)
             {
                 RebuildView();
             }
@@ -243,7 +293,9 @@ namespace EpicLoot_UnityLib
                 return;
             }
 
-            if (!inventory.CanAddItem(kind.Prefab, amount))
+            // Asked with the item it will add rather than the prefab: free stack space is counted per world
+            // level, and only the created item carries this world's.
+            if (!inventory.CanAddItem(kind.CreateItem(amount)))
             {
                 player.Message(MessageHud.MessageType.Center, "$msg_noroom");
                 return;
@@ -329,6 +381,73 @@ namespace EpicLoot_UnityLib
             zdo.Set(ZdoKey, package.GetBase64());
         }
 
+        // The changes applied in the last AppliedLogSeconds of network time, which every owner shares, so the
+        // log stays a handful of entries.
+        private static List<AppliedChange> ReadAppliedLog(ZDO zdo, double now)
+        {
+            List<AppliedChange> log = new List<AppliedChange>();
+            string data = zdo.GetString(AppliedLogKey, string.Empty);
+            if (string.IsNullOrEmpty(data))
+            {
+                return log;
+            }
+
+            try
+            {
+                ZPackage package = new ZPackage(data);
+                package.ReadInt();
+                int count = package.ReadInt();
+                for (int i = 0; i < count; ++i)
+                {
+                    AppliedChange change = new AppliedChange
+                    {
+                        Sender = package.ReadLong(),
+                        RequestId = package.ReadInt(),
+                        Time = package.ReadDouble(),
+                        Applied = new Dictionary<string, int>()
+                    };
+                    ReadCounts(package, change.Applied);
+                    if (now - change.Time <= AppliedLogSeconds)
+                    {
+                        log.Add(change);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[EpicLoot] Could not read the enchanting table's storage log: {e.Message}");
+            }
+
+            return log;
+        }
+
+        private static void WriteAppliedLog(ZDO zdo, List<AppliedChange> log)
+        {
+            ZPackage package = new ZPackage();
+            package.Write(SerializationVersion);
+            package.Write(log.Count);
+            foreach (AppliedChange change in log)
+            {
+                package.Write(change.Sender);
+                package.Write(change.RequestId);
+                package.Write(change.Time);
+                WriteCounts(package, change.Applied);
+            }
+
+            zdo.Set(AppliedLogKey, package.GetBase64());
+        }
+
+        private static string DescribeDeltas(Dictionary<string, int> deltas)
+        {
+            List<string> parts = new List<string>(deltas.Count);
+            foreach (KeyValuePair<string, int> pair in deltas)
+            {
+                parts.Add($"{pair.Key} {pair.Value:+0;-0}");
+            }
+
+            return string.Join(", ", parts);
+        }
+
         private void Send(Dictionary<string, int> deltas, Action<Dictionary<string, int>> onApplied)
         {
             if (deltas.Count == 0 || _nview == null || !_nview.IsValid())
@@ -344,17 +463,30 @@ namespace EpicLoot_UnityLib
                 SentAt = Time.time
             };
             _requests.Add(request);
-
-            ZPackage package = new ZPackage();
-            package.Write(request.Id);
-            WriteCounts(package, deltas);
-            _nview.InvokeRPC(ChangeRpc, package);
+            Transmit(request);
 
             RebuildView();
         }
 
+        // Addressed to whoever owns the table now, so a repeat follows ownership. On the owner itself this
+        // runs the change and its answer before returning.
+        private void Transmit(Request request)
+        {
+            if (_nview == null || !_nview.IsValid())
+            {
+                return;
+            }
+
+            request.LastSentAt = Time.time;
+            ZPackage package = new ZPackage();
+            package.Write(request.Id);
+            WriteCounts(package, request.Deltas);
+            _nview.InvokeRPC(ChangeRpc, package);
+        }
+
         private void RPC_StashChange(long sender, ZPackage package)
         {
+            // Anyone else lets it go; the sender repeats it until the owner answers.
             if (_nview == null || !_nview.IsValid() || !_nview.IsOwner())
             {
                 return;
@@ -365,6 +497,29 @@ namespace EpicLoot_UnityLib
             ReadCounts(package, deltas);
 
             ZDO zdo = _nview.GetZDO();
+            double now = ZNet.instance != null ? ZNet.instance.GetTimeSeconds() : 0.0;
+            List<AppliedChange> log = ReadAppliedLog(zdo, now);
+            AppliedChange previous = log.Find(x => x.Sender == sender && x.RequestId == requestId);
+            Dictionary<string, int> applied = previous?.Applied ?? Apply(zdo, deltas);
+            if (previous == null)
+            {
+                log.Add(new AppliedChange { Sender = sender, RequestId = requestId, Time = now, Applied = applied });
+                WriteAppliedLog(zdo, log);
+            }
+
+            ZPackage reply = new ZPackage();
+            reply.Write(requestId);
+            WriteCounts(reply, applied);
+            _nview.InvokeRPC(sender, ChangeResultRpc, reply);
+
+            if (previous == null)
+            {
+                Sync();
+            }
+        }
+
+        private Dictionary<string, int> Apply(ZDO zdo, Dictionary<string, int> deltas)
+        {
             Dictionary<string, int> counts = ReadCounts(zdo);
             Dictionary<string, int> applied = new Dictionary<string, int>();
             int capacity = Capacity;
@@ -396,20 +551,15 @@ namespace EpicLoot_UnityLib
             }
 
             WriteCounts(zdo, counts);
-
-            ZPackage reply = new ZPackage();
-            reply.Write(requestId);
-            WriteCounts(reply, applied);
-            _nview.InvokeRPC(sender, ChangeResultRpc, reply);
-
-            Sync();
+            return applied;
         }
 
         private void RPC_StashChangeResult(long sender, ZPackage package)
         {
             int requestId = package.ReadInt();
             Request request = _requests.Find(x => x.Id == requestId);
-            if (request == null)
+            // Confirmed already: the answer to a repeat that crossed the first answer.
+            if (request == null || request.Confirmed)
             {
                 return;
             }

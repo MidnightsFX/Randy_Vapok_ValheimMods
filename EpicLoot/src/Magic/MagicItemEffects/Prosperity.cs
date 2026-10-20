@@ -20,8 +20,8 @@ namespace EpicLoot.Magic.MagicItemEffects
         private const float PlayerScanRange = 100f;
 
         // Player-ZDO key holding the local player's Prosperity value, mirrored by
-        // Multiplayer_Player_Patch.UpdateRichesAndLuck on equip/unequip. A float, unlike Luck's and Riches'
-        // int keys, so a fractional value is not truncated.
+        // Multiplayer_Player_Patch.UpdateRichesAndLuck on equip/unequip. A float, as Luck's and Riches' keys
+        // are, so a fractional value is not truncated.
         public const string ZdoValueKey = "el-prs";
 
         // Loot rolls on whichever machine owns the creature or chest -- possibly a dedicated server with

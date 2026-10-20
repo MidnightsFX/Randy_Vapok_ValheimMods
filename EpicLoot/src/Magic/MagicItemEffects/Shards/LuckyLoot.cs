@@ -113,11 +113,10 @@ namespace EpicLoot.MagicItemEffects.Shards {
         // Player.m_localPlayer. Writing this the way Headhunter does would silently disable the effect in
         // the most common multiplayer topology.
         //
-        // Unlike Riches this takes the max rather than the sum, and does not cache. Max, because the value
-        // is simultaneously a chance and (through Multiplier) a drop multiple -- summing two players' 10%
-        // into 20% would imply an 11x multiplier rather than 6x. No cache, because Riches' 5-second one is
-        // a single scalar shared across every creature in the world, and a player scan on death is cheap
-        // when deaths are rare relative to frames.
+        // Unlike Riches this takes the max rather than the sum, because the value is simultaneously a
+        // chance and (through Multiplier) a drop multiple -- summing two players' 10% into 20% would imply
+        // an 11x multiplier rather than 6x. Scanned per death, as Riches is: a player scan is cheap when
+        // deaths are rare relative to frames.
         private static float BestNearbyValue(Vector3 position) {
             var players = new List<Player>();
             Player.GetPlayersInRange(position, PlayerScanRange, players);
@@ -184,19 +183,26 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 }
             }
 
+            var maxAdded = GetMaxAddedUnitsPerDeath();
+            var maxPerEntry = GetMaxUnitsPerEntry();
             var added = 0;
             for (var i = 0; i < dropList.Count; i++) {
-                if (added >= GetMaxAddedUnitsPerDeath()) {
+                if (added >= maxAdded) {
                     break;
                 }
 
+                // Only items are multiplied. A drop list can also spawn creatures (BlobElite drops Blobs),
+                // and multiplying those would turn one kill into a swarm.
                 var prefab = dropList[i].Key;
-                if (prefab == null || excluded.Contains(prefab) || IsProtected(prefab)) {
+                if (prefab == null || prefab.GetComponent<ItemDrop>() == null || excluded.Contains(prefab) ||
+                    IsProtected(prefab)) {
                     continue;
                 }
 
+                // Clamped to what is left of the per-death allowance, so the last entry multiplied cannot
+                // overshoot it.
                 var amount = dropList[i].Value;
-                var newAmount = Mathf.Min(amount * multiplier, GetMaxUnitsPerEntry());
+                var newAmount = Mathf.Min(amount * multiplier, maxPerEntry, amount + (maxAdded - added));
                 if (newAmount > amount) {
                     added += newAmount - amount;
                     dropList[i] = new KeyValuePair<GameObject, int>(prefab, newAmount);

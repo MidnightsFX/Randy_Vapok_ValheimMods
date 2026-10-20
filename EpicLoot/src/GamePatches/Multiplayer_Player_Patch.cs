@@ -264,8 +264,9 @@ namespace EpicLoot
             {
                 if (player == Player.m_localPlayer && player.m_nview != null && player.m_nview.GetZDO() is ZDO zdo)
                 {
-                    int currentZdoLuck = zdo.GetInt("el-luk");
-                    int currentZdoRiches = zdo.GetInt("el-rch");
+                    // Luck and Riches are floats too: diminishing shard stacking gives fractional totals.
+                    float currentZdoLuck = zdo.GetFloat(LootRoller.LuckZdoValueKey);
+                    float currentZdoRiches = zdo.GetFloat(MagicItemEffects.Riches_CharacterDrop_GenerateDropList_Patch.ZdoValueKey);
                     // Lucky Loot is read by CharacterDrop.GenerateDropList, which runs on the creature's
                     // owner -- a machine that may have no local player at all. Mirroring the value here is
                     // what lets that machine see it. Stored as floats: both effects roll in fractional
@@ -277,22 +278,25 @@ namespace EpicLoot
                     float currentZdoProsperity = zdo.GetFloat(Prosperity.ZdoValueKey);
                     // Life Siphon is read by the owner of whatever this player hits.
                     float currentZdoLifeSiphon = zdo.GetFloat(MagicItemEffects.LifeSiphon.ZdoValueKey);
+                    // Corpse Rot is read by the owner of whatever this player kills.
+                    float currentZdoCorpseRot = zdo.GetFloat(BonemassCorpseRot.ZdoValueKey);
 
-                    int currentLuck = (int)player.GetTotalActiveMagicEffectValue(MagicEffectType.Luck);
-                    int currentRiches = (int)player.GetTotalActiveMagicEffectValue(MagicEffectType.Riches);
+                    float currentLuck = player.GetTotalActiveMagicEffectValue(MagicEffectType.Luck);
+                    float currentRiches = player.GetTotalActiveMagicEffectValue(MagicEffectType.Riches);
                     float currentLuckyLoot = player.GetTotalActiveMagicEffectValue(MagicEffectType.LuckyLoot);
                     float currentHeadHunter = player.GetTotalActiveMagicEffectValue(MagicEffectType.HeadHunter);
                     float currentProsperity = player.GetTotalActiveMagicEffectValue(MagicEffectType.Prosperity);
                     float currentLifeSiphon = player.GetTotalActiveMagicEffectValue(MagicEffectType.LifeSiphon);
+                    float currentCorpseRot = player.GetTotalActiveMagicEffectValue(MagicEffectType.CorpseRot);
 
                     if (currentLuck != currentZdoLuck)
                     {
-                        zdo.Set("el-luk", currentLuck);
+                        zdo.Set(LootRoller.LuckZdoValueKey, currentLuck);
                     }
 
                     if (currentRiches != currentZdoRiches)
                     {
-                        zdo.Set("el-rch", currentRiches);
+                        zdo.Set(MagicItemEffects.Riches_CharacterDrop_GenerateDropList_Patch.ZdoValueKey, currentRiches);
                     }
 
                     if (currentLuckyLoot != currentZdoLuckyLoot)
@@ -313,6 +317,11 @@ namespace EpicLoot
                     if (currentLifeSiphon != currentZdoLifeSiphon)
                     {
                         zdo.Set(MagicItemEffects.LifeSiphon.ZdoValueKey, currentLifeSiphon);
+                    }
+
+                    if (currentCorpseRot != currentZdoCorpseRot)
+                    {
+                        zdo.Set(BonemassCorpseRot.ZdoValueKey, currentCorpseRot);
                     }
                 }
             }

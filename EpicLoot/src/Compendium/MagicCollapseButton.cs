@@ -1,3 +1,4 @@
+using EpicLoot_UnityLib;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -44,6 +45,9 @@ public class MagicCollapseButton
         hintRect.pivot = new Vector2(0.5f, 0.5f);
         hintRect.sizeDelta = new Vector2(HintSize, HintSize);
         hintRect.anchoredPosition = new Vector2(-HintMargin, HintMargin);
+        // Fills the glyph from ZInput each time the hint is shown and whenever the pad layout changes while
+        // it is, so it follows the connected pad without asking ZInput every frame.
+        _hint.gameObject.AddComponent<GamepadGlyph>().ZInputKey = GamepadKey;
         _hint.gameObject.SetActive(false);
     }
 
@@ -97,15 +101,8 @@ public class MagicCollapseButton
         _label.text = Localization.instance.Localize(collapsed ? "$mod_epicloot_expand_all" : "$mod_epicloot_collapse_all");
     }
 
-    // The glyph string comes from ZInput so it follows the connected pad's layout; refreshed each time the
-    // hint is shown rather than once, since the pad can change while the dialog is open.
     public void ShowHint(bool gamepadActive)
     {
-        if (gamepadActive && ZInput.instance != null)
-        {
-            _hint.text = ZInput.instance.GetBoundKeyString(GamepadKey, true);
-        }
-
         if (_hintShown != gamepadActive)
         {
             _hintShown = gamepadActive;
