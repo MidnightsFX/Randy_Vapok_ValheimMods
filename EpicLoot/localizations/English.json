@@ -204,6 +204,7 @@
     "mod_epicloot_me_triplebowshot_config_chance": "Triple Shot Chance",
 
     "mod_epicloot_press_socket": "Open shard slots",
+    "mod_epicloot_hold_details": "Hold for effect details",
     "mod_epicloot_socket_notmagic": "This item cannot be slotted",
     "mod_epicloot_socket_unavailable": "This item's slots can't be opened right now",
     "mod_epicloot_socket_nofreeslot": "No open slots",

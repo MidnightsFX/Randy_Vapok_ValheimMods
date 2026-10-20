@@ -62,6 +62,21 @@ public static class MagicTooltipPatches
         return $"\n[<color=yellow><b>{keys}</b></color>] $mod_epicloot_press_socket";
     }
 
+    private static string GetEffectDetailsHint(ItemDrop.ItemData item)
+    {
+        if (item == null || !ZInput.IsGamepadActive())
+        {
+            return "";
+        }
+
+        if (!Shards.IsShard(item) && !(item.IsMagic(out MagicItem magicItem) && magicItem.Effects.Count > 0))
+        {
+            return "";
+        }
+
+        return "\n[<color=yellow><b>$KEY_LTrigger</b></color>] $mod_epicloot_hold_details";
+    }
+
     // Set the topic of the tooltip with the decorated name
     [HarmonyPatch(typeof(InventoryGrid), nameof(InventoryGrid.CreateItemTooltip),
         typeof(ItemDrop.ItemData), typeof(UITooltip))]
@@ -92,7 +107,7 @@ public static class MagicTooltipPatches
                 PatchOnHoverFix.ComparisonAdded = false;
                 tooltipText = item.GetTooltip();
             }
-            tooltip.Set(item.GetDecoratedName(), tooltipText + GetSocketOpenHint(item));
+            tooltip.Set(item.GetDecoratedName(), tooltipText + GetSocketOpenHint(item) + GetEffectDetailsHint(item));
             return false;
         }
     }
