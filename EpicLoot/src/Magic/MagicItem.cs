@@ -168,9 +168,11 @@ namespace EpicLoot
             return $"<color={color}>{EpicLoot.GetRarityDisplayName(Rarity)}</color>";
         }
 
-        // True while the player holds Shift, used to reveal the detailed per-effect tooltip block
+        // True while the player holds Shift, or the left trigger on a gamepad (vanilla's inventory
+        // reads that trigger as its Shift), used to reveal the detailed per-effect tooltip block
         // (description, roll range, config values). Shared by the magic-item and loose-shard tooltips.
-        public static bool ShowEffectDetails => ZInput.GetKey(KeyCode.LeftShift) || ZInput.GetKey(KeyCode.RightShift);
+        public static bool ShowEffectDetails =>
+            ZInput.GetKey(KeyCode.LeftShift) || ZInput.GetKey(KeyCode.RightShift) || ZInput.GetButton("JoyLTrigger");
 
         public string GetTooltip()
         {
