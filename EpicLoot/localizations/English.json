@@ -28,6 +28,10 @@
     "mod_epicloot_itemtype_torch": "Torch",
     "mod_epicloot_itemtype_utility": "Utility",
     "mod_epicloot_itemtype_trinket": "Trinket",
+    "mod_epicloot_itemtype_staff": "Staff",
+    "mod_epicloot_itemtype_tool": "Tool",
+    "mod_epicloot_itemtype_bows": "Bow",
+    "mod_epicloot_itemtype_crossbows": "Crossbow",
     "mod_epicloot_set": "Set",
 
     "mod_epicloot_craftingmaterial": "crafting material",

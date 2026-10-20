@@ -108,11 +108,23 @@ public class MagicTextList
 
     public MagicTextTable AddTable(params MagicTableColumn[] columns)
     {
-        MagicTextTable table = new MagicTextTable(_layout.transform, _template, MagicPages.instance.MinWidth - 10f,
-            columns, ResizeOverlay);
+        MagicTextTable table = CreateTable(columns);
         Elements.Add(new MagicTableGroup(table));
         return table;
     }
+
+    /// <summary>A table under <paramref name="title"/>, which is hidden along with it when a filter empties it.</summary>
+    public MagicTextTable AddTable(string title, params MagicTableColumn[] columns)
+    {
+        MagicTextElement titleElement = _template.Create(title, _layout.transform);
+        titleElement.EnableOutline(true);
+        MagicTextTable table = CreateTable(columns);
+        Elements.Add(new MagicTableGroup(titleElement, table));
+        return table;
+    }
+
+    private MagicTextTable CreateTable(MagicTableColumn[] columns) =>
+        new MagicTextTable(_layout.transform, _template, MagicPages.instance.MinWidth - 10f, columns, ResizeOverlay);
 
     public bool HasTables => Elements.Any(x => x is MagicTableGroup);
 

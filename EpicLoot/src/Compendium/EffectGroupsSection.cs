@@ -41,6 +41,7 @@ public static class EffectGroupsSection
             MagicEffectType.DamageBonusFromPlayerWeight, MagicEffectType.DamageIncreaseFromMovementPenalty,
             MagicEffectType.IncreaseHarvestDamage, MagicEffectType.ConvertPhysicalDamageToLightning, MagicEffectType.CoilingVenom,
             MagicEffectType.IcyWeight, MagicEffectType.ReduceArmorIncreaseDamage, MagicEffectType.NecroticFire,
+            MagicEffectType.CorpseRot, MagicEffectType.HelsHarvest, MagicEffectType.QuarryMark,
         }),
         ("$mod_epicloot_effects_onblock", new[]
         {
@@ -55,7 +56,7 @@ public static class EffectGroupsSection
         {
             MagicEffectType.PerfectDodge, MagicEffectType.PerfectDodgeGivesHealth, MagicEffectType.PerfectDodgeGivesStamina,
             MagicEffectType.PerfectDodgeGivesEitr, MagicEffectType.PerfectDodgeGivesSpeed, MagicEffectType.DecreaseDodgeCost,
-            MagicEffectType.ModifyDodgeStaminaUse,
+            MagicEffectType.ModifyDodgeStaminaUse, MagicEffectType.RollCleanse,
         }),
         ("$mod_epicloot_effects_adrenaline", new[]
         {
@@ -72,6 +73,7 @@ public static class EffectGroupsSection
             MagicEffectType.DamageReductionAtNight, MagicEffectType.DayArmor, MagicEffectType.ArmorFromMovementPenalty,
             MagicEffectType.Coinplated, MagicEffectType.FeatherFall, MagicEffectType.ReduceFallDamage,
             MagicEffectType.IncreaseHeatResistance, MagicEffectType.Warmth, MagicEffectType.Waterproof,
+            MagicEffectType.ForestsAid,
         }),
         ("$mod_epicloot_effects_ranged", new[]
         {
@@ -91,9 +93,7 @@ public static class EffectGroupsSection
         ("$mod_epicloot_effects_gathering", new[]
         {
             MagicEffectType.IncreaseMiningDrop, MagicEffectType.IncreaseTreeDrop, MagicEffectType.BountifulHarvest,
-            MagicEffectType.HelsHarvest, MagicEffectType.ForestsAid, MagicEffectType.GreenThumb, MagicEffectType.QuarryMark,
-            MagicEffectType.CorpseRot, MagicEffectType.LuckyCraft, MagicEffectType.FreeBuild, MagicEffectType.ModifyBuildDistance,
-            MagicEffectType.RollCleanse,
+            MagicEffectType.GreenThumb, MagicEffectType.LuckyCraft, MagicEffectType.FreeBuild, MagicEffectType.ModifyBuildDistance,
             MagicEffectType.LuckWhileFishing, MagicEffectType.ReduceFishingStaminaCost,
         }),
         ("$mod_epicloot_effects_utility", new[]

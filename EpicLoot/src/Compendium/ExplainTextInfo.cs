@@ -53,8 +53,14 @@ public class ExplainTextInfo(string topic) : MagicTextInfo(topic)
         };
     }
 
+    public override bool HasItemTypeFilter => true;
+
+    public override bool AllowsItemType(object tag, ItemTypeOption type) =>
+        tag is string effectType && ItemTypeFilter.EffectsFor(type).Contains(effectType);
+
     public override void Build(MagicPages instance)
     {
+        ItemTypeFilter.Invalidate();
         Dictionary<string, List<Source>> grantedBy = GetGrantedBy();
         Dictionary<string, List<Entry>> byCategory = MagicItemEffectDefinitions.AllDefinitions.Values
             .Where(x => !EnchantCostsHelper.EffectIsDeprecated(x))
@@ -76,8 +82,8 @@ public class ExplainTextInfo(string topic) : MagicTextInfo(topic)
             }
 
             instance.MagicPagesTextArea.Add("");
-            instance.MagicPagesTextArea.Add($"<size={MagicPages.LARGE_FONT_SIZE}>{category}</size>");
             MagicTextTable table = instance.MagicPagesTextArea.AddTable(
+                $"<size={MagicPages.LARGE_FONT_SIZE}>{category}</size>",
                 new MagicTableColumn { Header = "$mod_epicloot_effectlist_col_effect", Weight = 0.44f, Outline = true },
                 new MagicTableColumn { Header = "$mod_epicloot_effectlist_col_items", Weight = 0.38f },
                 new MagicTableColumn { Header = "$mod_epicloot_effectlist_col_rarity", Weight = 0.18f, Alignment = TextAnchor.MiddleRight });
@@ -93,7 +99,7 @@ public class ExplainTextInfo(string topic) : MagicTextInfo(topic)
                     DescribeItems(definition, sources),
                     DescribeOrigin(definition, rarities, sources),
                 };
-                table.AddRow(cells, GetDetail(definition, rarities, sources), false);
+                table.AddRow(cells, GetDetail(definition, rarities, sources), false, definition.Type);
             }
 
             table.Finish();
