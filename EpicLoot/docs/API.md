@@ -38,7 +38,7 @@ Two consequences worth knowing before you write glue by hand:
 ## Versioning
 
 ```csharp
-API.ApiVersion            // const int, currently 1
+API.ApiVersion            // const int, currently 2
 API.GetApiVersion()       // same value, as a call
 API.GetPluginVersion()    // "0.13.0"
 API.GetPluginId()         // "randyknapp.mods.epicloot"
@@ -261,6 +261,8 @@ binding to an event field.
 API.AddMagicItemChangedListener((item, reason) => { /* ... */ });
 API.AddLootGeneratedListener(item => { /* ... */ });
 API.AddBountyCompletedListener((player, monsterId) => { /* ... */ });
+API.AddAdventureDataChangedListener(() => { /* ... */ });          // API 2, see Bounties below
+API.AddBountyTargetSlainListener(json => { /* ... */ });          // API 2, see Bounties below
 // plus a matching Remove* for each
 ```
 
@@ -285,6 +287,49 @@ world would notify you at world load.
 
 The item's new magic data is already committed when your listener runs. A listener that throws is logged
 and does not stop the other listeners or the game action.
+
+---
+
+## Bounties (API 2)
+
+Accepted bounties live in each character's save, not on the server, so a mod that wants to show them to
+other players (a party or guild mod, say) reads them on the owner's client and sends them on itself.
+
+```csharp
+string GetActiveBounties();   // JSON array, the local player's bounties in this world
+int    GetBountyPinType();    // Minimap.PinType as int, -1 before the minimap starts
+bool   AddAdventureDataChangedListener(Action listener);        // local client
+bool   AddBountyTargetSlainListener(Action<string> listener);   // server / listen host
+```
+
+`GetActiveBounties` lists the bounties that are `InProgress` (being hunted) or `Complete` (finished, reward
+not yet claimed):
+
+```json
+[{ "Id": "Bounty.123.4.BlackForest.Troll", "PlayerId": 123, "MonsterId": "Troll", "Name": "Troll",
+   "Biome": "BlackForest", "X": 512.0, "Y": 31.5, "Z": -880.0, "Radius": 47.25, "State": "InProgress",
+   "Slain": false, "Adds": [{ "MonsterId": "Greydwarf", "Count": 2 }],
+   "RewardIron": 2, "RewardGold": 0, "RewardCoins": 0, "Interval": 4 }]
+```
+
+- `X/Y/Z` and `Radius` describe the circle the owner's map shows. The creatures spawn somewhere inside it,
+  picked later by whichever machine gets near, so the exact spot is not known in advance.
+- `Name` is localized on the owner's client. An add's `Count` is how many are still alive.
+- Anyone may kill a bounty's creatures, and the kill always credits the owner, even when the owner is offline
+  (the server keeps it until they log in).
+
+`AdventureDataChanged` fires after every write of the local player's adventure data: accepting, a kill,
+completing, claiming or abandoning a bounty, buying a treasure map or finding its chest, replayed offline
+kills, and the routine save with the character. It has no payload, and the routine save means it can fire
+with nothing changed, so read `GetActiveBounties` and compare.
+
+`BountyTargetSlain` fires on the server for every bounty creature that dies, owner online or not, with
+`{ "BountyId", "PlayerId", "MonsterId", "IsAdd" }`. That is how a server-side mod keeps an offline owner's
+bounty up to date. It also fires for the leftover creatures of an abandoned bounty, which no longer credit
+anyone.
+
+Pins drawn with `GetBountyPinType()` get Epic Loot's bounty icon, and the large map's bounty filter button
+hides them along with Epic Loot's own.
 
 ---
 

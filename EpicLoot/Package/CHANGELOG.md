@@ -22,6 +22,7 @@ Changes:
 * A failed temper no longer lowers an enchantment unless the server turns that on, and then only the enchantment being tempered can drop.
 * The temper panel shows the chance to downgrade, and its destroy chance is now the real chance per attempt.
 * Bounties now pay double the coins and bounty tokens.
+* Other mods can now read a player's active bounties, so they can show them to friends.
 * New Enchantments!
     * Prosperity gives a chance for additional loot drops from creatures and chests
     * Green Thumb on the Cultivator makes the plants you sow grow faster.
@@ -77,6 +78,7 @@ Bugfixes:
 * Indestructible armor no longer wears down unseen and shows as broken once the enchantment is gone.
 * Triple Shot and Double Magic Shot now lower each projectile's whole damage, including weapon upgrades and arrows, as described.
 * Enchanting table upgrades that get no answer, for example because the table's owner left, now refund their cost.
+* The health bar grows more slowly at high health and no longer runs off the top of the screen.
 * Item gating no longer loses items when the same boss is listed more than once for an item type.
 * Fixes slotted shardstone tooltips showing a roll range, unknown enchantments showing blank lines, and blank names or icons in the crafting result window.
 
