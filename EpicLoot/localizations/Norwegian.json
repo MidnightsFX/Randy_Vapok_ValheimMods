@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Økt skade i varigheten av effekten.",
   "mod_epicloot_set_me_bulwark": "Forsvarsmur [Aktivert]: Forhindrer all skade i 5 sekunder. Nedkjøling: 60 sekunder.",
   "mod_epicloot_set_me_undying": "Udødelig [Passiv]: Ved død, gjenoppretter full helse. Nedkjøling: 20 minutter.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Nærkampangrep som gir frostskade gir ytterligere 50% av våpenskaden som frost i en kjegle foran angriperen.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Nærkampangrep som gir frostskade gir ytterligere {0:0.#}% av våpenskaden som frost i en kjegle foran angriperen.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktivert]: I 10 sekunder kan du ikke regenerere helse, men du får +50% til +200% skade basert på manglende helse. Nedkjøling: 3 minutter.",
   "mod_epicloot_basicmagicnameformat": "Magi {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

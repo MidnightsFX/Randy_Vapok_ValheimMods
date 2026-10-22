@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Augmentation des dégâts pendant la durée de l'effet.",
   "mod_epicloot_set_me_bulwark": "Bulwark [Activé] : Prévient tous les dégâts pendant 5 secondes. Temps de recharge : 60 secondes.",
   "mod_epicloot_set_me_undying": "Immortel [Passif] : À la mort, régénérez la santé complète. Temps de recharge : 20 minutes.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Les attaques au corps à corps qui infligent des dégâts de givre infligent 50% de dégâts supplémentaires en givre dans un cône devant l'attaquant.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Les attaques au corps à corps qui infligent des dégâts de givre infligent {0:0.#}% de dégâts supplémentaires en givre dans un cône devant l'attaquant.",
   "mod_epicloot_set_me_berserker": "Berserker [Activé] : Pendant 10 secondes, vous ne pouvez pas régénérer de santé, mais vous gagnez +50% à +200% de dégâts en fonction de la santé perdue. Temps de recharge : 3 minutes.",
   "mod_epicloot_basicmagicnameformat": "Magie {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

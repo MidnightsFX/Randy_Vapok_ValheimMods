@@ -55,6 +55,10 @@ copy `EquipmentAndQuickSlots.dll` into the `BepInEx/plugins` folder.
   Archery's own hotkeys; everything else it does is untouched. Set
   `Compatibility / Better Archery quiver integration` to `false` to switch its quiver off entirely
   instead and use the quick slots for ammo.
+* **Item Favorite Framework** is optional. When it is installed, the quick slot bar shows its star on
+  items you favorited (or that sit in a favorited quick slot) and its trash mark on items you flagged
+  as trash. Turn this off with `Quick Slots / Show favorite marks`. Its own borders already show on the
+  slots in the equipment panel.
 * Other slot mods — AzuExtendedPlayerInventory, ExtendedPlayerInventory, ExtraSlots, ComfyQuickSlots —
   are declared incompatible; BepInEx will not load this mod next to them.
 

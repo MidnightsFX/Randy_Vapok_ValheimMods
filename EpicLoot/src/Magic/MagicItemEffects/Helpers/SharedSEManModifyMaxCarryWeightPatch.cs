@@ -38,7 +38,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             GainMaxCarryWeightFromRested.ModifyMaxCarryWeight(player, __instance, ref limit);
             CarryWeightForMovementPenalty.ModifyMaxCarryWeight(player, baseLimit, ref limit);
             
-            GiantsBlood.ModifyMaxCarryWeight(player, ref limit);
+            GiantsBlood.ModifyMaxCarryWeight(player, baseLimit, ref limit);
 
             // Last -- see the note above.
             TravelLight.ModifyMaxCarryWeight(player, ref limit);

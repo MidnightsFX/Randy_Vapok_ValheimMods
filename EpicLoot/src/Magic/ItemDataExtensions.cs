@@ -619,6 +619,10 @@ public static class ItemDataExtensions
         }
 
         ItemRarity itemRarity = item.GetRarity();
+        // Shift (the left trigger on a gamepad) puts each bonus's description under its line, as it does for the
+        // item's own effects. No range, since a bonus has one value per tier, and no Config lines: the description
+        // states the numbers that matter, and the bigger bonuses carry a dozen tuning keys.
+        bool showDetails = MagicItem.ShowEffectDetails;
         foreach (SetBonusInfo setBonusInfo in setInfo.SetBonuses.OrderBy(x => x.Count))
         {
             if (setBonusInfo.Effect == null)
@@ -635,8 +639,8 @@ public static class ItemDataExtensions
 
             // An inactive bonus previews the value it would have at the hovered item's rarity.
             ItemRarity? tier = progress.GetTier(setBonusInfo);
-            string display = MagicItem.GetEffectText(effectDef,
-                SetBonusEvaluator.GetBonusValue(setBonusInfo, tier ?? itemRarity));
+            float value = SetBonusEvaluator.GetBonusValue(setBonusInfo, tier ?? itemRarity);
+            string display = MagicItem.GetEffectText(effectDef, value);
 
             // The tier only changes anything when the bonus has per-rarity values.
             string tierTag = tier.HasValue && setBonusInfo.Effect.ValuesPerRarity != null
@@ -645,6 +649,12 @@ public static class ItemDataExtensions
 
             text.Append($"\n<color={(tier.HasValue ? EpicLoot.GetSetItemColor() : inactiveColor)}>" +
                 $"({setBonusInfo.Count}) ‣ {display}</color>{tierTag}");
+
+            string detail = showDetails ? SetDescriptions.DescribeSetBonusDetail(effectDef, value) : "";
+            if (detail.Length > 0)
+            {
+                text.Append($"\n<color={(tier.HasValue ? "#c0c0c0ff" : inactiveColor)}>    {detail}</color>");
+            }
         }
 
         return text.ToString();

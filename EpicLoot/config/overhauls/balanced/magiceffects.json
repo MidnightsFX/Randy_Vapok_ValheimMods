@@ -7488,6 +7488,7 @@
     {
       "Type": "Bulwark",
       "DisplayText": "$mod_epicloot_set_me_bulwark",
+      "Description": "$mod_epicloot_set_me_bulwark_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7513,6 +7514,7 @@
     {
       "Type": "Undying",
       "DisplayText": "$mod_epicloot_set_me_undying",
+      "Description": "$mod_epicloot_set_me_undying_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7521,6 +7523,7 @@
     {
       "Type": "FrostDamageAOE",
       "DisplayText": "$mod_epicloot_set_me_frostdamageaoe_display",
+      "Description": "$mod_epicloot_set_me_frostdamageaoe_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7545,6 +7548,7 @@
     {
       "Type": "Berserker",
       "DisplayText": "$mod_epicloot_set_me_berserker",
+      "Description": "$mod_epicloot_set_me_berserker_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7553,6 +7557,7 @@
     {
       "Type": "OverwhelmingLaunch",
       "DisplayText": "$mod_epicloot_set_me_overwhelminglaunch",
+      "Description": "$mod_epicloot_set_me_overwhelminglaunch_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7589,6 +7594,7 @@
     {
       "Type": "Artillery",
       "DisplayText": "$mod_epicloot_set_me_artillery",
+      "Description": "$mod_epicloot_set_me_artillery_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7614,6 +7620,7 @@
     {
       "Type": "Assassin",
       "DisplayText": "$mod_epicloot_set_me_assassin",
+      "Description": "$mod_epicloot_set_me_assassin_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7639,6 +7646,7 @@
     {
       "Type": "CoilingVenom",
       "DisplayText": "$mod_epicloot_set_me_coilingvenom",
+      "Description": "$mod_epicloot_set_me_coilingvenom_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7657,6 +7665,7 @@
     {
       "Type": "NineSteps",
       "DisplayText": "$mod_epicloot_set_me_ninesteps",
+      "Description": "$mod_epicloot_set_me_ninesteps_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7729,6 +7738,7 @@
     {
       "Type": "Hexen",
       "DisplayText": "$mod_epicloot_set_me_hexen",
+      "Description": "$mod_epicloot_set_me_hexen_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7751,6 +7761,7 @@
     {
       "Type": "Sniper",
       "DisplayText": "$mod_epicloot_set_me_sniper",
+      "Description": "$mod_epicloot_set_me_sniper_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7774,6 +7785,7 @@
     {
       "Type": "Frostwalker",
       "DisplayText": "$mod_epicloot_set_me_frostwalker",
+      "Description": "$mod_epicloot_set_me_frostwalker_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7798,6 +7810,7 @@
     {
       "Type": "SpiritAnimal",
       "DisplayText": "$mod_epicloot_set_me_spiritanimal",
+      "Description": "$mod_epicloot_set_me_spiritanimal_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7822,6 +7835,7 @@
     {
       "Type": "Earthshaker",
       "DisplayText": "$mod_epicloot_set_me_earthshaker",
+      "Description": "$mod_epicloot_set_me_earthshaker_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7859,6 +7873,7 @@
     {
       "Type": "PiercingBolts",
       "DisplayText": "$mod_epicloot_set_me_piercingbolts",
+      "Description": "$mod_epicloot_set_me_piercingbolts_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7877,6 +7892,7 @@
     {
       "Type": "ElementalArchery",
       "DisplayText": "$mod_epicloot_set_me_elementalarchery",
+      "Description": "$mod_epicloot_set_me_elementalarchery_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7887,6 +7903,7 @@
     {
       "Type": "ConjuredArrows",
       "DisplayText": "$mod_epicloot_set_me_conjuredarrows",
+      "Description": "$mod_epicloot_set_me_conjuredarrows_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7908,6 +7925,7 @@
     {
       "Type": "ConvertHealthToEitr",
       "DisplayText": "$mod_epicloot_set_me_converthealthtoeitr",
+      "Description": "$mod_epicloot_set_me_converthealthtoeitr_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7926,6 +7944,7 @@
     {
       "Type": "DeepWell",
       "DisplayText": "$mod_epicloot_set_me_deepwell",
+      "Description": "$mod_epicloot_set_me_deepwell_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7947,6 +7966,7 @@
     {
       "Type": "EitrBarrier",
       "DisplayText": "$mod_epicloot_set_me_eitrbarrier",
+      "Description": "$mod_epicloot_set_me_eitrbarrier_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7970,6 +7990,7 @@
     {
       "Type": "Interconnected",
       "DisplayText": "$mod_epicloot_set_me_interconnected",
+      "Description": "$mod_epicloot_set_me_interconnected_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -7988,6 +8009,7 @@
     {
       "Type": "AddAllSkills",
       "DisplayText": "$mod_epicloot_set_me_addallskills",
+      "Description": "$mod_epicloot_set_me_addallskills_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -8006,6 +8028,7 @@
     {
       "Type": "EitrInfusion",
       "DisplayText": "$mod_epicloot_set_me_eitrinfusion",
+      "Description": "$mod_epicloot_set_me_eitrinfusion_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -8029,6 +8052,7 @@
     {
       "Type": "QuarryMark",
       "DisplayText": "$mod_epicloot_set_me_quarrymark",
+      "Description": "$mod_epicloot_set_me_quarrymark_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -8051,6 +8075,7 @@
     {
       "Type": "HelsHarvest",
       "DisplayText": "$mod_epicloot_set_me_helsharvest",
+      "Description": "$mod_epicloot_set_me_helsharvest_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -8073,6 +8098,7 @@
     {
       "Type": "Vanish",
       "DisplayText": "$mod_epicloot_set_me_vanish",
+      "Description": "$mod_epicloot_set_me_vanish_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -8095,6 +8121,7 @@
     {
       "Type": "Firebrand",
       "DisplayText": "$mod_epicloot_set_me_firebrand",
+      "Description": "$mod_epicloot_set_me_firebrand_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -8118,6 +8145,7 @@
     {
       "Type": "LifeSiphon",
       "DisplayText": "$mod_epicloot_set_me_lifesiphon",
+      "Description": "$mod_epicloot_set_me_lifesiphon_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -8139,6 +8167,7 @@
     {
       "Type": "KineticQuake",
       "DisplayText": "$mod_epicloot_set_me_kineticquake",
+      "Description": "$mod_epicloot_set_me_kineticquake_desc",
       "Requirements": {
         "NoRoll": true
       },
@@ -8168,6 +8197,7 @@
     {
       "Type": "ShieldThrow",
       "DisplayText": "$mod_epicloot_set_me_shieldthrow",
+      "Description": "$mod_epicloot_set_me_shieldthrow_desc",
       "Requirements": {
         "NoRoll": true
       },

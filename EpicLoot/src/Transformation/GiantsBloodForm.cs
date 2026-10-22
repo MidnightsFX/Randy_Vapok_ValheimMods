@@ -30,6 +30,7 @@ public class GiantsBloodForm : MonoBehaviour
     private Vector3 _savedCenter;
 
     private float _collisionScale = 1f;
+    private float _extraMass;
 
     public static bool TryGet(Character character, out GiantsBloodForm form)
     {
@@ -112,11 +113,12 @@ public class GiantsBloodForm : MonoBehaviour
 
         Scale = scale;
 
+        // Held and worn items hang from bones under the root, so they scale with it and need nothing of their own.
         _player.transform.localScale = _savedRootScale * scale;
 
         SetCollisionScale(Small ? 1f : scale);
 
-        _player.SetExtraMass(0f);
+        UpdateExtraMass();
     }
 
     private void Revert()
@@ -137,7 +139,18 @@ public class GiantsBloodForm : MonoBehaviour
         _collisionScale = 1f;
         ActiveForms.Remove(_player);
 
-        _player.SetExtraMass(0f);
+        UpdateExtraMass();
+    }
+
+    // Mass grows with volume. Only the owner simulates its body, and the change is applied as a difference
+    // rather than through SetExtraMass(0), which would drop the pull mass a cart adds while attached.
+    private void UpdateExtraMass()
+    {
+        if (!_nview.IsOwner() || _player.m_body == null) return;
+
+        var extraMass = Active ? _player.m_originalMass * (Mathf.Pow(Scale, 3) - 1f) : 0f;
+        _player.m_body.mass += extraMass - _extraMass;
+        _extraMass = extraMass;
     }
 
     private bool Small => _player.IsCrouching() || _player.InDodge() || !_player.IsOnGround();
@@ -181,5 +194,19 @@ public class GiantsBloodForm : MonoBehaviour
     private static class Player_Awake_Patch
     {
         private static void Postfix(Player __instance) => __instance.gameObject.AddComponent<GiantsBloodForm>();
+    }
+
+    // Vanilla's SetExtraMass (a cart attaching or detaching) rewrites the mass from the original, so put the
+    // giant's share back on top.
+    [HarmonyPatch(typeof(Character), nameof(Character.SetExtraMass))]
+    private static class Character_SetExtraMass_Patch
+    {
+        private static void Postfix(Character __instance)
+        {
+            if (TryGet(__instance, out var form) && __instance.m_body != null)
+            {
+                __instance.m_body.mass += form._extraMass;
+            }
+        }
     }
 }

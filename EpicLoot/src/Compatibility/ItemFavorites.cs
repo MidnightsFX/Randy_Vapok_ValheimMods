@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using BepInEx.Bootstrap;
 using EpicLoot.Config;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using Iff = ItemFavoriteFrameworkAPI.ItemFavorites;
 
 namespace EpicLoot.Compatibility;
 
@@ -16,37 +15,20 @@ namespace EpicLoot.Compatibility;
 /// that mod; here they are left out of every enchanting-table list that destroys or consumes the item,
 /// and get a star wherever the tables list items.
 ///
-/// Soft in every direction: no assembly reference, only a soft BepInDependency for load order. The
-/// framework's API is bound once, to typed delegates, the first time it is needed. When the mod is
-/// absent every check answers "not favorited" and no star is drawn.
+/// Soft in every direction: no assembly reference, only a soft BepInDependency for load order. Every call
+/// goes through the framework's own shim (ItemFavoriteFrameworkAPI/ItemFavorites.cs, copied unchanged from
+/// the framework's repository; replace it whole to update it), which binds each endpoint once and answers
+/// "not favorited" when the mod is absent or too old for that endpoint. This class adds Epic Loot's own
+/// rules on top: the config switches, failing closed, and the star.
 /// </summary>
 public static class ItemFavorites
 {
-    private const string PluginGuid = "MidnightsFX.ItemFavoriteFramework";
-    private const string ApiTypeName = "ItemFavoriteFramework.API, ItemFavoriteFramework";
     private const string StarName = "EL_FavoriteStar";
 
-    // Bits of the framework's GetMarks.
-    private const int MarkItemFavorite = 1;
-    private const int MarkSlotFavorite = 2;
-
-    private static bool _resolved;
     private static bool _reportedFailure;
-    private static Func<ItemDrop.ItemData, bool> _isProtected;
-    private static Func<ItemDrop.ItemData, int> _getMarks;
-    private static Func<Sprite> _getFavoriteIcon;
-    private static Func<Color> _getFavoriteColor;
-    private static Func<Color> _getFavoritedSlotColor;
 
-    /// <summary>True when Item Favorite Framework is installed and its API bound.</summary>
-    public static bool IsLoaded
-    {
-        get
-        {
-            Resolve();
-            return _isProtected != null;
-        }
-    }
+    /// <summary>True when Item Favorite Framework is installed and its API was found.</summary>
+    public static bool IsLoaded => Iff.IsLoaded();
 
     /// <summary>
     /// The player favorited this item, or it sits in a favorited slot of their inventory, and they
@@ -60,15 +42,9 @@ public static class ItemFavorites
             return false;
         }
 
-        Resolve();
-        if (_isProtected == null)
-        {
-            return false;
-        }
-
         try
         {
-            return _isProtected(item);
+            return Iff.IsProtected(item);
         }
         catch (Exception e)
         {
@@ -93,7 +69,7 @@ public static class ItemFavorites
 
         Transform existing = icon.transform.Find(StarName);
         int marks = item != null && ELConfig.ShowFavoriteStars.Value ? GetMarks(item) : 0;
-        if ((marks & (MarkItemFavorite | MarkSlotFavorite)) == 0)
+        if ((marks & (Iff.MarkItemFavorite | Iff.MarkSlotFavorite)) == 0)
         {
             if (existing != null)
             {
@@ -109,21 +85,15 @@ public static class ItemFavorites
             return;
         }
 
-        star.color = (marks & MarkItemFavorite) != 0 ? _getFavoriteColor() : _getFavoritedSlotColor();
+        star.color = (marks & Iff.MarkItemFavorite) != 0 ? Iff.GetFavoriteColor() : Iff.GetFavoritedSlotColor();
         star.gameObject.SetActive(true);
     }
 
     private static int GetMarks(ItemDrop.ItemData item)
     {
-        Resolve();
-        if (_getMarks == null)
-        {
-            return 0;
-        }
-
         try
         {
-            return _getMarks(item);
+            return Iff.GetMarks(item);
         }
         catch (Exception e)
         {
@@ -136,7 +106,7 @@ public static class ItemFavorites
     // icon. A child of the icon, so it draws above it and hides with it.
     private static Image CreateStar(Image icon)
     {
-        Sprite sprite = _getFavoriteIcon?.Invoke();
+        Sprite sprite = Iff.GetFavoriteIcon();
         if (sprite == null)
         {
             return null;
@@ -157,78 +127,10 @@ public static class ItemFavorites
         return star;
     }
 
-    private static void Resolve()
-    {
-        if (_resolved)
-        {
-            return;
-        }
-
-        _resolved = true;
-        if (!Chainloader.PluginInfos.ContainsKey(PluginGuid))
-        {
-            return;
-        }
-
-        try
-        {
-            Type api = Type.GetType(ApiTypeName, throwOnError: false);
-            int apiVersion = api == null ? 0 : Bind<Func<int>>(api, "GetApiVersion")?.Invoke() ?? 0;
-            if (apiVersion < 1)
-            {
-                EpicLoot.LogWarningForce("Item Favorite Framework is installed but its API was not found; favorites are ignored.");
-                return;
-            }
-
-            _getMarks = Bind<Func<ItemDrop.ItemData, int>>(api, "GetMarks");
-            _getFavoriteIcon = Bind<Func<Sprite>>(api, "GetFavoriteIcon");
-            _getFavoriteColor = Bind<Func<Color>>(api, "GetFavoriteColor");
-            _getFavoritedSlotColor = Bind<Func<Color>>(api, "GetFavoritedSlotColor");
-            // Last: IsLoaded keys off it, so a partial bind never reads as loaded.
-            Func<ItemDrop.ItemData, bool> isProtected = Bind<Func<ItemDrop.ItemData, bool>>(api, "IsProtected");
-            if (isProtected == null || _getMarks == null || _getFavoriteIcon == null || _getFavoriteColor == null ||
-                _getFavoritedSlotColor == null)
-            {
-                _getMarks = null;
-                EpicLoot.LogWarningForce("Item Favorite Framework's API is missing an endpoint Epic Loot uses; favorites are ignored.");
-                return;
-            }
-
-            _isProtected = isProtected;
-            EpicLoot.Log($"Item Favorite Framework found (API {apiVersion}); favorited items are kept out of destructive enchanting lists.");
-        }
-        catch (Exception e)
-        {
-            EpicLoot.LogWarningForce($"Could not bind Item Favorite Framework's API; favorites are ignored: {e.Message}");
-        }
-    }
-
-    // Matches the delegate's exact signature, so a renamed or changed endpoint binds to nothing
-    // instead of throwing at the call site.
-    private static T Bind<T>(Type api, string name) where T : class
-    {
-        MethodInfo invoke = typeof(T).GetMethod("Invoke");
-        Type[] parameters = invoke.GetParameters().Select(p => p.ParameterType).ToArray();
-        MethodInfo method = api.GetMethod(name, BindingFlags.Public | BindingFlags.Static, null, parameters, null);
-        if (method == null || method.ReturnType != invoke.ReturnType)
-        {
-            return null;
-        }
-
-        return Delegate.CreateDelegate(typeof(T), method, throwOnBindFailure: false) as T;
-    }
-
     // ---------------------------------------------------------------------------------------------------
-    // Wishlists and loot rolls (the framework's API 3). Bound separately from the favorites above, and each
-    // endpoint on its own, so an older framework still gives favorites and simply none of this.
+    // Wishlists and loot rolls (the framework's API 3). An older framework lacks these endpoints, and the
+    // shim then simply does nothing for them, so favorites still work.
     // ---------------------------------------------------------------------------------------------------
-
-    private delegate bool StartRollFn(ItemDrop drop, string playerIdsJson, string optionsJson, ref string rollId, ref string error);
-
-    private static bool _lootResolved;
-    private static Func<bool> _isRollingAvailable;
-    private static StartRollFn _startRoll;
-    private static Func<Vector3, float, string> _getPlayerIdsNearJson;
 
     /// <summary>
     /// Registers Epic Loot's wishlist conditions (rarity, unique, set, effects) and its magic item names with
@@ -236,59 +138,33 @@ public static class ItemFavorites
     /// </summary>
     public static void RegisterLootIntegration()
     {
-        if (!Chainloader.PluginInfos.ContainsKey(PluginGuid))
+        if (!Iff.IsLoaded())
         {
+            if (Chainloader.PluginInfos.ContainsKey(Iff.PluginGuid))
+            {
+                EpicLoot.LogWarningForce("Item Favorite Framework is installed but its API was not found; favorites are ignored.");
+            }
+
             return;
         }
 
+        EpicLoot.Log($"Item Favorite Framework {Iff.GetPluginVersion()} found (API {Iff.GetApiVersion()}); " +
+            "favorited items are kept out of destructive enchanting lists.");
+
         try
         {
-            Type api = Type.GetType(ApiTypeName, throwOnError: false);
-            if (api == null)
+            if (Iff.RegisterWishlistProvider(ItemFavoritesWishlist.ProviderId, ItemFavoritesWishlist.GetSchema,
+                    ItemFavoritesWishlist.Matches, ItemFavoritesWishlist.Describe, ItemFavoritesWishlist.Suggest))
             {
-                return;
-            }
-
-            var register = Bind<Func<string, Func<string, string>, Func<ItemDrop.ItemData, string, bool>, Func<string, string>,
-                Func<ItemDrop.ItemData, string>, bool>>(api, "RegisterWishlistProvider");
-            if (register != null)
-            {
-                register(ItemFavoritesWishlist.ProviderId, ItemFavoritesWishlist.GetSchema, ItemFavoritesWishlist.Matches,
-                    ItemFavoritesWishlist.Describe, ItemFavoritesWishlist.Suggest);
                 EpicLoot.Log("Registered Epic Loot's wishlist conditions with Item Favorite Framework.");
             }
 
-            var addNames = Bind<Action<Func<ItemDrop.ItemData, string>>>(api, "AddItemNameProvider");
-            addNames?.Invoke(ItemFavoritesWishlist.DisplayName);
+            Iff.AddItemNameProvider(ItemFavoritesWishlist.DisplayName);
         }
         catch (Exception e)
         {
             EpicLoot.LogWarningForce($"Could not register Epic Loot's wishlist conditions with Item Favorite Framework: {e.Message}");
         }
-    }
-
-    private static void ResolveLoot()
-    {
-        if (_lootResolved)
-        {
-            return;
-        }
-
-        _lootResolved = true;
-        if (!Chainloader.PluginInfos.ContainsKey(PluginGuid))
-        {
-            return;
-        }
-
-        Type api = Type.GetType(ApiTypeName, throwOnError: false);
-        if (api == null)
-        {
-            return;
-        }
-
-        _isRollingAvailable = Bind<Func<bool>>(api, "IsRollingAvailable");
-        _startRoll = Bind<StartRollFn>(api, "StartRoll");
-        _getPlayerIdsNearJson = Bind<Func<Vector3, float, string>>(api, "GetPlayerIdsNearJson");
     }
 
     /// <summary>
@@ -303,14 +179,13 @@ public static class ItemFavorites
             return;
         }
 
-        ResolveLoot();
-        if (_startRoll == null || _getPlayerIdsNearJson == null || _isRollingAvailable == null || !_isRollingAvailable())
-        {
-            return;
-        }
-
         try
         {
+            if (!Iff.IsRollingAvailable())
+            {
+                return;
+            }
+
             GameObject creature = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(characterName) : null;
             Character character = creature != null ? creature.GetComponent<Character>() : null;
             if (ELConfig.LootRollBossesOnly.Value && (character == null || !character.IsBoss()))
@@ -318,7 +193,7 @@ public static class ItemFavorites
                 return;
             }
 
-            string members = _getPlayerIdsNearJson(dropPoint, ELConfig.LootRollPlayerRange.Value);
+            string members = Iff.GetPlayerIdsNearJson(dropPoint, ELConfig.LootRollPlayerRange.Value);
             if (JArray.Parse(members).Count < ELConfig.LootRollMinimumPlayers.Value)
             {
                 return;
@@ -340,9 +215,7 @@ public static class ItemFavorites
                     continue;
                 }
 
-                string rollId = "";
-                string error = "";
-                if (!_startRoll(drop, members, options, ref rollId, ref error))
+                if (!Iff.StartRoll(drop, members, options, out _, out string error))
                 {
                     EpicLoot.Log($"No loot roll for {drop.m_itemData.m_shared.m_name}: {error}.");
                 }

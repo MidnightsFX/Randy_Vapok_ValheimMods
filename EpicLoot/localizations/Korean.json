@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "효과 기간 동안 피해 증가합니다.",
   "mod_epicloot_set_me_bulwark": "불워크 [사용 가능]: 5초 동안 모든 피해 방지. 재사용 대기시간: 60초.",
   "mod_epicloot_set_me_undying": "언다잉 [수동]: 사망 시, 전체 체력 회복. 재사용 대기시간: 20분.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "서리 피해를 입히는 근접 공격은 공격자 앞의 원뿔 영역에 무기 데미지의 추가 50%를 서리 피해로 입힙니다.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "서리 피해를 입히는 근접 공격은 공격자 앞의 원뿔 영역에 무기 데미지의 추가 {0:0.#}%를 서리 피해로 입힙니다.",
   "mod_epicloot_set_me_berserker": "버서커 [사용 가능]: 10초 동안 체력을 회복할 수 없지만, 체력 부족에 따라 +50%에서 +200%까지의 추가 데미지를 획득합니다. 재사용 대기시간: 3분.",
   "mod_epicloot_basicmagicnameformat": "매직 {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

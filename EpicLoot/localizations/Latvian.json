@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Palielināts bojājums efekta ilgumā.",
   "mod_epicloot_set_me_bulwark": "Aizsargs [Aktivizēts]: Novērš visu bojājumu uz 5 sekundēm. Atkārtošanās laiks: 60 sekundes.",
   "mod_epicloot_set_me_undying": "Nemirstīgais [Pavērsiens]: Nāvē atgūst pilnu veselību. Atkārtošanās laiks: 20 minūtes.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Tuva cīņa, kas nodara saldēšanas bojājumus, papildus 50% no ieroča bojājumiem kā saldēšanas konusā uzbrucēja priekšā.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Tuva cīņa, kas nodara saldēšanas bojājumus, papildus {0:0.#}% no ieroča bojājumiem kā saldēšanas konusā uzbrucēja priekšā.",
   "mod_epicloot_set_me_berserker": "Berserks [Aktivizēts]: 10 sekunžu laikā jūs nevarat atjaunot veselību, bet iegūstat +50% līdz +200% bojājumu atkarībā no trūkstošās veselības. Atkārtošanās laiks: 3 minūtes.",
   "mod_epicloot_basicmagicnameformat": "Maģija {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Zvýšené poškození po dobu trvání účinku.",
   "mod_epicloot_set_me_bulwark": "Obranná zeď [Aktivováno]: Zabraňuje veškerému poškození po dobu 5 sekund. Doba do obnovení: 60 sekund.",
   "mod_epicloot_set_me_undying": "Nesmrtelný [Pasivní]: Při smrti získáte plné zdraví. Doba do obnovení: 20 minut.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Melee útoky, které způsobují mrazivé poškození, způsobí dalších 50% zbraně jako mrazivé poškození v kuželu před útočníkem.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Melee útoky, které způsobují mrazivé poškození, způsobí dalších {0:0.#}% zbraně jako mrazivé poškození v kuželu před útočníkem.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktivováno]: Po dobu 10 sekund nemůžete regenerovat zdraví, ale získáte +50% až +200% poškození podle chybějícího zdraví. Doba do obnovení: 3 minuty.",
   "mod_epicloot_basicmagicnameformat": "Magie {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

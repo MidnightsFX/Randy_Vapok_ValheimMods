@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Növekvő kár az hatás ideje alatt.",
   "mod_epicloot_set_me_bulwark": "Vár [Aktiválva]: Megakadályozza az összes sebzést 5 másodpercig. Visszatöltési idő: 60 másodperc.",
   "mod_epicloot_set_me_undying": "Elpusztíthatatlan [Passzív]: Halál esetén teljes egészséget visszaszerez. Visszatöltési idő: 20 perc.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Közeli támadások, amelyek fagysebzést okoznak, további 50%-kal sebeznek fegyverként a támadó előtt lévő konuszban.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Közeli támadások, amelyek fagysebzést okoznak, további {0:0.#}%-kal sebeznek fegyverként a támadó előtt lévő konuszban.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktiválva]: 10 másodpercig nem tudsz regenerálni, de +50% - +200% sebzést kapsz az életerő hiányától függően. Visszatöltési idő: 3 perc.",
   "mod_epicloot_basicmagicnameformat": "Varázslat {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

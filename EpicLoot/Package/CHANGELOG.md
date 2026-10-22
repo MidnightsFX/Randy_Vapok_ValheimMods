@@ -23,6 +23,8 @@ Changes:
 * The temper panel shows the chance to downgrade, and its destroy chance is now the real chance per attempt.
 * Bounties now pay double the coins and bounty tokens.
 * Other mods can now read a player's active bounties, so they can show them to friends.
+* Works with Item Favorite Framework when it is installed: favorited items are kept out of enchanting table screens that use items up and are marked with a star.
+* With Item Favorite Framework, wishlists can ask for a rarity, unique item, set or enchantments, and servers can have magic drops rolled for among nearby players.
 * New Enchantments!
     * Prosperity gives a chance for additional loot drops from creatures and chests
     * Green Thumb on the Cultivator makes the plants you sow grow faster.
@@ -81,6 +83,7 @@ Bugfixes:
 * The health bar grows more slowly at high health and no longer runs off the top of the screen.
 * Item gating no longer loses items when the same boss is listed more than once for an item type.
 * Fixes slotted shardstone tooltips showing a roll range, unknown enchantments showing blank lines, and blank names or icons in the crafting result window.
+* Set bonuses now read as one short line each, and holding Shift (or the left trigger on a gamepad) shows what each one does in full.
 
 New Sets:
 - Wrath of the Thunderer set, whose full set lets you hurl your melee weapon, even mid-swing, to slam down where you aim.
@@ -103,6 +106,7 @@ New Sets:
 - Svalinn's Arc set for bucklers and round shields, whose full set throws your shield through enemies and back, hitting harder the more damage you have blocked.
 - Coils of the World Serpent set for spear fighters, which turns part of your physical damage into venom that ignores resistance and, as a full set, dooms heavily envenomed enemies to walk nine steps and fall dead.
 - Gullveig's Rebirth set for elemental mages, whose full set makes you a Hexen for as long as you wear it: a Jotun Witch's body, magic blast and lightning bolt, and flight that burns Eitr and sinks you to the ground when it runs dry.
+- Jotunn's Blood set for two-handed fighters, whose bonuses make you larger, stronger and able to carry more, at the cost of a growing weakness to fire.
 
 
 

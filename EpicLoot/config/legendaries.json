@@ -1452,7 +1452,8 @@
       "Requirements": {
         "AllowedItemTypes": [
           "TwoHandedWeapon"
-        ]
+        ],
+        "AllowedSkillTypes": [ "Axes", "Clubs", "Swords", "Polearms" ]
       },
       "GuaranteedEffectCount": 6
     },

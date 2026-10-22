@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Ökad skada under effektens varaktighet.",
   "mod_epicloot_set_me_bulwark": "Bulwark [Aktiverad]: Förhindra all skada i 5 sekunder. Återställningstid: 60 sekunder.",
   "mod_epicloot_set_me_undying": "Odödlig [Passiv]: Vid död, återfå full hälsa. Återställningstid: 20 minuter.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Melee-attacker som gör frostskada ger ytterligare 50% av vapenskadan som frost i en kon i framför angriparen.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Melee-attacker som gör frostskada ger ytterligare {0:0.#}% av vapenskadan som frost i en kon i framför angriparen.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktiverad]: Under 10 sekunder kan du inte regenerera hälsa, men du får +50% till +200% skada baserat på saknad hälsa. Återställningstid: 3 minuter.",
   "mod_epicloot_basicmagicnameformat": "Magi {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

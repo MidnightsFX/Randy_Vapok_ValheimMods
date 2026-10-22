@@ -63,6 +63,13 @@ public class SetInfo(string topic, bool showSearchBar = true) : MagicTextInfo(to
             }
 
             content.Add($" - ({bonus.Count}) {SetDescriptions.DescribeSetBonus(definition, bonus, rarities)}");
+
+            // The bonus line is kept short for tooltips; the full explanation is the description.
+            string detail = SetDescriptions.DescribeSetBonusDetail(definition, bonus, rarities);
+            if (detail.Length > 0)
+            {
+                content.Add($"    <color=#c0c0c0ff>{detail}</color>");
+            }
         }
 
         instance.MagicPagesTextArea.Add($"<size={MagicPages.LARGE_FONT_SIZE}>" +

@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Artan hasar etki süresince.",
   "mod_epicloot_set_me_bulwark": "Siper [Aktif]: 5 saniye boyunca tüm hasarı engeller. Geri dönüş süresi: 60 saniye.",
   "mod_epicloot_set_me_undying": "Ölümsüz [Pasif]: Ölümde, tam sağlık yeniden kazanılır. Geri dönüş süresi: 20 dakika.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Buz hasarı veren yakın saldırılar, saldıranın önünde konik olarak silah hasarının +%50'sini ek olarak buz olarak verir.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Buz hasarı veren yakın saldırılar, saldıranın önünde konik olarak silah hasarının +%{0:0.#}'sini ek olarak buz olarak verir.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktif]: 10 saniye boyunca sağlık yenilenemez, ancak sağlık eksikliğine bağlı olarak +%50 ila +%200 hasar kazanılır. Geri dönüş süresi: 3 dakika.",
   "mod_epicloot_basicmagicnameformat": "Sihir {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

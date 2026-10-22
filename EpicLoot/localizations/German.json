@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Erhöhter Schaden für die Dauer des Effekts.",
   "mod_epicloot_set_me_bulwark": "Bollwerk [Aktiviert]: Verhindert jeglichen Schaden für 5 Sekunden. Abklingzeit: 60 Sekunden.",
   "mod_epicloot_set_me_undying": "Unsterblich [Passiv]: Nach dem Tod wird die volle Gesundheit wiederhergestellt. Abklingzeit: 20 Minuten.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Nahkampfangriffe, die Frostschaden verursachen, fügen vor dem Angreifer in einem Kegel zusätzliche 50% des Waffenschadens als Frostschaden zu.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Nahkampfangriffe, die Frostschaden verursachen, fügen vor dem Angreifer in einem Kegel zusätzliche {0:0.#}% des Waffenschadens als Frostschaden zu.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktiviert]: Für 10 Sekunden kann keine Gesundheit regeneriert werden, aber der Schaden erhöht sich um +50% bis +200%, abhängig von der fehlenden Gesundheit. Abklingzeit: 3 Minuten.",
   "mod_epicloot_basicmagicnameformat": "Magie {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

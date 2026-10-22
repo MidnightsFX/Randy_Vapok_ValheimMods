@@ -36,7 +36,7 @@ namespace EpicLoot;
 [BepInDependency("vapok.mods.adventurebackpacks", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("kg.ValheimEnchantmentSystem", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("org.bepinex.plugins.steadyregeneration", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("MidnightsFX.ItemFavoriteFramework", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency(ItemFavoriteFrameworkAPI.ItemFavorites.PluginGuid, BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class EpicLoot : BaseUnityPlugin {
     public const string PluginId = "randyknapp.mods.epicloot";
     public const string DisplayName = "Epic Loot";

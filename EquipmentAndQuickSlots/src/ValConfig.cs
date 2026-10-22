@@ -11,6 +11,7 @@ namespace EquipmentAndQuickSlots {
         public static ConfigEntry<bool> ViewDebugSaveData;
         public static ConfigEntry<TextAnchor> QuickSlotsAnchor;
         public static ConfigEntry<Vector2> QuickSlotsPosition;
+        public static ConfigEntry<bool> ShowFavoriteMarks;
         public static ConfigEntry<bool> PreventStackAll;
         public static ConfigEntry<bool> PreventAutoPickup;
         public static ConfigEntry<bool> BackupEnabled;
@@ -100,6 +101,9 @@ namespace EquipmentAndQuickSlots {
                 new ConfigDescription("The point on the HUD to anchor the Quick Slots bar. Changing this also changes the pivot of the Quick Slots to that corner.", null, new ConfigurationManagerAttributes { }));
             QuickSlotsPosition = Config.Bind("Quick Slots", "Quick Slots Position", new Vector2(216, 150),
                 new ConfigDescription("The position offset from the Quick Slots Anchor at which to place the Quick Slots.", null, new ConfigurationManagerAttributes { }));
+            ShowFavoriteMarks = Config.Bind("Quick Slots", "Show favorite marks", true,
+                new ConfigDescription("When Item Favorite Framework is installed, items in the quick slots that you favorited or flagged as trash there show its star or trash mark on the quick slot bar.", null, new ConfigurationManagerAttributes { }));
+            ShowFavoriteMarks.SettingChanged += (_, _) => HotkeyBarRefreshGate.Invalidate();
 
             EquipmentPanelPosition = Config.Bind("Equipment Panel", "Equipment Panel Position", new Vector2(615f, 28f),
                 new ConfigDescription("Position of the equipment and quick slot panel, relative to the inventory grid. Drag the panel by its background in-game to move it (hold the drag key, or enable 'Equipment Panel Draggable').", null, new ConfigurationManagerAttributes { }));

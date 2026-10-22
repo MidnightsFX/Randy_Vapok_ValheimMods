@@ -69,7 +69,9 @@ public static class MagicTooltipPatches
             return "";
         }
 
-        if (!Shards.IsShard(item) && !(item.IsMagic(out MagicItem magicItem) && magicItem.Effects.Count > 0))
+        // A set rune has no effects of its own, but its set bonuses have details.
+        if (!Shards.IsShard(item) && !item.IsSetRune() &&
+            !(item.IsMagic(out MagicItem magicItem) && magicItem.Effects.Count > 0))
         {
             return "";
         }

@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Aukin skaði í gegnumhaldandi áhrif.Aukinn skaði í gegnumhaldandi áhrif.",
   "mod_epicloot_set_me_bulwark": "Skjöldur [Virkjað]: Ógildir allan skaða í 5 sekúndur. Endurhleðsla: 60 sekúndur.",
   "mod_epicloot_set_me_undying": "Ódauður [Þolinmóður]: Á dauða, fá aftur fullt heilsu. Endurhleðsla: 20 mínútur.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Meðhögg sem valda frostskemmdum valda aukinni 50% af vopnaskaða sem frost í keilu frammi við árásaraðila.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Meðhögg sem valda frostskemmdum valda aukinni {0:0.#}% af vopnaskaða sem frost í keilu frammi við árásaraðila.",
   "mod_epicloot_set_me_berserker": "Berserkur [Virkjað]: Í 10 sekúndur getur þú ekki endurheimt heilsu, en þú færð +50% til +200% skaða miðað við vantar heilsu. Endurhleðsla: 3 mínútur.",
   "mod_epicloot_basicmagicnameformat": "Galdur {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

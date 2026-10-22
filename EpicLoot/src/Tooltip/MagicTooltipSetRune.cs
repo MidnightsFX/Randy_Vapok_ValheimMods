@@ -42,6 +42,8 @@ public partial class MagicTooltip
         }
 
         text.Append("\n$mod_epicloot_set_bonuses:");
+        // Shift adds each bonus's description, as on a set piece's tooltip.
+        bool showDetails = MagicItem.ShowEffectDetails;
         foreach (SetBonusInfo bonus in set.SetBonuses.Where(x => x?.Effect != null).OrderBy(x => x.Count))
         {
             if (!MagicItemEffectDefinitions.TryGet(bonus.Effect.Type, out MagicItemEffectDefinition definition))
@@ -51,6 +53,12 @@ public partial class MagicTooltip
 
             text.Append($"\n<color={setColor}>({bonus.Count}) ‣ " +
                 $"{SetDescriptions.DescribeSetBonus(definition, bonus, rarities)}</color>");
+
+            string detail = showDetails ? SetDescriptions.DescribeSetBonusDetail(definition, bonus, rarities) : "";
+            if (detail.Length > 0)
+            {
+                text.Append($"\n<color=#c0c0c0ff>    {detail}</color>");
+            }
         }
 
         if (anyFurtherRestricted)

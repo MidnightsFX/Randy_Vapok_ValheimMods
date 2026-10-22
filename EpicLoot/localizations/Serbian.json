@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Povećana šteta tokom trajanja efekta.",
   "mod_epicloot_set_me_bulwark": "Obrambeni bedem [Aktivirano]: Sprječava svu štetu 5 sekundi. Pauza: 60 sekundi.",
   "mod_epicloot_set_me_undying": "Besmrtan [Pasivan]: Na smrt, povrati puno zdravlje. Pauza: 20 minuta.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Napadi blizu koji nanose zamrznutu štetu dodatno nanose 50% štete oružja kao zamrznutu štetu u stožcu ispred napadača.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Napadi blizu koji nanose zamrznutu štetu dodatno nanose {0:0.#}% štete oružja kao zamrznutu štetu u stožcu ispred napadača.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktivirano]: Tijekom 10 sekundi, ne možete regenerirati zdravlje, ali dobivate +50% do +200% štete ovisno o nedostatku zdravlja. Pauza: 3 minute.",
   "mod_epicloot_basicmagicnameformat": "Magija {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

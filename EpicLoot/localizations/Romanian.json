@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Daune crescute pentru durata efectului.",
   "mod_epicloot_set_me_bulwark": "Bulwark [Activat]: Previne toate daunele timp de 5 secunde. Timp de refacere: 60 secunde.",
   "mod_epicloot_set_me_undying": "Nemuritor [Pasiv]: La moarte, recâștigă toată energia. Timp de refacere: 20 minute.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Atacurile de luptă care provoacă daune de îngheț aduc un plus de 50% din daunele armei sub formă de îngheț într-un con în fața atacatorului.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Atacurile de luptă care provoacă daune de îngheț aduc un plus de {0:0.#}% din daunele armei sub formă de îngheț într-un con în fața atacatorului.",
   "mod_epicloot_set_me_berserker": "Berserker [Activat]: Timp de 10 secunde, nu poți regenera energia, dar obții un bonus de +50% până la +200% daune în funcție de energia lipsă. Timp de refacere: 3 minute.",
   "mod_epicloot_basicmagicnameformat": "Magie {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

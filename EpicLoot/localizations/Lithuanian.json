@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Padidintas žala veikimo trukmei metu.Padidintas žalos kiekis veikimo metu.",
   "mod_epicloot_set_me_bulwark": "Bulvarkas [Aktyvuotas]: 5 sekundes apsaugo nuo visos žalos. Atsarginis laikas: 60 sekundžių.",
   "mod_epicloot_set_me_undying": "Nemirtingas [Pasyvus]: Mirdamas, atkurti visą sveikatą. Atsarginis laikas: 20 minutes.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Melee atakos, kurios sukelia šalnos žalą, priekyje esančiame kūne padaro papildomai 50% ginklo žalos kaip šalna.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Melee atakos, kurios sukelia šalnos žalą, priekyje esančiame kūne padaro papildomai {0:0.#}% ginklo žalos kaip šalna.",
   "mod_epicloot_set_me_berserker": "Berserkeris [Aktyvuotas]: 10 sekundžių negalite atkurti sveikatos, bet gaunate +50% iki +200% žalos pagal prarastą sveikatą. Atsarginis laikas: 3 minutes.",
   "mod_epicloot_basicmagicnameformat": "Magija {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

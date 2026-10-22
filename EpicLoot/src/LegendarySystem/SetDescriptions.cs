@@ -63,6 +63,32 @@ namespace EpicLoot.LegendarySystem
             return $"{MagicItem.GetEffectTextGeneric(definition, "<b><color=yellow>X</color></b>")} (X = {perRarity})";
         }
 
+        /// <summary>
+        /// The bonus's extended description at one value: the text a set tooltip shows under the bonus line while
+        /// Shift is held. Empty when the effect has no description.
+        /// </summary>
+        public static string DescribeSetBonusDetail(MagicItemEffectDefinition definition, float value)
+        {
+            return string.IsNullOrEmpty(definition.Description) ? "" : MagicItem.GetEffectDescription(definition, value);
+        }
+
+        /// <summary>
+        /// The extended description across the set's rarities, filled in the way <see cref="DescribeSetBonus"/>
+        /// fills the line above it: the real value when every rarity agrees, its X otherwise.
+        /// </summary>
+        public static string DescribeSetBonusDetail(MagicItemEffectDefinition definition, SetBonusInfo bonus, List<ItemRarity> rarities)
+        {
+            if (string.IsNullOrEmpty(definition.Description))
+            {
+                return "";
+            }
+
+            List<float> values = rarities.Select(r => SetBonusEvaluator.GetBonusValue(bonus, r)).Distinct().ToList();
+            return values.Count <= 1
+                ? MagicItem.GetEffectDescription(definition, values.FirstOrDefault())
+                : MagicItem.GetEffectDescriptionGeneric(definition, "<b><color=yellow>X</color></b>");
+        }
+
         /// <summary>The rarities, each in its own color, comma separated.</summary>
         public static string FormatRarities(IEnumerable<ItemRarity> rarities)
         {

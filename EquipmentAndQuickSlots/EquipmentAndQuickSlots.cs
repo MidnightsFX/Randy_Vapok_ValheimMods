@@ -12,6 +12,7 @@ namespace EquipmentAndQuickSlots {
     [BepInDependency("moreslots", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("randyknapp.mods.auga", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("randyknapp.mods.epicloot", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(ItemFavoriteFrameworkAPI.ItemFavorites.PluginGuid, BepInDependency.DependencyFlags.SoftDependency)]
     // Soft dependency purely for load order: Better Archery has to be loaded AND patched
     // before this Awake runs, or BetterArcheryCompat has nothing to detect and nothing to
     // unpatch (see src/Compatibility/BetterArcheryCompat.cs).
@@ -50,6 +51,7 @@ namespace EquipmentAndQuickSlots {
             LoadAssets();
             Slots.InitializeSlots();
             EpicLootCompat.Initialize();
+            ItemFavoritesCompat.Initialize();
 
             _harmony = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), PluginId);
 

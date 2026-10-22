@@ -217,6 +217,8 @@ namespace EquipmentAndQuickSlots {
                     if (binding && binding.GetComponent<TMP_Text>() is TMP_Text text)
                         text.text = slots[QuickSlotStartIndex + i].GetShortcutText();
                 }
+
+                ItemFavoritesCompat.UpdateQuickBarMarks(__instance);
             }
 
             [HarmonyFinalizer]

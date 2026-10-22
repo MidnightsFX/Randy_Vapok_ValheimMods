@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Øget skade i varigheden af effekten.",
   "mod_epicloot_set_me_bulwark": "Fæstning [Aktiveret]: Forhindrer al skade i 5 sekunder. Nedkøling: 60 sekunder.",
   "mod_epicloot_set_me_undying": "Udødelig [Passiv]: Ved død, genvind fuld sundhed. Nedkøling: 20 minutter.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Melee angreb der giver frostskade giver yderligere 50% af våbenskaden som frost i en kegle foran angriberen.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Melee angreb der giver frostskade giver yderligere {0:0.#}% af våbenskaden som frost i en kegle foran angriberen.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktiveret]: I 10 sekunder kan du ikke regenerere sundhed, men du får +50% til +200% skade baseret på manglende sundhed. Nedkøling: 3 minutter.",
   "mod_epicloot_basicmagicnameformat": "Magi {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

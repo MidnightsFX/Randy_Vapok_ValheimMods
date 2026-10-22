@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "增加伤害持续时间。",
   "mod_epicloot_set_me_bulwark": "壁垒 [激活]: 防止所有伤害5秒。冷却时间：60秒。",
   "mod_epicloot_set_me_undying": "不朽 [被动]: 死亡时，恢复全血。冷却时间：20分钟。",
-  "mod_epicloot_set_me_frostdamageaoe_display": "造成冰霜伤害的近战攻击在攻击者正前方形成锥形范围，额外造成武器伤害的50%作为冰霜伤害。",
+  "mod_epicloot_set_me_frostdamageaoe_display": "造成冰霜伤害的近战攻击在攻击者正前方形成锥形范围，额外造成武器伤害的{0:0.#}%作为冰霜伤害。",
   "mod_epicloot_set_me_berserker": "狂战士 [激活]: 在10秒内，无法恢复生命，但根据缺失的生命值获得+50%至+200%的伤害。冷却时间：3分钟。",
   "mod_epicloot_basicmagicnameformat": "魔法 {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

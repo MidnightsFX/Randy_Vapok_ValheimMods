@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Verhoogde schade gedurende de duur van het effect.",
   "mod_epicloot_set_me_bulwark": "Bulwark [Geactiveerd]: Voorkomt alle schade voor 5 seconden. Cooldown: 60 seconden.",
   "mod_epicloot_set_me_undying": "Onsterfelijk [Passief]: Bij dood, herwin volledige gezondheid. Cooldown: 20 minuten.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Melee aanvallen die ijsschade veroorzaken doen een extra 50% van wapenschade als ijs in een kegel voor de aanvaller.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Melee aanvallen die ijsschade veroorzaken doen een extra {0:0.#}% van wapenschade als ijs in een kegel voor de aanvaller.",
   "mod_epicloot_set_me_berserker": "Berserker [Geactiveerd]: Voor 10 seconden, kan je geen gezondheid regenereren, maar je krijgt +50% tot +200% schade gebaseerd op ontbrekende gezondheid. Cooldown: 3 minuten.",
   "mod_epicloot_basicmagicnameformat": "Magie {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

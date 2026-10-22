@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Zwiększone obrażenia przez czas trwania efektu.",
   "mod_epicloot_set_me_bulwark": "Bulwark [Aktywowane]: Zapobiega wszelkim obrażeniom przez 5 sekund. Czas odnowienia: 60 sekund.",
   "mod_epicloot_set_me_undying": "Nieśmiertelny [Pasywny]: Po śmierci odzyskuje pełne zdrowie. Czas odnowienia: 20 minut.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Ataki wręcz zadające obrażenia mroźne zadają dodatkowe 50% obrażeń broni jako mroźne w stożku przed atakującym.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Ataki wręcz zadające obrażenia mroźne zadają dodatkowe {0:0.#}% obrażeń broni jako mroźne w stożku przed atakującym.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktywowane]: Przez 10 sekund nie można regenerować zdrowia, ale zyskuje się +50% do +200% obrażeń w zależności od brakującego zdrowia. Czas odnowienia: 3 minuty.",
   "mod_epicloot_basicmagicnameformat": "Magia {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

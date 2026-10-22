@@ -170,7 +170,8 @@ namespace EpicLoot
 
         // True while the player holds Shift, or the left trigger on a gamepad (vanilla's inventory
         // reads that trigger as its Shift), used to reveal the detailed per-effect tooltip block
-        // (description, roll range, config values). Shared by the magic-item and loose-shard tooltips.
+        // (description, roll range, config values). Shared by the magic-item and loose-shard tooltips, and by the
+        // set bonus lines on set pieces and set runes (descriptions only).
         public static bool ShowEffectDetails =>
             ZInput.GetKey(KeyCode.LeftShift) || ZInput.GetKey(KeyCode.RightShift) || ZInput.GetButton("JoyLTrigger");
 

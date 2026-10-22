@@ -15,12 +15,13 @@ namespace EpicLoot.MagicItemEffects
         public static float GiantsBloodValue(Player player) =>
             player == null ? 0f : player.GetTotalActiveMagicEffectValue(MagicEffectType.GiantsBlood);
 
-        public static void ModifyMaxCarryWeight(Player player, ref float limit)
+        public static void ModifyMaxCarryWeight(Player player, float baseLimit, ref float limit)
         {
             var pct = player.GetTotalActiveMagicEffectValue(MagicEffectType.GiantsBlood, 0.01f);
             if (pct == 0f) return;
 
-            limit += limit * pct * CarryWeightPctPerPoint;
+            // Of the base limit, as the other percentage carry effects do, not of the running total.
+            limit += baseLimit * pct * CarryWeightPctPerPoint;
         }
 
         public static void ApplyHealthRegen(Player player, string magicEffect, ref float regenValue)
@@ -81,35 +82,6 @@ namespace EpicLoot.MagicItemEffects
                     m_modifier = modifier,
                 };
                 __result.Apply(FirePair);
-            }
-        }
-
-        [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.AttachItem))]
-        private static class VisEquipment_AttachItem_Patch
-        {
-            private static void Postfix(VisEquipment __instance, GameObject __result)
-            {
-                if (__result == null) return;
-
-                var scale = Transformation.GiantsBloodForm.Of(__instance.GetComponent<Player>());
-                if (Mathf.Approximately(scale, 1f)) return;
-
-                __result.transform.localScale *= scale;
-            }
-        }
-
-        [HarmonyPatch(typeof(Character), nameof(Character.SetExtraMass))]
-        private static class Character_SetExtraMass_Patch
-        {
-            private static void Postfix(Character __instance, float amount)
-            {
-                if (__instance == null || __instance != Player.m_localPlayer || __instance.m_body == null) return;
-
-                var value = GiantsBloodValue(Player.m_localPlayer);
-                if (value <= 0f) return;
-
-                var scale = 1f + value / 100f;
-                __instance.m_body.mass += __instance.m_originalMass * (Mathf.Pow(scale, 3) - 1f);
             }
         }
 

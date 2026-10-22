@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Povećana šteta tijekom trajanja učinka.",
   "mod_epicloot_set_me_bulwark": "Bulwark [Aktivirano]: Sprječava svu štetu tijekom 5 sekundi. Cooldown: 60 sekundi.",
   "mod_epicloot_set_me_undying": "Undying [Pasivno]: Po smrti, povratite puno zdravlje. Cooldown: 20 minuta.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Napadi oružjem koji nanose štetu od leda nanose dodatnih 50% štete oružja kao led u stožcu ispred napadača.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Napadi oružjem koji nanose štetu od leda nanose dodatnih {0:0.#}% štete oružja kao led u stožcu ispred napadača.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktivirano]: Tijekom 10 sekundi, ne možete obnavljati zdravlje, ali dobivate +50% do +200% štete ovisno o nedostatku zdravlja. Cooldown: 3 minute.",
   "mod_epicloot_basicmagicnameformat": "Magija {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

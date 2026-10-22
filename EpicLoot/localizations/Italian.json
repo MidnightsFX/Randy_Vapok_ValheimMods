@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Aumento del danno per la durata dell'effetto.Aumento del danno per la durata dell'effetto.",
   "mod_epicloot_set_me_bulwark": "Bulwark [Attivato]: Previeni tutti i danni per 5 secondi. Tempo di attesa: 60 secondi.",
   "mod_epicloot_set_me_undying": "Indistruttibile [Passivo]: Alla morte, recupera la salute completa. Tempo di attesa: 20 minuti.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Gli attacchi corpo a corpo che infliggono danni da gelo infliggono un ulteriore 50% del danno dell'arma come gelo in un cono di fronte all'attaccante.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Gli attacchi corpo a corpo che infliggono danni da gelo infliggono un ulteriore {0:0.#}% del danno dell'arma come gelo in un cono di fronte all'attaccante.",
   "mod_epicloot_set_me_berserker": "Berserker [Attivato]: Per 10 secondi, non puoi rigenerare la salute, ma ottieni +50% a +200% di danni in base alla salute mancante. Tempo di attesa: 3 minuti.",
   "mod_epicloot_basicmagicnameformat": "Magia {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Aumento de daño durante la duración del efecto.",
   "mod_epicloot_set_me_bulwark": "Baluarte [Activado]: Previene todo el daño durante 5 segundos. Tiempo de reutilización: 60 segundos.",
   "mod_epicloot_set_me_undying": "Inmortal [Pasivo]: Al morir, recupera toda la salud. Tiempo de reutilización: 20 minutos.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Los ataques cuerpo a cuerpo que infligen daño de escarcha infligen un 50% adicional del daño del arma como escarcha en un cono frente al atacante.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Los ataques cuerpo a cuerpo que infligen daño de escarcha infligen un {0:0.#}% adicional del daño del arma como escarcha en un cono frente al atacante.",
   "mod_epicloot_set_me_berserker": "Berserker [Activado]: Durante 10 segundos, no puedes regenerar salud, pero obtienes +50% a +200% de daño según la salud que falte. Tiempo de reutilización: 3 minutos.",
   "mod_epicloot_basicmagicnameformat": "Magia {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

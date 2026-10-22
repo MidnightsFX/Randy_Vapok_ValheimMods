@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "効果の期間中にダメージが増加します。効果の期間中にダメージが増加します。",
   "mod_epicloot_set_me_bulwark": "Bulwark [アクティブ]: 5秒間すべてのダメージを防ぎます。クールダウン: 60秒。",
   "mod_epicloot_set_me_undying": "Undying [パッシブ]: 死亡時、全体の体力を回復します。クールダウン: 20分。",
-  "mod_epicloot_set_me_frostdamageaoe_display": "霜のダメージを与える近接攻撃は、攻撃者の前方に錐状に追加の50%の武器ダメージを霜として与えます。",
+  "mod_epicloot_set_me_frostdamageaoe_display": "霜のダメージを与える近接攻撃は、攻撃者の前方に錐状に追加の{0:0.#}%の武器ダメージを霜として与えます。",
   "mod_epicloot_set_me_berserker": "Berserker [アクティブ]: 10秒間、体力を回復できませんが、体力が不足するほど50%から200%のダメージを増加します。クールダウン: 3分。",
   "mod_epicloot_basicmagicnameformat": "マジック{0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

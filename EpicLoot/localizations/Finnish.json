@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Lisääntynyt vahinko vaikutuksen keston ajan.",
   "mod_epicloot_set_me_bulwark": "Suojamuuri [Aktivoitu]: Estää kaiken vahingon 5 sekunnin ajan. Jäähdytysaika: 60 sekuntia.",
   "mod_epicloot_set_me_undying": "Kuolematon [Passiivinen]: Kuollessa palauta täysi terveys. Jäähdytysaika: 20 minuuttia.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Lähitaisteluhyökkäykset, jotka aiheuttavat jäätävää vahinkoa, aiheuttavat lisäksi 50% aseen vahingosta jäätä kartion muodossa hyökkääjän edessä.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Lähitaisteluhyökkäykset, jotka aiheuttavat jäätävää vahinkoa, aiheuttavat lisäksi {0:0.#}% aseen vahingosta jäätä kartion muodossa hyökkääjän edessä.",
   "mod_epicloot_set_me_berserker": "Berserkki [Aktivoitu]: 10 sekunnin ajan et voi uudistaa terveyttäsi, mutta saat +50% - +200% vahinkoa terveyden puutteen perusteella. Jäähdytysaika: 3 minuuttia.",
   "mod_epicloot_basicmagicnameformat": "Taika {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",

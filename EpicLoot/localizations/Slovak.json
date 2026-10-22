@@ -1832,7 +1832,7 @@
   "mod_epicloot_me_adrenaline_rush_desc": "Zvýšené poškodenie počas trvania účinku.",
   "mod_epicloot_set_me_bulwark": "Opevnenie [Aktivované]: Zabraňuje všetkému poškodeniu počas 5 sekúnd. Obnovenie: 60 sekúnd.",
   "mod_epicloot_set_me_undying": "Nesmrteľnosť [Pasívne]: Po smrti obnovíte plné zdravie. Obnovenie: 20 minút.",
-  "mod_epicloot_set_me_frostdamageaoe_display": "Útoky zblízka, ktoré spôsobia mrazivé poškodenie, spôsobia ďalších 50% poškodenia zbrane ako mrazivé v kuželi pred útočníkom.",
+  "mod_epicloot_set_me_frostdamageaoe_display": "Útoky zblízka, ktoré spôsobia mrazivé poškodenie, spôsobia ďalších {0:0.#}% poškodenia zbrane ako mrazivé v kuželi pred útočníkom.",
   "mod_epicloot_set_me_berserker": "Berserker [Aktivovaný]: Počas 10 sekúnd nemôžete obnoviť zdravie, ale získate +50% až +200% poškodenia v závislosti od chýbajúceho zdravia. Obnovenie: 3 minúty.",
   "mod_epicloot_basicmagicnameformat": "Mágia {0}",
   "mod_epicloot_fullnameformat": "{0}{1}{2}",
