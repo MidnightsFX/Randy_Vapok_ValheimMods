@@ -961,7 +961,8 @@ namespace EpicLoot.CraftingV2
             foreach (string item in resultItemNames)
             {
                 ObjectDB.instance.TryGetItemPrefab(item, out GameObject founditem);
-                if (founditem == null)
+                ItemDrop foundItemDrop = founditem != null ? founditem.GetComponent<ItemDrop>() : null;
+                if (foundItemDrop == null || !EpicLoot.CanBeMagicItem(foundItemDrop.m_itemData))
                 {
                     continue;
                 }
@@ -974,7 +975,7 @@ namespace EpicLoot.CraftingV2
 
                 result.Add(new InventoryItemListElement()
                 {
-                    Item = founditem.GetComponent<ItemDrop>().m_itemData
+                    Item = foundItemDrop.m_itemData
                 });
             }
 
