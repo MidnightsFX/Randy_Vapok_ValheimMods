@@ -1443,6 +1443,54 @@
       "GuaranteedMagicEffects": [
         { "Type": "IncreaseEitr" }
       ]
+    },
+    {
+      "ID": "GiantsBloodTwoHandedWeapon",
+      "Name": "$mod_epicloot_l_giantsbloodtwohandedweapon",
+      "Description": "$mod_epicloot_l_giantsbloodtwohandedweapon_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "TwoHandedWeapon"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "GiantsBloodHelm",
+      "Name": "$mod_epicloot_l_giantsbloodhelm",
+      "Description": "$mod_epicloot_l_giantsbloodhelm_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Helmet"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "GiantsBloodChest",
+      "Name": "$mod_epicloot_l_giantsbloodchest",
+      "Description": "$mod_epicloot_l_giantsbloodchest_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Chest"
+        ]
+      },
+      "GuaranteedEffectCount": 6
+    },
+    {
+      "ID": "GiantsBloodLegs",
+      "Name": "$mod_epicloot_l_giantsbloodlegs",
+      "Description": "$mod_epicloot_l_giantsbloodlegs_desc",
+      "IsSetItem": true,
+      "Requirements": {
+        "AllowedItemTypes": [
+          "Legs"
+        ]
+      },
+      "GuaranteedEffectCount": 6
     }
   ],
   "LegendarySets": [
@@ -2047,8 +2095,27 @@
           "Ancient": { "MinValue": 2, "MaxValue": 2, "Increment": 0.5 }
           } } }
       ]
-    }
-  ],
+    },
+    {
+    "ID": "GiantsBlood",
+    "Name": "$mod_epicloot_set_giantsblood",
+    "Rarities": [ "Legendary", "Mythic", "Ancient" ],
+    "LegendaryIDs": [
+    "GiantsBloodTwoHandedWeapon",
+    "GiantsBloodHelm",
+    "GiantsBloodChest",
+    "GiantsBloodLegs"
+    ],
+    "SetBonuses": [
+    { "Count": 2, "Effect": { "Type": "GiantsBlood", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+    { "Count": 2, "Effect": { "Type": "SlightlyWeakToFire", "Values": { "MinValue": 1, "MaxValue": 1, "Increment": 1 } } },
+    { "Count": 3, "Effect": { "Type": "GiantsBlood", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+    { "Count": 3, "Effect": { "Type": "WeakToFire", "Values": { "MinValue": 1, "MaxValue": 1, "Increment": 1 } } },
+    { "Count": 4, "Effect": { "Type": "GiantsBlood", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+    { "Count": 4, "Effect": { "Type": "VeryWeakToFire", "Values": { "MinValue": 1, "MaxValue": 1, "Increment": 1 } } }
+    ]
+}
+],
 
   "MythicItems" : [
 
