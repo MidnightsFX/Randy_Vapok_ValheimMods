@@ -3943,6 +3943,68 @@
       ]
     },
     {
+      "Type": "LifeAfterKill",
+      "DisplayText": "$mod_epicloot_me_lifeafterkill_display",
+      "Description": "$mod_epicloot_me_lifeafterkill_desc",
+      "Requirements": {
+        "AllowedItemTypes": [
+          "OneHandedWeapon",
+          "TwoHandedWeapon",
+          "TwoHandedWeaponLeft",
+          "Bow"
+        ],
+        "ExcludedSkillTypes": [
+          "Pickaxes"
+        ],
+        "AllowedRarities": [
+          "Rare",
+          "Epic",
+          "Legendary",
+          "Mythic",
+          "Ancient"
+        ],
+        "ExcludedItemNames": [
+          "$item_fishingrod",
+          "$item_graplinghook"
+        ],
+        "ItemUsesStaminaOnAttack": true
+      },
+      "ValuesPerRarity": {
+        "Rare": {
+          "MinValue": 2,
+          "MaxValue": 4,
+          "Increment": 1
+        },
+        "Epic": {
+          "MinValue": 3,
+          "MaxValue": 6,
+          "Increment": 1
+        },
+        "Legendary": {
+          "MinValue": 4,
+          "MaxValue": 8,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 6,
+          "MaxValue": 10,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 8,
+          "MaxValue": 12,
+          "Increment": 1
+        }
+      },
+      "SelectionWeight": 5,
+      "Prefixes": [
+        "$mod_epicloot_me_lifeafterkill_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_lifeafterkill_suffix1"
+      ]
+    },
+    {
       "Type": "EitrLeech",
       "DisplayText": "$mod_epicloot_me_eitrleech_display",
       "Description": "$mod_epicloot_me_eitrleech_desc",

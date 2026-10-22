@@ -165,6 +165,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             GainAdrenalineWhenApplyingPoison.OnDamageDealt(__instance, hit, attacker);
             BurningAdrenaline.OnDamageDealt(hit, attacker);
             StaminaOnKill.OnDamageDealt(__instance, hit, attacker);
+            LifeAfterKill.OnDamageDealt(__instance, hit, attacker);
             Conduit.OnDamageDealt(__instance, hit, attacker);
             if (strike) {
                 EikthyrShockingCharge.OnDamageDealt(__instance, hit, attacker);

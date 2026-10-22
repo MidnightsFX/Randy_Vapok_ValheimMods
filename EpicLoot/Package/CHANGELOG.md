@@ -29,6 +29,7 @@ Changes:
     * Prosperity gives a chance for additional loot drops from creatures and chests
     * Green Thumb on the Cultivator makes the plants you sow grow faster.
     * Close Quarter on melee weapons reduces how far your hits knock enemies back.
+    * Life After Kill on weapons heals you a set amount each time you kill an enemy.
     * The grappling hook gets its own enchantments, Swift Reel and Long Line, and is treated as a tool rather than a weapon for loot and damage effects.
 
 Bugfixes:
