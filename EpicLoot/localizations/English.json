@@ -2186,7 +2186,7 @@
     "mod_epicloot_set_me_shieldthrow_desc": "Shield Throw [Hotkey]: Hurl your shield where you aim. It flies through enemies until it strikes something solid, then returns to your hand, hitting each enemy on the way out and again on the way back for {0:0}% of your block power as blunt damage. Damage you block fills a gauge that the throw spends for up to +{1:0}% damage. You cannot block until it returns. Costs {2:0} stamina.",
     "mod_epicloot_shieldthrow_hint": "Throw Shield",
     "mod_epicloot_set_me_coilingvenom": "Coiling Venom: {0:0.#}% physical as venom",
-    "mod_epicloot_set_me_coilingvenom_desc": "Coiling Venom: {0:0.#}% of your physical damage is dealt as poison instead. Your poison ignores resistance and immunity, and adds to the venom already in an enemy instead of replacing it.",
+    "mod_epicloot_set_me_coilingvenom_desc": "Coiling Venom: {0:0.#}% of your physical damage is dealt as poison instead. Your poison ignores resistance and adds to the venom already in an enemy instead of replacing it.",
     "mod_epicloot_set_me_ninesteps": "Nine Steps: Venom past {0:0.#}% health dooms",
     "mod_epicloot_set_me_ninesteps_desc": "Nine Steps: When the venom in an enemy reaches {0:0.#}% of its remaining health, it is doomed. It walks {1:0} more steps, {2:0.#} seconds, and falls dead.",
     "mod_epicloot_ninesteps_doomed": "Doomed",
