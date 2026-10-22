@@ -7678,6 +7678,55 @@
       }
     },
     {
+      "Type": "SlightlyWeakToFire",
+      "DisplayText": "$mod_epicloot_me_slightlyweaktofire_display",
+      "Description": "$mod_epicloot_me_slightlyweaktofire_desc",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false
+    },
+    {
+      "Type": "WeakToFire",
+      "DisplayText": "$mod_epicloot_me_weaktofire_display",
+      "Description": "$mod_epicloot_me_weaktofire_desc",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false
+    },
+    {
+      "Type": "VeryWeakToFire",
+      "DisplayText": "$mod_epicloot_me_veryweaktofire_display",
+      "Description": "$mod_epicloot_me_veryweaktofire_desc",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false
+    },
+    {
+      "Type": "GiantsBlood",
+      "DisplayText": "$mod_epicloot_set_me_giantsblood",
+      "Description": "$mod_epicloot_set_me_giantsblood_desc",
+      "Requirements": {
+        "NoRoll": true
+      },
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "ValuesPerRarity": {
+        "Legendary": { "MinValue": 10, "MaxValue": 10, "Increment": 1 },
+        "Mythic": { "MinValue": 10, "MaxValue": 10, "Increment": 1 },
+        "Ancient": { "MinValue": 10, "MaxValue": 10, "Increment": 1 }
+      }
+    },
+    {
       "Type": "Hexen",
       "DisplayText": "$mod_epicloot_set_me_hexen",
       "Requirements": {

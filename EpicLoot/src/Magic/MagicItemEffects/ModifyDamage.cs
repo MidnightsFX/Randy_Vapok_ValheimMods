@@ -87,6 +87,8 @@ public static class ModifyDamage
                 modifyAll += dodgeBuffValue;
             }
         }
+        
+        GiantsBlood.ApplyPhysicalDamage(player, ref damages);
 
         if (!item.IsMagic())
         {
@@ -166,7 +168,7 @@ public static class ModifyDamage
         damages.Modify(modifyAll);
     }
 
-    private static void ModifyPhysicalDamage(ref HitData.DamageTypes damages, float modifier)
+    internal static void ModifyPhysicalDamage(ref HitData.DamageTypes damages, float modifier)
     {
         damages.m_blunt *= modifier;
         damages.m_slash *= modifier;
