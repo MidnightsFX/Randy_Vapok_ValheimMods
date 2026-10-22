@@ -2129,7 +2129,10 @@
     "mod_epicloot_spiritanimal_refuse_tryagain": "{0} could not be bound. Try again.",
     "mod_epicloot_spiritanimal_missing": "Your fylgja, {0}, cannot be summoned: its creature no longer exists.",
     "mod_epicloot_spiritanimal_unreadable": "Your fylgja could not be read, so it cannot be summoned or replaced.",
-    "mod_epicloot_set_me_earthshaker": "Earthshaker [Hotkey]: In mid-air, dive where you aim, steering with your aim as you fall, and slam the ground for {0:0} damage, half blunt and half pierce, within {1:0.#}m, +1m per {9:0}m fallen. +1% damage per {4:0.#} weight carried over {5:0} (up to +{6:0}%), and +{7:0.#}% per metre fallen past {8:0.#}m. Diving with less than {2:0.#}m of clear air below you deals {10:0}% less damage. Costs {3:0} stamina.",
+    "mod_epicloot_set_me_earthshaker": "Earthshaker: Allows for you to slam the ground using [{11}] while in mid-air.",
+
+    "mod_epicloot_set_me_earthshaker_desc": "Earthshaker [{11}]: In mid-air, dive where you aim, steering with your aim as you fall, and slam the ground for {0:0} damage, half blunt and half pierce, within {1:0.#}m, +1m per {9:0}m fallen. +1% damage per {4:0.#} weight carried over {5:0} (up to +{6:0}%), and +{7:0.#}% per metre fallen past {8:0.#}m. Diving with less than {2:0.#}m of clear air below you deals {10:0}% less damage. Costs {3:0} stamina.",
+    
     "mod_epicloot_earthshaker_hint": "Earthshaker",
     "mod_epicloot_set_me_piercingbolts": "Piercing Bolts: Your crossbow bolts pass through every creature in their path, striking each once and keeping {0:0}% of their damage after each one.",
     "mod_epicloot_set_me_elementalarchery": "Elemental Archery: Your bows use Elemental Magic instead of Bows for damage, draw speed and stamina, and hitting creatures with them trains Elemental Magic.",

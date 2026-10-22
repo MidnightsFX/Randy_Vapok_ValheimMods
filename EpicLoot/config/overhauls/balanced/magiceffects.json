@@ -7773,6 +7773,7 @@
     {
       "Type": "Earthshaker",
       "DisplayText": "$mod_epicloot_set_me_earthshaker",
+      "Description": "$mod_epicloot_set_me_earthshaker_desc",
       "Requirements": {
         "NoRoll": true
       },
