@@ -600,6 +600,16 @@ public static class ItemDataExtensions
 
     // Counts the way bonus application does (SetBonusEvaluator): equipment providers included, each piece
     // once, each bonus at its own tier.
+    // Where a set bonus line puts its bullet, and where a shift-revealed description starts, as TMP
+    // columns measured in em from the text area's left edge (so both scale with the font size).
+    //
+    // <indent> rather than <pos>: it positions the caret the same way but the margin persists across
+    // word wrap, so a long effect name or description keeps clear of the "(N) ‣" gutter instead of
+    // wrapping back underneath it. Each line closes its own </indent> -- left open it would carry on
+    // into the following lines.
+    private const string BulletIndent = "<indent=2em>";
+    private const string DescriptionIndent = "<indent=2.8em>";
+
     private static string GetMagicSetTooltip(ItemDrop.ItemData item, LegendarySetInfo setInfo)
     {
         const string inactiveColor = "#808080ff";
@@ -619,6 +629,12 @@ public static class ItemDataExtensions
         }
 
         ItemRarity itemRarity = item.GetRarity();
+        bool showDetails = MagicItem.ShowEffectDetails;
+
+        // The count of the last bonus actually rendered, so several effects at the same count list
+        // under one header instead of restating it. Updated after the append, never on the skip paths
+        // below, so a bonus that fails to render cannot open a group.
+        int lastCount = -1;
         foreach (SetBonusInfo setBonusInfo in setInfo.SetBonuses.OrderBy(x => x.Count))
         {
             if (setBonusInfo.Effect == null)
@@ -635,16 +651,38 @@ public static class ItemDataExtensions
 
             // An inactive bonus previews the value it would have at the hovered item's rarity.
             ItemRarity? tier = progress.GetTier(setBonusInfo);
-            string display = MagicItem.GetEffectText(effectDef,
-                SetBonusEvaluator.GetBonusValue(setBonusInfo, tier ?? itemRarity));
+            float bonusValue = SetBonusEvaluator.GetBonusValue(setBonusInfo, tier ?? itemRarity);
+            string display = MagicItem.GetEffectText(effectDef, bonusValue);
 
             // The tier only changes anything when the bonus has per-rarity values.
             string tierTag = tier.HasValue && setBonusInfo.Effect.ValuesPerRarity != null
                 ? $" <color={EpicLoot.GetRarityColor(tier.Value)}>({EpicLoot.GetRarityDisplayName(tier.Value)})</color>"
                 : "";
 
+            // Only the first bonus at a given count states the count; the rest keep just the bullet, so
+            // they read as one block under it.
+            //
+            // The bullet is placed with a TMP column tag rather than padded with spaces. The tooltip
+            // font is proportional, so "(2) " is wider than four spaces and space-padding left the
+            // continuation bullet short of the header's. An absolute position lands both on the same
+            // column whatever the glyph widths, and clears a two-digit count.
+            string prefix = setBonusInfo.Count == lastCount
+                ? $"{BulletIndent}‣ "
+                : $"({setBonusInfo.Count}){BulletIndent}‣ ";
+
             text.Append($"\n<color={(tier.HasValue ? EpicLoot.GetSetItemColor() : inactiveColor)}>" +
-                $"({setBonusInfo.Count}) ‣ {display}</color>{tierTag}");
+                $"{prefix}{display}</indent></color>{tierTag}");
+            lastCount = setBonusInfo.Count;
+
+            // Shift reveals each bonus's description, the way MagicItem.GetTooltip does for an item's
+            // own effects, so the line above can stay short. Sits just past the bullet so it reads as
+            // belonging to that effect. Skipped when the effect has no Description -- the format call
+            // would otherwise emit the raw token.
+            if (showDetails && !string.IsNullOrEmpty(effectDef.Description))
+            {
+                text.Append($"\n<color=#c0c0c0ff>{DescriptionIndent}" +
+                    $"{MagicItem.GetEffectDescription(effectDef, bonusValue)}</indent></color>");
+            }
         }
 
         return text.ToString();
