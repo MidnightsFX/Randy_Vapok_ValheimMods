@@ -68,6 +68,8 @@ internal class ELConfig {
     public static ConfigEntry<int> LootRollMinimumPlayers;
     public static ConfigEntry<bool> _adventureModeEnabled;
     public static readonly ConfigEntry<string>[] AbilityKeyCodes = new ConfigEntry<string>[AbilityController.AbilitySlotCount];
+    public static readonly ConfigEntry<KeyCode>[] AbilityGamepadButtons = new ConfigEntry<KeyCode>[AbilityController.AbilitySlotCount];
+    public static ConfigEntry<bool> AbilityGamepadUseAltKey;
     public static ConfigEntry<TextAnchor> AbilityBarAnchor;
     public static ConfigEntry<Vector2> AbilityBarPosition;
     public static ConfigEntry<TextAnchor> AbilityBarLayoutAlignment;
@@ -835,6 +837,18 @@ internal class ELConfig {
         AbilityKeyCodes[0] = BindClient(SectionAbilities, "Ability Hotkey 1", "g", "Hotkey for Ability Slot 1.");
         AbilityKeyCodes[1] = BindClient(SectionAbilities, "Ability Hotkey 2", "h", "Hotkey for Ability Slot 2.");
         AbilityKeyCodes[2] = BindClient(SectionAbilities, "Ability Hotkey 3", "j", "Hotkey for Ability Slot 3.");
+        AbilityGamepadUseAltKey = BindClient(SectionAbilities, "Ability Gamepad Buttons Use Modifier", true,
+            "Ability gamepad buttons only fire while the game's gamepad modifier is held: LB on the Default and " +
+            "Alternative 2 layouts, LT on Alternative 1. The same modifier the game uses for dodge and camera zoom. " +
+            "Off makes each button fire on its own, which takes it away from its vanilla action while the slot holds " +
+            "an activated ability.");
+        for (int i = 0; i < AbilityController.AbilitySlotCount; i++)
+        {
+            AbilityGamepadButtons[i] = BindClient(SectionAbilities, $"Ability Gamepad Button {i + 1}",
+                i == 0 ? KeyCode.JoystickButton9 : KeyCode.None,
+                $"Gamepad button (JoystickButton0-19) for Ability Slot {i + 1}, pressed with the modifier above. " +
+                "JoystickButton9 is the right stick click, which no layout uses with the modifier. None unbinds it.");
+        }
         AbilityBarAnchor = BindClient(SectionAbilities, "Ability Bar Anchor", TextAnchor.LowerLeft,
             "The point on the HUD to anchor the ability bar. Changing this also changes the pivot of the ability bar to that corner. " +
             "For reference: the ability bar size is 208 by 64.");
