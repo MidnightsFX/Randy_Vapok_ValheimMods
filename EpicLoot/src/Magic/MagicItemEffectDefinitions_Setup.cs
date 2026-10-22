@@ -156,6 +156,10 @@ namespace EpicLoot
 
         public static string Bulwark = nameof(Bulwark);
         public static string Undying = nameof(Undying);
+        public static string GiantsBlood = nameof(GiantsBlood);
+        public static string SlightlyWeakToFire = nameof(SlightlyWeakToFire);
+        public static string WeakToFire = nameof(WeakToFire);
+        public static string VeryWeakToFire = nameof(VeryWeakToFire);
 
         public static void Initialize()
         {
