@@ -616,6 +616,13 @@ namespace EpicLoot
                             continue;
                         }
 
+                        ItemDrop prefabItemDrop = selectedPrefab.GetComponent<ItemDrop>();
+                        if (prefabItemDrop == null || !EpicLoot.CanBeMagicItem(prefabItemDrop.m_itemData))
+                        {
+                            failures += 1;
+                            continue;
+                        }
+
                         GameObject droppedItem;
                         bool previousForceDisableInit = ZNetView.m_forceDisableInit;
                         ZNetView.m_forceDisableInit = true;

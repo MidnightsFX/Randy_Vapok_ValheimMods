@@ -75,6 +75,7 @@ namespace EpicLoot
         public static string CoinHoarder = nameof(CoinHoarder);
         public static string Weightless = nameof(Weightless);
         public static string LifeSteal = nameof(LifeSteal);
+        public static string LifeAfterKill = nameof(LifeAfterKill);
         public static string EitrLeech = nameof(EitrLeech);
         public static string Bloodlust = nameof(Bloodlust);
         public static string AddCarryWeight = nameof(AddCarryWeight);

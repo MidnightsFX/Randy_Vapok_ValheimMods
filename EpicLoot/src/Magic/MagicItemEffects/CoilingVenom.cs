@@ -137,8 +137,6 @@ namespace EpicLoot.MagicItemEffects
                     case HitData.DamageModifier.SlightlyResistant:
                     case HitData.DamageModifier.Resistant:
                     case HitData.DamageModifier.VeryResistant:
-                    case HitData.DamageModifier.Immune:
-                    case HitData.DamageModifier.Ignore:
                         __result.m_poison = HitData.DamageModifier.Normal;
                         break;
                 }

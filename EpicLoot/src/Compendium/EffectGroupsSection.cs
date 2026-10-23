@@ -30,7 +30,7 @@ public static class EffectGroupsSection
             MagicEffectType.EitrWeave, MagicEffectType.OffSetAttack, MagicEffectType.Hexen, MagicEffectType.SpiritAnimal,
             MagicEffectType.MeteorSummoner, MagicEffectType.LifeSiphon,
             MagicEffectType.LifeGainOnHit, MagicEffectType.HealthGainPerXDamageDone, MagicEffectType.EitrLeech,
-            MagicEffectType.StaminaOnKill, MagicEffectType.IncreaseAllPoisonDamageDone, MagicEffectType.PhysToFire,
+            MagicEffectType.StaminaOnKill, MagicEffectType.LifeAfterKill, MagicEffectType.IncreaseAllPoisonDamageDone, MagicEffectType.PhysToFire,
             MagicEffectType.PhysToFrost, MagicEffectType.PhysToLightning, MagicEffectType.PhysToPoison, MagicEffectType.PoisonToTrueDamage,
             MagicEffectType.ModifyDamage, MagicEffectType.ModifyDamageLowHealth, MagicEffectType.ModifyPhysicalDamage,
             MagicEffectType.ModifyElementalDamage, MagicEffectType.AddBluntDamage, MagicEffectType.AddSlashingDamage,

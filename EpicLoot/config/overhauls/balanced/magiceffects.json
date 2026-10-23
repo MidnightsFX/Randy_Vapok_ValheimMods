@@ -3914,6 +3914,75 @@
       ]
     },
     {
+      "Type": "LifeAfterKill",
+      "DisplayText": "$mod_epicloot_me_lifeafterkill_display",
+      "Description": "$mod_epicloot_me_lifeafterkill_desc",
+      "Requirements": {
+        "AllowedItemTypes": [
+          "OneHandedWeapon",
+          "TwoHandedWeapon",
+          "TwoHandedWeaponLeft",
+          "Bow"
+        ],
+        "ExcludedSkillTypes": [
+          "Pickaxes",
+          "BloodMagic",
+          "Bows",
+          "Crossbows"
+        ],
+        "AllowedRarities": [
+          "Rare",
+          "Epic",
+          "Legendary",
+          "Mythic",
+          "Ancient"
+        ],
+        "ExcludedItemNames": [
+          "$item_fishingrod",
+          "AxeBerzerkr",
+          "AxeBerzerkrBlood",
+          "AxeBerzerkrLightning",
+          "AxeBerzerkrNature",
+          "$item_graplinghook"
+        ],
+        "ItemUsesStaminaOnAttack": true
+      },
+      "ValuesPerRarity": {
+        "Rare": {
+          "MinValue": 5,
+          "MaxValue": 10,
+          "Increment": 1
+        },
+        "Epic": {
+          "MinValue": 8,
+          "MaxValue": 15,
+          "Increment": 1
+        },
+        "Legendary": {
+          "MinValue": 12,
+          "MaxValue": 20,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 16,
+          "MaxValue": 25,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 20,
+          "MaxValue": 30,
+          "Increment": 1
+        }
+      },
+      "SelectionWeight": 1,
+      "Prefixes": [
+        "$mod_epicloot_me_lifeafterkill_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_lifeafterkill_suffix1"
+      ]
+    },
+    {
       "Type": "EitrLeech",
       "DisplayText": "$mod_epicloot_me_eitrleech_display",
       "Description": "$mod_epicloot_me_eitrleech_desc",

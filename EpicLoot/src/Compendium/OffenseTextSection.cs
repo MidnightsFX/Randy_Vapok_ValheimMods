@@ -108,6 +108,7 @@ public static class OffenseTextSection
         AddAttackSpeed(player, table);
         AddStagger(player, table, weapon, otherWeapon);
         AddLifeSteal(player, table, otherWeapon);
+        AddLifeAfterKill(player, table, otherWeapon);
         AddBackstab(player, table, weapon, include);
         AddStamina(player, table, weapon, include);
         AddEitr(player, table, weapon, include);
@@ -346,6 +347,19 @@ public static class OffenseTextSection
         ModifyWithLowHealth.Apply(player, MagicEffectType.LifeSteal,
             effect => total += player.GetTotalActiveMagicEffectValue(effect, 0.01f, ignore));
         AddRow(table, "$mod_epicloot_offense_lifesteal", Percent(0f), total, Percent(total), detail, SignedPercent, true);
+    }
+
+    private static void AddLifeAfterKill(Player player, MagicTextTable table, ItemDrop.ItemData otherWeapon)
+    {
+        ItemDrop.ItemData ignore = IsWeapon(otherWeapon) ? otherWeapon : null;
+        List<string> detail = new(StatSourceLines.GetMagicSources(player, MagicEffectType.LifeAfterKill, x => x != ignore));
+        if (detail.Count == 0)
+        {
+            return;
+        }
+
+        float total = player.GetTotalActiveMagicEffectValue(MagicEffectType.LifeAfterKill, 1f, ignore);
+        AddRow(table, "$mod_epicloot_offense_lifeafterkill", Decimal(0f), total, Decimal(total), detail, x => Signed(x, "0.#"), true);
     }
 
     private static void AddBackstab(Player player, MagicTextTable table, ItemDrop.ItemData weapon,
