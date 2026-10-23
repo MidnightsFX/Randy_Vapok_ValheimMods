@@ -41,6 +41,10 @@ public class MagicTextElement : IMagicTextPart
         _text.enableWordWrapping = true;
         _text.overflowMode = TextOverflowModes.Overflow;
         _text.alignment = TextAlignmentOptions.TopLeft;
+
+        // TextMeshProUGUI.Awake is what sets this, and copies built under a folded table row are measured
+        // before they ever wake; without it GetPreferredValues scales the text by 0.1 and no line wraps.
+        _text.isOrthographic = true;
     }
 
     private MagicTextElement(GameObject source)
@@ -91,12 +95,20 @@ public class MagicTextElement : IMagicTextPart
 
     public void SetFontSize(int size) => _text.fontSize = size;
 
-    private void Set(string line)
+    private void Set(string line, bool measure)
     {
         _text.text = Localization.instance.Localize(line);
-        _searchText = RichTextTag.Replace(_text.text, string.Empty).ToLowerInvariant();
-        Resize();
+        _searchText = Strip(_text.text);
+        if (measure)
+        {
+            Resize();
+        }
     }
+
+    /// <summary>What <see cref="IsMatch"/> would match <paramref name="line"/> against, without an element for it.</summary>
+    public static string ToSearchText(string line) => Strip(Localization.instance.Localize(line));
+
+    private static string Strip(string text) => RichTextTag.Replace(text, string.Empty).ToLowerInvariant();
 
     public void SetParent(Transform parent) => _rect.SetParent(parent);
     public void Destroy() => UnityEngine.Object.Destroy(_obj);
@@ -130,11 +142,15 @@ public class MagicTextElement : IMagicTextPart
         }
     }
 
-    public MagicTextElement Create(string line, Transform parent)
+    /// <summary>
+    /// A copy showing <paramref name="line"/>. With <paramref name="measure"/> off, the caller sizes it with
+    /// <see cref="Fit"/> once the font size and alignment are set, instead of measuring it at the template's.
+    /// </summary>
+    public MagicTextElement Create(string line, Transform parent, bool measure = true)
     {
         GameObject go = GameObject.Instantiate(_obj, parent);
         MagicTextElement element = new MagicTextElement(go);
-        element.Set(line);
+        element.Set(line, measure);
         return element;
     }
 }

@@ -67,9 +67,10 @@ public class MagicTextTable : IMagicTextPart
         BuildHeader();
     }
 
-    public void AddRow(string[] cells, IList<string> detail, bool expanded)
+    /// <summary><paramref name="tag"/> identifies the row to the filter predicate a page may apply.</summary>
+    public void AddRow(string[] cells, IList<string> detail, bool expanded, object tag = null)
     {
-        Row row = new Row(this, cells, detail, expanded && detail.Count > 0 && !MagicPages.Collapsed);
+        Row row = new Row(this, cells, detail, expanded && detail.Count > 0 && !MagicPages.Collapsed, tag);
         _rows.Add(row);
     }
 
@@ -81,6 +82,7 @@ public class MagicTextTable : IMagicTextPart
 
     public bool IsMatch(string loweredQuery) => _rows.Any(x => x.IsMatch(loweredQuery));
     public void Enable(bool enable) => _obj.SetActive(enable);
+    public bool IsVisible => _obj.activeSelf;
     public void Destroy() => UnityEngine.Object.Destroy(_obj);
     public float GetHeight() => _rect.sizeDelta.y;
 
@@ -94,12 +96,12 @@ public class MagicTextTable : IMagicTextPart
         Relayout();
     }
 
-    public void Filter(string loweredQuery)
+    public void Filter(string loweredQuery, Func<object, bool> include = null)
     {
         bool any = false;
         foreach (Row row in _rows)
         {
-            bool match = loweredQuery.Length == 0 || row.IsMatch(loweredQuery);
+            bool match = (loweredQuery.Length == 0 || row.IsMatch(loweredQuery)) && (include == null || include(row.Tag));
             row.Enable(match);
             any |= match;
         }
@@ -110,6 +112,12 @@ public class MagicTextTable : IMagicTextPart
 
     private void Relayout()
     {
+        int shown = 0;
+        foreach (Row row in _rows.Where(x => x.Visible))
+        {
+            row.SetStriped(shown++ % 2 == 1);
+        }
+
         float height = _fixedParts.Sum(x => x.sizeDelta.y) + _rows.Where(x => x.Visible).Sum(x => x.GetHeight());
         _rect.sizeDelta = new Vector2(_rect.sizeDelta.x, height);
         LayoutRebuilder.MarkLayoutForRebuild(_rect);
@@ -137,7 +145,7 @@ public class MagicTextTable : IMagicTextPart
 
     private MagicTextElement CreateCell(Transform line, string text, int column, int fontSize, bool allowOutline)
     {
-        MagicTextElement cell = _template.Create(text, line);
+        MagicTextElement cell = _template.Create(text, line, false);
         cell.SetFontSize(fontSize);
         cell.SetAlignment(_columns[column].Alignment);
         cell.EnableOutline(allowOutline && _columns[column].Outline);
@@ -199,14 +207,20 @@ public class MagicTextTable : IMagicTextPart
         private readonly RectTransform _line;
         private readonly RectTransform _detail;
         private readonly RectTransform _arrow;
+        private readonly Button _button;
         private readonly List<MagicTextElement> _texts = new();
+        private readonly IList<string> _detailLines;
+        private readonly string[] _detailSearchText;
+        private bool _detailBuilt;
         private bool _expanded;
 
         public bool Visible { get; private set; } = true;
+        public object Tag { get; }
 
-        public Row(MagicTextTable table, string[] cells, IList<string> detail, bool expanded)
+        public Row(MagicTextTable table, string[] cells, IList<string> detail, bool expanded, object tag)
         {
             _table = table;
+            Tag = tag;
 
             GameObject containerGo = new GameObject("row", typeof(RectTransform));
             _container = (RectTransform)containerGo.transform;
@@ -219,19 +233,17 @@ public class MagicTextTable : IMagicTextPart
             Image background = _line.gameObject.AddComponent<Image>();
             background.color = Color.white;
             background.raycastTarget = true;
-            Button button = _line.gameObject.AddComponent<Button>();
-            button.targetGraphic = background;
-            button.transition = Selectable.Transition.ColorTint;
-            ColorBlock colors = button.colors;
-            colors.normalColor = table._rows.Count % 2 == 1 ? StripeColor : Color.clear;
+            _button = _line.gameObject.AddComponent<Button>();
+            _button.targetGraphic = background;
+            _button.transition = Selectable.Transition.ColorTint;
+            ColorBlock colors = _button.colors;
             colors.highlightedColor = HoverColor;
-            colors.selectedColor = colors.normalColor;
             colors.pressedColor = PressedColor;
-            colors.disabledColor = colors.normalColor;
             colors.colorMultiplier = 1f;
             colors.fadeDuration = 0.08f;
-            button.colors = colors;
-            button.onClick.AddListener(Toggle);
+            _button.colors = colors;
+            _button.onClick.AddListener(Toggle);
+            SetStriped(table._rows.Count % 2 == 1);
 
             GameObject arrowGo = new GameObject("arrow", typeof(RectTransform));
             _arrow = (RectTransform)arrowGo.transform;
@@ -265,23 +277,23 @@ public class MagicTextTable : IMagicTextPart
             ConfigureVertical(detailLayout, Mathf.RoundToInt(PadX + DetailIndent));
             detailLayout.padding.bottom = Mathf.RoundToInt(DetailBottomPad);
 
-            float detailWidth = table._rect.sizeDelta.x - PadX - DetailIndent;
-            float detailHeight = detail.Count > 0 ? DetailBottomPad : 0f;
-            foreach (string text in detail)
-            {
-                MagicTextElement element = table._template.Create(text, _detail);
-                element.SetFontSize(DetailFontSize);
-                element.Fit(detailWidth, 18f);
-                _texts.Add(element);
-                detailHeight += element.GetHeight();
-            }
-
-            _detail.sizeDelta = new Vector2(_detail.sizeDelta.x, detailHeight);
+            _detailLines = detail;
+            _detailSearchText = detail.Select(MagicTextElement.ToSearchText).ToArray();
             _expanded = expanded;
             ApplyExpanded();
         }
 
-        public bool IsMatch(string loweredQuery) => _texts.Any(x => x.IsMatch(loweredQuery));
+        public bool IsMatch(string loweredQuery) =>
+            _texts.Any(x => x.IsMatch(loweredQuery)) || _detailSearchText.Any(x => x.Contains(loweredQuery));
+
+        public void SetStriped(bool striped)
+        {
+            ColorBlock colors = _button.colors;
+            colors.normalColor = striped ? StripeColor : Color.clear;
+            colors.selectedColor = colors.normalColor;
+            colors.disabledColor = colors.normalColor;
+            _button.colors = colors;
+        }
 
         public void Enable(bool enable)
         {
@@ -293,9 +305,31 @@ public class MagicTextTable : IMagicTextPart
 
         public float GetHeight() => _container.sizeDelta.y;
 
+        private void BuildDetail()
+        {
+            if (_detailBuilt)
+            {
+                return;
+            }
+
+            _detailBuilt = true;
+            float detailWidth = _table._rect.sizeDelta.x - PadX - DetailIndent;
+            float detailHeight = DetailBottomPad;
+            foreach (string text in _detailLines)
+            {
+                MagicTextElement element = _table._template.Create(text, _detail, false);
+                element.SetFontSize(DetailFontSize);
+                element.Fit(detailWidth, 18f);
+                _texts.Add(element);
+                detailHeight += element.GetHeight();
+            }
+
+            _detail.sizeDelta = new Vector2(_detail.sizeDelta.x, detailHeight);
+        }
+
         private void Toggle()
         {
-            if (_detail.childCount == 0)
+            if (_detailLines.Count == 0)
             {
                 return;
             }
@@ -307,7 +341,7 @@ public class MagicTextTable : IMagicTextPart
 
         public void SetExpanded(bool expanded)
         {
-            if (_detail.childCount == 0 || _expanded == expanded)
+            if (_detailLines.Count == 0 || _expanded == expanded)
             {
                 return;
             }
@@ -318,6 +352,11 @@ public class MagicTextTable : IMagicTextPart
 
         private void ApplyExpanded()
         {
+            if (_expanded)
+            {
+                BuildDetail();
+            }
+
             _detail.gameObject.SetActive(_expanded);
             _arrow.localRotation = Quaternion.Euler(0f, 0f, _expanded ? 0f : 90f);
             float height = _line.sizeDelta.y + (_expanded ? _detail.sizeDelta.y : 0f);
