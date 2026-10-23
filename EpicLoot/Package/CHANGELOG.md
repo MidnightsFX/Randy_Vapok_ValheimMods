@@ -86,6 +86,7 @@ Bugfixes:
 * Item gating no longer loses items when the same boss is listed more than once for an item type.
 * Fixes slotted shardstone tooltips showing a roll range, unknown enchantments showing blank lines, and blank names or icons in the crafting result window.
 * Set bonuses now read as one short line each, and holding Shift (or the left trigger on a gamepad) shows what each one does in full.
+* Stamina on Kill and Everflow now trigger once per kill, not once for every hit that lands as a creature dies.
 
 New Sets:
 - Wrath of the Thunderer set, whose full set lets you hurl your melee weapon, even mid-swing, to slam down where you aim.

@@ -5,9 +5,7 @@ namespace EpicLoot.MagicItemEffects
     // Heals the player a flat amount when a hit of theirs kills a creature.
     public static class LifeAfterKill
     {
-        // A cleave or multishot lands several hits on the same victim in one frame, each of which reads as lethal
-        // (the owner's health is already at zero, a remote victim's estimate has not moved), so only the first pays.
-        private static ZDOID _lastKill = ZDOID.None;
+        private static readonly KillCredit _credit = new KillCredit();
 
         // Postfix handler invoked by CharacterDamageDispatch (on-hit reaction, attacker side).
         public static void OnDamageDealt(Character target, HitData hit, Character attacker)
@@ -20,18 +18,12 @@ namespace EpicLoot.MagicItemEffects
             }
 
             // The memoized total first: against a target another peer owns, the kill check estimates the whole hit.
+            // One heal per kill, however many hits land as the victim dies (KillCredit).
             if (player.GetTotalActiveMagicEffectValue(MagicEffectType.LifeAfterKill) <= 0f
-                || !MagicEffectsHelper.IsLethalHit(target, hit))
+                || !_credit.TryClaim(target, hit))
             {
                 return;
             }
-
-            ZDOID victim = target.m_nview.GetZDO().m_uid;
-            if (victim == _lastKill)
-            {
-                return;
-            }
-            _lastKill = victim;
 
             ItemDrop.ItemData weapon = MagicEffectsHelper.GetActiveWeapon(player);
             if (weapon == null)

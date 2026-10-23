@@ -116,7 +116,10 @@ public class GiantsBloodForm : MonoBehaviour
         // Held and worn items hang from bones under the root, so they scale with it and need nothing of their own.
         _player.transform.localScale = _savedRootScale * scale;
 
-        SetCollisionScale(Small ? 1f : scale);
+        // The collider keeps its current size (normal on the first application) and UpdateCollision grows it
+        // once CanBeBig says there is room; growing it here would push the player into a low ceiling. It is
+        // still set, since its local size is measured against the new root scale.
+        SetCollisionScale(Small ? 1f : Mathf.Min(_collisionScale, scale));
 
         UpdateExtraMass();
     }
