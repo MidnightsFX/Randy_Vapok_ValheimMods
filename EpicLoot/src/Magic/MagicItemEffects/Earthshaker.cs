@@ -233,7 +233,7 @@ namespace EpicLoot.MagicItemEffects
             var key = Bound(ELConfig.EarthshakerKey);
             var button = Bound(ELConfig.EarthshakerGamepadButton);
             bool keyDown = KeyDown(key);
-            bool buttonDown = KeyDown(button);
+            bool buttonDown = SetAbilityKeys.GamepadButtonDown(player, button);
             if (!keyDown && !buttonDown || !_hasSet || !player.TakeInput() || Hud.InRadial() || !IsAirborne(player))
             {
                 return;
@@ -260,7 +260,7 @@ namespace EpicLoot.MagicItemEffects
             var key = Bound(ELConfig.EarthshakerKey);
             var button = Bound(ELConfig.EarthshakerGamepadButton);
             bool keyHeld = KeyHeld(key);
-            bool buttonHeld = KeyHeld(button);
+            bool buttonHeld = SetAbilityKeys.GamepadButtonHeld(player, button);
             if (!keyHeld && !buttonHeld || !player.TakeInput() || !_diving && (!_hasSet || !IsAirborne(player)))
             {
                 return;

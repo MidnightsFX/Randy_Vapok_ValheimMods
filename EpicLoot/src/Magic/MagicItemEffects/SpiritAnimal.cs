@@ -684,7 +684,7 @@ namespace EpicLoot.MagicItemEffects
             var key = Bound(ELConfig.SpiritAnimalKey);
             var button = Bound(ELConfig.SpiritAnimalGamepadButton);
             bool keyDown = KeyDown(key);
-            bool buttonDown = KeyDown(button);
+            bool buttonDown = SetAbilityKeys.GamepadButtonDown(player, button);
             if (!keyDown && !buttonDown || !CanUseBindKey(player))
             {
                 return;
@@ -1062,9 +1062,7 @@ namespace EpicLoot.MagicItemEffects
 
         private static string KeyLabel()
         {
-            var button = Bound(ELConfig.SpiritAnimalGamepadButton);
-            var key = Bound(ELConfig.SpiritAnimalKey);
-            return (ZInput.IsGamepadActive() && button != KeyCode.None) || key == KeyCode.None ? button.ToString() : key.ToString();
+            return SetAbilityKeys.ActiveLabel(Bound(ELConfig.SpiritAnimalKey), Bound(ELConfig.SpiritAnimalGamepadButton));
         }
 
         private static bool BindKeysUnbound() =>
@@ -1110,7 +1108,7 @@ namespace EpicLoot.MagicItemEffects
                 var key = Bound(ELConfig.SpiritAnimalKey);
                 var button = Bound(ELConfig.SpiritAnimalGamepadButton);
                 bool keyHeld = KeyHeld(key);
-                bool buttonHeld = KeyHeld(button);
+                bool buttonHeld = SetAbilityKeys.GamepadButtonHeld(player, button);
                 if (!keyHeld && !buttonHeld || !CanUseBindKey(player) || GetHoveredCreature(player) == null)
                 {
                     return;

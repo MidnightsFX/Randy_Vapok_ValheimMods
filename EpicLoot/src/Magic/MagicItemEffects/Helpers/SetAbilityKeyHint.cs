@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using EpicLoot.Abilities;
 using System;
 using TMPro;
 using UnityEngine;
@@ -22,6 +23,7 @@ namespace EpicLoot.MagicItemEffects
         private GameObject _gamepadEntry;
         private KeyCode _keyboardShownKey = KeyCode.None;
         private KeyCode _gamepadShownKey = KeyCode.None;
+        private string _gamepadShownModifierPath = "";
 
         // The config entries are passed as getters: ELConfig binds them after the effect classes may have been
         // touched, so a captured reference could still be null.
@@ -49,6 +51,7 @@ namespace EpicLoot.MagicItemEffects
                 _gamepadEntry = CloneEntry(hints.m_secondaryAttackGP, "Text - Block");
                 _keyboardShownKey = KeyCode.None;
                 _gamepadShownKey = KeyCode.None;
+                _gamepadShownModifierPath = "";
             }
 
             bool available = _available();
@@ -65,15 +68,25 @@ namespace EpicLoot.MagicItemEffects
                 _keyboardEntry.SetActive(key != KeyCode.None);
             }
 
-            if (_gamepadEntry != null && button != _gamepadShownKey)
+            // The set hotkeys' gamepad buttons take the ability bar's modifier (SetAbilityKeys), which moves between LT
+            // and LB with the gamepad layout, so its binding is compared too.
+            string modifierPath = button != KeyCode.None && AbilityController.UseGamepadModifier
+                ? AbilityController.GamepadModifierPath() ?? ""
+                : "";
+            if (_gamepadEntry != null && (button != _gamepadShownKey || modifierPath != _gamepadShownModifierPath))
             {
                 _gamepadShownKey = button;
+                _gamepadShownModifierPath = modifierPath;
                 if (button != KeyCode.None)
                 {
                     var text = _gamepadEntry.GetComponentInChildren<TMP_Text>(true);
                     if (text != null)
                     {
-                        text.text = $"{Localization.instance.Localize(_labelToken)} <mspace=0.6em> {GamepadGlyph(button)}</mspace>";
+                        string modifier = modifierPath.Length > 0
+                            ? ZInput.instance.GetBoundKeyString("JoyAltKeys", emptyStringOnMissing: true)
+                            : "";
+                        string chord = modifier.Length > 0 ? $"{modifier} + {GamepadGlyph(button)}" : GamepadGlyph(button);
+                        text.text = $"{Localization.instance.Localize(_labelToken)} <mspace=0.6em> {chord}</mspace>";
                     }
                 }
                 _gamepadEntry.SetActive(button != KeyCode.None);

@@ -79,9 +79,10 @@ namespace EpicLoot.Abilities
             return ELConfig.AbilityGamepadButtons[index]?.Value ?? KeyCode.None;
         }
 
-        private static bool UseGamepadModifier => ELConfig.AbilityGamepadUseAltKey?.Value ?? true;
+        internal static bool UseGamepadModifier => ELConfig.AbilityGamepadUseAltKey?.Value ?? true;
 
-        private static bool GamepadModifierHeld()
+        // Also gates the set hotkeys' gamepad buttons (SetAbilityKeys).
+        internal static bool GamepadModifierHeld()
         {
             return !UseGamepadModifier || ZInput.GetButton("JoyAltKeys");
         }
@@ -126,7 +127,12 @@ namespace EpicLoot.Abilities
         // cannot draw.
         public static string GamepadBindingLabel(int index)
         {
-            var button = GetGamepadButton(index);
+            return GamepadChordLabel(GetGamepadButton(index));
+        }
+
+        // The same label for any button pressed with the modifier rule above, such as a set hotkey's.
+        public static string GamepadChordLabel(KeyCode button)
+        {
             if (button == KeyCode.None)
             {
                 return string.Empty;

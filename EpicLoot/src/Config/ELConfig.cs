@@ -838,19 +838,30 @@ internal class ELConfig {
         AbilityKeyCodes[1] = BindClient(SectionAbilities, "Ability Hotkey 2", "h", "Hotkey for Ability Slot 2.");
         AbilityKeyCodes[2] = BindClient(SectionAbilities, "Ability Hotkey 3", "j", "Hotkey for Ability Slot 3.");
         AbilityGamepadUseAltKey = BindClient(SectionAbilities, "Ability Gamepad Buttons Use Modifier", true,
-            "Ability gamepad buttons only fire while the game's gamepad modifier is held: LT on the Default and " +
-            "Alternative 2 layouts (where it is also block), LB on Alternative 1. The same modifier the game uses for " +
-            "dodge and camera zoom. Ability buttons do nothing in build mode. " +
-            "Off makes each button fire on its own, which takes it away from its vanilla action while the slot holds " +
-            "an activated ability.");
+            "Ability gamepad buttons, and the set hotkey gamepad buttons below, only fire while the game's gamepad " +
+            "modifier is held: LT on the Default and Alternative 2 layouts (where it is also block), LB on " +
+            "Alternative 1. The same modifier the game uses for dodge and camera zoom. These buttons do nothing in " +
+            "build mode. Off makes each button fire on its own, which takes it away from its vanilla action while " +
+            "its ability can be used.");
+        // One default chord per slot, so an activated ability in any slot has a button (the stock sets fill slot 1,
+        // but API abilities from other mods can take the others), with what the game does with that button while the
+        // modifier is held.
+        var abilityGamepadDefaults = new (KeyCode Button, string Note)[AbilityController.AbilitySlotCount]
+        {
+            (KeyCode.JoystickButton9, "JoystickButton9 is the right stick click (Start on macOS). With the modifier " +
+                "held, the game uses it only for crouch on the Alternative layouts"),
+            (KeyCode.JoystickButton8, "JoystickButton8 is the left stick click. With the modifier held, the game uses " +
+                "it to toggle auto pickup, and for crouch (Default layout) or run (Alternative layouts)"),
+            (KeyCode.JoystickButton2, "JoystickButton2 is the X button (Square). With the modifier held, the game " +
+                "uses it only for interact on the Alternative layouts"),
+        };
         for (int i = 0; i < AbilityController.AbilitySlotCount; i++)
         {
             AbilityGamepadButtons[i] = BindClient(SectionAbilities, $"Ability Gamepad Button {i + 1}",
-                i == 0 ? KeyCode.JoystickButton9 : KeyCode.None,
+                abilityGamepadDefaults[i].Button,
                 $"Gamepad button (JoystickButton0-19) for Ability Slot {i + 1}, pressed with the modifier above. " +
-                "JoystickButton9 is the right stick click (Start on macOS). With the modifier held, the game uses it " +
-                "only for crouch on the Alternative layouts, which the ability takes over while the slot holds an " +
-                "activated ability. None unbinds it.");
+                $"{abilityGamepadDefaults[i].Note}, which the ability takes over while the slot holds an activated " +
+                "ability. None unbinds it.");
         }
         AbilityBarAnchor = BindClient(SectionAbilities, "Ability Bar Anchor", TextAnchor.LowerLeft,
             "The point on the HUD to anchor the ability bar. Changing this also changes the pivot of the ability bar to that corner. " +
@@ -867,23 +878,29 @@ internal class ELConfig {
             "Key that hurls your weapon while the Overwhelming Launch set bonus is active and a melee weapon " +
             "is held. While that is true the key does only this: whatever vanilla action shares it (T is the " +
             "emote wheel) is suppressed. None disables the keyboard binding.");
-        OverwhelmingLaunchGamepadButton = BindClient(SectionAbilities, "Overwhelming Launch Gamepad Button", KeyCode.None,
-            "Gamepad button (JoystickButton0-19) for Overwhelming Launch. Unbound by default. Every gamepad " +
-            "button already has a vanilla action, and that action is suppressed while a launchable weapon is held.");
+        OverwhelmingLaunchGamepadButton = BindClient(SectionAbilities, "Overwhelming Launch Gamepad Button", KeyCode.JoystickButton9,
+            "Gamepad button (JoystickButton0-19) for Overwhelming Launch, pressed with the modifier of Ability Gamepad " +
+            "Buttons Use Modifier. JoystickButton9 is the right stick click, the same chord as Ability Slot 1 and " +
+            "the other set hotkeys: no one can wear two sets that need a press. While a launchable weapon is held, " +
+            "the button's vanilla action is suppressed. None unbinds it.");
         SpiritAnimalKey = BindClient(SectionAbilities, "Spirit Animal Hotkey", KeyCode.Y,
             "Key that binds the tamed creature under the crosshair as your spirit animal while the Spirit Animal " +
             "set bonus is active. A confirmation is shown first. None disables the keyboard binding.");
-        SpiritAnimalGamepadButton = BindClient(SectionAbilities, "Spirit Animal Gamepad Button", KeyCode.None,
-            "Gamepad button (JoystickButton0-19) for binding a spirit animal. Unbound by default. While a tamed " +
-            "creature that can be bound is under the crosshair, the button's vanilla action is suppressed.");
+        SpiritAnimalGamepadButton = BindClient(SectionAbilities, "Spirit Animal Gamepad Button", KeyCode.JoystickButton9,
+            "Gamepad button (JoystickButton0-19) for binding a spirit animal, pressed with the modifier of Ability " +
+            "Gamepad Buttons Use Modifier. JoystickButton9 is the right stick click, the same chord as Ability Slot 1 " +
+            "and the other set hotkeys: no one can wear two sets that need a press. While a tamed creature that can be " +
+            "bound is under the crosshair, the button's vanilla action is suppressed. None unbinds it.");
         EarthshakerKey = BindClient(SectionAbilities, "Earthshaker Hotkey", KeyCode.T,
             "Key that dives and slams the ground while the Earthshaker set bonus is active and you are in the air. " +
             "Shares T with Overwhelming Launch, since no one can wear both full sets. While airborne with the set, " +
             "the key does only this: whatever vanilla action shares it (T is the emote wheel) is suppressed. " +
             "None disables the keyboard binding.");
-        EarthshakerGamepadButton = BindClient(SectionAbilities, "Earthshaker Gamepad Button", KeyCode.None,
-            "Gamepad button (JoystickButton0-19) for Earthshaker. Unbound by default. Every gamepad button already " +
-            "has a vanilla action, and that action is suppressed while you are airborne with the set.");
+        EarthshakerGamepadButton = BindClient(SectionAbilities, "Earthshaker Gamepad Button", KeyCode.JoystickButton9,
+            "Gamepad button (JoystickButton0-19) for Earthshaker, pressed with the modifier of Ability Gamepad " +
+            "Buttons Use Modifier. JoystickButton9 is the right stick click, the same chord as Ability Slot 1 and " +
+            "the other set hotkeys: no one can wear two sets that need a press. While you are airborne with the set, " +
+            "the button's vanilla action is suppressed. None unbinds it.");
         ShowOwnFalconWings = BindClient(SectionAbilities, "Show Own Falcon Wings", true,
             "Show the dark wings of the Freyja's Falcon set on your own character. Turn off if they block your view; " +
             "other players still see them.");
@@ -892,17 +909,21 @@ internal class ELConfig {
             "Overwhelming Launch and Earthshaker, since no one can wear two of those full sets. While the full set is " +
             "worn, the key does only this: whatever vanilla action shares it (T is the emote wheel) is suppressed. " +
             "None disables the keyboard binding.");
-        EitrInfusionGamepadButton = BindClient(SectionAbilities, "Eitr Infusion Gamepad Button", KeyCode.None,
-            "Gamepad button (JoystickButton0-19) for Eitr Infusion. Unbound by default. Every gamepad button already " +
-            "has a vanilla action, and that action is suppressed while the full set is worn.");
+        EitrInfusionGamepadButton = BindClient(SectionAbilities, "Eitr Infusion Gamepad Button", KeyCode.JoystickButton9,
+            "Gamepad button (JoystickButton0-19) for Eitr Infusion, pressed with the modifier of Ability Gamepad " +
+            "Buttons Use Modifier. JoystickButton9 is the right stick click, the same chord as Ability Slot 1 and " +
+            "the other set hotkeys: no one can wear two sets that need a press. While the full set is worn, " +
+            "the button's vanilla action is suppressed. None unbinds it.");
         ShieldThrowKey = BindClient(SectionAbilities, "Shield Throw Hotkey", KeyCode.T,
             "Key that throws your shield while the Shield Throw set bonus is active and a shield is in your hand. " +
             "Shares T with Overwhelming Launch, Earthshaker and Eitr Infusion, since no one can wear two of those full " +
             "sets. While that is true the key does only this: whatever vanilla action shares it (T is the emote wheel) " +
             "is suppressed. None disables the keyboard binding.");
-        ShieldThrowGamepadButton = BindClient(SectionAbilities, "Shield Throw Gamepad Button", KeyCode.None,
-            "Gamepad button (JoystickButton0-19) for Shield Throw. Unbound by default. Every gamepad button already " +
-            "has a vanilla action, and that action is suppressed while the full set is worn with a shield in hand.");
+        ShieldThrowGamepadButton = BindClient(SectionAbilities, "Shield Throw Gamepad Button", KeyCode.JoystickButton9,
+            "Gamepad button (JoystickButton0-19) for Shield Throw, pressed with the modifier of Ability Gamepad " +
+            "Buttons Use Modifier. JoystickButton9 is the right stick click, the same chord as Ability Slot 1 and " +
+            "the other set hotkeys: no one can wear two sets that need a press. While the full set is worn with a " +
+            "shield in hand, the button's vanilla action is suppressed. None unbinds it.");
 
         // 9 - Debug
         _loggingEnabled = BindClient(SectionDebug, "Logging Enabled", true, "Enable logging");

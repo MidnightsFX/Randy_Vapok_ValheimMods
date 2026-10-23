@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using EpicLoot.LegendarySystem;
+using EpicLoot.MagicItemEffects;
 
 namespace EpicLoot.Compendium;
 
@@ -69,6 +70,12 @@ public class SetInfo(string topic, bool showSearchBar = true) : MagicTextInfo(to
             if (detail.Length > 0)
             {
                 content.Add($"    <color=#c0c0c0ff>{detail}</color>");
+            }
+
+            string activationKey = SetAbilityKeys.DescribeActivationKey(definition);
+            if (activationKey.Length > 0)
+            {
+                content.Add($"    <color=#c0c0c0ff>{activationKey}</color>");
             }
         }
 

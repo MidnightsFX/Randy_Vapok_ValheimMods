@@ -271,7 +271,7 @@ namespace EpicLoot.MagicItemEffects
             var key = Bound(ELConfig.ShieldThrowKey);
             var button = Bound(ELConfig.ShieldThrowGamepadButton);
             bool keyDown = KeyDown(key);
-            bool buttonDown = KeyDown(button);
+            bool buttonDown = SetAbilityKeys.GamepadButtonDown(player, button);
             if (!keyDown && !buttonDown || !player.TakeInput() || Hud.InRadial())
             {
                 return;
@@ -303,7 +303,7 @@ namespace EpicLoot.MagicItemEffects
             var key = Bound(ELConfig.ShieldThrowKey);
             var button = Bound(ELConfig.ShieldThrowGamepadButton);
             bool keyHeld = KeyHeld(key);
-            bool buttonHeld = KeyHeld(button);
+            bool buttonHeld = SetAbilityKeys.GamepadButtonHeld(player, button);
             if (!keyHeld && !buttonHeld || !player.TakeInput() || GetThrowShield(player) == null)
             {
                 return;

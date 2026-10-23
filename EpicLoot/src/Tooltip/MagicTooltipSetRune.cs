@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EpicLoot.LegendarySystem;
+using EpicLoot.MagicItemEffects;
 
 namespace EpicLoot;
 
@@ -58,6 +59,12 @@ public partial class MagicTooltip
             if (detail.Length > 0)
             {
                 text.Append($"\n<color=#c0c0c0ff>    {detail}</color>");
+            }
+
+            string activationKey = showDetails ? SetAbilityKeys.DescribeActivationKey(definition) : "";
+            if (activationKey.Length > 0)
+            {
+                text.Append($"\n<color=#c0c0c0ff>    {activationKey}</color>");
             }
         }
 

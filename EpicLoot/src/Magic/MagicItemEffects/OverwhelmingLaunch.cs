@@ -208,7 +208,7 @@ namespace EpicLoot.MagicItemEffects
             var key = Bound(ELConfig.OverwhelmingLaunchKey);
             var button = Bound(ELConfig.OverwhelmingLaunchGamepadButton);
             bool keyDown = KeyDown(key);
-            bool buttonDown = KeyDown(button);
+            bool buttonDown = SetAbilityKeys.GamepadButtonDown(player, button);
             if (!keyDown && !buttonDown || !player.TakeInput() || Hud.InRadial())
             {
                 return;
@@ -240,7 +240,7 @@ namespace EpicLoot.MagicItemEffects
             var key = Bound(ELConfig.OverwhelmingLaunchKey);
             var button = Bound(ELConfig.OverwhelmingLaunchGamepadButton);
             bool keyHeld = KeyHeld(key);
-            bool buttonHeld = KeyHeld(button);
+            bool buttonHeld = SetAbilityKeys.GamepadButtonHeld(player, button);
             if (!keyHeld && !buttonHeld || !player.TakeInput() || GetLaunchWeapon(player) == null)
             {
                 return;

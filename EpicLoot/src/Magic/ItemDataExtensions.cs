@@ -2,6 +2,7 @@
 using EpicLoot.Crafting;
 using EpicLoot.Data;
 using EpicLoot.LegendarySystem;
+using EpicLoot.MagicItemEffects;
 using EpicLoot.ShardStones;
 using System;
 using System.Collections.Generic;
@@ -654,6 +655,12 @@ public static class ItemDataExtensions
             if (detail.Length > 0)
             {
                 text.Append($"\n<color={(tier.HasValue ? "#c0c0c0ff" : inactiveColor)}>    {detail}</color>");
+            }
+
+            string activationKey = showDetails ? SetAbilityKeys.DescribeActivationKey(effectDef) : "";
+            if (activationKey.Length > 0)
+            {
+                text.Append($"\n<color={(tier.HasValue ? "#c0c0c0ff" : inactiveColor)}>    {activationKey}</color>");
             }
         }
 

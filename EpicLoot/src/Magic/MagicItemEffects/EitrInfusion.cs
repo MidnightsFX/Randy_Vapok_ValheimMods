@@ -173,7 +173,7 @@ namespace EpicLoot.MagicItemEffects
             var key = Bound(ELConfig.EitrInfusionKey);
             var button = Bound(ELConfig.EitrInfusionGamepadButton);
             bool keyDown = KeyDown(key);
-            bool buttonDown = KeyDown(button);
+            bool buttonDown = SetAbilityKeys.GamepadButtonDown(player, button);
             if (!keyDown && !buttonDown || !_hasSet || !player.TakeInput() || Hud.InRadial() || player.IsDead())
             {
                 return;
@@ -235,7 +235,7 @@ namespace EpicLoot.MagicItemEffects
             var key = Bound(ELConfig.EitrInfusionKey);
             var button = Bound(ELConfig.EitrInfusionGamepadButton);
             bool keyHeld = KeyHeld(key);
-            bool buttonHeld = KeyHeld(button);
+            bool buttonHeld = SetAbilityKeys.GamepadButtonHeld(player, button);
             if (!keyHeld && !buttonHeld || !_hasSet || player != _owner || !player.TakeInput())
             {
                 return;

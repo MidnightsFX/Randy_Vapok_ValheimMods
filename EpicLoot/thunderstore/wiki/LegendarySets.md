@@ -10,7 +10,7 @@ Every legendary set in Epic Loot, with its pieces and the bonuses it gives. All 
 - When a bonus is shown as three values, they are its strength at Legendary / Mythic / Ancient. A bonus uses the rarity of your weakest piece among those it needs, so a three-piece bonus uses your third-best piece.
 - A copy of a piece you already wear does not count twice.
 - A set weapon only counts while it is in your hands. Stowed on your back it keeps the set's look but not its bonuses.
-- Abilities marked **[Hotkey]** are used with the set ability key (T by default, set in the config under Abilities).
+- Abilities marked **[Activated]** need a key press. The newer sets use T (Y for Spirit Animal), and Bulwark and Berserker use the ability bar keys (G, H, J). On a gamepad, hold the modifier (LT, or LB on the Alternative 1 layout) and click the right stick. Each bonus shows its key under its description: hold Shift over a set piece, or open the Compendium. Keys are set in the config under Abilities.
 - "Always rolls with" lists the enchantments a piece is guaranteed to have; its other enchantments are random.
 - The rune feature at the enchanting table can extract a set from an item and etch it onto another.
 
@@ -104,7 +104,7 @@ Berserker is an activated ability: it takes one of the ability hotkeys (G, H, J 
 |---|---|
 | 2 | Lightning Resistance 25% |
 | 3 | Imbue Lightning Damage 20% |
-| 4 | Overwhelming Launch [Hotkey]: Hurl your melee weapon where you aim. It slams down for its weapon damage +50% in an area, then flies back to your hand, and cannot attack until it returns. Costs 3x a normal attack. |
+| 4 | Overwhelming Launch [Activated]: Hurl your melee weapon where you aim. It slams down for its weapon damage +50% in an area, then flies back to your hand, and cannot attack until it returns. Costs 3x a normal attack. |
 
 Full-set look: tinted armor, aura effects.
 
@@ -229,7 +229,7 @@ Full-set look: tinted armor, aura effects.
 | 2 | +10 Melee Skills |
 | 3 | Quick Draw +20% (faster bow and crossbow draw) |
 | 3 | Attack Speed +10% |
-| 4 | Spirit Animal: Bind a tamed creature as your fylgja. In battle its spirit fights beside you at 100 / 115 / 130% strength for 120 seconds, is summoned again if the fight goes on, and returns 30 seconds after it falls. |
+| 4 | Spirit Animal [Activated]: Bind a tamed creature as your fylgja. In battle its spirit fights beside you at 100 / 115 / 130% strength for 120 seconds, is summoned again if the fight goes on, and returns 30 seconds after it falls. |
 
 Full-set look: glowing weapon, falling leaves around you.
 
@@ -252,7 +252,7 @@ Fylgja's Bond has two weapon pieces, a bow and a melee weapon. Either one counts
 | 2 | Piercing Resistance 20% |
 | 3 | Air Jump (jump once more while in the air) |
 | 3 | Jump Stamina Use -25% |
-| 4 | Earthshaker [Hotkey]: In mid-air, dive where you aim, steering with your aim as you fall, and slam the ground for 200 / 250 / 300 damage, half blunt and half pierce, within 5m, +1m per 15m fallen. +1% damage per 10 weight carried over 300 (up to +300%), and +2% per metre fallen past 5m. Diving with less than 3m of clear air below you deals 50% less damage. Costs 25 stamina. |
+| 4 | Earthshaker [Activated]: In mid-air, dive where you aim, steering with your aim as you fall, and slam the ground for 200 / 250 / 300 damage, half blunt and half pierce, within 5m, +1m per 15m fallen. +1% damage per 10 weight carried over 300 (up to +300%), and +2% per metre fallen past 5m. Diving with less than 3m of clear air below you deals 50% less damage. Costs 25 stamina. |
 
 Full-set look: tinted armor.
 
@@ -336,7 +336,7 @@ Full-set look: tinted armor, aura effects.
 | 3 | Eitr Leech 5% |
 | 3 | Interconnected: the skill of the weapon in your hands gains 20 / 25 / 30% of its partner skill's level (see [Interconnected](#interconnected)). |
 | 4 | All Skills +5 |
-| 4 | Eitr Infusion [Hotkey]: Pour all your Eitr into your weapon, at least 20, for a second of infusion per 4 Eitr. While infused your hits deal +40 / 45 / 50% of the weapon's highest damage type as that type, or as fire, frost or lightning if you were burning, frozen or shocked, or near a fire, when it began. Your Eitr does not regenerate, Spellsword swings cost no Eitr, and pressing again pours in the Eitr you have regained. |
+| 4 | Eitr Infusion [Activated]: Pour all your Eitr into your weapon, at least 20, for a second of infusion per 4 Eitr. While infused your hits deal +40 / 45 / 50% of the weapon's highest damage type as that type, or as fire, frost or lightning if you were burning, frozen or shocked, or near a fire, when it began. Your Eitr does not regenerate, Spellsword swings cost no Eitr, and pressing again pours in the Eitr you have regained. |
 
 Full-set look: tinted armor.
 
@@ -478,7 +478,7 @@ Full-set look: tinted armor.
 | 2 | Blocking Skill +15 |
 | 2 | Block Stamina Use -25% |
 | 3 | Stagger Damage Taken -30% |
-| 4 | Shield Throw [Hotkey]: Hurl your shield where you aim. It flies through enemies until it strikes something solid, then returns to your hand, hitting each enemy on the way out and again on the way back for 100 / 125 / 150% of your block power as blunt damage. Damage you block fills a gauge that the throw spends for up to +300% damage. You cannot block until it returns. Costs 20 stamina. |
+| 4 | Shield Throw [Activated]: Hurl your shield where you aim. It flies through enemies until it strikes something solid, then returns to your hand, hitting each enemy on the way out and again on the way back for 100 / 125 / 150% of your block power as blunt damage. Damage you block fills a gauge that the throw spends for up to +300% damage. You cannot block until it returns. Costs 20 stamina. |
 
 Full-set look: tinted armor.
 

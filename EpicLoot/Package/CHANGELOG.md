@@ -5,6 +5,7 @@ Changes:
     * Sets can be configured to drop at any rarity, and set pieces of different rarities count toward the same set
     * The rune feature can now extract and Etch sets from and to items
 * Set visual effects keep showing while a set weapon is stowed on your back, but the set bonuses still need it in hand.
+* Set bonuses that need a key press are marked Activated, show their key in their description, and have a gamepad button by default.
 * Adds Quick Configure, editable in game configs for most Epicloot options, and a 1 time setup tutorial
 * Server admins can change every Quick Configure setting from their own game, and the server passes the changes on to every player.
 * Improvements to the loot system (existing loot tables can be upgraded)
