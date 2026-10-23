@@ -118,7 +118,6 @@
          every DLL referencing it (EpicLoot, AdvancedPortals), which strips their components from the
          bundles. In game it comes from the ValheimModding-YamlDotNet package; 16.3.0's net47 build is
          the same file. -->
-    <PackageReference Include="YamlDotNet" Version="16.3.0" ExcludeAssets="all" PrivateAssets="all" GeneratePathProperty="true" />
   </ItemGroup>
 
   <!-- Stage the merged EpicLoot.dll into the Unity project so the enchanting-UI prefabs bind to it
