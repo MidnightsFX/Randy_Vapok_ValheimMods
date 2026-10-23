@@ -4,6 +4,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -22,6 +23,8 @@ namespace EpicLoot.Abilities
         private InputLayout _shownLayout;
         private KeyCode _shownButton = KeyCode.None;
         private string _shownKey;
+        private string _shownModifierPath;
+        private Gamepad _shownPad;
 
         public virtual void Awake()
         {
@@ -81,9 +84,12 @@ namespace EpicLoot.Abilities
             var layout = ZInput.InputLayout;
             var button = gamepad ? AbilityController.GetGamepadButton(_index) : KeyCode.None;
             var key = gamepad ? null : ELConfig.AbilityKeyCodes[_index].Value;
+            // Within one layout the modifier can still be rebound, and a pad swapped for one with other button names.
+            var modifierPath = gamepad && modifier ? AbilityController.GamepadModifierPath() : null;
+            var pad = gamepad ? Gamepad.current : null;
             Binding.enabled = ability.IsActivatedAbility() && (gamepad ? button != KeyCode.None : !string.IsNullOrEmpty(key));
             if (gamepad == _shownGamepad && modifier == _shownModifier && layout == _shownLayout &&
-                button == _shownButton && key == _shownKey)
+                button == _shownButton && key == _shownKey && modifierPath == _shownModifierPath && pad == _shownPad)
             {
                 return;
             }
@@ -93,6 +99,8 @@ namespace EpicLoot.Abilities
             _shownLayout = layout;
             _shownButton = button;
             _shownKey = key;
+            _shownModifierPath = modifierPath;
+            _shownPad = pad;
             Binding.text = gamepad ? AbilityController.GamepadBindingLabel(_index) : key?.ToUpperInvariant() ?? string.Empty;
         }
     }

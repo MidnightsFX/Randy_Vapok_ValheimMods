@@ -838,8 +838,9 @@ internal class ELConfig {
         AbilityKeyCodes[1] = BindClient(SectionAbilities, "Ability Hotkey 2", "h", "Hotkey for Ability Slot 2.");
         AbilityKeyCodes[2] = BindClient(SectionAbilities, "Ability Hotkey 3", "j", "Hotkey for Ability Slot 3.");
         AbilityGamepadUseAltKey = BindClient(SectionAbilities, "Ability Gamepad Buttons Use Modifier", true,
-            "Ability gamepad buttons only fire while the game's gamepad modifier is held: LB on the Default and " +
-            "Alternative 2 layouts, LT on Alternative 1. The same modifier the game uses for dodge and camera zoom. " +
+            "Ability gamepad buttons only fire while the game's gamepad modifier is held: LT on the Default and " +
+            "Alternative 2 layouts (where it is also block), LB on Alternative 1. The same modifier the game uses for " +
+            "dodge and camera zoom. Ability buttons do nothing in build mode. " +
             "Off makes each button fire on its own, which takes it away from its vanilla action while the slot holds " +
             "an activated ability.");
         for (int i = 0; i < AbilityController.AbilitySlotCount; i++)
@@ -847,7 +848,9 @@ internal class ELConfig {
             AbilityGamepadButtons[i] = BindClient(SectionAbilities, $"Ability Gamepad Button {i + 1}",
                 i == 0 ? KeyCode.JoystickButton9 : KeyCode.None,
                 $"Gamepad button (JoystickButton0-19) for Ability Slot {i + 1}, pressed with the modifier above. " +
-                "JoystickButton9 is the right stick click, which no layout uses with the modifier. None unbinds it.");
+                "JoystickButton9 is the right stick click (Start on macOS). With the modifier held, the game uses it " +
+                "only for crouch on the Alternative layouts, which the ability takes over while the slot holds an " +
+                "activated ability. None unbinds it.");
         }
         AbilityBarAnchor = BindClient(SectionAbilities, "Ability Bar Anchor", TextAnchor.LowerLeft,
             "The point on the HUD to anchor the ability bar. Changing this also changes the pivot of the ability bar to that corner. " +

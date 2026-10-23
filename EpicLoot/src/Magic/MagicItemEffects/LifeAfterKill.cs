@@ -14,7 +14,13 @@ namespace EpicLoot.MagicItemEffects
         {
             var player = Player.m_localPlayer;
             if (hit == null || player == null || target == player || attacker != player
-                || target.IsPlayer() || target.IsTamed()
+                || target.IsPlayer() || target.IsTamed())
+            {
+                return;
+            }
+
+            // The memoized total first: against a target another peer owns, the kill check estimates the whole hit.
+            if (player.GetTotalActiveMagicEffectValue(MagicEffectType.LifeAfterKill) <= 0f
                 || !MagicEffectsHelper.IsLethalHit(target, hit))
             {
                 return;

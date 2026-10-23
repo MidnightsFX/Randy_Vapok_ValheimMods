@@ -138,14 +138,21 @@ namespace EpicLoot.Abilities
                 return label;
             }
 
-            string modifier = null;
-            if (ZInput.instance != null && ZInput.instance.m_buttons.TryGetValue("JoyAltKeys", out var def) &&
-                def?.ButtonAction != null && def.ButtonAction.bindings.Count > 0)
+            string modifierPath = GamepadModifierPath();
+            string modifier = modifierPath != null ? ShortButtonName(modifierPath) : null;
+            return string.IsNullOrEmpty(modifier) ? label : $"{modifier}+{label}";
+        }
+
+        // The control the game's gamepad modifier is bound to now, or null when it has no binding.
+        public static string GamepadModifierPath()
+        {
+            if (ZInput.instance == null || !ZInput.instance.m_buttons.TryGetValue("JoyAltKeys", out var def) ||
+                def?.ButtonAction == null || def.ButtonAction.bindings.Count == 0)
             {
-                modifier = ShortButtonName(def.GetActionPath(effective: true));
+                return null;
             }
 
-            return string.IsNullOrEmpty(modifier) ? label : $"{modifier}+{label}";
+            return def.GetActionPath(effective: true);
         }
 
         private bool SlotTakesGamepadButton(int index, out KeyCode button)
@@ -155,10 +162,11 @@ namespace EpicLoot.Abilities
         }
 
         // Runs before the body of Player.Update, i.e. before vanilla reads this frame's buttons, so the press can be
-        // taken away from whatever vanilla action shares the button.
+        // taken away from whatever vanilla action shares the button. Never in build mode, where the modifier with
+        // the right stick click toggles alternate placement on the Alternative layouts.
         internal void CheckGamepadInput()
         {
-            if (!_player.TakeInput() || Hud.InRadial() || !GamepadModifierHeld())
+            if (!_player.TakeInput() || _player.InPlaceMode() || Hud.InRadial() || !GamepadModifierHeld())
             {
                 return;
             }
@@ -179,7 +187,7 @@ namespace EpicLoot.Abilities
         // time Player.Update runs, so they are held down here too.
         internal void ConsumeHeldGamepadButtons()
         {
-            if (!_player.TakeInput() || !GamepadModifierHeld())
+            if (!_player.TakeInput() || _player.InPlaceMode() || !GamepadModifierHeld())
             {
                 return;
             }
