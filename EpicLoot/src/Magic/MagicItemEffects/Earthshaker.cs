@@ -129,7 +129,7 @@ namespace EpicLoot.MagicItemEffects
             MagicItem.RegisterDisplayValues(MagicEffectType.Earthshaker, value => new object[]
             {
                 value, Radius, MinHeight, StaminaCost, WeightPerPercent, WeightThreshold, MaxWeightBonus,
-                FallBonusPerMetre, FallThreshold, FallPerRadiusMetre, LowDivePenalty
+                FallBonusPerMetre, FallThreshold, FallPerRadiusMetre, LowDivePenalty, DiveHint.DisplayName
             });
         }
 

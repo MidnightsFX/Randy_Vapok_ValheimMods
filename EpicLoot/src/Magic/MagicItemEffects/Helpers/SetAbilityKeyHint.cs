@@ -35,6 +35,17 @@ namespace EpicLoot.MagicItemEffects
             _button = button;
         }
 
+        internal string DisplayName
+        {
+            get
+            {
+                KeyCode button = _button()?.Value ?? KeyCode.None;
+                return ZInput.IsGamepadActive() && button != KeyCode.None
+                    ? GamepadGlyph(button)
+                    : ZInput.KeyCodeToDisplayName(_key()?.Value ?? KeyCode.None);
+            }
+        }
+
         internal void Refresh(KeyHints hints)
         {
             if (hints.m_combatHints == null || !hints.m_combatHints.activeSelf)

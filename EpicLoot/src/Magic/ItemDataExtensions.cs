@@ -608,6 +608,7 @@ public static class ItemDataExtensions
     // wrapping back underneath it. Each line closes its own </indent> -- left open it would carry on
     // into the following lines.
     private const string BulletIndent = "<indent=2em>";
+    private const string TextIndent = "<indent=2.8em>";
     private const string DescriptionIndent = "<indent=2.8em>";
 
     private static string GetMagicSetTooltip(ItemDrop.ItemData item, LegendarySetInfo setInfo)
@@ -667,11 +668,11 @@ public static class ItemDataExtensions
             // continuation bullet short of the header's. An absolute position lands both on the same
             // column whatever the glyph widths, and clears a two-digit count.
             string prefix = setBonusInfo.Count == lastCount
-                ? $"{BulletIndent}‣ "
-                : $"({setBonusInfo.Count}){BulletIndent}‣ ";
+                ? $"{BulletIndent}‣{TextIndent}"
+                : $"({setBonusInfo.Count}){BulletIndent}‣{TextIndent}";
 
             text.Append($"\n<color={(tier.HasValue ? EpicLoot.GetSetItemColor() : inactiveColor)}>" +
-                $"{prefix}{display}</indent></color>{tierTag}");
+                $"{prefix}{display}</color>{tierTag}</indent></indent>");
             lastCount = setBonusInfo.Count;
 
             // Shift reveals each bonus's description, the way MagicItem.GetTooltip does for an item's

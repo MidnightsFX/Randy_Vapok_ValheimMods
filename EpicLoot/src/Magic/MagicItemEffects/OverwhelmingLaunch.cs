@@ -74,7 +74,7 @@ namespace EpicLoot.MagicItemEffects
         // Tooltip: "... weapon damage +{0}% ... Costs {1}x a normal attack" -- {1} follows a retune of CostScale.
         public static void RegisterDisplayValues()
         {
-            MagicItem.RegisterDisplayValues(MagicEffectType.OverwhelmingLaunch, value => new object[] { value, CostScale });
+            MagicItem.RegisterDisplayValues(MagicEffectType.OverwhelmingLaunch, value => new object[] { value, CostScale, LaunchHint.DisplayName });
         }
 
         private class PendingSlam

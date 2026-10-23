@@ -99,7 +99,7 @@ namespace EpicLoot.MagicItemEffects
         {
             MagicItem.RegisterDisplayValues(MagicEffectType.EitrInfusion, value => new object[]
             {
-                value, MinEitr, EitrPerSecond
+                value, MinEitr, EitrPerSecond, InfuseHint.DisplayName
             });
         }
 

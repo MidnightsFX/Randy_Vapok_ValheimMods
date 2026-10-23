@@ -81,7 +81,7 @@ namespace EpicLoot.MagicItemEffects
         // Tooltip: "... for {0}% of your block power ... for up to +{1}% damage ... Costs {2} stamina."
         public static void RegisterDisplayValues()
         {
-            MagicItem.RegisterDisplayValues(MagicEffectType.ShieldThrow, value => new object[] { value, MaxGaugeBonusPercent, StaminaCost });
+            MagicItem.RegisterDisplayValues(MagicEffectType.ShieldThrow, value => new object[] { value, MaxGaugeBonusPercent, StaminaCost, ThrowHint.DisplayName });
         }
 
         private const string ThrowAttackItem = "SpearFlint";
