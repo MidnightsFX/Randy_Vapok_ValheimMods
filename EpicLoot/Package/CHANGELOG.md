@@ -4,28 +4,27 @@ Changes:
 * Sets overhaul!
     * Sets can be configured to drop at any rarity, and set pieces of different rarities count toward the same set
     * The rune feature can now extract and Etch sets from and to items
-* Set visual effects keep showing while a set weapon is stowed on your back, but the set bonuses still need it in hand.
-* Set bonuses that need a key press are marked Activated, show their key in their description, and have a gamepad button by default.
+    * Set visual effects keep showing while a set weapon is stowed on your back, but the set bonuses still need it in hand.
+    * Set bonuses that need a key press are marked Activated, show their key in their description, and have a gamepad button by default.
 * Adds Quick Configure, editable in game configs for most Epicloot options, and a 1 time setup tutorial
-* Server admins can change every Quick Configure setting from their own game, and the server passes the changes on to every player.
+    * Server admins can change every Quick Configure setting from their own game, and the server passes the changes on to every player.
 * Improvements to the loot system (existing loot tables can be upgraded)
     * new loot table format, with more control over what drops and how much
     * Modded creatures are now automatically included in the loot tables
 * All Boss drops are now configuable, and the loot table changes are non-destructive
 * Eikthyr and Black Forest creatures and chests no longer drop wooden shields, and troll armor is now part of the regular Black Forest armor loot.
-* Unique shardstones and Brokkr's Gift drop twice as often.
 * Slotting runestones into shard slots can be turned off, which leaves runestones already slotted inactive but still removable.
 * Runestones that repeat an effect already on an item can be set to count for less with each copy.
 * The enchanting table's search boxes can now find items by their enchantments.
-* The enchanting table can store enchanting materials: the new Storage feature holds materials, blank runestones, shardstones, chisels and bounty tokens without taking inventory space, and every table feature spends straight from it. Storage follows ward access like a chest. Existing configs need Storage added to Table Features Active to see it.
+* The enchanting table can store enchanting materials: the new Storage feature holds materials. Existing configs need Storage added to Table Features Active to see it.
 * Rare magic effects are marked with stars and a shimmer in tooltips and at the enchanting table.
-* Tempering now costs a single iron or gold bounty token per attempt instead of materials.
-* A failed temper no longer lowers an enchantment unless the server turns that on, and then only the enchantment being tempered can drop.
-* The temper panel shows the chance to downgrade, and its destroy chance is now the real chance per attempt.
+* Tempering
+    * Tempering now costs a single iron or gold bounty token per attempt instead of materials.
+    * A failed temper no longer lowers an enchantment unless the server turns that on, and then only the enchantment being tempered can drop.
+    * The temper panel shows the chance to downgrade
 * Bounties now pay double the coins and bounty tokens.
 * Other mods can now read a player's active bounties, so they can show them to friends.
 * Works with Item Favorite Framework when it is installed: favorited items are kept out of enchanting table screens that use items up and are marked with a star.
-* With Item Favorite Framework, wishlists can ask for a rarity, unique item, set or enchantments, and servers can have magic drops rolled for among nearby players.
 * New Enchantments!
     * Prosperity gives a chance for additional loot drops from creatures and chests
     * Green Thumb on the Cultivator makes the plants you sow grow faster.
