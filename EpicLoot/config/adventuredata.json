@@ -33,7 +33,8 @@
     ],
     "RandomItemsCount": 0,
     "OtherItems": [
-      { "Item": "Andvaranaut", "CoinsCost": 1998 }
+      { "Item": "Andvaranaut", "CoinsCost": 1998 },
+      { "Item": "SkuldsThread", "CoinsCost": 1500 }
     ]
   },
   "Gamble": { 
