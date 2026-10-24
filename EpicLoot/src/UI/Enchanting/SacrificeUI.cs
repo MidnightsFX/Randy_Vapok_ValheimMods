@@ -81,19 +81,11 @@ namespace EpicLoot_UnityLib
         [UsedImplicitly]
         public void OnEnable()
         {
-            _sacrificeMode = SacrificeMode.Sacrifice;
-            IdentifyStylePanel.SetActive(false);
-            if (_sacrificeCategory != null)
-            {
-                _sacrificeCategory.SetValueWithoutNotify(0);
-                _sacrificeCategoryPanel.SetActive(true);
-            }
-            IdentifyToggle.isOn = false;
-            SacrificeToggle.isOn = true;
-            AvailableItems.ClearFilter();
-            List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems(CurrentSacrificeCategory);
-            AvailableItems.SetItems(items.Cast<IListElement>().ToList());
-            AvailableItems.DeselectAll();
+            // The prefab opens with the Sacrifice toggle already on, so setting isOn would not fire the handler.
+            IdentifyToggle.SetIsOnWithoutNotify(false);
+            SacrificeToggle.SetIsOnWithoutNotify(true);
+            _sacrificeCategory?.SetValueWithoutNotify(0);
+            SacrificeModeSelected(true);
         }
 
         // A runtime clone of the identify style panel rather than a second dropdown in the prefab.
