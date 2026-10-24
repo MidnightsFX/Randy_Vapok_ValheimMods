@@ -318,9 +318,20 @@ namespace EpicLoot.CraftingV2
             Unidentified,
             Trophies,
             Shardstones,
-            Materials,
+            Other,
             TableStorage
         }
+
+        // Other (boss drops, modded entries) is only listed under All.
+        internal static readonly SacrificeCategory[] SacrificeCategoryOptions =
+        {
+            SacrificeCategory.All,
+            SacrificeCategory.Equipment,
+            SacrificeCategory.Unidentified,
+            SacrificeCategory.Trophies,
+            SacrificeCategory.Shardstones,
+            SacrificeCategory.TableStorage,
+        };
 
         internal static readonly Dictionary<SacrificeCategory, string> SacrificeCategoryLabels =
             new Dictionary<SacrificeCategory, string>
@@ -330,7 +341,6 @@ namespace EpicLoot.CraftingV2
                 { SacrificeCategory.Unidentified, "$mod_epicloot_sacrifice_category_unidentified" },
                 { SacrificeCategory.Trophies, "$mod_epicloot_sacrifice_category_trophies" },
                 { SacrificeCategory.Shardstones, "$mod_epicloot_sacrifice_category_shardstones" },
-                { SacrificeCategory.Materials, "$mod_epicloot_sacrifice_category_materials" },
                 { SacrificeCategory.TableStorage, "$mod_epicloot_sacrifice_category_storage" },
             };
 
@@ -356,7 +366,7 @@ namespace EpicLoot.CraftingV2
                 return SacrificeCategory.Trophies;
             }
 
-            return item.IsEquipable() ? SacrificeCategory.Equipment : SacrificeCategory.Materials;
+            return item.IsEquipable() ? SacrificeCategory.Equipment : SacrificeCategory.Other;
         }
 
         internal static List<InventoryItemListElement> GetSacrificeItems(SacrificeCategory category = SacrificeCategory.All)

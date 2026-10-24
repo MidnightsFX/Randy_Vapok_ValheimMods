@@ -39,10 +39,15 @@ namespace EpicLoot_UnityLib
         private GameObject _sacrificeCategoryPanel;
         private TMP_Dropdown _sacrificeCategory;
 
-        private EnchantingUIController.SacrificeCategory CurrentSacrificeCategory =>
-            _sacrificeCategory == null
-                ? EnchantingUIController.SacrificeCategory.All
-                : (EnchantingUIController.SacrificeCategory)_sacrificeCategory.value;
+        private EnchantingUIController.SacrificeCategory CurrentSacrificeCategory
+        {
+            get
+            {
+                EnchantingUIController.SacrificeCategory[] options = EnchantingUIController.SacrificeCategoryOptions;
+                int index = _sacrificeCategory == null ? 0 : _sacrificeCategory.value;
+                return index >= 0 && index < options.Length ? options[index] : EnchantingUIController.SacrificeCategory.All;
+            }
+        }
 
         public override void Awake()
         {
@@ -80,7 +85,7 @@ namespace EpicLoot_UnityLib
             IdentifyStylePanel.SetActive(false);
             if (_sacrificeCategory != null)
             {
-                _sacrificeCategory.SetValueWithoutNotify((int)EnchantingUIController.SacrificeCategory.All);
+                _sacrificeCategory.SetValueWithoutNotify(0);
                 _sacrificeCategoryPanel.SetActive(true);
             }
             IdentifyToggle.isOn = false;
@@ -110,14 +115,21 @@ namespace EpicLoot_UnityLib
                 return;
             }
 
+            // The prefab's dropdown carries its caption as a child named SortByLabel.
+            Transform caption = _sacrificeCategory.transform.Find("SortByLabel");
+            TMP_Text captionText = caption != null ? caption.GetComponent<TMP_Text>() : null;
+            if (captionText != null)
+            {
+                captionText.text = Localization.instance.Localize("$mod_epicloot_sacrifice_selection");
+            }
+
             _sacrificeCategory.ClearOptions();
-            foreach (EnchantingUIController.SacrificeCategory category in
-                Enum.GetValues(typeof(EnchantingUIController.SacrificeCategory)))
+            foreach (EnchantingUIController.SacrificeCategory category in EnchantingUIController.SacrificeCategoryOptions)
             {
                 string label = EnchantingUIController.SacrificeCategoryLabels[category];
                 _sacrificeCategory.options.Add(new TMP_Dropdown.OptionData(Localization.instance.Localize(label)));
             }
-            _sacrificeCategory.SetValueWithoutNotify((int)EnchantingUIController.SacrificeCategory.All);
+            _sacrificeCategory.SetValueWithoutNotify(0);
             _sacrificeCategory.RefreshShownValue();
             _sacrificeCategory.onValueChanged.AddListener(_ =>
             {
