@@ -36,13 +36,20 @@ namespace EpicLoot_UnityLib
 
         SacrificeMode _sacrificeMode = SacrificeMode.Sacrifice;
 
-        private readonly List<GameObject> _identifyCategoryHints = new List<GameObject>();
+        private GameObject _sacrificeCategoryPanel;
+        private TMP_Dropdown _sacrificeCategory;
+
+        private EnchantingUIController.SacrificeCategory CurrentSacrificeCategory =>
+            _sacrificeCategory == null
+                ? EnchantingUIController.SacrificeCategory.All
+                : (EnchantingUIController.SacrificeCategory)_sacrificeCategory.value;
 
         public override void Awake()
         {
             base.Awake();
 
-            CreateIdentifyCategoryHint();
+            CreateCategoryHint();
+            CreateSacrificeCategoryPanel();
 
             SacrificeToggle.onValueChanged.AddListener((isOn) => {
                 SacrificeModeSelected(isOn);
@@ -69,18 +76,59 @@ namespace EpicLoot_UnityLib
         [UsedImplicitly]
         public void OnEnable()
         {
-            List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems();
             _sacrificeMode = SacrificeMode.Sacrifice;
             IdentifyStylePanel.SetActive(false);
-            ShowIdentifyCategoryHint(false);
+            if (_sacrificeCategory != null)
+            {
+                _sacrificeCategory.SetValueWithoutNotify((int)EnchantingUIController.SacrificeCategory.All);
+                _sacrificeCategoryPanel.SetActive(true);
+            }
             IdentifyToggle.isOn = false;
             SacrificeToggle.isOn = true;
             AvailableItems.ClearFilter();
+            List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems(CurrentSacrificeCategory);
             AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             AvailableItems.DeselectAll();
         }
 
-        private void CreateIdentifyCategoryHint()
+        // A runtime clone of the identify style panel rather than a second dropdown in the prefab.
+        private void CreateSacrificeCategoryPanel()
+        {
+            if (IdentifyStylePanel == null || IdentifyStyle == null)
+            {
+                return;
+            }
+
+            _sacrificeCategoryPanel = Instantiate(IdentifyStylePanel, IdentifyStylePanel.transform.parent, false);
+            _sacrificeCategoryPanel.name = "SacrificeCategoryPanel";
+            _sacrificeCategoryPanel.transform.SetSiblingIndex(IdentifyStylePanel.transform.GetSiblingIndex() + 1);
+            _sacrificeCategory = _sacrificeCategoryPanel.GetComponentInChildren<TMP_Dropdown>(true);
+            if (_sacrificeCategory == null)
+            {
+                Destroy(_sacrificeCategoryPanel);
+                _sacrificeCategoryPanel = null;
+                return;
+            }
+
+            _sacrificeCategory.ClearOptions();
+            foreach (EnchantingUIController.SacrificeCategory category in
+                Enum.GetValues(typeof(EnchantingUIController.SacrificeCategory)))
+            {
+                string label = EnchantingUIController.SacrificeCategoryLabels[category];
+                _sacrificeCategory.options.Add(new TMP_Dropdown.OptionData(Localization.instance.Localize(label)));
+            }
+            _sacrificeCategory.SetValueWithoutNotify((int)EnchantingUIController.SacrificeCategory.All);
+            _sacrificeCategory.RefreshShownValue();
+            _sacrificeCategory.onValueChanged.AddListener(_ =>
+            {
+                if (_sacrificeMode == SacrificeMode.Sacrifice && !_locked)
+                {
+                    RefreshAvailableItems();
+                }
+            });
+        }
+
+        private void CreateCategoryHint()
         {
             Transform bottomRow = transform.Find("GamepadHints/BottomRow");
             if (bottomRow == null)
@@ -96,11 +144,10 @@ namespace EpicLoot_UnityLib
                 return;
             }
 
-            GameObject spacingClone = Instantiate(spacing.gameObject, bottomRow, false);
-            spacingClone.name = "Spacing";
+            Instantiate(spacing.gameObject, bottomRow, false).name = "Spacing";
 
             GameObject labelClone = Instantiate(label.gameObject, bottomRow, false);
-            labelClone.name = "IdentifyCategory";
+            labelClone.name = "Category";
             TMP_Text labelText = labelClone.GetComponentInChildren<TMP_Text>(true);
             if (labelText != null)
             {
@@ -108,44 +155,29 @@ namespace EpicLoot_UnityLib
             }
 
             GameObject glyphClone = Instantiate(glyph.gameObject, bottomRow, false);
-            glyphClone.name = "IdentifyCategoryButton";
+            glyphClone.name = "CategoryButton";
             GamepadGlyph glyphKey = glyphClone.GetComponentInChildren<GamepadGlyph>(true);
             if (glyphKey != null)
             {
                 glyphKey.ZInputKey = "JoyDPadLeft";
             }
-
-            _identifyCategoryHints.Add(spacingClone);
-            _identifyCategoryHints.Add(labelClone);
-            _identifyCategoryHints.Add(glyphClone);
-            ShowIdentifyCategoryHint(false);
-        }
-
-        private void ShowIdentifyCategoryHint(bool visible)
-        {
-            foreach (GameObject hint in _identifyCategoryHints)
-            {
-                if (hint != null && hint.activeSelf != visible)
-                {
-                    hint.SetActive(visible);
-                }
-            }
         }
 
         protected override void OnDPadHorizontal(int direction)
         {
-            if (_locked || _sacrificeMode != SacrificeMode.Identify)
+            if (_locked)
             {
                 return;
             }
 
-            int optionCount = IdentifyStyle.options.Count;
+            TMP_Dropdown dropdown = _sacrificeMode == SacrificeMode.Identify ? IdentifyStyle : _sacrificeCategory;
+            int optionCount = dropdown == null ? 0 : dropdown.options.Count;
             if (optionCount == 0)
             {
                 return;
             }
 
-            IdentifyStyle.value = (IdentifyStyle.value + direction + optionCount) % optionCount;
+            dropdown.value = (dropdown.value + direction + optionCount) % optionCount;
         }
 
         public override void Update()
@@ -324,7 +356,7 @@ namespace EpicLoot_UnityLib
             }
 
             _sacrificeMode = SacrificeMode.Sacrifice;
-            List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems();
+            List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems(CurrentSacrificeCategory);
             // The two modes list disjoint item sets, so a filter carried across the toggle would hide
             // nearly everything and read as a bug.
             AvailableItems.ClearFilter();
@@ -336,8 +368,8 @@ namespace EpicLoot_UnityLib
             SetMainButtonLabel("$mod_epicloot_sacrifice");
             OnSelectedItemsChanged();
             IdentifyStylePanel.SetActive(false);
+            _sacrificeCategoryPanel?.SetActive(true);
             CostList.gameObject.SetActive(false);
-            ShowIdentifyCategoryHint(false);
         }
 
         private void IdentifyModeSelected(bool isOn)
@@ -359,8 +391,8 @@ namespace EpicLoot_UnityLib
             Warning.color = new Color(1f, 0.631f, 0.235f);
             SetMainButtonLabel("$mod_epicloot_identify");
             IdentifyStylePanel.SetActive(true);
+            _sacrificeCategoryPanel?.SetActive(false);
             CostList.gameObject.SetActive(true);
-            ShowIdentifyCategoryHint(true);
         }
 
         private void RefreshAvailableItems()
@@ -372,7 +404,7 @@ namespace EpicLoot_UnityLib
             }
             else if (_sacrificeMode == SacrificeMode.Sacrifice)
             {
-                List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems();
+                List<InventoryItemListElement> items = EnchantingUIController.GetSacrificeItems(CurrentSacrificeCategory);
                 AvailableItems.SetItems(items.Cast<IListElement>().ToList());
             }
 
@@ -493,6 +525,10 @@ namespace EpicLoot_UnityLib
 
             SacrificeToggle.interactable = false;
             IdentifyToggle.interactable = false;
+            if (_sacrificeCategory != null)
+            {
+                _sacrificeCategory.interactable = false;
+            }
         }
 
         public override void Unlock()
@@ -501,6 +537,10 @@ namespace EpicLoot_UnityLib
 
             SacrificeToggle.interactable = true;
             IdentifyToggle.interactable = true;
+            if (_sacrificeCategory != null)
+            {
+                _sacrificeCategory.interactable = true;
+            }
         }
     }
 }

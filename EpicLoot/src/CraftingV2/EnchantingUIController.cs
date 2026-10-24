@@ -311,9 +311,56 @@ namespace EpicLoot.CraftingV2
                 .ToList();
         }
 
-        internal static List<InventoryItemListElement> GetSacrificeItems()
+        internal enum SacrificeCategory
         {
-            Player player = Player.m_localPlayer;
+            All,
+            Equipment,
+            Unidentified,
+            Trophies,
+            Shardstones,
+            Materials,
+            TableStorage
+        }
+
+        internal static readonly Dictionary<SacrificeCategory, string> SacrificeCategoryLabels =
+            new Dictionary<SacrificeCategory, string>
+            {
+                { SacrificeCategory.All, "$mod_epicloot_sacrifice_category_all" },
+                { SacrificeCategory.Equipment, "$mod_epicloot_sacrifice_category_equipment" },
+                { SacrificeCategory.Unidentified, "$mod_epicloot_sacrifice_category_unidentified" },
+                { SacrificeCategory.Trophies, "$mod_epicloot_sacrifice_category_trophies" },
+                { SacrificeCategory.Shardstones, "$mod_epicloot_sacrifice_category_shardstones" },
+                { SacrificeCategory.Materials, "$mod_epicloot_sacrifice_category_materials" },
+                { SacrificeCategory.TableStorage, "$mod_epicloot_sacrifice_category_storage" },
+            };
+
+        internal static SacrificeCategory ClassifySacrificeItem(ItemDrop.ItemData item)
+        {
+            if (InventoryManagement.ActiveStash != null && InventoryManagement.ActiveStash.TryGetSnapshotPrefab(item, out _))
+            {
+                return SacrificeCategory.TableStorage;
+            }
+
+            if (item.IsShardStone())
+            {
+                return SacrificeCategory.Shardstones;
+            }
+
+            if (item.IsUnidentified())
+            {
+                return SacrificeCategory.Unidentified;
+            }
+
+            if (item.m_shared.m_itemType == ItemDrop.ItemData.ItemType.Trophy)
+            {
+                return SacrificeCategory.Trophies;
+            }
+
+            return item.IsEquipable() ? SacrificeCategory.Equipment : SacrificeCategory.Materials;
+        }
+
+        internal static List<InventoryItemListElement> GetSacrificeItems(SacrificeCategory category = SacrificeCategory.All)
+        {
             List<InventoryItemListElement> result = new List<InventoryItemListElement>();
 
             List<ItemDrop.ItemData> boundItems = InventoryManagement.Instance.GetBoundItems();
@@ -330,6 +377,15 @@ namespace EpicLoot.CraftingV2
 
                     // Not through RegisterSacrificeFilter: a veto there also cancels the disenchant bonus roll.
                     if (ItemFavorites.IsProtected(item))
+                    {
+                        continue;
+                    }
+
+                    SacrificeCategory itemCategory = ClassifySacrificeItem(item);
+                    bool listed = category == SacrificeCategory.All
+                        ? itemCategory != SacrificeCategory.TableStorage
+                        : itemCategory == category;
+                    if (!listed)
                     {
                         continue;
                     }
