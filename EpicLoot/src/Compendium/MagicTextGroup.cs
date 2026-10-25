@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace EpicLoot.Compendium;
 
@@ -21,7 +22,11 @@ public class MagicTextGroup
         return Title.IsMatch(lowered) || Content.Any(x => x.IsMatch(lowered));
     }
 
-    public virtual void Filter(string query) => Enable(IsMatch(query));
+    /// <summary>
+    /// Shows the parts matching <paramref name="query"/>; <paramref name="include"/>, when given, is asked
+    /// per tagged table row and has no bearing on plain text.
+    /// </summary>
+    public virtual void Filter(string query, Func<object, bool> include = null) => Enable(IsMatch(query));
 
     public void Enable(bool enable)
     {
@@ -42,7 +47,17 @@ public class MagicTableGroup : MagicTextGroup
         _table = table;
     }
 
+    /// <summary>A table under its own heading; the heading shows only while the table has rows to show.</summary>
+    public MagicTableGroup(IMagicTextPart title, MagicTextTable table) : base(title, table)
+    {
+        _table = table;
+    }
+
     public MagicTextTable Table => _table;
 
-    public override void Filter(string query) => _table.Filter(query.ToLowerInvariant());
+    public override void Filter(string query, Func<object, bool> include = null)
+    {
+        _table.Filter(query.ToLowerInvariant(), include);
+        Title.Enable(_table.IsVisible);
+    }
 }

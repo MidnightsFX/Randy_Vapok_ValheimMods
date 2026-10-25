@@ -110,14 +110,14 @@ namespace EpicLoot.LegendarySystem
         }
 
         // An ItemType enum name has a display token; an iteminfo.json type or "Staff" is shown as written.
-        private static string DescribeItemType(string itemType)
+        public static string DescribeItemType(string itemType)
         {
             return Extensions.TryLocalize($"mod_epicloot_itemtype_{itemType.ToLowerInvariant()}", out string localized)
                 ? localized
                 : itemType;
         }
 
-        private static string DescribeSkill(Skills.SkillType skill)
+        public static string DescribeSkill(Skills.SkillType skill)
         {
             return Extensions.TryLocalize($"skill_{skill.ToString().ToLowerInvariant()}", out string localized)
                 ? localized
@@ -126,7 +126,7 @@ namespace EpicLoot.LegendarySystem
 
         // Requirements match on the item's shared name token; a prefab name is resolved to its token when
         // the prefab exists.
-        private static string DescribeItemName(string itemName)
+        public static string DescribeItemName(string itemName)
         {
             if (string.IsNullOrEmpty(itemName) || itemName.StartsWith("$"))
             {

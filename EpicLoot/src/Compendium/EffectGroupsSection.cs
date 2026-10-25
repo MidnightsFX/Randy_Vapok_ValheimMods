@@ -41,6 +41,7 @@ public static class EffectGroupsSection
             MagicEffectType.DamageBonusFromPlayerWeight, MagicEffectType.DamageIncreaseFromMovementPenalty,
             MagicEffectType.IncreaseHarvestDamage, MagicEffectType.ConvertPhysicalDamageToLightning, MagicEffectType.CoilingVenom,
             MagicEffectType.IcyWeight, MagicEffectType.ReduceArmorIncreaseDamage, MagicEffectType.NecroticFire,
+            MagicEffectType.CorpseRot, MagicEffectType.HelsHarvest, MagicEffectType.QuarryMark,
         }),
         ("$mod_epicloot_effects_onblock", new[]
         {
@@ -55,7 +56,7 @@ public static class EffectGroupsSection
         {
             MagicEffectType.PerfectDodge, MagicEffectType.PerfectDodgeGivesHealth, MagicEffectType.PerfectDodgeGivesStamina,
             MagicEffectType.PerfectDodgeGivesEitr, MagicEffectType.PerfectDodgeGivesSpeed, MagicEffectType.DecreaseDodgeCost,
-            MagicEffectType.ModifyDodgeStaminaUse,
+            MagicEffectType.ModifyDodgeStaminaUse, MagicEffectType.RollCleanse,
         }),
         ("$mod_epicloot_effects_adrenaline", new[]
         {
@@ -72,6 +73,7 @@ public static class EffectGroupsSection
             MagicEffectType.DamageReductionAtNight, MagicEffectType.DayArmor, MagicEffectType.ArmorFromMovementPenalty,
             MagicEffectType.Coinplated, MagicEffectType.FeatherFall, MagicEffectType.ReduceFallDamage,
             MagicEffectType.IncreaseHeatResistance, MagicEffectType.Warmth, MagicEffectType.Waterproof,
+            MagicEffectType.ForestsAid,
         }),
         ("$mod_epicloot_effects_ranged", new[]
         {
@@ -91,9 +93,7 @@ public static class EffectGroupsSection
         ("$mod_epicloot_effects_gathering", new[]
         {
             MagicEffectType.IncreaseMiningDrop, MagicEffectType.IncreaseTreeDrop, MagicEffectType.BountifulHarvest,
-            MagicEffectType.HelsHarvest, MagicEffectType.ForestsAid, MagicEffectType.GreenThumb, MagicEffectType.QuarryMark,
-            MagicEffectType.CorpseRot, MagicEffectType.LuckyCraft, MagicEffectType.FreeBuild, MagicEffectType.ModifyBuildDistance,
-            MagicEffectType.RollCleanse,
+            MagicEffectType.GreenThumb, MagicEffectType.LuckyCraft, MagicEffectType.FreeBuild, MagicEffectType.ModifyBuildDistance,
             MagicEffectType.LuckWhileFishing, MagicEffectType.ReduceFishingStaminaCost,
         }),
         ("$mod_epicloot_effects_utility", new[]
@@ -117,6 +117,11 @@ public static class EffectGroupsSection
         .SelectMany(c => c.Effects.Select(e => (e, c.Category)))
         .GroupBy(x => x.e)
         .ToDictionary(g => g.Key, g => g.First().Category);
+
+    public static IEnumerable<string> CategoryNames => Categories.Select(x => x.Category).Concat(new[] { OtherCategory });
+
+    public static string GetCategory(string effectType) =>
+        CategoryOf.TryGetValue(effectType, out string found) ? found : OtherCategory;
 
     public static void Build(MagicPages instance)
     {
@@ -160,7 +165,7 @@ public static class EffectGroupsSection
                 continue;
             }
 
-            string category = CategoryOf.TryGetValue(effectType, out string found) ? found : OtherCategory;
+            string category = GetCategory(effectType);
             if (!byCategory.TryGetValue(category, out List<string> list))
             {
                 list = new List<string>();
@@ -177,7 +182,7 @@ public static class EffectGroupsSection
 
         instance.MagicPagesTextArea.Add("");
         instance.MagicPagesTextArea.Add($"<size={MagicPages.LARGE_FONT_SIZE}>$mod_epicloot_misc_header</size>");
-        foreach (string category in Categories.Select(x => x.Category).Concat(new[] { OtherCategory }))
+        foreach (string category in CategoryNames)
         {
             if (!byCategory.TryGetValue(category, out List<string> effectTypes))
             {
