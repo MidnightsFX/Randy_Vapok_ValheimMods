@@ -110,10 +110,16 @@ public static partial class TerminalManager
         string itemPrefabNameArg = args.GetString(2);
         args.Context.PrintInfo($"magicitem - {itemPrefabNameArg} with effect: {effectArg}");
 
-        if (!MagicItemEffectDefinitions.TryGet(effectArg, out MagicItemEffectDefinition magicItemEffectDef))
+        MagicItemEffectDefinition magicItemEffectDef = null;
+        foreach (string effectType in effectArg.Split(','))
         {
-            args.Context.PrintWarning($"> Could not find effect: {effectArg}");
-            return;
+            if (!MagicItemEffectDefinitions.TryGet(effectType.Trim(), out MagicItemEffectDefinition definition))
+            {
+                args.Context.PrintWarning($"> Could not find effect: {effectType}");
+                return;
+            }
+
+            magicItemEffectDef ??= definition;
         }
 
         GameObject itemPrefab = ObjectDB.instance.GetItemPrefab(itemPrefabNameArg);

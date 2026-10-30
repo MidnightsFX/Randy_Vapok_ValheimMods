@@ -2148,10 +2148,19 @@ namespace EpicLoot
 
         public static void AddDebugMagicEffects(MagicItem item)
         {
-            if (!string.IsNullOrEmpty(ForcedMagicEffect) && !item.HasEffect(ForcedMagicEffect))
+            if (string.IsNullOrEmpty(ForcedMagicEffect))
             {
-                EpicLoot.Log($"AddDebugMagicEffect {ForcedMagicEffect}");
-                item.Effects.Add(RollEffect(MagicItemEffectDefinitions.Get(ForcedMagicEffect), item.Rarity));
+                return;
+            }
+
+            foreach (string effectType in ForcedMagicEffect.Split(','))
+            {
+                string forced = effectType.Trim();
+                if (forced.Length > 0 && !item.HasEffect(forced) && MagicItemEffectDefinitions.TryGet(forced, out var definition))
+                {
+                    EpicLoot.Log($"AddDebugMagicEffect {forced}");
+                    item.Effects.Add(RollEffect(definition, item.Rarity));
+                }
             }
         }
 

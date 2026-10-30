@@ -5521,6 +5521,53 @@
       ]
     },
     {
+      "Type": "HomingMissile",
+      "DisplayText": "$mod_epicloot_me_homingmissile_display",
+      "Description": "$mod_epicloot_me_homingmissile_desc",
+      "Requirements": {
+        "AllowedItemTypes": [
+          "OneHandedWeapon",
+          "TwoHandedWeapon"
+        ],
+        "ExcludedItemTypes": [
+          "Staff"
+        ],
+        "ExcludedSkillTypes": [
+          "Pickaxes"
+        ],
+        "MustHaveEffectTypes": [
+          "Throwable"
+        ],
+        "AllowedRarities": [
+          "Legendary",
+          "Mythic",
+          "Ancient"
+        ]
+      },
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 6, "MaxValue": 8, "Increment": 1 },
+        "Rare": { "MinValue": 8, "MaxValue": 10, "Increment": 1 },
+        "Epic": { "MinValue": 10, "MaxValue": 12, "Increment": 1 },
+        "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 1 },
+        "Mythic": { "MinValue": 15, "MaxValue": 18, "Increment": 1 },
+        "Ancient": { "MinValue": 18, "MaxValue": 20, "Increment": 1 }
+      },
+      "SelectionWeight": 5,
+      "Prefixes": [
+        "$mod_epicloot_me_homingmissile_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_homingmissile_suffix1"
+      ],
+      "Config": {
+        "AcquireAngle": 25,
+        "LoseRangeMultiplier": 1.6,
+        "StartTurnRate": 45,
+        "FullTurnRate": 1440,
+        "RampSeconds": 3
+      }
+    },
+    {
       "Type": "Apportation",
       "DisplayText": "$mod_epicloot_me_apportation_display",
       "Description": "$mod_epicloot_me_apportation_desc",

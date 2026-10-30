@@ -80,6 +80,7 @@ public static class EffectGroupsSection
             MagicEffectType.ModifyProjectileSpeed, MagicEffectType.ModifyFireRate, MagicEffectType.ModifyMagicFireRate,
             MagicEffectType.ReduceEitrCost, MagicEffectType.ConvertEitrCostToStaminaCost, MagicEffectType.ConsumeEitrFirstForBloodCosts,
             MagicEffectType.KillsReduceNextBloodCost, MagicEffectType.ShieldThrow, MagicEffectType.Throwable, MagicEffectType.RecallWeapon,
+            MagicEffectType.HomingMissile,
             MagicEffectType.ModifySummonDamage, MagicEffectType.ModifySummonHealth,
         }),
         ("$mod_epicloot_effects_movement", new[]
