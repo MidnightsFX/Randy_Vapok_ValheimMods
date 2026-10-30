@@ -99,6 +99,10 @@
     <EmbeddedResource Include="..\ValheimUnity\AssetBundles\epicloot">
       <Link>epicloot</Link>
     </EmbeddedResource>
+    <!-- The bundle's shaders compiled for Metal; macOS materials are moved onto them (Common MetalShaderSidecar). -->
+    <EmbeddedResource Include="..\ValheimUnity\AssetBundles\osx\epicloot_metal">
+      <Link>epicloot_metal</Link>
+    </EmbeddedResource>
     <EmbeddedResource Include="config\*.json" />
     <EmbeddedResource Include="config\*\*\*.json" />
     <EmbeddedResource Include="localizations\*.json" />

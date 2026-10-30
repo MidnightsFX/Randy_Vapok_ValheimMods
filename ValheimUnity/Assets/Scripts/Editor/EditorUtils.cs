@@ -32,6 +32,9 @@ public class EditorUtils
         }
 
         BuildRecord.Write(projectRootDir, stagePath, manifest.GetAllAssetBundles());
+
+        // The bundled shaders compiled for Metal, which macOS needs; see MetalShaderSidecars.
+        MetalShaderSidecars.Build(projectRootDir, stagePath);
     }
 
 /*    public class MakeScriptableObject

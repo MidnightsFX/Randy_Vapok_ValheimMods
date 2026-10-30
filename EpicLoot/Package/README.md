@@ -18,44 +18,12 @@ The mod is currently in ***Early Access***! That means it's **not done**! Be pat
 
 ***EpicLoot works in multiplayer and on dedicated servers!*** The server and all players should have the mod and its dependencies installed.
 
-## Version 0.13!
-
-Introducing a large new feature: **Shardstones!**
-
-Shardstones grant a variety of small buffs to allow much greater control over your build.
-  * Press Interact (E by default) on a socketed item in your inventory to open its shard slots in a small panel beside your inventory, then drag in a shardstone or an Etched Runestone.
-  * Enchanted items can now drop with shard slots, and the rarer the item the more slots it is likely to have.
-  * Shardstones drop all over the world, each biome and boss has their own drops. Maybe you can find a unique shardstone also?
-  * Shardstones can be upgraded to a higher rarity in the enchanting table's Convert Materials tab, under its own Upgrade Shardstones mode
-  * A shardstone you don't want can be sacrificed for dust, reagents and essence of its own rarity
-
-Shard drops come from the loot tables, so if you have customized your loottables.json you will need to accept the config update prompt (or refresh BepInEx/config/EpicLoot/baseconfig/loottables.json) before any shardstones will drop.
-
-Also new in 0.13: **Tempering**, a service from Hildir that rerolls the value of an existing enchantment. Tired of augmenting and hoping? Well now you can focus entirely on upgrading specific enchants!
-
-Other notable changes:
-- Expanded tooltips that reveal the full details of an effect when you hold Shift
-- Config upgrade system can automatically upgrade your configs or just let you know when an upgrade includes changes to your configs
-- Quick Configure: an in-game settings panel for the options most worlds change
-
-See the wiki on thunderstore for more information! Link below!
-
 ## Quick Configure
 
 The **Mod Config** button at the bottom right of the main menu and the pause menu opens Epic Loot's
-Quick Configure panel: a paged editor over the settings most worlds want to change (balance presets and
-drop mix, features, rarity tables, loot drops, shardstones, the enchanting table, the merchant,
-bounties, interface, item colours, effect tuning, advanced). Hover a row for the same description you
-would read in the config file. Save writes the `.cfg` in one go; on the host, the JSON-backed rows
-(rarity tables, each biome's drop amounts and rarity weights, merchant and bounty numbers, bounty
-targets and rewards per biome, treasure map costs per biome, the item categories that gate drops behind
-bosses, every effect's tunables) are written into `config/EpicLoot/baseconfig/` and reloaded live. A server admin who is not the host can
-change the server settings from the pause menu; the JSON rows are read-only there. The first launch
-opens the panel once as a setup wizard, once per user rather than once per mod manager profile: the
-record is `ModQuickConfig/FirstRun.cfg` next to your Valheim saves. Set `Welcome Wizard` in the config to
-`ShowNextLaunch` to run it again, or to `Never` to keep it closed in that profile.
-`Show Quick Configure Button` hides the launcher entry. The config update prompt opens after the wizard,
-and other mods' welcomes take turns with it rather than opening on top of it.
+Quick Configure panel. Want to make changes to the mods config but don't want to learn or edit json?
+The quick config is the way to do that. It lets you easily adjust balance, tune effects or change 
+the mod to your liking.
 
 ## Documentation
 
@@ -71,6 +39,9 @@ subscribing to enchant/socket/loot events, and generating magic items.
 See [docs/API.md](docs/API.md) for the reference and a migration table from the internals mods patch today.
 The [`EpicLootAPI`](../EpicLootAPI/EpicLootAPI/README.md) shim gives you typed wrappers you can bundle into
 your plugin with ILRepack.
+
+### AI Policy
+We accept AI-assisted changes. All code, assets etc. Must be reviewed and tested before it will be merged or released.
 
 ## Credits
 

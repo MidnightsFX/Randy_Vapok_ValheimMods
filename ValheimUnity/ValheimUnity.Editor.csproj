@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\Editor\LegacyTextToTmp.cs" />
     <Compile Include="Assets\Scripts\Editor\QuickConfigPrefabBuilder.cs" />
     <Compile Include="Assets\Scripts\Editor\GamepadGlyphTools.cs" />
+    <Compile Include="Assets\Scripts\Editor\MetalShaderSidecars.cs" />
     <Compile Include="Assets\Scripts\Editor\PanelTmpMigration.cs" />
   </ItemGroup>
   <ItemGroup>

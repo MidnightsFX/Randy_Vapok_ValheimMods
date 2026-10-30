@@ -347,6 +347,17 @@ namespace EquipmentAndQuickSlots {
         public static Slot FindSlot(string slotID) => slots.FirstOrDefault(slot => slot.ID == slotID);
 
         public static bool TryFindFreeSlotForItem(ItemDrop.ItemData item, out Slot slot) {
+            if (!FindFreeSlotForItem(item, out slot))
+                return false;
+
+            if (IsStillFree(slot, item))
+                return true;
+
+            // IsStillFree dropped the stale cache, so this search reads the inventory itself.
+            return FindFreeSlotForItem(item, out slot);
+        }
+
+        private static bool FindFreeSlotForItem(ItemDrop.ItemData item, out Slot slot) {
             slot = null;
 
             if (item == null)
@@ -424,7 +435,43 @@ namespace EquipmentAndQuickSlots {
 
         public static bool TryFindEmptyQuickSlot(out Slot slot) {
             slot = slots.FirstOrDefault(s => s.IsFreeQuickSlot());
+            if (slot != null && !IsStillFree(slot, null))
+                slot = slots.FirstOrDefault(s => s.IsFreeQuickSlot());
+
             return slot != null;
+        }
+
+        // Slot.Item is cached until the next inventory change, so a cell about to be handed out for an
+        // item is checked against the inventory itself. A stale "empty" answer put picked-up items on top
+        // of the first quick slot's resident, where the grid draws only one of them and the rest vanish.
+        // On a mismatch the cache is dropped (the caller searches again) and the call chain is logged,
+        // since whatever filled the cache with the wrong answer ran earlier than this. Capped, so a cause
+        // that repeats every frame cannot flood the log.
+        internal static bool IsStillFree(Slot slot, ItemDrop.ItemData forItem) {
+            Vector2i pos = slot.GridPosition;
+            if (PlayerInventory?.GetOtherItemAt(pos.x, pos.y, forItem) is not ItemDrop.ItemData occupant)
+                return true;
+
+            if (_staleSlotCacheWarnings++ < MaxStaleSlotCacheWarnings)
+                EquipmentAndQuickSlots.LogWarning($"Slot {slot.ID} at {pos} was cached as empty but holds {occupant.m_shared.m_name}; " +
+                                                  $"refreshing the slot cache. Caller: {DescribeCaller()}" +
+                                                  (_staleSlotCacheWarnings == MaxStaleSlotCacheWarnings ? " (further occurrences are not logged)" : ""));
+            ClearCachedItems();
+            return false;
+        }
+
+        private const int MaxStaleSlotCacheWarnings = 20;
+        private static int _staleSlotCacheWarnings;
+
+        private static string DescribeCaller() {
+            System.Diagnostics.StackFrame[] frames = new System.Diagnostics.StackTrace(2, false).GetFrames();
+            if (frames == null)
+                return "unknown";
+
+            return string.Join(" <- ", frames.Take(10)
+                .Select(frame => frame.GetMethod())
+                .Where(method => method != null)
+                .Select(method => $"{method.DeclaringType?.Name}.{method.Name}"));
         }
 
         internal static void SaveLastEquippedSlotsToItems() {

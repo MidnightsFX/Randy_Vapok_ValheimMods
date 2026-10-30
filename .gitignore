@@ -92,6 +92,13 @@ ValheimUnity/AssetBundles/*.manifest
 ValheimUnity/AssetBundles/epicloot
 # Written by Mod > Build Asset Bundles beside the bundles; mod-tools reads it to tell whether epicloot is current
 ValheimUnity/AssetBundles/build-record.json*
+# Metal shader sidecars (MetalShaderSidecars.cs): epicloot's stays untracked like epicloot, the others are committed
+ValheimUnity/AssetBundles/osx/*.manifest
+ValheimUnity/AssetBundles/osx/osx
+ValheimUnity/AssetBundles/osx/epicloot_metal
+ValheimUnity/AssetBundles/osx/build-record.json*
+# Temporary carrier materials, created and deleted by the sidecar build
+ValheimUnity/Assets/_MetalShaderCarriers*
 ValheimUnity/Assets/ExternalLibraries/*.dll
 ValheimUnity/Assets/ExternalLibraries/valheim/*.dll
 ValheimUnity/UserSettings

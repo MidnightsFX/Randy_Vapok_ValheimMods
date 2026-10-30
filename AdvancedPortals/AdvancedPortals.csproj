@@ -39,6 +39,10 @@
     <EmbeddedResource Include="..\ValheimUnity\AssetBundles\advancedportals">
       <Link>advancedportals</Link>
     </EmbeddedResource>
+    <!-- The bundle's shaders compiled for Metal; macOS materials are moved onto them (Common MetalShaderSidecar). -->
+    <EmbeddedResource Include="..\ValheimUnity\AssetBundles\osx\advancedportals_metal">
+      <Link>advancedportals_metal</Link>
+    </EmbeddedResource>
   </ItemGroup>
 
   <Target Name="CopyAssembly" AfterTargets="Build">

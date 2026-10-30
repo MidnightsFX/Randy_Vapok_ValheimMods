@@ -1,3 +1,7 @@
+**2.0.1**
+
+* Jam's items and effects no longer render pink on macOS.
+
 **2.0.0**
 
 * Deep North update!

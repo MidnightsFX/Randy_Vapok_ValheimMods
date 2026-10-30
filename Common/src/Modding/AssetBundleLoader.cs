@@ -39,6 +39,7 @@ namespace Common {
                     return null;
                 }
                 _liveStreams.Add(stream);
+                MetalShaderSidecar.Apply(bundle, filename, assembly);
                 return bundle;
             } catch (Exception e) {
                 ModLogger.LogError($"Failed to load embedded asset bundle '{resourceName}': {e.Message}");
@@ -82,6 +83,7 @@ namespace Common {
                     return null;
                 }
                 ModLogger.LogDebug($"Loaded embedded asset bundle '{resourceName}' ({bytes.Length / 1024} KB) from memory in {timer.Elapsed.TotalMilliseconds:0} ms.");
+                MetalShaderSidecar.Apply(bundle, filename, assembly);
                 return bundle;
             } catch (Exception e) {
                 ModLogger.LogError($"Failed to load embedded asset bundle '{resourceName}': {e.Message}");

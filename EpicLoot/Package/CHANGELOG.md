@@ -1,3 +1,9 @@
+**0.15.5**
+* Ability cooldowns no longer reset when you log out or die
+* MacOS native Metal Shader support
+    * This is new and hard for us to test, so please report any issues you see with it.   
+* Updated translations again
+
 **0.15.4**
 * Shard slots now support opening with chests, backpacks or other inventories
 * Shard Slots default to using E again, configurable

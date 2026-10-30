@@ -23,28 +23,51 @@ namespace EquipmentAndQuickSlots {
         }
 
         private static bool PutIntoFirstEmptySlot(ItemDrop.ItemData item) {
-            if (TryGetSavedPlayerSlot(item, out Slot prevSlot) && prevSlot.IsActive && prevSlot.ItemBelongs(item) && (prevSlot.IsFree || item == prevSlot.Item)) {
-                item.m_gridPos = prevSlot.GridPosition;
+            if (!TryFindHomeForItem(item, out Vector2i gridPos))
+                return false;
+
+            item.m_gridPos = gridPos;
+            // Slot.Item is cached, and the cell just filled still reads as empty. Both validators rehome
+            // several items in one pass, so without this the next one was handed the same slot cell and
+            // landed on top of this one.
+            ClearCachedItems();
+            return true;
+        }
+
+        private static bool TryFindHomeForItem(ItemDrop.ItemData item, out Vector2i gridPos) {
+            if (TryGetSavedPlayerSlot(item, out Slot prevSlot) && prevSlot.IsActive && prevSlot.ItemBelongs(item) && (prevSlot.IsFree || item == prevSlot.Item)
+                && IsStillFree(prevSlot, item)) {
+                gridPos = prevSlot.GridPosition;
                 return true;
             }
 
-            Vector2i gridPos = PlayerInventory.FindEmptySlot(true);
-            if (gridPos.x > -1 && gridPos.y > -1) {
-                item.m_gridPos = gridPos;
+            gridPos = PlayerInventory.FindEmptySlot(true);
+            if (gridPos.x > -1 && gridPos.y > -1)
                 return true;
-            }
 
             if (TryFindFreeSlotForItem(item, out Slot slot)) {
-                item.m_gridPos = slot.GridPosition;
+                gridPos = slot.GridPosition;
                 return true;
             }
 
-            if (TryMakeFreeSpaceInPlayerInventory(out Vector2i gridPosEmptied)) {
-                item.m_gridPos = gridPosEmptied;
-                return true;
-            }
+            return TryMakeFreeSpaceInPlayerInventory(out gridPos);
+        }
 
-            return false;
+        // An item sharing a cell with another is drawn underneath it: invisible, yet still carried and
+        // weighed. With no free cell anywhere, it goes on the ground, as vanilla would have left an item
+        // the player had no room to pick up. Worn gear, quest items (vanilla refuses to drop those) and
+        // the item being dragged stay put and are retried on the next sweep.
+        private static void DropItemWithNoRoom(ItemDrop.ItemData item) {
+            Player player = Player.m_localPlayer;
+            if (player.IsDead() || player.IsTeleporting() || player.IsItemEquiped(item) || item.m_shared.m_questItem
+                || (InventoryGui.instance && InventoryGui.instance.m_dragItem == item))
+                return;
+
+            if (PlayerInventory.GetOtherItemAt(item.m_gridPos.x, item.m_gridPos.y, item) == null)
+                return;
+
+            EquipmentAndQuickSlots.LogWarning($"ItemsValidation: no room for {item.m_shared.m_name} x{item.m_stack} hidden under another item at {item.m_gridPos}; dropping it");
+            player.DropItem(PlayerInventory, item, item.m_stack);
         }
 
         internal static class SlotsValidation {
@@ -180,7 +203,15 @@ namespace EquipmentAndQuickSlots {
                     occupiedPositions.Add(item.m_gridPos);
                 }
 
-                if (misplacedItems.Count(PutIntoFirstEmptySlot) > 0)
+                bool moved = false;
+                foreach (ItemDrop.ItemData item in misplacedItems) {
+                    if (PutIntoFirstEmptySlot(item))
+                        moved = true;
+                    else
+                        DropItemWithNoRoom(item);
+                }
+
+                if (moved)
                     PlayerInventory.Changed();
 
                 // Items settled in a slot no longer need their return-address tag. An item that

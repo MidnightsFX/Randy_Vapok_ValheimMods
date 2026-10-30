@@ -20,6 +20,9 @@ namespace EquipmentAndQuickSlots {
         public static ConfigEntry<bool> EquipmentPanelDraggable;
         public static ConfigEntry<KeyboardShortcut> EquipmentPanelDragKey;
         public static ConfigEntry<bool> ShowPaperdoll;
+        public static ConfigEntry<Vector2> ContainerPosition;
+        public static ConfigEntry<bool> ContainerDraggable;
+        public static ConfigEntry<KeyboardShortcut> ContainerDragKey;
         public static ConfigEntry<bool> ShowExtraUtilityItems;
         public static readonly ConfigEntry<KeyboardShortcut>[] QuickSlotKeys = new ConfigEntry<KeyboardShortcut>[MaxQuickSlots];
         public static readonly ConfigEntry<string>[] QuickSlotLabels = new ConfigEntry<string>[MaxQuickSlots];
@@ -113,6 +116,15 @@ namespace EquipmentAndQuickSlots {
                 new ConfigDescription("Hold this key while dragging the panel background to move the panel.", null, new ConfigurationManagerAttributes { }));
             ShowPaperdoll = Config.Bind("Equipment Panel", "Show Paperdoll", false,
                 new ConfigDescription("Draw the character paperdoll image behind the equipment slots.", null, new ConfigurationManagerAttributes { }));
+
+            // Same section and keys as ViperAlpha's unofficial 3.1.5 fork, so a position saved
+            // there carries over (both use this mod's config file).
+            ContainerPosition = Config.Bind("Container Window", "Container Position", Vector2.zero,
+                new ConfigDescription("Offset of the chest window from where the game places it. 0, 0 keeps the automatic placement, which moves the window below the inventory's extra rows as far as the screen allows. Drag the window by its background or title in-game to move it (hold the drag key, or enable 'Container Draggable'); hold the drag key and right-click the window to put it back. The window is always kept on the screen.", null, new ConfigurationManagerAttributes { }));
+            ContainerDraggable = Config.Bind("Container Window", "Container Draggable", false,
+                new ConfigDescription("Allow dragging the chest window by its background at any time, without holding the drag key.", null, new ConfigurationManagerAttributes { }));
+            ContainerDragKey = Config.Bind("Container Window", "Container Drag Key", new KeyboardShortcut(KeyCode.LeftAlt),
+                new ConfigDescription("Hold this key while dragging the chest window's background to move it, or while right-clicking it to return it to its automatic place.", null, new ConfigurationManagerAttributes { }));
 
             // Whether your own extra utility items are rendered is your call, and it is your value
             // that travels to everyone else: the visuals ride a ZDO the wearer owns.

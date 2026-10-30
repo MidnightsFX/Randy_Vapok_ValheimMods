@@ -1,7 +1,11 @@
 **3.2.0**
 * Quick slots can now be used from a controller with a button combination that can be changed in the config.
 * The quick slot bar and the equipment panel show each quick slot's controller buttons while playing on a controller.
-* With Item Favorite Framework installed, the quick slot bar shows its favorite and trash marks.
+* With Item Favorite Framework installed, the quick slot bar shows its item markings
+* Fixes picked-up items hiding behind each other in a quick slot when the inventory is full.
+* An item hidden under another with no free space left is now dropped on the ground
+* Fixes the chest window being pushed off the bottom of the screen with several extra inventory rows and a large interface scale.
+* The chest window can now be dragged to a spot of your choice, the same way as the equipment panel.
 
 **3.1.4**
 * Quick slot hotkeys no longer fire while the build menu (hammer, cultivator, feaster) is open,

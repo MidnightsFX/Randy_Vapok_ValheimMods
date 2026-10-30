@@ -24,6 +24,10 @@ and Trinket — plus up to six hotkeyable quick slots.
   balance change. You can never wear two copies of the same item, and the extra items show on
   your character for everyone.
 * Configurable keep-on-death and auto-equip-on-gravestone-pickup behavior.
+* Move the equipment panel or the chest window by holding Left Alt and dragging its background
+  (`Equipment Panel` and `Container Window` in the config). Left Alt + right-click on the chest
+  window puts it back in its automatic place below the inventory. The chest window always stays
+  on the screen.
 * Other mods can add custom slots through the API — see
   [docs/API.md](https://github.com/RandyKnapp/ValheimMods/tree/main/EquipmentAndQuickSlots/docs/API.md).
 
@@ -61,6 +65,9 @@ copy `EquipmentAndQuickSlots.dll` into the `BepInEx/plugins` folder.
   slots in the equipment panel.
 * Other slot mods — AzuExtendedPlayerInventory, ExtendedPlayerInventory, ExtraSlots, ComfyQuickSlots —
   are declared incompatible; BepInEx will not load this mod next to them.
+
+### AI Policy
+We accept AI-assisted changes. All code, assets etc. Must be reviewed and tested before it will be merged or released.
 
 ### Notes
 

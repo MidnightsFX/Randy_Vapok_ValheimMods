@@ -71,7 +71,6 @@ namespace EquipmentAndQuickSlots {
         private static Image inventoryBackgroundImage;
         private static RectTransform inventoryDarken;
         private static RectTransform inventorySelectedFrame;
-        private static Vector2? containerOriginalPivot;
         private static RectTransform equipmentBackground;
         private static RectTransform quickBackground;
         private static RectTransform customBackground;
@@ -188,7 +187,8 @@ namespace EquipmentAndQuickSlots {
 
         // Extra visible rows: the player panel's stretch-anchored background (and its darken /
         // gamepad selection frame) is extended downward by one base-row-fraction per extra row,
-        // and the container panel is nudged down so it doesn't sit under the taller inventory.
+        // and the container panel is nudged down so it doesn't sit under the taller inventory
+        // (see ContainerWindow).
         private static void UpdateInventoryPanelForExtraRows() {
             int extraRows = ExtraRows;
             float anchorY = -1f * (extraRows / (float)BaseRows - 0.01f * Math.Max(extraRows - 1, 0));
@@ -199,12 +199,7 @@ namespace EquipmentAndQuickSlots {
             if (inventorySelectedFrame)
                 inventorySelectedFrame.anchorMin = inventoryBackground.anchorMin;
 
-            RectTransform container = InventoryGui.instance.m_container;
-            if (container) {
-                if (containerOriginalPivot == null)
-                    containerOriginalPivot = container.pivot;
-                container.pivot = new Vector2(containerOriginalPivot.Value.x, containerOriginalPivot.Value.y + extraRows * 0.2f);
-            }
+            ContainerWindow.UpdatePosition(extraRows);
         }
 
         private static Vector2 RowBackgroundSize(int slotCount) => new Vector2(rowBackgroundPitch * slotCount + 10f, rowBackgroundHeight);
@@ -531,7 +526,7 @@ namespace EquipmentAndQuickSlots {
             inventoryBackgroundImage = null;
             inventoryDarken = null;
             inventorySelectedFrame = null;
-            containerOriginalPivot = null;
+            ContainerWindow.Clear();
             equipmentBackground = null;
             quickBackground = null;
             customBackground = null;

@@ -1,4 +1,5 @@
 **1.2.0**
+* Portal effects no longer render pink on macOS.
 * Portals now use the shared configurable-piece system. Each portal gains new server-synced settings that apply live, without a restart:
   * **Requires Workbench** / **Workbench** - whether a crafting station is needed at all, and which one.
   * **Piece Category** - which hammer build tab the portal appears in.

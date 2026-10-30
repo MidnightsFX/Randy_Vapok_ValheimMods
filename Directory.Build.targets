@@ -131,12 +131,20 @@
     </Task>
   </UsingTask>
 
+  <!-- A bundle whose materials use shaders it carries itself also gets osx\<name>_metal from the Unity build:
+       those shaders compiled for Metal, which Common's MetalShaderSidecar moves the materials onto on macOS.
+       A project that embeds the bundle but not that file builds fine and renders pink on every Mac. -->
   <Target Name="CheckEmbeddedAssetBundles" BeforeTargets="CoreCompile">
     <ItemGroup>
       <_EmbeddedAssetBundle Include="@(EmbeddedResource)"
                             Condition="$([System.String]::Copy('%(FullPath)').Replace('\', '/').Contains('/ValheimUnity/AssetBundles/'))" />
+      <_MetalShaderSidecar Include="@(_EmbeddedAssetBundle->'%(RootDir)%(Directory)osx\%(Filename)%(Extension)_metal')" />
+      <_MissingMetalShaderSidecar Include="@(_MetalShaderSidecar)" Exclude="@(_EmbeddedAssetBundle->'%(FullPath)')"
+                                  Condition="Exists('%(FullPath)')" />
     </ItemGroup>
     <CheckUnityBundles Bundles="@(_EmbeddedAssetBundle)" Condition="'@(_EmbeddedAssetBundle)' != ''" />
+    <Error Condition="'@(_MissingMetalShaderSidecar)' != ''"
+           Text="This project embeds an asset bundle but not its Metal shaders: add an EmbeddedResource for @(_MissingMetalShaderSidecar, ', '), or its materials render pink on macOS." />
   </Target>
 
 </Project>
