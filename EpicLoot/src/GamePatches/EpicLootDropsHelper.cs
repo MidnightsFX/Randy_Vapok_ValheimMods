@@ -1,5 +1,6 @@
 ﻿using BepInEx.Configuration;
 using EpicLoot.Config;
+using EpicLoot.GatedItemType;
 using EpicLoot.MagicItemEffects.Shards;
 using HarmonyLib;
 using System;
@@ -122,15 +123,25 @@ namespace EpicLoot
                 return;
             }
 
-            EpicLootDropsHelper.OnCharacterDeath(__instance);
-
-            // No-ragdoll path: GenerateDropList ran moments ago in this same frame, so Lucky Loot's latch
-            // is consumed directly rather than travelling through a ragdoll ZDO.
-            int luckyRolls = LuckyLoot.ConsumePendingRolls(__instance);
-            if (luckyRolls > 0 &&
-                EpicLootDropsHelper.TryGetDropInfo(__instance, out string name, out int level, out Vector3 dropPoint))
+            // This runs in the frame Character.OnDeath asked the server for the creature's defeat key, which a
+            // client only gets back a round trip later; the ragdoll path rolls seconds later and needs none of this.
+            GatedItemTypeHelper.RollingDefeatKey = __instance.m_character != null ? __instance.m_character.m_defeatSetGlobalKey : null;
+            try
             {
-                LuckyLoot.RollBonusEpicLootDrops(name, level, dropPoint, luckyRolls);
+                EpicLootDropsHelper.OnCharacterDeath(__instance);
+
+                // No-ragdoll path: GenerateDropList ran moments ago in this same frame, so Lucky Loot's latch
+                // is consumed directly rather than travelling through a ragdoll ZDO.
+                int luckyRolls = LuckyLoot.ConsumePendingRolls(__instance);
+                if (luckyRolls > 0 &&
+                    EpicLootDropsHelper.TryGetDropInfo(__instance, out string name, out int level, out Vector3 dropPoint))
+                {
+                    LuckyLoot.RollBonusEpicLootDrops(name, level, dropPoint, luckyRolls);
+                }
+            }
+            finally
+            {
+                GatedItemTypeHelper.RollingDefeatKey = null;
             }
         }
     }

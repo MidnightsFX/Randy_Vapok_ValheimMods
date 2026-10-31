@@ -111,7 +111,9 @@
       "Type": "Knives",
       "Fallback": "Fists",
       "ItemFallback": "KnifeWood",
-      "IgnoredItems": [],
+      "IgnoredItems": [
+        "KnifeVoid"
+      ],
       "Items": [],
       "ItemsByBoss": {
         "none": [
@@ -139,8 +141,7 @@
         "defeated_frozenking_p3": [
           "KnifeGold",
           "KnifeGold_FrostFire",
-          "KnifeGold_BloodLightning",
-          "KnifeVoid"
+          "KnifeGold_BloodLightning"
         ]
       }
     },
@@ -591,7 +592,9 @@
       "Type": "HeadArmor",
       "Fallback": "ChestArmor",
       "ItemFallback": "ArmorRagsLegs",
-      "IgnoredItems": [],
+      "IgnoredItems": [
+        "HelmetCrownofValheim"
+      ],
       "Items": [],
       "ItemsByBoss": {
         "none": [],

@@ -2586,7 +2586,7 @@
           "Tier7Everything"
         ],
         "DeepNorth": [
-          "Tier7Everything"
+          "Tier8Everything"
         ]
       },
       "Costs": [
@@ -2627,7 +2627,7 @@
           "Tier7Weapons"
         ],
         "DeepNorth": [
-          "Tier7Weapons"
+          "Tier8Weapons"
         ]
       },
       "Costs": [
@@ -2681,8 +2681,8 @@
           "Tier7Shields"
         ],
         "DeepNorth": [
-          "Tier7Armor",
-          "Tier7Shields"
+          "Tier8Armor",
+          "Tier8Shields"
         ]
       },
       "Costs": [
@@ -2708,7 +2708,7 @@
         "Plains": [ "Tier3Tools", "ModUtility", "Tier5Trinkets" ],
         "Mistlands": [ "Tier6Tools", "ModUtility", "Tier6Trinkets" ],
         "AshLands": [ "Tier6Tools", "ModUtility", "Tier7Trinkets" ],
-        "DeepNorth": [ "Tier6Tools", "ModUtility", "Tier7Trinkets" ]
+        "DeepNorth": [ "Tier6Tools", "ModUtility", "Tier8Trinkets" ]
       },
       "Costs": [
         {

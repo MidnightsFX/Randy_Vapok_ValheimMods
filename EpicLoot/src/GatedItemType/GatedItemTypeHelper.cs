@@ -58,6 +58,15 @@ namespace EpicLoot.GatedItemType
         public static List<Heightmap.Biome> BiomesInOrder = new List<Heightmap.Biome>();
         public static Dictionary<Heightmap.Biome, List<string>> BiomesToBossKeys = new Dictionary<Heightmap.Biome, List<string>>();
 
+        /// <summary>
+        /// The defeat key of the creature whose drops are rolling right now, counted as set for that roll.
+        /// Vanilla's Character.OnDeath sends the key to the server and runs CharacterDrop.OnDeath in the same
+        /// frame, so on a client that owns the boss (any dedicated server) the key only arrives a round trip
+        /// later. A boss without a ragdoll (the Queen, the Frozen King) rolls in that frame and used to have
+        /// its own tier's gear swapped for the tier below. Set and cleared around that roll only.
+        /// </summary>
+        public static string RollingDefeatKey;
+
         public static void Initialize(ItemInfoConfig config)
         {
             if (config == null)
@@ -469,7 +478,7 @@ namespace EpicLoot.GatedItemType
                     bool allKeysPresent = true;
                     foreach (string boss in bosses)
                     {
-                        bool hasKey = ZoneSystem.instance.GetGlobalKey(boss);
+                        bool hasKey = HasBossKey(boss);
                         if (hasKey || add)
                         {
                             validBosses.Add(boss);
@@ -557,13 +566,20 @@ namespace EpicLoot.GatedItemType
             {
                 string key = GetBossKeyForMode(boss, mode);
 
-                if (!string.IsNullOrEmpty(key) && !ZoneSystem.instance.GetGlobalKey(key))
+                if (!string.IsNullOrEmpty(key) && !HasBossKey(key))
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private static bool HasBossKey(string key)
+        {
+            // Global keys are stored lowercased, so compare the rolling key the same way.
+            return ZoneSystem.instance.GetGlobalKey(key) ||
+                (!string.IsNullOrEmpty(RollingDefeatKey) && string.Equals(key, RollingDefeatKey, System.StringComparison.OrdinalIgnoreCase));
         }
 
         private static bool HasAllBossKeysForBiome(Heightmap.Biome biome)
@@ -575,7 +591,7 @@ namespace EpicLoot.GatedItemType
 
             foreach (string key in BiomesToBossKeys[biome])
             {
-                if (!ZoneSystem.instance.GetGlobalKey(key))
+                if (!HasBossKey(key))
                 {
                     return false;
                 }

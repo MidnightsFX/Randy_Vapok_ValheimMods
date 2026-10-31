@@ -1,5 +1,6 @@
 **0.15.5**
-* Worlds load much faster alongside large location mods such as More World Locations, and locations are no longer all read again after every mod update.
+* Deep North weapons and armor now drop from Deep North creatures, chests, treasure maps and the Frozen King once the Frozen King is defeated.
+* Worlds load much faster alongside large location mods
 * Epic Loot no longer re-checks every item and loot list at startup when the mod list and its configs have not changed.
 * The skeletons and blobs summoned by the Aspect of the Writhing Dead no longer drop magic items.
 * Ability cooldowns no longer reset when you log out or die

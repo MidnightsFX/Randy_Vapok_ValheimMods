@@ -748,6 +748,91 @@
         { "Item": "Tier7Shields" },
         { "Item": "Tier7Trinkets" }
       ]
+    },
+    {
+      "Name": "Tier8Weapons",
+      "Loot": [
+        { "Item": "SwordGold",                    "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "SwordGold_FrostFire",          "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "SwordGold_BloodLightning",     "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "THSwordGold",                  "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "THSwordGold_FrostFire",        "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "THSwordGold_BloodLightning",   "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "AxeGold",                      "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "AxeGold_FrostFire",            "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "AxeGold_BloodLightning",       "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "BattleaxeGold",                "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "BattleaxeGold_FrostFire",      "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "BattleaxeGold_BloodLightning", "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "KnifeGold",                    "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "KnifeGold_FrostFire",          "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "KnifeGold_BloodLightning",     "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "FistGold",                     "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "FistGold_FrostFire",           "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "FistGold_BloodLightning",      "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "StaffFrostOrbs",               "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "StaffOrbofAhri",               "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "StaffSpiritCaller",            "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "StaffThunderBlood",            "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "MaceGold",                     "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "MaceGold_FrostFire",           "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "MaceGold_BloodLightning",      "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "SledgeGold",                   "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "SledgeGold_FrostFire",         "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "SledgeGold_BloodLightning",    "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "AtgeirGold",                   "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "AtgeirGold_FrostFire",         "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "AtgeirGold_BloodLightning",    "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "SpearGold",                    "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "SpearGold_FrostFire",          "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "SpearGold_BloodLightning",     "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "BowGold",                      "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "BowGold_FrostFire",            "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "BowGold_BloodLightning",       "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "CrossbowGold",                 "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "CrossbowGold_FrostFire",       "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "CrossbowGold_BloodLightning",  "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] }
+      ]
+    },
+    {
+      "Name": "Tier8Armor",
+      "Loot": [
+        { "Item": "ArmorDeepNorthHeavyChest",  "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "ArmorDeepNorthHeavylegs",   "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "HelmetDNHeavy",             "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "ArmorDeepNorthMediumChest", "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "ArmorDeepNorthMediumlegs",  "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "HelmetDNMediumHood",        "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "ArmorDeepNorthMageChest",   "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "ArmorDeepNorthMagelegs",    "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "HelmetDNMage",              "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "CapeDeepNorth",             "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "CapeDeepNorthMage",         "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] }
+      ]
+    },
+    {
+      "Name": "Tier8Shields",
+      "Loot": [
+        { "Item": "ShieldGoldBuckler", "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "ShieldGold",        "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "ShieldGoldTower",   "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] }
+      ]
+    },
+    {
+      "Name": "Tier8Trinkets",
+      "Loot": [
+        { "Item": "TrinketBloodGoldHealth",  "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] },
+        { "Item": "TrinketBloodGoldStamina", "Weight": 1, "Rarity": [ 0, 0, 20, 40, 30, 10 ] }
+      ]
+    },
+    {
+      "Name": "Tier8Everything",
+      "Loot": [
+        { "Item": "Tier8Weapons" },
+        { "Item": "Tier8Armor"   },
+        { "Item": "Tier8Shields" },
+        { "Item": "Tier8Trinkets" }
+      ]
     }
   ],
   "DefaultStarScaling": { "DropChance": 0.149, "BonusDrops": 0.016, "RarityShift": 0.28, "RarityFalloff": 1 },
@@ -916,14 +1001,16 @@
           "Level": 1,
           "Drops": [ [0, 60], [1, 36], [2, 4] ],
           "Loot": [
-            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 5, 25, 65, 5 ] }
+            { "Item": "Tier7Everything", "Weight": 3, "Rarity": [ 0, 5, 25, 65, 5 ] },
+            { "Item": "Tier8Everything", "Weight": 1, "Rarity": [ 0, 5, 25, 65, 5 ] }
           ]
         },
         {
           "Level": 2,
           "Drops": [ [0, 40], [1, 46], [2, 3], [3, 1] ],
           "Loot": [
-            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 30, 60, 10 ] }
+            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 30, 60, 10 ] },
+            { "Item": "Tier8Everything", "Weight": 1, "Rarity": [ 0, 0, 30, 60, 10 ] }
           ]
         }
       ]
@@ -936,7 +1023,7 @@
           "Level": 1,
           "Drops": [ [0, 60], [1, 36], [2, 4] ],
           "Loot": [
-            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 20, 55, 20, 5 ] }
+            { "Item": "Tier8Everything", "Weight": 1, "Rarity": [ 0, 0, 20, 55, 20, 5 ] }
           ]
         }
       ]
@@ -1370,7 +1457,7 @@
           "Level": 1,
           "Drops": [ [4, 20], [5, 60], [6, 15], [7, 5] ],
           "Loot": [
-            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 0, 60, 35, 5 ] }
+            { "Item": "Tier8Everything", "Weight": 1, "Rarity": [ 0, 0, 0, 60, 35, 5 ] }
           ]
         }
       ]
@@ -1635,7 +1722,8 @@
           "Level": 1,
           "Drops": [ [0, 55], [1, 30], [2, 12], [3, 3] ],
           "Loot": [
-            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 45, 35, 15, 5 ] },
+            { "Item": "Tier7Everything", "Weight": 0.75, "Rarity": [ 0, 0, 45, 35, 15, 5 ] },
+            { "Item": "Tier8Everything", "Weight": 0.25, "Rarity": [ 0, 0, 45, 35, 15, 5 ] },
             { "Item": "ShardUnique", "Weight": 0.04 },
             { "Item": "ShardSlotChisel", "Weight": 0.04 }
           ]
@@ -1649,7 +1737,8 @@
           "Level": 1,
           "Drops": [ [0, 55], [1, 30], [2, 12], [3, 3] ],
           "Loot": [
-            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 45, 35, 15, 5 ] },
+            { "Item": "Tier7Everything", "Weight": 0.75, "Rarity": [ 0, 0, 45, 35, 15, 5 ] },
+            { "Item": "Tier8Everything", "Weight": 0.25, "Rarity": [ 0, 0, 45, 35, 15, 5 ] },
             { "Item": "ShardUnique", "Weight": 0.04 },
             { "Item": "ShardSlotChisel", "Weight": 0.04 }
           ]
@@ -1663,7 +1752,8 @@
           "Level": 1,
           "Drops": [ [0, 50], [1, 32], [2, 14], [3, 4] ],
           "Loot": [
-            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 35, 38, 20, 7 ] },
+            { "Item": "Tier7Everything", "Weight": 0.75, "Rarity": [ 0, 0, 35, 38, 20, 7 ] },
+            { "Item": "Tier8Everything", "Weight": 0.25, "Rarity": [ 0, 0, 35, 38, 20, 7 ] },
             { "Item": "ShardUnique", "Weight": 0.06 },
             { "Item": "ShardSlotChisel", "Weight": 0.06 }
           ]
@@ -1677,7 +1767,8 @@
           "Level": 1,
           "Drops": [ [0, 40], [1, 35], [2, 19], [3, 6] ],
           "Loot": [
-            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 20, 40, 28, 12 ] },
+            { "Item": "Tier7Everything", "Weight": 0.75, "Rarity": [ 0, 0, 20, 40, 28, 12 ] },
+            { "Item": "Tier8Everything", "Weight": 0.25, "Rarity": [ 0, 0, 20, 40, 28, 12 ] },
             { "Item": "ShardUnique", "Weight": 0.1 },
             { "Item": "ShardSlotChisel", "Weight": 0.1 }
           ]
@@ -1789,7 +1880,8 @@
           "Level": 1,
           "Drops": [ [3, 75], [4, 18], [5, 7] ],
           "Loot": [
-            { "Item": "Tier7Everything", "Weight": 1, "Rarity": [ 0, 0, 30, 40, 22, 8 ] },
+            { "Item": "Tier7Everything", "Weight": 0.5, "Rarity": [ 0, 0, 30, 40, 22, 8 ] },
+            { "Item": "Tier8Everything", "Weight": 0.5, "Rarity": [ 0, 0, 30, 40, 22, 8 ] },
             { "Item": "ShardUnique", "Weight": 0.06 },
             { "Item": "ShardSlotChisel", "Weight": 0.06 }
           ]
