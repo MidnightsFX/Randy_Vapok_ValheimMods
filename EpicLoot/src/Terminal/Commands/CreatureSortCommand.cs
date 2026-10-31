@@ -8,6 +8,8 @@ public static partial class TerminalManager
     // creaturesort       re-sorts and writes (server / single player only)
     // creaturesort dry   shows what the sorter would do, without writing anything
     // creaturesort all   the dry run including creatures that already have a table or are excluded
+    // Every form reads the locations, so its list of explicit entries that differ from the rules has the
+    // evidence a world load can leave out.
     private static void RunCreatureSort(Terminal.ConsoleEventArgs args)
     {
         string mode = args.GetString(1, "").ToLowerInvariant();
@@ -18,7 +20,7 @@ public static partial class TerminalManager
             return;
         }
 
-        var run = CreatureSorterRunner.Run("console", write);
+        var run = CreatureSorterRunner.Run("console", write, readAllLocations: true);
         if (run == null)
         {
             args.Context.PrintError(write

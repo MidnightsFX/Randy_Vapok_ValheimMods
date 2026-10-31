@@ -166,10 +166,13 @@ namespace EpicLoot
         };
 
         // Vanilla creatures the rules would place but that should not drop loot (farmable, player-made,
-        // unused, or a boss phase that is not the one that drops). Mirrors CreatureSorter.Overrides in
-        // config/itemsorter.json.
+        // unused, a boss phase that is not the one that drops, or adds a boss fight spawns). Mirrors
+        // CreatureSorter.Overrides in config/itemsorter.json.
         public static readonly string[] DefaultSkips =
-            { "Hen", "BlobFrost", "SeekerBrood", "Ghost_Void", "Ghost_old", "FrozenKing", "DvergerTest" };
+        {
+            "Hen", "BlobFrost", "SeekerBrood", "Ghost_Void", "Ghost_old", "FrozenKing", "DvergerTest",
+            "Skeleton_aspect", "BlobAspect"
+        };
 
         public static readonly CreatureClassExtras DefaultBossExtras = new CreatureClassExtras
         {

@@ -374,5 +374,9 @@ same without writing anything, and `creaturesort all` includes creatures that al
 server option `Auto Add Creatures To Loot Tables` turns the sorter off.
 
 What each location spawns is remembered in `creaturesorter-locations.json` in the same folder, so the
-location prefabs are loaded once rather than on every world load. The file starts over by itself when the
-game or any mod updates. If a mod changes its locations without a version change, delete the file.
+location prefabs are loaded once rather than on every world load. Each location is read again only when the
+files it loads from change: a game update for the game's own locations, and an update of any mod for a
+mod's locations. Locations that mods add through Jotunn's soft-reference system, such as all of More World
+Locations', are never loaded just to be read, because Jotunn keeps such a location in memory for the rest of
+the session once it has been loaded; the sorter only uses what they spawn when the game has already loaded
+them. To have every location read again, delete the file.

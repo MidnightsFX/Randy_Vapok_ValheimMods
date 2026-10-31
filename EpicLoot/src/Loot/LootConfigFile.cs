@@ -19,25 +19,24 @@ namespace EpicLoot
 
         private static string FilePath => Path.Combine(ELConfig.GetOverhaulDirectoryPath(), $"{ConfigName}.json");
 
-        /// <summary>Serializes a whole loot config over the on-disk file. False when the write failed.</summary>
-        internal static bool Write(LootConfig config, string reason)
+        /// <summary>
+        /// Serializes a whole loot config over the on-disk file, unless the file already holds exactly that
+        /// text (then nothing needs reading back either).
+        /// </summary>
+        internal static BaseConfigWriter.Result Write(LootConfig config, string reason)
         {
+            string contents;
             try
             {
-                string contents = JsonConvert.SerializeObject(config, Formatting.Indented);
-                string path = FilePath;
-                string previousContents = File.Exists(path) ? File.ReadAllText(path) : null;
-                File.WriteAllText(path, contents);
-                // Claim this as the mod's own output ONLY when the baseline it merged over was also
-                // ours -- a player-edited baseline must stay flagged as the player's.
-                ConfigVersionManager.RecordWrittenContent(ConfigName, contents, previousContents);
-                return true;
+                contents = JsonConvert.SerializeObject(config, Formatting.Indented);
             }
             catch (Exception e)
             {
                 EpicLoot.LogError($"Failed to write loottables.json ({reason}): {e.Message}");
-                return false;
+                return BaseConfigWriter.Result.Failed;
             }
+
+            return BaseConfigWriter.Write(ConfigName, contents, reason);
         }
 
         /// <summary>

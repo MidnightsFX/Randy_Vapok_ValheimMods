@@ -1,4 +1,7 @@
 **0.15.5**
+* Worlds load much faster alongside large location mods such as More World Locations, and locations are no longer all read again after every mod update.
+* Epic Loot no longer re-checks every item and loot list at startup when the mod list and its configs have not changed.
+* The skeletons and blobs summoned by the Aspect of the Writhing Dead no longer drop magic items.
 * Ability cooldowns no longer reset when you log out or die
 * MacOS native Metal Shader support
     * This is new and hard for us to test, so please report any issues you see with it.   

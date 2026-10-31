@@ -300,7 +300,9 @@
       "Ghost_Void": { "Skip": true },
       "Ghost_old": { "Skip": true },
       "FrozenKing": { "Skip": true },
-      "DvergerTest": { "Skip": true }
+      "DvergerTest": { "Skip": true },
+      "Skeleton_aspect": { "Skip": true },
+      "BlobAspect": { "Skip": true }
     }
   }
 }

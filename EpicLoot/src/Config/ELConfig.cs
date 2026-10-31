@@ -1510,8 +1510,9 @@ internal class ELConfig {
         }
 
         // The auto-add pass merges onto the live config, writes the result back out and re-reads the
-        // files it rewrote itself, so nothing here waits on the scheduler.
-        AutoAddEnchantableItems.CheckAndAddAllEnchantableItems(false);
+        // files it rewrote itself, so nothing here waits on the scheduler. Forced: the rebuilt files are
+        // new input whatever its last-run record says.
+        AutoAddEnchantableItems.CheckAndAddAllEnchantableItems(false, force: true);
     }
 
     private static void IngestPatchFilesFromDisk(object s, FileSystemEventArgs e) {

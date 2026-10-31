@@ -3,11 +3,13 @@ using EpicLoot.Biomes;
 using EpicLoot.Config;
 using EpicLoot.Magic;
 using HarmonyLib;
+using SoftReferenceableAssets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace EpicLoot
@@ -60,7 +62,13 @@ namespace EpicLoot
         /// Sorts and, when <paramref name="write"/> is set and this machine owns the config, writes the
         /// result. Returns the decisions and the merge, or null when the sorter could not run.
         /// </summary>
-        public static (List<CreatureDecision> Decisions, CreatureSorter.MergeResult Merge)? Run(string reason, bool write)
+        /// <param name="readAllLocations">
+        /// Run the location pass even when no creature needs it to be placed. A world load leaves it out then,
+        /// which costs nothing in loot but leaves creatures that have their own tables with weaker evidence, so
+        /// the explicit entries the rules would tier differently are best checked from the console.
+        /// </param>
+        public static (List<CreatureDecision> Decisions, CreatureSorter.MergeResult Merge)? Run(string reason, bool write,
+            bool readAllLocations = false)
         {
             if (_running || LootRoller.Config == null || ZNetScene.instance == null)
             {
@@ -76,7 +84,7 @@ namespace EpicLoot
             try
             {
                 Stopwatch timer = Stopwatch.StartNew();
-                (List<CreatureDecision> decisions, (int Loaded, int Cached)? locations) = Classify();
+                (List<CreatureDecision> decisions, LocationCounts locations) = Classify(readAllLocations);
                 LastDecisions = decisions;
                 CreatureSorter.MergeResult merge = CreatureSorter.Merge(LootRoller.Config.LootTables, decisions);
 
@@ -90,9 +98,7 @@ namespace EpicLoot
                     name => explicitRefs.TryGetValue(name, out string refObject) ? refObject : null);
 
                 int unresolved = decisions.Count(d => d.Action == CreatureAction.Unresolved || d.Action == CreatureAction.NoTemplate);
-                string locationNote = locations is (int loaded, int cached)
-                    ? $" (location prefabs: {loaded} scanned, {cached} from cache)"
-                    : "";
+                string locationNote = locations != null ? $" ({locations})" : "";
                 string summary = $"Creature sorter ({reason}): {decisions.Count(d => d.IsCandidate)} creature(s) without " +
                     $"a loot table; {merge.Added.Count} added, {merge.Updated.Count} updated, {merge.Removed.Count} removed, " +
                     $"{unresolved} could not be placed{locationNote}, " +
@@ -106,7 +112,7 @@ namespace EpicLoot
                     {
                         LootConfig updated = LootRoller.Config.ShallowCopy();
                         updated.LootTables = merge.Tables;
-                        if (LootConfigFile.Write(updated, "creature sorter"))
+                        if (LootConfigFile.Write(updated, "creature sorter") == BaseConfigWriter.Result.Written)
                         {
                             ELConfig.ReloadBaseConfigsFromDisk(new[] { "loottables.json" });
                         }
@@ -140,9 +146,8 @@ namespace EpicLoot
             return ZNet.instance != null && ZNet.instance.IsServer();
         }
 
-        // The decisions, and how many location prefabs were loaded or read from the cache when the location
-        // pass ran.
-        private static (List<CreatureDecision>, (int Loaded, int Cached)?) Classify()
+        // The decisions, and where the location pass found its prefabs when it ran.
+        private static (List<CreatureDecision>, LocationCounts) Classify(bool readAllLocations)
         {
             CreatureBiomeRegistry registry = new CreatureBiomeRegistry(BiomeDataManager.BiomesInOrder
                 .Select(def => new KeyValuePair<string, IEnumerable<string>>(def.Name, def.BossDefeatedKeys)));
@@ -193,8 +198,9 @@ namespace EpicLoot
 
             List<CreatureDecision> decisions = CreatureSorter.Classify(facts.Values.ToList(), settings, registry,
                 biomeMaterials, HasOwnTable, TemplateExists, false);
-            (int Loaded, int Cached)? locations = null;
-            if (settings.ScanLocations && decisions.Any(d => d.Action == CreatureAction.Unresolved && d.Biome == null))
+            LocationCounts locations = null;
+            if (settings.ScanLocations &&
+                (readAllLocations || decisions.Any(d => d.Action == CreatureAction.Unresolved && d.Biome == null)))
             {
                 locations = GatherLocations(facts, registry);
             }
@@ -372,119 +378,135 @@ namespace EpicLoot
         // Which creatures each location's spawners make. Reading that means loading the location prefab, so
         // only a prefab the cache does not know yet is loaded, and what it held is added to the cache. Only
         // reached when a creature is still unplaced after everything cheaper.
-        private static (int Loaded, int Cached) GatherLocations(Dictionary<string, CreatureFacts> facts, CreatureBiomeRegistry registry)
+        private static LocationCounts GatherLocations(Dictionary<string, CreatureFacts> facts, CreatureBiomeRegistry registry)
         {
+            LocationCounts counts = new LocationCounts();
             if (ZoneSystem.instance?.m_locations == null)
             {
-                return (0, 0);
+                return counts;
             }
 
             CreatureSorterLocationCache cache = CreatureSorterLocationCache.Load();
-            int loaded = 0;
-            int cached = 0;
-            bool added = false;
+            HashSet<string> keysInUse = new HashSet<string>(StringComparer.Ordinal);
+            List<(ZoneSystem.ZoneLocation Location, SoftReference<GameObject> Prefab, string Biome, string Key, string Source)> toRead =
+                new List<(ZoneSystem.ZoneLocation, SoftReference<GameObject>, string, string, string)>();
             foreach (ZoneSystem.ZoneLocation location in ZoneSystem.instance.m_locations)
             {
-                if (location == null || !location.m_enable || !location.m_prefab.IsValid)
+                if (location == null)
                 {
                     continue;
                 }
 
-                string biome = EarliestInMask(location.m_biome, registry);
+                // A copy: SoftReference.Asset caches the asset in the struct, which would otherwise leave the
+                // ZoneLocation holding an instance that is unloaded again below.
+                SoftReference<GameObject> prefab = location.m_prefab;
+                if (!prefab.IsValid)
+                {
+                    continue;
+                }
+
+                string key = prefab.m_assetID.ToString();
+                keysInUse.Add(key);
+                string biome = location.m_enable ? EarliestInMask(location.m_biome, registry) : null;
                 if (biome == null)
                 {
                     continue;
                 }
 
-                string key = location.m_prefab.m_assetID.ToString();
-                if (cache.Prefabs.TryGetValue(key, out LocationSpawns spawns))
+                // Already in memory (Jotunn's in-memory locations, or one the game has loaded): free to read, and
+                // not cached, since nothing is saved by it.
+                if (prefab.IsLoaded)
                 {
-                    cached++;
-                }
-                else
-                {
-                    loaded++;
-                    // A prefab that could not be read is left out of the cache, to be tried again next time.
-                    spawns = ReadLocationSpawns(location);
-                    if (spawns == null)
-                    {
-                        continue;
-                    }
-
-                    cache.Prefabs[key] = spawns;
-                    added = true;
+                    counts.InMemory++;
+                    AddLocationBiome(facts, ReadSpawns(prefab.Asset), biome);
+                    continue;
                 }
 
-                foreach (SpawnedPrefab spawned in spawns.Spawns ?? new List<SpawnedPrefab>())
+                string source = cache.SourceOf(prefab.m_assetID, out bool isVanilla);
+                if (!isVanilla && KeptLoadedOnceLoaded(location))
                 {
-                    AddBiome(CreatureFor(facts, spawned)?.LocationBiomes, biome);
+                    counts.LeftUnread++;
+                    continue;
                 }
+
+                LocationSpawns spawns = cache.Get(key, source);
+                if (spawns != null)
+                {
+                    counts.Cached++;
+                    AddLocationBiome(facts, spawns.Spawns, biome);
+                    continue;
+                }
+
+                toRead.Add((location, prefab, biome, key, source));
             }
 
-            if (added)
+            if (toRead.Count > 0)
             {
-                cache.Save();
+                EpicLoot.LogForce($"Creature sorter: reading {toRead.Count} location prefab(s) it has not seen with this " +
+                    "game version and mod list. They are remembered, so this happens once after an update.");
             }
 
-            return (loaded, cached);
+            foreach ((ZoneSystem.ZoneLocation location, SoftReference<GameObject> prefab, string biome, string key, string source) in toRead)
+            {
+                counts.Read++;
+                // A prefab that could not be read is remembered as such, to be tried again when its source changes.
+                LocationSpawns spawns = ReadLocationSpawns(location, prefab) ??
+                    new LocationSpawns { Name = location.m_prefabName, Unreadable = true, Spawns = new List<SpawnedPrefab>() };
+                spawns.Source = source;
+                cache.Set(key, spawns);
+                AddLocationBiome(facts, spawns.Spawns, biome);
+            }
+
+            cache.SaveIfChanged(keysInUse);
+            return counts;
+        }
+
+        private sealed class LocationCounts
+        {
+            public int Read;
+            public int Cached;
+            public int InMemory;
+            public int LeftUnread;
+
+            public override string ToString() =>
+                $"location prefabs: {Read} read, {Cached} from cache, {InMemory} in memory, {LeftUnread} left unread";
+        }
+
+        private static void AddLocationBiome(Dictionary<string, CreatureFacts> facts, List<SpawnedPrefab> spawns, string biome)
+        {
+            foreach (SpawnedPrefab spawned in spawns ?? new List<SpawnedPrefab>())
+            {
+                AddBiome(CreatureFor(facts, spawned)?.LocationBiomes, biome);
+            }
+        }
+
+        // A Jotunn soft-reference custom location (More World Locations registers all of its this way) is never
+        // loaded just to be read. Jotunn's first load of one instantiates the location to resolve its mocks,
+        // registers its unknown prefabs, and loads it a second time that it never releases, so it would stay in
+        // memory for the whole session: hundreds of bundles of it with a large location mod. What such a
+        // location spawns is left out unless the game has already loaded it.
+        private static bool KeptLoadedOnceLoaded(ZoneSystem.ZoneLocation location)
+        {
+            try
+            {
+                return Jotunn.Managers.ZoneManager.Instance.GetCustomLocation(location.m_prefabName)?.SoftReference == true;
+            }
+            catch (KeyNotFoundException)
+            {
+                // Not a Jotunn location: GetCustomLocation indexes its dictionary directly.
+                return false;
+            }
         }
 
         // Loads a location prefab just long enough to note every prefab its spawners make; null when it
         // cannot be read.
-        private static LocationSpawns ReadLocationSpawns(ZoneSystem.ZoneLocation location)
+        private static LocationSpawns ReadLocationSpawns(ZoneSystem.ZoneLocation location, SoftReference<GameObject> prefab)
         {
             try
             {
-                location.m_prefab.Load();
-                GameObject asset = location.m_prefab.Asset;
-                if (asset == null)
-                {
-                    return null;
-                }
-
-                List<GameObject> prefabs = new List<GameObject>();
-                foreach (CreatureSpawner spawner in asset.GetComponentsInChildren<CreatureSpawner>(true))
-                {
-                    prefabs.Add(spawner.m_creaturePrefab);
-                }
-
-                foreach (SpawnArea area in asset.GetComponentsInChildren<SpawnArea>(true))
-                {
-                    foreach (SpawnArea.SpawnData spawn in area.m_prefabs ?? new List<SpawnArea.SpawnData>())
-                    {
-                        prefabs.Add(spawn?.m_prefab);
-                    }
-                }
-
-                foreach (OfferingBowl bowl in asset.GetComponentsInChildren<OfferingBowl>(true))
-                {
-                    prefabs.Add(bowl.m_bossPrefab);
-                }
-
-                foreach (TriggerSpawner trigger in asset.GetComponentsInChildren<TriggerSpawner>(true))
-                {
-                    prefabs.AddRange(trigger.m_creaturePrefabs ?? Array.Empty<GameObject>());
-                }
-
-                // Both names are kept: which one is a creature is decided against the creatures of each run.
-                List<SpawnedPrefab> spawns = new List<SpawnedPrefab>();
-                HashSet<string> seen = new HashSet<string>(StringComparer.Ordinal);
-                foreach (GameObject prefab in prefabs)
-                {
-                    if (prefab == null)
-                    {
-                        continue;
-                    }
-
-                    CreatureSpawner spawner = prefab.GetComponent<CreatureSpawner>();
-                    string creature = spawner != null && spawner.m_creaturePrefab != null ? spawner.m_creaturePrefab.name : null;
-                    if (seen.Add(prefab.name + "\n" + creature))
-                    {
-                        spawns.Add(new SpawnedPrefab { Prefab = prefab.name, Creature = creature });
-                    }
-                }
-
-                return new LocationSpawns { Name = asset.name, Spawns = spawns };
+                prefab.Load();
+                GameObject asset = prefab.Asset;
+                return asset == null ? null : new LocationSpawns { Name = asset.name, Spawns = ReadSpawns(asset) };
             }
             catch (Exception e)
             {
@@ -493,8 +515,88 @@ namespace EpicLoot
             }
             finally
             {
-                location.m_prefab.Release();
+                UnloadNow(prefab);
             }
+        }
+
+        // Every prefab a location's spawners make. Both names are kept: which one is a creature is decided
+        // against the creatures of each run.
+        private static List<SpawnedPrefab> ReadSpawns(GameObject asset)
+        {
+            List<SpawnedPrefab> spawns = new List<SpawnedPrefab>();
+            if (asset == null)
+            {
+                return spawns;
+            }
+
+            List<GameObject> prefabs = new List<GameObject>();
+            foreach (CreatureSpawner spawner in asset.GetComponentsInChildren<CreatureSpawner>(true))
+            {
+                prefabs.Add(spawner.m_creaturePrefab);
+            }
+
+            foreach (SpawnArea area in asset.GetComponentsInChildren<SpawnArea>(true))
+            {
+                foreach (SpawnArea.SpawnData spawn in area.m_prefabs ?? new List<SpawnArea.SpawnData>())
+                {
+                    prefabs.Add(spawn?.m_prefab);
+                }
+            }
+
+            foreach (OfferingBowl bowl in asset.GetComponentsInChildren<OfferingBowl>(true))
+            {
+                prefabs.Add(bowl.m_bossPrefab);
+            }
+
+            foreach (TriggerSpawner trigger in asset.GetComponentsInChildren<TriggerSpawner>(true))
+            {
+                prefabs.AddRange(trigger.m_creaturePrefabs ?? Array.Empty<GameObject>());
+            }
+
+            HashSet<string> seen = new HashSet<string>(StringComparer.Ordinal);
+            foreach (GameObject prefab in prefabs)
+            {
+                if (prefab == null)
+                {
+                    continue;
+                }
+
+                CreatureSpawner spawner = prefab.GetComponent<CreatureSpawner>();
+                string creature = spawner != null && spawner.m_creaturePrefab != null ? spawner.m_creaturePrefab.name : null;
+                if (seen.Add(prefab.name + "\n" + creature))
+                {
+                    spawns.Add(new SpawnedPrefab { Prefab = prefab.name, Creature = creature });
+                }
+            }
+
+            return spawns;
+        }
+
+        // Releases a prefab the scan loaded and unloads it now. Release() unloads asynchronously, so a scan of
+        // hundreds of locations within one frame would hold every one of them in memory at once.
+        private static void UnloadNow(SoftReference<GameObject> prefab)
+        {
+            try
+            {
+                SwapOut(prefab.m_assetID);
+            }
+            catch (Exception e) when (e is MissingMemberException || e is TypeLoadException)
+            {
+                // A game update renamed the loader's internals (thrown as SwapOut is compiled, before it runs).
+                prefab.Release();
+            }
+            catch (Exception e)
+            {
+                EpicLoot.Log($"Creature sorter could not unload a location prefab: {e.Message}");
+            }
+        }
+
+        // The same release as SoftReference.Release(), then a synchronous unload once nothing else holds the
+        // prefab. Runtime.Loader is internal (reached through the publicized reference), hence out of line.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void SwapOut(AssetID assetID)
+        {
+            Runtime.Loader.SwapLoad(Array.Empty<AssetID>(), new[] { assetID });
         }
 
         // The creature a spawn entry makes: the prefab itself, or what a CreatureSpawner prefab spawns.
