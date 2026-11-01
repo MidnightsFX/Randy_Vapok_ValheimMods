@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Tasto di attivazione: $1",
   "mod_epicloot_set_activationkey_gamepad": "Tasto di attivazione: $1 (controller: $2)",
   "mod_epicloot_set_activationkey_none": "Tasto di attivazione: nessuno assegnato (sezione di config Abilities)",
-  "mod_epicloot_legendary_sets": "Set Leggendari",
   "mod_epicloot_enchantments": "Incantamenti",
   "mod_epicloot_output": "Risultato",
   "mod_epicloot_history": "Cronologia",

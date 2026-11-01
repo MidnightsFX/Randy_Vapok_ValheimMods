@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Aktiváló gomb: $1",
   "mod_epicloot_set_activationkey_gamepad": "Aktiváló gomb: $1 (kontroller: $2)",
   "mod_epicloot_set_activationkey_none": "Aktiváló gomb: nincs hozzárendelve (Abilities konfigurációs szakasz)",
-  "mod_epicloot_legendary_sets": "Legendás készletek",
   "mod_epicloot_enchantments": "Bűbájok",
   "mod_epicloot_output": "Eredmény",
   "mod_epicloot_history": "Előzmények",

@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Aktivointinäppäin: $1",
   "mod_epicloot_set_activationkey_gamepad": "Aktivointinäppäin: $1 (peliohjain: $2)",
   "mod_epicloot_set_activationkey_none": "Aktivointinäppäin: ei asetettu (Abilities-asetusosio)",
-  "mod_epicloot_legendary_sets": "Legendaariset setit",
   "mod_epicloot_enchantments": "Lumoukset",
   "mod_epicloot_output": "Tulos",
   "mod_epicloot_history": "Historia",

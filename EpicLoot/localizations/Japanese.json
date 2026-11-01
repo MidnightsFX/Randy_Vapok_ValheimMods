@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "発動キー: $1",
   "mod_epicloot_set_activationkey_gamepad": "発動キー: $1（ゲームパッド: $2）",
   "mod_epicloot_set_activationkey_none": "発動キー: 未設定（Abilities 設定セクション）",
-  "mod_epicloot_legendary_sets": "伝説のセット",
   "mod_epicloot_enchantments": "エンチャント",
   "mod_epicloot_output": "結果",
   "mod_epicloot_history": "履歴",

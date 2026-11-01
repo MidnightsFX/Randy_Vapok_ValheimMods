@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Etkinleştirme tuşu: $1",
   "mod_epicloot_set_activationkey_gamepad": "Etkinleştirme tuşu: $1 (oyun kumandası: $2)",
   "mod_epicloot_set_activationkey_none": "Etkinleştirme tuşu: atanmadı (Abilities yapılandırma bölümü)",
-  "mod_epicloot_legendary_sets": "Efsanevi Setler",
   "mod_epicloot_enchantments": "Büyüler",
   "mod_epicloot_output": "Sonuç",
   "mod_epicloot_history": "Geçmiş",

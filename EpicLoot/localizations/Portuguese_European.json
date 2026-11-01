@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Tecla de ativação: $1",
   "mod_epicloot_set_activationkey_gamepad": "Tecla de ativação: $1 (comando: $2)",
   "mod_epicloot_set_activationkey_none": "Tecla de ativação: nenhuma atribuída (secção de configuração Abilities)",
-  "mod_epicloot_legendary_sets": "Conjuntos Lendários",
   "mod_epicloot_enchantments": "Encantamentos",
   "mod_epicloot_output": "Resultado",
   "mod_epicloot_history": "Histórico",

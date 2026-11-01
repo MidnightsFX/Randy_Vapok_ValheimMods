@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Tastă de activare: $1",
   "mod_epicloot_set_activationkey_gamepad": "Tastă de activare: $1 (controller: $2)",
   "mod_epicloot_set_activationkey_none": "Tastă de activare: nicio tastă atribuită (secțiunea de config Abilities)",
-  "mod_epicloot_legendary_sets": "Seturi legendare",
   "mod_epicloot_enchantments": "Descântece",
   "mod_epicloot_output": "Rezultat",
   "mod_epicloot_history": "Istoric",

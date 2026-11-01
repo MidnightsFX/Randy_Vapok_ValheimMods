@@ -25,6 +25,10 @@ internal partial class TooltipRenderer
         {
             text.Append($"<color={data.SetColor}>{data.SetLabel}</color>\n");
         }
+        else if (data.UniqueLabel != null)
+        {
+            text.Append($"<color={data.UniqueColor}>{data.UniqueLabel}</color>\n");
+        }
     }
 
     private void AddDescription()

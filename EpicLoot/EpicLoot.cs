@@ -1055,6 +1055,10 @@ public sealed class EpicLoot : BaseUnityPlugin {
         return ELConfig._setItemColor.Value;
     }
 
+    public static string GetUniqueItemColor() {
+        return ELConfig._uniqueItemColor.Value;
+    }
+
     public static string GetRarityDisplayName(ItemRarity rarity) {
         switch (rarity) {
             case ItemRarity.Magic:

@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "გააქტიურების ღილაკი: $1",
   "mod_epicloot_set_activationkey_gamepad": "გააქტიურების ღილაკი: $1 (გეიმპადი: $2)",
   "mod_epicloot_set_activationkey_none": "გააქტიურების ღილაკი: არ არის მინიჭებული (კონფიგურაციის სექცია Abilities)",
-  "mod_epicloot_legendary_sets": "ლეგენდარული სეტები",
   "mod_epicloot_enchantments": "მოჯადოებები",
   "mod_epicloot_output": "შედეგი",
   "mod_epicloot_history": "ისტორია",

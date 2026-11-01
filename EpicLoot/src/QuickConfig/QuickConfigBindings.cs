@@ -373,6 +373,7 @@ internal static class QuickConfigBindings {
         // --- 8. Interface ---
         Toggle("UseGeneratedMagicItemNames", ELConfig.UseGeneratedMagicItemNames, "Use Generated Magic Item Names", BindingScope.Client);
         Toggle("KeepInventoryOpenOverItems", ELConfig.KeepInventoryOpenOverItems, "Keep Inventory Open Over Items", BindingScope.Client);
+        Toggle("UniqueItemEmbers", ELConfig.UniqueItemEmbers, "Unique Item Embers", BindingScope.Client);
         Toggle("ShowRarityInRecipeList", ELConfig.ShowRarityInRecipeList, "Show Rarity In Recipe List", BindingScope.Client);
         FloatSlider("UIAudioVolumeAdjustment", ELConfig.UIAudioVolumeAdjustment, "UI Audio Volume", BindingScope.Client, 0f, 1f, 0.05f);
         IntSlider("TooltipMaxWidth", ELConfig.TooltipMaxWidth, "Tooltip Max Width", BindingScope.Client, 150, 1200);
@@ -406,6 +407,7 @@ internal static class QuickConfigBindings {
         RarityColor("_mythicRarityColor", ELConfig._mythicRarityColor, "_mythicMaterialIconColor", ELConfig._mythicMaterialIconColor, "Mythic");
         RarityColor("_ancientRarityColor", ELConfig._ancientRarityColor, "_ancientMaterialIconColor", ELConfig._ancientMaterialIconColor, "Ancient");
         HexColor("_setItemColor", ELConfig._setItemColor, "Set Item Color");
+        HexColor("_uniqueItemColor", ELConfig._uniqueItemColor, "Unique Item Color");
 
         // --- 10. Rarity (loottables.json) ---
         BiomeDrops();

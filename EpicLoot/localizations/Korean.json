@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "발동 키: $1",
   "mod_epicloot_set_activationkey_gamepad": "발동 키: $1 (게임패드: $2)",
   "mod_epicloot_set_activationkey_none": "발동 키: 지정되지 않음 (Abilities 설정 섹션)",
-  "mod_epicloot_legendary_sets": "전설 세트",
   "mod_epicloot_enchantments": "마법 부여",
   "mod_epicloot_output": "결과",
   "mod_epicloot_history": "기록",

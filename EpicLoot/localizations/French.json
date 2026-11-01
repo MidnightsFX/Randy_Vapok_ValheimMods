@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Touche d'activation : $1",
   "mod_epicloot_set_activationkey_gamepad": "Touche d'activation : $1 (manette : $2)",
   "mod_epicloot_set_activationkey_none": "Touche d'activation : aucune assignée (section de config Abilities)",
-  "mod_epicloot_legendary_sets": "Ensembles légendaires",
   "mod_epicloot_enchantments": "Enchantements",
   "mod_epicloot_output": "Résultat",
   "mod_epicloot_history": "Historique",

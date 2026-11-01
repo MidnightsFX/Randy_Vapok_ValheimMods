@@ -58,6 +58,22 @@
       ]
     },
     {
+      "ID": "Gridarvolr",
+      "Name": "$mod_epicloot_l_gridarvolr",
+      "Description": "$mod_epicloot_l_gridarvolr_desc",
+      "Rarities": [ "Ancient" ],
+      "Requirements": {
+        "AllowedItemTypes": [ "TwoHandedWeapon" ],
+        "AllowedSkillTypes": [ "Clubs" ]
+      },
+      "GuaranteedEffectCount": 7,
+      "GuaranteedMagicEffects": [
+        { "Type": "Throwable" },
+        { "Type": "RecallWeapon" },
+        { "Type": "HomingMissile" }
+      ]
+    },
+    {
       "ID": "Lindisfarne",
       "Name": "$mod_epicloot_l_lind",
       "Description": "$mod_epicloot_l_lind_desc",

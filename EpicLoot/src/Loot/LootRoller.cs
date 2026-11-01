@@ -1448,7 +1448,7 @@ namespace EpicLoot
                         if (!MagicItemEffectDefinitions.TryGet(guaranteedMagicEffect.Type, out var effectDef))
                         {
                             EpicLoot.LogError($"Could not find magic effect (Type={guaranteedMagicEffect.Type}) " +
-                                $"while creating legendary/mythic item (ID={itemInfo.ID})");
+                                $"while creating unique item (ID={itemInfo.ID})");
                             continue;
                         }
 

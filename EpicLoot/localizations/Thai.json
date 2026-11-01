@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "ปุ่มเปิดใช้งาน: $1",
   "mod_epicloot_set_activationkey_gamepad": "ปุ่มเปิดใช้งาน: $1 (เกมแพด: $2)",
   "mod_epicloot_set_activationkey_none": "ปุ่มเปิดใช้งาน: ยังไม่ได้กำหนด (ส่วนการตั้งค่า Abilities)",
-  "mod_epicloot_legendary_sets": "ชุดในตำนาน",
   "mod_epicloot_enchantments": "การร่ายมนตร์",
   "mod_epicloot_output": "ผลลัพธ์",
   "mod_epicloot_history": "ประวัติ",

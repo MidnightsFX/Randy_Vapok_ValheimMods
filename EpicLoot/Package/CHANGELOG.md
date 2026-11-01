@@ -14,6 +14,10 @@
 * The enchanting table's Upgrade tab is back with Auga, and its page shows its title again.
 * The message on the enchanting table's Storage tab no longer runs into the Take All buttons.
 * Items in the quick slots of Equipment and Quick Slots now count as hotbar items at the enchanting table, so they stay out of the sacrifice list when hotbar items are hidden.
+* Named items from legendaries.json are now called unique items everywhere, so they are no longer confused with the Legendary rarity
+    * Unique items are labelled Unique Item in their tooltip and show a gold rune in the inventory like set pieces do
+    * In the inventory the cell gets a gold border, the rune breathes and embers drift up the cell. Unique Item Embers under Interface turns this off, and Item Colors has the colour
+    * The compendium's Legendary Sets page is now Unique Sets
 
 **0.15.6**
 * Works with Auga 1.4.1 and newer

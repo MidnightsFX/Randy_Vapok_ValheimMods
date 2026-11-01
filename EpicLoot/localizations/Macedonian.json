@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Копче за активирање: $1",
   "mod_epicloot_set_activationkey_gamepad": "Копче за активирање: $1 (контролер: $2)",
   "mod_epicloot_set_activationkey_none": "Копче за активирање: не е доделено (делот Abilities во конфигурацијата)",
-  "mod_epicloot_legendary_sets": "Легендарни сетови",
   "mod_epicloot_enchantments": "Маѓепсувања",
   "mod_epicloot_output": "Резултат",
   "mod_epicloot_history": "Историја",

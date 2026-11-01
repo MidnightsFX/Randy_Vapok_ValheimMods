@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Aktivierungstaste: $1",
   "mod_epicloot_set_activationkey_gamepad": "Aktivierungstaste: $1 (Gamepad: $2)",
   "mod_epicloot_set_activationkey_none": "Aktivierungstaste: keine belegt (Konfigurationsabschnitt Abilities)",
-  "mod_epicloot_legendary_sets": "Legendäre Sets",
   "mod_epicloot_enchantments": "Verzauberungen",
   "mod_epicloot_output": "Ergebnis",
   "mod_epicloot_history": "Verlauf",

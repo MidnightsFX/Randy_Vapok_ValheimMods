@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Клавіша активації: $1",
   "mod_epicloot_set_activationkey_gamepad": "Клавіша активації: $1 (геймпад: $2)",
   "mod_epicloot_set_activationkey_none": "Клавіша активації: не призначено (розділ налаштувань Abilities)",
-  "mod_epicloot_legendary_sets": "Легендарні набори",
   "mod_epicloot_enchantments": "Зачарування",
   "mod_epicloot_output": "Результат",
   "mod_epicloot_history": "Історія",

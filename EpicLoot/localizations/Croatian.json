@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Tipka za aktivaciju: $1",
   "mod_epicloot_set_activationkey_gamepad": "Tipka za aktivaciju: $1 (upravljač: $2)",
   "mod_epicloot_set_activationkey_none": "Tipka za aktivaciju: nije dodijeljena (odjeljak konfiguracije Abilities)",
-  "mod_epicloot_legendary_sets": "Legendarni setovi",
   "mod_epicloot_enchantments": "Začaranja",
   "mod_epicloot_output": "Rezultat",
   "mod_epicloot_history": "Povijest",

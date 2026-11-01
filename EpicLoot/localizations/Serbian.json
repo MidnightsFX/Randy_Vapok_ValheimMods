@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Тастер за активацију: $1",
   "mod_epicloot_set_activationkey_gamepad": "Тастер за активацију: $1 (контролер: $2)",
   "mod_epicloot_set_activationkey_none": "Тастер за активацију: није додељен (одељак подешавања Abilities)",
-  "mod_epicloot_legendary_sets": "Легендарни сетови",
   "mod_epicloot_enchantments": "Чаролије",
   "mod_epicloot_output": "Резултат",
   "mod_epicloot_history": "Историја",

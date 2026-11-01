@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Aktyvavimo klavišas: $1",
   "mod_epicloot_set_activationkey_gamepad": "Aktyvavimo klavišas: $1 (pultas: $2)",
   "mod_epicloot_set_activationkey_none": "Aktyvavimo klavišas: nepriskirtas (konfigūracijos skyrius Abilities)",
-  "mod_epicloot_legendary_sets": "Legendinės rinkiniai",
   "mod_epicloot_enchantments": "Užkeikimai",
   "mod_epicloot_output": "Rezultatas",
   "mod_epicloot_history": "Istorija",

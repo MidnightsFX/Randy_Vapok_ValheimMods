@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Aktivačný kláves: $1",
   "mod_epicloot_set_activationkey_gamepad": "Aktivačný kláves: $1 (gamepad: $2)",
   "mod_epicloot_set_activationkey_none": "Aktivačný kláves: nepriradený (sekcia konfigurácie Abilities)",
-  "mod_epicloot_legendary_sets": "Legendárne sady",
   "mod_epicloot_enchantments": "Očarovania",
   "mod_epicloot_output": "Výsledok",
   "mod_epicloot_history": "História",

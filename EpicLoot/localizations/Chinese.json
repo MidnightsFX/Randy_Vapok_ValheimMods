@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "激活键：$1",
   "mod_epicloot_set_activationkey_gamepad": "激活键：$1（手柄：$2）",
   "mod_epicloot_set_activationkey_none": "激活键：未绑定（Abilities 配置分区）",
-  "mod_epicloot_legendary_sets": "传奇套装",
   "mod_epicloot_enchantments": "附魔",
   "mod_epicloot_output": "产出",
   "mod_epicloot_history": "历史",

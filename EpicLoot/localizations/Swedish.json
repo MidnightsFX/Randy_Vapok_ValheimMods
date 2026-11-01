@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Aktiveringstangent: $1",
   "mod_epicloot_set_activationkey_gamepad": "Aktiveringstangent: $1 (handkontroll: $2)",
   "mod_epicloot_set_activationkey_none": "Aktiveringstangent: ingen tilldelad (konfigurationsavsnittet Abilities)",
-  "mod_epicloot_legendary_sets": "Legendariska set",
   "mod_epicloot_enchantments": "Förbättringar",
   "mod_epicloot_output": "Resultat",
   "mod_epicloot_history": "Historik",

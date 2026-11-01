@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Activeringstoets: $1",
   "mod_epicloot_set_activationkey_gamepad": "Activeringstoets: $1 (gamepad: $2)",
   "mod_epicloot_set_activationkey_none": "Activeringstoets: niet ingesteld (configsectie Abilities)",
-  "mod_epicloot_legendary_sets": "Legendarische sets",
   "mod_epicloot_enchantments": "Betoveringen",
   "mod_epicloot_output": "Resultaat",
   "mod_epicloot_history": "Geschiedenis",

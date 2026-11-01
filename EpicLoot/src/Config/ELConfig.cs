@@ -30,6 +30,7 @@ internal class ELConfig {
     public static ConfigFile cfg;
 
     public static ConfigEntry<string> _setItemColor;
+    public static ConfigEntry<string> _uniqueItemColor;
     public static ConfigEntry<string> _magicRarityColor;
     public static ConfigEntry<string> _rareRarityColor;
     public static ConfigEntry<string> _epicRarityColor;
@@ -46,6 +47,7 @@ internal class ELConfig {
     public static ConfigEntry<bool> ShowRarityInRecipeList;
     public static ConfigEntry<bool> ShowEnchantSelectionChance;
     public static ConfigEntry<EffectRarityFlare> EffectRarityFlareMode;
+    public static ConfigEntry<bool> UniqueItemEmbers;
     public static ConfigEntry<bool> TransferMagicItemToCrafts;
     public static ConfigEntry<bool> _loggingEnabled;
     public static ConfigEntry<LogLevel> _logLevel;
@@ -757,6 +759,10 @@ internal class ELConfig {
             "Off = no marker.\n" +
             "Static = a coloured star rating after the effect, one to three stars by how rare it is.\n" +
             "Animated = as Static, and in the item tooltip and the enchanting table those lines also drift and shimmer.");
+        UniqueItemEmbers = BindClient(SectionInterface, "Unique Item Embers", true,
+            "If set to true, the inventory cell of a unique item (a named item from legendaries.json that is not a " +
+            "set piece) gets a border, the rune breathes and embers drift up the cell, in the Unique Item Color. " +
+            "If set to false, unique items show the rune marker only.");
         ShowEquippedAndHotbarItemsInSacrificeTab = BindClient(SectionInterface,
             "ShowEquippedAndHotbarItemsInSacrificeTab", false,
             "If set to false, hides the items that are equipped, on your hotbar or in the quick slots of " +
@@ -866,6 +872,8 @@ internal class ELConfig {
             "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
         _setItemColor = BindClient(SectionItemColors, "Set Item Color", "#26ffff",
             "The color of set item text and the set item icon. Use a hex color, default is cyan");
+        _uniqueItemColor = BindClient(SectionItemColors, "Unique Item Color", "#ffd75e",
+            "The color of the unique item label, icon and cell effects. Use a hex color, default is gold");
 
         // 8 - Abilities
         AbilityKeyCodes[0] = BindClient(SectionAbilities, "Ability Hotkey 1", "g", "Hotkey for Ability Slot 1.");

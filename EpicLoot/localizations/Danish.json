@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Aktiveringstast: $1",
   "mod_epicloot_set_activationkey_gamepad": "Aktiveringstast: $1 (gamepad: $2)",
   "mod_epicloot_set_activationkey_none": "Aktiveringstast: ingen tildelt (konfigurationsafsnittet Abilities)",
-  "mod_epicloot_legendary_sets": "Legendariske sæt",
   "mod_epicloot_enchantments": "Fortryllelser",
   "mod_epicloot_output": "Resultat",
   "mod_epicloot_history": "Historik",

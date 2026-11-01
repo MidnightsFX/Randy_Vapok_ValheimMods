@@ -2622,7 +2622,6 @@
   "mod_epicloot_set_activationkey": "Klawisz aktywacji: $1",
   "mod_epicloot_set_activationkey_gamepad": "Klawisz aktywacji: $1 (gamepad: $2)",
   "mod_epicloot_set_activationkey_none": "Klawisz aktywacji: nieprzypisany (sekcja konfiguracji Abilities)",
-  "mod_epicloot_legendary_sets": "Legendarne zestawy",
   "mod_epicloot_enchantments": "Zaklęcia",
   "mod_epicloot_output": "Wynik",
   "mod_epicloot_history": "Historia",
