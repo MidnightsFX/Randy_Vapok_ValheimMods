@@ -399,7 +399,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
         EpicAssets.MapIconBounty = assetBundle.LoadAsset<Sprite>("MapIconBounty");
         EpicAssets.AbandonBountySFX = assetBundle.LoadAsset<AudioClip>("AbandonBounty");
         EpicAssets.DoubleJumpSFX = assetBundle.LoadAsset<AudioClip>("DoubleJump");
-        EpicAssets.OffSetSFX = assetBundle.LoadAsset<AudioClip>("sfx_offset");
+        EpicAssets.OffSetSFX = assetBundle.LoadAsset<GameObject>("sfx_offset");
         EpicAssets.DebugTextPrefab = assetBundle.LoadAsset<GameObject>("DebugText");
         EpicAssets.AbilityBar = assetBundle.LoadAsset<GameObject>("AbilityBar");
         EpicAssets.ConfigMessagePrefab = assetBundle.LoadAsset<GameObject>("ConfigMessage");
@@ -868,6 +868,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
         AudioMixerMocks.Resolve(EpicAssets.UndyingSFX, "SFX");
         AudioMixerMocks.Resolve(EpicAssets.BerserkerSFX, "SFX");
         AudioMixerMocks.Resolve(EpicAssets.DodgeBuffSFX, "SFX");
+        AudioMixerMocks.Resolve(EpicAssets.OffSetSFX, "SFX");
         foreach (GameObject lootBeam in EpicAssets.MagicItemLootBeamPrefabs) {
             AudioMixerMocks.Resolve(lootBeam, "Ambient");
         }
