@@ -32,7 +32,7 @@ public sealed class EpicAssets
     public static Sprite MapIconBounty;
     public static AudioClip AbandonBountySFX;
     public static AudioClip DoubleJumpSFX;
-    public static AudioClip OffSetSFX;
+    public static GameObject OffSetSFX;
     public static GameObject DebugTextPrefab;
     public static GameObject AbilityBar;
     public static GameObject ConfigMessagePrefab;
