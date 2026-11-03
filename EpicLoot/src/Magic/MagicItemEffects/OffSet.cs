@@ -9,10 +9,11 @@ public class OffSetAttack
 {
     private const int EFFECT_DURATION = 500; // miliseconds
     private static bool _activeOffSet = false;
+    private static bool _activeOffSetSFXPlayed = false;
     private static long _offSetTriggerTime = 0;
 
     /// <summary>
-    /// Records OffSetAttack is triggered.
+    /// Records OffSetAttack is triggered. Only plays sfx once per window.
     /// </summary>
     /// <param name="__instance"></param>
     [HarmonyPatch(typeof(Attack), nameof(Attack.OnAttackTrigger))]
@@ -28,18 +29,20 @@ public class OffSetAttack
         {
             _offSetTriggerTime = DateTime.Now.Ticks;
             _activeOffSet = true;
+            _activeOffSetSFXPlayed = false;
         }
     }
 
     /// <summary>
     /// Applies any active OffSetAttack buffs when taking damage. Prefix handler invoked (victim-side) by
-    /// CharacterDamageDispatch.
+    /// CharacterDamageDispatch. Removed offset for environmental or dot dmg with no Attacker
     /// </summary>
     public static void ReduceIncomingHit(Character __instance, HitData hit)
     {
         if (!_activeOffSet ||
             __instance == null ||
             __instance != Player.m_localPlayer ||
+            !hit.HaveAttacker() ||
             !Player.m_localPlayer.HasActiveMagicEffect(MagicEffectType.OffSetAttack, out float effectValue, 0.01f))
         {
             return;
@@ -53,7 +56,10 @@ public class OffSetAttack
             hit.m_pushForce = 0f; // knock back immunity
             hit.m_staggerMultiplier = 0f;
 
-            AudioSource.PlayClipAtPoint(EpicAssets.OffSetSFX, Player.m_localPlayer.transform.position);
+            if (!_activeOffSetSFXPlayed) {
+                LocalFx.Spawn(EpicAssets.OffSetSFX, Player.m_localPlayer.transform.position, Quaternion.identity, lifetime: 4f, noCameraShake: false);
+                _activeOffSetSFXPlayed = true;
+            }
         }
         else
         {
