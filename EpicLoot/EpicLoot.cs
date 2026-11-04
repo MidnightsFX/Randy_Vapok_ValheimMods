@@ -912,8 +912,8 @@ public sealed class EpicLoot : BaseUnityPlugin {
         andvaranautFinder.m_startMessage = "$mod_epicloot_item_andvaranaut_startmsg";
 
         // Setup restrictions
-        andvaranautFinder.RequiredComponentTypes = new List<Type> { typeof(TreasureMapChest), typeof(BountyTarget) };
-        wishboneFinder.DisallowedComponentTypes = new List<Type> { typeof(TreasureMapChest), typeof(BountyTarget) };
+        andvaranautFinder.RequiredComponentTypes = new List<Type> { typeof(TreasureMapChest) };
+        wishboneFinder.DisallowedComponentTypes = new List<Type> { typeof(TreasureMapChest) };
 
         // Add to list
         ObjectDB.instance.m_StatusEffects.Remove(originalFinder);

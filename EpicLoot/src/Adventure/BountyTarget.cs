@@ -31,9 +31,6 @@ namespace EpicLoot.Adventure
             _zdo = _character.m_nview.GetZDO();
             _instances.Add(this);
 
-            var beacon = gameObject.AddComponent<Beacon>();
-            beacon.m_range = EpicLoot.GetAndvaranautRange();
-
             if (HasBeenSetup())
             {
                 Reinitialize();
@@ -339,32 +336,6 @@ namespace EpicLoot.Adventure
             public static void Postfix(Character __instance)
             {
                 StartBountyTarget(__instance);
-            }
-        }
-
-        /// <summary>
-        /// Remove the beacon of bounty targets when they take damage. Uses TargetMethods because two
-        /// class-level [HarmonyPatch] attributes MERGE into a single target (the old form only
-        /// patched Character.OnDamaged -- and Humanoid overrides it without calling base, so the
-        /// beacon never cleared for real bounty targets, which are all Humanoids).
-        /// </summary>
-        [HarmonyPatch]
-        public static class Character_OnDamaged_Patch
-        {
-            public static System.Collections.Generic.IEnumerable<System.Reflection.MethodBase> TargetMethods()
-            {
-                yield return AccessTools.DeclaredMethod(typeof(Character), "OnDamaged");
-                yield return AccessTools.DeclaredMethod(typeof(Humanoid), "OnDamaged");
-            }
-
-            public static void Postfix(Character __instance)
-            {
-                var target = __instance.GetComponent<BountyTarget>();
-                if (target)
-                {
-                    var beacon = __instance.GetComponent<Beacon>();
-                    UnityEngine.Object.Destroy(beacon);
-                }
             }
         }
     }
