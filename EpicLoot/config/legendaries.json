@@ -312,6 +312,205 @@
       ]
     },
     {
+      "ID": "Gleipnir",
+      "Name": "$mod_epicloot_l_gleipnir",
+      "Description": "$mod_epicloot_l_gleipnir_desc",
+      "Requirements": {
+        "AllowedSkillTypes": [ "Unarmed" ]
+      },
+      "GuaranteedEffectCount": 5,
+      "GuaranteedMagicEffects": [
+        { "Type": "Paralyze", "Values": { "MinValue": 1.5, "MaxValue": 2, "Increment": 0.1 } },
+        { "Type": "Slow", "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 } },
+        { "Type": "AddUnarmedSkill", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 1 } }
+      ]
+    },
+    {
+      "ID": "Gambanteinn",
+      "Name": "$mod_epicloot_l_gambanteinn",
+      "Description": "$mod_epicloot_l_gambanteinn_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Staff" ]
+      },
+      "GuaranteedEffectCount": 5,
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyMagicFireRate", "Values": { "MinValue": 32, "MaxValue": 36, "Increment": 1 } },
+        { "Type": "IncreaseEitr", "Values": { "MinValue": 45, "MaxValue": 50, "Increment": 1 } },
+        { "Type": "QuickLearner", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } }
+      ]
+    },
+    {
+      "ID": "DvalinnsPick",
+      "Name": "$mod_epicloot_l_dvalinnspick",
+      "Description": "$mod_epicloot_l_dvalinnspick_desc",
+      "Requirements": {
+        "AllowedSkillTypes": [ "Pickaxes" ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "IncreaseMiningDrop", "Values": { "MinValue": 5, "MaxValue": 6, "Increment": 1 } },
+        { "Type": "AddPickaxesSkill", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 1 } },
+        { "Type": "AddCarryWeight", "Values": { "MinValue": 100, "MaxValue": 125, "Increment": 5 } },
+        { "Type": "RemoveSpeedPenalty" }
+      ]
+    },
+    {
+      "ID": "SkogulsTarge",
+      "Name": "$mod_epicloot_l_skogulstarge",
+      "Description": "$mod_epicloot_l_skogulstarge_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Bucklers" ]
+      },
+      "GuaranteedEffectCount": 5,
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyParryWindow", "Values": { "MinValue": 120, "MaxValue": 140, "Increment": 1 } },
+        { "Type": "ModifyParry", "Values": { "MinValue": 28, "MaxValue": 32, "Increment": 0.5 } },
+        { "Type": "Opportunist", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 } }
+      ]
+    },
+    {
+      "ID": "SkjoldrsShield",
+      "Name": "$mod_epicloot_l_skjoldrsshield",
+      "Description": "$mod_epicloot_l_skjoldrsshield_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "RoundShields" ]
+      },
+      "GuaranteedEffectCount": 5,
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyBlockPower", "Values": { "MinValue": 28, "MaxValue": 32, "Increment": 0.5 } },
+        { "Type": "AvoidDamageTaken", "Values": { "MinValue": 15, "MaxValue": 18, "Increment": 0.5 } },
+        { "Type": "IncreaseHealth", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 1 } }
+      ]
+    },
+    {
+      "ID": "JarnvidrWard",
+      "Name": "$mod_epicloot_l_jarnvidrward",
+      "Description": "$mod_epicloot_l_jarnvidrward_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "TowerShields" ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "Immovable" },
+        { "Type": "ModifyBlockForce", "Values": { "MinValue": 28, "MaxValue": 32, "Increment": 1 } },
+        { "Type": "AddPhysicalResistancePercentage", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.2 } }
+      ]
+    },
+    {
+      "ID": "SigurdsByrnie",
+      "Name": "$mod_epicloot_l_sigurdsbyrnie",
+      "Description": "$mod_epicloot_l_sigurdsbyrnie_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Chest" ]
+      },
+      "GuaranteedEffectCount": 5,
+      "GuaranteedMagicEffects": [
+        { "Type": "AddPoisonResistancePercentage", "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 } },
+        { "Type": "AvoidDamageTaken", "Values": { "MinValue": 16, "MaxValue": 18, "Increment": 0.5 } },
+        { "Type": "ModifyHealthRegen", "Values": { "MinValue": 20, "MaxValue": 24, "Increment": 1 } }
+      ]
+    },
+    {
+      "ID": "KarisLeggings",
+      "Name": "$mod_epicloot_l_karisleggings",
+      "Description": "$mod_epicloot_l_karisleggings_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Legs" ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "ModifyMovementSpeed", "Values": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 } },
+        { "Type": "ModifySprintStaminaUse", "Values": { "MinValue": 28, "MaxValue": 32, "Increment": 0.5 } },
+        { "Type": "ModifyDiscoveryRadius", "Values": { "MinValue": 30, "MaxValue": 35, "Increment": 1 } },
+        { "Type": "FeatherFall" }
+      ]
+    },
+    {
+      "ID": "Aegishjalmr",
+      "Name": "$mod_epicloot_l_aegishjalmr",
+      "Description": "$mod_epicloot_l_aegishjalmr_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Helmet" ]
+      },
+      "GuaranteedEffectCount": 5,
+      "GuaranteedMagicEffects": [
+        { "Type": "StaggerOnDamageTaken", "Values": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 } },
+        { "Type": "ModifyArmor", "Values": { "MinValue": 22, "MaxValue": 25, "Increment": 0.5 } },
+        { "Type": "HeadHunter", "Values": { "MinValue": 20, "MaxValue": 24, "Increment": 0.5 } }
+      ]
+    },
+    {
+      "ID": "Fjadrhamr",
+      "Name": "$mod_epicloot_l_fjadrhamr",
+      "Description": "$mod_epicloot_l_fjadrhamr_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Shoulder" ]
+      },
+      "GuaranteedEffectCount": 6,
+      "GuaranteedMagicEffects": [
+        { "Type": "DoubleJump" },
+        { "Type": "FeatherFall" },
+        { "Type": "ModifyJumpStaminaUse", "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 } }
+      ]
+    },
+    {
+      "ID": "LogisBrand",
+      "Name": "$mod_epicloot_l_logisbrand",
+      "Description": "$mod_epicloot_l_logisbrand_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Torch" ]
+      },
+      "GuaranteedEffectCount": 7,
+      "GuaranteedMagicEffects": [
+        { "Type": "AddFireDamage", "Values": { "MinValue": 18, "MaxValue": 22, "Increment": 0.5 } },
+        { "Type": "Comfortable", "Values": { "MinValue": 4, "MaxValue": 5, "Increment": 1 } },
+        { "Type": "Warmth" },
+        { "Type": "Indestructible" }
+      ]
+    },
+    {
+      "ID": "EitrisHammer",
+      "Name": "$mod_epicloot_l_eitrishammer",
+      "Description": "$mod_epicloot_l_eitrishammer_desc",
+      "Requirements": {
+        "AllowedItemNames": [ "$item_hammer" ]
+      },
+      "GuaranteedEffectCount": 5,
+      "GuaranteedMagicEffects": [
+        { "Type": "FreeBuild" },
+        { "Type": "ModifyBuildDistance", "Values": { "MinValue": 80, "MaxValue": 100, "Increment": 1 } },
+        { "Type": "AddCrafterSkills", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 1 } }
+      ]
+    },
+    {
+      "ID": "Draupnir",
+      "Name": "$mod_epicloot_l_draupnir",
+      "Description": "$mod_epicloot_l_draupnir_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Utility" ],
+        "ExcludedItemNames": [ "$item_demister" ]
+      },
+      "GuaranteedEffectCount": 5,
+      "GuaranteedMagicEffects": [
+        { "Type": "Riches", "Values": { "MinValue": 15, "MaxValue": 18, "Increment": 0.5 } },
+        { "Type": "CoinHoarder", "Values": { "MinValue": 15, "MaxValue": 18, "Increment": 0.5 } },
+        { "Type": "Luck", "Values": { "MinValue": 20, "MaxValue": 24, "Increment": 1 } }
+      ]
+    },
+    {
+      "ID": "Brisingamen",
+      "Name": "$mod_epicloot_l_brisingamen",
+      "Description": "$mod_epicloot_l_brisingamen_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Trinket" ]
+      },
+      "GuaranteedEffectCount": 5,
+      "GuaranteedMagicEffects": [
+        { "Type": "AddElementalResistancePercentage", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.2 } },
+        { "Type": "IncreaseHealth", "Values": { "MinValue": 22, "MaxValue": 26, "Increment": 1 } }
+      ]
+    },
+    {
       "ID": "HeimdallTowerShield",
       "Name": "$mod_epicloot_l_heimdalltowershield",
       "Description": "$mod_epicloot_l_heimdalltowershield_desc",
