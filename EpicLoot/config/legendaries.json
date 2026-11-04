@@ -498,6 +498,20 @@
       ]
     },
     {
+      "ID": "Wyrdbound",
+      "Name": "$mod_epicloot_l_wyrdbound",
+      "Description": "$mod_epicloot_l_wyrdbound_desc",
+      "Requirements": {
+        "AllowedItemTypes": [ "Utility" ],
+        "ExcludedItemNames": [ "$item_demister", "$mod_epicloot_item_skuldsthread" ]
+      },
+      "GuaranteedEffectCount": 7,
+      "GuaranteedMagicEffects": [
+        { "Type": "Andvaranaut" },
+        { "Type": "SkuldsThread" }
+      ]
+    },
+    {
       "ID": "Brisingamen",
       "Name": "$mod_epicloot_l_brisingamen",
       "Description": "$mod_epicloot_l_brisingamen_desc",

@@ -102,7 +102,7 @@ public static class EffectGroupsSection
             MagicEffectType.ModifyNoise, MagicEffectType.ModifyPickupRange, MagicEffectType.ModifyDiscoveryRadius,
             MagicEffectType.DayDiscovery, MagicEffectType.ModifyWispRange, MagicEffectType.Glowing, MagicEffectType.Comfortable,
             MagicEffectType.Apportation, MagicEffectType.Luck, MagicEffectType.LuckyLoot, MagicEffectType.Riches,
-            MagicEffectType.Prosperity, MagicEffectType.Wager, MagicEffectType.Andvaranaut, MagicEffectType.Wishbone,
+            MagicEffectType.Prosperity, MagicEffectType.Wager, MagicEffectType.Andvaranaut, MagicEffectType.SkuldsThread, MagicEffectType.Wishbone,
             MagicEffectType.DvergerCirclet, MagicEffectType.DecreaseForsakenCooldown, MagicEffectType.DecreaseMeadCooldown,
             MagicEffectType.InstantMead, MagicEffectType.AutoMead, MagicEffectType.PotionEfficacy, MagicEffectType.ModifyLowHealth,
         }),
