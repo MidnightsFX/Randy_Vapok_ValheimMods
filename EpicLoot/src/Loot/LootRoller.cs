@@ -1438,9 +1438,13 @@ namespace EpicLoot
                     magicItem.LegendaryID = itemInfo.ID;
                     magicItem.DisplayName = itemInfo.Name;
 
-                    if (itemInfo.GuaranteedEffectCount > 0)
+                    int guaranteedCount = itemInfo.GuaranteedEffectCountPerRarity != null &&
+                        itemInfo.GuaranteedEffectCountPerRarity.TryGetValue(rarity, out int perRarityCount)
+                        ? perRarityCount
+                        : itemInfo.GuaranteedEffectCount;
+                    if (guaranteedCount > 0)
                     {
-                        effectCount = itemInfo.GuaranteedEffectCount;
+                        effectCount = guaranteedCount;
                     }
 
                     foreach (var guaranteedMagicEffect in itemInfo.GuaranteedMagicEffects)

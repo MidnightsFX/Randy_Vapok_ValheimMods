@@ -20,6 +20,7 @@
     * The compendium's Legendary Sets page is now Unique Sets
     * The magicsetitem console command is now magicunique (short form miunique); magicsetitem still works
     * Unique items roll one more enchantment than their rarity normally does, and their signature enchantments roll above the normal range
+    * Unique items now roll at Mythic and Ancient as well as Legendary, with stronger signature enchantments at higher rarities
     * Extracting a rune from an enchantment stronger than a normal roll now shows the capped value the rune will hold
 
 **0.15.6**
