@@ -19,6 +19,8 @@
     * In the inventory the cell gets a gold border, the rune breathes and embers drift up the cell. Unique Item Embers under Interface turns this off, and Item Colors has the colour
     * The compendium's Legendary Sets page is now Unique Sets
     * The magicsetitem console command is now magicunique (short form miunique); magicsetitem still works
+    * Unique items roll one more enchantment than their rarity normally does, and their signature enchantments roll above the normal range
+    * Extracting a rune from an enchantment stronger than a normal roll now shows the capped value the rune will hold
 
 **0.15.6**
 * Works with Auga 1.4.1 and newer

@@ -880,6 +880,8 @@
     "mod_epicloot_rune_extract_warning_reduce": "Extracting an enchantment removes it from the item and creates a rune with the selected enchantment.",
     "mod_epicloot_rune_extract_warning_reduce_rarity": "Extracting an enchantment removes it from the item, reduces the item's rarity, and creates a rune with the selected enchantment.",
     "mod_epicloot_rune_extract_warning_destroy": "Extracting an enchantment destroys the item, but creates a rune with the selected enchantment.",
+    "mod_epicloot_rune_extract_capped_row": "Rune capped at: $1",
+    "mod_epicloot_rune_extract_capped_warning": "Runes hold at most a normal $1 roll, so this rune will have $2.",
     "mod_epicloot_rune_imbue_warning": "Imbuing a rune applies it to an item, overwriting a selected enchantment.",
     "mod_epicloot_rune_enchantment_selector": "Select Enchantment",
     "mod_epicloot_rune_enchantment_overwrite_target": "Select Enchantment to overwrite.",
