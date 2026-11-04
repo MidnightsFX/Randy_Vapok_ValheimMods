@@ -1490,9 +1490,8 @@ namespace EpicLoot
 
         /// <summary>
         /// Picks the unique a fresh <paramref name="rarity"/> item becomes, or null for a plain item. With
-        /// probability SetItemDropChance it tries a set piece first; when no set piece enabled at this
-        /// rarity fits the item it falls through to the regular unique roll rather than making the item
-        /// generic. The regular roll includes <see cref="UniqueLegendaryHelper.GenericLegendaryInfo"/>.
+        /// probability SetItemDropChance it tries a set piece first; when that misses or no set piece enabled
+        /// at this rarity fits the item, it becomes a regular unique with probability UniqueItemDropChance.
         /// </summary>
         private static LegendaryInfo RollUniqueInfo(ItemRarity rarity, ItemDrop.ItemData baseItem, MagicItem magicItem)
         {
@@ -1520,8 +1519,21 @@ namespace EpicLoot
                 return null;
             }
 
+            var uniqueRoll = Random.Range(0.0f, 1.0f);
+            var rollUnique = uniqueRoll < ELConfig.UniqueItemDropChance.Value;
+            EpicLoot.Log($"Rolling {rarity} unique: unique={rollUnique} ({uniqueRoll:#.##}/{ELConfig.UniqueItemDropChance.Value})");
+            if (!rollUnique)
+            {
+                return null;
+            }
+
             var availableUniques = UniqueLegendaryHelper.GetAvailableUniques(baseItem, magicItem, rarity);
             EpicLoot.Log($"Available {rarity} uniques: {string.Join(", ", availableUniques.Select(x => x.ID))}");
+            if (availableUniques.Count == 0)
+            {
+                return null;
+            }
+
             _weightedUniqueTable.Setup(availableUniques, x => x.SelectionWeight);
             return _weightedUniqueTable.Roll();
         }

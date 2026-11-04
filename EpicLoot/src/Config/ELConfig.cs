@@ -88,6 +88,7 @@ internal class ELConfig {
     public static ConfigEntry<KeyCode> ShieldThrowKey;
     public static ConfigEntry<KeyCode> ShieldThrowGamepadButton;
     public static ConfigEntry<float> SetItemDropChance;
+    public static ConfigEntry<float> UniqueItemDropChance;
     public static ConfigEntry<bool> HealthCriticalEffectsEnabled;
     public static ConfigEntry<bool> AllowRuneSocketing;
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
@@ -492,7 +493,14 @@ internal class ELConfig {
         SetItemDropChance = BindServer(SectionBalance, "Set Item Drop Chance", 0.15f,
             "The percent chance that an item of a rarity with item sets enabled (Legendary, Mythic and " +
             "Ancient by default, see each set's Rarities in legendaries.json) is dropped, enchanted " +
-            "or identified as a set item. If no set piece fits the item it rolls a regular unique instead.\n" +
+            "or identified as a set item. If no set piece fits the item it rolls for a regular unique instead.\n" +
+            "Min = 0, Max = 1",
+            new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
+        UniqueItemDropChance = BindServer(SectionBalance, "Unique Item Drop Chance", 0.1f,
+            "The percent chance that an item of a rarity with uniques enabled (Legendary by default, see " +
+            "each unique's Rarities in legendaries.json) that did not become a set item is dropped, " +
+            "enchanted or identified as a unique. Which unique is picked by SelectionWeight among those " +
+            "that fit the item.\n" +
             "Min = 0, Max = 1",
             new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         HealthCriticalEffectsEnabled = BindServer(SectionBalance, "Health Critical Enchantments", true,

@@ -594,17 +594,15 @@ namespace EpicLoot.LegendarySystem
         }
 
         /// <summary>
-        /// The non-set uniques that can roll on <paramref name="baseItem"/> at <paramref name="rarity"/>,
-        /// plus <see cref="GenericLegendaryInfo"/> (a unique-less item of that rarity).
+        /// The non-set uniques that can roll on <paramref name="baseItem"/> at <paramref name="rarity"/>.
+        /// May be empty; there is no generic entry.
         /// </summary>
         public static List<LegendaryInfo> GetAvailableUniques(ItemDrop.ItemData baseItem, MagicItem magicItem, ItemRarity rarity)
         {
-            List<LegendaryInfo> result = AllUniques.Values
+            return AllUniques.Values
                 .Where(x => !IsSetPiece(x) && IsEnabledAt(x, rarity) &&
                     (x.Requirements == null || x.Requirements.CheckRequirements(baseItem, magicItem)))
                 .ToList();
-            result.Add(GenericLegendaryInfo);
-            return result;
         }
 
         /// <summary>
@@ -708,7 +706,9 @@ namespace EpicLoot.LegendarySystem
         {
             if (!rollSetItem)
             {
-                return GetAvailableUniques(baseItem, magicItem, rarity);
+                List<LegendaryInfo> uniques = GetAvailableUniques(baseItem, magicItem, rarity);
+                uniques.Add(GenericLegendaryInfo);
+                return uniques;
             }
 
             List<LegendaryInfo> pieces = GetAvailableSetPieces(baseItem, magicItem, rarity);

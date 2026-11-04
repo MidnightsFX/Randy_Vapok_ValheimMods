@@ -183,6 +183,7 @@ internal static class QuickConfigBindings {
         FloatSlider("GlobalDropRateModifier", ELConfig.GlobalDropRateModifier, "Global Drop Rate Modifier", BindingScope.Server, 0f, 4f, 0.05f);
         EnumCycle("_gatedItemTypeModeConfig", ELConfig._gatedItemTypeModeConfig, "Item Drop Limits", BindingScope.Server);
         FloatSlider("SetItemDropChance", ELConfig.SetItemDropChance, "Set Item Drop Chance", BindingScope.Server, 0f, 1f, 0.01f);
+        FloatSlider("UniqueItemDropChance", ELConfig.UniqueItemDropChance, "Unique Item Drop Chance", BindingScope.Server, 0f, 1f, 0.01f);
         Toggle("HealthCriticalEffectsEnabled", ELConfig.HealthCriticalEffectsEnabled, "Health Critical Enchantments", BindingScope.Server);
         FloatSlider("ItemDropRatio", ELConfig.ItemDropRatio, "Item Drop Ratio", BindingScope.Server, 0f, 1f, 0.01f);
         FloatSlider("ShardStoneDropRatio", ELConfig.ShardStoneDropRatio, "Shard Stone Drop Ratio", BindingScope.Server, 0f, 1f, 0.01f);
