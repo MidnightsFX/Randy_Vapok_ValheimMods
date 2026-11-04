@@ -10,8 +10,9 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Swords" ]
       },
+      "GuaranteedEffectCount": 5,
       "GuaranteedMagicEffects": [
-        { "Type": "AddFireDamage" }
+        { "Type": "AddFireDamage", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 } }
       ]
     },
     {
@@ -24,8 +25,9 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Clubs" ]
       },
+      "GuaranteedEffectCount": 5,
       "GuaranteedMagicEffects": [
-        { "Type": "ModifyMovementSpeed" }
+        { "Type": "ModifyMovementSpeed", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } }
       ]
     },
     {
@@ -36,8 +38,9 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Spears" ]
       },
+      "GuaranteedEffectCount": 5,
       "GuaranteedMagicEffects": [
-        { "Type": "ModifyDamage" }
+        { "Type": "ModifyDamage", "Values": { "MinValue": 8, "MaxValue": 10, "Increment": 0.1 } }
       ]
     },
     {
@@ -49,10 +52,10 @@
       "Requirements": {
         "AllowedItemNames": [ "$item_sledge_iron" ]
       },
-      "GuaranteedEffectCount": 6, 
+      "GuaranteedEffectCount": 7,
       "GuaranteedMagicEffects": [
-        { "Type": "ModifyPhysicalDamage" },
-        { "Type": "AddLightningDamage" },
+        { "Type": "ModifyPhysicalDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
+        { "Type": "AddLightningDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
         { "Type": "Throwable" },
         { "Type": "RecallWeapon" }
       ]
@@ -66,11 +69,11 @@
         "AllowedItemTypes": [ "TwoHandedWeapon" ],
         "AllowedSkillTypes": [ "Clubs" ]
       },
-      "GuaranteedEffectCount": 7,
+      "GuaranteedEffectCount": 9,
       "GuaranteedMagicEffects": [
         { "Type": "Throwable" },
         { "Type": "RecallWeapon" },
-        { "Type": "HomingMissile" }
+        { "Type": "HomingMissile", "Values": { "MinValue": 22, "MaxValue": 25, "Increment": 1 } }
       ]
     },
     {
@@ -81,11 +84,12 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Axes" ]
       },
+      "GuaranteedEffectCount": 7,
       "GuaranteedMagicEffects": [
         { "Type": "Throwable" },
         { "Type": "RecallWeapon" },
-        { "Type": "Opportunist" },
-        { "Type": "ModifyBackstab" }
+        { "Type": "Opportunist", "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 } },
+        { "Type": "ModifyBackstab", "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.25 } }
       ]
     },
     {
@@ -96,10 +100,11 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Swords" ]
       },
+      "GuaranteedEffectCount": 5,
       "GuaranteedMagicEffects": [
-        { "Type": "AddSlashingDamage" },
-        { "Type": "Executioner"},
-        { "Type": "ModifyPhysicalDamage" }
+        { "Type": "AddSlashingDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
+        { "Type": "Executioner", "Values": { "MinValue": 175, "MaxValue": 200, "Increment": 5 } },
+        { "Type": "ModifyPhysicalDamage", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } }
       ]
     },
     {
@@ -112,11 +117,12 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Swords" ]
       },
+      "GuaranteedEffectCount": 7,
       "GuaranteedMagicEffects": [
         { "Type": "Glowing" },
         { "Type": "RemoveSpeedPenalty" },
-        { "Type": "Opportunist" },
-        { "Type": "ModifyBackstab" }
+        { "Type": "Opportunist", "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 } },
+        { "Type": "ModifyBackstab", "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.25 } }
       ]
     },
     {
@@ -127,11 +133,12 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Knives" ]
       },
+      "GuaranteedEffectCount": 7,
       "GuaranteedMagicEffects": [
         { "Type": "Throwable" },
         { "Type": "RecallWeapon" },
-        { "Type": "AddPoisonDamage" },
-        { "Type": "ModifyBackstab" }
+        { "Type": "AddPoisonDamage", "Values": { "MinValue": 15, "MaxValue": 20, "Increment": 0.5 } },
+        { "Type": "ModifyBackstab", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.25 } }
       ]
     },
     {
@@ -142,10 +149,11 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Knives" ]
       },
+      "GuaranteedEffectCount": 5,
       "GuaranteedMagicEffects": [
-        { "Type": "AddSlashingDamage" },
-        { "Type": "ModifyMovementSpeed" },
-        { "Type": "ModifyAttackSpeed" }
+        { "Type": "AddSlashingDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
+        { "Type": "ModifyMovementSpeed", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } },
+        { "Type": "ModifyAttackSpeed", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } }
       ]
     },
     {
@@ -156,12 +164,13 @@
         "AllowedItemTypes": [ "TwoHandedWeapon" ],
         "AllowedSkillTypes": [ "Axes" ]
       },
+      "GuaranteedEffectCount": 6,
       "GuaranteedMagicEffects": [
-        { "Type": "ModifyMovementSpeedLowHealth" },
-        { "Type": "ModifyStaminaRegenLowHealth" },
-        { "Type": "ModifyDamageLowHealth" },
-        { "Type": "ModifyAttackSpeedLowHealth" },
-        { "Type": "AvoidDamageTakenLowHealth" }
+        { "Type": "ModifyMovementSpeedLowHealth", "Values": { "MinValue": 18, "MaxValue": 21, "Increment": 1 } },
+        { "Type": "ModifyStaminaRegenLowHealth", "Values": { "MinValue": 30, "MaxValue": 35, "Increment": 1 } },
+        { "Type": "ModifyDamageLowHealth", "Values": { "MinValue": 22, "MaxValue": 25, "Increment": 1 } },
+        { "Type": "ModifyAttackSpeedLowHealth", "Values": { "MinValue": 22, "MaxValue": 25, "Increment": 1 } },
+        { "Type": "AvoidDamageTakenLowHealth", "Values": { "MinValue": 25, "MaxValue": 28, "Increment": 1 } }
       ]
     },
     {
@@ -172,10 +181,11 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Swords" ]
       },
+      "GuaranteedEffectCount": 6,
       "GuaranteedMagicEffects": [
-        { "Type": "AddSlashingDamage" },
-        { "Type": "ModifyAttackStaminaUse" },
-        { "Type": "ModifyAttackSpeed" },
+        { "Type": "AddSlashingDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
+        { "Type": "ModifyAttackStaminaUse", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 } },
+        { "Type": "ModifyAttackSpeed", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } },
         { "Type": "Indestructible" }
       ]
     },
@@ -187,10 +197,11 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Swords" ]
       },
+      "GuaranteedEffectCount": 6,
       "GuaranteedMagicEffects": [
-        { "Type": "AddSlashingDamage" },
-        { "Type": "ModifyAttackStaminaUse" },
-        { "Type": "LifeSteal" },
+        { "Type": "AddSlashingDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
+        { "Type": "ModifyAttackStaminaUse", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 } },
+        { "Type": "LifeSteal", "Values": { "MinValue": 8, "MaxValue": 10, "Increment": 0.5 } },
         { "Type": "Indestructible" }
       ]
     },
@@ -202,11 +213,12 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Clubs" ]
       },
+      "GuaranteedEffectCount": 5,
       "GuaranteedMagicEffects": [
-        { "Type": "AddFireDamage" },
-        { "Type": "AddFrostDamage" },
-        { "Type": "AddLightningDamage" },
-        { "Type": "AddPoisonDamage" }
+        { "Type": "AddFireDamage", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } },
+        { "Type": "AddFrostDamage", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } },
+        { "Type": "AddLightningDamage", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } },
+        { "Type": "AddPoisonDamage", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } }
       ]
     },
     {
@@ -216,10 +228,11 @@
       "Requirements" : {
         "AllowedItemNames" : [ "$item_mace_needle" ]
       },
+      "GuaranteedEffectCount": 5,
       "GuaranteedMagicEffects": [
-        { "Type": "AddPiercingDamage" },
-        { "Type": "LifeSteal" },
-        { "Type": "LifeStealLowHealth" }
+        { "Type": "AddPiercingDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
+        { "Type": "LifeSteal", "Values": { "MinValue": 8, "MaxValue": 10, "Increment": 0.5 } },
+        { "Type": "LifeStealLowHealth", "Values": { "MinValue": 15, "MaxValue": 20, "Increment": 0.5 } }
       ]
     },
     {
@@ -230,10 +243,11 @@
         "AllowedItemTypes": [ "TwoHandedWeapon" ],
         "AllowedSkillTypes": [ "Polearms" ]
       },
+      "GuaranteedEffectCount": 5,
       "GuaranteedMagicEffects": [
-        { "Type": "AddPiercingDamage" },
-        { "Type": "ModifyAttackSpeed" },
-        { "Type": "ModifyAttackStaminaUse" }
+        { "Type": "AddPiercingDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
+        { "Type": "ModifyAttackSpeed", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } },
+        { "Type": "ModifyAttackStaminaUse", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 } }
       ]
     },
     {
@@ -244,8 +258,9 @@
         "AllowedItemTypes": [ "Bow" ],
         "AllowedSkillTypes": [ "Bows" ]
       },
+      "GuaranteedEffectCount": 6,
       "GuaranteedMagicEffects": [
-        { "Type": "ModifyMovementSpeed" },
+        { "Type": "ModifyMovementSpeed", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
         { "Type": "RemoveSpeedPenalty" }
       ]
     },
@@ -257,9 +272,10 @@
         "AllowedItemTypes": [ "Bow" ],
         "AllowedSkillTypes": [ "Bows" ]
       },
+      "GuaranteedEffectCount": 6,
       "GuaranteedMagicEffects": [
-        { "Type": "ExplosiveArrows" },
-        { "Type": "AddFrostDamage" },
+        { "Type": "ExplosiveArrows", "Values": { "MinValue": 15, "MaxValue": 20, "Increment": 0.5 } },
+        { "Type": "AddFrostDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
         { "Type": "Indestructible" }
       ]
     },
@@ -271,9 +287,10 @@
         "AllowedItemTypes": [ "Bow" ],
         "AllowedSkillTypes": [ "Bows" ]
       },
+      "GuaranteedEffectCount": 6,
       "GuaranteedMagicEffects": [
-        { "Type": "QuickDraw" },
-        { "Type": "ModifyAttackStaminaUse" },
+        { "Type": "QuickDraw", "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 } },
+        { "Type": "ModifyDrawStaminaUse", "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 1 } },
         { "Type": "Indestructible" }
       ]
     },
@@ -285,13 +302,13 @@
         "AllowedItemTypes": [ "OneHandedWeapon" ],
         "AllowedSkillTypes": [ "Knives" ]
       },
-      "GuaranteedEffectCount": 6, 
+      "GuaranteedEffectCount": 6,
       "GuaranteedMagicEffects": [
-        { "Type": "ModifyAttackStaminaUse" },
-        { "Type": "ModifyAttackSpeed" },
-        { "Type": "AddLightningDamage" },
-        { "Type": "AddPiercingDamage" },
-        { "Type": "ModifyMovementSpeed" }
+        { "Type": "ModifyAttackStaminaUse", "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 } },
+        { "Type": "ModifyAttackSpeed", "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 } },
+        { "Type": "AddLightningDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
+        { "Type": "AddPiercingDamage", "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 } },
+        { "Type": "ModifyMovementSpeed", "Values": { "MinValue": 8, "MaxValue": 10, "Increment": 0.5 } }
       ]
     },
     {
