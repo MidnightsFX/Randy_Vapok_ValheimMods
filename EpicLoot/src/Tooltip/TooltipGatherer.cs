@@ -123,7 +123,7 @@ internal partial class TooltipGatherer
         }
         else if (magicItem.IsUniqueLegendary())
         {
-            data.UniqueLabel = "$mod_epicloot_uniquelabel";
+            data.UniqueLabel = UniqueLegendaryHelper.GetUniqueLabelToken(item.GetRarity());
         }
     }
 

@@ -196,7 +196,7 @@ public static partial class TerminalManager
             return;
         }
 
-        args.Context.PrintInfo($"magicsetitem - id:{legendaryID} rarity:{rarity}");
+        args.Context.PrintInfo($"magicunique - id:{legendaryID} rarity:{rarity}");
         SpawnLegendaryHelper(args, legendaryID, rarity, IsRandomArg(itemArg) ? "" : itemArg);
     }
 

@@ -344,7 +344,7 @@ teleport, food, ...) are not in it. A trimmed example for an enchanted sword:
   `Active`, the `Tier` an active bonus applies at, and the description and activation key with details.
   `SetColor` is the colour the set label, set sections and set rune lines are drawn in (the player's Set
   Item Color setting, also `GetSetItemColor()`).
-- `UniqueLabel` is the "Unique Item" line of a named unique that is not a set piece, else null, and
+- `UniqueLabel` is the "<Rarity> Unique Item" line of a named unique that is not a set piece, else null, and
   `UniqueColor` the colour it is drawn in (the player's Unique Item Color setting).
 - `Hints` are drawn in order under the tooltip. `Id` is `container_open` (how another mod's container
   opens, such as a BowsBeforeHoes quiver), `socket_open` (the player's shard slot shortcut, or the gamepad

@@ -807,5 +807,11 @@ namespace EpicLoot.LegendarySystem
         {
             return $"$mod_epicloot_{rarity.ToString().ToLowerInvariant()}setlabel";
         }
+
+        /// <summary>The localization token heading a unique item of <paramref name="rarity"/> in its tooltip.</summary>
+        public static string GetUniqueLabelToken(ItemRarity rarity)
+        {
+            return $"$mod_epicloot_{rarity.ToString().ToLowerInvariant()}uniquelabel";
+        }
     }
 }
