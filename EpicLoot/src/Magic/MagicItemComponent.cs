@@ -89,7 +89,7 @@ public sealed class MagicItemComponent
         MagicItem = Parse(raw);
         _socketGridVersion = 0;
 
-        if (FixupValuelessEffects())
+        if (FixupValuelessEffects() | ConvertLegacyYieldEffects())
         {
             SetMagicItemQuietly(MagicItem);
             return;
@@ -241,6 +241,27 @@ public sealed class MagicItemComponent
             }
 
             WarnOnceAboutMissingRarityValues(effect.EffectType, MagicItem.Rarity);
+        }
+
+        return changed;
+    }
+
+    private bool ConvertLegacyYieldEffects()
+    {
+        if (MagicItem == null)
+        {
+            return false;
+        }
+
+        bool changed = false;
+        foreach (MagicItemEffect effect in MagicItem.Effects)
+        {
+            changed |= IncreaseDrop.ConvertLegacyValue(effect);
+        }
+
+        foreach (SocketedEffect socket in MagicItem.Sockets)
+        {
+            changed |= IncreaseDrop.ConvertLegacyValue(socket?.Effect);
         }
 
         return changed;

@@ -849,24 +849,24 @@
       },
       "ValuesPerRarity": {
         "Epic": {
-          "MinValue": 0.5,
-          "MaxValue": 0.5,
-          "Increment": 0.5
+          "MinValue": 12.5,
+          "MaxValue": 12.5,
+          "Increment": 12.5
         },
         "Legendary": {
-          "MinValue": 1,
-          "MaxValue": 1,
-          "Increment": 0.5
+          "MinValue": 25,
+          "MaxValue": 25,
+          "Increment": 12.5
         },
         "Mythic": {
-          "MinValue": 1.5,
-          "MaxValue": 1.5,
-          "Increment": 0.5
+          "MinValue": 37.5,
+          "MaxValue": 37.5,
+          "Increment": 12.5
         },
         "Ancient": {
-          "MinValue": 2,
-          "MaxValue": 2,
-          "Increment": 0.5
+          "MinValue": 50,
+          "MaxValue": 50,
+          "Increment": 12.5
         }
       },
       "SelectionWeight": 10,
@@ -890,34 +890,34 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 0.5,
-          "MaxValue": 0.5,
-          "Increment": 0.5
+          "MinValue": 5,
+          "MaxValue": 5,
+          "Increment": 5
         },
         "Rare": {
-          "MinValue": 1,
-          "MaxValue": 1,
-          "Increment": 0.5
+          "MinValue": 10,
+          "MaxValue": 10,
+          "Increment": 5
         },
         "Epic": {
-          "MinValue": 1.5,
-          "MaxValue": 1.5,
-          "Increment": 0.5
+          "MinValue": 15,
+          "MaxValue": 15,
+          "Increment": 5
         },
         "Legendary": {
-          "MinValue": 2,
-          "MaxValue": 2,
-          "Increment": 0.5
+          "MinValue": 20,
+          "MaxValue": 20,
+          "Increment": 5
         },
         "Mythic": {
-          "MinValue": 2.5,
-          "MaxValue": 2.5,
-          "Increment": 0.5
+          "MinValue": 25,
+          "MaxValue": 25,
+          "Increment": 5
         },
         "Ancient": {
-          "MinValue": 3,
-          "MaxValue": 3,
-          "Increment": 0.5
+          "MinValue": 30,
+          "MaxValue": 30,
+          "Increment": 5
         }
       },
       "SelectionWeight": 10,

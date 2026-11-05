@@ -657,10 +657,10 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 6, "Mythic": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "IncreaseMiningDrop",
-          "Values": { "MinValue": 5, "MaxValue": 6, "Increment": 1 },
+          "Values": { "MinValue": 125, "MaxValue": 150, "Increment": 25 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 5, "MaxValue": 6, "Increment": 1 },
-            "Mythic": { "MinValue": 6, "MaxValue": 7, "Increment": 1 }
+            "Legendary": { "MinValue": 125, "MaxValue": 150, "Increment": 25 },
+            "Mythic": { "MinValue": 150, "MaxValue": 175, "Increment": 25 }
           } },
         { "Type": "AddPickaxesSkill",
           "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 1 },

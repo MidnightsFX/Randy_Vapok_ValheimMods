@@ -2,7 +2,6 @@
 * The health regen shardstone for shoulders can be set to work while resting, while rested or both, and the Legendary balance template now gives it for both.
 * Balance templates now include shardstones, so applying a template also replaces your shardstone settings.
 * Shardstones already socketed now pick up balance changes without being taken out and put back.
-* Mining and lumberjacking drop effects now build up fractions of a drop with each break, and the balance template sets how fast.
 * Attacks, dodges and jumps can no longer be reduced below a tenth of their cost.
 * Eitr Weaving now restores a percentage of max eitr.
 * Paying eitr costs from stamina no longer refunds eitr when you have no stamina.
@@ -22,6 +21,12 @@
     * Unique items roll one more enchantment than their rarity normally does, and their signature enchantments roll above the normal range
     * Unique items now roll at Mythic and Ancient as well as Legendary, with stronger signature enchantments at higher rarities
     * Extracting a rune from an enchantment stronger than a normal roll now shows the capped value the rune will hold
+* Mining Drop and Lumberjacking Drop are now Ore Yield and Wood Yield, a percentage bonus. Existing items convert automatically when loaded
+    * The bonus applies evenly across node types, so scrap piles and soft tissue no longer gain far more than ore veins
+    * Stone and plain wood are skipped when the same drop table has something better, so veins give only extra ore
+    * Rock chunks that collapse and logs that break on impact now get the bonus
+    * Bonus drops land in stacks where normal drops land, with a floating +X and a sound
+    * The balance template sets the percentage: half on Minimal, double on Legendary
 
 **0.15.6**
 * Works with Auga 1.4.1 and newer

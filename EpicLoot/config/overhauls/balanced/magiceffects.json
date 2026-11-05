@@ -841,24 +841,24 @@
       },
       "ValuesPerRarity": {
         "Epic": {
-          "MinValue": 1,
-          "MaxValue": 1,
-          "Increment": 1
+          "MinValue": 25,
+          "MaxValue": 25,
+          "Increment": 25
         },
         "Legendary": {
-          "MinValue": 2,
-          "MaxValue": 2,
-          "Increment": 1
+          "MinValue": 50,
+          "MaxValue": 50,
+          "Increment": 25
         },
         "Mythic": {
-          "MinValue": 3,
-          "MaxValue": 3,
-          "Increment": 1
+          "MinValue": 75,
+          "MaxValue": 75,
+          "Increment": 25
         },
         "Ancient": {
-          "MinValue": 4,
-          "MaxValue": 4,
-          "Increment": 1
+          "MinValue": 100,
+          "MaxValue": 100,
+          "Increment": 25
         }
       },
       "SelectionWeight": 10,
@@ -881,34 +881,34 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 1,
-          "MaxValue": 1,
-          "Increment": 1
+          "MinValue": 10,
+          "MaxValue": 10,
+          "Increment": 10
         },
         "Rare": {
-          "MinValue": 2,
-          "MaxValue": 2,
-          "Increment": 1
+          "MinValue": 20,
+          "MaxValue": 20,
+          "Increment": 10
         },
         "Epic": {
-          "MinValue": 3,
-          "MaxValue": 3,
-          "Increment": 1
+          "MinValue": 30,
+          "MaxValue": 30,
+          "Increment": 10
         },
         "Legendary": {
-          "MinValue": 4,
-          "MaxValue": 4,
-          "Increment": 1
+          "MinValue": 40,
+          "MaxValue": 40,
+          "Increment": 10
         },
         "Mythic": {
-          "MinValue": 5,
-          "MaxValue": 5,
-          "Increment": 1
+          "MinValue": 50,
+          "MaxValue": 50,
+          "Increment": 10
         },
         "Ancient": {
-          "MinValue": 6,
-          "MaxValue": 6,
-          "Increment": 1
+          "MinValue": 60,
+          "MaxValue": 60,
+          "Increment": 10
         }
       },
       "SelectionWeight": 10,
