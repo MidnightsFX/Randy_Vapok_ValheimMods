@@ -169,7 +169,7 @@ internal static class QuickConfigBindings {
                 EditsFiles = true,
                 VisibleWhen = _ => CanEditFiles(),
                 Tooltip = () => QuickConfigTooltip.Text($"Balance preset: {name}",
-                    "Sets the Balance Template and the four drop ratios to this preset. On Save, " +
+                    "Sets the Balance Template and the four drop weights to this preset. On Save, " +
                     "magiceffects.json and shardstones.json are rewritten from the preset's template and " +
                     "the Effect Tuning page is reset to them."),
                 Act = staged => BalancePreset.ApplyToStaged(staged, name)
@@ -184,13 +184,21 @@ internal static class QuickConfigBindings {
         EnumCycle("_gatedItemTypeModeConfig", ELConfig._gatedItemTypeModeConfig, "Item Drop Limits", BindingScope.Server);
         FloatSlider("SetItemDropChance", ELConfig.SetItemDropChance, "Set Item Drop Chance", BindingScope.Server, 0f, 1f, 0.01f);
         FloatSlider("UniqueItemDropChance", ELConfig.UniqueItemDropChance, "Unique Item Drop Chance", BindingScope.Server, 0f, 1f, 0.01f);
+        Readout("readout:setuniquemix", SetUniqueMixReadout, "Set and unique mix",
+            "How the two chances above split items that can roll as either. The set roll comes first, so the " +
+            "unique chance only applies to what is left. An item no set piece fits rolls only the unique chance, " +
+            "and each unique's own Rarities in legendaries.json still limit where it can roll.");
         Toggle("HealthCriticalEffectsEnabled", ELConfig.HealthCriticalEffectsEnabled, "Health Critical Enchantments", BindingScope.Server);
-        FloatSlider("ItemDropRatio", ELConfig.ItemDropRatio, "Item Drop Ratio", BindingScope.Server, 0f, 1f, 0.01f);
-        FloatSlider("ShardStoneDropRatio", ELConfig.ShardStoneDropRatio, "Shard Stone Drop Ratio", BindingScope.Server, 0f, 1f, 0.01f);
-        FloatSlider("ItemsUnidentifiedDropRatio", ELConfig.ItemsUnidentifiedDropRatio, "Items Unidentified Drop Ratio", BindingScope.Server, 0f, 1f, 0.01f);
-        FloatSlider("MaterialsDropRatio", ELConfig.MaterialsDropRatio, "Materials Drop Ratio", BindingScope.Server, 0f, 1f, 0.01f);
+        FloatSlider("ItemDropRatio", ELConfig.ItemDropRatio, "Item Drop Weight", BindingScope.Server, 0f, 1f, 0.01f,
+            tooltip: () => DropWeightTooltip(ELConfig.ItemDropRatio, "Item Drop Weight"));
+        FloatSlider("ShardStoneDropRatio", ELConfig.ShardStoneDropRatio, "Shard Stone Drop Weight", BindingScope.Server, 0f, 1f, 0.01f,
+            tooltip: () => DropWeightTooltip(ELConfig.ShardStoneDropRatio, "Shard Stone Drop Weight"));
+        FloatSlider("ItemsUnidentifiedDropRatio", ELConfig.ItemsUnidentifiedDropRatio, "Unidentified Drop Weight", BindingScope.Server, 0f, 1f, 0.01f,
+            tooltip: () => DropWeightTooltip(ELConfig.ItemsUnidentifiedDropRatio, "Unidentified Drop Weight"));
+        FloatSlider("MaterialsDropRatio", ELConfig.MaterialsDropRatio, "Materials Drop Weight", BindingScope.Server, 0f, 1f, 0.01f,
+            tooltip: () => DropWeightTooltip(ELConfig.MaterialsDropRatio, "Materials Drop Weight"));
         Readout("readout:dropmix", DropMixReadout, "Drop mix",
-            "How the four ratios above split each loot drop. They are relative weights, so only their " +
+            "How the four weights above split each loot drop. They are relative weights, so only their " +
             "proportions matter; this line shows the resulting share of each category.");
         RarityCounts();
         AdvancedPagesAction(QuickConfigureTool.ShowAdvancedKey, "$mod_epicloot_cfg_show_advanced", true,
@@ -464,11 +472,12 @@ internal static class QuickConfigBindings {
     }
 
     private static void FloatSlider(string key, ConfigEntry<float> entry, string name, BindingScope scope,
-        float min, float max, float step, Func<StagedConfig, bool> visible = null, Func<StagedConfig, bool> enabled = null) {
+        float min, float max, float step, Func<StagedConfig, bool> visible = null, Func<StagedConfig, bool> enabled = null,
+        Func<string> tooltip = null) {
         CfgSlotFor(key, entry);
         Add(new Binding {
             Key = key, DisplayName = name, Kind = BindingKind.Float, Scope = scope, Min = min, Max = max, Step = step,
-            Tooltip = () => QuickConfigTooltip.Of(entry),
+            Tooltip = tooltip ?? (() => QuickConfigTooltip.Of(entry)),
             VisibleWhen = visible, EnabledWhen = enabled,
             Get = staged => staged.Get(key, entry.Value),
             Set = (staged, value) => staged.Set(key, Snap(ToFloat(value, entry.Value), min, max, step))
@@ -1426,7 +1435,21 @@ internal static class QuickConfigBindings {
             $"{Percent(unidentified / total)} unidentified, {Percent(materials / total)} materials";
     }
 
+    private static string SetUniqueMixReadout(StagedConfig staged) {
+        float set = staged.Get("SetItemDropChance", 0f);
+        float unique = (1f - set) * staged.Get("UniqueItemDropChance", 0f);
+        return $"Of Legendary and higher items: {PercentTenths(set)} set, {PercentTenths(unique)} unique, " +
+            $"{PercentTenths(1f - set - unique)} plain";
+    }
+
+    // The .cfg keeps its "Ratio" keys so existing files still load; the panel calls them weights.
+    private static string DropWeightTooltip(ConfigEntry<float> entry, string name) {
+        return QuickConfigTooltip.Text(name, entry.Description?.Description?.Replace(" Drop Ratio", " Drop Weight"));
+    }
+
     private static string Percent(float share) => Mathf.RoundToInt(share * 100f) + "%";
+
+    private static string PercentTenths(float share) => (share * 100f).ToString("0.#", CultureInfo.InvariantCulture) + "%";
 
     // ------------------------------------------------------------------------------------------------
     //  Option lists

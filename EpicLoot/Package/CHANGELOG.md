@@ -21,6 +21,8 @@
     * Unique items roll one more enchantment than their rarity normally does, and their signature enchantments roll above the normal range
     * Unique items now roll at Mythic and Ancient as well as Legendary, with stronger signature enchantments at higher rarities
     * Extracting a rune from an enchantment stronger than a normal roll now shows the capped value the rune will hold
+    * Quick Configure's Balance page has Unique Item Drop Chance beside Set Item Drop Chance, with a line showing how the two split items, and the Interface page has Unique Item Embers
+* Quick Configure's four drop ratios are now labelled as weights, since they only matter relative to each other
 * Mining Drop and Lumberjacking Drop are now Ore Yield and Wood Yield, a percentage bonus. Existing items convert automatically when loaded
     * The bonus applies evenly across node types, so scrap piles and soft tissue no longer gain far more than ore veins
     * Stone and plain wood are skipped when the same drop table has something better, so veins give only extra ore
