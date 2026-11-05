@@ -1,4 +1,5 @@
 ﻿using EpicLoot;
+using EpicLoot.Compatibility;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -314,6 +315,7 @@ public class InventoryManagement
         {
             Inventory inventory = Player.m_localPlayer.GetInventory();
             inventory.GetBoundItems(boundItems);
+            EaqsQuickSlots.AppendItems(boundItems);
         }
 
         return boundItems;

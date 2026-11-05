@@ -333,7 +333,8 @@ namespace EpicLoot.ShardStones {
         // diminishing returns are applied on read (GetRuneStackMultiplier).
         //
         // Values are baked into the socket (the whole effect pipeline and every tooltip read them from
-        // there), so this must run on every path that adds, removes or re-hosts a socket.
+        // there), so this must run on every path that adds, removes or re-hosts a socket. A change to the
+        // grid itself is picked up on an item's next read (MagicItemComponent.RefreshSocketValues).
         public static void RecomputeSocketValues(ItemDrop.ItemData equipment, MagicItem magicItem) {
             if (equipment == null || magicItem == null || magicItem.Sockets.Count == 0) {
                 return;

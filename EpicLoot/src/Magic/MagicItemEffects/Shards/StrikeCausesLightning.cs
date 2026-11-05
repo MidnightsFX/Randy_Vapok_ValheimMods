@@ -6,8 +6,8 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a chance for the player to cause lightning strikes on enemies they hit
     public static class StrikeCausesLightning {
         // Lightning damage per shard-value point, and the blast radius of the strike. Both tunable in this
-        // effect's Config block in config/shardstones.json, under these key names.
-        public const float DefaultDamagePerValue = 6f;
+        // effect's Config block in shardstones.json, under these key names.
+        public const float DefaultDamagePerValue = 3.6f;
         public const float DefaultRadius = 1f;
 
         private const string DamagePerValueKey = "DamagePerValue";

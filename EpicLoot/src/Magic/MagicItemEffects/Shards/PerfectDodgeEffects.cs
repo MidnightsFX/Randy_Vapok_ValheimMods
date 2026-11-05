@@ -94,7 +94,7 @@ namespace EpicLoot.MagicItemEffects.Shards
     public static class PerfectDodge
     {
         // How many dodges the buff may stack to, and how long a stack survives without a refresh. Tunable as
-        // "MaxStacks" and "BuffDuration" in this effect's Config block in config/shardstones.json.
+        // "MaxStacks" and "BuffDuration" in this effect's Config block in shardstones.json.
         public const int DefaultMaxStacks = 5;
         public const float DefaultBuffDuration = 10f;
 
@@ -232,7 +232,7 @@ namespace EpicLoot.MagicItemEffects.Shards
     public static class PerfectDodgeGivesSpeed
     {
         // Seconds the speed buff lasts after a perfect dodge. Tunable as "BuffDuration" in this effect's
-        // Config block in config/shardstones.json.
+        // Config block in shardstones.json.
         public const float DefaultBuffDuration = 1f;
 
         private const string BuffDurationKey = "BuffDuration";

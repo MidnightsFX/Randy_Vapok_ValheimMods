@@ -2,7 +2,8 @@
     "Global": {
         "Values": {
             "MovementPenaltyReference": 0.4,
-            "BloodBlockSelfDamagePercent": 5
+            "BloodBlockSelfDamagePercent": 5,
+            "CostFloorPercent": 10
         }
     },
     "Shards": {
@@ -1200,12 +1201,12 @@
                 "Head": {
                     "EffectType": "IncreaseMiningDrop",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 1.5,
-                        "Epic": 2,
-                        "Legendary": 2.5,
-                        "Mythic": 3,
-                        "Ancient": 3.5
+                        "Magic": 2,
+                        "Rare": 3,
+                        "Epic": 4,
+                        "Legendary": 5,
+                        "Mythic": 6,
+                        "Ancient": 7
                     }
                 },
                 "Chest": {
@@ -1222,12 +1223,12 @@
                 "Legs": {
                     "EffectType": "IncreaseTreeDrop",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 1.5,
-                        "Epic": 2,
-                        "Legendary": 2.5,
-                        "Mythic": 3,
-                        "Ancient": 3.5
+                        "Magic": 2,
+                        "Rare": 3,
+                        "Epic": 4,
+                        "Legendary": 5,
+                        "Mythic": 6,
+                        "Ancient": 7
                     }
                 },
                 "Trinket": {
@@ -2065,7 +2066,8 @@
                         "Ancient": 14
                     },
                     "Config": {
-                        "DamagePerTrigger": 200
+                        "DamagePerTrigger": 200,
+                        "PoolPerValue": 8
                     }
                 }
             }
@@ -2201,6 +2203,10 @@
                         "Legendary": 80,
                         "Mythic": 100,
                         "Ancient": 100
+                    },
+                    "Config": {
+                        "WhileResting": 1,
+                        "WhileRested": 1
                     }
                 }
             }
@@ -2379,7 +2385,7 @@
                     "Ancient": 16
                 },
                 "Config": {
-                    "DamagePerValue": 6,
+                    "DamagePerValue": 3.6,
                     "Radius": 1
                 }
             },

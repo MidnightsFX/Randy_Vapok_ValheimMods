@@ -9,7 +9,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     public static class KillsReduceNextBloodCost {
         // Cap on the banked reduction (1 = kills can bank up to a fully-free next blood attack), and how
         // many seconds the bank lasts before lapsing -- refreshed on every kill. Tunable as "MaxReduction"
-        // and "BuffDuration" in this effect's Config block in config/shardstones.json.
+        // and "BuffDuration" in this effect's Config block in shardstones.json.
         public const float DefaultMaxReduction = 1f;
         public const float DefaultBuffDuration = 30f;
 
@@ -65,6 +65,13 @@ namespace EpicLoot.MagicItemEffects.Shards {
             }
         }
 
+        // What the banked discount leaves of the next blood cost. Other characters have no bank.
+        public static float GetNextCostShare(Character character) {
+            return character == Player.m_localPlayer
+                ? ModifyAttackCosts.GetEffectPercentage(_bankedReduction)
+                : 1f;
+        }
+
         [HarmonyPatch(typeof(Character), nameof(Character.UseHealth))]
         private static class UseHealth_Patch {
             [UsedImplicitly]
@@ -73,7 +80,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
                     return;
                 }
 
-                hp *= 1f - Mathf.Clamp01(_bankedReduction);
+                hp *= GetNextCostShare(__instance);
                 ClearBank();
                 // The buff notices the empty bank on the next SEMan tick (SE_BloodRite.IsDone) and removes
                 // itself; nothing to do here.

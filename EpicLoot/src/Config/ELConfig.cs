@@ -759,7 +759,8 @@ internal class ELConfig {
             "Animated = as Static, and in the item tooltip and the enchanting table those lines also drift and shimmer.");
         ShowEquippedAndHotbarItemsInSacrificeTab = BindClient(SectionInterface,
             "ShowEquippedAndHotbarItemsInSacrificeTab", false,
-            "If set to false, hides the items that are equipped or on your hotbar in the Sacrifice items list.");
+            "If set to false, hides the items that are equipped, on your hotbar or in the quick slots of " +
+            "Equipment and Quick Slots in the Sacrifice items list.");
         ShowStorageCounts = BindClient(SectionInterface, "Show Storage Counts", true,
             "Shows, after each material cost at the enchanting table, how many of it are available from " +
             "storage outside your inventory, such as a craft-from-containers mod (as a green +N). Hover " +
@@ -1300,15 +1301,22 @@ internal class ELConfig {
         return dirInfo.FullName;
     }
 
+    /// <summary>The configs shipped once per Balance Template, under config/overhauls/&lt;template&gt;/.</summary>
+    internal static readonly string[] BalanceTemplateFiles = { "magiceffects.json", "shardstones.json" };
+
+    internal static bool IsBalanceTemplateFile(string fileName) {
+        return Array.IndexOf(BalanceTemplateFiles, fileName) >= 0;
+    }
+
     public static string GetDefaultEmbeddedFileLocation(string configName) {
         // Callers may pass the config name with or without extension; the embedded resource names
-        // (and the magiceffects overhaul check below) require the ".json" suffix.
+        // (and the balance template check below) require the ".json" suffix.
         if (!configName.EndsWith(".json")) {
             configName += ".json";
         }
 
         string embeddedcfgpath = "EpicLoot.config." + configName;
-        if (configName == "magiceffects.json") {
+        if (IsBalanceTemplateFile(configName)) {
             embeddedcfgpath = "EpicLoot.config.overhauls." + BalanceConfigurationType.Value + "." + configName;
         }
 

@@ -7443,6 +7443,9 @@
           "Increment": 1.5
         }
       },
+      "Config": {
+        "MaxEitrPercentPerValue": 0.2
+      },
       "SelectionWeight": 1,
       "Prefixes": [
         "$mod_epicloot_me_eitrweave_prefix1"

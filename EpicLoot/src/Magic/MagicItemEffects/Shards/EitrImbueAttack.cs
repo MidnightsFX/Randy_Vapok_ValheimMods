@@ -6,7 +6,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a bonus to spirit damage based on the physical damage dealt by the player, at the cost of Eitr
     public static class EitrImbueAttack {
         // Eitr paid per point of bonus spirit damage -- the conversion ratio. Tunable as "EitrCostPerDamage"
-        // in this effect's Config block in config/shardstones.json.
+        // in this effect's Config block in shardstones.json.
         public const float DefaultEitrCostPerDamage = 1f;
 
         private const string EitrCostPerDamageKey = "EitrCostPerDamage";

@@ -6,7 +6,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Burns a chunk of health to refill an amount of stamina, cooldown based
     public static class RunningOnEmpty {
         // Seconds between charges. Tunable as "Cooldown" in this effect's Config block in
-        // config/shardstones.json.
+        // shardstones.json.
         public const float DefaultCooldown = 30f;
 
         private const string CooldownKey = "Cooldown";

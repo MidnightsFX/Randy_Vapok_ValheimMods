@@ -10,7 +10,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
         // RadiusPerTier per point, cooldown is Cooldown MINUS CooldownPerValue per point, floored at
         // MinCooldown -- so a stronger shard reaches further AND fires more often. At the shipped ramp
         // that is 7.5m / 45s at Rare through 10.5m / 15s at Ancient. All tunable in this effect's Config
-        // block in config/shardstones.json, under these key names.
+        // block in shardstones.json, under these key names.
         public const float DefaultCooldown = 60f;
         public const float DefaultCooldownPerValue = 1.5f;
         public const float DefaultMinCooldown = 10f;

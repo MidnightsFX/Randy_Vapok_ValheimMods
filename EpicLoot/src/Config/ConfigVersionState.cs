@@ -33,7 +33,7 @@ public class ConfigVersionEntry
     /// </summary>
     public string WrittenHash = "";
 
-    /// <summary>Only meaningful for magiceffects, whose embedded source depends on BalanceConfigurationType.</summary>
+    /// <summary>Only meaningful for the balance template files, whose embedded source depends on BalanceConfigurationType.</summary>
     public string Variant = "";
 
     /// <summary>

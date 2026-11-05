@@ -270,7 +270,7 @@ public static class ConfigVersionManager
     /// Drops files that stopped being outdated after detection ran: something this session rewrote them
     /// to the shipped default, or stamped what it wrote as the mod's own output of it. The prompt calls
     /// this as it opens, because it now waits its turn behind the Quick Configure welcome wizard, whose
-    /// balance preset can rewrite magiceffects.json in the meantime.
+    /// balance preset can rewrite the balance template files in the meantime.
     /// </summary>
     public static void PruneResolvedOutdated()
     {
@@ -470,7 +470,7 @@ public static class ConfigVersionManager
     /// </summary>
     private static string GetEmbeddedHash(string configName, out string variant, out string embedded)
     {
-        variant = configName == "magiceffects" ? ELConfig.BalanceConfigurationType.Value : "";
+        variant = ELConfig.IsBalanceTemplateFile($"{configName}.json") ? ELConfig.BalanceConfigurationType.Value : "";
         embedded = null;
 
         try

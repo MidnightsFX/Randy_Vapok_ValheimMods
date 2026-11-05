@@ -10,6 +10,12 @@ namespace EpicLoot_UnityLib
     {
         private const float EmptyCellAlpha = 0.25f;
 
+        // Between the title above and the grids below, in line with the Take All buttons.
+        private const float CapacityLabelMargin = 2f;
+        private const float CapacityLabelHeight = 48f;
+        private const float CapacityLabelY = -62f;
+        private const float CapacityLabelMinFontSize = 10f;
+
         public TMP_Text CapacityLabel;
         public MultiSelectItemList MaterialsList;
         public MultiSelectItemList ShardstonesList;
@@ -54,6 +60,32 @@ namespace EpicLoot_UnityLib
                 TakeAllShardstonesButton.onClick.AddListener(() => OnTakeAllClicked(StashCatalog.ShardstoneGrid));
                 _takeAllShardstonesHint = FindGamepadHint(TakeAllShardstonesButton.transform);
             }
+
+            FitCapacityLabelBetweenButtons();
+        }
+
+        // The message shares a row with the Take All buttons, in a rect far wider than the gap between them, so the
+        // locked and warded messages and many translations ran across both. It stays in the gap, wrapping and then
+        // shrinking to fit. Truncate would drop whatever did not fit, so overflow is off.
+        private void FitCapacityLabelBetweenButtons()
+        {
+            if (CapacityLabel == null || TakeAllMaterialsButton == null || TakeAllShardstonesButton == null)
+            {
+                return;
+            }
+
+            RectTransform left = (RectTransform)TakeAllMaterialsButton.transform;
+            RectTransform right = (RectTransform)TakeAllShardstonesButton.transform;
+            float gap = right.anchoredPosition.x - right.rect.width / 2f - (left.anchoredPosition.x + left.rect.width / 2f);
+
+            RectTransform label = CapacityLabel.rectTransform;
+            label.sizeDelta = new Vector2(gap - 2f * CapacityLabelMargin, CapacityLabelHeight);
+            label.anchoredPosition = new Vector2(label.anchoredPosition.x, CapacityLabelY);
+
+            CapacityLabel.fontSizeMax = CapacityLabel.fontSize;
+            CapacityLabel.fontSizeMin = CapacityLabelMinFontSize;
+            CapacityLabel.enableAutoSizing = true;
+            CapacityLabel.overflowMode = TextOverflowModes.Overflow;
         }
 
         public void OnEnable()

@@ -11,7 +11,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // (single-player, or enemies close to the host); against remote-owned enemies it is best-effort.
     public static class QueenEverflow {
         // How many kills the buff may stack to, and how long a stack survives without a refresh. Tunable as
-        // "MaxStacks" and "BuffDuration" in this effect's Config block in config/shardstones.json.
+        // "MaxStacks" and "BuffDuration" in this effect's Config block in shardstones.json.
         public const int DefaultMaxStacks = 10;
         public const float DefaultBuffDuration = 10f;
 

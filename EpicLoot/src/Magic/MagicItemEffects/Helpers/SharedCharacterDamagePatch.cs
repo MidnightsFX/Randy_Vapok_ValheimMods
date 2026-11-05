@@ -49,11 +49,15 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             EpicLoot.LogErrorForce($"[SharedCharacterDamagePatch] {stage} on {target.m_name}: {e}");
         }
 
+        // __state is the target's health before this hit. The postfix cannot read it: when this client owns the target
+        // the hit has already landed by then, and when it does not, it has not.
         [HarmonyPrefix]
-        private static void EarlyPreDamagePatch(Character __instance, HitData hit) {
+        private static void EarlyPreDamagePatch(Character __instance, HitData hit, out float __state) {
+            __state = 0f;
             if (IsDroppedHit(__instance, hit)) {
                 return;
             }
+            __state = __instance.GetHealth();
             try {
                 EarlyPreDamage(__instance, hit);
             } catch (Exception e) {
@@ -75,12 +79,12 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
         }
 
         [HarmonyPostfix]
-        private static void PostDamagePatch(Character __instance, HitData hit) {
+        private static void PostDamagePatch(Character __instance, HitData hit, float __state) {
             if (IsDroppedHit(__instance, hit)) {
                 return;
             }
             try {
-                PostDamage(__instance, hit);
+                PostDamage(__instance, hit, __state);
             } catch (Exception e) {
                 LogHandlerError("postfix", __instance, e);
             }
@@ -136,7 +140,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             CoilingVenom.TagOutgoingHit(__instance, hit, hit.GetAttacker());
         }
 
-        private static void PostDamage(Character __instance, HitData hit) {
+        private static void PostDamage(Character __instance, HitData hit, float healthBeforeHit) {
             Character attacker = hit.GetAttacker();
             if (IsSelfInflicted(__instance, attacker)) {
                 return;
@@ -151,7 +155,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
                 // On-hit reactions (attacker side unless the handler guards otherwise).
                 AddLifeSteal.CheckAndDoLifeSteal(hit, attacker);
                 BloodDrinker.OnDamageDealt(hit, attacker);
-                AddEitrLeech.OnDamageDealt(hit, attacker);
+                AddEitrLeech.OnDamageDealt(hit, attacker, healthBeforeHit);
                 ChainLightning.OnDamageDealt(__instance, hit, attacker);
                 StrikeCausesLightning.OnDamageDealt(__instance, hit, attacker);
                 ApplySlow_Character_Damage_Patch.OnDamageDealt(__instance, hit, attacker);

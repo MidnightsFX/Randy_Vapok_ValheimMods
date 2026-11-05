@@ -170,14 +170,14 @@ internal static class QuickConfigBindings {
                 VisibleWhen = _ => CanEditFiles(),
                 Tooltip = () => QuickConfigTooltip.Text($"Balance preset: {name}",
                     "Sets the Balance Template and the four drop ratios to this preset. On Save, " +
-                    "magiceffects.json is rewritten from the preset's template and the Effect Tuning " +
-                    "page is reset to it."),
+                    "magiceffects.json and shardstones.json are rewritten from the preset's template and " +
+                    "the Effect Tuning page is reset to them."),
                 Act = staged => BalancePreset.ApplyToStaged(staged, name)
             });
         }
         Readout("readout:template", staged => $"Current template: {staged.Get("BalanceConfigurationType", "balanced")}",
-            "Balance Template", "The overhaul variant of magiceffects.json in use (balanced, minimal or legendary). " +
-            "Pick a preset above to change it; the file is rewritten from that template on Save.");
+            "Balance Template", "The overhaul variant of magiceffects.json and shardstones.json in use (balanced, " +
+            "minimal or legendary). Pick a preset above to change it; the files are rewritten from that template on Save.");
         TextChoice("BalanceConfigurationType", ELConfig.BalanceConfigurationType, "Balance Template", BindingScope.Server,
             () => BalancePreset.Names, BalancePreset.Normalize, visible: _ => CanEditFiles() == false);
         FloatSlider("GlobalDropRateModifier", ELConfig.GlobalDropRateModifier, "Global Drop Rate Modifier", BindingScope.Server, 0f, 4f, 0.05f);
@@ -1066,9 +1066,9 @@ internal static class QuickConfigBindings {
             Options = ItemPrefabNames,
             Tooltip = () => QuickConfigTooltip.Text("Effect configs",
                 "The per-effect tunables (Config block) of every loaded magic effect. Overhaul effects are " +
-                "written to baseconfig/magiceffects.json; a Balance preset rewrites that file from its " +
-                "template and resets them. Shard effects are written to baseconfig/shardstones.json, into " +
-                "every shard slot that carries the effect, so all copies stay identical. Effects registered " +
+                "written to baseconfig/magiceffects.json. Shard effects are written to baseconfig/shardstones.json, " +
+                "into every shard slot that carries the effect, so all copies stay identical. A Balance preset " +
+                "rewrites both files from its template and resets them. Effects registered " +
                 "by other mods or synthesized in code are shown read-only. Riches' keys are item prefab names " +
                 "and its values the cost of each; every other effect has a fixed set of keys."),
             Get = staged => staged.Get(key, new EffectConfigsValue()),

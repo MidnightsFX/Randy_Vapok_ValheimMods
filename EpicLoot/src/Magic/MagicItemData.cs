@@ -83,6 +83,7 @@ public static class MagicItemData
                 component.Reload(raw);
             }
 
+            component.RefreshSocketValues();
             return component;
         }
 
@@ -91,6 +92,7 @@ public static class MagicItemData
         // through here and must find this component rather than build a second one.
         Components.Add(item, component);
         component.Reload(raw);
+        component.RefreshSocketValues();
         return component;
     }
 

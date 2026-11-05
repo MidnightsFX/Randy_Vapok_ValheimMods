@@ -8,7 +8,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
         private const string BatSourcePrefab = "Bat";              // vanilla creature we clone
         private const string TamedBatPrefab = "EL_TamedBat";       // our registered player-faction/tamed clone
 
-        // All tunable in this effect's Config block in config/shardstones.json, under these key names.
+        // All tunable in this effect's Config block in shardstones.json, under these key names.
         // The summon count is the shard value plus SummonCountOffset, and at most ConcurrentPerSummon times
         // that many bats may be alive at once. BatLifetime seeds the cached clone's TimedDestruction, which
         // is baked into the registered prefab, so a change to it lands on the next game session.

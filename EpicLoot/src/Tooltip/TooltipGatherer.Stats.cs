@@ -261,7 +261,8 @@ internal partial class TooltipGatherer
             return;
         }
 
-        float attackDrawStaminaPercentage = 1 - magicItem.GetTotalEffectValue(MagicEffectType.ModifyDrawStaminaUse, 0.01f);
+        float attackDrawStaminaPercentage = ModifyAttackCosts.GetEffectPercentage(
+            magicItem.GetTotalEffectValue(MagicEffectType.ModifyDrawStaminaUse, 0.01f));
         AddStat("$item_staminahold", attackDrawStaminaPercentage * item.m_shared.m_attack.m_drawStaminaDrain,
             magicItem.HasEffect(MagicEffectType.ModifyDrawStaminaUse));
     }

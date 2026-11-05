@@ -168,7 +168,7 @@ namespace EpicLoot.ShardStones {
         public Dictionary<string, float> Values = new Dictionary<string, float>();
     }
 
-    // Root of config/shardstones.json: the full shard effect/rarity grid keyed by color, plus the
+    // Root of shardstones.json: the full shard effect/rarity grid keyed by color, plus the
     // cross-effect tunables that belong to no single shard.
     public class ShardStonesConfig {
         public Dictionary<ShardType, ShardDefinition> Shards = new Dictionary<ShardType, ShardDefinition>();
@@ -182,7 +182,7 @@ namespace EpicLoot.ShardStones {
         // display name, so only identical-rarity shards of the same color merge -- up to this many.
         private const int ShardStackSize = 100;
 
-        // Shard effect/rarity definitions, loaded from config/shardstones.json (registered in
+        // Shard effect/rarity definitions, loaded from shardstones.json (registered in
         // ELConfig.InitializeConfig). Keyed by color; each carries its own rarity set.
         private static Dictionary<ShardType, ShardDefinition> _definitions =
             new Dictionary<ShardType, ShardDefinition>();
@@ -190,6 +190,11 @@ namespace EpicLoot.ShardStones {
         // Cross-effect tunables from the "Global" block, kept whole so GetCFG can round-trip them to
         // clients. The live values are pushed into static fields by EffectConfig.ApplyGlobalConfig.
         private static ShardGlobalConfig _globalConfig = new ShardGlobalConfig();
+
+        // Counts the grid's loads; 0 until the first one. Socketed stones carry values baked from the grid,
+        // so an item whose values were worked out under another count re-derives them on its next read
+        // (MagicItemComponent.RefreshSocketValues).
+        public static int GridVersion { get; private set; }
 
         // Config setup hook (SychronizeConfig<ShardStonesConfig>). Backfills defaults so downstream
         // lookups never hit a null Rarities/TypeEffects/Config.
@@ -227,6 +232,11 @@ namespace EpicLoot.ShardStones {
             // ShardStoneConversions.Merge runs from both its own Initialize and the other file's event.
             // RegisterShardEffectDefinitions replaces its own previous output, so re-running is safe.
             global::EpicLoot.Magic.MagicItemEffects.Helpers.ShardEffectDefinitions.RegisterShardEffectDefinitions();
+
+            // A template switch, a live edit or a server push reaches stones already on gear through this.
+            // The worn totals and everything derived from them are dropped so they are read again.
+            GridVersion++;
+            ShardSocketManager.OnRuneSocketRulesChanged();
         }
 
         public static ShardStonesConfig GetCFG() {

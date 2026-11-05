@@ -9,7 +9,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     public static class AdrenalineFrostWave {
         // Enemy search radius, and the speed floor while chilled -- movement drops to this fraction at
         // application and eases back to normal over the duration, following vanilla's frost curve. Both
-        // tunable in this effect's Config block in config/shardstones.json, under these key names.
+        // tunable in this effect's Config block in shardstones.json, under these key names.
         public const float DefaultRadius = 10f;
         public const float DefaultSpeedFloor = 0.4f;
 

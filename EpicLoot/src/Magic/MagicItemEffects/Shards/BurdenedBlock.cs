@@ -12,7 +12,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     {
         // Carried weight the bonus starts paying out at, and how much further weight buys each additional
         // step of it. Tunable as "WeightThreshold" and "WeightPerBonus" in this effect's Config block in
-        // config/shardstones.json.
+        // shardstones.json.
         public const float DefaultWeightThreshold = 300f;
         public const float DefaultWeightPerBonus = 50f;
 

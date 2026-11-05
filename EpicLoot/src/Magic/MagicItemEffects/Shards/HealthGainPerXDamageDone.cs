@@ -7,7 +7,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a heal to the player for every X damage dealt, cumulative across hits
     public static class HealthGainPerXDamageDone {
         // Threshold of damage dealt before the player is healed. Tunable as "DamagePerTrigger" in this
-        // effect's Config block in config/shardstones.json.
+        // effect's Config block in shardstones.json.
         public const float DefaultDamagePerTrigger = 200f;
 
         private const string DamagePerTriggerKey = "DamagePerTrigger";

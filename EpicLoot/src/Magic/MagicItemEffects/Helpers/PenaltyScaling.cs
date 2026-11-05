@@ -8,7 +8,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
         // heavy loadout, i.e. where MovementPenaltyFactor reaches 1. ~20% speed loss is roughly a full set
         // of the heaviest armor.
         //
-        // Tunable as "MovementPenaltyReference" in the Global block of config/shardstones.json. It is a
+        // Tunable as "MovementPenaltyReference" in the Global block of shardstones.json. It is a
         // plain static field rather than a per-read config lookup because MovementPenaltyFactor sits under
         // GetArmor / GetMaxCarryWeight / ModifyStaminaRegen, which run at 50Hz; EffectConfig.ApplyGlobalConfig
         // refreshes it once per config load instead. Seven shards scale off it, so moving it retunes all of
