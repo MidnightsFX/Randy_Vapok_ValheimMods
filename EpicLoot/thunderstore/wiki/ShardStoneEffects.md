@@ -1,6 +1,6 @@
 # ShardStone Effects by Slot
 
-All data is sourced from [`config/shardstones.json`](config/shardstones.json), keyed by shard color → slot → effect.
+All data is sourced from [`config/overhauls/*/shardstones.json`](config/overhauls/), keyed by shard color → slot → effect. Each Balance Template has its own copy.
 Standard shards (Core/Dark/Light) define one effect per broad slot; Boss shards use a single **uniform** effect that
 applies to any socket. Effect power scales by rarity (Magic → Rare → Epic → Legendary → Mythic → Ancient).
 
@@ -112,7 +112,7 @@ into unsupported equipment.
 Every effect the shard grid above actually grants, with its in-game tooltip and description lifted verbatim from
 [`localizations/English.json`](localizations/English.json) (`mod_epicloot_me_<effect>_display` / `_desc`).
 `{0}`, `{1}`, ... and **X** are the rarity-scaled values from
-[`config/shardstones.json`](config/shardstones.json); an effect with more than one placeholder pulls its extra
+[`config/overhauls/*/shardstones.json`](config/overhauls/); an effect with more than one placeholder pulls its extra
 numbers from its `Config` block in
 [`ShardEffectDefinitions`](src/Magic/MagicItemEffects/Helpers/ShardEffectDefinitions.cs). Effect ids are globally
 unique — no effect is shared by two shards.
@@ -201,9 +201,9 @@ unique — no effect is shared by two shards.
 | `RunningOnEmpty` | Purple | Utility | Second Wind: {0}% of Max Health | When stamina runs out, burn up to {0}% of your max health for that much stamina. 30 second cooldown. |
 | `IncreaseHarvestDamage` | Grey | Melee Wpn, Ranged Wpn, Magic Wpn | +{0}% Harvest Damage | +{0}% chopping and mining damage. |
 | `BlockAsWoodCuttingAndPickaxes` | Grey | Shield | Adds +{1} block skill | Adds +{0}% of woodcutting and pickaxes skills after all modifiers as block skill. This bonus is rounded down to whole values |
-| `IncreaseMiningDrop` | Grey | Head | Mining Drop +{0:0} | Increase total amount of drops from ore and stone mining by **X**. |
+| `IncreaseMiningDrop` | Grey | Head | Mining Drop +{0:0.##} | Each break of ore or stone adds **X** toward extra drops, and every full 1 drops one. Fractions carry over to the next break. Values are half of Balanced on Minimal and double on Legendary. |
 | `AddFishingSkill` | Grey | Chest | Fishing Skill +{0} | Increases the player's fishing skill level by +**X**. This may cause the skill level to increase above 100. |
-| `IncreaseTreeDrop` | Grey | Legs | Lumberjacking Drop +{0:0} | Increase total amount of drops from trees and logs by **X**. |
+| `IncreaseTreeDrop` | Grey | Legs | Lumberjacking Drop +{0:0.##} | Each break of a tree or log adds **X** toward extra drops, and every full 1 drops one. Fractions carry over to the next break. Values are half of Balanced on Minimal and double on Legendary. |
 | `ReduceFishingStaminaCost` | Grey | Shoulders | -{0}% Fishing Stamina | Reduces the stamina cost of fishing by {0}%. |
 | `GainAdrenalineFromHarvesting` | Grey | Trinket | Gain {0} Adrenaline on Harvest | Gain {0} adrenaline each time you strike a tree or rock. |
 | `IncreaseHarvestXPGain` | Grey | Utility | +{0}% Gathering Skill XP | +{0}% XP for Woodcutting and Pickaxes. |
@@ -264,7 +264,7 @@ unique — no effect is shared by two shards.
 | `AddLightningResistancePercentage` | LightBlue | Head | Lightning Resistance {0:0.#}% | The player reduces all lightning damage taken by +**X**%. This effect stacks additively with other damage reduction effects equipped by the player. |
 | `PhysToLightning` | LightBlue | Chest | Convert {0}% Incoming Physical to Lightning | Move {0}% of incoming physical damage to lightning before resistances. |
 | `StormRider` | LightBlue | Legs | +{0}% Movement Speed in Storms | +{0}% movement speed while a storm rages. |
-| `Conduit` | LightBlue | Shoulders | Conduit: Restore {0} Eitr per {1} Lightning Damage Dealt | Restore {0} eitr for every {1} lightning damage you deal. |
+| `Conduit` | LightBlue | Shoulders | Conduit: Restore {0} Eitr per {1} Lightning Damage Dealt (Pool {2:0}) | Restore {0} eitr for every {1} lightning damage you deal, drawn from a pool that refills at your normal eitr regen rate, even in combat. `PoolPerValue` in its `Config` block sets the pool size: 3 on Minimal, 5 on Balanced, 8 on Legendary. A status icon shows the pool while the effect is worn. |
 | `StormFury` | LightBlue | Trinket | +{0} Adrenaline every {1}s in Storms, No Adrenaline Decay | Every {1} seconds while a storm rages, gain {0} adrenaline. Your adrenaline does not decay for as long as the storm lasts. |
 | `ConvertPhysicalDamageToLightning` | LightBlue | Utility | Convert {0}% Weapon Physical to Lightning | Move {0}% of this weapon's physical damage to lightning. |
 | `HealthGainPerXDamageDone` | LightGreen | Melee Wpn, Ranged Wpn, Magic Wpn | Heal {0} per {1} Damage Dealt | Heal {0} health for every {1} damage you deal with this weapon. |
@@ -272,7 +272,7 @@ unique — no effect is shared by two shards.
 | `PotionEfficacy` | LightGreen | Head | +{0}% Potion Duration | Consumed potions and meads last {0}% longer. |
 | `Comfortable` | LightGreen | Chest | Comfort +{0} | When resting and wearing the magic equipment, the player's comfort level is increased by +**X**. |
 | `AddPickaxesSkill` | LightGreen | Legs | Pickaxes Skill +{0} | Increases the player's pickaxes skill level by +**X**. This may cause the skill level to increase above 100. |
-| `RestingHealthRegen` | LightGreen | Shoulders | +{0}% Health Regen While Resting | Increases health regeneration by {0}% while you are resting by a fire. |
+| `RestingHealthRegen` | LightGreen | Shoulders | +{0}% Health Regen While Resting (the Legendary template: While Resting or Rested) | Increases health regeneration by {0}% while you are resting by a fire. `WhileResting` and `WhileRested` in its `Config` block (0 = off) choose which of the two count; the text follows them. Balanced and Minimal ship resting only, Legendary ships both. |
 | `AdrenalineIncreasesHealthRegen` | LightGreen | Trinket | Adrenaline Surge: +{0}% Health Regen for {1}s | When your adrenaline fills, gain +{0}% health regen for {1} seconds. Refilling refreshes the buff rather than stacking it. |
 | `BountifulHarvest` | LightGreen | Utility | Bountiful Harvest: {0}% Bonus Yield | {0}% chance to gather a bonus item when harvesting. |
 | `DamageBonusFromPlayerWeight` | Peach | Melee Wpn, Ranged Wpn, Magic Wpn | +Up to {0}% Damage by Pack Weight | Weapon damage scaling with how loaded your pack is, up to +{0}%. |

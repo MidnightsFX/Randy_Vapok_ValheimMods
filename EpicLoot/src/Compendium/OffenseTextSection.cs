@@ -467,7 +467,7 @@ public static class OffenseTextSection
 
         float modifier = (magicItem?.GetTotalEffectValue(MagicEffectType.ModifyDrawStaminaUse, 0.01f) ?? 0f) +
             MagicEffectsHelper.GetTotalActiveSetEffectValue(player, MagicEffectType.ModifyDrawStaminaUse, 0.01f);
-        float total = (1f - Mathf.Clamp(modifier, 0f, 1f)) * baseValue;
+        float total = ModifyAttackCosts.GetEffectPercentage(modifier) * baseValue;
         List<string> detail = new();
         detail.AddRange(StatSourceLines.GetMagicSources(player, MagicEffectType.ModifyDrawStaminaUse,
             x => x == weapon));

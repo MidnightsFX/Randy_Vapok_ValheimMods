@@ -12,7 +12,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // override, so vanilla drives it off the live stack count on every swing.
     public static class Bloodrage {
         // How many hits taken the rage may stack to, and how long a stack survives without a refresh.
-        // Tunable as "MaxStacks" and "BuffDuration" in this effect's Config block in config/shardstones.json.
+        // Tunable as "MaxStacks" and "BuffDuration" in this effect's Config block in shardstones.json.
         public const int DefaultMaxStacks = 5;
         public const float DefaultBuffDuration = 10f;
 

@@ -226,7 +226,7 @@ namespace EpicLoot
 
             // Host-item gating: item type, skill type, item name, rarity, and item-property predicates.
             // Shards bypass this (checkItemTypeGating == false): a shard's placement is decided
-            // authoritatively by the per-slot effect grid in config/shardstones.json, so re-applying an
+            // authoritatively by the per-slot effect grid in shardstones.json, so re-applying an
             // effect's rune/loot-roll host requirements here would wrongly reject valid slot mappings
             // (e.g. AddPickaxesSkill -- a Pickaxes-skill weapon effect -- resolved onto the Legs armor
             // slot). The effect-composition rules (exclusivity / must-have, above) still apply to shards.

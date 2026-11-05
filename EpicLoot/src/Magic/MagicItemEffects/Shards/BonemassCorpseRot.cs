@@ -9,7 +9,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     public static class BonemassCorpseRot {
         // Seconds between detonations, the burst radius, and the poison dealt per point of shard value
         // (20 -> 5..25 becomes 100..500). All tunable in this effect's Config block in
-        // config/shardstones.json, under these key names.
+        // shardstones.json, under these key names.
         public const float DefaultCooldown = 5f;
         public const float DefaultRadius = 2f;
         public const float DefaultPoisonPerTier = 20f;

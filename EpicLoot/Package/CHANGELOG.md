@@ -1,3 +1,20 @@
+**0.15.7**
+* The health regen shardstone for shoulders can be set to work while resting, while rested or both, and the Legendary balance template now gives it for both.
+* Balance templates now include shardstones, so applying a template also replaces your shardstone settings.
+* Shardstones already socketed now pick up balance changes without being taken out and put back.
+* Mining and lumberjacking drop effects now build up fractions of a drop with each break, and the balance template sets how fast.
+* Attacks, dodges and jumps can no longer be reduced below a tenth of their cost.
+* Eitr Weaving now restores a percentage of max eitr.
+* Paying eitr costs from stamina no longer refunds eitr when you have no stamina.
+* Stormcaller's lightning strikes deal less damage.
+* Conduit now restores eitr from a pool that refills at your normal eitr regen rate, even in combat, and higher values give a larger pool and more eitr per hit.
+* Conduit's pool now shows as a status icon on the HUD while it is worn.
+* Eitr Leech no longer counts damage past a target's remaining health.
+* Epic Loot's compendium pages no longer show up blank with Auga, and their tables now fit the page.
+* The enchanting table's Upgrade tab is back with Auga, and its page shows its title again.
+* The message on the enchanting table's Storage tab no longer runs into the Take All buttons.
+* Items in the quick slots of Equipment and Quick Slots now count as hotbar items at the enchanting table, so they stay out of the sacrifice list when hotbar items are hidden.
+
 **0.15.6**
 * Works with Auga 1.4.1 and newer
 * The shard slot panel no longer covers the quick slots of Equipment and Quick Slots or other mods' panels beside the inventory.

@@ -331,7 +331,7 @@ Full-set look: tinted armor, aura effects.
 
 | Pieces | Bonus |
 |---|---|
-| 2 | Eitr Weaving +30 (parrying restores Eitr) |
+| 2 | Eitr Weaving +6% (parrying restores a share of max Eitr) |
 | 2 | Spellblade +15 (half of each attack's cost is paid in Eitr instead, and the attack deals more damage) |
 | 3 | Eitr Leech 5% |
 | 3 | Interconnected: the skill of the weapon in your hands gains 20 / 25 / 30% of its partner skill's level (see [Interconnected](#interconnected)). |

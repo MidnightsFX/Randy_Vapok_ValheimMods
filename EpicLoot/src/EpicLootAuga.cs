@@ -274,7 +274,10 @@ namespace EpicLoot
 
             foreach (var text in obj.GetComponentsInChildren<TMP_Text>(true))
             {
-                if (IsHeaderFont(text.font != null ? text.font.name : null))
+                // A VanillaFont picks its text's font when its page first opens, so the enchanting table's page
+                // titles keep the game's face. Only a page already open here would keep a swap: that is the Upgrade
+                // page, and the bold face's taller line truncates its title to nothing.
+                if (IsHeaderFont(text.font != null ? text.font.name : null) && text.GetComponent<VanillaFont>() == null)
                 {
                     var bold = GetBoldTmpFont();
                     if (bold != null)
@@ -344,6 +347,13 @@ namespace EpicLoot
             rt.pivot = oldRt.pivot;
             rt.anchoredPosition = oldRt.anchoredPosition;
             rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, oldRt.rect.width);
+            // The tab bar fits every tab only at the size the window's prefab gives them. The Auga tab prefab is
+            // taller, which pushes the last tab off the bottom of the window. The label stretches with the tab and
+            // auto-sizes its font to fit, so it keeps its own height or it shrinks until it cannot be read.
+            var labelRt = (RectTransform)newButton.transform.Find("Text");
+            var labelHeight = labelRt.rect.height;
+            rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, oldRt.rect.height);
+            labelRt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, labelHeight);
 
             newButton.transform.Find("Text").GetComponent<TMP_Text>().text = button.transform.Find("Text").GetComponent<TMP_Text>().text;
             newButton.transform.Find("Image").GetComponent<Image>().sprite = button.transform.Find("Image").GetComponent<Image>().sprite;

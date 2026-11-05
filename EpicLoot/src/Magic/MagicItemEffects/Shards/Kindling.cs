@@ -8,7 +8,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a stamina restoration effect based on fire damage taken, uses an accumulated threshold.
     public static class Kindling {
         // Fire damage taken per stamina trigger; higher = a slower trickle. Tunable as "DamagePerTrigger"
-        // in this effect's Config block in config/shardstones.json.
+        // in this effect's Config block in shardstones.json.
         public const float DefaultDamagePerTrigger = 75f;
 
         private const string DamagePerTriggerKey = "DamagePerTrigger";

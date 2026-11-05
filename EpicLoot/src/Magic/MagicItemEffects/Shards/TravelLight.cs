@@ -10,7 +10,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
         // Max carry weight removed per 1 point of shard value (i.e. per 1% of move speed gained), and the
         // backstop that stops stacked sources pushing the carry cap to zero or below. Tunable as
         // "CarryWeightPerValue" and "MinResultingCarryWeight" in this effect's Config block in
-        // config/shardstones.json.
+        // shardstones.json.
         public const float DefaultCarryWeightPerValue = 10f;
         public const float DefaultMinResultingCarryWeight = 50f;
 

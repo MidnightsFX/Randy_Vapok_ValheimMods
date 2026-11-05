@@ -7,7 +7,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     public static class AdrenalineIncreasesHealthRegen {
         // Seconds of buff granted per 1 point of shard value -- what turns the single rarity ramp into both
         // a regen percentage and a duration. Tunable as "SecondsPerPercent" in this effect's Config block in
-        // config/shardstones.json.
+        // shardstones.json.
         public const float DefaultSecondsPerPercent = 0.5f;
 
         private const string SecondsPerPercentKey = "SecondsPerPercent";

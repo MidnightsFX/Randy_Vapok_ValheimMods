@@ -7,7 +7,7 @@ using UnityEngine;
 namespace EpicLoot.MagicItemEffects.Shards {
     // Lays a trail of burning behind the player while moving, damage scaled by the effect value
     public static class Trailblazer {
-        // Tuning knobs, all read from this effect's Config block in config/shardstones.json under these key
+        // Tuning knobs, all read from this effect's Config block in shardstones.json under these key
         // names. PatchLifetime additionally seeds the cached VFX template's particle duration and
         // TimedDestruction timeout; those are baked into the registered prefab, so a lifetime raised past the
         // default makes the burn outlast its visual until the next game session. Lowering it is exact,

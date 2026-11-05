@@ -9,7 +9,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     public static class BloodDrinker {
         // Max health removed, as a percent of the health pool, per 1 point of shard value. With the
         // shard's 3/6/9/12/15 values this yields -7.5%/-15%/-22.5%/-30%/-37.5% across Magic..Mythic.
-        // Tunable as "MaxHealthPercentPerValue" in this effect's Config block in config/shardstones.json.
+        // Tunable as "MaxHealthPercentPerValue" in this effect's Config block in shardstones.json.
         public const float DefaultMaxHealthPercentPerValue = 2.5f;
 
         // Floor on the amount removed. A pure percentage is negligible on a low-food character (37.5% of

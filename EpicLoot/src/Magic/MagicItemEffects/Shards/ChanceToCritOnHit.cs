@@ -9,7 +9,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
         // Damage multiplier applied on a successful crit; 2 = double damage. This is distinct in intent from
         // ChanceDoubleDamage (a Fortune-shard proc) even though the default matches, so the two carry
         // separate Config blocks and can be retuned apart. Tunable as "DamageMultiplier" in this effect's
-        // Config block in config/shardstones.json.
+        // Config block in shardstones.json.
         public const float DefaultDamageMultiplier = 2f;
 
         private const string DamageMultiplierKey = "DamageMultiplier";

@@ -62,16 +62,14 @@ public class MagicPages : MonoBehaviour
             $"{EpicLoot.GetMagicEffectPip(false)} $mod_epicloot_shardstones_title"));
         
         // The vanilla dialog keeps its parts in Texts_frame. Auga's compendium dialogs (AugaTextsDialog) have no
-        // frame: the text area, in the same TextArea/ScrollArea/Content shape, sits under the root, and there
-        // is no close button.
-        Transform frame = transform.Find("Texts_frame");
-        bool augaDialog = frame == null;
-        if (augaDialog)
-        {
-            frame = transform;
-        }
+        // frame of their own: the text area, in the same TextArea/ScrollArea/Content shape, sits under the root,
+        // and there is no close button. Auga does hang an empty, inactive Texts_frame on them, for mods that
+        // cannot cope without one, and pages built into that never show. So where the text area sits decides
+        // which dialog this is, not whether a frame exists.
+        bool augaDialog = transform.Find("TextArea") != null;
+        Transform frame = augaDialog ? transform : transform.Find("Texts_frame");
 
-        Transform textArea = frame.Find("TextArea");
+        Transform textArea = frame != null ? frame.Find("TextArea") : null;
         if (textArea == null || textArea.Find("ScrollArea/Content") == null)
         {
             EpicLoot.LogWarning($"Compendium: {name} has no TextArea/ScrollArea/Content; Epic Loot's pages are left out of it.");
@@ -87,9 +85,13 @@ public class MagicPages : MonoBehaviour
 
         if (augaDialog)
         {
+            // Pages are measured against MinWidth, and Auga's scroll area is inset from its text area. At the text
+            // area's width, tables run out of the scroll area and lose their last column.
+            MinWidth = ((RectTransform)textArea.Find("ScrollArea")).rect.width;
             MagicPagesTextArea = new MagicTextList(compendiumTextArea, frame);
             MagicPagesTextArea.SetTopPadding(Mathf.RoundToInt(AUGA_SEARCH_BAR_HEIGHT + 2 * AUGA_SEARCH_BAR_MARGIN));
-            float rowWidth = Mathf.Max(MinWidth - 40f, 200f);
+            // The search bar row is docked to the text area itself.
+            float rowWidth = Mathf.Max(textAreaRect.rect.width - 40f, 200f);
             float searchWidth = rowWidth - COLLAPSE_BUTTON_WIDTH - COLLAPSE_BUTTON_SPACING;
             Search = new MagicSearchField(MagicPagesTextArea.Root);
             Search.DockTop(searchWidth, AUGA_SEARCH_BAR_HEIGHT, AUGA_SEARCH_BAR_MARGIN,

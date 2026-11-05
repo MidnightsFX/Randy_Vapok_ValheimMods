@@ -10,7 +10,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
         // Multiplier applied on a successful proc; 2 = double damage. Kept separate from
         // ChanceToCritOnHit's multiplier despite the matching default -- they are different shards and are
         // meant to be tunable apart. Tunable as "DamageMultiplier" in this effect's Config block in
-        // config/shardstones.json.
+        // shardstones.json.
         public const float DefaultDamageMultiplier = 2f;
 
         private const string DamageMultiplierKey = "DamageMultiplier";

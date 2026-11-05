@@ -19,7 +19,7 @@ namespace EpicLoot.Magic.MagicItemEffects.Helpers {
     public static class ShardEffectDefinitions {
         // Code-side defaults for the per-effect tunables. These are the fallback half of the merge in
         // BuildConfig; the authored half is the "Config" block on the effect's grid entry in
-        // config/shardstones.json, which overlays these per key.
+        // shardstones.json, which overlays these per key.
         //
         // Keeping a code default for every key is not optional: a player's existing on-disk
         // shardstones.json keeps winning until they accept the ConfigVersionManager rewrite prompt, so a
@@ -63,6 +63,8 @@ namespace EpicLoot.Magic.MagicItemEffects.Helpers {
                 // Adrenaline Surge: seconds of buff granted per point of shard value, which is what turns
                 // the single rarity ramp into both a regen % and a duration.
                 { MagicEffectType.AdrenalineIncreasesHealthRegen, AdrenalineIncreasesHealthRegen.DefaultConfig },
+                // Resting Health Regen: whether the bonus applies while Resting, while Rested, or both.
+                { MagicEffectType.RestingHealthRegen, RestingHealthRegen.DefaultConfig },
 
                 // -------- Boss shard actives --------
                 // Meteor: hits to charge, plus the launch geometry and impact radius.
@@ -86,7 +88,7 @@ namespace EpicLoot.Magic.MagicItemEffects.Helpers {
                 { MagicEffectType.StrikeCausesLightning, StrikeCausesLightning.DefaultConfig },
 
                 // -------- Accumulator / threshold effects --------
-                // Conduit: lightning dealt per eitr payout.
+                // Conduit: lightning dealt per eitr payout, and how much eitr its pool holds per value point.
                 { MagicEffectType.Conduit, Conduit.DefaultConfig },
                 // Health per X damage done: damage banked per heal payout.
                 { MagicEffectType.HealthGainPerXDamageDone, HealthGainPerXDamageDone.DefaultConfig },
@@ -161,6 +163,11 @@ namespace EpicLoot.Magic.MagicItemEffects.Helpers {
                 MagicItemEffectDefinitions.Add(definition);
                 Synthesized[pair.Key] = definition;
             }
+
+            // After the merge rather than in BuildDefinition: on a client this definition arrives with the
+            // server's magiceffects.json, so the grid only reaches it as an overlay and its text would stay
+            // as the server last sent it.
+            RestingHealthRegen.RefreshDisplayText();
         }
 
         // Undoes the last run so this one rebuilds from the current grid instead of no-opping on the

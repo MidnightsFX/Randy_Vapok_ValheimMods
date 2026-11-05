@@ -8,7 +8,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a small heal over time when the player spends Eitr. The heal is triggered every time the player spends a threshold amount of Eitr.
     public static class HealthOnEitrUse {
         // Threshold of Eitr spent before the player is healed. Tunable as "EitrPerTrigger" in this
-        // effect's Config block in config/shardstones.json.
+        // effect's Config block in shardstones.json.
         public const float DefaultEitrPerTrigger = 100f;
 
         private const string EitrPerTriggerKey = "EitrPerTrigger";

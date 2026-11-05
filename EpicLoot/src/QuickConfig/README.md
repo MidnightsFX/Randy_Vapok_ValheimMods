@@ -5,11 +5,11 @@ shipped in the `epicloot` bundle) and **bound by code** in this folder. Maintain
 and add rows in the editor; the code only finds rows by their GameObject name and wires the named
 widget children below. Nothing here positions anything.
 
-The editor-side generator that produced the initial prefabs is
-`ValheimUnity/Assets/Scripts/Editor/QuickConfigPrefabBuilder.cs` (menu `Mod/Quick Configure/...`).
-It only creates pages that do not exist yet, so hand edits survive; row templates and the shell can be
-regenerated on purpose, and "Rebuild Selected Pages" resets just the page prefabs selected in the
-Project window to the script's table.
+The prefabs are the source; nothing generates them. To add a setting, drop an instance of a `Rows/Row_*`
+template into a page prefab, name it after the key and register the key in `QuickConfigBindings.cs`.
+Pages nest the row templates, so an edit to a template reaches every page that uses it. To undo edits to
+a page, restore that prefab from git. After any prefab change run `Mod/Build Asset Bundles`, then rebuild
+EpicLoot, which embeds the bundle.
 
 ## Rows and pages are identified by GameObject name (no baked components)
 
@@ -120,7 +120,7 @@ is shown, so a bundle without the button never strands the rest.
 The shell's `Reset` button stages the shipped default of every row on the shown page the player may
 edit (after a confirm); Save writes it like any other edit, and other pages are untouched. A .cfg row
 takes its BepInEx default. A JSON row takes the value from the file the mod ships (the embedded
-baseconfig, `ShippedDefaults`; magiceffects.json is the overhaul of the staged Balance Template): a
+baseconfig, `ShippedDefaults`; magiceffects.json and shardstones.json are the overhaul of the staged Balance Template): a
 simple value by the dotted path in its key, a table through its slot's `Default`, which merges by identity
 so an entry the shipped file lacks (a loot table, a bounty biome, an item category another mod added)
 keeps its current values. A slot without a default is left alone.
@@ -139,7 +139,8 @@ label can be switched to a token later. Page titles, nav buttons, the welcome te
 - JSON writes edit the on-disk baseconfig as a `JObject` (only the changed tokens) and reload it through
   `ELConfig.ReloadBaseConfigsFromDisk`. They **never** call `ConfigVersionManager.RecordWrittenContent`:
   panel edits are the player's work, and stamping them as the mod's would let the next update overwrite
-  them silently. The Balance preset rewrite from the embedded overhaul *does* record itself.
+  them silently. The Balance preset rewrite of `ELConfig.BalanceTemplateFiles` from the embedded overhaul *does*
+  record itself.
 - JSON rows and the preset buttons are editable by the host and by a server admin
   (`QuickConfigBindings.CanEditFiles`: Jotunn's `PlayerIsAdmin` off-host), read-only for anyone else.
   The shared launcher only shows the panel to those two anyway.
@@ -153,10 +154,10 @@ written on the server by `QuickConfigServerSave`, over one CustomRPC (`epicloot_
 2. **Fetch**: the client asks for the server's current text of every file with a staged change.
 3. The client applies the staged changes to that text with the host's own code
    (`JsonConfigEdits.ApplyStaged`, the slots' writers) and sends each edited file back with a hash of
-   the text it edited. With a preset pressed, it asks for the magiceffects.json rewrite instead of
-   sending edits to that file, as the host drops them.
+   the text it edited. With a preset pressed, it asks for the rewrite of the balance template files
+   (magiceffects.json, shardstones.json) instead of sending edits to them, as the host drops them.
 4. **Write**: the server checks the sender against its admin list (vanilla `ZNet.IsAdmin` on the peer's
-   host name) and that each file still hashes the same, then rewrites magiceffects.json if asked (backing
+   host name) and that each file still hashes the same, then rewrites the template files if asked (backing
    up a hand-edited one; there is no one to ask), writes the files in `StagedConfig.JsonFileOrder` and
    reloads them, which pushes them to every connected player. A file that will not load is put back.
 5. The save completes when the server's reply **and** the push of every file it wrote have arrived

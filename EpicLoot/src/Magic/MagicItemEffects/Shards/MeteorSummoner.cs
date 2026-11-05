@@ -8,7 +8,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     public static class MeteorSummoner {
         private const string MeteorPrefab = "projectile_meteor";
 
-        // All tunable in this effect's Config block in config/shardstones.json, under these key names.
+        // All tunable in this effect's Config block in shardstones.json, under these key names.
         public const int DefaultMaxCharges = 25;             // weapon hits required to charge the meteor
         public const float DefaultSpawnHeight = 20f;         // metres above the target the meteor launches from
         public const float DefaultMinDistance = 5f;          // min horizontal offset of the launch point

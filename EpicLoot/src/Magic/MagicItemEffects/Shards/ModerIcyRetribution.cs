@@ -5,7 +5,7 @@ using UnityEngine;
 namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a reactive frost nova when the player takes damage, with a scaling damage and cooldown based on rarity.
     public static class ModerIcyRetribution {
-        // All tunable in this effect's Config block in config/shardstones.json, under these key names.
+        // All tunable in this effect's Config block in shardstones.json, under these key names.
         public const float DefaultRadius = 8f;
         public const float DefaultFrostPerTier = 8f;       // frost damage per point of value (15..30 -> 120..240)
         public const float DefaultBaseCooldown = 200f;     // cooldown at Epic (the shard's rarity floor)

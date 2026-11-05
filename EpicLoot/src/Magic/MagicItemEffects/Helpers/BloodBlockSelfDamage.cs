@@ -9,7 +9,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
     // the local player a share of max health as untyped true damage, with the shared hit/blood fx.
     public static class BloodBlockSelfDamage {
         // Percent of max health charged per block start. Shared by both blood block shards, so it lives
-        // in the Global block of config/shardstones.json ("BloodBlockSelfDamagePercent") rather than on
+        // in the Global block of shardstones.json ("BloodBlockSelfDamagePercent") rather than on
         // either effect. A plain static field because this sits on a per-frame UpdateBlock postfix;
         // EffectConfig.ApplyGlobalConfig refreshes it once per config load.
         public const float DefaultSelfDamagePercent = 5f;

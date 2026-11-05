@@ -7,7 +7,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Grants adrenaline every few seconds for each nearby enemy that the local player has poisoned.
     public static class GainAdrenalineWhenApplyingPoison {
         // Seconds between adrenaline pulses, and how far a poisoned foe can be and still count. Tunable as
-        // "TickInterval" and "Radius" in this effect's Config block in config/shardstones.json;
+        // "TickInterval" and "Radius" in this effect's Config block in shardstones.json;
         // PoisonAdrenalinePulse re-arms its InvokeRepeating when the interval changes.
         public const float DefaultTickInterval = 3f;
         public const float DefaultRadius = 30f;

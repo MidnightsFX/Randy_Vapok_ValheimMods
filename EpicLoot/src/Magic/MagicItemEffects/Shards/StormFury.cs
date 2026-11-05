@@ -9,7 +9,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // Storm based adrenaline pulse. Grants a flat amount of adrenaline every 10 seconds while in a storm and suppresses adrenaline decay
     public static class StormFury {
         // Seconds between adrenaline pulses. Tunable as "TickInterval" in this effect's Config block in
-        // config/shardstones.json; StormFuryPulse re-arms its InvokeRepeating when this changes.
+        // shardstones.json; StormFuryPulse re-arms its InvokeRepeating when this changes.
         public const float DefaultTickInterval = 10f;
 
         private const string TickIntervalKey = "TickInterval";

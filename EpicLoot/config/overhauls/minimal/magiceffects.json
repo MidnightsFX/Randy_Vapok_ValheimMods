@@ -838,24 +838,24 @@
       },
       "ValuesPerRarity": {
         "Epic": {
-          "MinValue": 1,
-          "MaxValue": 1,
-          "Increment": 1
+          "MinValue": 0.5,
+          "MaxValue": 0.5,
+          "Increment": 0.5
         },
         "Legendary": {
-          "MinValue": 2,
-          "MaxValue": 2,
-          "Increment": 1
+          "MinValue": 1,
+          "MaxValue": 1,
+          "Increment": 0.5
         },
         "Mythic": {
-          "MinValue": 3,
-          "MaxValue": 3,
-          "Increment": 1
+          "MinValue": 1.5,
+          "MaxValue": 1.5,
+          "Increment": 0.5
         },
         "Ancient": {
-          "MinValue": 4,
-          "MaxValue": 4,
-          "Increment": 1
+          "MinValue": 2,
+          "MaxValue": 2,
+          "Increment": 0.5
         }
       },
       "SelectionWeight": 10,
@@ -879,34 +879,34 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 1,
-          "MaxValue": 1,
-          "Increment": 1
+          "MinValue": 0.5,
+          "MaxValue": 0.5,
+          "Increment": 0.5
         },
         "Rare": {
-          "MinValue": 2,
-          "MaxValue": 2,
-          "Increment": 1
+          "MinValue": 1,
+          "MaxValue": 1,
+          "Increment": 0.5
         },
         "Epic": {
-          "MinValue": 3,
-          "MaxValue": 3,
-          "Increment": 1
+          "MinValue": 1.5,
+          "MaxValue": 1.5,
+          "Increment": 0.5
         },
         "Legendary": {
-          "MinValue": 4,
-          "MaxValue": 4,
-          "Increment": 1
+          "MinValue": 2,
+          "MaxValue": 2,
+          "Increment": 0.5
         },
         "Mythic": {
-          "MinValue": 5,
-          "MaxValue": 5,
-          "Increment": 1
+          "MinValue": 2.5,
+          "MaxValue": 2.5,
+          "Increment": 0.5
         },
         "Ancient": {
-          "MinValue": 6,
-          "MaxValue": 6,
-          "Increment": 1
+          "MinValue": 3,
+          "MaxValue": 3,
+          "Increment": 0.5
         }
       },
       "SelectionWeight": 10,
@@ -7468,6 +7468,9 @@
           "MaxValue": 80,
           "Increment": 1.5
         }
+      },
+      "Config": {
+        "MaxEitrPercentPerValue": 0.12
       },
       "SelectionWeight": 10,
       "Prefixes": [

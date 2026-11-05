@@ -5,7 +5,7 @@ using UnityEngine;
 namespace EpicLoot.MagicItemEffects.Shards {
     // Provides a charge that builds on combat hits and discharges as a forward lightning shockwave when full.
     public static class EikthyrShockingCharge {
-        // All tunable in this effect's Config block in config/shardstones.json, under these key names.
+        // All tunable in this effect's Config block in shardstones.json, under these key names.
         //
         // Hits required to trigger a discharge: MaxCharges is the threshold at a shard value of zero,
         // ChargesPerValue is how many hits each point of value shaves off it, and MinCharges is the floor
