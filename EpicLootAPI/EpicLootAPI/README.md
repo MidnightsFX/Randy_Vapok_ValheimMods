@@ -5,7 +5,7 @@ so you never need a hard assembly reference or a Harmony patch on its internals.
 
 Two things live here:
 
-- **Extending Epic Loot with new content** — magic effects, legendary items and sets, abilities,
+- **Extending Epic Loot with new content** — magic effects, unique items and sets, abilities,
   material conversions, sacrifices, bounties. That is what most of this README covers.
   (Recipes are deprecated — see [Example Recipe](#example-recipe--deprecated).)
 - **Integrating with Epic Loot's behaviour** — inventory and equipment providers, sacrifice filters,
@@ -126,7 +126,7 @@ wherever you fill the slot in:
 EpicLoot.ApplyMagicItemBackground(element.m_go, element.m_equiped, item, inventoryGrid: false);
 ```
 
-Pass `null` for `item` to clear a slot. `inventoryGrid: true` also draws the legendary set marker. Child
+Pass `null` for `item` to clear a slot. `inventoryGrid: true` also draws the set and unique markers. Child
 images are created only when a slot first needs one, so calling this every frame — and for empty slots —
 is cheap.
 
@@ -204,7 +204,7 @@ if (item.CanBeMagicItem())
     float luck = EpicLoot.GetLuckFactor(dropPoint);
     item.TryMakeMagicItem(ItemRarity.Epic, luck);
 
-    // or forcing a named legendary -- fails rather than downgrading if it does not fit
+    // or forcing a named unique -- fails rather than downgrading if it does not fit
     item.TryMakeMagicItem(ItemRarity.Legendary, luck, "HeimdallLegs");
 }
 
@@ -280,8 +280,8 @@ private static void TeleportInstant(this Player player, Vector3 position, Quater
 
 ```
 
-### Example Legendary Item
-Add a custom legendary item, with its own specific enchantments, on a specific item type. 
+### Example Unique Item
+Add a custom unique item, with its own specific enchantments, on a specific item type. 
 
 A unique rolls at the rarities in its `Rarities` list. The `LegendaryType` constructor registers it at that
 one rarity; the `params ItemRarity[]` constructor enables several, and `SetValuesForRarity` gives a

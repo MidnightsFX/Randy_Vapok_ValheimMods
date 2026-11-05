@@ -1201,12 +1201,12 @@
                 "Head": {
                     "EffectType": "IncreaseMiningDrop",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 1.5,
-                        "Epic": 2,
-                        "Legendary": 2.5,
-                        "Mythic": 3,
-                        "Ancient": 3.5
+                        "Magic": 25,
+                        "Rare": 37.5,
+                        "Epic": 50,
+                        "Legendary": 62.5,
+                        "Mythic": 75,
+                        "Ancient": 87.5
                     }
                 },
                 "Chest": {
@@ -1223,12 +1223,12 @@
                 "Legs": {
                     "EffectType": "IncreaseTreeDrop",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 1.5,
-                        "Epic": 2,
-                        "Legendary": 2.5,
-                        "Mythic": 3,
-                        "Ancient": 3.5
+                        "Magic": 10,
+                        "Rare": 15,
+                        "Epic": 20,
+                        "Legendary": 25,
+                        "Mythic": 30,
+                        "Ancient": 35
                     }
                 },
                 "Trinket": {

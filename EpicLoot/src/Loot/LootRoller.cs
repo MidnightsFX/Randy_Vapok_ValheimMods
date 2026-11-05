@@ -1438,9 +1438,13 @@ namespace EpicLoot
                     magicItem.LegendaryID = itemInfo.ID;
                     magicItem.DisplayName = itemInfo.Name;
 
-                    if (itemInfo.GuaranteedEffectCount > 0)
+                    int guaranteedCount = itemInfo.GuaranteedEffectCountPerRarity != null &&
+                        itemInfo.GuaranteedEffectCountPerRarity.TryGetValue(rarity, out int perRarityCount)
+                        ? perRarityCount
+                        : itemInfo.GuaranteedEffectCount;
+                    if (guaranteedCount > 0)
                     {
-                        effectCount = itemInfo.GuaranteedEffectCount;
+                        effectCount = guaranteedCount;
                     }
 
                     foreach (var guaranteedMagicEffect in itemInfo.GuaranteedMagicEffects)
@@ -1448,7 +1452,7 @@ namespace EpicLoot
                         if (!MagicItemEffectDefinitions.TryGet(guaranteedMagicEffect.Type, out var effectDef))
                         {
                             EpicLoot.LogError($"Could not find magic effect (Type={guaranteedMagicEffect.Type}) " +
-                                $"while creating legendary/mythic item (ID={itemInfo.ID})");
+                                $"while creating unique item (ID={itemInfo.ID})");
                             continue;
                         }
 
@@ -1490,9 +1494,8 @@ namespace EpicLoot
 
         /// <summary>
         /// Picks the unique a fresh <paramref name="rarity"/> item becomes, or null for a plain item. With
-        /// probability SetItemDropChance it tries a set piece first; when no set piece enabled at this
-        /// rarity fits the item it falls through to the regular unique roll rather than making the item
-        /// generic. The regular roll includes <see cref="UniqueLegendaryHelper.GenericLegendaryInfo"/>.
+        /// probability SetItemDropChance it tries a set piece first; when that misses or no set piece enabled
+        /// at this rarity fits the item, it becomes a regular unique with probability UniqueItemDropChance.
         /// </summary>
         private static LegendaryInfo RollUniqueInfo(ItemRarity rarity, ItemDrop.ItemData baseItem, MagicItem magicItem)
         {
@@ -1520,8 +1523,21 @@ namespace EpicLoot
                 return null;
             }
 
+            var uniqueRoll = Random.Range(0.0f, 1.0f);
+            var rollUnique = uniqueRoll < ELConfig.UniqueItemDropChance.Value;
+            EpicLoot.Log($"Rolling {rarity} unique: unique={rollUnique} ({uniqueRoll:#.##}/{ELConfig.UniqueItemDropChance.Value})");
+            if (!rollUnique)
+            {
+                return null;
+            }
+
             var availableUniques = UniqueLegendaryHelper.GetAvailableUniques(baseItem, magicItem, rarity);
             EpicLoot.Log($"Available {rarity} uniques: {string.Join(", ", availableUniques.Select(x => x.ID))}");
+            if (availableUniques.Count == 0)
+            {
+                return null;
+            }
+
             _weightedUniqueTable.Setup(availableUniques, x => x.SelectionWeight);
             return _weightedUniqueTable.Roll();
         }
@@ -2148,10 +2164,19 @@ namespace EpicLoot
 
         public static void AddDebugMagicEffects(MagicItem item)
         {
-            if (!string.IsNullOrEmpty(ForcedMagicEffect) && !item.HasEffect(ForcedMagicEffect))
+            if (string.IsNullOrEmpty(ForcedMagicEffect))
             {
-                EpicLoot.Log($"AddDebugMagicEffect {ForcedMagicEffect}");
-                item.Effects.Add(RollEffect(MagicItemEffectDefinitions.Get(ForcedMagicEffect), item.Rarity));
+                return;
+            }
+
+            foreach (string effectType in ForcedMagicEffect.Split(','))
+            {
+                string forced = effectType.Trim();
+                if (forced.Length > 0 && !item.HasEffect(forced) && MagicItemEffectDefinitions.TryGet(forced, out var definition))
+                {
+                    EpicLoot.Log($"AddDebugMagicEffect {forced}");
+                    item.Effects.Add(RollEffect(definition, item.Rarity));
+                }
             }
         }
 

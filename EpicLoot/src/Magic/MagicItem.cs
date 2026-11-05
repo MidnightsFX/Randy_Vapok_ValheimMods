@@ -43,6 +43,7 @@ namespace EpicLoot
         {
             EffectType = type;
             EffectValue = value;
+            Version = MagicItemEffects.IncreaseDrop.VersionFor(type);
         }
     }
 
