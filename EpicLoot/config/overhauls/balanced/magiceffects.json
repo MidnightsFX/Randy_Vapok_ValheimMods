@@ -60,6 +60,9 @@
       "DisplayText": "$mod_epicloot_me_chainlightning_display",
       "Description": "$mod_epicloot_me_chainlightning_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -161,6 +164,9 @@
       "DisplayText": "$mod_epicloot_me_modifydamage_display",
       "Description": "$mod_epicloot_me_modifydamage_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -1816,6 +1822,9 @@
       "DisplayText": "$mod_epicloot_me_modifyprojectilespeed_display",
       "Description": "$mod_epicloot_me_modifyprojectilespeed_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "Staff",
           "Bow"
@@ -2166,6 +2175,9 @@
       "DisplayText": "$mod_epicloot_me_addfiredamage_display",
       "Description": "$mod_epicloot_me_addfiredamage_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "ExclusiveEffectTypes": [
           "AddBluntDamage",
           "AddSlashingDamage",
@@ -2189,8 +2201,7 @@
           "Staff"
         ],
         "ExcludedSkillTypes": [
-          "Pickaxes",
-          "BloodMagic"
+          "Pickaxes"
         ],
         "ExcludedItemNames": [
           "$item_fishingrod",
@@ -2242,6 +2253,9 @@
       "DisplayText": "$mod_epicloot_me_addfrostdamage_display",
       "Description": "$mod_epicloot_me_addfrostdamage_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "ExclusiveEffectTypes": [
           "AddBluntDamage",
           "AddSlashingDamage",
@@ -2265,8 +2279,7 @@
           "Staff"
         ],
         "ExcludedSkillTypes": [
-          "Pickaxes",
-          "BloodMagic"
+          "Pickaxes"
         ],
         "ExcludedItemNames": [
           "$item_fishingrod",
@@ -2318,6 +2331,9 @@
       "DisplayText": "$mod_epicloot_me_addlightningdamage_display",
       "Description": "$mod_epicloot_me_addlightningdamage_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "ExclusiveEffectTypes": [
           "AddBluntDamage",
           "AddSlashingDamage",
@@ -2341,8 +2357,7 @@
           "Staff"
         ],
         "ExcludedSkillTypes": [
-          "Pickaxes",
-          "BloodMagic"
+          "Pickaxes"
         ],
         "ExcludedItemNames": [
           "$item_fishingrod",
@@ -2394,6 +2409,9 @@
       "DisplayText": "$mod_epicloot_me_addpoisondamage_display",
       "Description": "$mod_epicloot_me_addpoisondamage_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "ExclusiveEffectTypes": [
           "AddBluntDamage",
           "AddSlashingDamage",
@@ -2417,8 +2435,7 @@
           "Staff"
         ],
         "ExcludedSkillTypes": [
-          "Pickaxes",
-          "BloodMagic"
+          "Pickaxes"
         ],
         "ExcludedItemNames": [
           "$item_fishingrod",
@@ -2470,6 +2487,9 @@
       "DisplayText": "$mod_epicloot_me_addspiritdamage_display",
       "Description": "$mod_epicloot_me_addspiritdamage_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "ExclusiveEffectTypes": [
           "AddBluntDamage",
           "AddSlashingDamage",
@@ -2493,8 +2513,7 @@
           "Staff"
         ],
         "ExcludedSkillTypes": [
-          "Pickaxes",
-          "BloodMagic"
+          "Pickaxes"
         ],
         "ExcludedItemNames": [
           "$item_fishingrod",
@@ -3860,6 +3879,9 @@
       "DisplayText": "$mod_epicloot_me_lifesteal_display",
       "Description": "$mod_epicloot_me_lifesteal_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -3929,6 +3951,9 @@
       "DisplayText": "$mod_epicloot_me_lifeafterkill_display",
       "Description": "$mod_epicloot_me_lifeafterkill_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -4937,6 +4962,9 @@
       "DisplayText": "$mod_epicloot_me_modifysummonhealth_display",
       "Description": "$mod_epicloot_me_modifysummonhealth_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Summon"
+        ],
         "AllowedSkillTypes": [
           "BloodMagic"
         ]
@@ -4986,6 +5014,9 @@
       "DisplayText": "$mod_epicloot_me_modifysummondamage_display",
       "Description": "$mod_epicloot_me_modifysummondamage_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Summon"
+        ],
         "AllowedSkillTypes": [
           "BloodMagic"
         ]
@@ -5429,6 +5460,9 @@
       "DisplayText": "$mod_epicloot_me_modifystaggerduration_display",
       "Description": "$mod_epicloot_me_modifystaggerduration_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -5711,6 +5745,9 @@
       "DisplayText": "$mod_epicloot_me_offsetattack_display",
       "Description": "$mod_epicloot_me_offsetattack_desc",
       "Requirements": {
+        "ExcludedSkillTypes": [
+          "BloodMagic"
+        ],
         "AllowedItemTypes": [
           "Helmet",
           "Shoulder",
@@ -5869,6 +5906,9 @@
       "DisplayText": "$mod_epicloot_me_staggerondamagetaken_display",
       "Description": "$mod_epicloot_me_staggerondamagetaken_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "Chest",
           "Shield",
@@ -6299,6 +6339,9 @@
       "DisplayText": "$mod_epicloot_me_modifydamagelowhealth_display",
       "Description": "$mod_epicloot_me_modifydamagelowhealth_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -6586,6 +6629,9 @@
       "DisplayText": "$mod_epicloot_me_lifesteallowhealth_display",
       "Description": "$mod_epicloot_me_lifesteallowhealth_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -6671,6 +6717,9 @@
       "DisplayText": "$mod_epicloot_me_executioner_display",
       "Description": "$mod_epicloot_me_executioner_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -6910,6 +6959,9 @@
       "DisplayText": "$mod_epicloot_me_modifystaggerdamage_display",
       "Description": "$mod_epicloot_me_modifystaggerdamage_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -7204,6 +7256,9 @@
       "DisplayText": "$mod_epicloot_me_slow_display",
       "Description": "$mod_epicloot_me_slow_desc",
       "Requirements": {
+        "AllowedStaffRoles": [
+          "Damage"
+        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",

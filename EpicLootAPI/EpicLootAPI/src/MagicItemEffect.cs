@@ -201,6 +201,7 @@ public class MagicItemEffectRequirements
     public List<Skills.SkillType> ExcludedSkillTypes = new List<Skills.SkillType>();
     public List<string> AllowedItemNames = new List<string>();
     public List<string> ExcludedItemNames = new List<string>();
+    public List<string> AllowedStaffRoles = new List<string>(); // Damage, Summon, Support; only staffs are checked
     public bool? ItemHasPhysicalDamage;
     public bool? ItemHasElementalDamage;
     public bool? ItemHasChopDamage;

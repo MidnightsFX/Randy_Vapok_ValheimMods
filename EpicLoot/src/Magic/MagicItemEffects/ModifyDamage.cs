@@ -17,11 +17,40 @@ public static class ModifyDamage
         {
             if (RunGetDamagePatch(__instance))
             {
-                Player player = Player.m_localPlayer;
-                ApplyMagicDamageModifiers(player, __instance, ref __result, CoinHoarder.GetDamageBonus(player));
-                ApplyShardWeaponModifiers(__instance, ref __result);
+                ApplyEquippedWeaponModifiers(__instance, ref __result);
             }
         }
+    }
+
+    [HarmonyPatch(typeof(Projectile), nameof(Projectile.Setup))]
+    private class ModifyDamage_Projectile_Setup_Patch
+    {
+        private static void Postfix(Projectile __instance, Character owner, HitData hitData, ItemDrop.ItemData item)
+        {
+            if (StaffRoles.CarriesOwnDamage(owner, hitData, item) && RunGetDamagePatch(item))
+            {
+                ApplyEquippedWeaponModifiers(item, ref __instance.m_damage);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Aoe), nameof(Aoe.Setup))]
+    private class ModifyDamage_Aoe_Setup_Patch
+    {
+        private static void Postfix(Aoe __instance, Character owner, HitData hitData, ItemDrop.ItemData item)
+        {
+            if (StaffRoles.CarriesOwnDamage(owner, hitData, item) && RunGetDamagePatch(item))
+            {
+                ApplyEquippedWeaponModifiers(item, ref __instance.m_damage);
+            }
+        }
+    }
+
+    private static void ApplyEquippedWeaponModifiers(ItemDrop.ItemData item, ref HitData.DamageTypes damage)
+    {
+        Player player = Player.m_localPlayer;
+        ApplyMagicDamageModifiers(player, item, ref damage, CoinHoarder.GetDamageBonus(player));
+        ApplyShardWeaponModifiers(item, ref damage);
     }
 
     private static void ApplyShardWeaponModifiers(ItemDrop.ItemData item, ref HitData.DamageTypes damage)

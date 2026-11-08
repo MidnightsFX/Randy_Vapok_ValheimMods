@@ -89,6 +89,22 @@ namespace EpicLoot.MagicItemEffects
         }
     }
 
+    [HarmonyPatch(typeof(Projectile), nameof(Projectile.Setup))]
+    public class ExecutionerSpawnedProjectile_Projectile_Setup_Patch
+    {
+        [UsedImplicitly]
+        private static void Postfix(Projectile __instance, Character owner, HitData hitData, ItemDrop.ItemData item)
+        {
+            if (!StaffRoles.CarriesOwnDamage(owner, hitData, item) || __instance.m_nview?.GetZDO() is not ZDO zdo)
+            {
+                return;
+            }
+
+            zdo.Set("epic loot executioner multiplier", 1 + MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
+                Player.m_localPlayer, item, MagicEffectType.Executioner, 0.01f));
+        }
+    }
+
     [HarmonyPatch(typeof(Attack), nameof(Attack.FireProjectileBurst))]
     public class ExecutionerProjectileInstantiation_Attack_FireProjectileBurst_Patch
     {

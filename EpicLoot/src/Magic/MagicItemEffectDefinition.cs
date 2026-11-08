@@ -43,6 +43,7 @@ namespace EpicLoot
         public List<Skills.SkillType> ExcludedSkillTypes = new List<Skills.SkillType>();
         public List<string> AllowedItemNames = new List<string>();
         public List<string> ExcludedItemNames = new List<string>();
+        public List<StaffRole> AllowedStaffRoles = new List<StaffRole>();
         public bool? ItemHasPhysicalDamage;
         public bool? ItemHasElementalDamage;
         public bool? ItemHasChopDamage;
@@ -289,6 +290,13 @@ namespace EpicLoot
 
             if (ExcludedItemNames?.Count > 0 && (ExcludedItemNames.Contains(itemData.m_shared.m_name) ||
                 ExcludedItemNames.Contains(itemData.m_dropPrefab?.name)))
+            {
+                failure = RequirementFailure.ItemTypeNotAllowed;
+                return false;
+            }
+
+            if (AllowedStaffRoles?.Count > 0 && StaffRoles.IsStaff(itemData) &&
+                !StaffRoles.HasAnyRole(itemData, AllowedStaffRoles))
             {
                 failure = RequirementFailure.ItemTypeNotAllowed;
                 return false;
