@@ -34,6 +34,8 @@ public static class InventoryGrid_UpdateGui_MagicItemComponent_Patch
                 setItem.enabled = false;
             }
         }
+
+        ItemBackgroundHelper.HideUniqueEffects(element.gameObject.transform);
     }
 
     public static void UpdateGuiItems(ItemDrop.ItemData itemData, InventoryElement element)

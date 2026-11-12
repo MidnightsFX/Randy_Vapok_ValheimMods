@@ -201,9 +201,9 @@ unique — no effect is shared by two shards.
 | `RunningOnEmpty` | Purple | Utility | Second Wind: {0}% of Max Health | When stamina runs out, burn up to {0}% of your max health for that much stamina. 30 second cooldown. |
 | `IncreaseHarvestDamage` | Grey | Melee Wpn, Ranged Wpn, Magic Wpn | +{0}% Harvest Damage | +{0}% chopping and mining damage. |
 | `BlockAsWoodCuttingAndPickaxes` | Grey | Shield | Adds +{1} block skill | Adds +{0}% of woodcutting and pickaxes skills after all modifiers as block skill. This bonus is rounded down to whole values |
-| `IncreaseMiningDrop` | Grey | Head | Mining Drop +{0:0.##} | Each break of ore or stone adds **X** toward extra drops, and every full 1 drops one. Fractions carry over to the next break. Values are half of Balanced on Minimal and double on Legendary. |
+| `IncreaseMiningDrop` | Grey | Head | Ore Yield +{0:0.##}% | Mined resources drop **X%** more. Stone only gets the bonus in rocks with nothing better. Values are half of Balanced on Minimal and double on Legendary. |
 | `AddFishingSkill` | Grey | Chest | Fishing Skill +{0} | Increases the player's fishing skill level by +**X**. This may cause the skill level to increase above 100. |
-| `IncreaseTreeDrop` | Grey | Legs | Lumberjacking Drop +{0:0.##} | Each break of a tree or log adds **X** toward extra drops, and every full 1 drops one. Fractions carry over to the next break. Values are half of Balanced on Minimal and double on Legendary. |
+| `IncreaseTreeDrop` | Grey | Legs | Wood Yield +{0:0.##}% | Trees and logs drop **X%** more. Plain wood only gets the bonus when there is no better wood. Values are half of Balanced on Minimal and double on Legendary. |
 | `ReduceFishingStaminaCost` | Grey | Shoulders | -{0}% Fishing Stamina | Reduces the stamina cost of fishing by {0}%. |
 | `GainAdrenalineFromHarvesting` | Grey | Trinket | Gain {0} Adrenaline on Harvest | Gain {0} adrenaline each time you strike a tree or rock. |
 | `IncreaseHarvestXPGain` | Grey | Utility | +{0}% Gathering Skill XP | +{0}% XP for Woodcutting and Pickaxes. |

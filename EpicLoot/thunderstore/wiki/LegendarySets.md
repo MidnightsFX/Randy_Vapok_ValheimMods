@@ -1,6 +1,6 @@
-# Legendary Sets
+# Unique Sets
 
-Every legendary set in Epic Loot, with its pieces and the bonuses it gives. All values are the defaults from `legendaries.json` (in `BepInEx/config/EpicLoot/baseconfig/`) with the balanced template; a server can change any of them.
+Every unique set in Epic Loot, with its pieces and the bonuses it gives. All values are the defaults from `legendaries.json` (in `BepInEx/config/EpicLoot/baseconfig/`) with the balanced template; a server can change any of them.
 
 ## How sets work
 

@@ -110,10 +110,16 @@ public static partial class TerminalManager
         string itemPrefabNameArg = args.GetString(2);
         args.Context.PrintInfo($"magicitem - {itemPrefabNameArg} with effect: {effectArg}");
 
-        if (!MagicItemEffectDefinitions.TryGet(effectArg, out MagicItemEffectDefinition magicItemEffectDef))
+        MagicItemEffectDefinition magicItemEffectDef = null;
+        foreach (string effectType in effectArg.Split(','))
         {
-            args.Context.PrintWarning($"> Could not find effect: {effectArg}");
-            return;
+            if (!MagicItemEffectDefinitions.TryGet(effectType.Trim(), out MagicItemEffectDefinition definition))
+            {
+                args.Context.PrintWarning($"> Could not find effect: {effectType}");
+                return;
+            }
+
+            magicItemEffectDef ??= definition;
         }
 
         GameObject itemPrefab = ObjectDB.instance.GetItemPrefab(itemPrefabNameArg);
@@ -190,7 +196,7 @@ public static partial class TerminalManager
             return;
         }
 
-        args.Context.PrintInfo($"magicsetitem - id:{legendaryID} rarity:{rarity}");
+        args.Context.PrintInfo($"magicunique - id:{legendaryID} rarity:{rarity}");
         SpawnLegendaryHelper(args, legendaryID, rarity, IsRandomArg(itemArg) ? "" : itemArg);
     }
 

@@ -321,6 +321,9 @@ namespace EpicLoot
                     {
                         zdo.Set(BonemassCorpseRot.ZdoValueKey, currentCorpseRot);
                     }
+
+                    MagicItemEffects.IncreaseMiningDrop.Instance.Publish(player, zdo);
+                    MagicItemEffects.IncreaseTreeDrop.Instance.Publish(player, zdo);
                 }
             }
         }
