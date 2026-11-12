@@ -208,24 +208,18 @@ namespace EpicLoot_UnityLib
             }
             else
             {
-                EnchantingUIController.SetMagicItem(this, _item.GetItem(), Tooltip);
-                CheckAndSetNameToEnchantingEffects();
-
-                int stored = GetStorageCount();
-                if (Tooltip != null && stored > 0)
+                ItemDrop.ItemData shownItem = _item.GetItem();
+                try
                 {
-                    string storageLine = Localization.instance.Localize("$mod_epicloot_storagecount", stored.ToString());
-                    Tooltip.m_text += $"\n<color={StorageCountColor}>{storageLine}</color>";
+                    ShowItem(shownItem);
                 }
-
-                if (ItemName != null)
+                catch (Exception e)
                 {
-                    ItemName.text += _item.GetDisplayNameSuffix();
-                }
-
-                if (ItemHoverTooltip != null)
-                {
-                    EnchantingUIController.SetItemTooltip(_item.GetItem(), ItemHoverTooltip);
+                    // The name, icon and tooltip run every other mod's patches on them, and one that throws for
+                    // a single item used to escape into the list's fill loop, leaving this row and every row
+                    // after it on the prefab's placeholder text ("Name Text", "XX").
+                    ReportItemFailure(shownItem, e, shownPlainly: true);
+                    ShowPlainItem(shownItem);
                 }
             }
 
@@ -240,8 +234,92 @@ namespace EpicLoot_UnityLib
             ItemBackgroundHelper.UpdateIconSetMarker(ItemIcon, _item?.GetItem());
 
             RefreshGamepadFocusIndicator();
+        }
 
-            
+        private void ShowItem(ItemDrop.ItemData item)
+        {
+            EnchantingUIController.SetMagicItem(this, item, Tooltip);
+            CheckAndSetNameToEnchantingEffects();
+
+            int stored = GetStorageCount();
+            if (Tooltip != null && stored > 0)
+            {
+                string storageLine = Localization.instance.Localize("$mod_epicloot_storagecount", stored.ToString());
+                Tooltip.m_text += $"\n<color={StorageCountColor}>{storageLine}</color>";
+            }
+
+            if (ItemName != null)
+            {
+                ItemName.text += _item.GetDisplayNameSuffix();
+            }
+
+            if (ItemHoverTooltip != null)
+            {
+                EnchantingUIController.SetItemTooltip(item, ItemHoverTooltip);
+            }
+        }
+
+        // What vanilla data alone can show: the item's own icon and name, and no tooltip body, so the row can
+        // still be read and selected when the full display throws.
+        private void ShowPlainItem(ItemDrop.ItemData item)
+        {
+            try
+            {
+                if (ItemIcon != null)
+                {
+                    Sprite[] icons = item.m_shared?.m_icons;
+                    ItemIcon.sprite = icons == null || icons.Length == 0
+                        ? null
+                        : icons[Mathf.Clamp(item.m_variant, 0, icons.Length - 1)];
+                }
+
+                if (MagicBG != null)
+                {
+                    MagicBG.enabled = false;
+                }
+
+                string plainName = Localization.instance.Localize(item.m_shared?.m_name ?? string.Empty);
+                if (ItemName != null)
+                {
+                    ItemName.text = plainName + _item.GetDisplayNameSuffix();
+                }
+
+                if (Tooltip != null)
+                {
+                    Tooltip.m_topic = plainName;
+                    Tooltip.m_text = string.Empty;
+                }
+
+                if (ItemHoverTooltip != null)
+                {
+                    ItemHoverTooltip.Set(plainName, string.Empty);
+                }
+            }
+            catch (Exception e)
+            {
+                ReportItemFailure(item, e, shownPlainly: false);
+            }
+        }
+
+        // SetItem runs for every row on every refresh of a list, so each failure is logged once per session.
+        // The exception's stack names the patch that threw, which is what a bug report needs.
+        private static readonly HashSet<string> ReportedFailures = new HashSet<string>();
+
+        internal static void ReportItemFailure(ItemDrop.ItemData item, Exception e, bool shownPlainly)
+        {
+            string itemName = item?.m_dropPrefab != null ? item.m_dropPrefab.name : item?.m_shared?.m_name ?? "<no item>";
+            string outcome = shownPlainly ? "so its row shows it plainly" : "so its row may be incomplete";
+            ReportOnce(itemName, e,
+                $"Could not show {itemName} normally in an enchanting table list, {outcome}. " +
+                "Something run for this item (usually another mod's patch on its name, icon or tooltip) threw:");
+        }
+
+        internal static void ReportOnce(string key, Exception e, string message)
+        {
+            if (ReportedFailures.Add($"{key}|{e.GetType().FullName}|{e.Message}"))
+            {
+                EpicLoot.EpicLoot.LogErrorForce($"{message}\n{e}");
+            }
         }
 
         private int GetStorageCount()

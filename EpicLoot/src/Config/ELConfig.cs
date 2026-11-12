@@ -702,7 +702,8 @@ internal class ELConfig {
             "Toggles Enchanting Table Feature on and off completely.");
         AutoDepositMaterials = BindClient(SectionEnchanting, "Auto Deposit Materials", false,
             "Opening an enchanting table with its Storage feature unlocked first moves every enchanting material, " +
-            "blank runestone, shardstone, chisel and bounty token from your inventory into the table's storage.");
+            "blank runestone, shardstone, chisel, bounty token and unidentified item from your inventory into the " +
+            "table's storage.");
         TemperBaseChance = BindServer(SectionEnchanting, "Temper Base Chance", 0.5f,
             "Base chance to temper item when below max value. When effect value is at max, the chance is at the base. If value is above max value, the chance is reduces by the decrement chance. Default value: 0.5");
         TemperDecrement = BindServer(SectionEnchanting, "Temper Decrement Amount", 0.15f,

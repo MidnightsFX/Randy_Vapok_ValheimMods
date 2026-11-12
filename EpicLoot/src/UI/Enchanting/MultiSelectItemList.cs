@@ -346,21 +346,13 @@ namespace EpicLoot_UnityLib
 
             List<IListElement> items = previousSelectionAmounts.Keys.ToList();
             SortMode sortMode = (SortMode)SortByDropdown.value;
-            List<IListElement> sortedItems = SortItems(sortMode, items);
+            List<IListElement> sortedItems = SortItemsOrKeepOrder(sortMode, items);
 
             for (int i = 0; i < sortedItems.Count; ++i)
             {
                 Transform childToSet = ListContainer.GetChild(i);
-                IListElement itemToSet = sortedItems[i];
                 MultiSelectItemListElement element = childToSet.GetComponent<MultiSelectItemListElement>();
-                element.SuppressEvents = true;
-                element.SetItem(itemToSet);
-                if (previousSelectionAmounts.TryGetValue(itemToSet, out int previousQuantity))
-                {
-                    element.SelectQuantity(previousQuantity, true);
-                }
-
-                element.SuppressEvents = false;
+                FillRow(element, sortedItems[i], previousSelectionAmounts);
             }
 
             // Rows were just reassigned by index, so the old show/hide mask now describes the wrong items.
@@ -423,25 +415,17 @@ namespace EpicLoot_UnityLib
             if (Sortable && SortByDropdown != null)
             {
                 SortMode sortMode = (SortMode)SortByDropdown.value;
-                sortedItems = SortItems(sortMode, items);
+                sortedItems = SortItemsOrKeepOrder(sortMode, items);
             }
 
             bool didFocus = false;
             for (int i = 0; i < itemCount; ++i)
             {
                 Transform childToSet = ListContainer.GetChild(i);
-                IListElement itemToSet = sortedItems[i];
                 MultiSelectItemListElement element = childToSet.GetComponent<MultiSelectItemListElement>();
                 element.UseEnchantAsName = UseEnchantAsName;
-                element.SuppressEvents = true;
-                element.SetItem(itemToSet);
+                FillRow(element, sortedItems[i], previousSelectionAmounts);
 
-                if (previousSelectionAmounts.TryGetValue(itemToSet, out int previousQuantity))
-                {
-                    element.SelectQuantity(previousQuantity, true);
-                }
-
-                element.SuppressEvents = false;
                 bool shouldFocus = HasGamepadFocus() && ((focusedElement == null && i == 0) || element == focusedElement);
                 element.GiveFocus(shouldFocus);
 
@@ -487,6 +471,49 @@ namespace EpicLoot_UnityLib
 
             OnSelectedItemsChanged?.Invoke();
             RefreshSelectAllToggle();
+        }
+
+        // One row's failure must not stop the rows after it or the refreshes that follow the loop. The element
+        // already falls back to a plain display when the item's name or tooltip throws; this catches the rest
+        // (the favorite star, the set marker, the selection restore) so the list still fills.
+        private static void FillRow(MultiSelectItemListElement element, IListElement item,
+            Dictionary<IListElement, int> previousSelectionAmounts)
+        {
+            element.SuppressEvents = true;
+            try
+            {
+                element.SetItem(item);
+
+                if (previousSelectionAmounts.TryGetValue(item, out int previousQuantity))
+                {
+                    element.SelectQuantity(previousQuantity, true);
+                }
+            }
+            catch (Exception e)
+            {
+                MultiSelectItemListElement.ReportItemFailure(item?.GetItem(), e, shownPlainly: false);
+            }
+            finally
+            {
+                element.SuppressEvents = false;
+            }
+        }
+
+        // Sorting reads each item's decorated name, which other mods patch as well, so a throw there keeps the
+        // order the items came in rather than leaving every row unfilled.
+        private List<IListElement> SortItemsOrKeepOrder(SortMode mode, List<IListElement> items)
+        {
+            try
+            {
+                return SortItems(mode, items);
+            }
+            catch (Exception e)
+            {
+                MultiSelectItemListElement.ReportOnce($"sort {mode}", e,
+                    $"Could not sort an enchanting table list by {mode}, so it keeps its original order. " +
+                    "Reading an item's name or rarity (usually another mod's patch on it) threw:");
+                return items;
+            }
         }
 
         public List<IListElement> SortItems(SortMode mode, List<IListElement> items)

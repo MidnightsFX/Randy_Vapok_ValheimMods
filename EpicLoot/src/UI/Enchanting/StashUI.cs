@@ -253,9 +253,18 @@ namespace EpicLoot_UnityLib
 
         private List<IListElement> BuildEntries(IReadOnlyList<StashItemKind> kinds)
         {
+            HashSet<string> heldUnidentified = GetHeldUnidentifiedBiomes(kinds);
             List<IListElement> entries = new List<IListElement>(kinds.Count);
             foreach (StashItemKind kind in kinds)
             {
+                // A biome's row of unidentified items shows only while the table holds some of them: a row for
+                // every biome would bury the chisels and tokens under rows of empty cells. The row is whole, so
+                // the rarities stay in their columns.
+                if (kind.Kind == StashKind.Unidentified && !heldUnidentified.Contains(kind.Family))
+                {
+                    continue;
+                }
+
                 if (!_entries.TryGetValue(kind.PrefabName, out StashEntry entry))
                 {
                     entry = new StashEntry { PrefabName = kind.PrefabName, Item = kind.CreateItem(0) };
@@ -267,6 +276,25 @@ namespace EpicLoot_UnityLib
             }
 
             return entries;
+        }
+
+        private HashSet<string> GetHeldUnidentifiedBiomes(IReadOnlyList<StashItemKind> kinds)
+        {
+            HashSet<string> biomes = new HashSet<string>();
+            if (_stash == null)
+            {
+                return biomes;
+            }
+
+            foreach (StashItemKind kind in kinds)
+            {
+                if (kind.Kind == StashKind.Unidentified && _stash.GetCount(kind.PrefabName) > 0)
+                {
+                    biomes.Add(kind.Family);
+                }
+            }
+
+            return biomes;
         }
 
         private void StyleCells()

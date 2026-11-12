@@ -240,11 +240,13 @@ public class InventoryManagement
             itemDrop.m_itemData.m_stack, itemDrop.m_itemData.GetIcon());
     }
 
-    // Both removal paths spend the player's own inventory first and only charge the shortfall to
-    // external providers, matching how the read paths above report availability.
-    // Returns how many were actually removed, which is less than amount when the item (or part of its
-    // stack) was no longer anywhere the table can reach. Callers that hand something out in exchange
-    // must pay out for that number, not for what they asked for.
+    // Both removal paths return how many were actually removed, which is less than amount when the item (or
+    // part of its stack) was no longer anywhere the table can reach. Callers that hand something out in
+    // exchange must pay out for that number, not for what they asked for.
+    //
+    // The storage's counts are this client's view of the table. When the table's owner finds fewer (another
+    // player spent them a moment earlier), the stash reports the difference once the owner answers, and it
+    // is taken from elsewhere instead, so the action is not free.
     public int RemoveExactItem(ItemDrop.ItemData item, int amount)
     {
         if (item == null || amount <= 0)
@@ -254,7 +256,9 @@ public class InventoryManagement
 
         if (ActiveStash != null && ActiveStash.TryGetSnapshotPrefab(item, out string stashPrefab))
         {
-            return ActiveStash.Take(stashPrefab, amount);
+            string sharedName = item.m_shared.m_name;
+            return ActiveStash.Take(stashPrefab, amount,
+                shortfall => ReportUncharged(sharedName, shortfall, RemoveStashKindFromInventory(stashPrefab, shortfall)));
         }
 
         Inventory inventory = GetInventory();
@@ -281,11 +285,34 @@ public class InventoryManagement
         return RemoveItem(item.m_shared.m_name, item.m_stack);
     }
 
+    // A cost is spent from the open table's storage first, then from the player's own inventory, and only
+    // the rest from what inventory providers offer (nearby chests).
     public int RemoveItem(string item, int amount)
     {
-        Inventory inventory = GetInventory();
+        if (amount <= 0)
+        {
+            return 0;
+        }
 
         int taken = 0;
+        if (ActiveStash != null)
+        {
+            taken = ActiveStash.TakeBySharedName(item, amount,
+                shortfall => ReportUncharged(item, shortfall, RemoveOutsideStash(item, shortfall)));
+        }
+
+        if (amount - taken > 0)
+        {
+            taken += RemoveOutsideStash(item, amount - taken);
+        }
+
+        return taken;
+    }
+
+    private int RemoveOutsideStash(string item, int amount)
+    {
+        int taken = 0;
+        Inventory inventory = GetInventory();
         if (inventory != null)
         {
             int before = inventory.CountItems(item);
@@ -293,18 +320,53 @@ public class InventoryManagement
             taken = before - inventory.CountItems(item);
         }
 
-        if (ActiveStash != null && amount - taken > 0)
+        if (amount - taken > 0)
         {
-            taken += ActiveStash.TakeBySharedName(item, amount - taken);
-        }
-
-        int shortfall = amount - taken;
-        if (shortfall > 0)
-        {
-            taken += API.RemoveProviderItems(item, shortfall);
+            taken += API.RemoveProviderItems(item, amount - taken);
         }
 
         return taken;
+    }
+
+    // An exact item from the storage stands for its kind, so a shortfall is made up from stacks of that same
+    // kind the player carries, never from a same-named item the storage would not accept (a runestone
+    // carrying an effect shares its name with the blank one).
+    private int RemoveStashKindFromInventory(string prefabName, int amount)
+    {
+        Inventory inventory = GetInventory();
+        if (inventory == null || amount <= 0)
+        {
+            return 0;
+        }
+
+        int taken = 0;
+        foreach (ItemDrop.ItemData item in new List<ItemDrop.ItemData>(inventory.GetAllItems()))
+        {
+            if (taken >= amount)
+            {
+                break;
+            }
+
+            if (!StashCatalog.IsStashable(item) || StashCatalog.GetPrefabName(item) != prefabName)
+            {
+                continue;
+            }
+
+            int take = Mathf.Min(item.m_stack, amount - taken);
+            inventory.RemoveItem(item, take);
+            taken += take;
+        }
+
+        return taken;
+    }
+
+    private static void ReportUncharged(string item, int shortfall, int charged)
+    {
+        if (charged < shortfall)
+        {
+            Debug.LogWarning($"[EpicLoot] The enchanting table's storage held {shortfall} fewer {item} than " +
+                $"this client was shown, and only {charged} could be taken elsewhere instead.");
+        }
     }
 
     public List<ItemDrop.ItemData> GetBoundItems()

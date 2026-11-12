@@ -14,6 +14,9 @@
 * The enchanting table's Upgrade tab is back with Auga, and its page shows its title again.
 * The message on the enchanting table's Storage tab no longer runs into the Take All buttons.
 * Items in the quick slots of Equipment and Quick Slots now count as hotbar items at the enchanting table, so they stay out of the sacrifice list when hotbar items are hidden.
+* The enchanting table now pays its costs from its own storage before your inventory and storage mods.
+* The enchanting table's storage can hold unidentified items, and they can be identified straight from it.
+* An item another mod breaks no longer leaves the rest of an enchanting table list blank, and the log now names the item and the cause.
 
 **0.15.6**
 * Works with Auga 1.4.1 and newer

@@ -142,8 +142,8 @@ broken integration degrades to vanilla behaviour; it does not break the enchanti
 ### Inventory providers
 
 Widen the enchanting table's view of the player's inventory: nearby containers, a backpack, a remote
-stash. Epic Loot spends the player's own inventory first and only charges the shortfall to providers, in
-registration order.
+stash. A cost is spent from the enchanting table's own storage first, then from the player's own inventory,
+and only the shortfall is charged to providers, in registration order.
 
 ```csharp
 API.RegisterInventoryProvider(

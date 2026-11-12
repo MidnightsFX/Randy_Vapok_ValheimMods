@@ -387,8 +387,13 @@ namespace EpicLoot_UnityLib
             });
         }
 
-        /// <summary>Spends up to <paramref name="amount"/> as a crafting cost; returns how many were taken.</summary>
-        public int Take(string prefabName, int amount)
+        /// <summary>
+        /// Spends up to <paramref name="amount"/> as a crafting cost; returns how many were taken. That is this
+        /// client's count, which the owner may not match (another player spent some first): once the owner
+        /// answers, <paramref name="onShortfall"/> gets how many it could not take, so the caller can charge them
+        /// elsewhere. On the owner itself the answer arrives before this returns.
+        /// </summary>
+        public int Take(string prefabName, int amount, Action<int> onShortfall = null)
         {
             int take = Mathf.Min(amount, GetCount(prefabName));
             if (take <= 0)
@@ -396,13 +401,22 @@ namespace EpicLoot_UnityLib
                 return 0;
             }
 
-            Send(new Dictionary<string, int> { { prefabName, -take } }, null);
+            Send(new Dictionary<string, int> { { prefabName, -take } }, onShortfall == null ? null : applied =>
+            {
+                int spent = applied.TryGetValue(prefabName, out int delta) ? -delta : 0;
+                if (spent < take)
+                {
+                    onShortfall(take - spent);
+                }
+            });
             return take;
         }
 
-        public int TakeBySharedName(string sharedName, int amount)
+        public int TakeBySharedName(string sharedName, int amount, Action<int> onShortfall = null)
         {
-            return StashCatalog.TryGetBySharedName(sharedName, out StashItemKind kind) ? Take(kind.PrefabName, amount) : 0;
+            return StashCatalog.TryGetBySharedName(sharedName, out StashItemKind kind)
+                ? Take(kind.PrefabName, amount, onShortfall)
+                : 0;
         }
 
         public static Dictionary<string, int> ReadCounts(ZDO zdo)

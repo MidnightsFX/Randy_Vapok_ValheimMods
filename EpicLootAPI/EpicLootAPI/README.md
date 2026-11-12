@@ -64,7 +64,8 @@ These are for integrating functionality into Epicloot. Primary if you need to pr
 
 ### Inventory provider — source enchanting materials from elsewhere
 
-Epic Loot spends the player's own inventory first and only charges the shortfall to providers.
+A cost is spent from the enchanting table's own storage first, then from the player's own inventory, and only
+the shortfall is charged to providers.
 
 ```c#
 EpicLoot.RegisterInventoryProvider(
