@@ -38,9 +38,8 @@ public static class ModifyAttackCosts
             DoPostfix(__instance.m_character, __instance.m_weapon, MagicEffectType.ModifyAttackStaminaUse, 1f, ref __result);
         }
 
-        // GetAttackEitr() is now a thin wrapper over GetAttackEitr(Character, ItemData); patching
-        // the unqualified name throws AmbiguousMatchException. Its siblings above still have a
-        // single overload each, so only this one needs the argument types.
+        // GetAttackEitr() is a thin wrapper over GetAttackEitr(Character, ItemData), so the name alone is
+        // ambiguous; its siblings above have one overload each.
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Attack), nameof(Attack.GetAttackEitr), typeof(Character), typeof(ItemDrop.ItemData))]
         private static void GetAttackEitr_Postfix(Character character, ItemDrop.ItemData weapon, ref float __result)

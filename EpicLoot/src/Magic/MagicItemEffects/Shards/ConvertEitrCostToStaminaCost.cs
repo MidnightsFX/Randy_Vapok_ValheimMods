@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Converts a portion of the eitr cost of using a skill into stamina cost instead.
     public static class ConvertEitrCostToStaminaCost {
         [HarmonyPatch(typeof(Player), nameof(Player.UseEitr))]
         private static class UseEitr_Patch {

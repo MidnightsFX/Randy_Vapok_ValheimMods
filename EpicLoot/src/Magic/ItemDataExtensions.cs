@@ -94,8 +94,7 @@ public static class ItemDataExtensions
         return parsed;
     }
 
-    // includeSocketed defaults to true: this extension is used by effect-application patches to gate
-    // behavior, so socketed effects should count. The only crafting caller (CheckRequirements) passes false.
+    // Sockets count by default: effect patches gate on this. CheckRequirements passes false.
     public static bool HasMagicEffect(this ItemDrop.ItemData itemData, string effectType, bool includeSocketed = true)
     {
         return itemData.GetMagicItem()?.HasEffect(effectType, includeSocketed: includeSocketed) ?? false;
@@ -125,7 +124,6 @@ public static class ItemDataExtensions
             return GetSetRuneName(itemData);
         }
 
-        // TODO: investigate
         string name = itemData.m_shared.m_name;
 
         if (itemData.IsMagic(out MagicItem magicItem) && !string.IsNullOrEmpty(magicItem.DisplayName))
@@ -290,11 +288,6 @@ public static class ItemDataExtensions
         return itemData.IsMagic(out MagicItem magicItem) && magicItem.IsUniqueLegendary() && !magicItem.IsLegendarySetItem();
     }
 
-    public static bool IsMundaneSetItem(this ItemDrop.ItemData itemData)
-    {
-        return !string.IsNullOrEmpty(itemData.m_shared.m_setName);
-    }
-
     public static int GetSetSize(this ItemDrop.ItemData itemData, string setID = null, bool isMundane = false)
     {
         if (setID == null)
@@ -320,24 +313,12 @@ public static class ItemDataExtensions
     }
 
     /// <summary>
-    /// Restores a real item prefab to <see cref="ItemDrop.ItemData.m_dropPrefab"/> when it is missing or has
-    /// been replaced by <see cref="EpicAssets.DummyName"/>.
-    ///
-    /// <para><see cref="Humanoid_Patch"/> stamps the dummy -- an empty prefab with no mesh and no ItemDrop --
-    /// onto any equipped ItemData whose m_dropPrefab is null, and that write is serialized with the item. The
-    /// item then renders as nothing ("transparent weapon") and, because the dummy is non-null but carries no
-    /// ItemDrop, it walks straight past every `m_dropPrefab == null` guard in the mod. Healing here repairs
-    /// items already saved that way; the sources that produced them are fixed separately.</para>
-    ///
-    /// <para>Resolution order:
-    /// <list type="number">
-    /// <item>ObjectDB's reference-keyed <c>m_itemByData</c> map (<c>TryGetItemPrefab(SharedData)</c>).
-    /// ItemData.Clone is a MemberwiseClone, so an instance shares its <c>m_shared</c> reference with the
-    /// prefab it came from -- this is exact and O(1).</item>
-    /// <item>A scan of ObjectDB matching <c>m_shared.m_name</c>, for items whose shared data was deep-copied
-    /// rather than shared (Instantiate does this, and shards rebuild theirs) and so miss the map.</item>
-    /// </list>
-    /// Returns true only when a prefab was actually restored.</para>
+    /// Restores a real item prefab to <see cref="ItemDrop.ItemData.m_dropPrefab"/> when it is missing or is
+    /// <see cref="EpicAssets.DummyName"/>. <see cref="Humanoid_Patch"/> stamps that dummy (no mesh, no
+    /// ItemDrop) onto equipped items with a null m_dropPrefab and it is saved with the item, which then
+    /// renders as nothing and passes every null check. ObjectDB's <c>m_itemByData</c> map is tried first
+    /// (ItemData.Clone shares <c>m_shared</c> with its prefab), then a scan by shared name for items whose
+    /// shared data was deep-copied (Instantiate, shards). Returns true only when a prefab was restored.
     /// </summary>
     public static bool HealDropPrefab(this ItemDrop.ItemData itemData)
     {
@@ -434,12 +415,7 @@ public static class ItemDataExtensions
             return;
         }
 
-        // m_dropPrefab is not necessarily an ITEM prefab: Humanoid_Patch.AssignEmptyToNull stamps
-        // EpicAssets.DummyPrefab (an empty CreateEmptyPrefab stand-in carrying no ItemDrop) onto any
-        // ItemData whose m_dropPrefab is null, which turns the safe null this method guards against into a
-        // non-null that sails past that guard. Without this check GetComponent returns null and the
-        // m_itemData dereference below throws -- and because the dummy is written back into the ItemData,
-        // that NRE then repeats on every later Inventory.Load / Container.Load / ItemDrop.Awake for the item.
+        // The dummy prefab (see HealDropPrefab) stays when nothing better was found, and it has no ItemDrop.
         if (!prefab.TryGetComponent(out ItemDrop itemDropPrefab))
         {
             return;
@@ -452,7 +428,7 @@ public static class ItemDataExtensions
 
         // A few vanilla items are magic by nature (the Dverger circlet, Megingjord, the Wishbone): an
         // instance with no magic of its own gets its preset, quietly, as on every load. Not when the item
-        // is kept from being magic by config, as before.
+        // is kept from being magic by config.
         if (!MagicItemData.HasMagicData(itemData) && EpicLoot.CanBeMagicItem(itemDropPrefab.m_itemData) &&
             MagicItemComponent.VanillaMagicFor(itemData.m_shared.m_name) is MagicItem preset)
         {

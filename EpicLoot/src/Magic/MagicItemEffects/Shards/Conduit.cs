@@ -10,11 +10,10 @@ namespace EpicLoot.MagicItemEffects.Shards {
     // caster gains no more than that rate however much lightning lands. A higher value makes the pool larger and
     // takes more from it per point of lightning damage.
     public static class Conduit {
-        // Lightning damage dealt per {value} eitr; higher = a slower trickle. Tunable as "DamagePerTrigger" in this
-        // effect's Config block in shardstones.json.
+        // Lightning damage dealt per {value} eitr.
         public const float DefaultDamagePerTrigger = 200f;
 
-        // Eitr the pool holds per point of value. Tunable as "PoolPerValue", where each Balance Template sets its own.
+        // Eitr the pool holds per point of value; each Balance Template sets its own.
         public const float DefaultPoolPerValue = 5f;
 
         public static readonly Dictionary<string, float> DefaultConfig = new Dictionary<string, float> {
@@ -35,8 +34,6 @@ namespace EpicLoot.MagicItemEffects.Shards {
             return value * Mathf.Max(0f, EffectConfig.Get(MagicEffectType.Conduit, PoolPerValueKey, DefaultPoolPerValue));
         }
 
-        // Tooltip: "Restore {0} Eitr per {1} Lightning Damage Dealt (Pool {2})". {1} and {2} are worked out from the
-        // Config, so the shown numbers follow a retune.
         public static void RegisterDisplayValues() {
             MagicItem.RegisterDisplayValues(MagicEffectType.Conduit,
                 value => new object[] { value, GetDamagePerTrigger(), GetPoolSize(value) });
@@ -88,7 +85,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
             _lastRefillTime = now;
         }
 
-        // Postfix handler invoked by CharacterDamageDispatch (on-hit reaction).
+        // Postfix handler invoked by SharedCharacterDamagePatch (on-hit reaction).
         public static void OnDamageDealt(Character __instance, HitData hit, Character attacker) {
             var player = Player.m_localPlayer;
             if (hit == null || player == null || hit.m_damage.m_lightning <= 0f || attacker != player

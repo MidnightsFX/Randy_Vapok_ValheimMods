@@ -1,4 +1,32 @@
 **0.16.0**
+* Bounty kills are now checked by the server, so one player can no longer complete or take another player's bounty progress.
+* Bounty and treasure map markers in the world are stored in a safer format, and ones from older versions still load.
+* Item categories no longer lose their fallback categories when Epic Loot adds items from other mods, and files that already lost them are repaired.
+* Tempering an item no longer undoes shardstones socketed or removed while the temper was under way.
+* Two players using the same enchanting table can no longer both spend the same stored materials, and an action that cannot be paid for no longer leaves the panel stuck.
+* Bounty and treasure map progress that cannot be read is now kept in the character file instead of being wiped.
+* Blood Rite now counts kills of creatures another player's game controls.
+* Frost Wave and Paralyze no longer leave creatures slowed or frozen again later in multiplayer.
+* Multishot procs are no longer cancelled by nearby monsters attacking between a staff's bursts.
+* Summons keep their summoner's health and damage bonuses whoever's game controls them.
+* Quarry Mark marks from before a death no longer pay out after respawning.
+* A bounty can no longer be bought twice in one period after discovering a new biome, and abandoning a bounty now removes its spawned creatures.
+* Frost ice spikes no longer hurt your own tames and summons.
+* Placed food shows eat or drink again, and dropped items show their current stack size.
+* Pressing Escape on a socket or Brokkr's Gift confirmation no longer closes the inventory too.
+* Config patches that remove a setting now work, and a patch whose path matches nothing is reported in the log.
+* A blank or mistyped ability hotkey no longer floods the log, and passive abilities no longer take an ability slot.
+* One failing magic effect no longer stops the others or the hit itself.
+* Several effects can no longer get stuck on after an error, and extreme values for mead cooldowns, weight reduction and Multishot are capped.
+* Weapon tooltips show attack costs with the same minimum the game applies.
+* Typing in the compendium search no longer triggers game hotkeys.
+* Mods using the Epic Loot API now always see their errors in the log, and their entries no longer appear twice for players on a server.
+* Bad input from another mod through the API no longer causes errors in Epic Loot.
+* Combat, movement, armor, item tooltips, identifying, the merchant and the enchanting table lists do less work every frame.
+* The log is quieter: trader diagnostics and per-patch and per-translation detail are gone.
+* Hildir's tempering panel now shows the right gamepad button on its Temper and Cancel buttons.
+* Unused settings, leftover debug code and old internal methods that other mods relied on have been removed.
+* Epic Loot console commands no longer error when there is no player, and the compendium's adventure page shows its empty message when nothing is active.
 * The health regen shardstone for shoulders can be set to work while resting, while rested or both, and the Legendary balance template now gives it for both.
 * Balance templates now include shardstones, so applying a template also replaces your shardstone settings.
 * Shardstones already socketed now pick up balance changes without being taken out and put back.

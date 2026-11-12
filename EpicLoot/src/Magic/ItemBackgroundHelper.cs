@@ -12,47 +12,40 @@ public static class ItemBackgroundHelper
         RectTransform magicItemTransform = (RectTransform)elementGo.transform.Find("magicItem");
         if (magicItemTransform == null)
         {
-            GameObject magicItemObject = UnityEngine.Object.Instantiate(equipped, equipped.transform.parent);
+            Image magicItemInit = CloneEquippedOverlay(equipped, "magicItem");
             // Directly below "equiped", never above it: the rarity background fills the whole cell,
             // so drawing it on top of the equipped marker hides the marker completely and a worn
             // magic item becomes indistinguishable from one sitting in the bag.
-            magicItemObject.transform.SetSiblingIndex(equipped.transform.GetSiblingIndex());
-            magicItemObject.name = "magicItem";
-            magicItemObject.SetActive(true);
-            magicItemTransform = (RectTransform)magicItemObject.transform;
-            magicItemTransform.anchorMin = magicItemTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            magicItemTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 64);
-            magicItemTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64);
-            magicItemTransform.pivot = new Vector2(0.5f, 0.5f);
-            magicItemTransform.anchoredPosition = Vector2.zero;
-            Image magicItemInit = magicItemTransform.GetComponent<Image>();
+            magicItemInit.transform.SetSiblingIndex(equipped.transform.GetSiblingIndex());
             magicItemInit.color = Color.white;
-            magicItemInit.raycastTarget = false;
+            magicItemTransform = (RectTransform)magicItemInit.transform;
         }
 
-        // Also add set item marker
-        if (isInventoryGrid)
+        if (isInventoryGrid && elementGo.transform.Find("setItem") == null)
         {
-            RectTransform setItemTransform = (RectTransform)elementGo.transform.Find("setItem");
-            if (setItemTransform == null)
-            {
-                GameObject setItemObject = UnityEngine.Object.Instantiate(equipped, equipped.transform.parent);
-                setItemObject.transform.SetAsLastSibling();
-                setItemObject.name = "setItem";
-                setItemObject.SetActive(true);
-                setItemTransform = (RectTransform)setItemObject.transform;
-                setItemTransform.anchorMin = setItemTransform.anchorMax = new Vector2(0.5f, 0.5f);
-                setItemTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 64);
-                setItemTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64);
-                setItemTransform.pivot = new Vector2(0.5f, 0.5f);
-                setItemTransform.anchoredPosition = Vector2.zero;
-                Image setItemInit = setItemTransform.GetComponent<Image>();
-                setItemInit.raycastTarget = false;
-                setItemInit.sprite = EpicLoot.GetSetItemSprite();
-            }
+            Image setItemInit = CloneEquippedOverlay(equipped, "setItem");
+            setItemInit.transform.SetAsLastSibling();
+            setItemInit.sprite = EpicLoot.GetSetItemSprite();
         }
 
         return magicItemTransform.GetComponent<Image>();
+    }
+
+    // A 64x64 copy of the slot's "equiped" overlay, centred and ignoring raycasts.
+    private static Image CloneEquippedOverlay(GameObject equipped, string name)
+    {
+        GameObject overlay = UnityEngine.Object.Instantiate(equipped, equipped.transform.parent);
+        overlay.name = name;
+        overlay.SetActive(true);
+        RectTransform rectTransform = (RectTransform)overlay.transform;
+        rectTransform.anchorMin = rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 64);
+        rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64);
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.anchoredPosition = Vector2.zero;
+        Image image = rectTransform.GetComponent<Image>();
+        image.raycastTarget = false;
+        return image;
     }
 
     public static void UpdateIconSetMarker(Image icon, ItemDrop.ItemData item)

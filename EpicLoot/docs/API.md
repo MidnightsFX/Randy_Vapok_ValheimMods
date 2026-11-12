@@ -64,7 +64,7 @@ broken before.
 | Instead of patching / reflecting | Call |
 |---|---|
 | `EpicLoot_UnityLib.InventoryManagement.GetAllItems` / `HasItem` / `CountItem` / `RemoveItem` / `RemoveExactItem` | `RegisterInventoryProvider` |
-| `EpicLoot.PlayerExtensions.GetEquipment` (deprecated — internals call `GetMagicEquipment`, so this patch does nothing) | `RegisterEquipmentProvider` |
+| `EpicLoot.PlayerExtensions.GetEquipment` (removed) / `GetMagicEquipment` | `RegisterEquipmentProvider` |
 | `EpicLoot.Crafting.EnchantCostsHelper.GetSacrificeProducts` (prefix returning false) | `RegisterSacrificeFilter` |
 | `EpicLoot.Crafting.EnchantTabController.GetEnchantCosts` (the type no longer exists) | `GetEnchantCostsJson` |
 | `EpicLoot.EpicLoot.GetRarityColor` + enumerating the `ItemRarity` enum | `GetRarityColorByIndex`, `GetRarityCount` |

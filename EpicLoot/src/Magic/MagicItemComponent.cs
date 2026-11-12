@@ -208,15 +208,10 @@ public sealed class MagicItemComponent
         }
     }
 
-    // A binary effect (Indestructible, Weightless, Throwable...) must sit at the default value of 1:
-    // older saves and hand-edited data can carry a stale number that would otherwise show up in the
-    // tooltip. "Binary" is deliberately judged across every rarity rather than at this item's own
-    // rarity -- the result is written straight back to m_customData, so a per-rarity test would
-    // permanently flatten a legitimately rolled value whenever the loaded definitions simply lack a
-    // block for that rarity. That happens for real: a dedicated server replaces the client's
-    // definitions wholesale on connect (ELConfig.ApplyClientConfig), so a server config that predates
-    // a newly added rarity would otherwise reset every effect on every item of that rarity to 1 --
-    // once, silently, and irreversibly. Report the gap instead, and leave the value alone.
+    // A binary effect (Indestructible, Weightless, Throwable...) must sit at the default value of 1, or a
+    // stale number shows in the tooltip. "Binary" is judged across every rarity, not this item's: the result
+    // is written back, and a server whose config lacks a block for a rarity (its definitions replace the
+    // client's on connect) would otherwise flatten every rolled value of that rarity to 1 for good.
     // Returns whether anything was corrected.
     private bool FixupValuelessEffects()
     {

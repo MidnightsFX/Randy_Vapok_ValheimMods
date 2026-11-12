@@ -15,8 +15,7 @@ EpicLoot, which embeds the bundle.
 
 The prefabs carry **no EpicLoot components**, by design: they stay independent of the mod assembly,
 so a rebuilt or renamed `EpicLoot.dll` can never turn a row into a missing script, and the prefabs
-open cleanly in an editor that has no mod DLLs at all. (Historically the editor could not load
-`EpicLoot.dll` either, until the MagicaCloth 2 asset satisfied `assembly_valheim`'s reference.) Instead:
+open cleanly in an editor that has no mod DLLs at all. Instead:
 
 - A row's **GameObject name is its key** (`GlobalDropRateModifier`, `json:adventuredata:Gamble.GamblesCount`,
   `action:preset:balanced`). Rename the object to rebind it. Decorative rows keep their template name
@@ -39,7 +38,7 @@ open cleanly in an editor that has no mod DLLs at all. (Historically the editor 
 | `<ELConfig static field>` | a BepInEx entry on `EpicLoot.Config.ELConfig` | `GlobalDropRateModifier`, `_adventureModeEnabled`, `ShowQuickConfigButton` |
 | `<field>.<part>` | one part of a composite entry | `AbilityKeyCodes.0`, `AbilityBarPosition.x` |
 | `Common.<Entry>` | a Common-layer entry on `Common.ModContext` | `Common.EnableDebugMode`, `Common.ConfigApplyDelay` |
-| `json:<file>:<path>` | a value in a baseconfig JSON (host or server admin) | `json:adventuredata:Gamble.GamblesCount`, `json:loottables:RarityCounts`, `json:magiceffects:TripleBowShot.Chance`, `json:magiceffects:Riches` |
+| `json:<file>:<path>` | a value in a baseconfig JSON (host or server admin) | `json:adventuredata:Gamble.GamblesCount`, `json:loottables:RarityCounts`, `json:shardstones:Global.Values.MovementPenaltyReference`, `json:magiceffects:EffectConfigs` |
 | `action:<verb>:<arg>` | a button | `action:preset:balanced`, `action:reset:TraderPanelPosition`, `action:url:discord`, `action:advanced:show` |
 | `readout:<name>` | code-fed text | `readout:dropmix`, `readout:template` |
 
@@ -80,6 +79,7 @@ scroll sensitivity 800 (since Call to Arms a wheel notch moves a list far less) 
 | `Row_BiomeDrops` | `Head` → `Label`, `Biome` (`Button` + child `Text`: the shown biome; opens the picker over the biomes that have drop tables, plus "Other"), `Target` (`Button` + child `Text`: the shown loot table, e.g. "Tier1Mob · level 2 (Greydwarf, Skeleton)"; opens the picker over the biome's tables), optional `Prev` / `Next` (`Button`s stepping through them); `Amount` (a WeightList with open keys: how many items drop) and `Rarity` (a WeightList with fixed keys: one chance per rarity). Key `json:loottables:LootTables`; every table is staged, the shown biome and table are row UI state. The tooltip sits on `Head`. |
 | `Row_RarityCounts` | `Head` → `Label`, `Rarity` (`Button` + child `Text`: the shown rarity; opens the picker); `Enchantments` and `Sockets` (WeightLists with open keys). Key `json:loottables:RarityCounts` (MagicEffectsCount and SocketCounts); every rarity is staged, the shown one is row UI state. The tooltip sits on `Head`. |
 | `Row_UpgradeCosts` | `Head` → `Label`, `Feature` (`Button`: the shown enchanting table feature); `Items` (`ScrollRect` whose `content` lays out an inactive `Level` template, cloned per level of the shown feature: `Head` → `Label` ("Unlock" for level 0, then "Level N"), `Add` (`Button`); then an `Item` template cloned per cost item: `Field` (`TMP_InputField`, item prefab name), `Pick` (`Button`, ObjectDB item picker, hidden when no item list is known), `Amount` (`TMP_InputField` int), `Remove` (`Button`)). When `content` carries a `GridLayoutGroup`, the code sets its cell height to fit the level with the most items. Key `json:enchantingupgrades:UpgradeCosts`; the levels shown run from Unlock to the feature's staged `MaximumFeatureLevels` value, and a level added by raising it is written with an `UpgradeValues` entry copied from the top level. The tooltip sits on `Head`. |
+| `Row_ItemCategories` | `Head` → `Label`, `Category` (`Button` + child `Text`: the shown category; opens the picker over every `ItemInfo[].Type`), `Add` (`Button`); `Items` (`ScrollRect`; `content` holds an inactive `Item` template: `Boss` (`Button` + child `Text`: boss key; opens the picker over `none` + the known keys), `Field` (`TMP_InputField` item prefab name), `Pick` (`Button`, ObjectDB item picker, hidden on the main menu), `Remove` (`Button`)). Key `json:iteminfo:ItemInfo`; every category is staged, the shown one is row UI state. The tooltip sits on `Head`. |
 
 A **WeightList** is a named child of a row (`Enchantments`, `Amount`, ...) holding a count:chance table
 whose chances should add up to 100: `Head` → `Label`, `Total` (`TMP_Text`, the warning shown only while
@@ -88,7 +88,6 @@ template: `Count` (`TMP_InputField` int, open keys) or `Name` (`TMP_Text`, fixed
 `Value` (`TMP_InputField` int), `Remove` (`Button`, open keys)). The sliders move freely; on Save each
 changed table is rebalanced to 100, the chances the player changed keeping their values and the others
 filling the rest (`WeightTable.Rebalance`). A table left untouched is not rewritten, even when it is off.
-| `Row_ItemCategories` | `Head` → `Label`, `Category` (`Button` + child `Text`: the shown category; opens the picker over every `ItemInfo[].Type`), `Add` (`Button`); `Items` (`ScrollRect`; `content` holds an inactive `Item` template: `Boss` (`Button` + child `Text`: boss key; opens the picker over `none` + the known keys), `Field` (`TMP_InputField` item prefab name), `Pick` (`Button`, ObjectDB item picker, hidden on the main menu), `Remove` (`Button`)). Key `json:iteminfo:ItemInfo`; every category is staged, the shown one is row UI state. The tooltip sits on `Head`. |
 
 Overlays, instantiated by code under `GUIManager.CustomGUIFront`:
 

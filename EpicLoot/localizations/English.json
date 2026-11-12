@@ -570,8 +570,6 @@
     "mod_epicloot_me_restinghealthregen_config_whilerested": "While Rested (0 = Off)",
     "mod_epicloot_me_travellight_display": "+{0}% Move Speed, -{1} Carry Weight",
     "mod_epicloot_me_travellight_desc": "Travel light: move {0}% faster, but your max carry weight is reduced by {1}.",
-    "mod_epicloot_me_batteringram_display": "Battering Ram: Blunt from Weight",
-    "mod_epicloot_me_batteringram_desc": "Running into enemies deals blunt damage based on your speed and carried weight (scaled by {0}).",
     "mod_epicloot_me_gainmaxcarryweightfromrested_display": "+{0} Carry Weight per Rested Level",
     "mod_epicloot_me_gainmaxcarryweightfromrested_desc": "While Rested, increases max carry weight by {0} for each level of your Rested comfort.",
 
@@ -1077,7 +1075,6 @@
     "mod_epicloot_item_skuldsthread_tooltip": "Draws a line of sparks toward a nearby bounty target or its minions. The closer you are, the clearer the line.",
     "mod_epicloot_item_skuldsthread_startmsg": "The thread stirs, seeking the doomed",
 
-    "mod_epicloot_se_paralyze": "Paralyze",
     "mod_epicloot_se_shockingcharge": "Eikthyr's Charge",
     "mod_epicloot_se_forestsaid": "Forest's Respite",
     "mod_epicloot_se_corpserot": "Bonemass' Rot",

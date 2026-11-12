@@ -22,40 +22,45 @@ public static partial class TerminalManager
         var allItemNames = GetValidMagicItemNames();
 
         LootRoller.CheatEffectCount = effectCount;
-        for (var i = 0; i < count; i++)
+        try
         {
-            var rarityTable = GetRarityTable(rarityArg);
-
-            var item = itemArg;
-            if (item == "random")
+            for (var i = 0; i < count; i++)
             {
-                var weightedRandomTable =
-                    new WeightedRandomCollection<string>(allItemNames, x => 1);
-                item = weightedRandomTable.Roll();
+                var rarityTable = GetRarityTable(rarityArg);
+
+                var item = itemArg;
+                if (item == "random")
+                {
+                    var weightedRandomTable =
+                        new WeightedRandomCollection<string>(allItemNames, x => 1);
+                    item = weightedRandomTable.Roll();
+                }
+
+                if (ObjectDB.instance.GetItemPrefab(item) == null)
+                {
+                    args.Context.PrintWarning($"> Could not find item: {item}");
+                    break;
+                }
+
+                args.Context.PrintInfo($">  {i + 1} - rarity: [{string.Join(", ", rarityTable)}], item: {item}");
+
+                var loot = LootTable.Simple("Console", [[1, 1]],
+                [
+                    new LootDrop { Item = item, Rarity = rarityTable, Weight = 1 }
+                ]);
+
+                var randomOffset = Random.insideUnitSphere;
+                var dropPoint = Player.m_localPlayer.transform.position +
+                                Player.m_localPlayer.transform.forward * 3 + Vector3.up * 1.5f + randomOffset;
+                LootRoller.CheatRollingItem = true;
+                LootRoller.RollLootTableAndSpawnObjects(loot, 1, loot.Object, dropPoint);
             }
-
-            if (ObjectDB.instance.GetItemPrefab(item) == null)
-            {
-                args.Context.PrintWarning($"> Could not find item: {item}");
-                break;
-            }
-
-            args.Context.PrintInfo($">  {i + 1} - rarity: [{string.Join(", ", rarityTable)}], item: {item}");
-
-            var loot = LootTable.Simple("Console", [[1, 1]],
-            [
-                new LootDrop { Item = item, Rarity = rarityTable, Weight = 1 }
-            ]);
-
-            var randomOffset = Random.insideUnitSphere;
-            var dropPoint = Player.m_localPlayer.transform.position +
-                            Player.m_localPlayer.transform.forward * 3 + Vector3.up * 1.5f + randomOffset;
-            LootRoller.CheatRollingItem = true;
-            LootRoller.RollLootTableAndSpawnObjects(loot, 1, loot.Object, dropPoint);
-            LootRoller.CheatRollingItem = false;
         }
-
-        LootRoller.CheatEffectCount = -1;
+        finally
+        {
+            LootRoller.CheatRollingItem = false;
+            LootRoller.CheatEffectCount = -1;
+        }
     }
 
     private static List<string> GetSpawnMagicItemOptions(string[] args)
@@ -66,34 +71,6 @@ public static partial class TerminalManager
             3 => GetValidMagicItemNames(),
             _ => []
         };
-    }
-
-    private static List<string> GetValidMagicItemNamesWithRequirements(string effectType)
-    {
-        List<string> result = [];
-        if (!MagicItemEffectDefinitions.TryGet(effectType, out var definition))
-        {
-            return result;
-        }
-
-        for (int i = 0; i < ObjectDB.instance.m_items.Count; ++i)
-        {
-            var itemPrefab = ObjectDB.instance.m_items[i];
-            if (!itemPrefab.TryGetComponent(out ItemDrop itemDrop))
-            {
-                continue;
-            }
-
-            var itemData = itemDrop.m_itemData.Clone();
-            itemData.m_dropPrefab = itemPrefab;
-            MagicItem dummyMagicItem = new MagicItem { Rarity = definition.Requirements.AllowedRarities.Count == 0 ? ItemRarity.Magic : definition.Requirements.AllowedRarities.First() };
-            if (definition.Requirements.CheckRequirements(itemData, dummyMagicItem))
-            {
-                result.Add(itemPrefab.name);
-            }
-        }
-
-        return result;
     }
 
     private static void SpawnMagicItemWithEffect(Terminal.ConsoleEventArgs args)
@@ -155,10 +132,16 @@ public static partial class TerminalManager
         LootRoller.CheatRollingItem = true;
         LootRoller.CheatForceMagicEffect = true;
         LootRoller.ForcedMagicEffect = effectArg;
-        LootRoller.RollLootTableAndSpawnObjects(loot, 1, loot.Object, dropPoint);
-        LootRoller.CheatForceMagicEffect = false;
-        LootRoller.ForcedMagicEffect = string.Empty;
-        LootRoller.CheatRollingItem = false;
+        try
+        {
+            LootRoller.RollLootTableAndSpawnObjects(loot, 1, loot.Object, dropPoint);
+        }
+        finally
+        {
+            LootRoller.CheatForceMagicEffect = false;
+            LootRoller.ForcedMagicEffect = string.Empty;
+            LootRoller.CheatRollingItem = false;
+        }
     }
 
     private static List<string> GetSpawnMagicItemWithEffectOptions(string[] args)
@@ -171,9 +154,10 @@ public static partial class TerminalManager
         };
     }
 
-    // magicsetitem <id> [item|random] [rarity|random]: any unique or set piece, at any rarity.
     private static void SpawnSetItem(Terminal.ConsoleEventArgs args)
     {
+        if (Player.m_localPlayer == null) return;
+
         if (args.Length < 2)
         {
             args.Context.PrintWarning("> Specify uniqueID, item (optional or random), rarity (optional or random)");
@@ -302,11 +286,17 @@ public static partial class TerminalManager
         Vector3 dropPoint = Player.m_localPlayer.transform.position +
             Player.m_localPlayer.transform.forward * 3 + Vector3.up * 1.5f + randomOffset;
         LootRoller.CheatRollingItem = true;
-        LootRoller.RollLootTableAndSpawnObjects(loot, 1, loot.Object, dropPoint);
-        LootRoller.CheatRollingItem = false;
-        LootRoller.CheatForceUniqueID = null;
-        LootRoller.CheatForceUniqueRarity = null;
-        LootRoller.CheatDisableGating = previousDisableGatingState;
+        try
+        {
+            LootRoller.RollLootTableAndSpawnObjects(loot, 1, loot.Object, dropPoint);
+        }
+        finally
+        {
+            LootRoller.CheatRollingItem = false;
+            LootRoller.CheatForceUniqueID = null;
+            LootRoller.CheatForceUniqueRarity = null;
+            LootRoller.CheatDisableGating = previousDisableGatingState;
+        }
     }
 
     private static List<string> GetSetItemOptions(string[] args)

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using EpicLoot;
-using EpicLoot.CraftingV2;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +12,7 @@ namespace EpicLoot_UnityLib
 
         // Every woken instance, so a rarity colour setting change can recolour them. The enchanting table UI is
         // built once per session, and each instance otherwise reads the colours only when it wakes or its
-        // rarity is set -- the buttons kept their old colours while the text around them took the new ones.
+        // rarity is set.
         private static readonly List<SetRarityColor> _instances = new List<SetRarityColor>();
 
         private readonly Dictionary<Graphic, Color> _defaultColors = new Dictionary<Graphic, Color>();
@@ -82,7 +81,7 @@ namespace EpicLoot_UnityLib
         {
             if ((int)Rarity >= 0)
             {
-                Color color = EnchantingUIController.GetRarityColor(Rarity);
+                Color color = EpicLoot.EpicLoot.GetRarityColorARGB(Rarity);
                 foreach (Graphic graphic in Graphics)
                 {
                     graphic.color = color;

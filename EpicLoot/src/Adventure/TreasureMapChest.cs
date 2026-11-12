@@ -96,19 +96,6 @@ namespace EpicLoot.Adventure
                 beacon.m_range = EpicLoot.GetAndvaranautRange();
             }
 
-            // TODO Figure out why this damn thing won't float
-            // Idea: It's probably because of the snap to ground chests have? Or gravity physics?
-            /*var rigidbody = gameObject.AddComponent<Rigidbody>();
-            rigidbody.constraints =
-                RigidbodyConstraints.FreezePositionX
-                | RigidbodyConstraints.FreezePositionZ
-                | RigidbodyConstraints.FreezeRotation;
-            rigidbody.collisionDetectionMode = CollisionDetectionMode.Discrete;
-
-            var floating = gameObject.AddComponent<Floating>();
-            floating.m_waterLevelOffset = 0.3f;
-            floating.TerrainCheck();*/
-
             Destroy(gameObject.GetComponent<WearNTear>());
         }
 
@@ -116,8 +103,6 @@ namespace EpicLoot.Adventure
         /// Whether <paramref name="container"/> is a treasure map chest its buyer has not found yet, and
         /// <paramref name="playerID"/> is not that buyer. Private privacy alone does not keep others out:
         /// Server Devcommands lets admins open any private chest (on by default), and other mods share chests.
-        /// Someone else opening it used to finish their own map of that biome and interval instead, and
-        /// flag the chest found, after which the buyer's map could never be finished.
         /// </summary>
         public static bool IsLockedFor(Container container, long playerID)
         {
@@ -230,8 +215,8 @@ namespace EpicLoot.Adventure
             var saveData = player.GetAdventureSaveData();
             if (zdo.GetBool("TreasureMapChest.HasBeenFound"))
             {
-                // Before the buyer-only lock, another player could open the chest first: it was flagged found
-                // while the buyer's map stayed open. The buyer finishes the map by opening it.
+                // A chest another player opened first in an older build is flagged found while the buyer's map
+                // is still open; the buyer finishes the map by opening it.
                 if (saveData.FoundTreasureChest(treasureMapChest.Interval, treasureMapChest.Biome))
                 {
                     player.SaveAdventureSaveData();

@@ -37,10 +37,9 @@ public class InventoryManagement
         return null;
     }
 
-    // The four read paths below all consult external inventory providers registered through
-    // EpicLoot.API.RegisterInventoryProvider (nearby containers, backpacks, remote stashes). With none
-    // registered the provider calls short-circuit on a bool and behavior is identical to the player's
-    // own inventory.
+    // The read paths below also consult the inventory providers registered through
+    // EpicLoot.API.RegisterInventoryProvider (nearby containers, backpacks, remote stashes), and all but
+    // GetEditableItems the open table's storage. With neither, they read the player's own inventory alone.
     public List<ItemDrop.ItemData> GetAllItems()
     {
         Inventory inventory = GetInventory();
@@ -158,7 +157,7 @@ public class InventoryManagement
 
     public void GiveItem(string item, int amount)
     {
-        Debug.Log($"Attempting to give item {item} with amount {amount}");
+        EpicLoot.EpicLoot.Log($"Attempting to give item {item} with amount {amount}");
         if (amount <= 0)
         {
             return;
@@ -173,8 +172,8 @@ public class InventoryManagement
         }
 
         // Not vanilla's Inventory.AddItem(name, ...): when the inventory fills, that drops a bare prefab
-        // (a stack of one) and still returns the item as added, so a full player claiming bounties got one
-        // coin or token per reward. The ItemData path adds what fits and drops the rest at its real size.
+        // (a stack of one) and still returns the item as added. The ItemData path adds what fits and drops
+        // the rest at its real size.
         itemData.m_stack = amount;
         GiveItem(itemData);
     }
@@ -190,7 +189,7 @@ public class InventoryManagement
     /// </param>
     public bool GiveItem(ItemDrop.ItemData item, bool announce)
     {
-        Debug.Log($"Attempting to give itemdata {item.m_shared.m_name} with amount {item.m_stack}");
+        EpicLoot.EpicLoot.Log($"Attempting to give itemdata {item.m_shared.m_name} with amount {item.m_stack}");
         Inventory inventory = GetInventory();
 
         do
@@ -229,7 +228,7 @@ public class InventoryManagement
 
     private void DropItem(ItemDrop.ItemData item)
     {
-        Debug.Log($"Attempting to drop itemdata {item.m_shared.m_name} with amount {item.m_stack}");
+        EpicLoot.EpicLoot.Log($"Attempting to drop itemdata {item.m_shared.m_name} with amount {item.m_stack}");
         Player player = Player.m_localPlayer;
         ItemDrop itemDrop = ItemDrop.DropItem(item, item.m_stack,
             player.transform.position + player.transform.forward + player.transform.up,
@@ -240,29 +239,314 @@ public class InventoryManagement
             itemDrop.m_itemData.m_stack, itemDrop.m_itemData.GetIcon());
     }
 
-    // Both removal paths return how many were actually removed, which is less than amount when the item (or
-    // part of its stack) was no longer anywhere the table can reach. Callers that hand something out in
-    // exchange must pay out for that number, not for what they asked for.
-    //
-    // The storage's counts are this client's view of the table. When the table's owner finds fewer (another
-    // player spent them a moment earlier), the stash reports the difference once the owner answers, and it
-    // is taken from elsewhere instead, so the action is not free.
-    public int RemoveExactItem(ItemDrop.ItemData item, int amount)
+    /// <summary>What a table action costs: materials by name, and exact items it consumes.</summary>
+    public sealed class Payment
     {
-        if (item == null || amount <= 0)
+        internal sealed class Line
         {
-            return 0;
+            public string Name;
+            public ItemDrop.ItemData Exact;
+            public int Amount;
         }
 
-        if (ActiveStash != null && ActiveStash.TryGetSnapshotPrefab(item, out string stashPrefab))
+        internal readonly List<Line> Lines = new List<Line>();
+
+        /// <summary>A cost list. Nothing is added under the no-cost cheat.</summary>
+        public Payment Cost(IEnumerable<InventoryItemListElement> cost)
         {
-            string sharedName = item.m_shared.m_name;
-            return ActiveStash.Take(stashPrefab, amount,
-                shortfall => ReportUncharged(sharedName, shortfall, RemoveStashKindFromInventory(stashPrefab, shortfall)));
+            if (cost == null || (Player.m_localPlayer != null && Player.m_localPlayer.NoCostCheat()))
+            {
+                return this;
+            }
+
+            foreach (InventoryItemListElement element in cost)
+            {
+                ItemDrop.ItemData item = element.GetItem();
+                if (item != null)
+                {
+                    ByName(item.m_shared.m_name, item.m_stack);
+                }
+            }
+
+            return this;
         }
 
+        public Payment ByName(string sharedName, int amount)
+        {
+            if (!string.IsNullOrEmpty(sharedName) && amount > 0)
+            {
+                Lines.Add(new Line { Name = sharedName, Amount = amount });
+            }
+
+            return this;
+        }
+
+        /// <summary>That item itself, as for an input the action uses up.</summary>
+        public Payment Exact(ItemDrop.ItemData item, int amount)
+        {
+            if (item != null && amount > 0)
+            {
+                Lines.Add(new Line { Name = item.m_shared.m_name, Exact = item, Amount = amount });
+            }
+
+            return this;
+        }
+    }
+
+    /// <summary>What a payment took, so an action that cannot go ahead after all can hand it back.</summary>
+    public sealed class Receipt
+    {
+        internal EnchantingTableStash Stash;
+        internal readonly Dictionary<string, int> FromStash = new Dictionary<string, int>();
+        internal readonly List<ItemDrop.ItemData> FromOutside = new List<ItemDrop.ItemData>();
+
+        public void Refund()
+        {
+            if (FromStash.Count > 0)
+            {
+                if (Stash != null)
+                {
+                    Stash.Return(FromStash);
+                }
+                else
+                {
+                    foreach (KeyValuePair<string, int> pair in FromStash)
+                    {
+                        if (StashCatalog.TryGetByPrefab(pair.Key, out StashItemKind kind))
+                        {
+                            Instance.GiveItem(kind.CreateItem(pair.Value));
+                        }
+                    }
+                }
+            }
+
+            foreach (ItemDrop.ItemData item in FromOutside)
+            {
+                Instance.GiveItem(item);
+            }
+
+            FromStash.Clear();
+            FromOutside.Clear();
+        }
+    }
+
+    private sealed class Planned
+    {
+        public Payment.Line Line;
+        public string StashPrefab;
+        public int FromStash;
+        public int Got;
+        public int OutsideNeed => Line.Amount - Got;
+    }
+
+    /// <summary>
+    /// Takes a payment, then reports what was taken: null when it could not all be paid, in which case nothing
+    /// is kept. The open table's storage is spent first, and only through its owner, the one client that may
+    /// change it: its share is asked for in one request and the rest of the action waits for the answer, so two
+    /// players spending the same stored materials cannot both be paid for. What the owner could not supply is
+    /// taken from the player's inventory, then from inventory providers. On the owner, and with nothing to take
+    /// from storage, <paramref name="onDone"/> runs before this returns.
+    /// </summary>
+    public void Pay(Payment payment, System.Action<Receipt> onDone)
+    {
+        EnchantingTableStash stash = ActiveStash;
+        Dictionary<string, int> stashWant = new Dictionary<string, int>();
+        List<Planned> plan = new List<Planned>();
+        foreach (Payment.Line line in payment.Lines)
+        {
+            Planned planned = new Planned { Line = line };
+            if (stash != null)
+            {
+                if (line.Exact != null)
+                {
+                    if (stash.TryGetSnapshotPrefab(line.Exact, out string prefab))
+                    {
+                        planned.StashPrefab = prefab;
+                        planned.FromStash = line.Amount;
+                    }
+                }
+                else if (StashCatalog.TryGetBySharedName(line.Name, out StashItemKind kind))
+                {
+                    stashWant.TryGetValue(kind.PrefabName, out int already);
+                    planned.StashPrefab = kind.PrefabName;
+                    planned.FromStash = Mathf.Clamp(stash.GetCount(kind.PrefabName) - already, 0, line.Amount);
+                }
+
+                if (planned.FromStash > 0)
+                {
+                    stashWant.TryGetValue(planned.StashPrefab, out int wanted);
+                    stashWant[planned.StashPrefab] = wanted + planned.FromStash;
+                }
+            }
+
+            plan.Add(planned);
+        }
+
+        if (stashWant.Count == 0)
+        {
+            Settle(plan, stash, new Dictionary<string, int>(), onDone);
+            return;
+        }
+
+        stash.Spend(stashWant, taken => Settle(plan, stash, taken, onDone), () =>
+        {
+            Debug.LogWarning("[EpicLoot] The enchanting table's storage never confirmed a payment; the action was not carried out.");
+            onDone(null);
+        });
+    }
+
+    private void Settle(List<Planned> plan, EnchantingTableStash stash, Dictionary<string, int> taken, System.Action<Receipt> onDone)
+    {
+        Receipt receipt = new Receipt { Stash = stash };
+        foreach (KeyValuePair<string, int> pair in taken)
+        {
+            receipt.FromStash[pair.Key] = pair.Value;
+        }
+
+        Dictionary<string, int> left = new Dictionary<string, int>(taken);
+        foreach (Planned planned in plan)
+        {
+            if (planned.FromStash <= 0)
+            {
+                continue;
+            }
+
+            left.TryGetValue(planned.StashPrefab, out int available);
+            planned.Got = Mathf.Min(planned.FromStash, available);
+            left[planned.StashPrefab] = available - planned.Got;
+        }
+
+        if (!CanCoverOutside(plan))
+        {
+            receipt.Refund();
+            onDone(null);
+            return;
+        }
+
+        foreach (Planned planned in plan)
+        {
+            int need = planned.OutsideNeed;
+            if (need <= 0)
+            {
+                continue;
+            }
+
+            int removed = TakeOutside(planned, need, receipt);
+            if (removed < need)
+            {
+                Debug.LogWarning($"[EpicLoot] Only {removed} of {need} {planned.Line.Name} could be taken; the action was not carried out.");
+                receipt.Refund();
+                onDone(null);
+                return;
+            }
+        }
+
+        onDone(receipt);
+    }
+
+    // Checked in full before anything outside the storage is taken, so a payment that cannot be made takes nothing.
+    private bool CanCoverOutside(List<Planned> plan)
+    {
         Inventory inventory = GetInventory();
+        Dictionary<string, int> byName = new Dictionary<string, int>();
+        Dictionary<string, int> byKind = new Dictionary<string, int>();
+        foreach (Planned planned in plan)
+        {
+            int need = planned.OutsideNeed;
+            if (need <= 0)
+            {
+                continue;
+            }
 
+            if (planned.Line.Exact == null)
+            {
+                byName.TryGetValue(planned.Line.Name, out int sum);
+                byName[planned.Line.Name] = sum + need;
+            }
+            else if (planned.StashPrefab != null)
+            {
+                byKind.TryGetValue(planned.StashPrefab, out int sum);
+                byKind[planned.StashPrefab] = sum + need;
+            }
+            else if (planned.Line.Exact.m_stack < need || !IsHeld(planned.Line.Exact, inventory))
+            {
+                return false;
+            }
+        }
+
+        foreach (KeyValuePair<string, int> pair in byName)
+        {
+            int held = (inventory != null ? inventory.CountItems(pair.Key) : 0) + API.CountProviderItems(pair.Key);
+            if (held < pair.Value)
+            {
+                return false;
+            }
+        }
+
+        foreach (KeyValuePair<string, int> pair in byKind)
+        {
+            if (CountStashKindInInventory(pair.Key) < pair.Value)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsHeld(ItemDrop.ItemData item, Inventory inventory)
+    {
+        if (inventory != null && inventory.ContainsItem(item))
+        {
+            return true;
+        }
+
+        if (!API.AnyInventoryProviders)
+        {
+            return false;
+        }
+
+        List<ItemDrop.ItemData> provided = new List<ItemDrop.ItemData>();
+        API.AppendProviderItems(provided);
+        return provided.Contains(item);
+    }
+
+    private int TakeOutside(Planned planned, int need, Receipt receipt)
+    {
+        Payment.Line line = planned.Line;
+        if (line.Exact != null && planned.StashPrefab != null)
+        {
+            int removed = RemoveStashKindFromInventory(planned.StashPrefab, need);
+            if (removed > 0 && StashCatalog.TryGetByPrefab(planned.StashPrefab, out StashItemKind kind))
+            {
+                receipt.FromOutside.Add(kind.CreateItem(removed));
+            }
+
+            return removed;
+        }
+
+        // Copied before it is taken: the copy is what a refund hands back.
+        ItemDrop.ItemData template = line.Exact ?? FindByName(line.Name);
+        ItemDrop.ItemData copy = template?.Clone();
+        int taken = line.Exact != null ? RemoveExactOutside(line.Exact, need) : RemoveOutsideStash(line.Name, need);
+        if (taken > 0 && copy != null)
+        {
+            copy.m_stack = taken;
+            receipt.FromOutside.Add(copy);
+        }
+
+        return taken;
+    }
+
+    private ItemDrop.ItemData FindByName(string sharedName)
+    {
+        List<ItemDrop.ItemData> items = GetAllItems();
+        return items?.Find(x => x?.m_shared != null && x.m_shared.m_name == sharedName);
+    }
+
+    private int RemoveExactOutside(ItemDrop.ItemData item, int amount)
+    {
+        Inventory inventory = GetInventory();
         int taken = 0;
         if (inventory != null && inventory.ContainsItem(item))
         {
@@ -271,22 +555,15 @@ public class InventoryManagement
             taken = before - (inventory.ContainsItem(item) ? item.m_stack : 0);
         }
 
-        int shortfall = amount - taken;
-        if (shortfall > 0)
+        if (amount - taken > 0)
         {
-            taken += API.RemoveExactProviderItem(item, shortfall);
+            taken += API.RemoveExactProviderItem(item, amount - taken);
         }
 
         return taken;
     }
 
-    public int RemoveItem(ItemDrop.ItemData item)
-    {
-        return RemoveItem(item.m_shared.m_name, item.m_stack);
-    }
-
-    // A cost is spent from the open table's storage first, then from the player's own inventory, and only
-    // the rest from what inventory providers offer (nearby chests).
+    // Pays at once from the inventory, then providers; never from the table storage, which pays through Pay.
     public int RemoveItem(string item, int amount)
     {
         if (amount <= 0)
@@ -294,19 +571,7 @@ public class InventoryManagement
             return 0;
         }
 
-        int taken = 0;
-        if (ActiveStash != null)
-        {
-            taken = ActiveStash.TakeBySharedName(item, amount,
-                shortfall => ReportUncharged(item, shortfall, RemoveOutsideStash(item, shortfall)));
-        }
-
-        if (amount - taken > 0)
-        {
-            taken += RemoveOutsideStash(item, amount - taken);
-        }
-
-        return taken;
+        return RemoveOutsideStash(item, amount);
     }
 
     private int RemoveOutsideStash(string item, int amount)
@@ -326,6 +591,26 @@ public class InventoryManagement
         }
 
         return taken;
+    }
+
+    private int CountStashKindInInventory(string prefabName)
+    {
+        Inventory inventory = GetInventory();
+        int count = 0;
+        if (inventory == null)
+        {
+            return 0;
+        }
+
+        foreach (ItemDrop.ItemData item in inventory.GetAllItems())
+        {
+            if (StashCatalog.IsStashable(item) && StashCatalog.GetPrefabName(item) == prefabName)
+            {
+                count += item.m_stack;
+            }
+        }
+
+        return count;
     }
 
     // An exact item from the storage stands for its kind, so a shortfall is made up from stacks of that same
@@ -358,15 +643,6 @@ public class InventoryManagement
         }
 
         return taken;
-    }
-
-    private static void ReportUncharged(string item, int shortfall, int charged)
-    {
-        if (charged < shortfall)
-        {
-            Debug.LogWarning($"[EpicLoot] The enchanting table's storage held {shortfall} fewer {item} than " +
-                $"this client was shown, and only {charged} could be taken elsewhere instead.");
-        }
     }
 
     public List<ItemDrop.ItemData> GetBoundItems()

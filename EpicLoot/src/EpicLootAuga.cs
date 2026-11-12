@@ -56,11 +56,7 @@ namespace EpicLoot
 
             var oldRt = (RectTransform)button.transform;
             var rt = (RectTransform)newButton.transform;
-            rt.anchorMin = oldRt.anchorMin;
-            rt.anchorMax = oldRt.anchorMax;
-            rt.pivot = oldRt.pivot;
-            rt.anchoredPosition = oldRt.anchoredPosition;
-            rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, oldRt.rect.width);
+            CopyPlacement(oldRt, rt);
             rt.SetSiblingIndex(oldRt.GetSiblingIndex());
 
             newButton.interactable = button.interactable;
@@ -95,6 +91,15 @@ namespace EpicLoot
             newButton.gameObject.SetActive(button.gameObject.activeSelf);
             Object.DestroyImmediate(button.gameObject);
             return newButton;
+        }
+
+        private static void CopyPlacement(RectTransform from, RectTransform to)
+        {
+            to.anchorMin = from.anchorMin;
+            to.anchorMax = from.anchorMax;
+            to.pivot = from.pivot;
+            to.anchoredPosition = from.anchoredPosition;
+            to.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, from.rect.width);
         }
 
         /// <summary>The label of a button, whichever kind of text component carries it.</summary>
@@ -342,11 +347,7 @@ namespace EpicLoot
 
             var oldRt = (RectTransform)button.transform;
             var rt = (RectTransform)newButton.transform;
-            rt.anchorMin = oldRt.anchorMin;
-            rt.anchorMax = oldRt.anchorMax;
-            rt.pivot = oldRt.pivot;
-            rt.anchoredPosition = oldRt.anchoredPosition;
-            rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, oldRt.rect.width);
+            CopyPlacement(oldRt, rt);
             // The tab bar fits every tab only at the size the window's prefab gives them. The Auga tab prefab is
             // taller, which pushes the last tab off the bottom of the window. The label stretches with the tab and
             // auto-sizes its font to fit, so it keeps its own height or it shrinks until it cannot be read.

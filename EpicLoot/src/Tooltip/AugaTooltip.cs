@@ -221,7 +221,7 @@ public static class AugaTooltip
                     value = $"<color=red>{bloodlust.Value:0.#}</color>";
                 }
                 // Spellsword changes the cost without the vanilla-UI tooltip colouring it; Auga's line is
-                // coloured either way, as it always was.
+                // coloured either way.
                 else if (stamina != null && (stamina.Modified || magicItem.HasEffect(MagicEffectType.SpellSword)))
                 {
                     value = Colored($"{stamina.Value:0.#}", magicColor);

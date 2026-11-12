@@ -9,8 +9,7 @@ public static class EitrWeaving
 {
     // A parry restores a percent of max eitr, and each point of the effect's value is worth this many percent.
     // The values stay on their old flat scale (15 to 100) because rolled items and runes store them: read directly
-    // as a percent, an item that rolled 72 would restore 72% of max eitr. Tunable as "MaxEitrPercentPerValue" in
-    // this effect's Config block in magiceffects.json, where each Balance Template sets its own.
+    // as a percent, an item that rolled 72 would restore 72% of max eitr. Each Balance Template sets its own.
     public const float DefaultMaxEitrPercentPerValue = 0.2f;
     private const string MaxEitrPercentPerValueKey = "MaxEitrPercentPerValue";
 
@@ -19,8 +18,8 @@ public static class EitrWeaving
         return value * EffectConfig.Get(MagicEffectType.EitrWeave, MaxEitrPercentPerValueKey, DefaultMaxEitrPercentPerValue);
     }
 
-    // Tooltip: "Eitr Weaving +{0}%", the percent of max eitr rather than the stored value. Rounded because the
-    // range text prints the raw float: 80 * 0.12 otherwise reads as 9.599999.
+    // The percent of max eitr rather than the stored value. Rounded because the range text prints the raw float:
+    // 80 * 0.12 otherwise reads as 9.599999.
     public static void RegisterDisplayValues()
     {
         MagicItem.RegisterDisplayValues(MagicEffectType.EitrWeave,

@@ -12,11 +12,8 @@ using UnityEngine.UI;
 
 namespace EpicLoot.QuickConfig;
 
-// A paged editor over the settings most worlds want to change. Opened from the shared Mod Config
-// launcher, or once on the main menu as the first-time setup, which adds a welcome page in front.
-// Every page can be saved, and the X closes from anywhere. The pages are prefabs from the epicloot
-// bundle (see README.md in this folder); this file is the shell: opening, navigation, saving, and the
-// staged state the pages edit.
+// The Quick Configure shell: opening, navigation, saving, and the staged state the pages edit. The
+// pages are prefabs from the epicloot bundle (contract in README.md in this folder).
 internal static class QuickConfigureTool {
     private const string LauncherEntry = "Epic Loot";
     internal const string PanelAsset = "QuickConfigPanel";
@@ -48,7 +45,6 @@ internal static class QuickConfigureTool {
         internal RowBinder Binder;
     }
 
-    // --- runtime state ---
     private static GameObject panelRoot;
     // Every page that was built, and the ones in the Back/Next sequence; currentPage indexes the latter.
     private static List<PageInstance> pages;
@@ -153,10 +149,6 @@ internal static class QuickConfigureTool {
         }
     }
 
-    // ------------------------------------------------------------------------------------------------
-    //  First-time setup
-    // ------------------------------------------------------------------------------------------------
-
     // Queued once, from Init, on the startup popup queue every mod carrying Common/src/Config/UI shares:
     // it waits for the main menu to settle and opens the popups one at a time, so this never lands on
     // top of another mod's welcome, or of the config update prompt queued behind it. Whether this user
@@ -174,11 +166,6 @@ internal static class QuickConfigureTool {
         return IsOpen;
     }
 
-    // ------------------------------------------------------------------------------------------------
-    //  Panel
-    // ------------------------------------------------------------------------------------------------
-
-    // The launcher's entry point.
     internal static void OpenPanel() {
         OpenPanel(tutorial: false);
     }
@@ -339,10 +326,6 @@ internal static class QuickConfigureTool {
             SetStatus("", true);
         }
     }
-
-    // ------------------------------------------------------------------------------------------------
-    //  Advanced pages
-    // ------------------------------------------------------------------------------------------------
 
     /// <summary>Whether every page is in the Back/Next sequence, or only <see cref="BasicPages"/>.</summary>
     internal static bool AdvancedPagesShown => advancedToggleMissing
@@ -552,10 +535,6 @@ internal static class QuickConfigureTool {
             hiddenMenu = null;
         }
     }
-
-    // ------------------------------------------------------------------------------------------------
-    //  Save
-    // ------------------------------------------------------------------------------------------------
 
     private static void OnSaveClicked() {
         TrySave(closeAfter: false);

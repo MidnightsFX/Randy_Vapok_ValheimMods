@@ -13,9 +13,6 @@ namespace EpicLoot
 
 namespace EpicLoot.MagicItemEffects
 {
-    // A thrown magic weapon (a spear, or anything made Throwable) locks onto the enemy the wisp is marking as it leaves
-    // the hand and steers toward it in flight, turning lazily at first and ever more sharply the longer it flies, so a
-    // miss never costs the weapon. The rolled value is not used yet.
     // Only the thrower's client simulates a projectile (Projectile.FixedUpdate is owner-only), so bending its velocity
     // there is the whole effect; every other client just sees the synced position.
     public static class HomingMissile

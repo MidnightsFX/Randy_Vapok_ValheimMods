@@ -43,7 +43,6 @@ internal class ELConfig {
     public static ConfigEntry<int> _legendaryMaterialIconColor;
     public static ConfigEntry<int> _mythicMaterialIconColor;
     public static ConfigEntry<int> _ancientMaterialIconColor;
-    public static ConfigEntry<bool> UseScrollingCraftDescription;
     public static ConfigEntry<bool> ShowRarityInRecipeList;
     public static ConfigEntry<bool> ShowEnchantSelectionChance;
     public static ConfigEntry<EffectRarityFlare> EffectRarityFlareMode;
@@ -138,7 +137,6 @@ internal class ELConfig {
     internal const int WelcomeWizardRevision = 1;
     /// <summary>The per-profile flag WelcomeWizardMode replaced; see MigrateWelcomeWizard.</summary>
     private const string LegacyWelcomeMessageKey = "Show Welcome Message, automatically set to false once config is viewed.";
-    public static ConfigEntry<bool> OutputPatchedConfigFiles;
     public static ConfigEntry<bool> VerifyPenaltyScalingCache;
     public static ConfigEntry<bool> EnchantingTableUpgradesActive;
     public static ConfigEntry<bool> EnableLimitedBountiesInProgress;
@@ -256,8 +254,8 @@ internal class ELConfig {
     // name on disk, so:
     //  - there can be at most nine sections; a tenth sorts as "10 - " between "1 - " and "2 - ".
     //  - moving a section renames it, which orphans the player's values. RelocatedSettings below carries
-    //    them across, and StripOrderPrefix makes a pure renumbering (a section inserted in the middle)
-    //    survive on its own.
+    //    them across, and ReadPreviousConfigValues strips the order prefix, so a pure renumbering (a
+    //    section inserted in the middle) survives on its own.
     private const string SectionGeneral = "General";
     private const string SectionBalance = "Balance";
     private const string SectionSockets = "Shardstones & Runes";
@@ -268,25 +266,18 @@ internal class ELConfig {
     private const string SectionAbilities = "Abilities";
     private const string SectionDebug = "Debug";
 
-    // Migration dictionary for historic settings
-    // TODO: Delete after a few releases, once the player base has had time to migrate their configs.
+    // Settings that moved or were renamed: current "Section::Key" -> where an older file has it.
     private static readonly Dictionary<string, string> RelocatedSettings = new Dictionary<string, string> {
-        // Rune extraction is a socket operation, not a drop-rate one.
         { $"{SectionSockets}::Rune Extract Mode", "Balance::Rune Extract Mode" },
-        // Tempering folded into the enchanting table section; its keys were only unambiguous while they
-        // had a section of their own.
         { $"{SectionEnchanting}::Temper Base Chance", "Tempering::Base Chance" },
         { $"{SectionEnchanting}::Temper Decrement Amount", "Tempering::Decrement Amount" },
         { $"{SectionEnchanting}::Temper Fail Destroys Item", "Tempering::Fail Destroys Item" },
         { $"{SectionEnchanting}::Temper Destroy Chance", "Tempering::Destroy Chance" },
-        // Adventure mode gathered out of Balance and the old Bounty Management section.
         { $"{SectionAdventure}::Adventure Mode Enabled", "Balance::Adventure Mode Enabled" },
         { $"{SectionAdventure}::Andvaranaut Range", "Balance::Andvaranaut Range" },
         { $"{SectionAdventure}::Gated Bounty Mode", "Balance::Gated Bounty Mode" },
         { $"{SectionAdventure}::Enable Bounty Limit", "Bounty Management::Enable Bounty Limit" },
         { $"{SectionAdventure}::Max Bounties Per Player", "Bounty Management::Max Bounties Per Player" },
-        // Interface absorbed Crafting UI, Tooltips and the panel positions that sat under General.
-        { $"{SectionInterface}::Use Scrolling Craft Description", "Crafting UI::Use Scrolling Craft Description" },
         { $"{SectionInterface}::Show Enchant Selection Chance", "Crafting UI::Show Enchant Selection Chance" },
         { $"{SectionInterface}::ShowEquippedAndHotbarItemsInSacrificeTab", "Crafting UI::ShowEquippedAndHotbarItemsInSacrificeTab" },
         { $"{SectionInterface}::AudioVolumeAdjustment", "Crafting UI::AudioVolumeAdjustment" },
@@ -296,7 +287,6 @@ internal class ELConfig {
         { $"{SectionInterface}::Trader Panel Y Position", "General::Trader Panel Y Position" },
         { $"{SectionInterface}::Temper Panel X Position", "General::Temper Panel X Position" },
         { $"{SectionInterface}::Temper Panel Y Position", "General::Temper Panel Y Position" },
-        // Logging is diagnostics; it belongs with the rest of them.
         { $"{SectionDebug}::Logging Enabled", "Logging::Logging Enabled" },
         { $"{SectionDebug}::Log Level", "Logging::Log Level" }
     };
@@ -322,7 +312,6 @@ internal class ELConfig {
         new List<(string, Func<bool>)>();
 
     public ELConfig(ConfigFile Config) {
-        // ensure all the config values are created
         cfg = Config;
         // Bind first, save once. Every Set with SaveOnConfigSet on rewrites the whole file, and the
         // migration below sets a good fraction of the entries.
@@ -382,7 +371,6 @@ internal class ELConfig {
     }
 
     private static void CreateConfigValues() {
-        // 1 - General
         UseGeneratedMagicItemNames = BindClient(SectionGeneral, "Use Generated Magic Item Names", true,
             "If true, magic items uses special, randomly generated names based on their rarity, type, and magic effects.");
         KeepInventoryOpenOverItems = BindClient(SectionGeneral, "Keep Inventory Open Over Items", true,
@@ -421,7 +409,6 @@ internal class ELConfig {
             "A roll only happens when at least this many players are in range; otherwise the drop is free as usual.",
             new AcceptableValueRange<int>(1, 10));
 
-        // 2 - Balance
         BalanceConfigurationType = BindServer(SectionBalance, "Balance Template", "Default",
             "Sets the type of balance configuration to use. " +
             "When initially set can change the value of other configurations in this file.\n" +
@@ -556,7 +543,6 @@ internal class ELConfig {
             "It is the same at every star level, and Global Drop Rate Modifier applies to it as to all loot.\n" +
             "Min = 0, Max = 1",
             new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
-        // 3 - Sockets
         AllowRuneSocketing = BindServer(SectionSockets, "Allow Rune Socketing", true,
             "When true, etched runestones can be slotted into shard slots.\n" +
             "When false, no runestone can be slotted. Runestones already in a slot stay there but grant " +
@@ -704,7 +690,6 @@ internal class ELConfig {
             "x to the right and y downwards (negative). Dragging the panel by its frame sets it. The panel is " +
             "always kept on screen. Takes effect while the panel is open.");
 
-        // 4 - Enchanting Table
         EnchantingTableUpgradesActive = BindServer(SectionEnchanting, "Upgrades Active", true,
             "Toggles Enchanting Table Upgrade Capabilities. If false, enchanting table features will be unlocked set to Level 1");
         EnchantingTableActivatedTabs = BindServer(SectionEnchanting, "Table Features Active",
@@ -736,7 +721,6 @@ internal class ELConfig {
             "Remove a mod from the list once it saves these changes through Epic Loot's API (DvergerAutomation " +
             "does, so it is not listed). Default: Azumatt.AzuCraftyBoxes");
 
-        // 5 - Adventure
         _adventureModeEnabled = BindServer(SectionAdventure, "Adventure Mode Enabled", true,
             "Set to true to enable all the adventure mode features: secret stash, gambling, treasure maps, and bounties. " +
             "Set to false to disable. This will not actually remove active treasure maps or bounties from your save.");
@@ -756,10 +740,6 @@ internal class ELConfig {
             "the gamble refresh interval, so each offer can be taken once; the offer comes back next interval.\n" +
             "When false the offer stays on the list and can be bought over and over. Default: false.");
 
-        // 6 - Interface
-        UseScrollingCraftDescription = BindClient(SectionInterface, "Use Scrolling Craft Description", true,
-            "Changes the item description in the crafting panel to scroll instead of scale when it gets too " +
-            "long for the space.");
         ShowRarityInRecipeList = BindClient(SectionInterface, "Show Rarity In Recipe List", true,
             "Shows the magic item rarity background behind item icons in the crafting panel's recipe " +
             "list and detail panel, the same way it is shown in your inventory.");
@@ -840,7 +820,6 @@ internal class ELConfig {
             "page in first-time setup). The Show Advanced Configs and Hide Advanced Configs buttons on the " +
             "Balance page set this, and the panel remembers it the next time it opens.");
 
-        // 7 - Item Colors
         _magicRarityColor = BindClient(SectionItemColors, "Magic Rarity Color", "Blue",
             "The color of Magic rarity items, the lowest magic item tier. " +
             "(Optional, use an HTML hex color starting with # to have a custom color.)\n" +
@@ -888,7 +867,6 @@ internal class ELConfig {
         _uniqueItemColor = BindClient(SectionItemColors, "Unique Item Color", "#ffd75e",
             "The color of the unique item label, icon and cell effects. Use a hex color, default is gold");
 
-        // 8 - Abilities
         AbilityKeyCodes[0] = BindClient(SectionAbilities, "Ability Hotkey 1", "g", "Hotkey for Ability Slot 1.");
         AbilityKeyCodes[1] = BindClient(SectionAbilities, "Ability Hotkey 2", "h", "Hotkey for Ability Slot 2.");
         AbilityKeyCodes[2] = BindClient(SectionAbilities, "Ability Hotkey 3", "j", "Hotkey for Ability Slot 3.");
@@ -980,7 +958,6 @@ internal class ELConfig {
             "the other set hotkeys: no one can wear two sets that need a press. While the full set is worn with a " +
             "shield in hand, the button's vanilla action is suppressed. None unbinds it.");
 
-        // 9 - Debug
         _loggingEnabled = BindClient(SectionDebug, "Logging Enabled", true, "Enable logging");
         _logLevel = BindClient(SectionDebug, "Log Level", LogLevel.Error,
             "Only log messages of the selected level or higher");
@@ -991,8 +968,6 @@ internal class ELConfig {
             "your Valheim saves. ShowNextLaunch opens it on the next launch and then goes back to Auto. Never " +
             "stops it opening by itself in this profile. The panel can be reopened any time from the Mod Config " +
             "button on the main or pause menu.");
-        OutputPatchedConfigFiles = BindClient(SectionDebug, "OutputPatchedConfigFiles", false,
-            "Just a debug flag for testing the patching system, do not use.");
         VerifyPenaltyScalingCache = BindClient(SectionDebug, "Verify Penalty Scaling Cache", false,
             "Recomputes the movement-penalty measurement on every read and logs any disagreement with the " +
             "per-step cached value. Costs a full status-effect speed pass per read -- for diagnosing a " +
@@ -1262,8 +1237,6 @@ internal class ELConfig {
     }
 
     public static void InitializeConfig() {
-
-
         SychronizeConfig<LootConfig>("loottables.json", LootRoller.Initialize,
             LootTablesRPC, LootRoller.GetCFG);
         SychronizeConfig<MagicItemEffectsList>("magiceffects.json", MagicItemEffectDefinitions.Initialize,
@@ -1301,8 +1274,8 @@ internal class ELConfig {
     }
 
     /// <summary>
-    /// Recipes cannot be created until the game is launched. Epic Loot no longer ships any recipes of its
-    /// own, so this only applies recipes other mods registered through <see cref="API.AddRecipe"/>.
+    /// Recipes cannot be created until the game is launched. Epic Loot ships no recipes of its own, so
+    /// this only applies recipes other mods registered through <see cref="API.AddRecipe"/>.
     /// Watch for issues, this can potentially trigger after client config synchronization and break.
     /// </summary>
     private static void InitializeRecipeOnReady() {
@@ -1353,19 +1326,26 @@ internal class ELConfig {
     public static void SychronizeConfig<T>(string filename, Action<T> setupMethod, CustomRPC targetRPC, Func<T> getConfig) where T : class {
         string baseCfgLocation = Path.Combine(ELConfig.GetOverhaulDirectoryPath(), filename);
 
-        // Ensure the base config file exists and reflects the current patches before we read it.
-        // LoadPatchedJSON handles the missing-file / AlwaysRefreshCoreConfigs / has-patches cases internally.
-        FilePatching.LoadPatchedJSON(filename.Split('.')[0]);
-
-        // Attempt to parse the core config, if its not valid use the embedded default config
+        // A file that cannot be written (locked, read-only) must not stop the rest of the configs loading: the
+        // read below then falls back to what is on disk, or to the embedded default.
         try {
-            string fileContents = File.ReadAllText(baseCfgLocation);
-            T contents = JsonConvert.DeserializeObject<T>(fileContents);
+            FilePatching.LoadPatchedJSON(filename.Split('.')[0]);
+        } catch (Exception e) {
+            EpicLoot.LogErrorForce($"Could not write the baseconfig file {filename}: {e.Message}");
+        }
+
+        T ReadBaseConfigFile() {
+            T contents = JsonConvert.DeserializeObject<T>(File.ReadAllText(baseCfgLocation));
             if (contents == null) {
                 // A file containing just "null" (or empty) deserializes to null without throwing.
                 throw new InvalidDataException("file deserialized to null");
             }
-            setupMethod(contents);
+
+            return contents;
+        }
+
+        try {
+            setupMethod(ReadBaseConfigFile());
         } catch (Exception e) {
             EpicLoot.LogWarningForce($"The existing baseconfig file {filename} is invalid! Defaults will be used." +
                 $"\n{e.Message}");
@@ -1386,7 +1366,6 @@ internal class ELConfig {
             return SendConfig(cfgs);
         }
 
-        // Setup the initial synchronization for network connection
         SynchronizationManager.Instance.AddInitialSynchronization(targetRPC, SendInitialConfig);
 
         // Reads the file back into the live config. Shared by the reload scheduler and by the
@@ -1397,12 +1376,7 @@ internal class ELConfig {
             }
 
             try {
-                T contents = JsonConvert.DeserializeObject<T>(File.ReadAllText(baseCfgLocation));
-                if (contents == null) {
-                    throw new InvalidDataException("file deserialized to null");
-                }
-
-                setupMethod(contents);
+                setupMethod(ReadBaseConfigFile());
             } catch (Exception ex) {
                 EpicLoot.LogWarningForce($"Config file {baseCfgLocation} is invalid and config will not be updated." + ex);
                 return false;
@@ -1456,14 +1430,11 @@ internal class ELConfig {
                 continue;
             }
 
-            // Per-file isolation: these are user-edited files, and a stray comma used to throw out
-            // of AddLocalizations -> Awake BEFORE any Harmony patch was applied, leaving the whole
-            // mod silently inert. Comments are stripped by the JSON reader itself instead of a
-            // regex, which used to truncate any line containing "//" inside a value (URLs).
+            // Per-file isolation: these are user-edited files, and a throw here would escape
+            // AddLocalizations and stop Awake before any Harmony patch is applied. Newtonsoft skips
+            // // and /* */ comments itself, so no regex pre-pass (which would break URLs in values).
             try {
                 string contents = File.ReadAllText(file);
-                // Newtonsoft skips // and /* */ comments natively during parsing, so no regex
-                // pre-pass is needed (the old one also broke URLs inside values).
                 Dictionary<string, string> localizationUpdates =
                     JsonConvert.DeserializeObject<Dictionary<string, string>>(contents);
 
@@ -1478,7 +1449,6 @@ internal class ELConfig {
             }
         }
     }
-
 
     /// <summary>
     /// Re-reads baseconfig files into the live config, in registration order.
@@ -1522,8 +1492,7 @@ internal class ELConfig {
     /// The reload has to be driven from here rather than left to the reload scheduler. That polls
     /// the files every couple of seconds, so the auto-add pass below would otherwise run against the
     /// pre-patch config still in memory and write it straight back over the files FilePatching had
-    /// just rebuilt. The patch survived on neither disk nor in memory, and only took effect after a
-    /// restart.
+    /// just rebuilt.
     /// </summary>
     internal static void RunPatchHotReload() {
         List<string> rebuiltTargets = FilePatching.ReloadAndApplyAllPatches();
@@ -1583,14 +1552,9 @@ internal class ELConfig {
             return;
         }
 
-        // No admin check: a rebuild writes only this player's own files, and on a client connected to
-        // someone else's server RunPatchHotReload leaves the server's configs in effect until it
-        // disconnects. Being that server's admin does not make the local files the server's.
-
         // Directory events carry no patch content, and the watcher spans subdirectories itself.
-        // Directory.Exists instead of File.GetAttributes: a Deleted event (or a Changed event racing
-        // an atomic-save rename) arrives for a path that no longer exists, and the GetAttributes
-        // throw was silently swallowed upstream -- the reload below then never ran.
+        // Directory.Exists rather than File.GetAttributes, which throws for the path a Deleted event
+        // (or a Changed event racing an atomic-save rename) names.
         if (Directory.Exists(e.FullPath)) {
             return;
         }
@@ -1662,19 +1626,16 @@ internal class ELConfig {
         // FileName included so dropping in / deleting / renaming a patch file actually fires
         // (LastWrite alone only reports in-place content writes).
         newPatchWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
-        // ProcessPatchDirectory recurses, so patches shipped in patches/<ModName>/ are loaded at
-        // startup; without this they were loaded but never watched, and only a subdirectory created
-        // while the game ran ever got a watcher of its own.
+        // ProcessPatchDirectory recurses, so patches shipped in patches/<ModName>/ need watching too.
         newPatchWatcher.IncludeSubdirectories = true;
         newPatchWatcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
         newPatchWatcher.EnableRaisingEvents = true;
         _patchWatcher = newPatchWatcher;
     }
 
-
     internal static void CheckAndUpdateLocalization(Dictionary<string, string> localizationUpdates, string language) {
+        EpicLoot.Log($"Applying {localizationUpdates.Count} {language} localization override(s).");
         foreach (KeyValuePair<string, string> localization in localizationUpdates) {
-            EpicLoot.Log($"Updating localization: {localization.Key} - {localization.Value}");
             LocalizationManager.Instance.GetLocalization().ClearToken(language, localization.Key);
             LocalizationManager.Instance.GetLocalization().AddTranslation(language, localization.Key, localization.Value);
         }
@@ -1748,9 +1709,9 @@ internal class ELConfig {
 
     // One guard for every server-pushed config: a payload that fails to parse (or deserializes to
     // null -- JsonConvert returns null for the literal "null" WITHOUT throwing) is ignored with an
-    // error, keeping whatever config is currently loaded. Passing the null through used to clear
-    // the live tables and then NRE inside the Initialize chain, leaving the client without that
-    // whole subsystem for the session.
+    // error, keeping whatever config is currently loaded. Passed on, a null would clear the live
+    // tables and then throw inside the Initialize chain.
+
     private static IEnumerator ApplyClientConfig<T>(string name, ZPackage package, Action<T> initialize) where T : class {
         T parsed = ClientRecieveParseJsonConfig<T>(package.ReadString());
         if (parsed == null) {

@@ -90,7 +90,6 @@ public sealed class EpicLoot : BaseUnityPlugin {
     /// <summary>Project Auga is installed and its API is attached; set in Awake, see <see cref="InitializeAuga"/>.</summary>
     public static bool HasAuga;
 
-    public static event Action AbilitiesInitialized;
     public static event Action LootTableLoaded;
 
     private static EpicLoot _instance;
@@ -120,16 +119,12 @@ public sealed class EpicLoot : BaseUnityPlugin {
         BiomeDataManager.OnBiomeDataInitialized += AdventureDataManager.OnBiomeDataChanged;
         BiomeDataManager.OnBiomeDataInitialized += GatedItemTypeHelper.OnBiomeDataChanged;
 
-        // Set the referenced common logger to the EL specific reference so that common things get logged
         PrefabCreator.Logger = Logger;
         InitializeAbilities();
         AddLocalizations();
         LoadAssets();
         _harmony = new Harmony(PluginId);
         PatchAllClasses(_harmony);
-        // Registers with the shared Mod Config launcher (main menu + pause menu) and, on a user's first
-        // run, queues the setup wizard on the shared startup popup queue, which opens it once the main
-        // menu is ready.
         QuickConfig.QuickConfigureTool.Init();
         // Opens behind the wizard (a notice, not a welcome). After LoadAssets, which loads its prefab.
         ConfigUpdatePrompt.Init();
@@ -137,29 +132,23 @@ public sealed class EpicLoot : BaseUnityPlugin {
         LootTableLoaded?.Invoke();
         RegisterMagicEffectEvents();
 
-        // Wishlist conditions and magic item names for Item Favorite Framework, when it is installed.
         Compatibility.ItemFavorites.RegisterLootIntegration();
-        // BowsBeforeHoes' quiver opener and tooltip make way for shard slots, when it is installed.
         Compatibility.BowsBeforeHoesCompat.Initialize(_harmony);
 
-        // Scheduled (non-per-frame) effect drivers, on their own DontDestroyOnLoad objects.
         MagicItemEffects.Shards.PoisonAdrenalinePulse.Create();
         MagicItemEffects.Shards.StormFuryPulse.Create();
 
-        // Logs, from the buyer's side, a bounty or treasure map that has not appeared at its map circle.
         AdventureSpawnWatchdog.Create();
 
         // Builds the enchanting table window hidden on each world's first spawn, behind the loading screen,
-        // so opening a table for the first time no longer stalls the game.
+        // so opening the first table does not stall the game.
         Game.m_playerInitialSpawn += EnchantingTableUI.PrepareForWorld;
 
-        // Main file config watcher
         SetupWatcher();
     }
 
     private static void RegisterMagicEffectEvents() {
-        // Register per-effect tooltip display-value providers (effects that show more than one number).
-        // These are keyed by effect-type constant and don't depend on config load, so register once here.
+        // Keyed by effect-type constant and independent of config load, so registered once here.
         MagicItemEffects.BulkupEffect.RegisterDisplayValues();
         MagicItemEffects.EitrWeaving.RegisterDisplayValues();
         MagicItemEffects.GiantsBlood.RegisterDisplayValues();
@@ -217,18 +206,14 @@ public sealed class EpicLoot : BaseUnityPlugin {
         // This needs to not run until after the game is loaded, otherwise it will not be able to find the ObjectDB
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += Riches_CharacterDrop_GenerateDropList_Patch.UpdateRichesOnEffectSetup;
 
-        // Register definitions for the Shardstone-only effect types (blank tooltips + warnings otherwise).
-        // Re-runs on every config (re)load; the defensive call covers the case where the effect config was
-        // already loaded (during ELConfig construction) before this subscription was added.
+        // Re-runs on every config (re)load; the immediate call covers the effect config having already
+        // loaded (during ELConfig construction) before this subscription existed.
         MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinitions += ShardEffectDefinitions.RegisterShardEffectDefinitions;
         if (MagicItemEffectDefinitions.AllDefinitions.Count > 0) {
             ShardEffectDefinitions.RegisterShardEffectDefinitions();
         }
 
-        // Fold the ShardStone recipes into the material conversions (enchanting "Convert Materials" tab).
-        // Same event/defensive pattern as the shard effect definitions above: re-runs on every
-        // material-conversions (re)load, with a defensive call if that config was already loaded before
-        // this subscription was added.
+        // Same pattern as above, for materialconversions.json.
         CraftingV2.MaterialConversions.OnSetupMaterialConversions += ShardStones.ShardStoneConversions.Merge;
         if (CraftingV2.MaterialConversions.Config != null) {
             ShardStones.ShardStoneConversions.Merge();
@@ -258,28 +243,22 @@ public sealed class EpicLoot : BaseUnityPlugin {
 
     private void AddLocalizations() {
         CustomLocalization Localization = LocalizationManager.Instance.GetLocalization();
-        // load all localization files within the localizations directory
         Log("Loading Localizations.");
         foreach (string embeddedResouce in typeof(EpicLoot).Assembly.GetManifestResourceNames()) {
             if (!embeddedResouce.Contains("localizations")) { continue; }
             string localization = ReadEmbeddedResourceFile(embeddedResouce);
-            // This will clean comments out of the localization files. Full-line comments only: the
-            // old pattern also truncated any line containing "//" inside a value (URLs in
-            // translations), corrupting the JSON.
+            // Full-line comments only: a value may contain "//" (URLs in translations).
             string cleaned_localization = Regex.Replace(localization, @"^\s*\/\/.*$", "", RegexOptions.Multiline);
-            // Log($"Cleaned Localization: {cleaned_localization}");
             var name = embeddedResouce.Split('.');
-            //Log($"Adding localization: {name[2]}");
             Localization.AddJsonFile(name[2], cleaned_localization);
         }
-        // Load the localization patches and additional languages
         ELConfig.StartupProcessModifiedLocalizations();
     }
 
     /// <summary>
     /// Applies every patch class in this assembly, in the order Harmony's PatchAll uses, but each on its own: a
     /// class that fails (another mod reshaped its target, or a game update moved it) costs that one feature.
-    /// A single PatchAll stopped at the first failure, so every class after it and the rest of Awake never ran.
+    /// A single PatchAll stops at the first failure, skipping every class after it and the rest of Awake.
     /// Transpilers must still never throw: HarmonyX keeps a failed transpiler registered on its method, so it
     /// would also break every patch another mod applies to that method later.
     /// </summary>
@@ -296,7 +275,6 @@ public sealed class EpicLoot : BaseUnityPlugin {
 
     private static void InitializeAbilities() {
         MagicEffectType.Initialize();
-        AbilitiesInitialized?.Invoke();
     }
 
     private static BepInEx.Logging.ManualLogSource _fallbackLogSink;
@@ -401,7 +379,6 @@ public sealed class EpicLoot : BaseUnityPlugin {
         EpicAssets.AbandonBountySFX = assetBundle.LoadAsset<AudioClip>("AbandonBounty");
         EpicAssets.DoubleJumpSFX = assetBundle.LoadAsset<AudioClip>("DoubleJump");
         EpicAssets.OffSetSFX = assetBundle.LoadAsset<GameObject>("sfx_offset");
-        EpicAssets.DebugTextPrefab = assetBundle.LoadAsset<GameObject>("DebugText");
         EpicAssets.AbilityBar = assetBundle.LoadAsset<GameObject>("AbilityBar");
         EpicAssets.ConfigMessagePrefab = assetBundle.LoadAsset<GameObject>("ConfigMessage");
         EpicAssets.SocketMessagePrefab = assetBundle.LoadAsset<GameObject>("SocketMessage");
@@ -469,7 +446,6 @@ public sealed class EpicLoot : BaseUnityPlugin {
         // After every RegisterPrefabs above: builds what the set effects would otherwise build on first use (wings,
         // snow, ice, fx copies) and compiles their code, behind the loading screen instead of mid-fight.
         PrefabManager.OnPrefabsRegistered += MagicItemEffects.SetEffectWarmup.OnPrefabsRegistered;
-        ItemManager.OnItemsRegistered += SetupStatusEffects;
         // legendaries.json problems are reported once every mod has registered its uniques and sets
         // through the API, so a set whose pieces another mod adds is not reported as broken.
         ItemManager.OnItemsRegistered += LegendarySystem.UniqueLegendaryHelper.EnableValidation;
@@ -559,7 +535,6 @@ public sealed class EpicLoot : BaseUnityPlugin {
             ItemManager.Instance.AddItem(customItem);
         }
 
-        // Make a dummy empty game object for later use.
         GameObject dummyGO = PrefabManager.Instance.CreateEmptyPrefab(EpicAssets.DummyName, true);
         ItemDrop itemDrop = dummyGO.AddComponent<ItemDrop>();
         itemDrop.m_itemData.m_shared = new ItemDrop.ItemData.SharedData();
@@ -711,7 +686,6 @@ public sealed class EpicLoot : BaseUnityPlugin {
 
                 if (prefab.TryGetComponent(out ItemDrop itemDrop)) {
                     if (itemDrop.m_itemData.IsMagicCraftingMaterial()) {
-                        // Set icons for crafting materials.
                         itemDrop.m_itemData.m_variant = GetRarityIconIndex(rarity);
                     }
                 }
@@ -883,7 +857,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
     }
 
     public static bool IsObjectDBReady() {
-        // Hack, just making sure the built-in items and prefabs have loaded
+        // ObjectDB.instance exists before the vanilla items are registered; Amber stands in for "they are".
         return ObjectDB.instance != null && ObjectDB.instance.m_items.Count != 0 &&
             ObjectDB.instance.GetItemPrefab("Amber") != null;
     }
@@ -895,11 +869,9 @@ public sealed class EpicLoot : BaseUnityPlugin {
         var andvaranaut = prefab.m_itemData;
         var wishbone = ObjectDB.instance.GetItemPrefab("Wishbone").GetComponent<ItemDrop>().m_itemData;
 
-        // first, create custom status effect
         var originalFinder = wishbone.m_shared.m_equipStatusEffect;
         var wishboneFinder = ScriptableObject.CreateInstance<SE_CustomFinder>();
 
-        // Copy all values from finder
         Common.Utils.CopyFields(originalFinder, wishboneFinder, typeof(SE_Finder));
         wishboneFinder.name = "CustomWishboneFinder";
 
@@ -911,20 +883,16 @@ public sealed class EpicLoot : BaseUnityPlugin {
         andvaranautFinder.m_tooltip = "$mod_epicloot_item_andvaranaut_tooltip";
         andvaranautFinder.m_startMessage = "$mod_epicloot_item_andvaranaut_startmsg";
 
-        // Setup restrictions
         andvaranautFinder.RequiredComponentTypes = new List<Type> { typeof(TreasureMapChest) };
         wishboneFinder.DisallowedComponentTypes = new List<Type> { typeof(TreasureMapChest) };
 
-        // Add to list
         ObjectDB.instance.m_StatusEffects.Remove(originalFinder);
         ObjectDB.instance.m_StatusEffects.Add(andvaranautFinder);
         ObjectDB.instance.m_StatusEffects.Add(wishboneFinder);
 
-        // Set new status effect
         andvaranaut.m_shared.m_equipStatusEffect = andvaranautFinder;
         wishbone.m_shared.m_equipStatusEffect = wishboneFinder;
 
-        // Setup magic item
         var magicItem = new MagicItem {
             Rarity = ItemRarity.Epic,
             TypeNameOverride = "$mod_epicloot_item_andvaranaut_type"
@@ -995,54 +963,16 @@ public sealed class EpicLoot : BaseUnityPlugin {
         return Sprite.Create(icon, new Rect(0f, 0f, icon.width, icon.height), new Vector2(0.5f, 0.5f), source.pixelsPerUnit);
     }
 
-    // Legacy registration of an ObjectDB-visible "Paralyze" status effect. Nothing in the mod
-    // consumes it -- Paralyze.cs applies its own EL_Paralyze prototype directly via SEMan -- but it
-    // is kept for anything external that looks the effect up by hash. The old lookup used
-    // string.GetHashCode (ObjectDB matches on GetStableHashCode), always returned null, and
-    // CopyFields(null, ...) then threw a TargetException on every world load (swallowed by Jotunn's
-    // SafeInvoke), so the effect was never actually registered.
-    private static void SetupStatusEffects() {
-        var lightning = ObjectDB.instance.GetStatusEffect("Lightning".GetStableHashCode());
-        if (lightning == null) {
-            LogWarning("Vanilla 'Lightning' status effect not found; skipping legacy Paralyze ObjectDB registration.");
-            ItemManager.OnItemsRegistered -= SetupStatusEffects;
-            return;
-        }
-        var paralyzed = ScriptableObject.CreateInstance<SE_Paralyzed>();
-        Common.Utils.CopyFields(lightning, paralyzed, typeof(StatusEffect));
-        paralyzed.name = "Paralyze";
-        paralyzed.m_name = "$mod_epicloot_se_paralyze";
-
-        ObjectDB.instance.m_StatusEffects.Add(paralyzed);
-        ItemManager.OnItemsRegistered -= SetupStatusEffects;
-    }
-
     public static AssetBundle LoadAssetBundle(string filename) {
         return AssetBundleLoader.LoadFromResourcesInMemory(filename, typeof(EpicLoot).Assembly);
     }
 
-    /// <summary>
-    /// This reads an embedded file resouce name, these are all resouces packed into the DLL
-    /// </summary>
-    /// <param name="filename"></param>
-    /// <returns></returns>
     internal static string ReadEmbeddedResourceFile(string filename) {
         using (var stream = typeof(EpicLoot).Assembly.GetManifestResourceStream(filename)) {
             using (var reader = new StreamReader(stream)) {
                 return reader.ReadToEnd();
             }
         }
-    }
-
-    internal static List<string> GetEmbeddedResourceNamesFromDirectory(string embedded_location = "EpicLoot.config.") {
-        List<string> resourcenames = new List<string>();
-        foreach (string embeddedResouce in typeof(EpicLoot).Assembly.GetManifestResourceNames()) {
-            if (embeddedResouce.Contains(embedded_location)) {
-                // Got to strip the starting 'EpicLoot.config.' off, so we just take the ending substring
-                resourcenames.Add(embeddedResouce.Substring(16));
-            }
-        }
-        return resourcenames;
     }
 
     public static bool CanBeMagicItem(ItemDrop.ItemData item) {
@@ -1080,7 +1010,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
 
     // Escapes rather than literal glyphs: this file has no BOM and a CP1252 round-trip once
     // corrupted these characters into mojibake. \u25BE = small down triangle, \u2666 = diamond suit
-    // (Auga); \u25BC = down triangle, \u25C6 = black diamond (default). Alt ideas: U+1F7A0, U+1F79B.
+    // (Auga); \u25BC = down triangle, \u25C6 = black diamond (default).
     public static string GetMagicEffectPip(bool hasBeenAugmented) {
         return HasAuga ? (hasBeenAugmented ? "\u25BE" : "\u2666") : (hasBeenAugmented ? "\u25BC" : "\u25C6");
     }
@@ -1098,7 +1028,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
     }
 
     private static bool IsPlayerItem(ItemDrop.ItemData item) {
-        // WTF, this is the only thing I found different between player usable items and items that are only for enemies
+        // Creature-only items (enemy weapons and attacks) have no icons; nothing else reliably tells them apart.
         return item.m_shared.m_icons.Length > 0;
     }
 
@@ -1237,7 +1167,6 @@ public sealed class EpicLoot : BaseUnityPlugin {
         return _instance._worldLuckFactor;
     }
 
-    // TODO, why isn't this used?
     public static void SetWorldLuckFactor(float luckFactor) {
         _instance._worldLuckFactor = luckFactor;
     }

@@ -317,7 +317,6 @@ would take to revive.
 | `ChanceToCritOnHit` | {0}% Chance to Crit for {1}x Damage | {0}% chance for a hit to critically strike for double damage. |
 | `PerfectDodgeGivesHealth` | Perfect Dodge Restores {0}% Health | Restore {0}% of max health on a perfect dodge. |
 | `StaminaReturnFromEitr` | Refund {0}% of Eitr Spent as Stamina | Restore stamina equal to {0}% of the eitr you spend. |
-| `BatteringRam` | Battering Ram: Blunt from Weight | Running into enemies deals blunt damage based on your speed and carried weight (scaled by {0}). |
 
 ## Implemented but unassigned effects
 
@@ -341,7 +340,6 @@ They are **not** equally close to working. Six are one config edit away; one als
 | **ChanceToCritOnHit** | [ChanceToCritOnHit.cs](src/Magic/MagicItemEffects/Shards/ChanceToCritOnHit.cs) | Live | Assign a slot |
 | **PerfectDodgeGivesHealth** | [PerfectDodgeEffects.cs:51](src/Magic/MagicItemEffects/Shards/PerfectDodgeEffects.cs#L51) | Live | Assign a slot |
 | **StaminaReturnFromEitr** | [StaminaReturnFromEitr.cs](src/Magic/MagicItemEffects/Shards/StaminaReturnFromEitr.cs) | Live | Assign a slot |
-| **BatteringRam** | [BatteringRam.cs](src/Magic/MagicItemEffects/Shards/BatteringRam.cs) | **Whole file commented out** | Uncomment, then assign a slot |
 
 ### Ready to assign — config only
 
@@ -372,12 +370,6 @@ assignment brings them back with their tuning intact.
   weapon and Shoulders slots). It is the only member of that family without a home.
 - **StaminaReturnFromEitr** — refunds a % of spent eitr as stamina. Self-contained `Player.UseEitr` postfix,
   no dispatcher involvement. Never assigned to a slot at any point.
-
-### Needs code restored as well
-
-- **BatteringRam** — blunt damage from running into enemies, scaled by carried weight and speed. The file's
-  own comment records why it was disabled: the per-frame `Player.Update` patch it needs was "mildly
-  expensive" for an effect nothing granted.
 
 ## Known quirks, accepted deliberately
 

@@ -7,7 +7,7 @@ using System.IO;
 namespace EpicLoot.QuickConfig;
 
 /// <summary>
-/// The three balance presets the old welcome panel offered, applied to the STAGED values only; the
+/// The three balance presets, applied to the STAGED values only; the
 /// overhaul rewrite of the balance template files happens on Save, after the .cfg batch, on the host or
 /// (for a server admin) on the server.
 /// </summary>

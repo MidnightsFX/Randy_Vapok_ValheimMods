@@ -88,10 +88,9 @@ namespace EpicLoot
     {
         // m_lastRevision as of each container's last walk. Container.CheckForChanges calls Load once a
         // second on every loaded container and Load returns straight away unless the ZDO revision moved,
-        // but a postfix runs either way, so this used to walk every item of every chest in range each
-        // second. m_lastRevision moves on a reload and on every owner-side Save, so comparing it still
-        // reaches items put straight into the inventory without a reload (the DropTable clones vanilla
-        // AddDefaultItems adds) as soon as it used to.
+        // but a postfix runs either way. m_lastRevision moves on a reload and on every owner-side Save,
+        // so comparing it still reaches items put straight into the inventory without a reload (the
+        // DropTable clones vanilla AddDefaultItems adds).
         private static readonly ConditionalWeakTable<Container, StrongBox<uint>> WalkedRevision =
             new ConditionalWeakTable<Container, StrongBox<uint>>();
 

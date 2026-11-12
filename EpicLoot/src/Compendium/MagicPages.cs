@@ -17,9 +17,6 @@ public class MagicPages : MonoBehaviour
     public const int MEDIUM_FONT_SIZE = 20;
     public const int FONT_SIZE = 18;
 
-    private const float GAMEPAD_SCROLL_SPEED = 1000f;
-    private const float GAMEPAD_STICK_DEADZONE = 0.5f;
-
     public float MinWidth { get; private set; }
     public float MinHeight { get; private set; }
 
@@ -90,7 +87,6 @@ public class MagicPages : MonoBehaviour
             MinWidth = ((RectTransform)textArea.Find("ScrollArea")).rect.width;
             MagicPagesTextArea = new MagicTextList(compendiumTextArea, frame);
             MagicPagesTextArea.SetTopPadding(Mathf.RoundToInt(AUGA_SEARCH_BAR_HEIGHT + 2 * AUGA_SEARCH_BAR_MARGIN));
-            // The search bar row is docked to the text area itself.
             float rowWidth = Mathf.Max(textAreaRect.rect.width - 40f, 200f);
             float searchWidth = rowWidth - COLLAPSE_BUTTON_WIDTH - COLLAPSE_BUTTON_SPACING;
             Search = new MagicSearchField(MagicPagesTextArea.Root);
@@ -181,7 +177,6 @@ public class MagicPages : MonoBehaviour
         UpdateGamepadScroll();
         UpdateCollapseButton();
 
-        //  makes search field glow when focused
         if (wasGlowing && !InSearchField())
         {
             Search.EnableGlow(false);
@@ -223,11 +218,7 @@ public class MagicPages : MonoBehaviour
             return;
         }
 
-        float rightStickAxis = ZInput.GetJoyRightStickY();
-        if (Mathf.Abs(rightStickAxis) > GAMEPAD_STICK_DEADZONE)
-        {
-            MagicPagesTextArea.ScrollBy(-rightStickAxis * GAMEPAD_SCROLL_SPEED * Time.unscaledDeltaTime);
-        }
+        MagicPagesTextArea.ApplyGamepadScroll();
     }
 
     public static bool InSearchField()

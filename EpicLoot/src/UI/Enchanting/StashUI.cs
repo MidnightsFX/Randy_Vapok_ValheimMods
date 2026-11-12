@@ -65,7 +65,7 @@ namespace EpicLoot_UnityLib
         }
 
         // The message shares a row with the Take All buttons, in a rect far wider than the gap between them, so the
-        // locked and warded messages and many translations ran across both. It stays in the gap, wrapping and then
+        // locked and warded messages and many translations would run across both. It stays in the gap, wrapping and then
         // shrinking to fit. Truncate would drop whatever did not fit, so overflow is off.
         private void FitCapacityLabelBetweenButtons()
         {

@@ -147,18 +147,12 @@ internal static class QuickConfigBindings {
         }
     }
 
-    // ------------------------------------------------------------------------------------------------
-    //  The registry, page by page
-    // ------------------------------------------------------------------------------------------------
-
     private static void Build() {
-        // --- Welcome ---
         UrlAction("action:url:discord", "$mod_epicloot_cfg_welcome_discord", DiscordUrl,
             "Opens the Epic Loot Discord in your browser.");
         UrlAction("action:url:patchnotes", "$mod_epicloot_cfg_welcome_patchnotes", PatchNotesUrl,
             "Opens the Thunderstore changelog in your browser.");
 
-        // --- 1. Balance ---
         foreach (string preset in BalancePreset.Names) {
             string name = preset;
             Add(new Binding {
@@ -181,7 +175,7 @@ internal static class QuickConfigBindings {
         TextChoice("BalanceConfigurationType", ELConfig.BalanceConfigurationType, "Balance Template", BindingScope.Server,
             () => BalancePreset.Names, BalancePreset.Normalize, visible: _ => CanEditFiles() == false);
         FloatSlider("GlobalDropRateModifier", ELConfig.GlobalDropRateModifier, "Global Drop Rate Modifier", BindingScope.Server, 0f, 4f, 0.05f);
-        EnumCycle("_gatedItemTypeModeConfig", ELConfig._gatedItemTypeModeConfig, "Item Drop Limits", BindingScope.Server);
+        EnumChoice("_gatedItemTypeModeConfig", ELConfig._gatedItemTypeModeConfig, "Item Drop Limits", BindingScope.Server);
         FloatSlider("SetItemDropChance", ELConfig.SetItemDropChance, "Set Item Drop Chance", BindingScope.Server, 0f, 1f, 0.01f);
         FloatSlider("UniqueItemDropChance", ELConfig.UniqueItemDropChance, "Unique Item Drop Chance", BindingScope.Server, 0f, 1f, 0.01f);
         Readout("readout:setuniquemix", SetUniqueMixReadout, "Set and unique mix",
@@ -209,12 +203,10 @@ internal static class QuickConfigBindings {
             "Goes back to this page only. Edits already made on the other pages are kept, and Save still " +
             "writes them. Remembered the next time the panel opens.");
 
-        // --- 2. Features ---
         Toggle("_adventureModeEnabled", ELConfig._adventureModeEnabled, "Adventure Mode Enabled", BindingScope.Server);
         Toggle("EnchantingTableUpgradesActive", ELConfig.EnchantingTableUpgradesActive, "Enchanting Table Upgrades Active", BindingScope.Server);
         Flags("EnchantingTableActivatedTabs", ELConfig.EnchantingTableActivatedTabs, "Table Features Active", BindingScope.Server);
 
-        // --- 3. Loot Drops ---
         Toggle("AutoAddEquipment", ELConfig.AutoAddEquipment, "Auto Add Equipment", BindingScope.Server);
         Func<StagedConfig, bool> autoAddOn = staged => staged.Get("AutoAddEquipment", true);
         Toggle("AutoRemoveEquipmentNotFound", ELConfig.AutoRemoveEquipmentNotFound, "Auto Remove Equipment Not Found", BindingScope.Server, enabled: autoAddOn);
@@ -238,7 +230,6 @@ internal static class QuickConfigBindings {
         FloatSlider("EliteRunestoneDropChance", ELConfig.EliteRunestoneDropChance, "Elite Runestone Drop Chance", BindingScope.Server, 0f, 1f, 0.01f,
             enabled: staged => staged.Get("EliteRunestoneDrops", ELConfig.EliteRunestoneDrops.Value));
 
-        // --- 4. Shardstones & Runes ---
         // The rune rows below only mean anything while runes can be slotted.
         Func<StagedConfig, bool> runeSocketing = staged => staged.Get("AllowRuneSocketing", ELConfig.AllowRuneSocketing.Value);
         Toggle("AllowRuneSocketing", ELConfig.AllowRuneSocketing, "Allow Rune Socketing", BindingScope.Server);
@@ -246,18 +237,18 @@ internal static class QuickConfigBindings {
         Toggle("AllowShardstoneDuplicateItemEffect", ELConfig.AllowShardstoneDuplicateItemEffect, "Allow Shardstone On Matching Item Effect", BindingScope.Server);
         Toggle("AllowRunestoneDuplicateItemEffect", ELConfig.AllowRunestoneDuplicateItemEffect, "Allow Runestone On Matching Item Effect", BindingScope.Server,
             enabled: runeSocketing);
-        EnumCycle("ShardSocketRemovalMode", ELConfig.ShardSocketRemovalMode, "Shard Removal Mode", BindingScope.Server);
-        EnumCycle("RuneSocketRemovalMode", ELConfig.RuneSocketRemovalMode, "Rune Removal Mode", BindingScope.Server,
+        EnumChoice("ShardSocketRemovalMode", ELConfig.ShardSocketRemovalMode, "Shard Removal Mode", BindingScope.Server);
+        EnumChoice("RuneSocketRemovalMode", ELConfig.RuneSocketRemovalMode, "Rune Removal Mode", BindingScope.Server,
             enabled: runeSocketing);
-        EnumCycle("ShardStackingMode", ELConfig.ShardStackingMode, "Shard Stack Mode", BindingScope.Server);
+        EnumChoice("ShardStackingMode", ELConfig.ShardStackingMode, "Shard Stack Mode", BindingScope.Server);
         FloatSlider("ShardStackDecayFactor", ELConfig.ShardStackDecayFactor, "Shard Stack Decay Factor", BindingScope.Server, 0f, 1f, 0.01f,
             visible: staged => staged.Get("ShardStackingMode", ShardStackMode.Diminishing) == ShardStackMode.Diminishing);
         Toggle("RuneDiminishingReturns", ELConfig.RuneDiminishingReturns, "Rune Diminishing Returns", BindingScope.Server,
             enabled: runeSocketing);
         FloatSlider("RuneStackDecayFactor", ELConfig.RuneStackDecayFactor, "Rune Stack Decay Factor", BindingScope.Server, 0f, 1f, 0.01f,
             visible: staged => staged.Get("RuneDiminishingReturns", ELConfig.RuneDiminishingReturns.Value), enabled: runeSocketing);
-        EnumCycle("RuneExtractItemMode", ELConfig.RuneExtractItemMode, "Rune Extract Mode", BindingScope.Server);
-        EnumCycle("RuneSetExtractItemMode", ELConfig.RuneSetExtractItemMode, "Set Rune Extract Mode", BindingScope.Server);
+        EnumChoice("RuneExtractItemMode", ELConfig.RuneExtractItemMode, "Rune Extract Mode", BindingScope.Server);
+        EnumChoice("RuneSetExtractItemMode", ELConfig.RuneSetExtractItemMode, "Set Rune Extract Mode", BindingScope.Server);
         Toggle("AllowGiftOnItemsWithSlots", ELConfig.AllowGiftOnItemsWithSlots, "Allow Brokkr Gift On Items With Slots", BindingScope.Server);
         IntSlider("LegendaryGiftSlotsAdded", ELConfig.LegendaryGiftSlotsAdded, "Legendary Gift Slots Added", BindingScope.Server, 1, LootRoller.MaxSocketCount);
         IntSlider("MythicGiftSlotsAdded", ELConfig.MythicGiftSlotsAdded, "Mythic Gift Slots Added", BindingScope.Server, 1, LootRoller.MaxSocketCount);
@@ -275,7 +266,6 @@ internal static class QuickConfigBindings {
             (root, value) => JsonConfigEdits.SetPath(root, "Global.Values.BloodBlockSelfDamagePercent", value),
             "Percent of the blocked damage the blood-block shard effects turn back on the wearer.");
 
-        // --- 5. Enchanting Table ---
         FloatSlider("TemperBaseChance", ELConfig.TemperBaseChance, "Temper Base Chance", BindingScope.Server, 0f, 1f, 0.01f);
         FloatSlider("TemperDecrement", ELConfig.TemperDecrement, "Temper Decrement Amount", BindingScope.Server, 0f, 1f, 0.01f);
         Toggle("TemperFailDowngrades", ELConfig.TemperFailDowngrades, "Temper Fail Downgrades Effect", BindingScope.Server);
@@ -309,7 +299,6 @@ internal static class QuickConfigBindings {
         }
         UpgradeCosts();
 
-        // --- 6. Adventure: Merchant ---
         IntSlider("_andvaranautRange", ELConfig._andvaranautRange, "Andvaranaut Range", BindingScope.Server, 5, 100);
         Toggle("RemovePurchasedGambles", ELConfig.RemovePurchasedGambles, "Remove Purchased Gambles", BindingScope.Server);
         JsonInt("json:adventuredata:SecretStash.RefreshInterval", "adventuredata.json", "Secret Stash Refresh (days)", 1, 30,
@@ -340,16 +329,6 @@ internal static class QuickConfigBindings {
             () => AdventureDataManager.Config?.TreasureMap?.RefreshInterval,
             (root, value) => JsonConfigEdits.SetPath(root, "TreasureMap.RefreshInterval", value),
             "In-game days between refreshes of the treasure maps on offer.");
-        JsonFloat("json:adventuredata:TreasureMap.StartRadiusMin", "adventuredata.json", "Start Radius Min", 0f, 10000f, 50f,
-            () => AdventureDataManager.Config?.TreasureMap?.StartRadiusMin,
-            (root, value) => JsonConfigEdits.SetPath(root, "TreasureMap.StartRadiusMin", value),
-            "Closest distance from the world centre a treasure map may be placed, in metres.");
-        JsonFloat("json:adventuredata:TreasureMap.StartRadiusMax", "adventuredata.json", "Start Radius Max", 0f, 10000f, 50f,
-            () => AdventureDataManager.Config?.TreasureMap?.StartRadiusMax,
-            (root, value) => JsonConfigEdits.SetPath(root, "TreasureMap.StartRadiusMax", value),
-            "Farthest distance from the world centre a treasure map may be placed, in metres.",
-            staged => staged.Get("json:adventuredata:TreasureMap.StartRadiusMin", 0f) > staged.Get("json:adventuredata:TreasureMap.StartRadiusMax", 0f)
-                ? "Treasure map Start Radius Min must not exceed Start Radius Max." : null);
         JsonFloat("json:adventuredata:TreasureMap.MinimapAreaRadius", "adventuredata.json", "Map Circle Radius", 25f, 500f, 5f,
             () => AdventureDataManager.Config?.TreasureMap?.MinimapAreaRadius,
             (root, value) => JsonConfigEdits.SetPath(root, "TreasureMap.MinimapAreaRadius", value),
@@ -362,8 +341,7 @@ internal static class QuickConfigBindings {
             new TreasureMapConfig().ScaleRadiiToWorldSize);
         BiomeCosts();
 
-        // --- 7. Adventure: Bounties ---
-        EnumCycle("BossBountyMode", ELConfig.BossBountyMode, "Gated Bounty Mode", BindingScope.Server);
+        EnumChoice("BossBountyMode", ELConfig.BossBountyMode, "Gated Bounty Mode", BindingScope.Server);
         Toggle("EnableLimitedBountiesInProgress", ELConfig.EnableLimitedBountiesInProgress, "Enable Bounty Limit", BindingScope.Server);
         IntSlider("MaxInProgressBounties", ELConfig.MaxInProgressBounties, "Max Bounties Per Player", BindingScope.Server, 1, 20,
             visible: staged => staged.Get("EnableLimitedBountiesInProgress", false));
@@ -379,7 +357,6 @@ internal static class QuickConfigBindings {
             () => AdventureDataManager.Config?.Bounties?.AddsHealthMultiplier);
         Bounties();
 
-        // --- 8. Interface ---
         Toggle("UseGeneratedMagicItemNames", ELConfig.UseGeneratedMagicItemNames, "Use Generated Magic Item Names", BindingScope.Client);
         Toggle("KeepInventoryOpenOverItems", ELConfig.KeepInventoryOpenOverItems, "Keep Inventory Open Over Items", BindingScope.Client);
         Toggle("UniqueItemEmbers", ELConfig.UniqueItemEmbers, "Unique Item Embers", BindingScope.Client);
@@ -408,7 +385,6 @@ internal static class QuickConfigBindings {
         Vector2Part("AbilityBarPosition.y", ELConfig.AbilityBarPosition, "Ability Bar Position Y", false);
         FloatSlider("AbilityBarIconSpacing", ELConfig.AbilityBarIconSpacing, "Ability Bar Icon Spacing", BindingScope.Client, 0f, 40f, 1f);
 
-        // --- 9. Item Colors ---
         RarityColor("_magicRarityColor", ELConfig._magicRarityColor, "_magicMaterialIconColor", ELConfig._magicMaterialIconColor, "Magic");
         RarityColor("_rareRarityColor", ELConfig._rareRarityColor, "_rareMaterialIconColor", ELConfig._rareMaterialIconColor, "Rare");
         RarityColor("_epicRarityColor", ELConfig._epicRarityColor, "_epicMaterialIconColor", ELConfig._epicMaterialIconColor, "Epic");
@@ -418,14 +394,11 @@ internal static class QuickConfigBindings {
         HexColor("_setItemColor", ELConfig._setItemColor, "Set Item Color");
         HexColor("_uniqueItemColor", ELConfig._uniqueItemColor, "Unique Item Color");
 
-        // --- 10. Rarity (loottables.json) ---
         BiomeDrops();
 
-        // --- 11. Effect Tuning ---
-        EnumCycle("GatedFreebuildMode", ELConfig.GatedFreebuildMode, "Gated Freebuild Mode", BindingScope.Server);
+        EnumChoice("GatedFreebuildMode", ELConfig.GatedFreebuildMode, "Gated Freebuild Mode", BindingScope.Server);
         EffectConfigs();
 
-        // --- 12. Advanced ---
         Toggle("_loggingEnabled", ELConfig._loggingEnabled, "Logging Enabled", BindingScope.Client);
         EnumChoice("_logLevel", ELConfig._logLevel, "Log Level", BindingScope.Client);
         Toggle("EnableHotReloadPatches", ELConfig.EnableHotReloadPatches, "Enable Hot Reloading Patches", BindingScope.Server);
@@ -439,10 +412,6 @@ internal static class QuickConfigBindings {
         WelcomeWizardNextLaunch();
         ItemCategories();
     }
-
-    // ------------------------------------------------------------------------------------------------
-    //  .cfg helpers
-    // ------------------------------------------------------------------------------------------------
 
     private static void Add(Binding binding) {
         bindings[binding.Key] = binding;
@@ -497,11 +466,6 @@ internal static class QuickConfigBindings {
     }
 
     // An enum shown as a cycle button (six members or fewer) or a picker; the widget decides.
-    private static void EnumCycle<T>(string key, ConfigEntry<T> entry, string name, BindingScope scope,
-        Func<StagedConfig, bool> enabled = null) where T : struct, Enum {
-        EnumChoice(key, entry, name, scope, enabled);
-    }
-
     private static void EnumChoice<T>(string key, ConfigEntry<T> entry, string name, BindingScope scope,
         Func<StagedConfig, bool> enabled = null) where T : struct, Enum {
         CfgSlotFor(key, entry);
@@ -699,14 +663,14 @@ internal static class QuickConfigBindings {
 
     private static void BossDrop(string modeKey, ConfigEntry<BossDropMode> modeEntry, string modeName,
         string rangeKey, ConfigEntry<float> rangeEntry, string rangeName) {
-        EnumCycle(modeKey, modeEntry, modeName, BindingScope.Server);
+        EnumChoice(modeKey, modeEntry, modeName, BindingScope.Server);
         FloatSlider(rangeKey, rangeEntry, rangeName, BindingScope.Server, 10f, 500f, 5f,
             visible: staged => staged.Get(modeKey, modeEntry.Value) == BossDropMode.OnePerPlayerNearBoss);
     }
 
     private static void BossExtraDrop(string modeKey, ConfigEntry<BossExtraDropMode> modeEntry,
         string rangeKey, ConfigEntry<float> rangeEntry, string boss) {
-        EnumCycle(modeKey, modeEntry, $"{boss} Drop Mode", BindingScope.Server);
+        EnumChoice(modeKey, modeEntry, $"{boss} Drop Mode", BindingScope.Server);
         FloatSlider(rangeKey, rangeEntry, $"{boss} Drop Player Range", BindingScope.Server, 10f, 500f, 5f,
             visible: staged => staged.Get(modeKey, modeEntry.Value) != BossExtraDropMode.Default);
     }
@@ -797,10 +761,6 @@ internal static class QuickConfigBindings {
         return text;
     }
 
-    // ------------------------------------------------------------------------------------------------
-    //  JSON helpers
-    // ------------------------------------------------------------------------------------------------
-
     private static JsonSlot JsonSlotFor(string key, string file, Func<object> read, Action<JObject, object> write) {
         JsonSlot slot = new JsonSlot { Key = key, File = file, Read = read, Write = write };
         slots.Add(slot);
@@ -848,7 +808,7 @@ internal static class QuickConfigBindings {
         });
     }
 
-    // --- Enchantments and sockets per rarity (loottables.json MagicEffectsCount / SocketCounts) ---
+    // Enchantments and sockets per rarity (loottables.json MagicEffectsCount / SocketCounts).
     // One staged value for both tables of every rarity; a table is only written, rebalanced to 100,
     // when it differs from the baseline.
 
@@ -924,8 +884,7 @@ internal static class QuickConfigBindings {
         }
     }
 
-    // --- Enchanting table upgrade costs (enchantingupgrades.json UpgradeCosts) ---
-
+    // Enchanting table upgrade costs (enchantingupgrades.json UpgradeCosts).
     private static void UpgradeCosts() {
         const string key = "json:enchantingupgrades:UpgradeCosts";
         JsonSlot slot = JsonSlotFor(key, "enchantingupgrades.json", () => ReadUpgradeCosts(EnchantingTableUpgrades.Config), null);
@@ -1056,7 +1015,7 @@ internal static class QuickConfigBindings {
             $"Multiplies the health of a {tier} bounty target.");
     }
 
-    // --- Effect configs: one editor over every loaded effect definition with a Config ---
+    // Effect configs: one editor over every loaded effect definition with a Config.
     // One staged value, two files: a slot per file feeds the same key, and each slot only counts
     // as dirty (and only writes) when the effects that belong to its file changed.
 
@@ -1115,8 +1074,7 @@ internal static class QuickConfigBindings {
         }
     }
 
-    // --- Bounty targets (adventuredata.json Bounties.Targets) ---
-
+    // Bounty targets (adventuredata.json Bounties.Targets).
     private static void Bounties() {
         const string key = "json:adventuredata:Bounties.Targets";
         JsonSlot slot = JsonSlotFor(key, "adventuredata.json", () => BountyTables.Read(),
@@ -1163,8 +1121,7 @@ internal static class QuickConfigBindings {
         });
     }
 
-    // --- Treasure map biome costs (adventuredata.json TreasureMap.BiomeInfo) ---
-
+    // Treasure map biome costs (adventuredata.json TreasureMap.BiomeInfo).
     private static void BiomeCosts() {
         const string key = "json:adventuredata:TreasureMap.BiomeInfo";
         JsonSlot slot = JsonSlotFor(key, "adventuredata.json",
@@ -1206,8 +1163,7 @@ internal static class QuickConfigBindings {
         });
     }
 
-    // --- Biome drop tables (loottables.json LootTables: Drops + per-entry Rarity weights) ---
-
+    // Biome drop tables (loottables.json LootTables: Drops + per-entry Rarity weights).
     private static void BiomeDrops() {
         const string key = "json:loottables:LootTables";
         JsonSlot slot = JsonSlotFor(key, "loottables.json", BiomeDropTables.Read, null);
@@ -1283,8 +1239,7 @@ internal static class QuickConfigBindings {
         return raw;
     }
 
-    // --- Item categories (iteminfo.json ItemInfo[].ItemsByBoss) ---
-
+    // Item categories (iteminfo.json ItemInfo[].ItemsByBoss).
     private static void ItemCategories() {
         const string key = "json:iteminfo:ItemInfo";
         JsonSlot slot = JsonSlotFor(key, "iteminfo.json", () => ReadItemCategories(GatedItemTypeHelper.GatedConfig), null);
@@ -1377,32 +1332,25 @@ internal static class QuickConfigBindings {
         return keys;
     }
 
-    // ------------------------------------------------------------------------------------------------
-    //  Live readers
-    // ------------------------------------------------------------------------------------------------
-
     private static float[][] GetTable(MagicEffectsCountConfig config, ItemRarity rarity) {
-        if (config == null) { return null; }
-        return rarity switch {
-            ItemRarity.Magic => config.Magic,
-            ItemRarity.Rare => config.Rare,
-            ItemRarity.Epic => config.Epic,
-            ItemRarity.Legendary => config.Legendary,
-            ItemRarity.Mythic => config.Mythic,
-            ItemRarity.Ancient => config.Ancient,
-            _ => null
-        };
+        return config == null ? null
+            : TableFor(rarity, config.Magic, config.Rare, config.Epic, config.Legendary, config.Mythic, config.Ancient);
     }
 
     private static float[][] GetTable(SocketCountsConfig config, ItemRarity rarity) {
-        if (config == null) { return null; }
+        return config == null ? null
+            : TableFor(rarity, config.Magic, config.Rare, config.Epic, config.Legendary, config.Mythic, config.Ancient);
+    }
+
+    private static float[][] TableFor(ItemRarity rarity, float[][] magic, float[][] rare, float[][] epic,
+        float[][] legendary, float[][] mythic, float[][] ancient) {
         return rarity switch {
-            ItemRarity.Magic => config.Magic,
-            ItemRarity.Rare => config.Rare,
-            ItemRarity.Epic => config.Epic,
-            ItemRarity.Legendary => config.Legendary,
-            ItemRarity.Mythic => config.Mythic,
-            ItemRarity.Ancient => config.Ancient,
+            ItemRarity.Magic => magic,
+            ItemRarity.Rare => rare,
+            ItemRarity.Epic => epic,
+            ItemRarity.Legendary => legendary,
+            ItemRarity.Mythic => mythic,
+            ItemRarity.Ancient => ancient,
             _ => null
         };
     }
@@ -1451,10 +1399,6 @@ internal static class QuickConfigBindings {
 
     private static string PercentTenths(float share) => (share * 100f).ToString("0.#", CultureInfo.InvariantCulture) + "%";
 
-    // ------------------------------------------------------------------------------------------------
-    //  Option lists
-    // ------------------------------------------------------------------------------------------------
-
     private static List<string> hotkeyNames;
 
     // The names Input.GetKey(string) accepts, which is how the ability bar polls its hotkeys. They are
@@ -1498,10 +1442,6 @@ internal static class QuickConfigBindings {
             .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
-
-    // ------------------------------------------------------------------------------------------------
-    //  Value helpers
-    // ------------------------------------------------------------------------------------------------
 
     // "json:adventuredata:Gamble.GamblesCount" -> "Gamble.GamblesCount", the dotted path inside the file.
     private static string JsonPath(string key) {

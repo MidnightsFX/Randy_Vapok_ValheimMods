@@ -216,7 +216,7 @@ namespace EpicLoot_UnityLib
                 catch (Exception e)
                 {
                     // The name, icon and tooltip run every other mod's patches on them, and one that throws for
-                    // a single item used to escape into the list's fill loop, leaving this row and every row
+                    // a single item would escape into the list's fill loop, leaving this row and every row
                     // after it on the prefab's placeholder text ("Name Text", "XX").
                     ReportItemFailure(shownItem, e, shownPlainly: true);
                     ShowPlainItem(shownItem);

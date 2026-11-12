@@ -25,7 +25,7 @@ public static class EffectGroupsSection
             MagicEffectType.Firebrand, MagicEffectType.StrikeCausesLightning, MagicEffectType.ChainLightning,
             MagicEffectType.ShockingCharge, MagicEffectType.StormFury, MagicEffectType.StormRider, MagicEffectType.FrostDamageAOE,
             MagicEffectType.IcyRetribution, MagicEffectType.Frostwalker, MagicEffectType.Earthshaker, MagicEffectType.KineticQuake,
-            MagicEffectType.BatteringRam, MagicEffectType.OverwhelmingLaunch, MagicEffectType.Paralyze, MagicEffectType.Slow,
+            MagicEffectType.OverwhelmingLaunch, MagicEffectType.Paralyze, MagicEffectType.Slow,
             MagicEffectType.Vanish, MagicEffectType.Mercenary, MagicEffectType.NineSteps, MagicEffectType.Conduit,
             MagicEffectType.EitrWeave, MagicEffectType.OffSetAttack, MagicEffectType.Hexen, MagicEffectType.SpiritAnimal,
             MagicEffectType.MeteorSummoner, MagicEffectType.LifeSiphon,

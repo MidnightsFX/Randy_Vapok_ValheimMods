@@ -51,30 +51,29 @@ namespace EpicLoot.MagicItemEffects
         {
             if (configuration != null && configuration.ContainsKey(PROJECTILES_KEY))
             {
-                return Mathf.RoundToInt(configuration[PROJECTILES_KEY]);
+                return Mathf.Max(1, Mathf.RoundToInt(configuration[PROJECTILES_KEY]));
             }
             return fallback;
         }
 
-        // The proc must be decided BEFORE vanilla consumes ammo: OnAttackTrigger calls UseAmmo
-        // first and FireProjectileBurst after. Rolling inside the burst prefix (the old shape)
-        // meant the tripled ammo cost was charged one attack late, and the flag leaked into the
-        // NEXT attack -- even with a different weapon -- once the last burst had fired.
+        // The proc is decided before vanilla consumes ammo: OnAttackTrigger calls UseAmmo first and
+        // FireProjectileBurst after.
         [HarmonyPatch(typeof(Attack), nameof(Attack.OnAttackTrigger))]
         [HarmonyPrefix]
         public static void Attack_OnAttackTrigger_Prefix(Attack __instance)
         {
-            _pendingShot = PendingShotType.None;
-            IsTripleShotActive = false;
-            ShotProjectiles = 0;
-
-            if (__instance?.GetWeapon() == null || __instance.m_character == null || !__instance.m_character.IsPlayer())
+            // Cleared only for the local player's own attacks: this client also runs OnAttackTrigger for every
+            // creature it owns, and one swinging between a staff's bursts must not cancel the proc.
+            if (!(__instance.m_character is Player player) || player != Player.m_localPlayer)
             {
                 return;
             }
 
-            Player player = (Player)__instance.m_character;
-            if (player != Player.m_localPlayer)
+            _pendingShot = PendingShotType.None;
+            IsTripleShotActive = false;
+            ShotProjectiles = 0;
+
+            if (__instance.GetWeapon() == null)
             {
                 return;
             }
@@ -117,7 +116,7 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
-            if (__instance?.GetWeapon() == null || __instance.m_character is not Player player ||
+            if (__instance.GetWeapon() == null || __instance.m_character is not Player player ||
                 player != Player.m_localPlayer)
             {
                 return;
@@ -125,20 +124,20 @@ namespace EpicLoot.MagicItemEffects
 
             if (_pendingShot == PendingShotType.TripleBow)
             {
-                ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.TripleBowShot), 0.4f, 2f, 1.25f, 3);
+                ModifyShot(player, __instance, GetEffectConfig(MagicEffectType.TripleBowShot), 0.4f, 2f, 1.25f, 3);
             }
             else
             {
-                ModifyShot(ref player, ref __instance, GetEffectConfig(MagicEffectType.DoubleMagicShot), 0.66f, 2f, 1.2f, 2);
+                ModifyShot(player, __instance, GetEffectConfig(MagicEffectType.DoubleMagicShot), 0.66f, 2f, 1.2f, 2);
             }
         }
 
         private static float GetCostScale(Dictionary<string, float> configuration, float fallback)
         {
-            return configuration != null && configuration.ContainsKey(COSTSCALE_KEY) ? configuration[COSTSCALE_KEY] : fallback;
+            return configuration != null && configuration.ContainsKey(COSTSCALE_KEY) ? Mathf.Max(0f, configuration[COSTSCALE_KEY]) : fallback;
         }
 
-        private static bool ModifyShot(ref Player player, ref Attack attack, Dictionary<string, float> configuration,
+        private static void ModifyShot(Player player, Attack attack, Dictionary<string, float> configuration,
             float damage, float costScale, float accuracy, int projectiles)
         {
             costScale = GetCostScale(configuration, costScale);
@@ -155,30 +154,29 @@ namespace EpicLoot.MagicItemEffects
 
                 attack.m_projectileAccuracy = attack.m_weapon.m_shared.m_attack.m_projectileAccuracy;
                 attack.m_projectiles = attack.m_weapon.m_shared.m_attack.m_projectiles;
-                return false;
+                return;
             }
 
             if (configuration != null)
             {
                 if (configuration.ContainsKey(DAMAGE_KEY))
                 {
-                    damage = configuration[DAMAGE_KEY];
+                    damage = Mathf.Max(0f, configuration[DAMAGE_KEY]);
                 }
 
                 if (configuration.ContainsKey(ACCURACY_KEY))
                 {
-                    accuracy = configuration[ACCURACY_KEY];
+                    accuracy = Mathf.Max(0f, configuration[ACCURACY_KEY]);
                 }
 
                 if (configuration.ContainsKey(PROJECTILES_KEY))
                 {
-                    projectiles = Mathf.RoundToInt(configuration[PROJECTILES_KEY]);
+                    projectiles = Mathf.Max(1, Mathf.RoundToInt(configuration[PROJECTILES_KEY]));
                 }
             }
 
-            // Applied to each projectile's own HitData as vanilla builds it (Attack_ModifyDamage_Postfix), so the
-            // whole hit is cut. Scaling the weapon's base m_damages left its upgrades, world level and the ammo
-            // at full strength.
+            // Applied to each projectile's own HitData as vanilla builds it (Attack_ModifyDamage_Postfix), so
+            // upgrades, world level and the ammo are cut too.
             _scaledBurstAttack = attack;
             _scaledBurstDamage = damage;
 
@@ -186,8 +184,6 @@ namespace EpicLoot.MagicItemEffects
 
             attack.m_projectiles = attack.m_weapon.m_shared.m_attack.m_projectiles * projectiles;
             ShotProjectiles = projectiles;
-
-            return true;
         }
 
         // Attack.ModifyDamage runs once per projectile inside FireProjectileBurst, on the finished HitData
@@ -216,12 +212,12 @@ namespace EpicLoot.MagicItemEffects
         /// <summary>
         /// Charges what the extra projectiles cost, if the player can pay it. CostScale is the whole attack's cost
         /// multiplier (the description's "twice the eitr" is 2), and vanilla charges the first 1x itself, so only
-        /// CostScale - 1 is ours. Charging the full CostScale on top made a double shot cost three times.
+        /// CostScale - 1 is ours.
         ///
         /// Vanilla charges its share once, as the attack starts (before any burst), or with m_perBurstResourceUsage
-        /// (Staff of Frost, ...) on every burst, checking and charging right after this prefix and Stop()ing the
-        /// attack when the player cannot pay. In the per-burst case the check has to cover both shares: charging
-        /// ours first left too little for vanilla's, so the eitr was taken and nothing was fired.
+        /// (Staff of Frost, ...) on every burst, right after this prefix, Stop()ing the attack when the player
+        /// cannot pay. In the per-burst case the check has to cover both shares, or ours would leave too little
+        /// for vanilla's.
         /// </summary>
         private static bool TryPayExtraCost(Player player, Attack attack, float costScale)
         {
@@ -279,7 +275,6 @@ namespace EpicLoot.MagicItemEffects
     [HarmonyPatch(typeof(Attack))]
     public static class UseAmmoTranspilerPatch
     {
-        //[HarmonyDebug]
         [HarmonyTranspiler]
         [HarmonyPatch(nameof(Attack.UseAmmo))]
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)

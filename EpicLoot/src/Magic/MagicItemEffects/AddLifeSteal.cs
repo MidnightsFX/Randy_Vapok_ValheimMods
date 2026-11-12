@@ -5,7 +5,7 @@ namespace EpicLoot.MagicItemEffects
 {
     public static class AddLifeSteal
     {
-        // Postfix handler invoked by CharacterDamageDispatch (on-hit reaction).
+        // On-hit reaction, called from SharedCharacterDamagePatch's postfix.
         public static void CheckAndDoLifeSteal(HitData hit, Character attacker)
         {
             if (attacker == null || attacker is not Player player)

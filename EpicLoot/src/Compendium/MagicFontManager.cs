@@ -10,25 +10,18 @@ public static class MagicFontManager
 {
     public enum FontOptions
     {
-        [InternalName("Norse")] Norse,
-        [InternalName("Norsebold")] NorseBold,
-        [InternalName("AveriaSerifLibre-Regular")] AveriaSerifLibre,
-        [InternalName("AveriaSerifLibre-Bold")] AveriaSerifLibreBold,
-        [InternalName("AveriaSerifLibre-Light")] AveriaSerifLibreLight,
-        [InternalName("LegacyRuntime")] LegacyRuntime
+        [InternalName("AveriaSerifLibre-Regular")] AveriaSerifLibre
     }
 
     // Each entry pairs a font asset with one of ITS OWN material variants. Pairing a font with another
     // font's material is the bug this file exists to prevent -- see Apply below.
     public enum TMP_FontOptions
     {
-        [TMP_Attributes("Valheim-Norse", "Valheim-Norse - Outline")] Norse,
         [TMP_Attributes("Valheim-Norsebold", "Valheim-Norsebold - Outline")] NorseBoldOutline,
         [TMP_Attributes("Valheim-AveriaSansLibre", "Valheim-AveriaSansLibre")] AveriaSansLibre,
         [TMP_Attributes("Valheim-AveriaSansLibre", "Valheim-AveriaSansLibre - Outline")] AveriaSansLibreOutline,
         [TMP_Attributes("Valheim-AveriaSerifLibre", "Valheim-AveriaSerifLibre - Outline")] AveriaSerifLibreOutline,
         [TMP_Attributes("Valheim-AveriaSerifLibre", "Valheim-AveriaSerifLibre")] AveriaSerifLibre,
-        [TMP_Attributes("Valheim-Rune", "Valheim-Rune")] Rune,
     }
 
     private class InternalName(string internalName) : Attribute
@@ -162,18 +155,13 @@ public static class MagicFontManager
         }
     }
 
-    // Applies a font asset and its material together, with the atlas check TMP itself performs.
-    //
     // TextMeshProUGUI.LoadFontAsset() only keeps a shared material whose _MainTex is the font asset's
     // current atlas texture, and falls back to the font's own material otherwise. The
     // fontSharedMaterial setter does no such check, and TMP_Text.font early-returns when the asset is
     // unchanged -- so a material assigned to a live component is never validated. Repeating TMP's check
-    // here means a font paired with another font's material (the shape of the deleted
-    // AveriaSansLibre-Bold entry) degrades to unstyled text instead of rendering as garbage.
-    //
-    // This is what made compendium group headings render as a few unreadable specks on the first open
-    // of a session and correctly on every open after: they are the only lines that swap material after
-    // the element is live, so they were the only ones TMP never got to validate.
+    // here means a font paired with another font's material degrades to unstyled text instead of
+    // rendering as garbage. Compendium group headings are the lines that swap material after the
+    // element is live, so they are the ones TMP never validates.
     // Returns false when no usable font asset could be resolved, so a caller that latches a
     // "fonts loaded" flag can retry on its next open instead of keeping the default font forever.
     public static bool Apply(TMP_Text text, TMP_FontOptions option)
@@ -274,70 +262,3 @@ public static class MagicFontManager
         public Material material;
     }
 }
-
-// ################## TMP Fonts:
-// Opensans - Fallback
-// AveriaSansLibre-Bold SDF
-// NotoSansJP-Regular SDF
-// NotoSansSC-Regular SDF
-// Valheim-AveriaSansLibre
-// NotoSansThai-Regular SDF
-// Valheim-AveriaSerifLibre
-// NotoSerifJP-Regular SDF
-// NotoSerifArmenian-Regular SDF
-// NotoSerifDevanagari-Regular SDF
-// NotoSerifGeorgian-Regular SDF
-// NotoSerifThai-Regular SDF
-// NotoEmoji-Regular SDF
-// NotoSerifMalayalam-Regular SDF
-// NotoSerifBengali-Regular SDF
-// NotoSansHebrew-Regular SDF
-// NotoSansArabic-Regular SDF
-// Fallback-NotoSerifNormal
-// NotoSerifSC-Regular SDF
-// NotoSerifKR-Regular SDF
-// NotoSansBengali-Regular SDF
-// Valheim-Prstartk
-// NotoSansGeorgian-Regular SDF
-// NotoSansArmenian-Regular SDF
-// Fallback-NotoSansNormal
-// NotoSansKR-Regular SDF
-// NotoSansMalayalam-Regular SDF
-// NotoSansDevanagari-Regular SDF
-// Valheim-Norsebold
-// NotoSansSC-Thin SDF
-// NotoSansJP-Thin SDF
-// NotoSansDevanagari-ExtraLight SDF
-// NotoSansThai-ExtraLight SDF
-// NotoSansBengali-ExtraLight SDF
-// Valheim-Norse
-// NotoSansArmenian-ExtraLight SDF
-// NotoSansKR-Thin SDF
-// NotoSansHebrew-Light SDF
-// NotoEmoji-Light SDF
-// NotoSansGeorgian-ExtraLight SDF
-// NotoSansArabic-Light SDF
-// NotoSansMalayalam-ExtraLight SDF
-// Fallback-NotoSansThin
-// Valheim-Rune
-
-
-// ################## Materials:
-// Valheim-AveriaSansLibre - Outline
-// Valheim-AveriaSerifLibre - Outline
-// Valheim-Prstartk
-// Valheim-AveriaSansLibre
-// Valheim-Prstartk - Outline
-// Valheim-AveriaSerifLibre
-// Valheim-Norsebold
-// Valheim-Norsebold - Outline (Thin)
-// Valheim-Norsebold - Outline
-// Valheim-AveriaSerifLibre - Outline (Thin)
-// Valheim-Norse
-// Valheim-Norse - Sign Lit
-// Valheim-Rune
-// Valheim-Prstartk - Outline (Thin)
-// Valheim-Norse - Outline
-// Valheim-Norse - Outline (Thin)
-// Valheim-AveriaSansLibre - Outline (Thin)
-// Valheim-AveriaSansLibre - Outline (Thick)

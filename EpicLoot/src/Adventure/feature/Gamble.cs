@@ -8,7 +8,6 @@ namespace EpicLoot.Adventure.Feature
 {
     public class GambleAdventureFeature : AdventureFeature
     {
-        public override AdventureFeatureType Type => AdventureFeatureType.Gamble;
         public override int RefreshInterval => AdventureDataManager.Config.Gamble.RefreshInterval;
 
         /// <summary>

@@ -2,7 +2,6 @@
 using JetBrains.Annotations;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Reduces the Eitr cost of using abilities by a percent
     public static class ReduceEitrCost {
         // What this effect leaves of an eitr cost. Other characters' costs are not reduced here.
         public static float GetCostShare(Character character) {

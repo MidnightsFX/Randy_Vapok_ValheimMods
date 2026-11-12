@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Provides a bonus to health regeneration while the player is actively resting (vanilla's "Resting"
-    // status: by a fire, sitting or sheltered), has the "Rested" buff it leaves behind, or either. Which of
-    // the two count is tunable as "WhileResting" and "WhileRested" in this effect's Config block in
-    // shardstones.json, 0 for off. The bonus applies once when both hold, and never with both off.
+    // Counts vanilla's "Resting" status (by a fire, sitting or sheltered), the "Rested" buff it leaves behind, or
+    // either, per the WhileResting and WhileRested keys. The bonus applies once when both hold.
     public static class RestingHealthRegen {
         public const float DefaultWhileResting = 1f;
         public const float DefaultWhileRested = 0f;
