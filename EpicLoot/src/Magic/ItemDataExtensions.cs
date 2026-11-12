@@ -284,6 +284,12 @@ public static class ItemDataExtensions
         return itemData.IsMagic(out MagicItem magicItem) && !string.IsNullOrEmpty(magicItem.SetID);
     }
 
+    /// <summary>A named unique (a legendaries.json item) that is not a set piece.</summary>
+    public static bool IsUniqueItem(this ItemDrop.ItemData itemData)
+    {
+        return itemData.IsMagic(out MagicItem magicItem) && magicItem.IsUniqueLegendary() && !magicItem.IsLegendarySetItem();
+    }
+
     public static bool IsMundaneSetItem(this ItemDrop.ItemData itemData)
     {
         return !string.IsNullOrEmpty(itemData.m_shared.m_setName);

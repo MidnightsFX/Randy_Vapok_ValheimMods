@@ -30,6 +30,7 @@ internal class ELConfig {
     public static ConfigFile cfg;
 
     public static ConfigEntry<string> _setItemColor;
+    public static ConfigEntry<string> _uniqueItemColor;
     public static ConfigEntry<string> _magicRarityColor;
     public static ConfigEntry<string> _rareRarityColor;
     public static ConfigEntry<string> _epicRarityColor;
@@ -46,6 +47,7 @@ internal class ELConfig {
     public static ConfigEntry<bool> ShowRarityInRecipeList;
     public static ConfigEntry<bool> ShowEnchantSelectionChance;
     public static ConfigEntry<EffectRarityFlare> EffectRarityFlareMode;
+    public static ConfigEntry<bool> UniqueItemEmbers;
     public static ConfigEntry<bool> TransferMagicItemToCrafts;
     public static ConfigEntry<bool> _loggingEnabled;
     public static ConfigEntry<LogLevel> _logLevel;
@@ -57,6 +59,7 @@ internal class ELConfig {
     public static ConfigEntry<BossDropMode> _bossTrophyDropMode;
     public static ConfigEntry<float> _bossTrophyDropPlayerRange;
     public static ConfigEntry<int> _andvaranautRange;
+    public static ConfigEntry<int> _bountyTrackerRange;
     public static ConfigEntry<bool> ShowEquippedAndHotbarItemsInSacrificeTab;
     public static ConfigEntry<bool> ShowStorageCounts;
     public static ConfigEntry<bool> RespectItemFavorites;
@@ -86,6 +89,7 @@ internal class ELConfig {
     public static ConfigEntry<KeyCode> ShieldThrowKey;
     public static ConfigEntry<KeyCode> ShieldThrowGamepadButton;
     public static ConfigEntry<float> SetItemDropChance;
+    public static ConfigEntry<float> UniqueItemDropChance;
     public static ConfigEntry<bool> HealthCriticalEffectsEnabled;
     public static ConfigEntry<bool> AllowRuneSocketing;
     public static ConfigEntry<bool> AllowDuplicateSocketedEffects;
@@ -490,7 +494,14 @@ internal class ELConfig {
         SetItemDropChance = BindServer(SectionBalance, "Set Item Drop Chance", 0.15f,
             "The percent chance that an item of a rarity with item sets enabled (Legendary, Mythic and " +
             "Ancient by default, see each set's Rarities in legendaries.json) is dropped, enchanted " +
-            "or identified as a set item. If no set piece fits the item it rolls a regular unique instead.\n" +
+            "or identified as a set item. If no set piece fits the item it rolls for a regular unique instead.\n" +
+            "Min = 0, Max = 1",
+            new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
+        UniqueItemDropChance = BindServer(SectionBalance, "Unique Item Drop Chance", 0.1f,
+            "The percent chance that an item of a rarity with uniques enabled (Legendary by default, see " +
+            "each unique's Rarities in legendaries.json) that did not become a set item is dropped, " +
+            "enchanted or identified as a unique. Which unique is picked by SelectionWeight among those " +
+            "that fit the item.\n" +
             "Min = 0, Max = 1",
             new AcceptableValueRange<float>(minValue: 0, maxValue: 1));
         HealthCriticalEffectsEnabled = BindServer(SectionBalance, "Health Critical Enchantments", true,
@@ -730,6 +741,9 @@ internal class ELConfig {
             "Set to false to disable. This will not actually remove active treasure maps or bounties from your save.");
         _andvaranautRange = BindServer(SectionAdventure, "Andvaranaut Range", 20,
             "Sets the range that Andvaranaut will activate to locate a treasure chest.");
+        _bountyTrackerRange = BindServer(SectionAdventure, "Bounty Tracker Range", 100,
+            "Sets the range at which Skuld's Thread draws its line to a bounty target or one of its minions. " +
+            "The line thins out with distance, so near the edge of the range only a few sparks show.");
         BossBountyMode = BindServer(SectionAdventure, "Gated Bounty Mode", GatedBountyMode.Unlimited,
             "Sets whether available bounties are ungated or gated by boss kills.");
         EnableLimitedBountiesInProgress = BindServer(SectionAdventure, "Enable Bounty Limit", false,
@@ -757,6 +771,10 @@ internal class ELConfig {
             "Off = no marker.\n" +
             "Static = a coloured star rating after the effect, one to three stars by how rare it is.\n" +
             "Animated = as Static, and in the item tooltip and the enchanting table those lines also drift and shimmer.");
+        UniqueItemEmbers = BindClient(SectionInterface, "Unique Item Embers", true,
+            "If set to true, the inventory cell of a unique item (a named item from legendaries.json that is not a " +
+            "set piece) gets a border, the rune breathes and embers drift up the cell, in the Unique Item Color. " +
+            "If set to false, unique items show the rune marker only.");
         ShowEquippedAndHotbarItemsInSacrificeTab = BindClient(SectionInterface,
             "ShowEquippedAndHotbarItemsInSacrificeTab", false,
             "If set to false, hides the items that are equipped, on your hotbar or in the quick slots of " +
@@ -866,6 +884,8 @@ internal class ELConfig {
             "Available options: 0=Red, 1=Orange, 2=Yellow, 3=Green, 4=Teal, 5=Blue, 6=Indigo, 7=Purple, 8=Pink, 9=Gray");
         _setItemColor = BindClient(SectionItemColors, "Set Item Color", "#26ffff",
             "The color of set item text and the set item icon. Use a hex color, default is cyan");
+        _uniqueItemColor = BindClient(SectionItemColors, "Unique Item Color", "#ffd75e",
+            "The color of the unique item label, icon and cell effects. Use a hex color, default is gold");
 
         // 8 - Abilities
         AbilityKeyCodes[0] = BindClient(SectionAbilities, "Ability Hotkey 1", "g", "Hotkey for Ability Slot 1.");

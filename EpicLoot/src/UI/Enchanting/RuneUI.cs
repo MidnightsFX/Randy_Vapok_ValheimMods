@@ -603,6 +603,13 @@ namespace EpicLoot_UnityLib
             return GetCostReduction(featureValues.Item1);
         }
 
+        private float GetCurrentPowerModifier()
+        {
+            Tuple<float, float> featureValues =
+                EnchantingTableUI.instance.SourceTable.GetFeatureCurrentValue(EnchantingFeature.Rune);
+            return GetPowerModifier(featureValues.Item2);
+        }
+
         // What the current mode charges for the item, keyed on its rarity: the source's for an extract,
         // the target's for an etch.
         private List<InventoryItemListElement> GetCurrentCost(ItemDrop.ItemData item)
@@ -761,8 +768,10 @@ namespace EpicLoot_UnityLib
 
             ClearEnchantmentList();
 
-            foreach (Tuple<string, bool> effect in augmentableEffects)
+            float powerModifier = _runeAction == RuneAction.Extract ? GetCurrentPowerModifier() : 1f;
+            for (int effectIndex = 0; effectIndex < augmentableEffects.Count; effectIndex++)
             {
+                Tuple<string, bool> effect = augmentableEffects[effectIndex];
                 GameObject enchantmentListElement = Instantiate(EnchantmentListPrefab, EnchantList);
                 // Include inactive: the prefab ships deactivated, so the clone is still inactive here and
                 // the plain overload would hand back null and leave every row reading "Enchant Selector".
@@ -771,6 +780,7 @@ namespace EpicLoot_UnityLib
                 enchantmentbutton.onValueChanged.AddListener((isOn) =>
                 {
                     SetSelectedEnchantIndex();
+                    RefreshWarning();
                     UpdateDisplayAvailableOverwriteEnchantments();
                     CheckIfActionDoable();
                 });
@@ -778,6 +788,12 @@ namespace EpicLoot_UnityLib
                 if (enchantmentElement != null)
                 {
                     enchantmentElement.text = effect.Item1;
+                    if (_runeAction == RuneAction.Extract &&
+                        EnchantingUIController.TryGetCappedRuneExtractText(item, effectIndex, powerModifier, out string cappedText))
+                    {
+                        enchantmentElement.text += "\n<size=80%><color=#FFB347>" +
+                            Localization.instance.Localize("$mod_epicloot_rune_extract_capped_row", cappedText) + "</color></size>";
+                    }
                     MagicTextShimmer.Ensure(enchantmentElement);
                 }
                 EffectListRow.Fit(enchantmentListElement, enchantmentElement);
@@ -800,6 +816,7 @@ namespace EpicLoot_UnityLib
 
             _enchantmentColumn.ClampFocus();
             RefreshEnchantmentFocus();
+            RefreshWarning();
 
             // ClampFocus keeps the old row index, which may now sit below the fold of a list that just
             // went back to the top.
@@ -872,7 +889,7 @@ namespace EpicLoot_UnityLib
         {
             _runeAction = action;
             RefreshMainButtonLabel();
-            Warning.text = Localization.instance.Localize(GetWarningKey(action));
+            RefreshWarning();
 
             // The rune column is only for the two etches; whatever it held belongs to the previous mode.
             AvailableRunesWindow.SetActive(action == RuneAction.Etch || action == RuneAction.SetEtch);
@@ -883,6 +900,19 @@ namespace EpicLoot_UnityLib
 
             RefreshColumnHeaders();
             NewModeSelected(true);
+        }
+
+        private void RefreshWarning()
+        {
+            string text = Localization.instance.Localize(GetWarningKey(_runeAction));
+            if (_runeAction == RuneAction.Extract && _selectedItem != null &&
+                EnchantingUIController.TryGetCappedRuneExtractText(_selectedItem, _selectedEnchantmentIndex, GetCurrentPowerModifier(), out string cappedText))
+            {
+                text += " <color=#FFB347>" + Localization.instance.Localize("$mod_epicloot_rune_extract_capped_warning",
+                    Localization.instance.Localize(EpicLoot.EpicLoot.GetRarityDisplayName(_selectedItem.GetRarity())), cappedText) + "</color>";
+            }
+
+            Warning.text = text;
         }
 
         private static string GetWarningKey(RuneAction action)

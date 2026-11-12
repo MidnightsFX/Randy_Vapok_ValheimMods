@@ -2,7 +2,6 @@
 * The health regen shardstone for shoulders can be set to work while resting, while rested or both, and the Legendary balance template now gives it for both.
 * Balance templates now include shardstones, so applying a template also replaces your shardstone settings.
 * Shardstones already socketed now pick up balance changes without being taken out and put back.
-* Mining and lumberjacking drop effects now build up fractions of a drop with each break, and the balance template sets how fast.
 * Attacks, dodges and jumps can no longer be reduced below a tenth of their cost.
 * Eitr Weaving now restores a percentage of max eitr.
 * Paying eitr costs from stamina no longer refunds eitr when you have no stamina.
@@ -14,6 +13,22 @@
 * The enchanting table's Upgrade tab is back with Auga, and its page shows its title again.
 * The message on the enchanting table's Storage tab no longer runs into the Take All buttons.
 * Items in the quick slots of Equipment and Quick Slots now count as hotbar items at the enchanting table, so they stay out of the sacrifice list when hotbar items are hidden.
+* Named items from legendaries.json are now called unique items everywhere, so they are no longer confused with the Legendary rarity
+    * Unique items are labelled with their rarity and Unique Item in their tooltip, such as Legendary Unique Item, and show a gold rune in the inventory like set pieces do
+    * In the inventory the cell gets a gold border, the rune breathes and embers drift up the cell. Unique Item Embers under Interface turns this off, and Item Colors has the colour
+    * The compendium's Legendary Sets page is now Unique Sets
+    * The magicsetitem console command is now magicunique (short form miunique); magicsetitem still works
+    * Unique items roll one more enchantment than their rarity normally does, and their signature enchantments roll above the normal range
+    * Unique items now roll at Mythic and Ancient as well as Legendary, with stronger signature enchantments at higher rarities
+    * Extracting a rune from an enchantment stronger than a normal roll now shows the capped value the rune will hold
+    * Quick Configure's Balance page has Unique Item Drop Chance beside Set Item Drop Chance, with a line showing how the two split items, and the Interface page has Unique Item Embers
+* Quick Configure's four drop ratios are now labelled as weights, since they only matter relative to each other
+* Mining Drop and Lumberjacking Drop are now Ore Yield and Wood Yield, a percentage bonus. Existing items convert automatically when loaded
+    * The bonus applies evenly across node types, so scrap piles and soft tissue no longer gain far more than ore veins
+    * Stone and plain wood are skipped when the same drop table has something better, so veins give only extra ore
+    * Rock chunks that collapse and logs that break on impact now get the bonus
+    * Bonus drops land in stacks where normal drops land, with a floating +X and a sound
+    * The balance template sets the percentage: half on Minimal, double on Legendary
 
 **0.15.6**
 * Works with Auga 1.4.1 and newer

@@ -80,6 +80,7 @@ public static class EffectGroupsSection
             MagicEffectType.ModifyProjectileSpeed, MagicEffectType.ModifyFireRate, MagicEffectType.ModifyMagicFireRate,
             MagicEffectType.ReduceEitrCost, MagicEffectType.ConvertEitrCostToStaminaCost, MagicEffectType.ConsumeEitrFirstForBloodCosts,
             MagicEffectType.KillsReduceNextBloodCost, MagicEffectType.ShieldThrow, MagicEffectType.Throwable, MagicEffectType.RecallWeapon,
+            MagicEffectType.HomingMissile,
             MagicEffectType.ModifySummonDamage, MagicEffectType.ModifySummonHealth,
         }),
         ("$mod_epicloot_effects_movement", new[]
@@ -101,7 +102,7 @@ public static class EffectGroupsSection
             MagicEffectType.ModifyNoise, MagicEffectType.ModifyPickupRange, MagicEffectType.ModifyDiscoveryRadius,
             MagicEffectType.DayDiscovery, MagicEffectType.ModifyWispRange, MagicEffectType.Glowing, MagicEffectType.Comfortable,
             MagicEffectType.Apportation, MagicEffectType.Luck, MagicEffectType.LuckyLoot, MagicEffectType.Riches,
-            MagicEffectType.Prosperity, MagicEffectType.Wager, MagicEffectType.Andvaranaut, MagicEffectType.Wishbone,
+            MagicEffectType.Prosperity, MagicEffectType.Wager, MagicEffectType.Andvaranaut, MagicEffectType.SkuldsThread, MagicEffectType.Wishbone,
             MagicEffectType.DvergerCirclet, MagicEffectType.DecreaseForsakenCooldown, MagicEffectType.DecreaseMeadCooldown,
             MagicEffectType.InstantMead, MagicEffectType.AutoMead, MagicEffectType.PotionEfficacy, MagicEffectType.ModifyLowHealth,
         }),

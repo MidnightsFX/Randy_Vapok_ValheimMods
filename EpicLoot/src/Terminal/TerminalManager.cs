@@ -96,8 +96,8 @@ public static partial class TerminalManager
         public static void Postfix()
         {
             _ = new Command("magicitem", "spawn magic item: [rarity] [item] [amount] [effect count]", SpawnMagicItem, GetSpawnMagicItemOptions, alternates: "mi");
-            _ = new Command("magicitemwitheffect", "spawn magic item with effect: [effect] [item]", SpawnMagicItemWithEffect, GetSpawnMagicItemWithEffectOptions, alternates: "mieffect");
-            _ = new Command("magicsetitem", "spawn a unique or set piece: [uniqueID] [item|random] [rarity|random]", SpawnSetItem, GetSetItemOptions);
+            _ = new Command("magicitemwitheffect", "spawn magic item with effects: [effect|effect,effect,...] [item]", SpawnMagicItemWithEffect, GetSpawnMagicItemWithEffectOptions, alternates: "mieffect");
+            _ = new Command("magicunique", "spawn a unique or set piece: [uniqueID] [item|random] [rarity|random]", SpawnSetItem, GetSetItemOptions, alternates: ["magicsetitem", "miunique"]);
             _ = new Command("magicitemset", "spawn every piece of a set: [setID] [rarity|random]", SpawnMagicItemSet, GetMagicItemSetOptions, alternates: "miset");
             _ = new Command("checkstackquality", "show list of items that have a max stack size over 1 and max quality over 1", CheckStackQuality);
             _ = new Command("magicmats", "spawn all magic materials with half stack", SpawnMagicCraftingMaterials);

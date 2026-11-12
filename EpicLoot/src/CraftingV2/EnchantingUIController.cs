@@ -1607,33 +1607,7 @@ namespace EpicLoot.CraftingV2
                 return null;
             }
 
-            // We might need to rethink how power modifier is checked and applied here. "Has a value" is the
-            // definition's call, not the number's: a value test (> 1) skipped real rolls of 1 or less.
-            if (!float.IsNaN(powerModifier) && powerModifier < 999f && powerModifier > 0 &&
-                !MagicItemEffectDefinitions.IsValuelessEffect(effect.EffectType))
-            {
-                runeEffect.EffectValue = effect.EffectValue * powerModifier;
-                // TryGet, not the raw dictionary index (which threw KeyNotFound for a removed content
-                // mod or a deleted shard grid slot) and not Get(), whose stand-in would cap the rune to
-                // made-up numbers. The cap stays on the rarity table even for uniques, deliberately.
-                var valueDef = MagicItemEffectDefinitions.TryGet(effect.EffectType, out var effectDef)
-                    ? effectDef.ValuesPerRarity?.GetValueDefForRarity(selectedItem.GetRarity())
-                    : null;
-                if (valueDef != null)
-                {
-                    float maxDefaultValue = valueDef.MaxValue;
-                    // To clamp down on potentially infinite power looping by re-runing items
-                    if (runeEffect.EffectValue > (maxDefaultValue * powerModifier))
-                    {
-                        runeEffect.EffectValue = (maxDefaultValue * powerModifier);
-                    }
-                }
-            }
-            else
-            {
-                // Tried to set the item to infinite power level
-                runeEffect.EffectValue = effect.EffectValue;
-            }
+            runeEffect.EffectValue = GetRuneExtractValue(effect, selectedItem.GetRarity(), powerModifier, out _);
 
             MagicItem enchantmentsToRune = new MagicItem
             {
@@ -1643,6 +1617,54 @@ namespace EpicLoot.CraftingV2
             API.WithChangeReason(API.ChangeReason.Rune, () => newItem.SaveMagicItem(enchantmentsToRune));
 
             return newItem;
+        }
+
+        internal static float GetRuneExtractValue(MagicItemEffect effect, ItemRarity rarity, float powerModifier, out bool capped)
+        {
+            capped = false;
+            // "Has a value" is the definition's call, not the number's: a value test (> 1) skipped real
+            // rolls of 1 or less.
+            if (float.IsNaN(powerModifier) || powerModifier >= 999f || powerModifier <= 0 ||
+                MagicItemEffectDefinitions.IsValuelessEffect(effect.EffectType))
+            {
+                return effect.EffectValue;
+            }
+
+            float value = effect.EffectValue * powerModifier;
+            // TryGet, not the raw dictionary index (which threw KeyNotFound for a removed content mod or a
+            // deleted shard grid slot) and not Get(), whose stand-in would cap the rune to made-up numbers.
+            // The cap stays on the rarity table even for uniques, deliberately: it stops re-runing loops
+            // from compounding power.
+            MagicItemEffectDefinition.ValueDef valueDef = MagicItemEffectDefinitions.TryGet(effect.EffectType, out var effectDef)
+                ? effectDef.ValuesPerRarity?.GetValueDefForRarity(rarity)
+                : null;
+            if (valueDef != null && value > valueDef.MaxValue * powerModifier)
+            {
+                capped = true;
+                value = valueDef.MaxValue * powerModifier;
+            }
+
+            return value;
+        }
+
+        internal static bool TryGetCappedRuneExtractText(ItemDrop.ItemData item, int index, float powerModifier, out string text)
+        {
+            text = null;
+            MagicItem magicItem = item?.GetMagicItem();
+            if (magicItem == null || index < 0 || index >= magicItem.Effects.Count)
+            {
+                return false;
+            }
+
+            MagicItemEffect effect = magicItem.Effects[index];
+            float value = GetRuneExtractValue(effect, magicItem.Rarity, powerModifier, out bool capped);
+            if (!capped || !MagicItemEffectDefinitions.TryGet(effect.EffectType, out MagicItemEffectDefinition effectDef))
+            {
+                return false;
+            }
+
+            text = Localization.instance.Localize(MagicItem.GetEffectText(effectDef, value));
+            return true;
         }
 
         internal static string GetSelectedEnchantmentNameByIndex(ItemDrop.ItemData selectedItem, int targetEnchant)

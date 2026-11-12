@@ -85,10 +85,12 @@ public static class AugaTooltip
 
         string subtitle = data.SetLabel != null
             ? $"<color={data.SetColor}>{data.SetLabel}</color>, {data.ItemTypeName}"
-            : $"<color={data.RarityColor}><color={data.RarityColor}>{data.RarityName}</color> {data.ItemTypeName}</color>";
+            : data.UniqueLabel != null
+                ? $"<color={data.UniqueColor}>{data.UniqueLabel}</color>, {data.ItemTypeName}"
+                : $"<color={data.RarityColor}><color={data.RarityColor}>{data.RarityName}</color> {data.ItemTypeName}</color>";
         Auga.API.ComplexTooltip_SetSubtitle(complexTooltip, Localization.instance.Localize(subtitle));
 
-        // Differs from Auga's own only for unique legendaries, which carry their own lore.
+        // Differs from Auga's own only for uniques, which carry their own lore.
         Auga.API.ComplexTooltip_SetDescription(complexTooltip, Localization.instance.Localize(data.Description));
 
         // Auga's inventory and crafting tooltips carry the scraped effect text already. EpicLoot's result
