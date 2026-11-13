@@ -128,7 +128,7 @@ public class HexenForm : MonoBehaviour
     private bool CanTakeOff => _player.m_eitr >= Hexen.MinEitr;
     private bool OutOfEitr => _player.m_eitr <= 0f;
 
-    private bool Apply(float scale)
+    private void Apply(float scale)
     {
         Scale = scale;
         var prefab = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(PrefabName) : null;
@@ -137,7 +137,7 @@ public class HexenForm : MonoBehaviour
         if (prefabVisual == null || witch == null)
         {
             EpicLoot.LogWarning($"HexenForm: prefab '{PrefabName}' is missing or has no Visual/Humanoid");
-            return false;
+            return;
         }
 
         _blast = WeaponFrom(witch, "JotunWitch_attack_magicblast");
@@ -149,7 +149,7 @@ public class HexenForm : MonoBehaviour
         if (_blast == null || _bolt == null || _dodgeLeft == null || _dodgeRight == null || _dodgeUp == null || _dodgeDown == null)
         {
             EpicLoot.LogWarning($"HexenForm: '{PrefabName}' no longer carries the expected default attack items");
-            return false;
+            return;
         }
 
         if (Active) Revert();
@@ -207,7 +207,6 @@ public class HexenForm : MonoBehaviour
 
         Active = true;
         ActiveForms[_player] = this;
-        return true;
     }
 
     private void Revert()

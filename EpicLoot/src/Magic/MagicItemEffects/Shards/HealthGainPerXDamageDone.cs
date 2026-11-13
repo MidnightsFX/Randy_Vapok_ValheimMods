@@ -4,10 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects.Shards {
-    // Provides a heal to the player for every X damage dealt, cumulative across hits
     public static class HealthGainPerXDamageDone {
-        // Threshold of damage dealt before the player is healed. Tunable as "DamagePerTrigger" in this
-        // effect's Config block in config/shardstones.json.
         public const float DefaultDamagePerTrigger = 200f;
 
         private const string DamagePerTriggerKey = "DamagePerTrigger";
@@ -23,18 +20,15 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 DamagePerTriggerKey, DefaultDamagePerTrigger));
         }
 
-        // Tooltip: "Heal {0} per {1} Damage Dealt" -- {1} is the configured threshold, so the shown number
-        // follows a retune instead of staying at the baked-in default.
         public static void RegisterDisplayValues() {
             MagicItem.RegisterDisplayValues(MagicEffectType.HealthGainPerXDamageDone,
                 value => new object[] { value, GetDamagePerTrigger() });
         }
 
-        // Cumulative damage the local player has dealt with the effect active but not yet paid out as a
-        // heal. Carries the sub-threshold remainder across hits.
+        // Carries the sub-threshold remainder across hits.
         private static float _accumulatedDamage;
 
-        // Postfix handler invoked by CharacterDamageDispatch (on-hit reaction).
+        // Postfix handler invoked by SharedCharacterDamagePatch (on-hit reaction).
         public static void OnDamageDealt(HitData hit, Character attacker) {
             if (!(attacker is Player player) || player != Player.m_localPlayer) {
                 return;

@@ -45,6 +45,17 @@
       "Comment": "Can't be rolled. Just added to make a Magic Item version of this item."
     },
     {
+      "Type": "SkuldsThread",
+      "DisplayText": "$mod_epicloot_me_skuldsthread_display",
+      "CanBeAugmented": false,
+      "CanBeDisenchanted": false,
+      "CanBeRunified": false,
+      "Requirements": {
+        "NoRoll": true
+      },
+      "Comment": "Can't be rolled. Just added to make a Magic Item version of this item."
+    },
+    {
       "Type": "ChainLightning",
       "DisplayText": "$mod_epicloot_me_chainlightning_display",
       "Description": "$mod_epicloot_me_chainlightning_desc",
@@ -793,24 +804,24 @@
       },
       "ValuesPerRarity": {
         "Epic": {
-          "MinValue": 1,
-          "MaxValue": 1,
-          "Increment": 1
+          "MinValue": 50,
+          "MaxValue": 50,
+          "Increment": 25
         },
         "Legendary": {
-          "MinValue": 2,
-          "MaxValue": 2,
-          "Increment": 1
+          "MinValue": 100,
+          "MaxValue": 100,
+          "Increment": 25
         },
         "Mythic": {
-          "MinValue": 3,
-          "MaxValue": 3,
-          "Increment": 1
+          "MinValue": 150,
+          "MaxValue": 150,
+          "Increment": 25
         },
         "Ancient": {
-          "MinValue": 4,
-          "MaxValue": 4,
-          "Increment": 1
+          "MinValue": 200,
+          "MaxValue": 200,
+          "Increment": 25
         }
       },
       "SelectionWeight": 10,
@@ -833,34 +844,34 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 1,
-          "MaxValue": 1,
-          "Increment": 1
+          "MinValue": 20,
+          "MaxValue": 20,
+          "Increment": 10
         },
         "Rare": {
-          "MinValue": 2,
-          "MaxValue": 2,
-          "Increment": 1
+          "MinValue": 40,
+          "MaxValue": 40,
+          "Increment": 10
         },
         "Epic": {
-          "MinValue": 3,
-          "MaxValue": 3,
-          "Increment": 1
+          "MinValue": 60,
+          "MaxValue": 60,
+          "Increment": 10
         },
         "Legendary": {
-          "MinValue": 4,
-          "MaxValue": 4,
-          "Increment": 1
+          "MinValue": 80,
+          "MaxValue": 80,
+          "Increment": 10
         },
         "Mythic": {
-          "MinValue": 5,
-          "MaxValue": 5,
-          "Increment": 1
+          "MinValue": 100,
+          "MaxValue": 100,
+          "Increment": 10
         },
         "Ancient": {
-          "MinValue": 6,
-          "MaxValue": 6,
-          "Increment": 1
+          "MinValue": 120,
+          "MaxValue": 120,
+          "Increment": 10
         }
       },
       "SelectionWeight": 10,
@@ -5521,6 +5532,53 @@
       ]
     },
     {
+      "Type": "HomingMissile",
+      "DisplayText": "$mod_epicloot_me_homingmissile_display",
+      "Description": "$mod_epicloot_me_homingmissile_desc",
+      "Requirements": {
+        "AllowedItemTypes": [
+          "OneHandedWeapon",
+          "TwoHandedWeapon"
+        ],
+        "ExcludedItemTypes": [
+          "Staff"
+        ],
+        "ExcludedSkillTypes": [
+          "Pickaxes"
+        ],
+        "MustHaveEffectTypes": [
+          "Throwable"
+        ],
+        "AllowedRarities": [
+          "Legendary",
+          "Mythic",
+          "Ancient"
+        ]
+      },
+      "ValuesPerRarity": {
+        "Magic": { "MinValue": 6, "MaxValue": 8, "Increment": 1 },
+        "Rare": { "MinValue": 8, "MaxValue": 10, "Increment": 1 },
+        "Epic": { "MinValue": 10, "MaxValue": 12, "Increment": 1 },
+        "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 1 },
+        "Mythic": { "MinValue": 15, "MaxValue": 18, "Increment": 1 },
+        "Ancient": { "MinValue": 18, "MaxValue": 20, "Increment": 1 }
+      },
+      "SelectionWeight": 5,
+      "Prefixes": [
+        "$mod_epicloot_me_homingmissile_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_homingmissile_suffix1"
+      ],
+      "Config": {
+        "AcquireAngle": 25,
+        "LoseRangeMultiplier": 1.6,
+        "StartTurnRate": 45,
+        "FullTurnRate": 1440,
+        "RampSeconds": 3
+      }
+    },
+    {
       "Type": "Apportation",
       "DisplayText": "$mod_epicloot_me_apportation_display",
       "Description": "$mod_epicloot_me_apportation_desc",
@@ -7361,6 +7419,9 @@
           "MaxValue": 100,
           "Increment": 1.5
         }
+      },
+      "Config": {
+        "MaxEitrPercentPerValue": 0.2
       },
       "SelectionWeight": 10,
       "Prefixes": [

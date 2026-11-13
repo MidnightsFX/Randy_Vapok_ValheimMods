@@ -15,13 +15,6 @@ namespace EpicLoot
 
 namespace EpicLoot.MagicItemEffects
 {
-    // EitrInfusion (4-piece Einherjar set bonus, NoRoll). A hotkey pours all of the wearer's eitr into the weapon: every
-    // EitrPerSecond eitr becomes a second of infusion, and MinEitr is needed to start one. While infused, each weapon hit
-    // adds the effect value as a percent of the weapon's highest damage type, as that same type, and natural eitr regen
-    // is held off. Meads, Eitr Weaving parries and Eitr Leech still add eitr, and pressing the key again pours what has
-    // come back into more time. The element is locked on the first press: Lightning, Frost or Burning on the wearer, or
-    // a nearby fire, turns the bonus into that element for the whole infusion. Poison never counts.
-    //
     // The timer and the regen hold run whatever the wearer does; the damage needs the 4-piece, i.e. the set sword in
     // hand. Spellsword's eitr cost is waived while infused (Spellsword checks IsInfused), since the eitr is already
     // spent.
@@ -46,7 +39,6 @@ namespace EpicLoot.MagicItemEffects
             Lightning
         }
 
-        // All tunable in this effect's Config block in magiceffects.json, under these key names.
         public const float DefaultMinEitr = 20f;
         public const float DefaultEitrPerSecond = 4f;
         public const float DefaultMaxSeconds = 0f;      // 0 = no cap
@@ -94,7 +86,6 @@ namespace EpicLoot.MagicItemEffects
         private static bool _iconMissingLogged;
         private static readonly HashSet<string> MissingFxLogged = new HashSet<string>();
 
-        // Tooltip: "{0}% of the weapon's highest damage ... at least {1} Eitr ... a second for every {2} Eitr ..."
         public static void RegisterDisplayValues()
         {
             MagicItem.RegisterDisplayValues(MagicEffectType.EitrInfusion, value => new object[]
@@ -120,8 +111,6 @@ namespace EpicLoot.MagicItemEffects
         public static bool IsInfused => _owner != null && _owner == Player.m_localPlayer && Time.time < _infusedUntil;
 
         public static float SecondsLeft => IsInfused ? _infusedUntil - Time.time : 0f;
-
-        public static Element LockedElement => _element;
 
         private static void SyncOwner(Player player)
         {
@@ -566,7 +555,7 @@ namespace EpicLoot.MagicItemEffects
             se.m_ttl = 0f;      // never expires on its own; IsDone removes it
 
             var startEffects = new List<EffectList.EffectData>();
-            AddEffect(startEffects, "sfx_Potion_eitr_minor", attach: false);
+            AddEffect(startEffects, "sfx_Potion_eitr_minor");
             if (startEffects.Count > 0)
             {
                 se.m_startEffects = new EffectList { m_effectPrefabs = startEffects.ToArray() };
@@ -576,12 +565,12 @@ namespace EpicLoot.MagicItemEffects
             return _indicator;
         }
 
-        private static void AddEffect(List<EffectList.EffectData> effects, string name, bool attach)
+        private static void AddEffect(List<EffectList.EffectData> effects, string name)
         {
             var prefab = FindFxPrefab(name);
             if (prefab != null)
             {
-                effects.Add(new EffectList.EffectData { m_prefab = prefab, m_enabled = true, m_attach = attach });
+                effects.Add(new EffectList.EffectData { m_prefab = prefab, m_enabled = true, m_attach = false });
             }
         }
 

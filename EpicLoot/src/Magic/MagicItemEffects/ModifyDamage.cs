@@ -8,10 +8,8 @@ namespace EpicLoot.MagicItemEffects;
 
 public static class ModifyDamage
 {
-    // Single consolidated patch for ItemDrop.ItemData.GetDamage. It applies the core magic damage
-    // modifiers and then the per-weapon shard modifiers that used to each declare their own GetDamage
-    // postfix. All of them are gated on the local player having the weapon equipped (RunGetDamagePatch),
-    // which also drives the weapon tooltip, so folding them here keeps that gating and ordering explicit.
+    // The one GetDamage patch: the core magic modifiers, then the shard weapon modifiers, all gated on the
+    // local player having the weapon equipped (RunGetDamagePatch), which also drives the weapon tooltip.
     [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetDamage), typeof(int), typeof(float))]
     private class ModifyDamage_ItemData_GetDamage_Patch
     {
@@ -26,9 +24,6 @@ public static class ModifyDamage
         }
     }
 
-    // Per-weapon shard GetDamage modifiers, run after the core modifiers. Each handler keeps its own
-    // effect-specific gate (day/night, adrenaline, weight, etc.); the equipped-local-player gate is
-    // already satisfied by RunGetDamagePatch above.
     private static void ApplyShardWeaponModifiers(ItemDrop.ItemData item, ref HitData.DamageTypes damage)
     {
         IncreaseDamageDuringDaytime.ModifyWeaponDamage(item, ref damage);
@@ -99,7 +94,6 @@ public static class ModifyDamage
         float totalDamage = damages.EpicLootGetTotalDamage();
         Skills.SkillType magicItemskillType = item.m_shared.m_skillType;
 
-        // Add damages first
         damages.m_blunt += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
             player, item, MagicEffectType.AddBluntDamage, 0.01f);
         damages.m_slash += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
@@ -130,8 +124,6 @@ public static class ModifyDamage
 
         // Added damage too, so the multipliers below scale it.
         EitrInfusion.AddInfusedDamage(player, item, ref damages);
-
-        // Then modify
 
         if (MagicEffectsHelper.HasActiveMagicEffectOnWeapon(player, item,
             MagicEffectType.ModifyPhysicalDamage, out float physicalDamageEffectValue, 0.01f))
@@ -164,7 +156,6 @@ public static class ModifyDamage
             modifyAll += Mathf.Lerp(2.0f, 0.5f, player.GetHealthPercentage());
         }
 
-        // Modify all only once
         damages.Modify(modifyAll);
     }
 
