@@ -24,6 +24,7 @@
 * Bad input from another mod through the API no longer causes errors in Epic Loot.
 * Combat, movement, armor, item tooltips, identifying, the merchant and the enchanting table lists do less work every frame.
 * The log is quieter: trader diagnostics and per-patch and per-translation detail are gone.
+* Large piles of magic drops no longer slow the game down, because only the loot beams nearest you are shown.
 * Hildir's tempering panel now shows the right gamepad button on its Temper and Cancel buttons.
 * Unused settings, leftover debug code and old internal methods that other mods relied on have been removed.
 * Epic Loot console commands no longer error when there is no player, and the compendium's adventure page shows its empty message when nothing is active.

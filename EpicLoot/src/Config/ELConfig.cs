@@ -179,6 +179,7 @@ internal class ELConfig {
     public static ConfigEntry<float> TraderPanelPositionY;
     public static ConfigEntry<float> TemperPanelPositionX;
     public static ConfigEntry<float> TemperPanelPositionY;
+    public static ConfigEntry<int> LootBeamLimit;
     public static ConfigEntry<KeyCode> TraderPanelDragKey;
     public static ConfigEntry<bool> ShowQuickConfigButton;
     public static ConfigEntry<bool> ShowAdvancedQuickConfigPages;
@@ -805,6 +806,10 @@ internal class ELConfig {
             "top-right of the trader window) of the EpicLoot tempering panel. Dragging the panel " +
             "in-game (by its corner handle, or anywhere while holding the Trader Panel Drag Key) " +
             "updates this automatically. Default: -155.");
+        LootBeamLimit = BindClient(SectionInterface, "Loot Beam Limit", 100,
+            "How many dropped magic items and enchanting materials show their glow at once; the ones nearest " +
+            "the camera do. Each glow costs a little every frame, so with hundreds of drops on the ground a lower " +
+            "limit keeps the game smooth. 0 shows none.", new AcceptableValueRange<int>(0, 500));
         TraderPanelDragKey = BindClient(SectionInterface, "Trader Panel Drag Key", KeyCode.LeftAlt,
             "Hold this key to drag the adventure trader and tempering panels from anywhere on them, their " +
             "lists and buttons included. Without it the panels stay put, so clicking them never moves " +

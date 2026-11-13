@@ -364,6 +364,7 @@ internal static class QuickConfigBindings {
         FloatSlider("UIAudioVolumeAdjustment", ELConfig.UIAudioVolumeAdjustment, "UI Audio Volume", BindingScope.Client, 0f, 1f, 0.05f);
         IntSlider("TooltipMaxWidth", ELConfig.TooltipMaxWidth, "Tooltip Max Width", BindingScope.Client, 150, 1200);
         IntSlider("TooltipMaxHeight", ELConfig.TooltipMaxHeight, "Tooltip Max Height", BindingScope.Client, 350, 4000);
+        IntSlider("LootBeamLimit", ELConfig.LootBeamLimit, "Loot Beam Limit", BindingScope.Client, 0, 500);
         ShortcutChoice("SocketOverlayShortcut", ELConfig.SocketOverlayShortcut, "Socket Overlay Shortcut", BindingScope.Client,
             "E", "E + LeftControl", "E + LeftAlt", "E + LeftShift");
         FloatSlider("TraderPanelPositionX", ELConfig.TraderPanelPositionX, "Trader Panel X Position", BindingScope.Client, -4000f, 4000f, 1f);
