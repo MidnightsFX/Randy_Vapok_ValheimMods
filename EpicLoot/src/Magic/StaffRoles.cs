@@ -49,13 +49,12 @@ namespace EpicLoot
             return roles;
         }
 
-        // Vanilla sets up a spawn-on-hit projectile without hit data, so it keeps its prefab damage instead of
-        // the weapon's. On a weapon with no damage of its own (the Orb of Ahri's returning orb) that prefab
-        // damage is the weapon's real damage.
+        // Vanilla sets up a spawn-on-hit projectile or Aoe without hit data, so it keeps its prefab damage
+        // instead of the weapon's and never sees the weapon's effects.
         public static bool CarriesOwnDamage(Character owner, HitData hitData, ItemDrop.ItemData item)
         {
             return hitData == null && item?.m_shared != null && owner != null && owner == Player.m_localPlayer &&
-                IsStaff(item) && item.m_shared.m_damages.EpicLootGetTotalDamage() <= 0f;
+                IsStaff(item);
         }
 
         private static HashSet<StaffRole> Classify(ItemDrop.ItemData.SharedData shared)

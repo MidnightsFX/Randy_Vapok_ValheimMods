@@ -22,6 +22,8 @@ public static partial class TerminalManager
         var allItemNames = GetValidMagicItemNames();
 
         LootRoller.CheatEffectCount = effectCount;
+        bool previousDisableGatingState = LootRoller.CheatDisableGating;
+        LootRoller.CheatDisableGating = true;
         try
         {
             for (var i = 0; i < count; i++)
@@ -59,6 +61,7 @@ public static partial class TerminalManager
         finally
         {
             LootRoller.CheatRollingItem = false;
+            LootRoller.CheatDisableGating = previousDisableGatingState;
             LootRoller.CheatEffectCount = -1;
         }
     }
@@ -129,6 +132,8 @@ public static partial class TerminalManager
         Vector3 randomOffset = UnityEngine.Random.insideUnitSphere;
         Vector3 dropPoint = Player.m_localPlayer.transform.position +
             Player.m_localPlayer.transform.forward * 3 + Vector3.up * 1.5f + randomOffset;
+        bool previousDisableGatingState = LootRoller.CheatDisableGating;
+        LootRoller.CheatDisableGating = true;
         LootRoller.CheatRollingItem = true;
         LootRoller.CheatForceMagicEffect = true;
         LootRoller.ForcedMagicEffect = effectArg;
@@ -141,6 +146,7 @@ public static partial class TerminalManager
             LootRoller.CheatForceMagicEffect = false;
             LootRoller.ForcedMagicEffect = string.Empty;
             LootRoller.CheatRollingItem = false;
+            LootRoller.CheatDisableGating = previousDisableGatingState;
         }
     }
 

@@ -37,13 +37,21 @@ public static class ModifyDamage
     [HarmonyPatch(typeof(Aoe), nameof(Aoe.Setup))]
     private class ModifyDamage_Aoe_Setup_Patch
     {
+        // Vanilla spawns each chain jump by cloning the live Aoe, already-scaled damage included. The marker is
+        // cloned with it, so a jump is not scaled again.
         private static void Postfix(Aoe __instance, Character owner, HitData hitData, ItemDrop.ItemData item)
         {
-            if (StaffRoles.CarriesOwnDamage(owner, hitData, item) && RunGetDamagePatch(item))
+            if (StaffRoles.CarriesOwnDamage(owner, hitData, item) && RunGetDamagePatch(item) &&
+                __instance.GetComponent<StaffDamageApplied>() == null)
             {
                 ApplyEquippedWeaponModifiers(item, ref __instance.m_damage);
+                __instance.gameObject.AddComponent<StaffDamageApplied>();
             }
         }
+    }
+
+    private class StaffDamageApplied : MonoBehaviour
+    {
     }
 
     private static void ApplyEquippedWeaponModifiers(ItemDrop.ItemData item, ref HitData.DamageTypes damage)
