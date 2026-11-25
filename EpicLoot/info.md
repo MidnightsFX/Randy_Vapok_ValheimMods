@@ -34,6 +34,7 @@ Listen to the event `MagicItemEffectDefinitions.OnSetupMagicItemEffectDefinition
     * **ExcludedSkillTypes:** This effect may only be rolled on an item that does not use one of these skill types.
     * **AllowedItemNames:** This effect may only be rolled on an item with one of these names. Use the unlocalized shared name, i.e.: `$item_sword_iron`
     * **ExcludedItemNames:** This effect may only be rolled on an item that does not have one of these names.
+    * **AllowedStaffRoles:** On a staff (ElementalMagic or BloodMagic), this effect may only be rolled if the staff fills one of these roles; other items ignore it. Options are: `Damage` (the staff or a projectile it spawns deals damage), `Summon` (its attack summons creatures), `Support` (neither, e.g. Staff of Protection)
     * **CustomFlags:** A set of arbitrary strings for future use.
     * **ExternalRequirements:** Requirement keys registered by external plugins through `API.RegisterMagicEffectRequirement`. Every listed key must be registered and must return true for the effect to roll.
   * **Value Per Rarity:** This effect may only be rolled on items of a rarity included in this table. The value is rolled using a linear distribution between Min and Max and divisible by the Increment.

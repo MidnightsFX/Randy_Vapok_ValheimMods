@@ -100,7 +100,7 @@ namespace EpicLoot.LegendarySystem
         {
             return r.ExcludedItemTypes?.Count > 0 || r.ExcludedSkillTypes?.Count > 0 || r.ExcludedItemNames?.Count > 0 ||
                 r.AllowedRarities?.Count > 0 || r.ExcludedRarities?.Count > 0 ||
-                r.ExternalRequirements?.Count > 0 || r.CustomFlags?.Count > 0 ||
+                r.ExternalRequirements?.Count > 0 || r.CustomFlags?.Count > 0 || r.AllowedStaffRoles?.Count > 0 ||
                 r.ItemHasPhysicalDamage.HasValue || r.ItemHasElementalDamage.HasValue || r.ItemHasChopDamage.HasValue ||
                 r.ItemUsesDurability.HasValue || r.ItemHasNegativeMovementSpeedModifier.HasValue ||
                 r.ItemHasBlockPower.HasValue || r.ItemHasParryPower.HasValue || r.ItemHasNoParryPower.HasValue ||
