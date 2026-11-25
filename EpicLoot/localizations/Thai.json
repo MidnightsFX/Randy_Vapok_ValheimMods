@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "รับการประกาศ!",
   "mod_epicloot_bounties_completemsg": "ประกาศได้รับการชนะ!",
   "mod_epicloot_bounties_locatingmsg": "กำลังค้นหาเป้าหมายของการประกาศ...",
+  "mod_epicloot_gradualunlock_milestone": "อุปกรณ์จาก $1: ปลดล็อกแล้ว $2%",
   "mod_epicloot_bounties_minionname": "ลูกโซ่ $1",
   "mod_epicloot_bounties_noroomtooltip": "ไม่มีที่ในกระเป๋าสำหรับรางวัล",
   "mod_epicloot_bounties_notcompletetooltip": "ยังไม่สมบูรณ์",

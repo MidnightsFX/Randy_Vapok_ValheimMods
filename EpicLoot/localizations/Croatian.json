@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Plijen pronađen!",
   "mod_epicloot_bounties_completemsg": "Plijen poražen!",
   "mod_epicloot_bounties_locatingmsg": "Lociranje mete plijena...",
+  "mod_epicloot_gradualunlock_milestone": "Oprema – $1: otključano $2%",
   "mod_epicloot_bounties_minionname": "$1 Minitauro",
   "mod_epicloot_bounties_noroomtooltip": "Nema mjesta u inventaru za nagradu",
   "mod_epicloot_bounties_notcompletetooltip": "Još nije dovršeno",

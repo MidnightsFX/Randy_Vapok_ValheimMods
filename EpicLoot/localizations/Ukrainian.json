@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Винагорода вибрана!",
   "mod_epicloot_bounties_completemsg": "Місія виконана!",
   "mod_epicloot_bounties_locatingmsg": "Визначення цілі місії...",
+  "mod_epicloot_gradualunlock_milestone": "Спорядження – $1: відкрито $2%",
   "mod_epicloot_bounties_minionname": "$1 Міньйон",
   "mod_epicloot_bounties_noroomtooltip": "Немає місця у інвентарі для винагороди",
   "mod_epicloot_bounties_notcompletetooltip": "Ще не завершено",

@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Награда получена!",
   "mod_epicloot_bounties_completemsg": "Задание выполнено!",
   "mod_epicloot_bounties_locatingmsg": "Сейчас я отмечу, где твоя цель...",
+  "mod_epicloot_gradualunlock_milestone": "Снаряжение – $1: открыто $2%",
   "mod_epicloot_bounties_minionname": "$1 прислужник",
   "mod_epicloot_bounties_noroomtooltip": "В инвентаре нет места для награды",
   "mod_epicloot_bounties_notcompletetooltip": "Еще не завершено",

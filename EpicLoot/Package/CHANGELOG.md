@@ -1,4 +1,6 @@
 **0.16.0**
+* Fylgja's Bond can bind a spirit animal again on the latest Valheim version, instead of failing after the old one was released.
+* A new drop limit option unlocks each biome's gear gradually after its boss falls, dropping it more often the more creatures you kill in that biome.
 * Bounty kills are now checked by the server, so one player can no longer complete or take another player's bounty progress.
 * Bounty and treasure map markers in the world are stored in a safer format, and ones from older versions still load.
 * Item categories no longer lose their fallback categories when Epic Loot adds items from other mods, and files that already lost them are repaired.
@@ -11,7 +13,10 @@
 * Summons keep their summoner's health and damage bonuses whoever's game controls them.
 * Quarry Mark marks from before a death no longer pay out after respawning.
 * A bounty can no longer be bought twice in one period after discovering a new biome, and abandoning a bounty now removes its spawned creatures.
+* The player who bought a treasure map can now always open its chest, even when another player's ward covers it.
 * Frost ice spikes no longer hurt your own tames and summons.
+* The Hexen form's attacks now use and train Elemental Magic instead of Swords.
+* Attacking in Hexen form with Dual Wield installed no longer sits the witch down and breaks her movement, and her spells no longer take the damage of the weapons in your hands.
 * Placed food shows eat or drink again, and dropped items show their current stack size.
 * Pressing Escape on a socket or Brokkr's Gift confirmation no longer closes the inventory too.
 * Config patches that remove a setting now work, and a patch whose path matches nothing is reported in the log.
@@ -25,6 +30,7 @@
 * Combat, movement, armor, item tooltips, identifying, the merchant and the enchanting table lists do less work every frame.
 * The log is quieter: trader diagnostics and per-patch and per-translation detail are gone.
 * Large piles of magic drops no longer slow the game down, because only the loot beams nearest you are shown.
+* Less stutter when your character first appears in a world, because Epic Loot finds the game's fonts much faster.
 * Hildir's tempering panel now shows the right gamepad button on its Temper and Cancel buttons.
 * Unused settings, leftover debug code and old internal methods that other mods relied on have been removed.
 * Epic Loot console commands no longer error when there is no player, and the compendium's adventure page shows its empty message when nothing is active.
@@ -39,7 +45,7 @@
 * Conduit's pool now shows as a status icon on the HUD while it is worn.
 * Eitr Leech no longer counts damage past a target's remaining health.
 * Epic Loot's compendium pages no longer show up blank with Auga, and their tables now fit the page.
-* The enchanting table's Upgrade tab is back with Auga, and its page shows its title again.
+* All of the enchanting table's tabs fit in its window again with Auga, so the Upgrade tab can be reached, and its page shows its title again.
 * The message on the enchanting table's Storage tab no longer runs into the Take All buttons.
 * Items in the quick slots of Equipment and Quick Slots now count as hotbar items at the enchanting table, so they stay out of the sacrifice list when hotbar items are hidden.
 * The enchanting table now pays its costs from its own storage before your inventory and storage mods.
@@ -61,6 +67,7 @@
     * Rock chunks that collapse and logs that break on impact now get the bonus
     * Bonus drops land in stacks where normal drops land, with a floating +X and a sound
     * The balance template sets the percentage: half on Minimal, double on Legendary
+* The optional Epic patches now cover Ancient items and the newer enchantments, unique items and sets, and their unique item values take effect again.
 
 **0.15.6**
 * Works with Auga 1.4.1 and newer

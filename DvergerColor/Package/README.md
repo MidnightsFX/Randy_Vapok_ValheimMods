@@ -12,3 +12,8 @@ Press "[" (left bracket) to narrow the beam and "]" (right bracket) to widen the
 ## Installation:
 Install with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
 Copy the ImprovedDvergerCirclet.dll file in the "files" folder to your BepInEx plugins folder.
+
+<!--
+AI_Assisted_Creation: This assembly was partially or fully created with the assistance of generative AI (Claude Code, using Anthropic's Claude models).
+AI_Model_Vendor: Anthropic
+-->

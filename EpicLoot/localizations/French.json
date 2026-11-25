@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Prime réclamée!",
   "mod_epicloot_bounties_completemsg": "Prime vaincue!",
   "mod_epicloot_bounties_locatingmsg": "Localisation de la cible de prime...",
+  "mod_epicloot_gradualunlock_milestone": "Équipement – $1 : $2 % débloqué",
   "mod_epicloot_bounties_minionname": "$1 Serviteur",
   "mod_epicloot_bounties_noroomtooltip": "Pas de place dans l'inventaire pour la récompense",
   "mod_epicloot_bounties_notcompletetooltip": "Pas encore complet",

@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Bounty Claimed!",
   "mod_epicloot_bounties_completemsg": "Bounty Vanquished!",
   "mod_epicloot_bounties_locatingmsg": "Lokalisera Bounty-mål...",
+  "mod_epicloot_gradualunlock_milestone": "Utrustning från $1: $2 % upplåst",
   "mod_epicloot_bounties_minionname": "$1 Minion",
   "mod_epicloot_bounties_noroomtooltip": "Inget utrymme i inventeringen för belöning",
   "mod_epicloot_bounties_notcompletetooltip": "Inte komplett än",

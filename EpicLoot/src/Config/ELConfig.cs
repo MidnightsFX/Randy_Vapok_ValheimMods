@@ -427,7 +427,14 @@ internal class ELConfig {
             "(Bronze gear will drop once Eikthyr is killed).\n" +
             "PlayerMustKnowRecipe: (local world only) the item can drop if the player can craft it.\n" +
             "PlayerMustHaveCraftedItem: (local world only) the item can drop if the player has already crafted it " +
-            "or otherwise picked it up. If an item type cannot drop, it will downgrade to an item of the same type and " +
+            "or otherwise picked it up.\n" +
+            "CurrentBiomeGradualUnlock: as BossKillUnlocksCurrentBiomeItems, but once the boss is dead a biome's gear " +
+            "drops with a chance that grows with the player's kills in that biome, reaching 100% at the biome's " +
+            "UnlockKills in biomedata.json (Meadows 200 up to Deep North 1200). Kills count for every player who hit " +
+            "the creature, only while this mode is set, and are kept per world. A miss drops the same item type from the biome below. Bosses always " +
+            "drop their own biome's gear, and the merchant only sells biomes at 100%. In multiplayer the kills that " +
+            "count are those of the player whose game rolls the drop, usually the one nearest the creature.\n" +
+            "If an item type cannot drop, it will downgrade to an item of the same type and " +
             "skill that the player has unlocked (i.e. swords will stay swords) according to iteminfo.json.");
         GatedFreebuildMode = BindServer(SectionBalance, "Gated Freebuild Mode", GatedPieceTypeMode.BossKillUnlocksCurrentBiomePieces,
             "Sets whether available pieces for the Freebuild effect are ungated or gated by boss kills.");

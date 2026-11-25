@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "현상금 청구됨!",
   "mod_epicloot_bounties_completemsg": "현상금 격파됨!",
   "mod_epicloot_bounties_locatingmsg": "현상금 대상 탐색 중...",
+  "mod_epicloot_gradualunlock_milestone": "$1 장비: $2% 해금",
   "mod_epicloot_bounties_minionname": "$1 하수인",
   "mod_epicloot_bounties_noroomtooltip": "보상을 위한 인벤토리 공간이 없습니다",
   "mod_epicloot_bounties_notcompletetooltip": "아직 완료되지 않음",

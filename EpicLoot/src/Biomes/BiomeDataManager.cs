@@ -18,6 +18,7 @@ namespace EpicLoot.Biomes
         /// <summary>Position in progression order, 0 first. Not the raw Order value from the file.</summary>
         public int Index;
         public IReadOnlyList<string> BossDefeatedKeys = Array.Empty<string>();
+        public int UnlockKills;
         public string Color = "white";
         public string DisplayName;
         public bool IsVanilla;
@@ -53,6 +54,19 @@ namespace EpicLoot.Biomes
         private static List<BountyBossConfig> _legacyBosses = new List<BountyBossConfig>();
         private static readonly HashSet<string> _warnedUnresolved = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private static bool _legacyNoticeLogged;
+
+        // The shipped UnlockKills, for an on-disk biomedata.json written before the field existed.
+        private static readonly Dictionary<Heightmap.Biome, int> DefaultUnlockKills = new Dictionary<Heightmap.Biome, int>
+        {
+            { Heightmap.Biome.Meadows, 200 },
+            { Heightmap.Biome.BlackForest, 400 },
+            { Heightmap.Biome.Swamp, 600 },
+            { Heightmap.Biome.Mountain, 700 },
+            { Heightmap.Biome.Plains, 800 },
+            { Heightmap.Biome.Mistlands, 900 },
+            { Heightmap.Biome.AshLands, 1000 },
+            { Heightmap.Biome.DeepNorth, 1200 },
+        };
 
         public static void Initialize(BiomeDataConfig config)
         {
@@ -298,6 +312,11 @@ namespace EpicLoot.Biomes
             return _byBiome.TryGetValue(biome, out BiomeDefinition def) ? def.BossDefeatedKeys : Array.Empty<string>();
         }
 
+        public static int GetUnlockKills(Heightmap.Biome biome)
+        {
+            return _byBiome.TryGetValue(biome, out BiomeDefinition def) ? def.UnlockKills : 0;
+        }
+
         /// <summary>True when every boss key of the biome is set. A biome with no keys is never gated.</summary>
         public static bool HasAllBossKeys(Heightmap.Biome biome)
         {
@@ -437,6 +456,7 @@ namespace EpicLoot.Biomes
                     Biome = biome,
                     BossDefeatedKeys = string.IsNullOrWhiteSpace(legacy.BossDefeatedKey) ?
                         new List<string>() : new List<string> { legacy.BossDefeatedKey.Trim() },
+                    UnlockKills = ResolveUnlockKills(null, biome),
                     IsVanilla = isVanilla,
                     IsLegacy = true
                 };
@@ -536,12 +556,23 @@ namespace EpicLoot.Biomes
                 Name = name,
                 Biome = biome,
                 BossDefeatedKeys = keys,
+                UnlockKills = ResolveUnlockKills(entry.UnlockKills, biome),
                 Color = ParseColor(entry.Color, name),
                 DisplayName = string.IsNullOrWhiteSpace(entry.DisplayName) ? null : entry.DisplayName.Trim(),
                 IsVanilla = isVanilla
             };
             order = entry.Order ?? int.MaxValue;
             return true;
+        }
+
+        private static int ResolveUnlockKills(int? configured, Heightmap.Biome biome)
+        {
+            if (configured.HasValue)
+            {
+                return Math.Max(0, configured.Value);
+            }
+
+            return DefaultUnlockKills.TryGetValue(biome, out int kills) ? kills : 0;
         }
 
         private static bool TryParseVanillaName(string value, out Heightmap.Biome biome)

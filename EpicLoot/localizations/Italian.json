@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Taglia Richiesta!",
   "mod_epicloot_bounties_completemsg": "Taglia Sconfitta!",
   "mod_epicloot_bounties_locatingmsg": "Localizzazione del Bersaglio della Taglia...",
+  "mod_epicloot_gradualunlock_milestone": "Equipaggiamento – $1: $2% sbloccato",
   "mod_epicloot_bounties_minionname": "$1 Minion",
   "mod_epicloot_bounties_noroomtooltip": "Nessuno spazio nell'inventario per la ricompensa",
   "mod_epicloot_bounties_notcompletetooltip": "Non ancora completato",

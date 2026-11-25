@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "報酬を獲得しました！",
   "mod_epicloot_bounties_completemsg": "懸賞金を打ち負かしました！",
   "mod_epicloot_bounties_locatingmsg": "懸賞金のターゲットを特定中...",
+  "mod_epicloot_gradualunlock_milestone": "$1の装備：$2%解放",
   "mod_epicloot_bounties_minionname": "$1 ミニオン",
   "mod_epicloot_bounties_noroomtooltip": "報酬のためのインベントリにスペースがありません",
   "mod_epicloot_bounties_notcompletetooltip": "まだ完了していません",

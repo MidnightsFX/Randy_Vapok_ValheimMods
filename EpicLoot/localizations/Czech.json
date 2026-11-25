@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Odmena nárokována!",
   "mod_epicloot_bounties_completemsg": "Odmena poražena!",
   "mod_epicloot_bounties_locatingmsg": "Vyhledávání cíle odměny...",
+  "mod_epicloot_gradualunlock_milestone": "Vybavení – $1: odemčeno $2 %",
   "mod_epicloot_bounties_minionname": "$1 Minion",
   "mod_epicloot_bounties_noroomtooltip": "Bez místa v inventáři pro odměnu",
   "mod_epicloot_bounties_notcompletetooltip": "Ještě není dokončeno",

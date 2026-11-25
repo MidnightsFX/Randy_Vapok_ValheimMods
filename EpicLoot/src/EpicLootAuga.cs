@@ -348,13 +348,6 @@ namespace EpicLoot
             var oldRt = (RectTransform)button.transform;
             var rt = (RectTransform)newButton.transform;
             CopyPlacement(oldRt, rt);
-            // The tab bar fits every tab only at the size the window's prefab gives them. The Auga tab prefab is
-            // taller, which pushes the last tab off the bottom of the window. The label stretches with the tab and
-            // auto-sizes its font to fit, so it keeps its own height or it shrinks until it cannot be read.
-            var labelRt = (RectTransform)newButton.transform.Find("Text");
-            var labelHeight = labelRt.rect.height;
-            rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, oldRt.rect.height);
-            labelRt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, labelHeight);
 
             newButton.transform.Find("Text").GetComponent<TMP_Text>().text = button.transform.Find("Text").GetComponent<TMP_Text>().text;
             newButton.transform.Find("Image").GetComponent<Image>().sprite = button.transform.Find("Image").GetComponent<Image>().sprite;

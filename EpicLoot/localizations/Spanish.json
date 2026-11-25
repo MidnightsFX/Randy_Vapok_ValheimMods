@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "¡Recompensa reclamada!",
   "mod_epicloot_bounties_completemsg": "¡Recompensa aniquilada!",
   "mod_epicloot_bounties_locatingmsg": "Localizando objetivo de recompensa...",
+  "mod_epicloot_gradualunlock_milestone": "Equipo – $1: $2 % desbloqueado",
   "mod_epicloot_bounties_minionname": "$1 Minion",
   "mod_epicloot_bounties_noroomtooltip": "No hay espacio en el inventario para la recompensa",
   "mod_epicloot_bounties_notcompletetooltip": "Todavía no completado",

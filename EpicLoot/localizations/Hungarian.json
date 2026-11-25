@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Jutalom igényelve!",
   "mod_epicloot_bounties_completemsg": "Jutalom elnyerve!",
   "mod_epicloot_bounties_locatingmsg": "Jutalom célpont lokalizálása...",
+  "mod_epicloot_gradualunlock_milestone": "Felszerelés – $1: $2% feloldva",
   "mod_epicloot_bounties_minionname": "$1 Lény",
   "mod_epicloot_bounties_noroomtooltip": "Nincs hely a jutalomnak a táskádban",
   "mod_epicloot_bounties_notcompletetooltip": "Még nincs teljesítve",

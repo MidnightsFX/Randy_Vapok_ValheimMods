@@ -41,6 +41,11 @@ The [`EpicLootAPI`](../EpicLootAPI/EpicLootAPI/README.md) shim gives you typed w
 your plugin with ILRepack.
 
 ### AI Policy
+<!--
+AI_Assisted_Creation: This assembly was partially or fully created with the assistance of generative AI (Claude Code, using Anthropic's Claude models).
+AI_Model_Vendor: Anthropic
+-->
+
 We accept AI-assisted changes. All code, assets etc. Must be reviewed and tested before it will be merged or released.
 
 ## Credits

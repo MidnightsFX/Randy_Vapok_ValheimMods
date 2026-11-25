@@ -3,9 +3,11 @@ using EpicLoot.Crafting;
 using EpicLoot.LegendarySystem;
 using EpicLoot.MagicItemEffects;
 using EpicLoot.ShardStones;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -14,6 +16,15 @@ namespace EpicLoot;
 
 public static class ItemDataExtensions
 {
+    private static readonly MethodInfo MemberwiseCloner = AccessTools.DeclaredMethod(typeof(object), "MemberwiseClone");
+
+    // A shallow copy, for an item that needs shared fields of its own without touching its prefab's.
+    // SharedData has no copy method of its own and MemberwiseClone is protected.
+    internal static ItemDrop.ItemData.SharedData Clone(this ItemDrop.ItemData.SharedData sharedData)
+    {
+        return (ItemDrop.ItemData.SharedData)MemberwiseCloner.Invoke(sharedData, null);
+    }
+
     public static bool IsMagic(this ItemDrop.ItemData itemData)
     {
         return MagicItemData.Get(itemData) != null;

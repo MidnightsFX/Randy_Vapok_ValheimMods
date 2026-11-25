@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "इनाम प्राप्त किया गया!",
   "mod_epicloot_bounties_completemsg": "इनाम जीता गया!",
   "mod_epicloot_bounties_locatingmsg": "इनाम का निशाना ढूंढ़ रहा है...",
+  "mod_epicloot_gradualunlock_milestone": "$1 उपकरण: $2% अनलॉक",
   "mod_epicloot_bounties_minionname": "$1 अनुयायी",
   "mod_epicloot_bounties_noroomtooltip": "इनाम के लिए इन्वेंटरी में जगह नहीं",
   "mod_epicloot_bounties_notcompletetooltip": "अभी पूर्ण नहीं हुआ है",

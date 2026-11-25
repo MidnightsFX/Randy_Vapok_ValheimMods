@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "賞金已領取！",
   "mod_epicloot_bounties_completemsg": "賞金已消滅！",
   "mod_epicloot_bounties_locatingmsg": "正在定位賞金目標...",
+  "mod_epicloot_gradualunlock_milestone": "$1裝備：已解鎖 $2%",
   "mod_epicloot_bounties_minionname": "$1 僕從",
   "mod_epicloot_bounties_noroomtooltip": "庫存中沒有空間可獲得獎勵",
   "mod_epicloot_bounties_notcompletetooltip": "尚未完成",

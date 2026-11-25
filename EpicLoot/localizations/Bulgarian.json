@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Наградата е взета!",
   "mod_epicloot_bounties_completemsg": "Баунти справено!",
   "mod_epicloot_bounties_locatingmsg": "Намиране на целта за баунти...",
+  "mod_epicloot_gradualunlock_milestone": "Екипировка – $1: отключени $2%",
   "mod_epicloot_bounties_minionname": "$1 Миньон",
   "mod_epicloot_bounties_noroomtooltip": "Няма място в инвентара за наградата",
   "mod_epicloot_bounties_notcompletetooltip": "Все още не е завършено",

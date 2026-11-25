@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Đã nhận tiền thưởng truy nã!",
   "mod_epicloot_bounties_completemsg": "Đã tiêu diệt mục tiêu truy nã!",
   "mod_epicloot_bounties_locatingmsg": "Đang định vị mục tiêu truy nã...",
+  "mod_epicloot_gradualunlock_milestone": "Trang bị $1: đã mở khóa $2%",
   "mod_epicloot_bounties_minionname": "Tay sai của $1",
   "mod_epicloot_bounties_noroomtooltip": "Không còn chỗ trong túi đồ để nhận thưởng",
   "mod_epicloot_bounties_notcompletetooltip": "Chưa hoàn thành",

@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "赏金已领取！",
   "mod_epicloot_bounties_completemsg": "赏金已消灭！",
   "mod_epicloot_bounties_locatingmsg": "定位赏金目标...",
+  "mod_epicloot_gradualunlock_milestone": "$1装备：已解锁 $2%",
   "mod_epicloot_bounties_minionname": "$1 手下",
   "mod_epicloot_bounties_noroomtooltip": "背包里没有足够空间领取奖励",
   "mod_epicloot_bounties_notcompletetooltip": "尚未完成",

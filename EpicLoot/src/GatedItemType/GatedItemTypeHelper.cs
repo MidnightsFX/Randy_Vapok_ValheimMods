@@ -22,7 +22,8 @@ namespace EpicLoot.GatedItemType
         BossKillUnlocksCurrentBiomeItems,
         BossKillUnlocksNextBiomeItems,
         PlayerMustKnowRecipe,
-        PlayerMustHaveCraftedItem
+        PlayerMustHaveCraftedItem,
+        CurrentBiomeGradualUnlock
     }
 
     public class GatedItemDetails
@@ -368,6 +369,12 @@ namespace EpicLoot.GatedItemType
 
         public static string GetGatedItemNameFromItemOrType(string itemOrType, GatedItemTypeMode gatedMode)
         {
+            using GradualUnlock.Scope roll = GradualUnlock.RollFor(gatedMode);
+            return ResolveGatedItemName(itemOrType, gatedMode);
+        }
+
+        private static string ResolveGatedItemName(string itemOrType, GatedItemTypeMode gatedMode)
+        {
             if (string.IsNullOrEmpty(itemOrType))
             {
                 return null;
@@ -587,6 +594,9 @@ namespace EpicLoot.GatedItemType
                 case GatedItemTypeMode.BossKillUnlocksCurrentBiomeItems:
                 case GatedItemTypeMode.BossKillUnlocksNextBiomeItems:
                     return CheckGateBossKill(itemName, mode);
+                case GatedItemTypeMode.CurrentBiomeGradualUnlock:
+                    AllItemsWithDetails.TryGetValue(itemName, out GatedItemDetails gradualDetails);
+                    return CheckGateBossKill(itemName, mode) || !GradualUnlock.IsItemTierOpen(gradualDetails);
                 default:
                     return true; // Fallback, item will be gated- we could not gate it properly
             }
@@ -683,6 +693,7 @@ namespace EpicLoot.GatedItemType
                 return false;
             }
 
+            using GradualUnlock.Scope possible = GradualUnlock.PossibleFor(mode);
             return mode == GatedItemTypeMode.Unlimited || !CheckIfItemNeedsGate(mode, itemName, out _);
         }
 

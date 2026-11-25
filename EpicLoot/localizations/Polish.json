@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Zdobycie nagrody!",
   "mod_epicloot_bounties_completemsg": "Pokonano nagrodę!",
   "mod_epicloot_bounties_locatingmsg": "Lokalizowanie celu nagrody...",
+  "mod_epicloot_gradualunlock_milestone": "Ekwipunek – $1: odblokowano $2%",
   "mod_epicloot_bounties_minionname": "$1 sługa",
   "mod_epicloot_bounties_noroomtooltip": "Brak miejsca w inwentarzu na nagrodę",
   "mod_epicloot_bounties_notcompletetooltip": "Niezakończone jeszcze",

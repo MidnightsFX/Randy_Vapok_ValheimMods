@@ -118,6 +118,7 @@ public static partial class TerminalManager
             _ = new Command("bounties", "print available bounties: [interval]", PrintAvailableBounties);
             _ = new Command("biomes", "print biome progression order, boss keys and status", PrintBiomes);
             _ = new Command("knowbiome", "mark a biome as discovered by the local player: [biome]", KnowBiome, GetKnowBiomeOptions);
+            _ = new Command("biomekills", "gradual unlock kill counts: [set <biome> <kills> | roll <item|type> [count]]", BiomeKills, GetBiomeKillsOptions);
             _ = new Command("playerbounties", "print player available bounties", PrintPlayerAvailableBounties);
             _ = new Command("gotomerchant", "teleport to merchant: [merchant]", GoToMerchant, GetGoToOptions, alternates: "gotom");
             _ = new Command("globalkeys", "print active global keys", PrintGlobalKeys);

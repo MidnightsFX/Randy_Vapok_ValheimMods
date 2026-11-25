@@ -37,6 +37,7 @@ namespace EpicLoot;
 [BepInDependency("org.bepinex.plugins.steadyregeneration", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency(ItemFavoriteFrameworkAPI.ItemFavorites.PluginGuid, BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency(Compatibility.BowsBeforeHoesCompat.PluginGuid, BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency(Compatibility.DualWieldCompat.PluginGuid, BepInDependency.DependencyFlags.SoftDependency)]
 public sealed class EpicLoot : BaseUnityPlugin {
     public const string PluginId = "randyknapp.mods.epicloot";
     public const string DisplayName = "Epic Loot";
@@ -134,6 +135,7 @@ public sealed class EpicLoot : BaseUnityPlugin {
 
         Compatibility.ItemFavorites.RegisterLootIntegration();
         Compatibility.BowsBeforeHoesCompat.Initialize(_harmony);
+        Compatibility.DualWieldCompat.Initialize(_harmony);
 
         MagicItemEffects.Shards.PoisonAdrenalinePulse.Create();
         MagicItemEffects.Shards.StormFuryPulse.Create();

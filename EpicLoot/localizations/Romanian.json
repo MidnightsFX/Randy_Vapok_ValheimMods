@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Recompensă revendicată!",
   "mod_epicloot_bounties_completemsg": "Recompensă învinsă!",
   "mod_epicloot_bounties_locatingmsg": "Localizare țintă recompensă...",
+  "mod_epicloot_gradualunlock_milestone": "Echipament – $1: $2% deblocat",
   "mod_epicloot_bounties_minionname": "$1 Minion",
   "mod_epicloot_bounties_noroomtooltip": "Nu este loc în inventar pentru recompensă",
   "mod_epicloot_bounties_notcompletetooltip": "Încă nu este complet",

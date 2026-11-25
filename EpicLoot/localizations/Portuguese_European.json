@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Recompensa Reivindicada!",
   "mod_epicloot_bounties_completemsg": "Recompensa Aniquilada!",
   "mod_epicloot_bounties_locatingmsg": "Localizando Alvo da Recompensa...",
+  "mod_epicloot_gradualunlock_milestone": "Equipamento – $1: $2% desbloqueado",
   "mod_epicloot_bounties_minionname": "$1 Servo",
   "mod_epicloot_bounties_noroomtooltip": "Sem espaço no inventário para recompensa",
   "mod_epicloot_bounties_notcompletetooltip": "Ainda não completo",

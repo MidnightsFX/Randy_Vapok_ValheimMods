@@ -1120,6 +1120,7 @@
     "mod_epicloot_bounties_claimedmsg": "Bounty Claimed!",
     "mod_epicloot_bounties_completemsg": "Bounty Vanquished!",
     "mod_epicloot_bounties_locatingmsg": "Locating Bounty Target...",
+    "mod_epicloot_gradualunlock_milestone": "$1 gear: $2% unlocked",
     "mod_epicloot_bounties_minionname": "$1 Minion",
     "mod_epicloot_bounties_noroomtooltip": "No room in inventory for reward",
     "mod_epicloot_bounties_notcompletetooltip": "Not complete yet",

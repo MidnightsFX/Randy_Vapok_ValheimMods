@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "სამომავლო გადაიტანე!",
   "mod_epicloot_bounties_completemsg": "სამომავლო გადაიტანე!",
   "mod_epicloot_bounties_locatingmsg": "სამომავლოს ადგილის გელოვა...",
+  "mod_epicloot_gradualunlock_milestone": "აღჭურვილობა – $1: განბლოკილია $2%",
   "mod_epicloot_bounties_minionname": "$1 მინიონი",
   "mod_epicloot_bounties_noroomtooltip": "მიღებისთვის საფრთხე არ არის ინვენტარში",
   "mod_epicloot_bounties_notcompletetooltip": "ჯერ არ არის დასრულებული",

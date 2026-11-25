@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Kopfgeld beansprucht!",
   "mod_epicloot_bounties_completemsg": "Kopfgeld vernichtet!",
   "mod_epicloot_bounties_locatingmsg": "Suche nach Kopfgeldziel...",
+  "mod_epicloot_gradualunlock_milestone": "Ausrüstung – $1: $2 % freigeschaltet",
   "mod_epicloot_bounties_minionname": "$1 Diener",
   "mod_epicloot_bounties_noroomtooltip": "Kein Platz im Inventar für Belohnung",
   "mod_epicloot_bounties_notcompletetooltip": "Noch nicht abgeschlossen",

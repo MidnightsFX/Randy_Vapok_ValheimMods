@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Κυνήγι Ανταμοιβής!",
   "mod_epicloot_bounties_completemsg": "Κυνήγι Καταστράφηκε!",
   "mod_epicloot_bounties_locatingmsg": "Εντοπισμός Στόχου Ανταμοιβής...",
+  "mod_epicloot_gradualunlock_milestone": "Εξοπλισμός – $1: ξεκλειδώθηκε $2%",
   "mod_epicloot_bounties_minionname": "$1 Υπαξιώματος",
   "mod_epicloot_bounties_noroomtooltip": "Χωρίς χώρο στο απόθεμα για ανταμοιβή",
   "mod_epicloot_bounties_notcompletetooltip": "Δεν έχει ολοκληρωθεί ακόμα",

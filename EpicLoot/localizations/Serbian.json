@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Nagrada Prikupljena!",
   "mod_epicloot_bounties_completemsg": "Nagrada Uništena!",
   "mod_epicloot_bounties_locatingmsg": "Lociranje Cilja Nagrade...",
+  "mod_epicloot_gradualunlock_milestone": "Oprema – $1: otključano $2%",
   "mod_epicloot_bounties_minionname": "$1 Slug",
   "mod_epicloot_bounties_noroomtooltip": "Nema mesta u inventaru za nagradu",
   "mod_epicloot_bounties_notcompletetooltip": "Još nije završeno",

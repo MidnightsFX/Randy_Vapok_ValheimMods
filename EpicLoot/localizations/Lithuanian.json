@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Išieškota užkarda!",
   "mod_epicloot_bounties_completemsg": "Užkarda nugalėta!",
   "mod_epicloot_bounties_locatingmsg": "Ieškant užkardos taikinio...",
+  "mod_epicloot_gradualunlock_milestone": "Įranga – $1: atrakinta $2 %",
   "mod_epicloot_bounties_minionname": "$1 Pajėga",
   "mod_epicloot_bounties_noroomtooltip": "Nėra vietos inventoriuje už atlygą",
   "mod_epicloot_bounties_notcompletetooltip": "Dar nebaigta",

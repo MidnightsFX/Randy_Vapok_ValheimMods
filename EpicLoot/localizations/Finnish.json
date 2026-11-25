@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Palkinto lunastettu!",
   "mod_epicloot_bounties_completemsg": "Palkkio voitettu!",
   "mod_epicloot_bounties_locatingmsg": "Etsitään palkkion kohdetta...",
+  "mod_epicloot_gradualunlock_milestone": "Varusteet – $1: $2 % avattu",
   "mod_epicloot_bounties_minionname": "$1 Apuri",
   "mod_epicloot_bounties_noroomtooltip": "Ei tilaa inventaariossa palkinnolle",
   "mod_epicloot_bounties_notcompletetooltip": "Ei vielä valmis",

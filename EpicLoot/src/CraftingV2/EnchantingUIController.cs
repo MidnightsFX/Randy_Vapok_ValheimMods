@@ -840,6 +840,12 @@ namespace EpicLoot.CraftingV2
                 {
                     return true;
                 }
+
+                if (mode == GatedItemTypeMode.CurrentBiomeGradualUnlock &&
+                    GradualUnlock.GetUnlockChance(GradualUnlock.GetTier(biome)) < 1f)
+                {
+                    return true;
+                }
             }
 
             return false;

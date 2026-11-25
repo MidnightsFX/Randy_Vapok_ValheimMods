@@ -499,7 +499,7 @@ Full-set look: tinted armor.
 | 2 | Eitr Regen +20% |
 | 3 | Interconnected: the skill of the weapon in your hands gains 20 / 25 / 30% of its partner skill's level (see [Interconnected](#interconnected)). |
 | 3 | Attack Eitr Use -20% |
-| 4 | Hexen: You wear the body of a Jotun Witch for as long as you wear the set. Your attacks become her magic blast and lightning bolt, and block or sneak with jump blinks you the way you move. Jump to take flight, holding jump or crouch to rise or sink. Flight drains 3 / 2.5 / 2 Eitr per second, needs 10 to take off, and when your Eitr runs dry you sink to the ground. |
+| 4 | Hexen: You wear the body of a Jotun Witch for as long as you wear the set. Your attacks become her magic blast and lightning bolt, and block or sneak with jump blinks you the way you move; all of them use and train Elemental Magic. Jump to take flight, holding jump or crouch to rise or sink. Flight drains 3 / 2.5 / 2 Eitr per second, needs 10 to take off, and when your Eitr runs dry you sink to the ground. |
 
 ## Jotunn's Blood
 

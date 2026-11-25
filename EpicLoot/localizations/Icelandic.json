@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Bounty krækta!",
   "mod_epicloot_bounties_completemsg": "Bounty sigraður!",
   "mod_epicloot_bounties_locatingmsg": "Að finna Bounty markmið...",
+  "mod_epicloot_gradualunlock_milestone": "Búnaður – $1: $2% opnað",
   "mod_epicloot_bounties_minionname": "$1 Minion",
   "mod_epicloot_bounties_noroomtooltip": "Engin pláss í geymslu fyrir laun",
   "mod_epicloot_bounties_notcompletetooltip": "Ekki lokið ennþá",

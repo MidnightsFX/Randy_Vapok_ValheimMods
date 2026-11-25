@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Odmena získaná!",
   "mod_epicloot_bounties_completemsg": "Odmena premožená!",
   "mod_epicloot_bounties_locatingmsg": "Vyhľadávanie cieľa odmeny...",
+  "mod_epicloot_gradualunlock_milestone": "Výstroj – $1: odomknuté $2 %",
   "mod_epicloot_bounties_minionname": "$1 Služobník",
   "mod_epicloot_bounties_noroomtooltip": "Žiadne miesto v inventári na odmenu",
   "mod_epicloot_bounties_notcompletetooltip": "Zatiaľ nie je dokončené",

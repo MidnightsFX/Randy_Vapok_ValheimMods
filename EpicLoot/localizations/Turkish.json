@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Ödül Alındı!",
   "mod_epicloot_bounties_completemsg": "Ödül Kazanıldı!",
   "mod_epicloot_bounties_locatingmsg": "Ödül Hedefi Bulunuyor...",
+  "mod_epicloot_gradualunlock_milestone": "$1 ekipmanı: %$2 açıldı",
   "mod_epicloot_bounties_minionname": "$1 Uşak",
   "mod_epicloot_bounties_noroomtooltip": "Ödül için envanterde yer yok",
   "mod_epicloot_bounties_notcompletetooltip": "Henüz tamamlanmadı",

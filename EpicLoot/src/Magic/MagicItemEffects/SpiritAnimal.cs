@@ -1460,31 +1460,29 @@ namespace EpicLoot.MagicItemEffects
                 return record;
             }
 
-            // A dry run of every generic path on empty data, so the first bind or summon of a session does not compile
-            // the seven list types' copies, writers and readers.
+            // Runs every generic copy, writer and reader once on empty data, so Mono compiles them for the seven value
+            // types at load rather than on the first bind or summon.
             internal static void Warmup()
             {
                 var record = new SpiritRecord();
                 var skip = Blocked;
-                Copy(new List<KeyValuePair<int, float>>(), record._floats, skip);
-                Copy(new List<KeyValuePair<int, Vector3>>(), record._vec3s, skip);
-                Copy(new List<KeyValuePair<int, Quaternion>>(), record._quats, skip);
-                Copy(new List<KeyValuePair<int, int>>(), record._ints, skip);
-                Copy(new List<KeyValuePair<int, long>>(), record._longs, skip);
-                Copy(new List<KeyValuePair<int, string>>(), record._strings, skip);
-                Copy(new List<KeyValuePair<int, byte[]>>(), record._bytes, skip);
+                Copy(default(FastIterableKeyValues<int, float>), record._floats, skip);
+                Copy(default(FastIterableKeyValues<int, Vector3>), record._vec3s, skip);
+                Copy(default(FastIterableKeyValues<int, Quaternion>), record._quats, skip);
+                Copy(default(FastIterableKeyValues<int, int>), record._ints, skip);
+                Copy(default(FastIterableKeyValues<int, long>), record._longs, skip);
+                Copy(default(FastIterableKeyValues<int, string>), record._strings, skip);
+                Copy(default(FastIterableKeyValues<int, byte[]>), record._bytes, skip);
                 TryParse(record.Serialize(), out _);
             }
 
-            private static void Copy<T>(List<KeyValuePair<int, T>> source, List<KeyValuePair<int, T>> target, HashSet<int> skip)
+            // The source is a view over ZDOExtraData's own arrays with a fixed count, and the next write or removal on
+            // that ZDO shifts or replaces them, so it is copied out before anything else runs.
+            private static void Copy<T>(FastIterableKeyValues<int, T> source, List<KeyValuePair<int, T>> target, HashSet<int> skip)
             {
-                if (source == null)
+                for (int i = 0; i < source.Count; i++)
                 {
-                    return;
-                }
-
-                foreach (var pair in source)
-                {
+                    var pair = source[i];
                     if (!skip.Contains(pair.Key))
                     {
                         target.Add(pair);

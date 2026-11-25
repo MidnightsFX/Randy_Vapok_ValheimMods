@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Beloning Geclaimd!",
   "mod_epicloot_bounties_completemsg": "Beloning Verslagen!",
   "mod_epicloot_bounties_locatingmsg": "Op Zoek naar Doelwit...",
+  "mod_epicloot_gradualunlock_milestone": "Uitrusting uit $1: $2% ontgrendeld",
   "mod_epicloot_bounties_minionname": "$1 Handlanger",
   "mod_epicloot_bounties_noroomtooltip": "Geen ruimte in inventaris voor beloning",
   "mod_epicloot_bounties_notcompletetooltip": "Nog niet voltooid",

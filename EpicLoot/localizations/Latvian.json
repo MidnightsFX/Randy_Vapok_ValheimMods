@@ -1049,6 +1049,7 @@
   "mod_epicloot_bounties_claimedmsg": "Nodokļu prasīts!",
   "mod_epicloot_bounties_completemsg": "Nodokļi uzvarēti!",
   "mod_epicloot_bounties_locatingmsg": "Nodokļu mērķa atrašana...",
+  "mod_epicloot_gradualunlock_milestone": "Ekipējums – $1: atbloķēti $2%",
   "mod_epicloot_bounties_minionname": "$1 Pavēlnieks",
   "mod_epicloot_bounties_noroomtooltip": "Nav vietas inventārā par atlīdzību",
   "mod_epicloot_bounties_notcompletetooltip": "Vēl nav pabeigts",

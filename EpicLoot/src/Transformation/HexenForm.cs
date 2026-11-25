@@ -252,6 +252,9 @@ public class HexenForm : MonoBehaviour
         ActiveForms.Remove(_player);
     }
 
+    // Her attack items leave m_skillType at its Swords default, which vanilla reads for skill gain, damage
+    // scaling, skill buffs and kill stats. ItemData.Clone shares m_shared with the prefab, so the copy gets
+    // its own before being retagged, and the witch herself is left untouched.
     private static ItemDrop.ItemData WeaponFrom(Humanoid witch, string prefabName)
     {
         foreach (var go in witch.m_defaultItems)
@@ -260,6 +263,8 @@ public class HexenForm : MonoBehaviour
             var drop = go.GetComponent<ItemDrop>();
             if (drop == null) return null;
             var item = drop.m_itemData.Clone();
+            item.m_shared = item.m_shared.Clone();
+            item.m_shared.m_skillType = Skills.SkillType.ElementalMagic;
             item.m_dropPrefab = go;
             return item;
         }

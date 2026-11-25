@@ -1,6 +1,5 @@
 using HarmonyLib;
 using JetBrains.Annotations;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace EpicLoot.MagicItemEffects
@@ -16,9 +15,6 @@ namespace EpicLoot.MagicItemEffects
     // lazily constructed yet.
     public static class Indestructible
     {
-        private static readonly MethodInfo memberwiseCloner = AccessTools.DeclaredMethod(typeof(object), "MemberwiseClone");
-        private static ItemDrop.ItemData.SharedData Clone(this ItemDrop.ItemData.SharedData sharedData) => (ItemDrop.ItemData.SharedData)memberwiseCloner.Invoke(sharedData, new object[]{});
-
         // The SharedData an item had before we swapped in our private copy. Restoring this exact
         // instance keeps the revert cheap and exact -- no prefab lookup, and no chance of writing
         // m_useDurability into the ObjectDB prefab's shared instance.
