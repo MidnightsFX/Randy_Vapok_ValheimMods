@@ -86,7 +86,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
         }
 
         // Postfix handler invoked by SharedCharacterDamagePatch (on-hit reaction).
-        public static void OnDamageDealt(Character __instance, HitData hit, Character attacker) {
+        public static void OnDamageDealt(Character __instance, HitData hit, Character attacker, float healthBeforeHit) {
             var player = Player.m_localPlayer;
             if (hit == null || player == null || hit.m_damage.m_lightning <= 0f || attacker != player
                 || __instance == player || __instance.IsPlayer() || __instance.IsTamed()) {
@@ -99,7 +99,8 @@ namespace EpicLoot.MagicItemEffects.Shards {
             }
 
             // Never more than the player has room for, so a full eitr bar leaves the pool alone.
-            var wanted = hit.m_damage.m_lightning * value / GetDamagePerTrigger();
+            var wanted = hit.m_damage.m_lightning * MagicEffectsHelper.GetCountedDamageFraction(hit, healthBeforeHit)
+                * value / GetDamagePerTrigger();
             var paid = Mathf.Min(wanted, _pool, player.GetMaxEitr() - player.GetEitr());
             if (paid > 0f) {
                 _pool -= paid;

@@ -87,7 +87,10 @@ internal static class BalancePreset {
     internal static bool ApplyOverhaulRewrite(bool backupFirst, out string message) {
         message = "";
         string template = ELConfig.BalanceConfigurationType.Value;
-        string files = string.Join(" and ", ELConfig.BalanceTemplateFiles);
+        string[] names = ELConfig.BalanceTemplateFiles;
+        string files = names.Length > 1
+            ? string.Join(", ", names, 0, names.Length - 1) + " and " + names[names.Length - 1]
+            : names[0];
         try {
             string backupDir = null;
             foreach (string file in ELConfig.BalanceTemplateFiles) {

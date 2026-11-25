@@ -1746,8 +1746,7 @@ namespace EpicLoot
                 {
                     EpicLoot.Log($"RollEffect: {effectDef.Type} {itemRarity} value={value} " +
                         $"(min={valuesDef.MinValue} max={valuesDef.MaxValue})");
-                    var incrementCount = (int)((valuesDef.MaxValue - valuesDef.MinValue) / valuesDef.Increment);
-                    value = valuesDef.MinValue + (Random.Range(0, incrementCount + 1) * valuesDef.Increment);
+                    value = valuesDef.MinValue + (Random.Range(0, valuesDef.GetStepCount() + 1) * valuesDef.Increment);
                     value *= powerlevelMod;
                 }
             }

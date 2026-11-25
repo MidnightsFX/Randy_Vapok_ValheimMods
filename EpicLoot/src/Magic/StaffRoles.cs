@@ -1,4 +1,7 @@
 using EpicLoot.General;
+using HarmonyLib;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,6 +20,16 @@ namespace EpicLoot
 
         private static readonly Dictionary<ItemDrop.ItemData.SharedData, HashSet<StaffRole>> Cache =
             new Dictionary<ItemDrop.ItemData.SharedData, HashSet<StaffRole>>();
+
+        // Each ObjectDB brings its own SharedData objects, so the last world's entries would never be hit again.
+        [HarmonyPatch(typeof(ObjectDB), nameof(ObjectDB.Awake))]
+        private static class ObjectDB_Awake_Patch
+        {
+            private static void Prefix()
+            {
+                Cache.Clear();
+            }
+        }
 
         public static bool IsStaff(ItemDrop.ItemData item)
         {
@@ -107,6 +120,64 @@ namespace EpicLoot
                     Inspect(projectile.m_spawnOnHit, true, projectile.m_projectilesInheritHitData, depth + 1, visited, roles);
                     break;
             }
+        }
+    }
+
+    // Reads a role list leniently: an unknown name is skipped with a warning, so one typo in a config file or an API
+    // definition drops that role instead of failing the whole file or effect. Writing is left to Json.NET.
+    public class StaffRoleListConverter : JsonConverter
+    {
+        public override bool CanWrite => false;
+
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(List<StaffRole>);
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+            JsonSerializer serializer)
+        {
+            var roles = new List<StaffRole>();
+            if (reader.TokenType == JsonToken.Null)
+            {
+                return roles;
+            }
+
+            if (reader.TokenType != JsonToken.StartArray)
+            {
+                throw new JsonSerializationException($"AllowedStaffRoles must be a list, not {reader.TokenType}.");
+            }
+
+            while (reader.Read() && reader.TokenType != JsonToken.EndArray)
+            {
+                // Server-to-client sync writes the roles as numbers, config files and the API as names.
+                object value = reader.Value;
+                bool known = reader.TokenType switch
+                {
+                    JsonToken.Integer => Enum.IsDefined(typeof(StaffRole), Convert.ToInt32(value)),
+                    JsonToken.String => Enum.TryParse((string)value, true, out StaffRole parsed) &&
+                        Enum.IsDefined(typeof(StaffRole), parsed),
+                    _ => false
+                };
+                if (known)
+                {
+                    roles.Add(reader.TokenType == JsonToken.Integer
+                        ? (StaffRole)Convert.ToInt32(value)
+                        : (StaffRole)Enum.Parse(typeof(StaffRole), (string)value, true));
+                    continue;
+                }
+
+                EpicLoot.LogWarningForce($"Unknown staff role '{value ?? reader.TokenType}' in AllowedStaffRoles was " +
+                    $"ignored. Roles are {string.Join(", ", Enum.GetNames(typeof(StaffRole)))}.");
+                reader.Skip();
+            }
+
+            return roles;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            throw new NotSupportedException();
         }
     }
 }

@@ -63,7 +63,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
         }
 
         // Postfix handler invoked by SharedCharacterDamagePatch (on-hit reaction, attacker side).
-        public static void OnDamageDealt(HitData hit, Character attacker) {
+        public static void OnDamageDealt(HitData hit, Character attacker, float healthBeforeHit) {
             if (!(attacker is Player player) || player != Player.m_localPlayer) {
                 return;
             }
@@ -73,7 +73,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
                 return;
             }
 
-            var heal = hit.m_damage.EpicLootGetTotalDamage() * fraction;
+            var heal = MagicEffectsHelper.GetCountedDamage(hit, healthBeforeHit) * fraction;
             if (heal > 0f) {
                 player.Heal(heal);
             }

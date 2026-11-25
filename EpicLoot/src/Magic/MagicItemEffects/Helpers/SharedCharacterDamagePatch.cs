@@ -148,15 +148,15 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             // patch and would otherwise clear the stake before it could be refunded.
             if (strike) {
                 Wager.OnDamageDealt(__instance, hit);
-                AddLifeSteal.CheckAndDoLifeSteal(hit, attacker);
-                BloodDrinker.OnDamageDealt(hit, attacker);
+                AddLifeSteal.CheckAndDoLifeSteal(hit, attacker, healthBeforeHit);
+                BloodDrinker.OnDamageDealt(hit, attacker, healthBeforeHit);
                 AddEitrLeech.OnDamageDealt(hit, attacker, healthBeforeHit);
                 ChainLightning.OnDamageDealt(__instance, hit, attacker);
                 StrikeCausesLightning.OnDamageDealt(__instance, hit, attacker);
                 ApplySlow_Character_Damage_Patch.OnDamageDealt(__instance, hit, attacker);
                 Paralyze.OnDamaged(__instance, hit, attacker);
                 StaggerOnDamageTaken_Character_Damage_Patch.OnDamageDealt(__instance, hit, attacker);
-                HealthGainPerXDamageDone.OnDamageDealt(hit, attacker);
+                HealthGainPerXDamageDone.OnDamageDealt(hit, attacker, healthBeforeHit);
                 LifeGainOnHit.OnDamageDealt(hit, attacker);
                 QuarryMark.OnDamageDealt(__instance, hit, attacker);
             }
@@ -166,7 +166,7 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers {
             StaminaOnKill.OnDamageDealt(__instance, hit, attacker);
             LifeAfterKill.OnDamageDealt(__instance, hit, attacker);
             KillsReduceNextBloodCost.OnDamageDealt(__instance, hit, attacker);
-            Conduit.OnDamageDealt(__instance, hit, attacker);
+            Conduit.OnDamageDealt(__instance, hit, attacker, healthBeforeHit);
             if (strike) {
                 EikthyrShockingCharge.OnDamageDealt(__instance, hit, attacker);
                 MeteorSummoner.OnDamageDealt(__instance, hit, attacker);

@@ -23,8 +23,8 @@ applies to any socket. Effect power scales by rarity (Magic → Rare → Epic �
 
 | Shard | Melee Wpn | Ranged Wpn | Magic Wpn | Shield | Head | Chest | Legs | Shoulders | Trinket | Utility |
 |---|---|---|---|---|---|---|---|---|---|---|
-| **DarkRed** (Berserk) |  IncreaseMeleeSkills | IncreaseRangedSkills | AddBluntDamage | BloodBaseBlock | HeadHunter | Bloodrage | BloodDrinker | ReduceArmorIncreaseDamage | AdrenalineCharge | OffSetAttack |
-| **DarkGreen** (Poison) | AddPoisonDamage | AddPoisonDamage | AddPoisonDamage | PhysToPoisonOnBlock | AddPoisonResistancePercentage | PhysToPoison | AddBlockingSkill | PoisonToTrueDamage | GainAdrenalineWhenApplyingPoison | IncreaseAllPoisonDamageDone |
+| **DarkRed** (Berserk) |  IncreaseMeleeSkills | IncreaseRangedSkills | AddSpiritDamage | BloodBaseBlock | HeadHunter | Bloodrage | BloodDrinker | ReduceArmorIncreaseDamage | AdrenalineCharge | OffSetAttack |
+| **DarkGreen** (Poison) | AddPoisonDamage | AddPoisonDamage | AddSpiritDamage | PhysToPoisonOnBlock | AddPoisonResistancePercentage | PhysToPoison | AddBlockingSkill | PoisonToTrueDamage | GainAdrenalineWhenApplyingPoison | IncreaseAllPoisonDamageDone |
 | **DarkBlue** (Frost) | AddFrostDamage | AddFrostDamage | AddFrostDamage | PhysToFrostOnBlock | AddFrostResistancePercentage | PhysToFrost | AddElementalMagicSkill | IcyWeight | AdrenalineFrostWave | Warmth |
 | **DarkPurple** (Blood) | ModifyAttackHealthUse | ModifyAttackHealthUse | ModifyAttackHealthUse | BloodStaggerBlock | KillsReduceNextBloodCost | ReflectDamage | BloodMagicLevelIncreasesHealthRegen | GainEitrWhenSacrificingHealth | GainAdrenalineWhenSacrificingHealth | AddBloodMagicSkill |
 | **Golden** (Luck) | ChanceDoubleDamage | ChanceDoubleDamage | ChanceDoubleDamage | LuckyBlock | Inspiration | LuckyLoot | LuckWhileFishing | LuckyCraft | Luck | Riches |
@@ -214,7 +214,7 @@ unique — no effect is shared by two shards.
 |---|---|---|---|---|
 | `IncreaseMeleeSkills` | DarkRed | Melee Wpn | +{0} Melee Skills | +{0} to all melee weapon skills. |
 | `IncreaseRangedSkills` | DarkRed | Ranged Wpn | +{0} Ranged Skills | +{0} to all ranged weapon skills. |
-| `AddBluntDamage` | DarkRed | Magic Wpn | Blunt Damage +{0:0.#}% | Add **X**% of the total unenchanted damage of this weapon as blunt damage to attacks made by the magic weapon. |
+| `AddSpiritDamage` | DarkRed | Magic Wpn | Imbue Spirit Damage {0:0.#}% | Add spirit damage equal to **X**% of this weapon's fire, frost, lightning and poison damage, including what other imbues add. |
 | `BloodBaseBlock` | DarkRed | Shield | Raising your guard costs 5% of max HP. Adds {0} to your base block | Damages self for 5% of max HP as true damage each time you raise your guard. This is charged once per block, not per blocked hit. Adds {0} to your base block. |
 | `HeadHunter` | DarkRed | Head | Headhunter +{0} | Increases chance to drop trophies by +**X**%. |
 | `Bloodrage` | DarkRed | Chest | Bloodrage: +{0}% Damage per Stack (max {1}) | Taking damage sends you into a rage: +{0}% damage on every attack per stack, stacking up to {1} times over 10 seconds. Each hit you take refreshes the duration. |
@@ -222,7 +222,8 @@ unique — no effect is shared by two shards.
 | `ReduceArmorIncreaseDamage` | DarkRed | Shoulders | -{0}% Armor, +{0}% Damage | Reduces your armor by {0}% but increases weapon damage by {0}%. |
 | `AdrenalineCharge` | DarkRed | Trinket | -{0}% Forsaken Cooldown at Full Adrenaline | When your adrenaline fills, reduce the remaining cooldown on your Forsaken Power by {0}%. |
 | `OffSetAttack` | DarkRed | Utility | OffSet Attack +{0}% | Your third attack in an attack string provides stagger immunity and damage reduction if timed against an enemy melee attack. |
-| `AddPoisonDamage` | DarkGreen | Melee Wpn, Ranged Wpn, Magic Wpn | Imbue Poison Damage {0:0.#}% | Add **X**% of the total unenchanted damage of this weapon as poison damage to attacks made by the magic weapon |
+| `AddPoisonDamage` | DarkGreen | Melee Wpn, Ranged Wpn | Imbue Poison Damage {0:0.#}% | Add poison damage equal to **X**% of this weapon's unenchanted physical damage, counting pierce three times, slash twice and blunt once. Elemental damage does not count. |
+| `AddSpiritDamage` | DarkGreen | Magic Wpn | Imbue Spirit Damage {0:0.#}% | Add spirit damage equal to **X**% of this weapon's fire, frost, lightning and poison damage, including what other imbues add. |
 | `PhysToPoisonOnBlock` | DarkGreen | Shield | Convert {0}% Incoming Physical to Poison on block | Move {0}% of incoming physical damage to poison before resistances on block. |
 | `AddPoisonResistancePercentage` | DarkGreen | Head | Poison Resistance {0:0.#}% | The player reduces all poison damage taken by +**X**%. This effect stacks additively with other damage reduction effects equipped by the player. |
 | `PhysToPoison` | DarkGreen | Chest | Convert {0}% Incoming Physical to Poison | Move {0}% of incoming physical damage to poison before resistances. |
@@ -259,7 +260,7 @@ unique — no effect is shared by two shards.
 
 | Effect | Shard | Slot(s) | Tooltip | What it does |
 |---|---|---|---|---|
-| `AddLightningDamage` | LightBlue | Melee Wpn, Ranged Wpn, Magic Wpn | Imbue Lightning Damage {0:0.#}% | Add **X**% of the total unenchanted damage of this weapon as lightning damage to attacks made by the magic weapon. |
+| `AddLightningDamage` | LightBlue | Melee Wpn, Ranged Wpn, Magic Wpn | Imbue Lightning Damage {0:0.#}% | Add lightning damage to attacks made by the magic weapon, on average **X**% of the total unenchanted damage of this weapon. Each hit rolls anywhere from none to twice that. |
 | `PhysToLightningOnBlock` | LightBlue | Shield | Convert {0}% Incoming Physical to Lightning on block | Move {0}% of incoming physical damage to lightning before resistances on block. |
 | `AddLightningResistancePercentage` | LightBlue | Head | Lightning Resistance {0:0.#}% | The player reduces all lightning damage taken by +**X**%. This effect stacks additively with other damage reduction effects equipped by the player. |
 | `PhysToLightning` | LightBlue | Chest | Convert {0}% Incoming Physical to Lightning | Move {0}% of incoming physical damage to lightning before resistances. |

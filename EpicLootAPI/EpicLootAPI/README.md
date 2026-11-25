@@ -281,6 +281,9 @@ private static void TeleportInstant(this Player player, Vector3 position, Quater
 
 ```
 
+On a staff, `AllowedStaffRoles` limits an effect to staffs that deal damage, summon creatures or do neither (support);
+other items ignore it: `Definition.Requirements.AllowedStaffRoles.Add(StaffRole.Damage);`
+
 ### Example Unique Item
 Add a custom unique item, with its own specific enchantments, on a specific item type. 
 

@@ -389,7 +389,7 @@ namespace EpicLoot.MagicItemEffects
         internal static void PlayIgnite(Element element, Vector3 position)
         {
             string name = IgniteSfx[(int)element];
-            GameObject prefab = name != null ? FindFxPrefab(name) : null;
+            GameObject prefab = name != null ? FindFxPrefab(name, localCopy: true) : null;
             if (prefab != null)
             {
                 LocalFx.Spawn(prefab, position, Quaternion.identity);
@@ -409,7 +409,7 @@ namespace EpicLoot.MagicItemEffects
             {
                 if (name != null)
                 {
-                    LocalFx.Prewarm(FindFxPrefab(name), scaled: false);
+                    LocalFx.Prewarm(FindFxPrefab(name, localCopy: true), scaled: false);
                 }
             }
         }
@@ -583,9 +583,12 @@ namespace EpicLoot.MagicItemEffects
             }
         }
 
-        private static GameObject FindFxPrefab(string name)
+        // The lightning ignite sound has no ZNetView and lives only in the lightning weapons' effect lists, so ZNetScene
+        // never has it. A local copy can come from anywhere; networked fx must be in ZNetScene.
+        private static GameObject FindFxPrefab(string name, bool localCopy = false)
         {
-            var prefab = ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(name) : null;
+            var prefab = localCopy ? WeaponAuraKit.FindPrefab(name) :
+                ZNetScene.instance != null ? ZNetScene.instance.GetPrefab(name) : null;
             if (prefab == null && MissingFxLogged.Add(name))
             {
                 EpicLoot.LogWarning($"[EitrInfusion] could not find the '{name}' prefab; playing without it.");

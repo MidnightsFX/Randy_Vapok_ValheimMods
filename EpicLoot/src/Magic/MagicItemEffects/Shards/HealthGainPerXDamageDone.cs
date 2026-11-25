@@ -29,7 +29,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
         private static float _accumulatedDamage;
 
         // Postfix handler invoked by SharedCharacterDamagePatch (on-hit reaction).
-        public static void OnDamageDealt(HitData hit, Character attacker) {
+        public static void OnDamageDealt(HitData hit, Character attacker, float healthBeforeHit) {
             if (!(attacker is Player player) || player != Player.m_localPlayer) {
                 return;
             }
@@ -47,7 +47,7 @@ namespace EpicLoot.MagicItemEffects.Shards {
             }
 
             var damagePerTrigger = GetDamagePerTrigger();
-            _accumulatedDamage += hit.m_damage.EpicLootGetTotalDamage();
+            _accumulatedDamage += MagicEffectsHelper.GetCountedDamage(hit, healthBeforeHit);
             if (_accumulatedDamage < damagePerTrigger) {
                 return;
             }

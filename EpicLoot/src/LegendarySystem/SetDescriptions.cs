@@ -102,6 +102,7 @@ namespace EpicLoot.LegendarySystem
                 r.AllowedRarities?.Count > 0 || r.ExcludedRarities?.Count > 0 ||
                 r.ExternalRequirements?.Count > 0 || r.CustomFlags?.Count > 0 || r.AllowedStaffRoles?.Count > 0 ||
                 r.ItemHasPhysicalDamage.HasValue || r.ItemHasElementalDamage.HasValue || r.ItemHasChopDamage.HasValue ||
+                r.ItemHasBluntDamage.HasValue || r.ItemHasSlashDamage.HasValue || r.ItemHasPierceDamage.HasValue ||
                 r.ItemUsesDurability.HasValue || r.ItemHasNegativeMovementSpeedModifier.HasValue ||
                 r.ItemHasBlockPower.HasValue || r.ItemHasParryPower.HasValue || r.ItemHasNoParryPower.HasValue ||
                 r.ItemHasArmor.HasValue || r.ItemHasBackstabBonus.HasValue || r.ItemUsesStaminaOnAttack.HasValue ||

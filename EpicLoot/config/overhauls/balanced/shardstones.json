@@ -123,12 +123,12 @@
                 "Shoulders": {
                     "EffectType": "BulkUp",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6,
-                        "Ancient": 7
+                        "Magic": 3,
+                        "Rare": 6,
+                        "Epic": 10,
+                        "Legendary": 15,
+                        "Mythic": 20,
+                        "Ancient": 25
                     }
                 }
             }
@@ -225,10 +225,10 @@
                     "EffectType": "UseAdrenalineAsStamina",
                     "ValuesPerRarity": {
                         "Magic": 20,
-                        "Rare": 40,
-                        "Epic": 60,
-                        "Legendary": 80,
-                        "Mythic": 100,
+                        "Rare": 35,
+                        "Epic": 50,
+                        "Legendary": 65,
+                        "Mythic": 80,
                         "Ancient": 100
                     }
                 },
@@ -343,11 +343,11 @@
                     "EffectType": "ModifyEitrRegen",
                     "ValuesPerRarity": {
                         "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6,
-                        "Ancient": 7
+                        "Rare": 4,
+                        "Epic": 6,
+                        "Legendary": 8,
+                        "Mythic": 10,
+                        "Ancient": 12
                     }
                 },
                 "Trinket": {
@@ -629,10 +629,10 @@
                     "EffectType": "PerfectDodgeGivesSpeed",
                     "ValuesPerRarity": {
                         "Magic": 20,
-                        "Rare": 40,
-                        "Epic": 60,
-                        "Legendary": 80,
-                        "Mythic": 100,
+                        "Rare": 35,
+                        "Epic": 50,
+                        "Legendary": 65,
+                        "Mythic": 80,
                         "Ancient": 100
                     },
                     "Config": {
@@ -1031,23 +1031,23 @@
                 "MeleeWeapon": {
                     "EffectType": "EitrLeech",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 2,
-                        "Epic": 3,
-                        "Legendary": 4,
-                        "Mythic": 5,
-                        "Ancient": 6
+                        "Magic": 0.5,
+                        "Rare": 1,
+                        "Epic": 1.5,
+                        "Legendary": 2,
+                        "Mythic": 2.5,
+                        "Ancient": 3.5
                     }
                 },
                 "RangedWeapon": {
                     "EffectType": "EitrLeech",
                     "ValuesPerRarity": {
-                        "Magic": 1,
-                        "Rare": 2,
-                        "Epic": 3,
-                        "Legendary": 4,
-                        "Mythic": 5,
-                        "Ancient": 6
+                        "Magic": 0.5,
+                        "Rare": 1,
+                        "Epic": 1.5,
+                        "Legendary": 2,
+                        "Mythic": 2.5,
+                        "Ancient": 3.5
                     }
                 },
                 "MagicWeapon": {
@@ -1075,12 +1075,12 @@
                 "Head": {
                     "EffectType": "DartingThoughts",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 3,
-                        "Epic": 4,
-                        "Legendary": 5,
-                        "Mythic": 6,
-                        "Ancient": 7
+                        "Magic": 5,
+                        "Rare": 10,
+                        "Epic": 15,
+                        "Legendary": 20,
+                        "Mythic": 25,
+                        "Ancient": 30
                     }
                 },
                 "Chest": {
@@ -1300,7 +1300,7 @@
                     }
                 },
                 "MagicWeapon": {
-                    "EffectType": "AddBluntDamage",
+                    "EffectType": "AddSpiritDamage",
                     "ValuesPerRarity": {
                         "Magic": 2,
                         "Rare": 3,
@@ -1431,7 +1431,7 @@
                     }
                 },
                 "MagicWeapon": {
-                    "EffectType": "AddPoisonDamage",
+                    "EffectType": "AddSpiritDamage",
                     "ValuesPerRarity": {
                         "Magic": 2,
                         "Rare": 3,
@@ -2151,11 +2151,11 @@
                     "EffectType": "Comfortable",
                     "ValuesPerRarity": {
                         "Magic": 1,
-                        "Rare": 2,
-                        "Epic": 3,
-                        "Legendary": 4,
-                        "Mythic": 5,
-                        "Ancient": 6
+                        "Rare": 1,
+                        "Epic": 2,
+                        "Legendary": 2,
+                        "Mythic": 3,
+                        "Ancient": 4
                     }
                 },
                 "Legs": {
@@ -2198,10 +2198,10 @@
                     "EffectType": "RestingHealthRegen",
                     "ValuesPerRarity": {
                         "Magic": 20,
-                        "Rare": 40,
-                        "Epic": 60,
-                        "Legendary": 80,
-                        "Mythic": 100,
+                        "Rare": 35,
+                        "Epic": 50,
+                        "Legendary": 65,
+                        "Mythic": 80,
                         "Ancient": 100
                     },
                     "Config": {
@@ -2317,12 +2317,12 @@
                 "Utility": {
                     "EffectType": "AddCarryWeight",
                     "ValuesPerRarity": {
-                        "Magic": 2,
-                        "Rare": 4,
-                        "Epic": 6,
-                        "Legendary": 8,
-                        "Mythic": 10,
-                        "Ancient": 12
+                        "Magic": 10,
+                        "Rare": 15,
+                        "Epic": 25,
+                        "Legendary": 35,
+                        "Mythic": 45,
+                        "Ancient": 55
                     }
                 },
                 "Shoulders": {

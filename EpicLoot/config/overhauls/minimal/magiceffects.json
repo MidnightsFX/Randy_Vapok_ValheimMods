@@ -66,8 +66,7 @@
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
-          "Bows",
-          "Crossbows"
+          "Bows"
         ],
         "ExcludedItemNames": [
           "$item_graplinghook"
@@ -167,7 +166,6 @@
         "AllowedStaffRoles": [
           "Damage"
         ],
-        "NoRoll": true,
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -175,20 +173,6 @@
           "Bow",
           "Torch",
           "Staff"
-        ],
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
         ],
         "ExcludedItemNames": [
           "$item_graplinghook"
@@ -233,20 +217,6 @@
       "DisplayText": "$mod_epicloot_me_modifyphysicaldamage_display",
       "Description": "$mod_epicloot_me_modifyphysicaldamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -317,20 +287,6 @@
       "DisplayText": "$mod_epicloot_me_modifyelementaldamage_display",
       "Description": "$mod_epicloot_me_modifyelementaldamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -429,7 +385,7 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 15,
+          "MinValue": 5,
           "MaxValue": 30,
           "Increment": 5
         },
@@ -501,13 +457,13 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 40,
-          "MaxValue": 60,
+          "MinValue": 20,
+          "MaxValue": 35,
           "Increment": 5
         },
         "Rare": {
-          "MinValue": 60,
-          "MaxValue": 80,
+          "MinValue": 25,
+          "MaxValue": 45,
           "Increment": 5
         }
       },
@@ -525,7 +481,6 @@
       "DisplayText": "$mod_epicloot_me_removespeedpenalty_display",
       "Description": "$mod_epicloot_me_removespeedpenalty_desc",
       "Requirements": {
-        "NoRoll": true,
         "ExclusiveEffectTypes": [
           "ModifyMovementSpeed"
         ],
@@ -543,7 +498,10 @@
           "Shoulder",
           "Staff"
         ],
-        "ItemHasNegativeMovementSpeedModifier": true
+        "ItemHasNegativeMovementSpeedModifier": true,
+        "AllowedRarities": [
+          "Ancient"
+        ]
       },
       "SelectionWeight": 2,
       "Prefixes": [
@@ -842,7 +800,6 @@
       "DisplayText": "$mod_epicloot_me_increaseminingdrop_display",
       "Description": "$mod_epicloot_me_increaseminingdrop_desc",
       "Requirements": {
-        "NoRoll": true,
         "AllowedSkillTypes": [
           "Pickaxes"
         ],
@@ -888,7 +845,6 @@
       "DisplayText": "$mod_epicloot_me_increasetreedrop_display",
       "Description": "$mod_epicloot_me_increasetreedrop_desc",
       "Requirements": {
-        "NoRoll": true,
         "AllowedSkillTypes": [
           "Axes"
         ],
@@ -1029,7 +985,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 5,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_increaseheatresistance_prefix1"
       ],
@@ -1182,7 +1138,7 @@
       "ValuesPerRarity": {
         "Magic": {
           "MinValue": 1,
-          "MaxValue": 5,
+          "MaxValue": 3,
           "Increment": 1
         },
         "Rare": {
@@ -1211,7 +1167,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 5,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_decreaseforsakencooldown_prefix1"
       ],
@@ -1367,7 +1323,7 @@
         },
         "Legendary": {
           "MinValue": 6,
-          "MaxValue": 18,
+          "MaxValue": 14,
           "Increment": 1
         },
         "Mythic": {
@@ -1409,37 +1365,37 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 0.5,
+          "MinValue": 0.1,
           "MaxValue": 1,
           "Increment": 0.1
         },
         "Rare": {
-          "MinValue": 1,
-          "MaxValue": 3,
+          "MinValue": 0.3,
+          "MaxValue": 2.7,
           "Increment": 0.1
         },
         "Epic": {
-          "MinValue": 1.5,
-          "MaxValue": 4.5,
+          "MinValue": 0.5,
+          "MaxValue": 4,
           "Increment": 0.1
         },
         "Legendary": {
-          "MinValue": 3,
-          "MaxValue": 6,
+          "MinValue": 0.7,
+          "MaxValue": 5.4,
           "Increment": 0.1
         },
         "Mythic": {
-          "MinValue": 4.5,
+          "MinValue": 1.3,
           "MaxValue": 7.5,
           "Increment": 0.1
         },
         "Ancient": {
-          "MinValue": 6,
+          "MinValue": 1.9,
           "MaxValue": 9,
           "Increment": 0.1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 1,
       "Prefixes": [
         "$mod_epicloot_me_addhealthregen_prefix1"
       ],
@@ -1468,7 +1424,7 @@
       "ValuesPerRarity": {
         "Magic": {
           "MinValue": 1,
-          "MaxValue": 5,
+          "MaxValue": 3.5,
           "Increment": 0.5
         },
         "Rare": {
@@ -1547,15 +1503,15 @@
           "MinValue": 18,
           "MaxValue": 25,
           "Increment": 1
-        },
-        "SelectionWeight": 10,
-        "Prefixes": [
-          "$mod_epicloot_me_ammoconservation_prefix1"
-        ],
-        "Suffixes": [
-          "$mod_epicloot_me_ammoconservation_suffix1"
-        ]
-      }
+        }
+      },
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_ammoconservation_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_ammoconservation_suffix1"
+      ]
     },
     {
       "Type": "InstantMead",
@@ -1574,15 +1530,13 @@
           "Ancient"
         ]
       },
-      "ValuesPerRarity": {
-        "SelectionWeight": 10,
-        "Prefixes": [
-          "$mod_epicloot_me_instantmead_prefix1"
-        ],
-        "Suffixes": [
-          "$mod_epicloot_me_instantmead_suffix1"
-        ]
-      }
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_instantmead_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_instantmead_suffix1"
+      ]
     },
     {
       "Type": "AutoMead",
@@ -1601,15 +1555,13 @@
           "Ancient"
         ]
       },
-      "ValuesPerRarity": {
-        "SelectionWeight": 10,
-        "Prefixes": [
-          "$mod_epicloot_me_automead_prefix1"
-        ],
-        "Suffixes": [
-          "$mod_epicloot_me_automead_suffix1"
-        ]
-      }
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_automead_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_automead_suffix1"
+      ]
     },
     {
       "Type": "ModifyNoise",
@@ -1629,8 +1581,8 @@
           "Increment": 1
         },
         "Rare": {
-          "MinValue": 8,
-          "MaxValue": 15,
+          "MinValue": 5,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Epic": {
@@ -1644,13 +1596,13 @@
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 30,
-          "MaxValue": 40,
+          "MinValue": 18,
+          "MaxValue": 36,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 45,
-          "MaxValue": 55,
+          "MinValue": 22,
+          "MaxValue": 45,
           "Increment": 1
         }
       },
@@ -1824,32 +1776,32 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 2,
-          "MaxValue": 5,
+          "MinValue": 1,
+          "MaxValue": 4,
           "Increment": 1
         },
         "Rare": {
-          "MinValue": 5,
+          "MinValue": 2,
           "MaxValue": 7,
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 7,
+          "MinValue": 5,
           "MaxValue": 10,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 10,
+          "MinValue": 7,
           "MaxValue": 13,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 13,
+          "MinValue": 9,
           "MaxValue": 16,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 16,
+          "MinValue": 10,
           "MaxValue": 19,
           "Increment": 1
         }
@@ -1942,8 +1894,8 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 5,
-          "MaxValue": 10,
+          "MinValue": 2,
+          "MaxValue": 5,
           "Increment": 1
         },
         "Rare": {
@@ -1985,20 +1937,6 @@
       "DisplayText": "$mod_epicloot_me_addbluntdamage_display",
       "Description": "$mod_epicloot_me_addbluntdamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -2014,7 +1952,8 @@
         "ExcludedItemNames": [
           "$item_fishingrod",
           "$item_graplinghook"
-        ]
+        ],
+        "ItemHasBluntDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -2061,20 +2000,6 @@
       "DisplayText": "$mod_epicloot_me_addslashingdamage_display",
       "Description": "$mod_epicloot_me_addslashingdamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -2090,7 +2015,8 @@
         "ExcludedItemNames": [
           "$item_fishingrod",
           "$item_graplinghook"
-        ]
+        ],
+        "ItemHasSlashDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -2139,20 +2065,6 @@
       "DisplayText": "$mod_epicloot_me_addpiercingdamage_display",
       "Description": "$mod_epicloot_me_addpiercingdamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -2165,7 +2077,8 @@
         "ExcludedItemNames": [
           "$item_fishingrod",
           "$item_graplinghook"
-        ]
+        ],
+        "ItemHasPierceDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -2217,18 +2130,7 @@
           "Damage"
         ],
         "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
+          "AddFrostDamage"
         ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
@@ -2295,18 +2197,7 @@
           "Damage"
         ],
         "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
+          "AddFireDamage"
         ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
@@ -2372,20 +2263,6 @@
         "AllowedStaffRoles": [
           "Damage"
         ],
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -2450,20 +2327,6 @@
         "AllowedStaffRoles": [
           "Damage"
         ],
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -2527,20 +2390,6 @@
       "Requirements": {
         "AllowedStaffRoles": [
           "Damage"
-        ],
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
         ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
@@ -2614,6 +2463,12 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddElementalResistancePercentage",
+          "AddFrostResistancePercentage",
+          "AddLightningResistancePercentage",
+          "AddPoisonResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2649,7 +2504,7 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 25
       },
       "SelectionWeight": 10,
       "Prefixes": [
@@ -2675,6 +2530,12 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddElementalResistancePercentage",
+          "AddFireResistancePercentage",
+          "AddLightningResistancePercentage",
+          "AddPoisonResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2710,7 +2571,7 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 25
       },
       "SelectionWeight": 10,
       "Prefixes": [
@@ -2736,6 +2597,12 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddElementalResistancePercentage",
+          "AddFireResistancePercentage",
+          "AddFrostResistancePercentage",
+          "AddPoisonResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2771,7 +2638,7 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 25
       },
       "SelectionWeight": 10,
       "Prefixes": [
@@ -2797,6 +2664,12 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddElementalResistancePercentage",
+          "AddFireResistancePercentage",
+          "AddFrostResistancePercentage",
+          "AddLightningResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2832,7 +2705,7 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 25
       },
       "SelectionWeight": 10,
       "Prefixes": [
@@ -2894,7 +2767,7 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 25
       },
       "SelectionWeight": 10,
       "Prefixes": [
@@ -2920,6 +2793,18 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "AllowedRarities": [
+          "Epic",
+          "Legendary",
+          "Mythic",
+          "Ancient"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddFireResistancePercentage",
+          "AddFrostResistancePercentage",
+          "AddLightningResistancePercentage",
+          "AddPoisonResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2950,9 +2835,9 @@
         }
       },
       "Config": {
-        "MaxResistance": 10
+        "MaxResistance": 25
       },
-      "SelectionWeight": 5,
+      "SelectionWeight": 0.2,
       "Prefixes": [
         "$mod_epicloot_me_addelementalresistancepercentage_prefix1"
       ],
@@ -2976,6 +2861,11 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddPhysicalResistancePercentage",
+          "AddSlashingResistancePercentage",
+          "AddPiercingResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -3011,9 +2901,9 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 25
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_addbluntresistancepercentage_prefix1"
       ],
@@ -3037,6 +2927,11 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddPhysicalResistancePercentage",
+          "AddBluntResistancePercentage",
+          "AddPiercingResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -3072,9 +2967,9 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 25
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_addslashingresistancepercentage_prefix1"
       ],
@@ -3098,6 +2993,11 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddPhysicalResistancePercentage",
+          "AddBluntResistancePercentage",
+          "AddSlashingResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -3133,9 +3033,9 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 25
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_addpiercingresistancepercentage_prefix1"
       ],
@@ -3159,6 +3059,17 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "AllowedRarities": [
+          "Epic",
+          "Legendary",
+          "Mythic",
+          "Ancient"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddBluntResistancePercentage",
+          "AddSlashingResistancePercentage",
+          "AddPiercingResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -3189,9 +3100,9 @@
         }
       },
       "Config": {
-        "MaxResistance": 10
+        "MaxResistance": 25
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.2,
       "Prefixes": [
         "$mod_epicloot_me_addphysicalresistancepercentage_prefix1"
       ],
@@ -3347,17 +3258,17 @@
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 7,
+          "MaxValue": 14,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
+          "MinValue": 9,
           "MaxValue": 18,
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_modifydodgestaminause_prefix1"
       ],
@@ -3396,17 +3307,17 @@
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
+          "MinValue": 4,
           "MaxValue": 12,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
+          "MinValue": 5,
           "MaxValue": 15,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
+          "MinValue": 6,
           "MaxValue": 18,
           "Increment": 1
         }
@@ -3424,7 +3335,13 @@
       "DisplayText": "$mod_epicloot_me_modifyattackeitruse_display",
       "Description": "$mod_epicloot_me_modifyattackeitruse_desc",
       "Requirements": {
-        "ItemUsesEitrOnAttack": true
+        "ItemUsesEitrOnAttack": true,
+        "AllowedRarities": [
+          "Epic",
+          "Legendary",
+          "Mythic",
+          "Ancient"
+        ]
       },
       "ValuesPerRarity": {
         "Rare": {
@@ -3453,7 +3370,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 1,
       "Prefixes": [
         "$mod_epicloot_me_modifyattackeitruse_prefix1"
       ],
@@ -3500,7 +3417,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_modifyattackhealthuse_prefix1"
       ],
@@ -3644,7 +3561,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 5,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_modifydrawstaminause_prefix1"
       ],
@@ -3687,17 +3604,17 @@
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
+          "MinValue": 4,
           "MaxValue": 12,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
+          "MinValue": 5,
           "MaxValue": 15,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
+          "MinValue": 6,
           "MaxValue": 18,
           "Increment": 1
         }
@@ -3715,7 +3632,6 @@
       "DisplayText": "$mod_epicloot_me_indestructible_display",
       "Description": "$mod_epicloot_me_indestructible_desc",
       "Requirements": {
-        "NoRoll" : true,
         "ExclusiveEffectTypes": [
           "ModifyDurability"
         ],
@@ -3737,13 +3653,10 @@
           "$item_fishingrod"
         ],
         "AllowedRarities": [
-          "Epic",
-          "Legendary",
-          "Mythic",
           "Ancient"
         ]
       },
-      "SelectionWeight": 2,
+      "SelectionWeight": 0.2,
       "Prefixes": [
         "$mod_epicloot_me_indestructible_prefix1"
       ],
@@ -3756,18 +3669,12 @@
       "DisplayText": "$mod_epicloot_me_coinhoarder_display",
       "Description": "$mod_epicloot_me_coinhoarder_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "ModifyDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "Helmet",
           "Utility",
           "Trinket"
         ],
         "AllowedRarities": [
-          "Magic",
-          "Rare",
           "Epic",
           "Legendary",
           "Mythic",
@@ -3775,16 +3682,6 @@
         ]
       },
       "ValuesPerRarity": {
-        "Magic": {
-          "MinValue": 0.5,
-          "MaxValue": 1,
-          "Increment": 0.5
-        },
-        "Rare": {
-          "MinValue": 1,
-          "MaxValue": 2,
-          "Increment": 0.5
-        },
         "Epic": {
           "MinValue": 1.5,
           "MaxValue": 3,
@@ -3925,7 +3822,10 @@
           "Bow"
         ],
         "ExcludedSkillTypes": [
-          "Pickaxes"
+          "Pickaxes",
+          "BloodMagic",
+          "Bows",
+          "Crossbows"
         ],
         "AllowedRarities": [
           "Rare",
@@ -3990,7 +3890,10 @@
           "Bow"
         ],
         "ExcludedSkillTypes": [
-          "Pickaxes"
+          "Pickaxes",
+          "BloodMagic",
+          "Bows",
+          "Crossbows"
         ],
         "AllowedRarities": [
           "Rare",
@@ -4052,7 +3955,9 @@
           "Bow"
         ],
         "ExcludedSkillTypes": [
-          "Pickaxes"
+          "Pickaxes",
+          "Bows",
+          "Crossbows"
         ],
         "AllowedRarities": [
           "Rare",
@@ -4065,7 +3970,10 @@
           "$item_fishingrod",
           "$item_graplinghook"
         ],
-        "ItemUsesEitrOnAttack": false
+        "ItemUsesEitrOnAttack": false,
+        "ExclusiveEffectTypes": [
+          "EitrWeave"
+        ]
       },
       "ValuesPerRarity": {
         "Rare": {
@@ -4152,7 +4060,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_modifyattackspeed_prefix1"
       ],
@@ -4194,12 +4102,17 @@
       "DisplayText": "$mod_epicloot_me_waterproof_display",
       "Description": "$mod_epicloot_me_waterproof_desc",
       "Requirements": {
-        "NoRoll": true,
         "AllowedItemTypes": [
           "Shoulder"
+        ],
+        "AllowedRarities": [
+          "Ancient"
+        ],
+        "ExclusiveEffectTypes": [
+          "Warmth"
         ]
       },
-      "SelectionWeight": 5,
+      "SelectionWeight": 0.2,
       "Prefixes": [
         "$mod_epicloot_me_waterproof_prefix1"
       ],
@@ -4212,18 +4125,19 @@
       "DisplayText": "$mod_epicloot_me_warmth_display",
       "Description": "$mod_epicloot_me_warmth_desc",
       "Requirements": {
-        "NoRoll": true,
         "AllowedItemTypes": [
           "Shoulder"
         ],
         "AllowedRarities": [
-          "Epic",
           "Legendary",
           "Mythic",
           "Ancient"
+        ],
+        "ExclusiveEffectTypes": [
+          "Waterproof"
         ]
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.2,
       "Prefixes": [
         "$mod_epicloot_me_warmth_prefix1"
       ],
@@ -4286,18 +4200,14 @@
       "DisplayText": "$mod_epicloot_me_doublejump_display",
       "Description": "$mod_epicloot_me_doublejump_desc",
       "Requirements": {
-        "NoRoll": true,
         "AllowedItemTypes": [
           "Legs"
         ],
         "AllowedRarities": [
-          "Epic",
-          "Legendary",
-          "Mythic",
           "Ancient"
         ]
       },
-      "SelectionWeight": 5,
+      "SelectionWeight": 0.2,
       "Prefixes": [
         "$mod_epicloot_me_doublejump_prefix1"
       ],
@@ -4318,6 +4228,9 @@
         ],
         "ExcludedItemNames": [
           "$item_graplinghook"
+        ],
+        "ExclusiveEffectTypes": [
+          "TripleBowShot"
         ]
       },
       "ValuesPerRarity": {
@@ -4370,6 +4283,9 @@
         ],
         "ExcludedSkillTypes": [
           "Pickaxes"
+        ],
+        "ExclusiveEffectTypes": [
+          "TripleBowShot"
         ]
       },
       "ValuesPerRarity": {
@@ -4404,7 +4320,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_quickdraw_prefix1"
       ],
@@ -4437,23 +4353,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -4486,23 +4402,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -4535,23 +4451,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -4584,23 +4500,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -4633,23 +4549,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -4682,23 +4598,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -4731,23 +4647,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -4780,23 +4696,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -4829,23 +4745,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -4878,23 +4794,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -5003,7 +4919,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 1,
       "Prefixes": [
         "$mod_epicloot_me_modifysummonhealth_prefix1"
       ],
@@ -5026,7 +4942,7 @@
       "ValuesPerRarity": {
         "Magic": {
           "MinValue": 1,
-          "MaxValue": 6,
+          "MaxValue": 4,
           "Increment": 1
         },
         "Rare": {
@@ -5055,7 +4971,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 1,
       "Prefixes": [
         "$mod_epicloot_me_modifysummondamage_prefix1"
       ],
@@ -5084,23 +5000,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -5182,23 +5098,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -5231,23 +5147,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -5300,7 +5216,7 @@
           "Increment": 5
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 1,
       "Prefixes": [
         "$mod_epicloot_me_modifywisprange_prefix1"
       ],
@@ -5431,27 +5347,27 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 4,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 5,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 1,
       "Prefixes": [
         "$mod_epicloot_me_addmovementskills_prefix1"
       ],
@@ -5532,32 +5448,32 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 4,
-          "MaxValue": 8,
+          "MinValue": 1,
+          "MaxValue": 2,
           "Increment": 1
         },
         "Rare": {
-          "MinValue": 5,
-          "MaxValue": 10,
+          "MinValue": 1,
+          "MaxValue": 4,
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 2,
+          "MaxValue": 6,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 7,
-          "MaxValue": 14,
+          "MinValue": 3,
+          "MaxValue": 9,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 8,
-          "MaxValue": 16,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 9,
+          "MinValue": 5,
           "MaxValue": 18,
           "Increment": 1
         }
@@ -5580,12 +5496,10 @@
           "$item_hoe"
         ],
         "AllowedRarities": [
-          "Legendary",
-          "Mythic",
           "Ancient"
         ]
       },
-      "SelectionWeight": 5,
+      "SelectionWeight": 0.1,
       "Prefixes": [
         "$mod_epicloot_me_freebuild_prefix1"
       ],
@@ -5691,8 +5605,6 @@
           "Throwable"
         ],
         "AllowedRarities": [
-          "Legendary",
-          "Mythic",
           "Ancient"
         ]
       },
@@ -5704,7 +5616,7 @@
         "Mythic": { "MinValue": 15, "MaxValue": 18, "Increment": 1 },
         "Ancient": { "MinValue": 18, "MaxValue": 20, "Increment": 1 }
       },
-      "SelectionWeight": 5,
+      "SelectionWeight": 0.2,
       "Prefixes": [
         "$mod_epicloot_me_homingmissile_prefix1"
       ],
@@ -5829,23 +5741,23 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 5,
-          "MaxValue": 8,
+          "MinValue": 3,
+          "MaxValue": 7,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 7,
-          "MaxValue": 10,
+          "MinValue": 4,
+          "MaxValue": 9,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 9,
-          "MaxValue": 12,
+          "MinValue": 5,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 11,
-          "MaxValue": 14,
+          "MinValue": 6,
+          "MaxValue": 12,
           "Increment": 1
         }
       },
@@ -5968,9 +5880,13 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Legs"
+        ],
+        "AllowedRarities": [
+          "Mythic",
+          "Ancient"
         ]
       },
-      "SelectionWeight": 1,
+      "SelectionWeight": 0.2,
       "Prefixes": [
         "$mod_epicloot_me_featherfall_prefix1"
       ],
@@ -5990,7 +5906,7 @@
       "ValuesPerRarity": {
         "Magic": {
           "MinValue": 1,
-          "MaxValue": 6,
+          "MaxValue": 4,
           "Increment": 1
         },
         "Rare": {
@@ -5999,22 +5915,22 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 8,
-          "MaxValue": 14,
+          "MinValue": 5,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 10,
+          "MinValue": 7,
           "MaxValue": 18,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 14,
+          "MinValue": 9,
           "MaxValue": 22,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 18,
+          "MinValue": 10,
           "MaxValue": 26,
           "Increment": 1
         }
@@ -6054,22 +5970,22 @@
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 2,
-          "MaxValue": 2,
+          "MinValue": 1,
+          "MaxValue": 1,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 3,
-          "MaxValue": 3,
+          "MinValue": 1,
+          "MaxValue": 2,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 4,
-          "MaxValue": 4,
+          "MinValue": 2,
+          "MaxValue": 3,
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_comfortable_prefix1"
       ],
@@ -6265,7 +6181,8 @@
           "Shield",
           "Tool",
           "Torch",
-          "TwoHandedWeaponLeft"
+          "TwoHandedWeaponLeft",
+          "Staff"
         ],
         "ExcludedItemNames": [
           "$item_hammer",
@@ -6622,13 +6539,13 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 4,
-          "MaxValue": 8,
+          "MinValue": 3,
+          "MaxValue": 6,
           "Increment": 1
         },
         "Rare": {
-          "MinValue": 6,
-          "MaxValue": 10,
+          "MinValue": 4,
+          "MaxValue": 9,
           "Increment": 1
         },
         "Epic": {
@@ -6798,7 +6715,7 @@
           "Increment": 5
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.2,
       "Prefixes": [
         "$mod_epicloot_me_executioner_prefix1"
       ],
@@ -6855,7 +6772,7 @@
         "Amber": 600,
         "Coins": 10
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 1,
       "Prefixes": [
         "$mod_epicloot_me_riches_prefix1"
       ],
@@ -6934,37 +6851,37 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 15,
-          "MaxValue": 25,
+          "MinValue": 3,
+          "MaxValue": 7,
           "Increment": 1
         },
         "Rare": {
-          "MinValue": 20,
-          "MaxValue": 30,
+          "MinValue": 5,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 25,
-          "MaxValue": 35,
+          "MinValue": 7,
+          "MaxValue": 14,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 30,
-          "MaxValue": 40,
+          "MinValue": 9,
+          "MaxValue": 18,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 35,
-          "MaxValue": 45,
+          "MinValue": 10,
+          "MaxValue": 21,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 40,
-          "MaxValue": 50,
+          "MinValue": 12,
+          "MaxValue": 25,
           "Increment": 1
         }
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 0.5,
       "Prefixes": [
         "$mod_epicloot_me_duelist_prefix1"
       ],
@@ -7023,13 +6940,13 @@
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 3,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 4,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Mythic": {
@@ -7125,37 +7042,43 @@
           "Shoulder",
           "Utility",
           "Trinket"
+        ],
+        "AllowedRarities": [
+          "Epic",
+          "Legendary",
+          "Mythic",
+          "Ancient"
         ]
       },
       "ValuesPerRarity": {
         "Magic": {
           "MinValue": 1,
-          "MaxValue": 6,
+          "MaxValue": 2,
           "Increment": 1
         },
         "Rare": {
-          "MinValue": 3,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 5,
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 5,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 8,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 10,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 15,
-          "MaxValue": 21,
+          "MinValue": 13,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -7182,37 +7105,43 @@
           "Shoulder",
           "Utility",
           "Trinket"
+        ],
+        "AllowedRarities": [
+          "Epic",
+          "Legendary",
+          "Mythic",
+          "Ancient"
         ]
       },
       "ValuesPerRarity": {
         "Magic": {
           "MinValue": 1,
-          "MaxValue": 6,
+          "MaxValue": 2,
           "Increment": 1
         },
         "Rare": {
-          "MinValue": 3,
-          "MaxValue": 9,
+          "MinValue": 2,
+          "MaxValue": 5,
           "Increment": 1
         },
         "Epic": {
-          "MinValue": 6,
-          "MaxValue": 12,
+          "MinValue": 5,
+          "MaxValue": 8,
           "Increment": 1
         },
         "Legendary": {
-          "MinValue": 9,
-          "MaxValue": 15,
+          "MinValue": 8,
+          "MaxValue": 10,
           "Increment": 1
         },
         "Mythic": {
-          "MinValue": 12,
-          "MaxValue": 18,
+          "MinValue": 10,
+          "MaxValue": 13,
           "Increment": 1
         },
         "Ancient": {
-          "MinValue": 15,
-          "MaxValue": 21,
+          "MinValue": 13,
+          "MaxValue": 16,
           "Increment": 1
         }
       },
@@ -7376,12 +7305,11 @@
     },
     {
       "Type": "TripleBowShot",
-      "DisplayText": "$mod_epicloot_me_triplebowshot",
+      "DisplayText": "$mod_epicloot_me_triplebowshot_display",
       "Description": "$mod_epicloot_me_triplebowshot_desc",
       "Requirements": {
         "AllowedItemTypes": [
-          "Bow",
-          "Crossbows"
+          "Bow"
         ],
         "AllowedRarities": [
           "Epic",
@@ -7391,13 +7319,37 @@
         ],
         "ExcludedItemNames": [
           "$item_graplinghook"
+        ],
+        "ExclusiveEffectTypes": [
+          "QuickDraw",
+          "ExplosiveArrows"
         ]
+      },
+      "ValuesPerRarity": {
+        "Epic": {
+          "MinValue": 34,
+          "MaxValue": 36,
+          "Increment": 1
+        },
+        "Legendary": {
+          "MinValue": 36,
+          "MaxValue": 37,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 37,
+          "MaxValue": 39,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 39,
+          "MaxValue": 40,
+          "Increment": 1
+        }
       },
       "SelectionWeight": 2,
       "Config": {
-        "Chance": 0.5,
-        "Damage": 0.4,
-        "Accuracy": 1.25,
+        "Accuracy": 1.5,
         "Projectiles": 3,
         "CostScale": 2
       },
@@ -7460,7 +7412,7 @@
           "Increment": 0.5
         },
         "Ancient": {
-          "MinValue": 13,
+          "MinValue": 10.5,
           "MaxValue": 25,
           "Increment": 0.5
         }
@@ -7532,17 +7484,17 @@
       "Description": "$mod_epicloot_me_eitrweave_desc",
       "Requirements": {
         "AllowedItemTypes": [
-            "Shield",
-            "OneHandedWeapon",
-            "TwoHandedWeapon",
-            "TwoHandedWeaponLeft"
-          ],
-          "ExcludedSkillTypes": [
-            "Pickaxes"
-          ],
-          "ExcludedItemNames": [
-            "$item_fishingrod"
-          ],
+          "Shield",
+          "OneHandedWeapon",
+          "TwoHandedWeapon",
+          "TwoHandedWeaponLeft"
+        ],
+        "ExcludedSkillTypes": [
+          "Pickaxes"
+        ],
+        "ExcludedItemNames": [
+          "$item_fishingrod"
+        ],
         "AllowedRarities": [
           "Rare",
           "Epic",
@@ -7552,7 +7504,7 @@
         ],
         "ItemHasParryPower": true,
         "ExclusiveEffectTypes": [
-          "Duelist"
+          "EitrLeech"
         ]
       },
       "ValuesPerRarity": {
@@ -7585,7 +7537,7 @@
       "Config": {
         "MaxEitrPercentPerValue": 0.12
       },
-      "SelectionWeight": 10,
+      "SelectionWeight": 1,
       "Prefixes": [
         "$mod_epicloot_me_eitrweave_prefix1"
       ],

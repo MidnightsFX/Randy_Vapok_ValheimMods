@@ -5,6 +5,7 @@ using EpicLoot.LegendarySystem;
 using EpicLoot.MagicItemEffects;
 using EpicLoot.ShardStones;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,10 +44,14 @@ namespace EpicLoot
         public List<Skills.SkillType> ExcludedSkillTypes = new List<Skills.SkillType>();
         public List<string> AllowedItemNames = new List<string>();
         public List<string> ExcludedItemNames = new List<string>();
+        [JsonConverter(typeof(StaffRoleListConverter))]
         public List<StaffRole> AllowedStaffRoles = new List<StaffRole>();
         public bool? ItemHasPhysicalDamage;
         public bool? ItemHasElementalDamage;
         public bool? ItemHasChopDamage;
+        public bool? ItemHasBluntDamage;
+        public bool? ItemHasSlashDamage;
+        public bool? ItemHasPierceDamage;
         public bool? ItemUsesDurability;
         public bool? ItemHasNegativeMovementSpeedModifier;
         public bool? ItemHasBlockPower;
@@ -323,6 +328,27 @@ namespace EpicLoot
                 return false;
             }
 
+            if (ItemHasBluntDamage != null &&
+                (ItemHasBluntDamage == itemData.m_shared.m_damages.m_blunt <= 0))
+            {
+                failure = RequirementFailure.ItemPropertyMismatch;
+                return false;
+            }
+
+            if (ItemHasSlashDamage != null &&
+                (ItemHasSlashDamage == itemData.m_shared.m_damages.m_slash <= 0))
+            {
+                failure = RequirementFailure.ItemPropertyMismatch;
+                return false;
+            }
+
+            if (ItemHasPierceDamage != null &&
+                (ItemHasPierceDamage == itemData.m_shared.m_damages.m_pierce <= 0))
+            {
+                failure = RequirementFailure.ItemPropertyMismatch;
+                return false;
+            }
+
             if (ItemUsesDurability != null &&
                 (ItemUsesDurability == !itemData.m_shared.m_useDurability))
             {
@@ -473,6 +499,14 @@ namespace EpicLoot
             public float MinValue;
             public float MaxValue;
             public float Increment;
+
+            /// <summary>How many increments above MinValue a roll can land; 0 when there is no increment.</summary>
+            public int GetStepCount()
+            {
+                // Float division lands a hair under a whole count when the step divides the range (2.6 / 0.2 is
+                // 12.999999), and truncating that would leave the top value unrollable.
+                return Increment > 0f ? UnityEngine.Mathf.FloorToInt((MaxValue - MinValue) / Increment + 0.001f) : 0;
+            }
         }
 
         [Serializable]
@@ -776,6 +810,94 @@ namespace EpicLoot
             }
 
             return results;
+        }
+
+        /// <summary>
+        /// The effects on the item, rolled or socketed, that keep <paramref name="candidate"/> off it when
+        /// exclusivity is the only thing that does: with them gone it would pass every other check
+        /// GetAvailableEffects makes. Empty when it fits already, or when something else (item type, rarity, a
+        /// missing effect) rules it out too. The effect at <paramref name="ignoreEffectIndex"/> is the one being
+        /// replaced and never counts.
+        /// </summary>
+        public static List<MagicItemEffect> GetExclusiveBlockers(ItemDrop.ItemData itemData, MagicItem magicItem,
+            int ignoreEffectIndex, MagicItemEffectDefinition candidate, bool checklootroll = true,
+            bool checkaugment = false, bool checkruneroll = false)
+        {
+            var blockers = new List<MagicItemEffect>();
+            if (candidate == null || magicItem == null || EnchantCostsHelper.EffectIsDeprecated(candidate))
+            {
+                return blockers;
+            }
+
+            var requirements = candidate.Requirements;
+            var exclusiveSelf = requirements != null &&
+                (requirements.ExclusiveSelf || requirements.ExclusiveEffectTypes?.Contains(candidate.Type) == true);
+            bool BlocksRolled(string other) => other == candidate.Type
+                ? exclusiveSelf
+                : MagicItemEffectRequirements.EffectsExclude(candidate.Type, other);
+            bool BlocksSocket(SocketedEffect socket) => socket != null && socket.IsActive() &&
+                (socket.Effect.EffectType == candidate.Type
+                    ? exclusiveSelf && !ShardSocketManager.AllowMatchingItemEffect(socket.ShardType)
+                    : MagicItemEffectRequirements.EffectsExclude(candidate.Type, socket.Effect.EffectType));
+
+            var effects = magicItem.Effects;
+            var sockets = magicItem.Sockets;
+            var keptEffects = new List<MagicItemEffect>();
+            for (var i = 0; i < effects.Count; i++)
+            {
+                if (i == ignoreEffectIndex)
+                {
+                    continue;
+                }
+
+                if (BlocksRolled(effects[i].EffectType))
+                {
+                    blockers.Add(effects[i]);
+                }
+                else
+                {
+                    keptEffects.Add(effects[i]);
+                }
+            }
+
+            var keptSockets = new List<SocketedEffect>();
+            foreach (var socket in sockets ?? new List<SocketedEffect>())
+            {
+                if (BlocksSocket(socket))
+                {
+                    blockers.Add(socket.Effect);
+                }
+                else
+                {
+                    keptSockets.Add(socket);
+                }
+            }
+
+            if (blockers.Count == 0)
+            {
+                return blockers;
+            }
+
+            bool fits;
+            magicItem.Effects = keptEffects;
+            magicItem.Sockets = keptSockets;
+            try
+            {
+                fits = candidate.CheckRequirements(itemData, magicItem, checklootroll, checkaugment, checkruneroll) &&
+                    FitsSocketedEffects(candidate, magicItem);
+            }
+            finally
+            {
+                magicItem.Effects = effects;
+                magicItem.Sockets = sockets;
+            }
+
+            if (!fits)
+            {
+                blockers.Clear();
+            }
+
+            return blockers;
         }
 
         // Whether a rolled effect of this definition may join the item's active socketed effects. Sockets

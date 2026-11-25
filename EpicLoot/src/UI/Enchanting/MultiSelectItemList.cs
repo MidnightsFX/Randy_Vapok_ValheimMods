@@ -21,6 +21,9 @@ namespace EpicLoot_UnityLib
     {
         public ItemDrop.ItemData Item;
         public string EnchantName;
+        // Set for a row shown but not selectable, with the reason its tooltip gives (a rune the item's other
+        // enchantments exclude).
+        public string BlockedReason;
 
         public string GetEnchantName() => EnchantName ?? string.Empty;
         public ItemDrop.ItemData GetItem() => Item;
@@ -525,7 +528,8 @@ namespace EpicLoot_UnityLib
         {
             try
             {
-                return SortItems(mode, items);
+                // OrderBy is stable, so a blocked row only drops below the selectable ones.
+                return SortItems(mode, items).OrderBy(IsBlocked).ToList();
             }
             catch (Exception e)
             {
@@ -534,6 +538,11 @@ namespace EpicLoot_UnityLib
                     "Reading an item's name or rarity (usually another mod's patch on it) threw:");
                 return items;
             }
+        }
+
+        private static bool IsBlocked(IListElement element)
+        {
+            return element is InventoryItemListElement { BlockedReason: not null };
         }
 
         public List<IListElement> SortItems(SortMode mode, List<IListElement> items)

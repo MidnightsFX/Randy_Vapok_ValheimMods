@@ -14,6 +14,8 @@ namespace EpicLoot_UnityLib
         public const string TotalQuantityFormat = "/ {0}";
         public const string ReadOnlyQuantityFormat = "{0}";
         public const string StorageCountColor = "#9BDB9B";
+        public const string BlockedReasonColor = "#FF8A80";
+        private const float BlockedAlpha = 0.45f;
 
         public Button MainButton;
         public Toggle SelectedToggle;
@@ -48,6 +50,10 @@ namespace EpicLoot_UnityLib
         private bool _locked;
         private bool _hasGamepadFocus;
         private List<string> _enchantmentSearchNames;
+        private CanvasGroup _canvasGroup;
+
+        private string BlockedReason => (_item as InventoryItemListElement)?.BlockedReason;
+        public bool IsBlocked => BlockedReason != null;
 
         public void Awake()
         {
@@ -257,6 +263,20 @@ namespace EpicLoot_UnityLib
             {
                 EnchantingUIController.SetItemTooltip(item, ItemHoverTooltip);
             }
+
+            if (IsBlocked)
+            {
+                string line = $"\n\n<color={BlockedReasonColor}>{BlockedReason}</color>";
+                if (Tooltip != null)
+                {
+                    Tooltip.m_text += line;
+                }
+
+                if (ItemHoverTooltip != null)
+                {
+                    ItemHoverTooltip.m_text += line;
+                }
+            }
         }
 
         // What vanilla data alone can show: the item's own icon and name, and no tooltip body, so the row can
@@ -354,6 +374,11 @@ namespace EpicLoot_UnityLib
 
         public void SelectQuantity(int quantity, bool noSound)
         {
+            if (IsBlocked)
+            {
+                quantity = 0;
+            }
+
             int prevQuantity = _selectedQuantity;
             if (_item == null)
             {
@@ -387,15 +412,16 @@ namespace EpicLoot_UnityLib
             RefreshGamepadFocusIndicator();
 
             bool stackItem = _item != null && _item.GetItem().m_shared.m_maxStackSize > 1;
+            bool blocked = IsBlocked;
 
             if (MainButton != null)
             {
-                MainButton.interactable = !_locked;
+                MainButton.interactable = !_locked && !blocked;
             }
 
             if (SelectedToggle != null)
             {
-                SelectedToggle.interactable = !_locked;
+                SelectedToggle.interactable = !_locked && !blocked;
                 SelectedToggle.gameObject.SetActive(!ReadOnly);
                 SelectedToggle.SetIsOnWithoutNotify(_selectedQuantity > 0);
             }
@@ -444,6 +470,21 @@ namespace EpicLoot_UnityLib
             if (SelectedBackground != null)
             {
                 SelectedBackground.SetActive(!ReadOnly && _selectedQuantity > 0);
+            }
+
+            // Rows are pooled, so a row that was blocked for the last list is restored for the next.
+            if (blocked && _canvasGroup == null)
+            {
+                _canvasGroup = gameObject.GetComponent<CanvasGroup>();
+                if (_canvasGroup == null)
+                {
+                    _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+                }
+            }
+
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha = blocked ? BlockedAlpha : 1f;
             }
 
             Localization.instance.Localize(transform);

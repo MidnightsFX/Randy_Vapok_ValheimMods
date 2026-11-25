@@ -1,10 +1,58 @@
 **0.16.0**
-* Fylgja's Bond can bind a spirit animal again on the latest Valheim version, instead of failing after the old one was released.
-* A new drop limit option unlocks each biome's gear gradually after its boss falls, dropping it more often the more creatures you kill in that biome.
-* Bounty kills are now checked by the server, so one player can no longer complete or take another player's bounty progress.
-* Bounty and treasure map markers in the world are stored in a safer format, and ones from older versions still load.
-* Item categories no longer lose their fallback categories when Epic Loot adds items from other mods, and files that already lost them are repaired.
-* Tempering an item no longer undoes shardstones socketed or removed while the temper was under way.
+* Updated for Valheim 1.0.30
+* Performance improvements for many frequent actions
+* Adds new unique items from Norse myth, and a Homing Missile enchantment that steers thrown Mythic and Ancient weapons onto enemies.
+* The merchant now sells Skuld's Thread, which points the way to nearby bounty targets.
+* Large piles of magic drops no longer slow the game down
+* Named items from legendaries.json are now called unique items everywhere, so they are no longer confused with the Legendary rarity
+    * Unique items now get special display effects, along with indications of their uniqueness in tooltip
+    * Unique items roll one more enchantment than their rarity normally does, and their signature enchantments roll above the normal range
+    * Unique items now roll at Mythic and Ancient as well as Legendary, with stronger signature enchantments at higher rarities
+    
+
+Balance Changes:
+* Balance templates now include shardstones and legendaries
+    * Shardstones already socketed now pick up balance changes without being taken out and put back.
+* Progressive Gating unlocks each biome's gear gradually after its boss falls, dropping it more often the more creatures you kill in that biome.
+* Frost ice spikes no longer hurt your own tames and summons.
+* The Hexen form's attacks now use and train Elemental Magic instead of Swords.
+* Staffs only roll damage enchantments if they deal damage, and summon enchantments if they summon.
+* A misspelled staff role in an enchantment's settings is now skipped with a warning instead of breaking the whole enchantment.
+* Blood magic staffs that deal damage can now roll added elemental damage.
+* Triple Shot now fires every time, with a roll value for how much damage and how much spread is provided
+    * Triple Shot items made before this change get a rolled value of their rarity when first loaded.
+* Smooths out rare enchantments minimal having the best enchantments being very rare, balanced less so and legendary they are even more common
+* Minimal balance template now rolls some of the most power enchants, rarely only at very high rarities
+* Weapon damage enchantments no longer exclude all others
+    * Fire and Frost imbues still can't share a weapon
+    * Blunt, Slash and Pierce damage enchantments now raise only their own damage type and roll only on weapons that deal it.
+    * Poison imbue now builds on physical damage, most from pierce and least from blunt, and no longer on elemental damage.
+    * Lightning imbue now strikes with a random strength on every hit.
+    * Spirit imbue now builds on the weapon's fire, frost, lightning and poison damage, including other imbues.
+* Elemental resistances can no longer share an item with each other in any template, and neither can physical resistances.
+* Health Regen and Add Health Regen can now roll on the same item.
+* The Dark Red and Dark Green shards now add Spirit damage on staffs.
+* Coin Hoarder now rolls only on Epic items and above in every template.
+* Damage resistance now has default caps across all rarities
+* The health regen shardstone for shoulders can be set to work while resting, while rested or both, and the Legendary balance template now gives it for both.
+* Attacks, dodges and jumps can no longer be reduced below a tenth of their cost.
+* Eitr Weaving now restores a percentage of max eitr.
+* Stormcaller's lightning strikes deal less damage.
+* Conduit now restores eitr from a pool that refills at your normal eitr regen rate, even in combat.
+* Eitr Leech no longer counts damage past a target's remaining health.
+* Lifesteal, Blood Drinker, Health Gain per X Damage Done and Conduit no longer count damage past a target's remaining health either.
+* Extracting a rune from an enchantment stronger than a normal roll now shows the capped value the rune will hold
+* Mining Drop and Lumberjacking Drop are now Ore Yield and Wood Yield, a percentage bonus. Existing items convert automatically when loaded
+    * The bonus applies evenly across node types, so scrap piles and soft tissue no longer gain far more than ore veins
+    * Stone and plain wood are skipped when the same drop table has something better, so veins give only extra ore
+    * Rock chunks that collapse and logs that break on impact now get the bonus
+    * Bonus drops land in stacks where normal drops land, with a floating +X and a sound
+    * The balance template sets the percentage: half on Minimal, double on Legendary
+
+Bugfixes:
+* Offset Attack no longer rolls on blood magic weapons.
+* Item categories no longer lose their fallback categories when Epic Loot adds items from other mods
+* Tempering an item no longer undoes shardstones socketed or removed while the temper was under way
 * Two players using the same enchanting table can no longer both spend the same stored materials, and an action that cannot be paid for no longer leaves the panel stuck.
 * Bounty and treasure map progress that cannot be read is now kept in the character file instead of being wiped.
 * Blood Rite now counts kills of creatures another player's game controls.
@@ -14,60 +62,29 @@
 * Quarry Mark marks from before a death no longer pay out after respawning.
 * A bounty can no longer be bought twice in one period after discovering a new biome, and abandoning a bounty now removes its spawned creatures.
 * The player who bought a treasure map can now always open its chest, even when another player's ward covers it.
-* Frost ice spikes no longer hurt your own tames and summons.
-* The Hexen form's attacks now use and train Elemental Magic instead of Swords.
-* Attacking in Hexen form with Dual Wield installed no longer sits the witch down and breaks her movement, and her spells no longer take the damage of the weapons in your hands.
+* Improves compatibility with dual wielding mods while in hexen form
 * Placed food shows eat or drink again, and dropped items show their current stack size.
 * Pressing Escape on a socket or Brokkr's Gift confirmation no longer closes the inventory too.
-* Config patches that remove a setting now work, and a patch whose path matches nothing is reported in the log.
-* A blank or mistyped ability hotkey no longer floods the log, and passive abilities no longer take an ability slot.
 * One failing magic effect no longer stops the others or the hit itself.
 * Several effects can no longer get stuck on after an error, and extreme values for mead cooldowns, weight reduction and Multishot are capped.
 * Weapon tooltips show attack costs with the same minimum the game applies.
 * Typing in the compendium search no longer triggers game hotkeys.
-* Mods using the Epic Loot API now always see their errors in the log, and their entries no longer appear twice for players on a server.
-* Bad input from another mod through the API no longer causes errors in Epic Loot.
-* Combat, movement, armor, item tooltips, identifying, the merchant and the enchanting table lists do less work every frame.
-* The log is quieter: trader diagnostics and per-patch and per-translation detail are gone.
-* Large piles of magic drops no longer slow the game down, because only the loot beams nearest you are shown.
-* Less stutter when your character first appears in a world, because Epic Loot finds the game's fonts much faster.
+* The rune page now lists runes that an item's other enchantments rule out, greyed out with the reason in their tooltip.
+* Picking an item for a rune action now selects its first enchantment, so its runes show straight away.
+* The Orb of Ahri's returning orb and explosion, and Thunderblood's explosion and chain lightning, now get the staff's damage enchantments.
+* Staff projectiles from other mods that spawn copies of themselves no longer add the staff's damage enchantments again on every copy.
+* Magic item console commands now ignore boss progression.
+* Ammo Conservation, Instant Mead and Auto Mead roll as often as intended and give items their own names.
+* Some enchantments, such as Health Regen and Eitr Weaving, can now roll the top of their range.
+* Resistance and Attack Eitr Use enchantments no longer roll a near-useless value on Magic items in the Minimal and Legendary templates.
 * Hildir's tempering panel now shows the right gamepad button on its Temper and Cancel buttons.
-* Unused settings, leftover debug code and old internal methods that other mods relied on have been removed.
-* Epic Loot console commands no longer error when there is no player, and the compendium's adventure page shows its empty message when nothing is active.
-* The health regen shardstone for shoulders can be set to work while resting, while rested or both, and the Legendary balance template now gives it for both.
-* Balance templates now include shardstones, so applying a template also replaces your shardstone settings.
-* Shardstones already socketed now pick up balance changes without being taken out and put back.
-* Attacks, dodges and jumps can no longer be reduced below a tenth of their cost.
-* Eitr Weaving now restores a percentage of max eitr.
 * Paying eitr costs from stamina no longer refunds eitr when you have no stamina.
-* Stormcaller's lightning strikes deal less damage.
-* Conduit now restores eitr from a pool that refills at your normal eitr regen rate, even in combat, and higher values give a larger pool and more eitr per hit.
-* Conduit's pool now shows as a status icon on the HUD while it is worn.
-* Eitr Leech no longer counts damage past a target's remaining health.
-* Epic Loot's compendium pages no longer show up blank with Auga, and their tables now fit the page.
-* All of the enchanting table's tabs fit in its window again with Auga, so the Upgrade tab can be reached, and its page shows its title again.
-* The message on the enchanting table's Storage tab no longer runs into the Take All buttons.
+* Auga compatibility improvements
 * Items in the quick slots of Equipment and Quick Slots now count as hotbar items at the enchanting table, so they stay out of the sacrifice list when hotbar items are hidden.
 * The enchanting table now pays its costs from its own storage before your inventory and storage mods.
 * The enchanting table's storage can hold unidentified items, and they can be identified straight from it.
-* An item another mod breaks no longer leaves the rest of an enchanting table list blank, and the log now names the item and the cause.
-* Named items from legendaries.json are now called unique items everywhere, so they are no longer confused with the Legendary rarity
-    * Unique items are labelled with their rarity and Unique Item in their tooltip, such as Legendary Unique Item, and show a gold rune in the inventory like set pieces do
-    * In the inventory the cell gets a gold border, the rune breathes and embers drift up the cell. Unique Item Embers under Interface turns this off, and Item Colors has the colour
-    * The compendium's Legendary Sets page is now Unique Sets
-    * The magicsetitem console command is now magicunique (short form miunique); magicsetitem still works
-    * Unique items roll one more enchantment than their rarity normally does, and their signature enchantments roll above the normal range
-    * Unique items now roll at Mythic and Ancient as well as Legendary, with stronger signature enchantments at higher rarities
-    * Extracting a rune from an enchantment stronger than a normal roll now shows the capped value the rune will hold
-    * Quick Configure's Balance page has Unique Item Drop Chance beside Set Item Drop Chance, with a line showing how the two split items, and the Interface page has Unique Item Embers
-* Quick Configure's four drop ratios are now labelled as weights, since they only matter relative to each other
-* Mining Drop and Lumberjacking Drop are now Ore Yield and Wood Yield, a percentage bonus. Existing items convert automatically when loaded
-    * The bonus applies evenly across node types, so scrap piles and soft tissue no longer gain far more than ore veins
-    * Stone and plain wood are skipped when the same drop table has something better, so veins give only extra ore
-    * Rock chunks that collapse and logs that break on impact now get the bonus
-    * Bonus drops land in stacks where normal drops land, with a floating +X and a sound
-    * The balance template sets the percentage: half on Minimal, double on Legendary
 * The optional Epic patches now cover Ancient items and the newer enchantments, unique items and sets, and their unique item values take effect again.
+* The magicsetitem console command is now magicunique (short form miunique); magicsetitem still works
 
 **0.15.6**
 * Works with Auga 1.4.1 and newer

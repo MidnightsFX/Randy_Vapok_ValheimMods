@@ -1187,6 +1187,56 @@ namespace EpicLoot.CraftingV2
             return returnList;
         }
 
+        // The runes GetApplyableRunesforItem leaves out only because another enchantment on the item, rolled or
+        // socketed, excludes theirs: shown greyed in the rune list, with what blocks them. `applyable` is what
+        // GetApplyableRunesforItem returned for the same item and effect.
+        internal static List<InventoryItemListElement> GetBlockedRunesForItem(ItemDrop.ItemData item, string selectedEffect,
+            List<InventoryItemListElement> applyable)
+        {
+            var blocked = new List<InventoryItemListElement>();
+            MagicItem magicItem = item?.GetMagicItem();
+            int selectedEnchantIndex = magicItem?.Effects.FindIndex(x => x.EffectType == selectedEffect) ?? -1;
+            if (selectedEnchantIndex < 0)
+            {
+                return blocked;
+            }
+
+            var shown = new HashSet<ItemDrop.ItemData>(applyable.Select(x => x.Item));
+            foreach (ItemDrop.ItemData rune in InventoryManagement.Instance.GetAllItems())
+            {
+                if (shown.Contains(rune) || !rune.IsRunestone() || !rune.IsMagic(out MagicItem runeMagic) ||
+                    ItemFavorites.IsProtected(rune))
+                {
+                    continue;
+                }
+
+                var blockers = new List<MagicItemEffect>();
+                foreach (MagicItemEffect effect in runeMagic.Effects)
+                {
+                    if (MagicItemEffectDefinitions.TryGet(effect.EffectType, out MagicItemEffectDefinition definition))
+                    {
+                        blockers.AddRange(MagicItemEffectDefinitions.GetExclusiveBlockers(
+                            item, magicItem, selectedEnchantIndex, definition, checkruneroll: true));
+                    }
+                }
+
+                if (blockers.Count == 0)
+                {
+                    continue;
+                }
+
+                string names = string.Join(", ", blockers.Select(x => MagicItem.GetEffectText(x, magicItem.Rarity, false)).Distinct());
+                blocked.Add(new InventoryItemListElement
+                {
+                    Item = rune,
+                    EnchantName = TooltipRenderer.RenderCompactEffects(runeMagic),
+                    BlockedReason = Localization.instance.Localize("$mod_epicloot_rune_exclusivewith", names)
+                });
+            }
+
+            return blocked;
+        }
+
         // A set rune is an EtchedRunestone{Rarity} whose MagicItem carries the SetID (and the source
         // piece's LegendaryID as a preference) with no effects. Set Etch makes the target whichever piece
         // of that set it fits, at the target's own rarity; the target keeps its effects.

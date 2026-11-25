@@ -164,13 +164,13 @@ internal static class QuickConfigBindings {
                 VisibleWhen = _ => CanEditFiles(),
                 Tooltip = () => QuickConfigTooltip.Text($"Balance preset: {name}",
                     "Sets the Balance Template and the four drop weights to this preset. On Save, " +
-                    "magiceffects.json and shardstones.json are rewritten from the preset's template and " +
+                    "magiceffects.json, shardstones.json and legendaries.json are rewritten from the preset's template and " +
                     "the Effect Tuning page is reset to them."),
                 Act = staged => BalancePreset.ApplyToStaged(staged, name)
             });
         }
         Readout("readout:template", staged => $"Current template: {staged.Get("BalanceConfigurationType", "balanced")}",
-            "Balance Template", "The overhaul variant of magiceffects.json and shardstones.json in use (balanced, " +
+            "Balance Template", "The overhaul variant of magiceffects.json, shardstones.json and legendaries.json in use (balanced, " +
             "minimal or legendary). Pick a preset above to change it; the files are rewritten from that template on Save.");
         TextChoice("BalanceConfigurationType", ELConfig.BalanceConfigurationType, "Balance Template", BindingScope.Server,
             () => BalancePreset.Names, BalancePreset.Normalize, visible: _ => CanEditFiles() == false);

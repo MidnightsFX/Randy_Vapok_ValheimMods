@@ -1308,7 +1308,7 @@ internal class ELConfig {
     }
 
     /// <summary>The configs shipped once per Balance Template, under config/overhauls/&lt;template&gt;/.</summary>
-    internal static readonly string[] BalanceTemplateFiles = { "magiceffects.json", "shardstones.json" };
+    internal static readonly string[] BalanceTemplateFiles = { "magiceffects.json", "shardstones.json", "legendaries.json" };
 
     internal static bool IsBalanceTemplateFile(string fileName) {
         return Array.IndexOf(BalanceTemplateFiles, fileName) >= 0;

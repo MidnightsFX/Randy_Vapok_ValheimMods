@@ -89,7 +89,7 @@ public sealed class MagicItemComponent
         MagicItem = Parse(raw);
         _socketGridVersion = 0;
 
-        if (FixupValuelessEffects() | ConvertLegacyYieldEffects())
+        if (FixupValuelessEffects() | ConvertLegacyEffects())
         {
             SetMagicItemQuietly(MagicItem);
             return;
@@ -241,22 +241,26 @@ public sealed class MagicItemComponent
         return changed;
     }
 
-    private bool ConvertLegacyYieldEffects()
+    private bool ConvertLegacyEffects()
     {
         if (MagicItem == null)
         {
             return false;
         }
 
+        int seed = (Raw ?? string.Empty).GetStableHashCode();
         bool changed = false;
         foreach (MagicItemEffect effect in MagicItem.Effects)
         {
             changed |= IncreaseDrop.ConvertLegacyValue(effect);
+            changed |= MultiShot.ConvertLegacyTripleShot(effect, MagicItem.Rarity, seed);
         }
 
-        foreach (SocketedEffect socket in MagicItem.Sockets)
+        for (int i = 0; i < MagicItem.Sockets.Count; i++)
         {
+            SocketedEffect socket = MagicItem.Sockets[i];
             changed |= IncreaseDrop.ConvertLegacyValue(socket?.Effect);
+            changed |= socket != null && MultiShot.ConvertLegacyTripleShot(socket.Effect, socket.SourceRarity, seed + i + 1);
         }
 
         return changed;

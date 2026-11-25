@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EpicLoot.General;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -229,6 +230,21 @@ namespace EpicLoot.src.Magic.MagicItemEffects.Helpers
             {
                 GameCamera.instance.m_playerPos = point;
             }
+        }
+
+        /// <summary>
+        /// The share of a hit's damage that a payout proportional to damage dealt may count: overkill does not
+        /// count, so a huge hit on a nearly dead target pays for the health it took. 0 for a hit with no damage.
+        /// </summary>
+        public static float GetCountedDamageFraction(HitData hit, float healthBeforeHit)
+        {
+            float total = hit.m_damage.EpicLootGetTotalDamage();
+            return total > 0f ? Mathf.Clamp01(healthBeforeHit / total) : 0f;
+        }
+
+        public static float GetCountedDamage(HitData hit, float healthBeforeHit)
+        {
+            return Mathf.Min(hit.m_damage.EpicLootGetTotalDamage(), Mathf.Max(0f, healthBeforeHit));
         }
 
         /// <summary>

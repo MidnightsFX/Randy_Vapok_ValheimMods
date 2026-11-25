@@ -2,6 +2,8 @@
 using EpicLoot.MagicItemEffects.Shards;
 using EpicLoot.src.Magic.MagicItemEffects.Helpers;
 using HarmonyLib;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace EpicLoot.MagicItemEffects;
@@ -27,31 +29,70 @@ public static class ModifyDamage
     {
         private static void Postfix(Projectile __instance, Character owner, HitData hitData, ItemDrop.ItemData item)
         {
-            if (StaffRoles.CarriesOwnDamage(owner, hitData, item) && RunGetDamagePatch(item))
-            {
-                ApplyEquippedWeaponModifiers(item, ref __instance.m_damage);
-            }
+            ApplyToSpawnedDamage(__instance, owner, hitData, item, ref __instance.m_damage);
         }
     }
 
     [HarmonyPatch(typeof(Aoe), nameof(Aoe.Setup))]
     private class ModifyDamage_Aoe_Setup_Patch
     {
-        // Vanilla spawns each chain jump by cloning the live Aoe, already-scaled damage included. The marker is
-        // cloned with it, so a jump is not scaled again.
         private static void Postfix(Aoe __instance, Character owner, HitData hitData, ItemDrop.ItemData item)
         {
-            if (StaffRoles.CarriesOwnDamage(owner, hitData, item) && RunGetDamagePatch(item) &&
-                __instance.GetComponent<StaffDamageApplied>() == null)
-            {
-                ApplyEquippedWeaponModifiers(item, ref __instance.m_damage);
-                __instance.gameObject.AddComponent<StaffDamageApplied>();
-            }
+            ApplyToSpawnedDamage(__instance, owner, hitData, item, ref __instance.m_damage);
         }
     }
 
+    // A prefab that references itself (an Aoe chain's m_chainObj, a projectile that spawns itself on hit) points at
+    // the live copy once instantiated, so the next spawn clones that copy, its already-scaled damage included. The
+    // marker is cloned with it, so the clone is not scaled again.
     private class StaffDamageApplied : MonoBehaviour
     {
+    }
+
+    private static void ApplyToSpawnedDamage(MonoBehaviour spawned, Character owner, HitData hitData,
+        ItemDrop.ItemData item, ref HitData.DamageTypes damage)
+    {
+        if (StaffRoles.CarriesOwnDamage(owner, hitData, item) && RunGetDamagePatch(item) &&
+            spawned.GetComponent<StaffDamageApplied>() == null)
+        {
+            ApplyEquippedWeaponModifiers(item, ref damage);
+            spawned.gameObject.AddComponent<StaffDamageApplied>();
+        }
+    }
+
+    private const float PoisonPerPierce = 3f;
+    private const float PoisonPerSlash = 2f;
+    private const float LightningRollMax = 2f;
+
+    // Valheim reads the weapon's damage once per target in a melee or area attack and once per projectile volley,
+    // so a roll made while one of those runs lands on that hit alone. Anywhere else (tooltips, a staff's spawned
+    // explosion) the imbue counts at its average.
+    private static int _attacksRunning;
+
+    private static float LightningRoll()
+    {
+        return _attacksRunning > 0 ? Random.Range(0f, LightningRollMax) : 1f;
+    }
+
+    [HarmonyPatch]
+    private static class Attack_DamageRead_Patch
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            yield return AccessTools.Method(typeof(Attack), nameof(Attack.DoMeleeAttack));
+            yield return AccessTools.Method(typeof(Attack), nameof(Attack.DoAreaAttack));
+            yield return AccessTools.Method(typeof(Attack), nameof(Attack.FireProjectileBurst));
+        }
+
+        private static void Prefix()
+        {
+            _attacksRunning++;
+        }
+
+        private static void Finalizer()
+        {
+            _attacksRunning--;
+        }
     }
 
     private static void ApplyEquippedWeaponModifiers(ItemDrop.ItemData item, ref HitData.DamageTypes damage)
@@ -130,34 +171,34 @@ public static class ModifyDamage
 
         float totalDamage = damages.EpicLootGetTotalDamage();
         Skills.SkillType magicItemskillType = item.m_shared.m_skillType;
+        HitData.DamageTypes unenchanted = damages;
+        float Value(string effectType) =>
+            MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(player, item, effectType, 0.01f);
 
-        damages.m_blunt += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-            player, item, MagicEffectType.AddBluntDamage, 0.01f);
-        damages.m_slash += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-            player, item, MagicEffectType.AddSlashingDamage, 0.01f);
-        damages.m_pierce += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-            player, item, MagicEffectType.AddPiercingDamage, 0.01f);
-        damages.m_fire += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-            player, item, MagicEffectType.AddFireDamage, 0.01f);
-        damages.m_frost += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-            player, item, MagicEffectType.AddFrostDamage, 0.01f);
-        damages.m_lightning += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-            player, item, MagicEffectType.AddLightningDamage, 0.01f);
-        damages.m_poison += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-            player, item, MagicEffectType.AddPoisonDamage, 0.01f);
-        damages.m_spirit += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-            player, item, MagicEffectType.AddSpiritDamage, 0.01f);
-
+        // Each physical type rises only by its own amount; an axe's chop and a pickaxe's mining damage rise with it.
+        float blunt = Value(MagicEffectType.AddBluntDamage);
+        float slash = Value(MagicEffectType.AddSlashingDamage);
+        float pierce = Value(MagicEffectType.AddPiercingDamage);
+        damages.m_blunt += unenchanted.m_blunt * blunt;
+        damages.m_slash += unenchanted.m_slash * slash;
+        damages.m_pierce += unenchanted.m_pierce * pierce;
         if (magicItemskillType == Skills.SkillType.Axes)
         {
-            damages.m_chop += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-                player, item, MagicEffectType.AddSlashingDamage, 0.01f);
+            damages.m_chop += unenchanted.m_chop * slash;
         }
         else if (magicItemskillType == Skills.SkillType.Pickaxes)
         {
-            damages.m_pickaxe += totalDamage * MagicEffectsHelper.GetTotalActiveMagicEffectValueForWeapon(
-                player, item, MagicEffectType.AddPiercingDamage, 0.01f);
+            damages.m_pickaxe += unenchanted.m_pickaxe * pierce;
         }
+
+        damages.m_fire += totalDamage * Value(MagicEffectType.AddFireDamage);
+        damages.m_frost += totalDamage * Value(MagicEffectType.AddFrostDamage);
+        damages.m_lightning += totalDamage * Value(MagicEffectType.AddLightningDamage) * LightningRoll();
+        damages.m_poison += (PoisonPerPierce * unenchanted.m_pierce + PoisonPerSlash * unenchanted.m_slash +
+            unenchanted.m_blunt) * Value(MagicEffectType.AddPoisonDamage);
+        // Last, so it also feeds on what the imbues above added.
+        damages.m_spirit += (damages.m_fire + damages.m_frost + damages.m_lightning + damages.m_poison) *
+            Value(MagicEffectType.AddSpiritDamage);
 
         // Added damage too, so the multipliers below scale it.
         EitrInfusion.AddInfusedDamage(player, item, ref damages);

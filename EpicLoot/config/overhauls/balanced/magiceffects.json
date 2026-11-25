@@ -66,8 +66,7 @@
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
-          "Bows",
-          "Crossbows"
+          "Bows"
         ],
         "ExcludedItemNames": [
           "$item_graplinghook"
@@ -175,20 +174,6 @@
           "Torch",
           "Staff"
         ],
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "ExcludedItemNames": [
           "$item_graplinghook"
         ]
@@ -232,26 +217,13 @@
       "DisplayText": "$mod_epicloot_me_modifyphysicaldamage_display",
       "Description": "$mod_epicloot_me_modifyphysicaldamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage",
-          "DoubleMagicShot"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
           "TwoHandedWeaponLeft",
-          "Bow"
+          "Bow",
+          "Torch",
+          "Staff"
         ],
         "ExcludedItemNames": [
           "$item_fishingrod",
@@ -315,25 +287,13 @@
       "DisplayText": "$mod_epicloot_me_modifyelementaldamage_display",
       "Description": "$mod_epicloot_me_modifyelementaldamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
           "Bow",
-          "Torch"
+          "Torch",
+          "TwoHandedWeaponLeft",
+          "Staff"
         ],
         "ExcludedSkillTypes": [
           "Pickaxes"
@@ -732,7 +692,9 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket"
         ],
         "ItemHasArmor": true
       },
@@ -934,7 +896,13 @@
           "Chest",
           "Shoulder",
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Helmet",
+          "Legs",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -1014,7 +982,7 @@
           "Increment": 0.5
         }
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 2.75,
       "Prefixes": [
         "$mod_epicloot_me_increaseheatresistance_prefix1"
       ],
@@ -1031,7 +999,13 @@
           "Legs",
           "Tool",
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Helmet",
+          "Chest",
+          "Shoulder",
+          "Shield",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -1083,7 +1057,14 @@
           "Helmet",
           "Staff",
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Chest",
+          "Legs",
+          "Shoulder",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExcludedItemNames": [
           "$item_hammer",
@@ -1139,7 +1120,8 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Helmet"
         ],
         "AllowedRarities": [
           "Magic",
@@ -1182,7 +1164,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 2.75,
       "Prefixes": [
         "$mod_epicloot_me_decreaseforsakencooldown_prefix1"
       ],
@@ -1255,10 +1237,15 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Helmet",
-          "Shoulder"
-        ],
-        "ExclusiveEffectTypes": [
-          "AddHealthRegen"
+          "Shoulder",
+          "Chest",
+          "Legs",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -1362,45 +1349,50 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Helmet",
-          "Shoulder"
-        ],
-        "ExclusiveEffectTypes": [
-          "ModifyHealthRegen"
+          "Shoulder",
+          "Chest",
+          "Legs",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
         "Magic": {
           "MinValue": 0.2,
           "MaxValue": 1.5,
-          "Increment": 0.2
+          "Increment": 0.1
         },
         "Rare": {
           "MinValue": 0.4,
           "MaxValue": 3,
-          "Increment": 0.2
+          "Increment": 0.1
         },
         "Epic": {
           "MinValue": 0.6,
           "MaxValue": 4.5,
-          "Increment": 0.2
+          "Increment": 0.1
         },
         "Legendary": {
           "MinValue": 0.8,
           "MaxValue": 6,
-          "Increment": 0.2
+          "Increment": 0.1
         },
         "Mythic": {
           "MinValue": 1.5,
           "MaxValue": 10,
-          "Increment": 0.2
+          "Increment": 0.1
         },
         "Ancient": {
           "MinValue": 2.2,
           "MaxValue": 14,
-          "Increment": 0.2
+          "Increment": 0.1
         }
       },
-      "SelectionWeight": 1,
+      "SelectionWeight": 5.5,
       "Prefixes": [
         "$mod_epicloot_me_addhealthregen_prefix1"
       ],
@@ -1417,7 +1409,13 @@
           "Legs",
           "Utility",
           "Trinket",
-          "Tool"
+          "Tool",
+          "Helmet",
+          "Chest",
+          "Shoulder",
+          "Shield",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -1502,15 +1500,15 @@
           "MinValue": 40,
           "MaxValue": 50,
           "Increment": 1
-        },
-        "SelectionWeight": 10,
-        "Prefixes": [
-          "$mod_epicloot_me_ammoconservation_prefix1"
-        ],
-        "Suffixes": [
-          "$mod_epicloot_me_ammoconservation_suffix1"
-        ]
-      }
+        }
+      },
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_ammoconservation_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_ammoconservation_suffix1"
+      ]
     },
     {
       "Type": "InstantMead",
@@ -1529,15 +1527,13 @@
           "Ancient"
         ]
       },
-      "ValuesPerRarity": {
-        "SelectionWeight": 10,
-        "Prefixes": [
-          "$mod_epicloot_me_instantmead_prefix1"
-        ],
-        "Suffixes": [
-          "$mod_epicloot_me_instantmead_suffix1"
-        ]
-      }
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_instantmead_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_instantmead_suffix1"
+      ]
     },
     {
       "Type": "AutoMead",
@@ -1556,15 +1552,13 @@
           "Ancient"
         ]
       },
-      "ValuesPerRarity": {
-        "SelectionWeight": 10,
-        "Prefixes": [
-          "$mod_epicloot_me_automead_prefix1"
-        ],
-        "Suffixes": [
-          "$mod_epicloot_me_automead_suffix1"
-        ]
-      }
+      "SelectionWeight": 10,
+      "Prefixes": [
+        "$mod_epicloot_me_automead_prefix1"
+      ],
+      "Suffixes": [
+        "$mod_epicloot_me_automead_suffix1"
+      ]
     },
     {
       "Type": "ModifyNoise",
@@ -1877,7 +1871,16 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Shoulder",
-          "Staff"
+          "Staff",
+          "Helmet",
+          "Chest",
+          "Legs",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExcludedItemNames": [
           "$item_hammer",
@@ -1931,20 +1934,6 @@
       "DisplayText": "$mod_epicloot_me_addbluntdamage_display",
       "Description": "$mod_epicloot_me_addbluntdamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -1961,10 +1950,7 @@
           "$item_fishingrod",
           "$item_graplinghook"
         ],
-        "AllowedSkillTypes": [
-          "Clubs",
-          "Unarmed"
-        ]
+        "ItemHasBluntDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -2011,20 +1997,6 @@
       "DisplayText": "$mod_epicloot_me_addslashingdamage_display",
       "Description": "$mod_epicloot_me_addslashingdamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -2041,11 +2013,7 @@
           "$item_fishingrod",
           "$item_graplinghook"
         ],
-        "AllowedSkillTypes": [
-          "Swords",
-          "Knives",
-          "Unarmed"
-        ]
+        "ItemHasSlashDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -2094,20 +2062,6 @@
       "DisplayText": "$mod_epicloot_me_addpiercingdamage_display",
       "Description": "$mod_epicloot_me_addpiercingdamage_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -2121,13 +2075,7 @@
           "$item_fishingrod",
           "$item_graplinghook"
         ],
-        "AllowedSkillTypes": [
-          "Spears",
-          "Bows",
-          "Crossbows",
-          "Knives",
-          "Polearms"
-        ]
+        "ItemHasPierceDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -2179,18 +2127,7 @@
           "Damage"
         ],
         "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
+          "AddFrostDamage"
         ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
@@ -2257,18 +2194,7 @@
           "Damage"
         ],
         "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
+          "AddFireDamage"
         ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
@@ -2334,20 +2260,6 @@
         "AllowedStaffRoles": [
           "Damage"
         ],
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -2412,20 +2324,6 @@
         "AllowedStaffRoles": [
           "Damage"
         ],
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
           "TwoHandedWeapon",
@@ -2489,20 +2387,6 @@
       "Requirements": {
         "AllowedStaffRoles": [
           "Damage"
-        ],
-        "ExclusiveEffectTypes": [
-          "AddBluntDamage",
-          "AddSlashingDamage",
-          "AddPiercingDamage",
-          "ModifyPhysicalDamage",
-          "ModifyDamage",
-          "ModifyDamageLowHealth",
-          "AddFireDamage",
-          "AddFrostDamage",
-          "AddLightningDamage",
-          "AddPoisonDamage",
-          "AddSpiritDamage",
-          "ModifyElementalDamage"
         ],
         "AllowedItemTypes": [
           "OneHandedWeapon",
@@ -2569,14 +2453,19 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExclusiveEffectTypes": [
           "AddElementalResistancePercentage",
           "AddFrostResistancePercentage",
           "AddLightningResistancePercentage",
-          "AddPoisonResistancePercentage",
-          "AddFireResistancePercentage"
+          "AddPoisonResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2631,14 +2520,19 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExclusiveEffectTypes": [
           "AddElementalResistancePercentage",
-          "AddFrostResistancePercentage",
+          "AddFireResistancePercentage",
           "AddLightningResistancePercentage",
-          "AddPoisonResistancePercentage",
-          "AddFireResistancePercentage"
+          "AddPoisonResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2693,14 +2587,19 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExclusiveEffectTypes": [
           "AddElementalResistancePercentage",
+          "AddFireResistancePercentage",
           "AddFrostResistancePercentage",
-          "AddLightningResistancePercentage",
-          "AddPoisonResistancePercentage",
-          "AddFireResistancePercentage"
+          "AddPoisonResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2755,14 +2654,19 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExclusiveEffectTypes": [
           "AddElementalResistancePercentage",
+          "AddFireResistancePercentage",
           "AddFrostResistancePercentage",
-          "AddLightningResistancePercentage",
-          "AddPoisonResistancePercentage",
-          "AddFireResistancePercentage"
+          "AddLightningResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2879,7 +2783,13 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "AllowedRarities": [
           "Epic",
@@ -2888,11 +2798,10 @@
           "Ancient"
         ],
         "ExclusiveEffectTypes": [
-          "AddElementalResistancePercentage",
+          "AddFireResistancePercentage",
           "AddFrostResistancePercentage",
           "AddLightningResistancePercentage",
-          "AddPoisonResistancePercentage",
-          "AddFireResistancePercentage"
+          "AddPoisonResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2928,9 +2837,9 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 50
       },
-      "SelectionWeight": 0.2,
+      "SelectionWeight": 2.6,
       "Prefixes": [
         "$mod_epicloot_me_addelementalresistancepercentage_prefix1"
       ],
@@ -2947,13 +2856,18 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExclusiveEffectTypes": [
           "AddPhysicalResistancePercentage",
           "AddSlashingResistancePercentage",
-          "AddPiercingResistancePercentage",
-          "AddBluntResistancePercentage"
+          "AddPiercingResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2991,7 +2905,7 @@
       "Config": {
         "MaxResistance": 50
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 5.25,
       "Prefixes": [
         "$mod_epicloot_me_addbluntresistancepercentage_prefix1"
       ],
@@ -3008,13 +2922,18 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExclusiveEffectTypes": [
           "AddPhysicalResistancePercentage",
-          "AddSlashingResistancePercentage",
-          "AddPiercingResistancePercentage",
-          "AddBluntResistancePercentage"
+          "AddBluntResistancePercentage",
+          "AddPiercingResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -3052,7 +2971,7 @@
       "Config": {
         "MaxResistance": 50
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 5.25,
       "Prefixes": [
         "$mod_epicloot_me_addslashingresistancepercentage_prefix1"
       ],
@@ -3069,13 +2988,18 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExclusiveEffectTypes": [
           "AddPhysicalResistancePercentage",
-          "AddSlashingResistancePercentage",
-          "AddPiercingResistancePercentage",
-          "AddBluntResistancePercentage"
+          "AddBluntResistancePercentage",
+          "AddSlashingResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -3113,7 +3037,7 @@
       "Config": {
         "MaxResistance": 50
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 5.25,
       "Prefixes": [
         "$mod_epicloot_me_addpiercingresistancepercentage_prefix1"
       ],
@@ -3130,13 +3054,18 @@
           "Helmet",
           "Chest",
           "Legs",
-          "Shoulder"
+          "Shoulder",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ],
         "ExclusiveEffectTypes": [
-          "AddPhysicalResistancePercentage",
+          "AddBluntResistancePercentage",
           "AddSlashingResistancePercentage",
-          "AddPiercingResistancePercentage",
-          "AddBluntResistancePercentage"
+          "AddPiercingResistancePercentage"
         ],
         "AllowedRarities": [
           "Epic",
@@ -3178,9 +3107,9 @@
         }
       },
       "Config": {
-        "MaxResistance": 20
+        "MaxResistance": 50
       },
-      "SelectionWeight": 0.2,
+      "SelectionWeight": 5.1,
       "Prefixes": [
         "$mod_epicloot_me_addphysicalresistancepercentage_prefix1"
       ],
@@ -3200,7 +3129,9 @@
           "Legs",
           "Utility",
           "Trinket",
-          "Tool"
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -3252,7 +3183,9 @@
           "Legs",
           "Utility",
           "Trinket",
-          "Tool"
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -3301,7 +3234,13 @@
       "Description": "$mod_epicloot_me_modifydodgestaminause_desc",
       "Requirements": {
         "AllowedItemTypes": [
-          "Legs"
+          "Legs",
+          "Shield",
+          "Utility",
+          "Trinket",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -3336,7 +3275,7 @@
           "Increment": 0.5
         }
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 5.25,
       "Prefixes": [
         "$mod_epicloot_me_modifydodgestaminause_prefix1"
       ],
@@ -3353,7 +3292,9 @@
           "Legs",
           "Utility",
           "Trinket",
-          "Tool"
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -3435,7 +3376,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 1,
+      "SelectionWeight": 5.5,
       "Prefixes": [
         "$mod_epicloot_me_modifyattackeitruse_prefix1"
       ],
@@ -3482,7 +3423,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 5.25,
       "Prefixes": [
         "$mod_epicloot_me_modifyattackhealthuse_prefix1"
       ],
@@ -3626,7 +3567,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 2.75,
       "Prefixes": [
         "$mod_epicloot_me_modifydrawstaminause_prefix1"
       ],
@@ -3723,7 +3664,7 @@
           "Ancient"
         ]
       },
-      "SelectionWeight": 0.2,
+      "SelectionWeight": 1.1,
       "Prefixes": [
         "$mod_epicloot_me_indestructible_prefix1"
       ],
@@ -3736,13 +3677,10 @@
       "DisplayText": "$mod_epicloot_me_coinhoarder_display",
       "Description": "$mod_epicloot_me_coinhoarder_desc",
       "Requirements": {
-        "ExclusiveEffectTypes": [
-          "ModifyDamage",
-          "ModifyElementalDamage"
-        ],
         "AllowedItemTypes": [
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Helmet"
         ],
         "AllowedRarities": [
           "Epic",
@@ -3831,7 +3769,10 @@
         "AllowedItemTypes": [
           "Shoulder",
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Helmet",
+          "Chest",
+          "Legs"
         ]
       },
       "ValuesPerRarity": {
@@ -3903,10 +3844,6 @@
         ],
         "ExcludedItemNames": [
           "$item_fishingrod",
-          "AxeBerzerkr",
-          "AxeBerzerkrBlood",
-          "AxeBerzerkrLightning",
-          "AxeBerzerkrNature",
           "$item_graplinghook"
         ],
         "ItemUsesStaminaOnAttack": true
@@ -3975,10 +3912,6 @@
         ],
         "ExcludedItemNames": [
           "$item_fishingrod",
-          "AxeBerzerkr",
-          "AxeBerzerkrBlood",
-          "AxeBerzerkrLightning",
-          "AxeBerzerkrNature",
           "$item_graplinghook"
         ],
         "ItemUsesStaminaOnAttack": true
@@ -4135,7 +4068,7 @@
           "Increment": 0.5
         }
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 5.25,
       "Prefixes": [
         "$mod_epicloot_me_modifyattackspeed_prefix1"
       ],
@@ -4190,7 +4123,7 @@
           "Warmth"
         ]
       },
-      "SelectionWeight": 0.2,
+      "SelectionWeight": 2.6,
       "Prefixes": [
         "$mod_epicloot_me_waterproof_prefix1"
       ],
@@ -4216,7 +4149,7 @@
           "Waterproof"
         ]
       },
-      "SelectionWeight": 0.2,
+      "SelectionWeight": 5.1,
       "Prefixes": [
         "$mod_epicloot_me_warmth_prefix1"
       ],
@@ -4289,7 +4222,7 @@
           "Ancient"
         ]
       },
-      "SelectionWeight": 0.2,
+      "SelectionWeight": 2.6,
       "Prefixes": [
         "$mod_epicloot_me_doublejump_prefix1"
       ],
@@ -4402,7 +4335,7 @@
           "Increment": 0.5
         }
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 5.25,
       "Prefixes": [
         "$mod_epicloot_me_quickdraw_prefix1"
       ],
@@ -5001,7 +4934,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 1,
+      "SelectionWeight": 5.5,
       "Prefixes": [
         "$mod_epicloot_me_modifysummonhealth_prefix1"
       ],
@@ -5053,7 +4986,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 1,
+      "SelectionWeight": 5.5,
       "Prefixes": [
         "$mod_epicloot_me_modifysummondamage_prefix1"
       ],
@@ -5298,7 +5231,7 @@
           "Increment": 5
         }
       },
-      "SelectionWeight": 1,
+      "SelectionWeight": 5.5,
       "Prefixes": [
         "$mod_epicloot_me_modifywisprange_prefix1"
       ],
@@ -5412,7 +5345,9 @@
         "AllowedItemTypes": [
           "Legs",
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Chest",
+          "Shoulder"
         ]
       },
       "ValuesPerRarity": {
@@ -5447,7 +5382,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 1,
+      "SelectionWeight": 5.5,
       "Prefixes": [
         "$mod_epicloot_me_addmovementskills_prefix1"
       ],
@@ -5580,7 +5515,7 @@
           "Ancient"
         ]
       },
-      "SelectionWeight": 0.1,
+      "SelectionWeight": 2.55,
       "Prefixes": [
         "$mod_epicloot_me_freebuild_prefix1"
       ],
@@ -5698,7 +5633,7 @@
         "Mythic": { "MinValue": 15, "MaxValue": 18, "Increment": 1 },
         "Ancient": { "MinValue": 18, "MaxValue": 20, "Increment": 1 }
       },
-      "SelectionWeight": 0.2,
+      "SelectionWeight": 2.6,
       "Prefixes": [
         "$mod_epicloot_me_homingmissile_prefix1"
       ],
@@ -5970,7 +5905,7 @@
           "Ancient"
         ]
       },
-      "SelectionWeight": 0.2,
+      "SelectionWeight": 0.6,
       "Prefixes": [
         "$mod_epicloot_me_featherfall_prefix1"
       ],
@@ -6034,7 +5969,11 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Chest",
+          "Legs",
+          "Shoulder",
+          "Helmet"
         ],
         "AllowedRarities": [
           "Epic",
@@ -6065,7 +6004,7 @@
           "Increment": 1
         }
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 5.25,
       "Prefixes": [
         "$mod_epicloot_me_comfortable_prefix1"
       ],
@@ -6085,7 +6024,9 @@
           "Legs",
           "Utility",
           "Trinket",
-          "Tool"
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -6135,7 +6076,15 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Helmet",
-          "Shoulder"
+          "Shoulder",
+          "Chest",
+          "Legs",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -6187,8 +6136,13 @@
           "Legs",
           "Utility",
           "Trinket",
-          "Tool"
-          
+          "Tool",
+          "Helmet",
+          "Chest",
+          "Shoulder",
+          "Shield",
+          "Torch",
+          "TwoHandedWeaponLeft"
         ]
       },
       "ValuesPerRarity": {
@@ -6238,7 +6192,22 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Shoulder",
-          "Staff"
+          "Staff",
+          "Helmet",
+          "Chest",
+          "Legs",
+          "Utility",
+          "Trinket",
+          "Shield",
+          "Tool",
+          "Torch",
+          "TwoHandedWeaponLeft"
+        ],
+        "ExcludedItemNames": [
+          "$item_hammer",
+          "$item_hoe",
+          "$item_cultivator",
+          "$item_fishingrod"
         ]
       },
       "ValuesPerRarity": {
@@ -6289,7 +6258,10 @@
         "AllowedItemTypes": [
           "Chest",
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Helmet",
+          "Legs",
+          "Shoulder"
         ],
         "ItemHasArmor": true
       },
@@ -6762,7 +6734,7 @@
           "Increment": 5
         }
       },
-      "SelectionWeight": 0.2,
+      "SelectionWeight": 5.1,
       "Prefixes": [
         "$mod_epicloot_me_executioner_prefix1"
       ],
@@ -6819,7 +6791,7 @@
         "Amber": 50,
         "Coins": 8
       },
-      "SelectionWeight": 1,
+      "SelectionWeight": 5.5,
       "Prefixes": [
         "$mod_epicloot_me_riches_prefix1"
       ],
@@ -6928,7 +6900,7 @@
           "Increment": 0.5
         }
       },
-      "SelectionWeight": 0.5,
+      "SelectionWeight": 5.25,
       "Prefixes": [
         "$mod_epicloot_me_duelist_prefix1"
       ],
@@ -7084,7 +7056,11 @@
         ],
         "AllowedItemTypes": [
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Helmet",
+          "Chest",
+          "Legs",
+          "Shoulder"
         ],
         "AllowedRarities": [
           "Epic",
@@ -7143,7 +7119,11 @@
         ],
         "AllowedItemTypes": [
           "Utility",
-          "Trinket"
+          "Trinket",
+          "Helmet",
+          "Chest",
+          "Legs",
+          "Shoulder"
         ],
         "AllowedRarities": [
           "Epic",
@@ -7344,12 +7324,11 @@
     },
     {
       "Type": "TripleBowShot",
-      "DisplayText": "$mod_epicloot_me_triplebowshot",
+      "DisplayText": "$mod_epicloot_me_triplebowshot_display",
       "Description": "$mod_epicloot_me_triplebowshot_desc",
       "Requirements": {
         "AllowedItemTypes": [
-          "Bow",
-          "Crossbows"
+          "Bow"
         ],
         "AllowedRarities": [
           "Epic",
@@ -7365,11 +7344,31 @@
           "$item_graplinghook"
         ]
       },
+      "ValuesPerRarity": {
+        "Epic": {
+          "MinValue": 40,
+          "MaxValue": 47,
+          "Increment": 1
+        },
+        "Legendary": {
+          "MinValue": 47,
+          "MaxValue": 53,
+          "Increment": 1
+        },
+        "Mythic": {
+          "MinValue": 53,
+          "MaxValue": 60,
+          "Increment": 1
+        },
+        "Ancient": {
+          "MinValue": 60,
+          "MaxValue": 67,
+          "Increment": 1
+        }
+      },
       "SelectionWeight": 2,
       "Config": {
-        "Chance": 0.75,
-        "Damage": 0.4,
-        "Accuracy": 1.25,
+        "Accuracy": 1.5,
         "Projectiles": 3,
         "CostScale": 2
       },
@@ -7524,7 +7523,6 @@
         ],
         "ItemHasParryPower": true,
         "ExclusiveEffectTypes": [
-          "Duelist",
           "EitrLeech"
         ]
       },
@@ -7558,7 +7556,7 @@
       "Config": {
         "MaxEitrPercentPerValue": 0.2
       },
-      "SelectionWeight": 1,
+      "SelectionWeight": 5.5,
       "Prefixes": [
         "$mod_epicloot_me_eitrweave_prefix1"
       ],

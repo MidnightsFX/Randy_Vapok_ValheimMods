@@ -14,11 +14,11 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6, "Ancient": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "AddFireDamage",
-          "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
+          "Values": { "MinValue": 16, "MaxValue": 20, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
-            "Mythic": { "MinValue": 23, "MaxValue": 28.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 26, "MaxValue": 32.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 16, "MaxValue": 20, "Increment": 0.5 },
+            "Mythic": { "MinValue": 19, "MaxValue": 24, "Increment": 0.5 },
+            "Ancient": { "MinValue": 22.5, "MaxValue": 28, "Increment": 0.5 }
           } }
       ]
     },
@@ -36,10 +36,10 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6 },
       "GuaranteedMagicEffects": [
         { "Type": "ModifyMovementSpeed",
-          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
+          "Values": { "MinValue": 6, "MaxValue": 7.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 6, "MaxValue": 7.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 7, "MaxValue": 9, "Increment": 0.5 }
           } }
       ]
     },
@@ -55,10 +55,10 @@
       "GuaranteedEffectCountPerRarity": { "Mythic": 6, "Ancient": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "ModifyDamage",
-          "Values": { "MinValue": 9.2, "MaxValue": 11.5, "Increment": 0.1 },
+          "Values": { "MinValue": 5.5, "MaxValue": 6.9, "Increment": 0.1 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 9.2, "MaxValue": 11.5, "Increment": 0.1 },
-            "Ancient": { "MinValue": 10.4, "MaxValue": 13, "Increment": 0.1 }
+            "Mythic": { "MinValue": 5.5, "MaxValue": 6.9, "Increment": 0.1 },
+            "Ancient": { "MinValue": 5.2, "MaxValue": 6.5, "Increment": 0.1 }
           } }
       ]
     },
@@ -75,16 +75,16 @@
       "GuaranteedEffectCountPerRarity": { "Mythic": 7, "Ancient": 8 },
       "GuaranteedMagicEffects": [
         { "Type": "ModifyPhysicalDamage",
-          "Values": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
+          "Values": { "MinValue": 7, "MaxValue": 9, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 15.5, "MaxValue": 19.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 7, "MaxValue": 9, "Increment": 0.5 },
+            "Ancient": { "MinValue": 8, "MaxValue": 10, "Increment": 0.5 }
           } },
         { "Type": "AddLightningDamage",
-          "Values": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
+          "Values": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 15.5, "MaxValue": 19.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 13.5, "MaxValue": 16.5, "Increment": 0.5 }
           } },
         { "Type": "Throwable" },
         { "Type": "RecallWeapon" }
@@ -120,16 +120,16 @@
         { "Type": "Throwable" },
         { "Type": "RecallWeapon" },
         { "Type": "Opportunist",
-          "Values": { "MinValue": 28.5, "MaxValue": 34.5, "Increment": 0.5 },
+          "Values": { "MinValue": 23, "MaxValue": 27.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 28.5, "MaxValue": 34.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 32.5, "MaxValue": 39, "Increment": 0.5 }
+            "Mythic": { "MinValue": 23, "MaxValue": 27.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 27, "MaxValue": 32.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyBackstab",
-          "Values": { "MinValue": 28.75, "MaxValue": 34.5, "Increment": 0.25 },
+          "Values": { "MinValue": 9.5, "MaxValue": 11.5, "Increment": 0.25 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 28.75, "MaxValue": 34.5, "Increment": 0.25 },
-            "Ancient": { "MinValue": 32.5, "MaxValue": 39, "Increment": 0.25 }
+            "Mythic": { "MinValue": 9.5, "MaxValue": 11.5, "Increment": 0.25 },
+            "Ancient": { "MinValue": 10.25, "MaxValue": 12.25, "Increment": 0.25 }
           } }
       ]
     },
@@ -145,10 +145,10 @@
       "GuaranteedEffectCountPerRarity": { "Mythic": 6, "Ancient": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "AddSlashingDamage",
-          "Values": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
+          "Values": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 15.5, "MaxValue": 19.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 13.5, "MaxValue": 16.5, "Increment": 0.5 }
           } },
         { "Type": "Executioner",
           "Values": { "MinValue": 200, "MaxValue": 230, "Increment": 5 },
@@ -157,10 +157,10 @@
             "Ancient": { "MinValue": 230, "MaxValue": 260, "Increment": 5 }
           } },
         { "Type": "ModifyPhysicalDamage",
-          "Values": { "MinValue": 11.5, "MaxValue": 14, "Increment": 0.5 },
+          "Values": { "MinValue": 6, "MaxValue": 7, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 11.5, "MaxValue": 14, "Increment": 0.5 },
-            "Ancient": { "MinValue": 13, "MaxValue": 15.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 6, "MaxValue": 7, "Increment": 0.5 },
+            "Ancient": { "MinValue": 6.5, "MaxValue": 8, "Increment": 0.5 }
           } }
       ]
     },
@@ -180,16 +180,16 @@
         { "Type": "Glowing" },
         { "Type": "RemoveSpeedPenalty" },
         { "Type": "Opportunist",
-          "Values": { "MinValue": 28.5, "MaxValue": 34.5, "Increment": 0.5 },
+          "Values": { "MinValue": 23, "MaxValue": 27.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 28.5, "MaxValue": 34.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 32.5, "MaxValue": 39, "Increment": 0.5 }
+            "Mythic": { "MinValue": 23, "MaxValue": 27.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 27, "MaxValue": 32.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyBackstab",
-          "Values": { "MinValue": 28.75, "MaxValue": 34.5, "Increment": 0.25 },
+          "Values": { "MinValue": 9.5, "MaxValue": 11.5, "Increment": 0.25 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 28.75, "MaxValue": 34.5, "Increment": 0.25 },
-            "Ancient": { "MinValue": 32.5, "MaxValue": 39, "Increment": 0.25 }
+            "Mythic": { "MinValue": 9.5, "MaxValue": 11.5, "Increment": 0.25 },
+            "Ancient": { "MinValue": 10.25, "MaxValue": 12.25, "Increment": 0.25 }
           } }
       ]
     },
@@ -207,16 +207,16 @@
         { "Type": "Throwable" },
         { "Type": "RecallWeapon" },
         { "Type": "AddPoisonDamage",
-          "Values": { "MinValue": 17.5, "MaxValue": 23, "Increment": 0.5 },
+          "Values": { "MinValue": 14.5, "MaxValue": 19, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 17.5, "MaxValue": 23, "Increment": 0.5 },
-            "Ancient": { "MinValue": 19.5, "MaxValue": 26, "Increment": 0.5 }
+            "Mythic": { "MinValue": 14.5, "MaxValue": 19, "Increment": 0.5 },
+            "Ancient": { "MinValue": 16.5, "MaxValue": 22.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyBackstab",
-          "Values": { "MinValue": 23, "MaxValue": 28.75, "Increment": 0.25 },
+          "Values": { "MinValue": 7.75, "MaxValue": 9.5, "Increment": 0.25 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 23, "MaxValue": 28.75, "Increment": 0.25 },
-            "Ancient": { "MinValue": 26, "MaxValue": 32.5, "Increment": 0.25 }
+            "Mythic": { "MinValue": 7.75, "MaxValue": 9.5, "Increment": 0.25 },
+            "Ancient": { "MinValue": 8, "MaxValue": 10.25, "Increment": 0.25 }
           } }
       ]
     },
@@ -232,16 +232,16 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6 },
       "GuaranteedMagicEffects": [
         { "Type": "AddSlashingDamage",
-          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
+          "Values": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyMovementSpeed",
-          "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
+          "Values": { "MinValue": 5, "MaxValue": 6, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
-            "Mythic": { "MinValue": 11.5, "MaxValue": 14, "Increment": 0.5 }
+            "Legendary": { "MinValue": 5, "MaxValue": 6, "Increment": 0.5 },
+            "Mythic": { "MinValue": 6, "MaxValue": 7, "Increment": 0.5 }
           } },
         { "Type": "ModifyAttackSpeed",
           "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
@@ -270,32 +270,32 @@
             "Ancient": { "MinValue": 23, "MaxValue": 27, "Increment": 1 }
           } },
         { "Type": "ModifyStaminaRegenLowHealth",
-          "Values": { "MinValue": 30, "MaxValue": 35, "Increment": 1 },
+          "Values": { "MinValue": 18, "MaxValue": 21, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 30, "MaxValue": 35, "Increment": 1 },
-            "Mythic": { "MinValue": 35, "MaxValue": 40, "Increment": 1 },
-            "Ancient": { "MinValue": 39, "MaxValue": 46, "Increment": 1 }
+            "Legendary": { "MinValue": 18, "MaxValue": 21, "Increment": 1 },
+            "Mythic": { "MinValue": 20, "MaxValue": 23, "Increment": 1 },
+            "Ancient": { "MinValue": 21, "MaxValue": 25, "Increment": 1 }
           } },
         { "Type": "ModifyDamageLowHealth",
-          "Values": { "MinValue": 22, "MaxValue": 25, "Increment": 1 },
+          "Values": { "MinValue": 17, "MaxValue": 19, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 22, "MaxValue": 25, "Increment": 1 },
-            "Mythic": { "MinValue": 25, "MaxValue": 29, "Increment": 1 },
-            "Ancient": { "MinValue": 29, "MaxValue": 33, "Increment": 1 }
+            "Legendary": { "MinValue": 17, "MaxValue": 19, "Increment": 1 },
+            "Mythic": { "MinValue": 19, "MaxValue": 22, "Increment": 1 },
+            "Ancient": { "MinValue": 22, "MaxValue": 25, "Increment": 1 }
           } },
         { "Type": "ModifyAttackSpeedLowHealth",
-          "Values": { "MinValue": 22, "MaxValue": 25, "Increment": 1 },
+          "Values": { "MinValue": 17, "MaxValue": 19, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 22, "MaxValue": 25, "Increment": 1 },
-            "Mythic": { "MinValue": 25, "MaxValue": 29, "Increment": 1 },
-            "Ancient": { "MinValue": 29, "MaxValue": 33, "Increment": 1 }
+            "Legendary": { "MinValue": 17, "MaxValue": 19, "Increment": 1 },
+            "Mythic": { "MinValue": 19, "MaxValue": 22, "Increment": 1 },
+            "Ancient": { "MinValue": 22, "MaxValue": 25, "Increment": 1 }
           } },
         { "Type": "AvoidDamageTakenLowHealth",
-          "Values": { "MinValue": 25, "MaxValue": 28, "Increment": 1 },
+          "Values": { "MinValue": 18, "MaxValue": 21, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 25, "MaxValue": 28, "Increment": 1 },
-            "Mythic": { "MinValue": 29, "MaxValue": 32, "Increment": 1 },
-            "Ancient": { "MinValue": 33, "MaxValue": 36, "Increment": 1 }
+            "Legendary": { "MinValue": 18, "MaxValue": 21, "Increment": 1 },
+            "Mythic": { "MinValue": 20, "MaxValue": 22, "Increment": 1 },
+            "Ancient": { "MinValue": 22, "MaxValue": 24, "Increment": 1 }
           } }
       ]
     },
@@ -311,18 +311,18 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 6, "Mythic": 7, "Ancient": 8 },
       "GuaranteedMagicEffects": [
         { "Type": "AddSlashingDamage",
-          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
+          "Values": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 15.5, "MaxValue": 19.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 13.5, "MaxValue": 16.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyAttackStaminaUse",
-          "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
+          "Values": { "MinValue": 15, "MaxValue": 19, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
-            "Mythic": { "MinValue": 23, "MaxValue": 28.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 26, "MaxValue": 32.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 15, "MaxValue": 19, "Increment": 0.5 },
+            "Mythic": { "MinValue": 17, "MaxValue": 21.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 19.5, "MaxValue": 24.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyAttackSpeed",
           "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
@@ -346,22 +346,22 @@
       "GuaranteedEffectCountPerRarity": { "Mythic": 7, "Ancient": 8 },
       "GuaranteedMagicEffects": [
         { "Type": "AddSlashingDamage",
-          "Values": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
+          "Values": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 15.5, "MaxValue": 19.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 13.5, "MaxValue": 16.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyAttackStaminaUse",
-          "Values": { "MinValue": 23, "MaxValue": 28.5, "Increment": 0.5 },
+          "Values": { "MinValue": 17, "MaxValue": 21.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 23, "MaxValue": 28.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 26, "MaxValue": 32.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 17, "MaxValue": 21.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 19.5, "MaxValue": 24.5, "Increment": 0.5 }
           } },
         { "Type": "LifeSteal",
-          "Values": { "MinValue": 9, "MaxValue": 11.5, "Increment": 0.5 },
+          "Values": { "MinValue": 3.5, "MaxValue": 4.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 9, "MaxValue": 11.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 10.5, "MaxValue": 13, "Increment": 0.5 }
+            "Mythic": { "MinValue": 3.5, "MaxValue": 4.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 4, "MaxValue": 5, "Increment": 0.5 }
           } },
         { "Type": "Indestructible" }
       ]
@@ -378,28 +378,28 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6 },
       "GuaranteedMagicEffects": [
         { "Type": "AddFireDamage",
-          "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
+          "Values": { "MinValue": 8, "MaxValue": 9.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
-            "Mythic": { "MinValue": 11.5, "MaxValue": 14, "Increment": 0.5 }
+            "Legendary": { "MinValue": 8, "MaxValue": 9.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 9.5, "MaxValue": 11.5, "Increment": 0.5 }
           } },
         { "Type": "AddFrostDamage",
-          "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
+          "Values": { "MinValue": 8, "MaxValue": 9.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
-            "Mythic": { "MinValue": 11.5, "MaxValue": 14, "Increment": 0.5 }
+            "Legendary": { "MinValue": 8, "MaxValue": 9.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 9.5, "MaxValue": 11.5, "Increment": 0.5 }
           } },
         { "Type": "AddLightningDamage",
-          "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
+          "Values": { "MinValue": 8, "MaxValue": 9.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
-            "Mythic": { "MinValue": 11.5, "MaxValue": 14, "Increment": 0.5 }
+            "Legendary": { "MinValue": 8, "MaxValue": 9.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 9.5, "MaxValue": 11.5, "Increment": 0.5 }
           } },
         { "Type": "AddPoisonDamage",
-          "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
+          "Values": { "MinValue": 8, "MaxValue": 9.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
-            "Mythic": { "MinValue": 11.5, "MaxValue": 14, "Increment": 0.5 }
+            "Legendary": { "MinValue": 8, "MaxValue": 9.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 9.5, "MaxValue": 11.5, "Increment": 0.5 }
           } }
       ]
     },
@@ -414,22 +414,22 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6 },
       "GuaranteedMagicEffects": [
         { "Type": "AddPiercingDamage",
-          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
+          "Values": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 }
           } },
         { "Type": "LifeSteal",
-          "Values": { "MinValue": 8, "MaxValue": 10, "Increment": 0.5 },
+          "Values": { "MinValue": 3.5, "MaxValue": 4.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 8, "MaxValue": 10, "Increment": 0.5 },
-            "Mythic": { "MinValue": 9, "MaxValue": 11.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 3.5, "MaxValue": 4.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 3.5, "MaxValue": 4.5, "Increment": 0.5 }
           } },
         { "Type": "LifeStealLowHealth",
-          "Values": { "MinValue": 15, "MaxValue": 20, "Increment": 0.5 },
+          "Values": { "MinValue": 5.5, "MaxValue": 7.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 15, "MaxValue": 20, "Increment": 0.5 },
-            "Mythic": { "MinValue": 17.5, "MaxValue": 23, "Increment": 0.5 }
+            "Legendary": { "MinValue": 5.5, "MaxValue": 7.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 6.5, "MaxValue": 8.5, "Increment": 0.5 }
           } }
       ]
     },
@@ -445,10 +445,10 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6 },
       "GuaranteedMagicEffects": [
         { "Type": "AddPiercingDamage",
-          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
+          "Values": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyAttackSpeed",
           "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
@@ -457,10 +457,10 @@
             "Mythic": { "MinValue": 11.5, "MaxValue": 14, "Increment": 0.5 }
           } },
         { "Type": "ModifyAttackStaminaUse",
-          "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
+          "Values": { "MinValue": 15, "MaxValue": 19, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
-            "Mythic": { "MinValue": 23, "MaxValue": 28.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 15, "MaxValue": 19, "Increment": 0.5 },
+            "Mythic": { "MinValue": 17, "MaxValue": 21.5, "Increment": 0.5 }
           } }
       ]
     },
@@ -476,10 +476,10 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 6, "Mythic": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "ModifyMovementSpeed",
-          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
+          "Values": { "MinValue": 6, "MaxValue": 7.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 6, "MaxValue": 7.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 7, "MaxValue": 9, "Increment": 0.5 }
           } },
         { "Type": "RemoveSpeedPenalty" }
       ]
@@ -502,10 +502,10 @@
             "Ancient": { "MinValue": 19.5, "MaxValue": 26, "Increment": 0.5 }
           } },
         { "Type": "AddFrostDamage",
-          "Values": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
+          "Values": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 15.5, "MaxValue": 19.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 13.5, "MaxValue": 16.5, "Increment": 0.5 }
           } },
         { "Type": "Indestructible" }
       ]
@@ -522,11 +522,11 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 6, "Mythic": 7, "Ancient": 8 },
       "GuaranteedMagicEffects": [
         { "Type": "QuickDraw",
-          "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 },
+          "Values": { "MinValue": 19, "MaxValue": 22.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 },
-            "Mythic": { "MinValue": 28.5, "MaxValue": 34.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 32.5, "MaxValue": 39, "Increment": 0.5 }
+            "Legendary": { "MinValue": 19, "MaxValue": 22.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 23, "MaxValue": 27.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 27, "MaxValue": 32.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyDrawStaminaUse",
           "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 1 },
@@ -550,11 +550,11 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6, "Ancient": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "ModifyAttackStaminaUse",
-          "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
+          "Values": { "MinValue": 15, "MaxValue": 19, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
-            "Mythic": { "MinValue": 23, "MaxValue": 28.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 26, "MaxValue": 32.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 15, "MaxValue": 19, "Increment": 0.5 },
+            "Mythic": { "MinValue": 17, "MaxValue": 21.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 19.5, "MaxValue": 24.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyAttackSpeed",
           "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 },
@@ -564,25 +564,25 @@
             "Ancient": { "MinValue": 13, "MaxValue": 15.5, "Increment": 0.5 }
           } },
         { "Type": "AddLightningDamage",
-          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
+          "Values": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 15.5, "MaxValue": 19.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 13.5, "MaxValue": 16.5, "Increment": 0.5 }
           } },
         { "Type": "AddPiercingDamage",
-          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
+          "Values": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 15.5, "MaxValue": 19.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 9.5, "MaxValue": 12, "Increment": 0.5 },
+            "Mythic": { "MinValue": 11.5, "MaxValue": 14.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 13.5, "MaxValue": 16.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyMovementSpeed",
-          "Values": { "MinValue": 8, "MaxValue": 10, "Increment": 0.5 },
+          "Values": { "MinValue": 4, "MaxValue": 5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 8, "MaxValue": 10, "Increment": 0.5 },
-            "Mythic": { "MinValue": 9, "MaxValue": 11.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 10.5, "MaxValue": 13, "Increment": 0.5 }
+            "Legendary": { "MinValue": 4, "MaxValue": 5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 4.5, "MaxValue": 6, "Increment": 0.5 },
+            "Ancient": { "MinValue": 5, "MaxValue": 6.5, "Increment": 0.5 }
           } }
       ]
     },
@@ -603,10 +603,10 @@
             "Ancient": { "MinValue": 2, "MaxValue": 2.6, "Increment": 0.1 }
           } },
         { "Type": "Slow",
-          "Values": { "MinValue": 28.5, "MaxValue": 34.5, "Increment": 0.5 },
+          "Values": { "MinValue": 23, "MaxValue": 27.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 28.5, "MaxValue": 34.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 32.5, "MaxValue": 39, "Increment": 0.5 }
+            "Mythic": { "MinValue": 23, "MaxValue": 27.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 27, "MaxValue": 32.5, "Increment": 0.5 }
           } },
         { "Type": "AddUnarmedSkill",
           "Values": { "MinValue": 23, "MaxValue": 29, "Increment": 1 },
@@ -627,22 +627,22 @@
       "GuaranteedEffectCountPerRarity": { "Mythic": 6, "Ancient": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "ModifyMagicFireRate",
-          "Values": { "MinValue": 37, "MaxValue": 41, "Increment": 1 },
+          "Values": { "MinValue": 25, "MaxValue": 27, "Increment": 1 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 37, "MaxValue": 41, "Increment": 1 },
-            "Ancient": { "MinValue": 42, "MaxValue": 47, "Increment": 1 }
+            "Mythic": { "MinValue": 25, "MaxValue": 27, "Increment": 1 },
+            "Ancient": { "MinValue": 27, "MaxValue": 30, "Increment": 1 }
           } },
         { "Type": "IncreaseEitr",
-          "Values": { "MinValue": 52, "MaxValue": 57, "Increment": 1 },
+          "Values": { "MinValue": 14, "MaxValue": 16, "Increment": 1 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 52, "MaxValue": 57, "Increment": 1 },
-            "Ancient": { "MinValue": 59, "MaxValue": 65, "Increment": 1 }
+            "Mythic": { "MinValue": 14, "MaxValue": 16, "Increment": 1 },
+            "Ancient": { "MinValue": 18, "MaxValue": 20, "Increment": 1 }
           } },
         { "Type": "QuickLearner",
-          "Values": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
+          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 15.5, "MaxValue": 19.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 12, "MaxValue": 15, "Increment": 0.5 },
+            "Ancient": { "MinValue": 14, "MaxValue": 17.5, "Increment": 0.5 }
           } }
       ]
     },
@@ -657,22 +657,22 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 6, "Mythic": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "IncreaseMiningDrop",
-          "Values": { "MinValue": 125, "MaxValue": 150, "Increment": 25 },
+          "Values": { "MinValue": 50, "MaxValue": 75, "Increment": 25 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 125, "MaxValue": 150, "Increment": 25 },
-            "Mythic": { "MinValue": 150, "MaxValue": 175, "Increment": 25 }
+            "Legendary": { "MinValue": 50, "MaxValue": 75, "Increment": 25 },
+            "Mythic": { "MinValue": 75, "MaxValue": 100, "Increment": 25 }
           } },
         { "Type": "AddPickaxesSkill",
-          "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 1 },
+          "Values": { "MinValue": 17, "MaxValue": 21, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 20, "MaxValue": 25, "Increment": 1 },
-            "Mythic": { "MinValue": 23, "MaxValue": 29, "Increment": 1 }
+            "Legendary": { "MinValue": 17, "MaxValue": 21, "Increment": 1 },
+            "Mythic": { "MinValue": 20, "MaxValue": 25, "Increment": 1 }
           } },
         { "Type": "AddCarryWeight",
-          "Values": { "MinValue": 100, "MaxValue": 125, "Increment": 5 },
+          "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 100, "MaxValue": 125, "Increment": 5 },
-            "Mythic": { "MinValue": 115, "MaxValue": 145, "Increment": 5 }
+            "Legendary": { "MinValue": 20, "MaxValue": 25, "Increment": 5 },
+            "Mythic": { "MinValue": 25, "MaxValue": 30, "Increment": 5 }
           } },
         { "Type": "RemoveSpeedPenalty" }
       ]
@@ -695,18 +695,18 @@
             "Ancient": { "MinValue": 156, "MaxValue": 182, "Increment": 1 }
           } },
         { "Type": "ModifyParry",
-          "Values": { "MinValue": 28, "MaxValue": 32, "Increment": 0.5 },
+          "Values": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 28, "MaxValue": 32, "Increment": 0.5 },
-            "Mythic": { "MinValue": 32, "MaxValue": 37, "Increment": 0.5 },
-            "Ancient": { "MinValue": 36.5, "MaxValue": 41.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 },
+            "Mythic": { "MinValue": 16, "MaxValue": 18.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 18, "MaxValue": 21, "Increment": 0.5 }
           } },
         { "Type": "Opportunist",
-          "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
+          "Values": { "MinValue": 15, "MaxValue": 19, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 20, "MaxValue": 25, "Increment": 0.5 },
-            "Mythic": { "MinValue": 23, "MaxValue": 28.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 26, "MaxValue": 32.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 15, "MaxValue": 19, "Increment": 0.5 },
+            "Mythic": { "MinValue": 18.5, "MaxValue": 23, "Increment": 0.5 },
+            "Ancient": { "MinValue": 21.5, "MaxValue": 27, "Increment": 0.5 }
           } }
       ]
     },
@@ -721,10 +721,10 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6 },
       "GuaranteedMagicEffects": [
         { "Type": "ModifyBlockPower",
-          "Values": { "MinValue": 28, "MaxValue": 32, "Increment": 0.5 },
+          "Values": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 28, "MaxValue": 32, "Increment": 0.5 },
-            "Mythic": { "MinValue": 32, "MaxValue": 37, "Increment": 0.5 }
+            "Legendary": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 },
+            "Mythic": { "MinValue": 16, "MaxValue": 18.5, "Increment": 0.5 }
           } },
         { "Type": "AvoidDamageTaken",
           "Values": { "MinValue": 15, "MaxValue": 18, "Increment": 0.5 },
@@ -733,10 +733,10 @@
             "Mythic": { "MinValue": 17.5, "MaxValue": 20.5, "Increment": 0.5 }
           } },
         { "Type": "IncreaseHealth",
-          "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 1 },
+          "Values": { "MinValue": 10, "MaxValue": 12, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 20, "MaxValue": 25, "Increment": 1 },
-            "Mythic": { "MinValue": 23, "MaxValue": 29, "Increment": 1 }
+            "Legendary": { "MinValue": 10, "MaxValue": 12, "Increment": 1 },
+            "Mythic": { "MinValue": 13, "MaxValue": 16, "Increment": 1 }
           } }
       ]
     },
@@ -758,10 +758,10 @@
             "Ancient": { "MinValue": 36, "MaxValue": 42, "Increment": 1 }
           } },
         { "Type": "AddPhysicalResistancePercentage",
-          "Values": { "MinValue": 11.6, "MaxValue": 13.8, "Increment": 0.2 },
+          "Values": { "MinValue": 9.6, "MaxValue": 11.6, "Increment": 0.2 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 11.6, "MaxValue": 13.8, "Increment": 0.2 },
-            "Ancient": { "MinValue": 13, "MaxValue": 15.6, "Increment": 0.2 }
+            "Mythic": { "MinValue": 9.6, "MaxValue": 11.6, "Increment": 0.2 },
+            "Ancient": { "MinValue": 11.2, "MaxValue": 13.4, "Increment": 0.2 }
           } }
       ]
     },
@@ -776,10 +776,10 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6 },
       "GuaranteedMagicEffects": [
         { "Type": "AddPoisonResistancePercentage",
-          "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 },
+          "Values": { "MinValue": 16.5, "MaxValue": 20, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 },
-            "Mythic": { "MinValue": 28.5, "MaxValue": 34.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 16.5, "MaxValue": 20, "Increment": 0.5 },
+            "Mythic": { "MinValue": 19, "MaxValue": 23, "Increment": 0.5 }
           } },
         { "Type": "AvoidDamageTaken",
           "Values": { "MinValue": 16, "MaxValue": 18, "Increment": 0.5 },
@@ -788,10 +788,10 @@
             "Mythic": { "MinValue": 18.5, "MaxValue": 20.5, "Increment": 0.5 }
           } },
         { "Type": "ModifyHealthRegen",
-          "Values": { "MinValue": 20, "MaxValue": 24, "Increment": 1 },
+          "Values": { "MinValue": 12, "MaxValue": 15, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 20, "MaxValue": 24, "Increment": 1 },
-            "Mythic": { "MinValue": 23, "MaxValue": 28, "Increment": 1 }
+            "Legendary": { "MinValue": 12, "MaxValue": 15, "Increment": 1 },
+            "Mythic": { "MinValue": 14, "MaxValue": 17, "Increment": 1 }
           } }
       ]
     },
@@ -806,22 +806,22 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 6, "Mythic": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "ModifyMovementSpeed",
+          "Values": { "MinValue": 7, "MaxValue": 8, "Increment": 0.5 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 7, "MaxValue": 8, "Increment": 0.5 },
+            "Mythic": { "MinValue": 8, "MaxValue": 9, "Increment": 0.5 }
+          } },
+        { "Type": "ModifySprintStaminaUse",
           "Values": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 },
           "ValuesPerRarity": {
             "Legendary": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 },
             "Mythic": { "MinValue": 16, "MaxValue": 18.5, "Increment": 0.5 }
           } },
-        { "Type": "ModifySprintStaminaUse",
-          "Values": { "MinValue": 28, "MaxValue": 32, "Increment": 0.5 },
-          "ValuesPerRarity": {
-            "Legendary": { "MinValue": 28, "MaxValue": 32, "Increment": 0.5 },
-            "Mythic": { "MinValue": 32, "MaxValue": 37, "Increment": 0.5 }
-          } },
         { "Type": "ModifyDiscoveryRadius",
-          "Values": { "MinValue": 30, "MaxValue": 35, "Increment": 1 },
+          "Values": { "MinValue": 27, "MaxValue": 32, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 30, "MaxValue": 35, "Increment": 1 },
-            "Mythic": { "MinValue": 35, "MaxValue": 40, "Increment": 1 }
+            "Legendary": { "MinValue": 27, "MaxValue": 32, "Increment": 1 },
+            "Mythic": { "MinValue": 31, "MaxValue": 35, "Increment": 1 }
           } },
         { "Type": "FeatherFall" }
       ]
@@ -837,18 +837,18 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 5, "Mythic": 6, "Ancient": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "StaggerOnDamageTaken",
-          "Values": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 },
+          "Values": { "MinValue": 9, "MaxValue": 10, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 14, "MaxValue": 16, "Increment": 0.5 },
-            "Mythic": { "MinValue": 16, "MaxValue": 18.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 18, "MaxValue": 21, "Increment": 0.5 }
+            "Legendary": { "MinValue": 9, "MaxValue": 10, "Increment": 0.5 },
+            "Mythic": { "MinValue": 9.5, "MaxValue": 11, "Increment": 0.5 },
+            "Ancient": { "MinValue": 10.5, "MaxValue": 12, "Increment": 0.5 }
           } },
         { "Type": "ModifyArmor",
-          "Values": { "MinValue": 22, "MaxValue": 25, "Increment": 0.5 },
+          "Values": { "MinValue": 14.5, "MaxValue": 16.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 22, "MaxValue": 25, "Increment": 0.5 },
-            "Mythic": { "MinValue": 25.5, "MaxValue": 28.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 28.5, "MaxValue": 32.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 14.5, "MaxValue": 16.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 17, "MaxValue": 19, "Increment": 0.5 },
+            "Ancient": { "MinValue": 19, "MaxValue": 21.5, "Increment": 0.5 }
           } },
         { "Type": "HeadHunter",
           "Values": { "MinValue": 20, "MaxValue": 24, "Increment": 0.5 },
@@ -872,11 +872,11 @@
         { "Type": "DoubleJump" },
         { "Type": "FeatherFall" },
         { "Type": "ModifyJumpStaminaUse",
-          "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 },
+          "Values": { "MinValue": 20, "MaxValue": 24, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 25, "MaxValue": 30, "Increment": 0.5 },
-            "Mythic": { "MinValue": 28.5, "MaxValue": 34.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 32.5, "MaxValue": 39, "Increment": 0.5 }
+            "Legendary": { "MinValue": 20, "MaxValue": 24, "Increment": 0.5 },
+            "Mythic": { "MinValue": 24, "MaxValue": 29, "Increment": 0.5 },
+            "Ancient": { "MinValue": 28, "MaxValue": 33.5, "Increment": 0.5 }
           } }
       ]
     },
@@ -891,16 +891,16 @@
       "GuaranteedEffectCountPerRarity": { "Legendary": 6, "Mythic": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "AddFireDamage",
-          "Values": { "MinValue": 18, "MaxValue": 22, "Increment": 0.5 },
+          "Values": { "MinValue": 14.5, "MaxValue": 17.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 18, "MaxValue": 22, "Increment": 0.5 },
-            "Mythic": { "MinValue": 20.5, "MaxValue": 25.5, "Increment": 0.5 }
+            "Legendary": { "MinValue": 14.5, "MaxValue": 17.5, "Increment": 0.5 },
+            "Mythic": { "MinValue": 17, "MaxValue": 21, "Increment": 0.5 }
           } },
         { "Type": "Comfortable",
-          "Values": { "MinValue": 4, "MaxValue": 5, "Increment": 1 },
+          "Values": { "MinValue": 2, "MaxValue": 2, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 4, "MaxValue": 5, "Increment": 1 },
-            "Mythic": { "MinValue": 5, "MaxValue": 6, "Increment": 1 }
+            "Legendary": { "MinValue": 2, "MaxValue": 2, "Increment": 1 },
+            "Mythic": { "MinValue": 3, "MaxValue": 4, "Increment": 1 }
           } },
         { "Type": "Warmth" },
         { "Type": "Indestructible" }
@@ -918,10 +918,10 @@
       "GuaranteedMagicEffects": [
         { "Type": "FreeBuild" },
         { "Type": "ModifyBuildDistance",
-          "Values": { "MinValue": 80, "MaxValue": 100, "Increment": 1 },
+          "Values": { "MinValue": 53, "MaxValue": 67, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 80, "MaxValue": 100, "Increment": 1 },
-            "Mythic": { "MinValue": 92, "MaxValue": 115, "Increment": 1 }
+            "Legendary": { "MinValue": 53, "MaxValue": 67, "Increment": 1 },
+            "Mythic": { "MinValue": 46, "MaxValue": 58, "Increment": 1 }
           } },
         { "Type": "AddCrafterSkills",
           "Values": { "MinValue": 20, "MaxValue": 25, "Increment": 1 },
@@ -943,22 +943,22 @@
       "GuaranteedEffectCountPerRarity": { "Mythic": 6, "Ancient": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "Riches",
-          "Values": { "MinValue": 17.5, "MaxValue": 20.5, "Increment": 0.5 },
+          "Values": { "MinValue": 10.5, "MaxValue": 12.5, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 17.5, "MaxValue": 20.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 19.5, "MaxValue": 23.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 10.5, "MaxValue": 12.5, "Increment": 0.5 },
+            "Ancient": { "MinValue": 11.5, "MaxValue": 13.5, "Increment": 0.5 }
           } },
         { "Type": "CoinHoarder",
-          "Values": { "MinValue": 17.5, "MaxValue": 20.5, "Increment": 0.5 },
+          "Values": { "MinValue": 9, "MaxValue": 10, "Increment": 0.5 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 17.5, "MaxValue": 20.5, "Increment": 0.5 },
-            "Ancient": { "MinValue": 19.5, "MaxValue": 23.5, "Increment": 0.5 }
+            "Mythic": { "MinValue": 9, "MaxValue": 10, "Increment": 0.5 },
+            "Ancient": { "MinValue": 10, "MaxValue": 12, "Increment": 0.5 }
           } },
         { "Type": "Luck",
-          "Values": { "MinValue": 23, "MaxValue": 28, "Increment": 1 },
+          "Values": { "MinValue": 20, "MaxValue": 24, "Increment": 1 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 23, "MaxValue": 28, "Increment": 1 },
-            "Ancient": { "MinValue": 26, "MaxValue": 31, "Increment": 1 }
+            "Mythic": { "MinValue": 20, "MaxValue": 24, "Increment": 1 },
+            "Ancient": { "MinValue": 23, "MaxValue": 28, "Increment": 1 }
           } }
       ]
     },
@@ -988,16 +988,16 @@
       "GuaranteedEffectCountPerRarity": { "Mythic": 6, "Ancient": 7 },
       "GuaranteedMagicEffects": [
         { "Type": "AddElementalResistancePercentage",
-          "Values": { "MinValue": 11.6, "MaxValue": 13.8, "Increment": 0.2 },
+          "Values": { "MinValue": 9.6, "MaxValue": 11.6, "Increment": 0.2 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 11.6, "MaxValue": 13.8, "Increment": 0.2 },
-            "Ancient": { "MinValue": 13, "MaxValue": 15.6, "Increment": 0.2 }
+            "Mythic": { "MinValue": 9.6, "MaxValue": 11.6, "Increment": 0.2 },
+            "Ancient": { "MinValue": 11.2, "MaxValue": 13.4, "Increment": 0.2 }
           } },
         { "Type": "IncreaseHealth",
-          "Values": { "MinValue": 25, "MaxValue": 30, "Increment": 1 },
+          "Values": { "MinValue": 14, "MaxValue": 17, "Increment": 1 },
           "ValuesPerRarity": {
-            "Mythic": { "MinValue": 25, "MaxValue": 30, "Increment": 1 },
-            "Ancient": { "MinValue": 29, "MaxValue": 34, "Increment": 1 }
+            "Mythic": { "MinValue": 14, "MaxValue": 17, "Increment": 1 },
+            "Ancient": { "MinValue": 17, "MaxValue": 20, "Increment": 1 }
           } }
       ]
     },
@@ -2230,7 +2230,7 @@
         "HeimdallLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "ModifyBlockPower", "Values": { "MinValue": 40, "MaxValue": 40, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyBlockPower", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Bulwark" } },
         { "Count": 4, "Effect": { "Type": "Undying" } }
       ]
@@ -2252,7 +2252,7 @@
       ],
       "SetBonuses": [
         { "Count": 2, "Effect": { "Type": "AddHealthRegen", "Values": { "MinValue": 3, "MaxValue": 3, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "ModifyHealthRegen", "Values": { "MinValue": 50, "MaxValue": 50, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyHealthRegen", "Values": { "MinValue": 31, "MaxValue": 31, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Berserker" } },
         { "Count": 4, "Effect": { "Type": "FrostDamageAOE", "Values": { "MinValue": 40, "MaxValue": 40, "Increment": 1 } } }
       ]
@@ -2274,8 +2274,8 @@
         "ThorLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddLightningResistancePercentage", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "AddLightningDamage", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddLightningResistancePercentage", "Values": { "MinValue": 17, "MaxValue": 17, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "AddLightningDamage", "Values": { "MinValue": 16, "MaxValue": 16, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "OverwhelmingLaunch", "Values": { "MinValue": 50, "MaxValue": 50, "Increment": 1 } } }
       ]
     },
@@ -2295,10 +2295,16 @@
         "DvergerArsenalChest"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AmmoConservation", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "AddCrossbowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "QuickDraw", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "TripleBowShot" } },
+        { "Count": 2, "Effect": { "Type": "AmmoConservation", "Values": { "MinValue": 12, "MaxValue": 12, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddCrossbowsSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "QuickDraw", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "TripleBowShot",
+          "Values": { "MinValue": 37, "MaxValue": 37, "Increment": 1 },
+          "ValuesPerRarity": {
+            "Legendary": { "MinValue": 37, "MaxValue": 37, "Increment": 1 },
+            "Mythic": { "MinValue": 39, "MaxValue": 39, "Increment": 1 },
+            "Ancient": { "MinValue": 40, "MaxValue": 40, "Increment": 1 }
+          } } },
         { "Count": 4, "Effect": { "Type": "Artillery",
           "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2322,10 +2328,10 @@
         "LokiLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "ModifyNoise", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "Opportunist", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyNoise", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "Opportunist", "Values": { "MinValue": 11, "MaxValue": 11, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "DodgeBuff", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "ModifyBackstab", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyBackstab", "Values": { "MinValue": 4, "MaxValue": 4, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "Assassin",
           "Values": { "MinValue": 200, "MaxValue": 200, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2352,7 +2358,7 @@
         "JormungandrLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddPoisonResistancePercentage", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddPoisonResistancePercentage", "Values": { "MinValue": 17, "MaxValue": 17, "Increment": 1 } } },
         { "Count": 2, "Effect": { "Type": "IncreaseAllPoisonDamageDone", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "CoilingVenom",
           "Values": { "MinValue": 50, "MaxValue": 50, "Increment": 1 },
@@ -2382,10 +2388,10 @@
         "EgilLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddBowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddBowsSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
         { "Count": 2, "Effect": { "Type": "ModifyDrawStaminaUse", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "ModifyBackstab", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "AddMovementSkills", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyBackstab", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "AddMovementSkills", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "Sniper",
           "Values": { "MinValue": 0.8, "MaxValue": 0.8, "Increment": 0.1 },
           "ValuesPerRarity": {
@@ -2412,7 +2418,7 @@
       ],
       "SetBonuses": [
         { "Count": 2, "Effect": { "Type": "EnergeticEitr", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "ModifyEitrRegen", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyEitrRegen", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "HeartyEitr", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "Frostwalker",
           "Values": { "MinValue": 3, "MaxValue": 3, "Increment": 0.5 },
@@ -2439,7 +2445,7 @@
       "SetBonuses": [
         { "Count": 2, "Effect": { "Type": "IncreaseRangedSkills", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
         { "Count": 2, "Effect": { "Type": "IncreaseMeleeSkills", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "QuickDraw", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "QuickDraw", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "ModifyAttackSpeed", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "SpiritAnimal",
           "Values": { "MinValue": 100, "MaxValue": 100, "Increment": 5 },
@@ -2462,10 +2468,10 @@
         "FreyjaCloak"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddSpearsSkill", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "AddPiercingResistancePercentage", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddSpearsSkill", "Values": { "MinValue": 17, "MaxValue": 17, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddPiercingResistancePercentage", "Values": { "MinValue": 13, "MaxValue": 13, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "DoubleJump" } },
-        { "Count": 3, "Effect": { "Type": "ModifyJumpStaminaUse", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyJumpStaminaUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "Earthshaker",
           "Values": { "MinValue": 200, "MaxValue": 200, "Increment": 50 },
           "ValuesPerRarity": {
@@ -2491,10 +2497,10 @@
         "BolthornLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddCrossbowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddCrossbowsSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
         { "Count": 2, "Effect": { "Type": "ModifyProjectileSpeed", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "QuickDraw", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "ModifyStaggerDamage", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "QuickDraw", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyStaggerDamage", "Values": { "MinValue": 22, "MaxValue": 22, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "PiercingBolts",
           "Values": { "MinValue": 75, "MaxValue": 75, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2521,8 +2527,8 @@
         "HeidrMantle"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddElementalMagicSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "ModifyEitrRegen", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddElementalMagicSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyEitrRegen", "Values": { "MinValue": 13, "MaxValue": 13, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "ElementalArchery" } },
         { "Count": 4, "Effect": { "Type": "ConjuredArrows",
           "Values": { "MinValue": 80, "MaxValue": 80, "Increment": 1 },
@@ -2548,10 +2554,10 @@
         "MimirCape"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "IncreaseEitr", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "IncreaseEitr", "Values": { "MinValue": 6, "MaxValue": 6, "Increment": 1 } } },
         { "Count": 2, "Effect": { "Type": "ConvertHealthToEitr", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "DeepWell", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "EitrLeech", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "EitrLeech", "Values": { "MinValue": 3, "MaxValue": 3, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "EitrBarrier",
           "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2574,8 +2580,8 @@
       ],
       "SetBonuses": [
         { "Count": 2, "Effect": { "Type": "EitrWeave", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "SpellSword", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "EitrLeech", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "SpellSword", "Values": { "MinValue": 11, "MaxValue": 11, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "EitrLeech", "Values": { "MinValue": 3, "MaxValue": 3, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Interconnected",
           "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2604,8 +2610,8 @@
         "UllrLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddBowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "AddAxesSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddBowsSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddAxesSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Interconnected",
           "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2613,7 +2619,7 @@
             "Mythic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
             "Ancient": { "MinValue": 30, "MaxValue": 30, "Increment": 1 }
           } } },
-        { "Count": 3, "Effect": { "Type": "ModifySprintStaminaUse", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifySprintStaminaUse", "Values": { "MinValue": 12, "MaxValue": 12, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "QuarryMark",
           "Values": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2639,7 +2645,7 @@
         "HelMantle"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddBloodMagicSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddBloodMagicSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
         { "Count": 2, "Effect": { "Type": "ModifyAttackHealthUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Interconnected",
           "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
@@ -2648,7 +2654,7 @@
             "Mythic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },
             "Ancient": { "MinValue": 30, "MaxValue": 30, "Increment": 1 }
           } } },
-        { "Count": 3, "Effect": { "Type": "LifeSteal", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "LifeSteal", "Values": { "MinValue": 2, "MaxValue": 2, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "HelsHarvest",
           "Values": { "MinValue": 2, "MaxValue": 2, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2669,8 +2675,8 @@
         "HuldraCape"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddKnivesSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "AddCrossbowsSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddKnivesSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddCrossbowsSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Interconnected",
           "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2686,11 +2692,11 @@
             "Ancient": { "MinValue": 5, "MaxValue": 5, "Increment": 0.5 }
           } } },
         { "Count": 4, "Effect": { "Type": "ModifyBackstab",
-          "Values": { "MinValue": 150, "MaxValue": 150, "Increment": 1 },
+          "Values": { "MinValue": 56, "MaxValue": 56, "Increment": 1 },
           "ValuesPerRarity": {
-            "Legendary": { "MinValue": 150, "MaxValue": 150, "Increment": 1 },
-            "Mythic": { "MinValue": 200, "MaxValue": 200, "Increment": 1 },
-            "Ancient": { "MinValue": 250, "MaxValue": 250, "Increment": 1 }
+            "Legendary": { "MinValue": 56, "MaxValue": 56, "Increment": 1 },
+            "Mythic": { "MinValue": 67, "MaxValue": 67, "Increment": 1 },
+            "Ancient": { "MinValue": 78, "MaxValue": 78, "Increment": 1 }
           } } }
       ]
     },
@@ -2707,9 +2713,9 @@
         "SurtrLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "IncreaseHeatResistance", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "AddFireResistancePercentage", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "AddFireDamage", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "IncreaseHeatResistance", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddFireResistancePercentage", "Values": { "MinValue": 17, "MaxValue": 17, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "AddFireDamage", "Values": { "MinValue": 16, "MaxValue": 16, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Executioner", "Values": { "MinValue": 100, "MaxValue": 100, "Increment": 5 } } },
         { "Count": 4, "Effect": { "Type": "Firebrand",
           "Values": { "MinValue": 75, "MaxValue": 75, "Increment": 25 },
@@ -2733,8 +2739,8 @@
       ],
       "SetBonuses": [
         { "Count": 2, "Effect": { "Type": "ModifyAttackHealthUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "AddBloodMagicSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "LifeSteal", "Values": { "MinValue": 5, "MaxValue": 5, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddBloodMagicSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "LifeSteal", "Values": { "MinValue": 2, "MaxValue": 2, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Bloodlust" } },
         { "Count": 4, "Effect": { "Type": "LifeSiphon",
           "Values": { "MinValue": 4, "MaxValue": 4, "Increment": 1 },
@@ -2757,10 +2763,10 @@
         "HrungnirLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "ModifyBlockPower", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "AddBlockingSkill", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "ModifyBlockStaminaUse", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
-        { "Count": 3, "Effect": { "Type": "ReflectDamage", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyBlockPower", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddBlockingSkill", "Values": { "MinValue": 12, "MaxValue": 12, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ModifyBlockStaminaUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 3, "Effect": { "Type": "ReflectDamage", "Values": { "MinValue": 18, "MaxValue": 18, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "KineticQuake",
           "Values": { "MinValue": 16, "MaxValue": 16, "Increment": 1 },
           "ValuesPerRarity": {
@@ -2782,8 +2788,8 @@
         "SvalinnLegs"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddBlockingSkill", "Values": { "MinValue": 15, "MaxValue": 15, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "ModifyBlockStaminaUse", "Values": { "MinValue": 25, "MaxValue": 25, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddBlockingSkill", "Values": { "MinValue": 12, "MaxValue": 12, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyBlockStaminaUse", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "ReduceStaggerTaken", "Values": { "MinValue": 30, "MaxValue": 30, "Increment": 1 } } },
         { "Count": 4, "Effect": { "Type": "ShieldThrow",
           "Values": { "MinValue": 100, "MaxValue": 100, "Increment": 1 },
@@ -2805,8 +2811,8 @@
         "GullveigCape"
       ],
       "SetBonuses": [
-        { "Count": 2, "Effect": { "Type": "AddElementalMagicSkill", "Values": { "MinValue": 10, "MaxValue": 10, "Increment": 1 } } },
-        { "Count": 2, "Effect": { "Type": "ModifyEitrRegen", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "AddElementalMagicSkill", "Values": { "MinValue": 8, "MaxValue": 8, "Increment": 1 } } },
+        { "Count": 2, "Effect": { "Type": "ModifyEitrRegen", "Values": { "MinValue": 13, "MaxValue": 13, "Increment": 1 } } },
         { "Count": 3, "Effect": { "Type": "Interconnected", "Values": { "MinValue": 20, "MaxValue": 20, "Increment": 1 }, "ValuesPerRarity": {
           "Legendary": { "MinValue": 20, "MaxValue": 20, "Increment": 1 },
           "Mythic": { "MinValue": 25, "MaxValue": 25, "Increment": 1 },

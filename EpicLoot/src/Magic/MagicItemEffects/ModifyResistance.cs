@@ -84,12 +84,28 @@ public static class ModifyResistance
     public static float GetResistanceCap(string effect)
     {
         Dictionary<string, float> cfg = MagicItemEffectDefinitions.GetEffectConfig(effect);
-        if (cfg == null || !cfg.ContainsKey("MaxResistance"))
+        if (cfg != null && cfg.TryGetValue("MaxResistance", out float maxResistance))
         {
-            return 1f;
+            return Mathf.Clamp01(maxResistance / 100f);
         }
 
-        return Mathf.Clamp01(cfg["MaxResistance"] / 100f);
+        // Chop has no enchantment of its own, only the physical group's bonus, so the group's cap is what limits it.
+        string group = GetGroupOf(effect);
+        return group != null ? GetResistanceCap(group) : 1f;
+    }
+
+    private static string GetGroupOf(string effect)
+    {
+        foreach (HitData.DamageType type in System.Enum.GetValues(typeof(HitData.DamageType)))
+        {
+            if (GetResistanceEffect(type) == effect)
+            {
+                string group = GetGroupResistanceEffect(type);
+                return group != effect ? group : null;
+            }
+        }
+
+        return null;
     }
 
     public static float GetUncappedResistanceFraction(Player player, string effect, float additionalResistance = 0f)

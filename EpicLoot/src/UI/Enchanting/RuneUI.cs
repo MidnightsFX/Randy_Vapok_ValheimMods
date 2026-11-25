@@ -516,9 +516,10 @@ namespace EpicLoot_UnityLib
                 return;
             }
 
-            List<InventoryItemListElement> availableEnchantRunes =
-                EnchantingUIController.GetApplyableRunesforItem(_selectedItem, EnchantingUIController.GetSelectedEnchantmentNameByIndex(_selectedItem, _selectedEnchantmentIndex));
-            AvailableRunes.SetItems(availableEnchantRunes.Cast<IListElement>().ToList());
+            string selectedEffect = EnchantingUIController.GetSelectedEnchantmentNameByIndex(_selectedItem, _selectedEnchantmentIndex);
+            List<InventoryItemListElement> runes = EnchantingUIController.GetApplyableRunesforItem(_selectedItem, selectedEffect);
+            runes.AddRange(EnchantingUIController.GetBlockedRunesForItem(_selectedItem, selectedEffect, runes));
+            AvailableRunes.SetItems(runes.Cast<IListElement>().ToList());
         }
 
         private void ClearEnchantmentList()
@@ -597,6 +598,16 @@ namespace EpicLoot_UnityLib
             // ClampFocus keeps the old row index, which may now sit below the fold of a list that just
             // went back to the top.
             _focusScrollRequestFrame = Time.frameCount;
+
+            // The rune column lists runes for one chosen enchantment, so with none chosen it stays empty.
+            if (item != null && !_locked)
+            {
+                EnchantmentRow first = _enchantmentRows.FirstOrDefault(row => row.Selectable);
+                if (first != null)
+                {
+                    first.Toggle.isOn = true;
+                }
+            }
         }
 
         // Indexed off the tracked rows, not off EnchantList: a rebuild leaves the previous rows parented
@@ -1154,7 +1165,6 @@ namespace EpicLoot_UnityLib
                 _selectedItem = selectedItem.Item1.GetItem();
                 _selectedRarity = _selectedItem.GetRarity();
                 UpdateDisplaySelectedItemEnchantments();
-                _selectedEnchantmentIndex = -1;
             }
             else
             {

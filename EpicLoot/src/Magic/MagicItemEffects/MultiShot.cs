@@ -24,6 +24,11 @@ namespace EpicLoot.MagicItemEffects
         private static Attack _scaledBurstAttack;
         private static float _scaledBurstDamage = 1f;
 
+        // The local player's Triple Shot value when the pending shot was rolled: each arrow's share of the shot's
+        // damage, in percent.
+        private static float _tripleShotValue;
+        private const float LegacyTripleShotDamage = 0.4f;
+
         // True while the local player's current attack fires a triple shot (rolled in OnAttackTrigger, before
         // its bursts), for effects that change how each of its projectiles flies.
         internal static bool IsTripleShotFiring => _pendingShot == PendingShotType.TripleBow;
@@ -47,13 +52,45 @@ namespace EpicLoot.MagicItemEffects
             return true;
         }
 
+        private static float GetFloat(Dictionary<string, float> configuration, string key, float fallback)
+        {
+            return configuration != null && configuration.TryGetValue(key, out float value) ? value : fallback;
+        }
+
         private static int GetProjectileCount(Dictionary<string, float> configuration, int fallback)
         {
-            if (configuration != null && configuration.ContainsKey(PROJECTILES_KEY))
+            return Mathf.Max(1, Mathf.RoundToInt(GetFloat(configuration, PROJECTILES_KEY, fallback)));
+        }
+
+        /// <summary>
+        /// Each Triple Shot arrow's share of the shot's damage, from the rolled value (a percent, at most a full arrow).
+        /// A value of 1 is an item rolled before Triple Shot had values and not yet converted, which keeps the old
+        /// fixed share.
+        /// </summary>
+        private static float TripleShotDamage(Dictionary<string, float> configuration, float value)
+        {
+            return value > MagicItemEffect.DefaultValue
+                ? Mathf.Clamp01(value / 100f)
+                : Mathf.Max(0f, GetFloat(configuration, DAMAGE_KEY, LegacyTripleShotDamage));
+        }
+
+        /// <summary>
+        /// Items rolled before Triple Shot had per-rarity values carry the default value. Each gets one of its
+        /// rarity's values once, picked by <paramref name="seed"/> (a hash of the item's saved text) rather than at
+        /// random, so every client converts the same item to the same value.
+        /// </summary>
+        public static bool ConvertLegacyTripleShot(MagicItemEffect effect, ItemRarity rarity, int seed)
+        {
+            if (effect == null || effect.EffectType != MagicEffectType.TripleBowShot ||
+                effect.EffectValue > MagicItemEffect.DefaultValue ||
+                !MagicItemEffectDefinitions.TryGet(effect.EffectType, out MagicItemEffectDefinition definition) ||
+                definition.GetValuesForRarity(rarity) is not { Increment: > 0f } values)
             {
-                return Mathf.Max(1, Mathf.RoundToInt(configuration[PROJECTILES_KEY]));
+                return false;
             }
-            return fallback;
+
+            effect.EffectValue = values.MinValue + (seed & int.MaxValue) % (values.GetStepCount() + 1) * values.Increment;
+            return true;
         }
 
         // The proc is decided before vanilla consumes ammo: OnAttackTrigger calls UseAmmo first and
@@ -83,8 +120,9 @@ namespace EpicLoot.MagicItemEffects
             // otherwise triple a staff's shots or the grappling hook's.
             var skill = __instance.GetWeapon().m_shared.m_skillType;
             if ((skill == Skills.SkillType.Bows || skill == Skills.SkillType.Crossbows) &&
-                player.HasActiveMagicEffect(MagicEffectType.TripleBowShot, out float _))
+                player.HasActiveMagicEffect(MagicEffectType.TripleBowShot, out float tripleShotValue))
             {
+                _tripleShotValue = tripleShotValue;
                 var cfg = GetEffectConfig(MagicEffectType.TripleBowShot);
                 // Decided here, before vanilla takes the ammo: a proc the player cannot pay for fires an ordinary shot,
                 // and must not have taken the extra arrows first.
@@ -124,17 +162,23 @@ namespace EpicLoot.MagicItemEffects
 
             if (_pendingShot == PendingShotType.TripleBow)
             {
-                ModifyShot(player, __instance, GetEffectConfig(MagicEffectType.TripleBowShot), 0.4f, 2f, 1.25f, 3);
+                var cfg = GetEffectConfig(MagicEffectType.TripleBowShot);
+                float damage = TripleShotDamage(cfg, _tripleShotValue);
+                // Accuracy is the spread multiplier of a 0% roll, narrowing to the weapon's own spread at a full arrow.
+                float spread = 1f + (Mathf.Max(1f, GetFloat(cfg, ACCURACY_KEY, 1.5f)) - 1f) * (1f - damage);
+                ModifyShot(player, __instance, cfg, damage, 2f, spread, 3);
             }
             else
             {
-                ModifyShot(player, __instance, GetEffectConfig(MagicEffectType.DoubleMagicShot), 0.66f, 2f, 1.2f, 2);
+                var cfg = GetEffectConfig(MagicEffectType.DoubleMagicShot);
+                ModifyShot(player, __instance, cfg, Mathf.Max(0f, GetFloat(cfg, DAMAGE_KEY, 0.66f)), 2f,
+                    Mathf.Max(0f, GetFloat(cfg, ACCURACY_KEY, 1.2f)), 2);
             }
         }
 
         private static float GetCostScale(Dictionary<string, float> configuration, float fallback)
         {
-            return configuration != null && configuration.ContainsKey(COSTSCALE_KEY) ? Mathf.Max(0f, configuration[COSTSCALE_KEY]) : fallback;
+            return Mathf.Max(0f, GetFloat(configuration, COSTSCALE_KEY, fallback));
         }
 
         private static void ModifyShot(Player player, Attack attack, Dictionary<string, float> configuration,
@@ -157,23 +201,7 @@ namespace EpicLoot.MagicItemEffects
                 return;
             }
 
-            if (configuration != null)
-            {
-                if (configuration.ContainsKey(DAMAGE_KEY))
-                {
-                    damage = Mathf.Max(0f, configuration[DAMAGE_KEY]);
-                }
-
-                if (configuration.ContainsKey(ACCURACY_KEY))
-                {
-                    accuracy = Mathf.Max(0f, configuration[ACCURACY_KEY]);
-                }
-
-                if (configuration.ContainsKey(PROJECTILES_KEY))
-                {
-                    projectiles = Mathf.Max(1, Mathf.RoundToInt(configuration[PROJECTILES_KEY]));
-                }
-            }
+            projectiles = GetProjectileCount(configuration, projectiles);
 
             // Applied to each projectile's own HitData as vanilla builds it (Attack_ModifyDamage_Postfix), so
             // upgrades, world level and the ammo are cut too.
