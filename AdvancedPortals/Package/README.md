@@ -53,8 +53,3 @@ with a table editor for the build cost. The teleport settings appear under the p
 
   * Manual: Drop the AdvancedPortals.dll into your BepInEx/plugins folder. Download Jotunn and install similarly.
   * ThunderStore: When using a thunderstore mod manager the files should be placed in the correct directory for you. Dependencies should install automatically.
-
-<!--
-AI_Assisted_Creation: This assembly was partially or fully created with the assistance of generative AI (Claude Code, using Anthropic's Claude models).
-AI_Model_Vendor: Anthropic
--->

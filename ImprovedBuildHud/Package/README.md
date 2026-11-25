@@ -12,8 +12,3 @@ Can optionally set the color and custom format.
 ## Installation
 
 Install with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/). Copy the ImprovedBuildHud.dll file to your BepInEx plugins folder.
-
-<!--
-AI_Assisted_Creation: This assembly was partially or fully created with the assistance of generative AI (Claude Code, using Anthropic's Claude models).
-AI_Model_Vendor: Anthropic
--->

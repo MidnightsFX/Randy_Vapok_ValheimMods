@@ -126,8 +126,3 @@ The following lists the jams with default configurations and prefab names:
 
 ### 1.0.6
 * Hildr's Request - 0.217.24
-
-<!--
-AI_Assisted_Creation: This assembly was partially or fully created with the assistance of generative AI (Claude Code, using Anthropic's Claude models).
-AI_Model_Vendor: Anthropic
--->

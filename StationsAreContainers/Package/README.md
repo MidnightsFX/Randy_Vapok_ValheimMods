@@ -21,8 +21,3 @@ Uses ServerSync.
 ## Installation
   * Nexus: Drop the StationsAreContainers.dll right into your BepInEx/plugins folder
   * ThunderStore: Use r2modman to install, or manually drop the dll into your BepInEx/plugins folder
-
-<!--
-AI_Assisted_Creation: This assembly was partially or fully created with the assistance of generative AI (Claude Code, using Anthropic's Claude models).
-AI_Model_Vendor: Anthropic
--->
