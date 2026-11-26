@@ -18,8 +18,14 @@ namespace EpicLoot
     {
         private const int MaxSpawnDepth = 4;
 
-        private static readonly Dictionary<ItemDrop.ItemData.SharedData, HashSet<StaffRole>> Cache =
-            new Dictionary<ItemDrop.ItemData.SharedData, HashSet<StaffRole>>();
+        private sealed class Profile
+        {
+            public readonly HashSet<StaffRole> Roles = new HashSet<StaffRole>();
+            public HitData.DamageTypes Dealt;
+        }
+
+        private static readonly Dictionary<ItemDrop.ItemData.SharedData, Profile> Cache =
+            new Dictionary<ItemDrop.ItemData.SharedData, Profile>();
 
         // Each ObjectDB brings its own SharedData objects, so the last world's entries would never be hit again.
         [HarmonyPatch(typeof(ObjectDB), nameof(ObjectDB.Awake))]
@@ -53,13 +59,25 @@ namespace EpicLoot
 
         public static HashSet<StaffRole> GetRoles(ItemDrop.ItemData item)
         {
-            if (!Cache.TryGetValue(item.m_shared, out HashSet<StaffRole> roles))
+            return GetProfile(item).Roles;
+        }
+
+        // The staff's own damage plus what the objects it spawns carry themselves: an Orb of Ahri or a Staff of Frost
+        // Orbs has none of its own, and its orbs' damage is what the imbues scale (ModifyDamage.ApplyToSpawnedDamage).
+        public static HitData.DamageTypes GetDealtDamage(ItemDrop.ItemData item)
+        {
+            return GetProfile(item).Dealt;
+        }
+
+        private static Profile GetProfile(ItemDrop.ItemData item)
+        {
+            if (!Cache.TryGetValue(item.m_shared, out Profile profile))
             {
-                roles = Classify(item.m_shared);
-                Cache[item.m_shared] = roles;
+                profile = Classify(item.m_shared);
+                Cache[item.m_shared] = profile;
             }
 
-            return roles;
+            return profile;
         }
 
         // Vanilla sets up a spawn-on-hit projectile or Aoe without hit data, so it keeps its prefab damage
@@ -70,30 +88,30 @@ namespace EpicLoot
                 IsStaff(item);
         }
 
-        private static HashSet<StaffRole> Classify(ItemDrop.ItemData.SharedData shared)
+        private static Profile Classify(ItemDrop.ItemData.SharedData shared)
         {
-            var roles = new HashSet<StaffRole>();
+            var profile = new Profile { Dealt = shared.m_damages };
             if (shared.m_damages.EpicLootGetTotalDamage() > 0f)
             {
-                roles.Add(StaffRole.Damage);
+                profile.Roles.Add(StaffRole.Damage);
             }
 
             var visited = new HashSet<GameObject>();
-            Inspect(shared.m_attack?.m_attackProjectile, false, true, 0, visited, roles);
-            Inspect(shared.m_secondaryAttack?.m_attackProjectile, false, true, 0, visited, roles);
+            Inspect(shared.m_attack?.m_attackProjectile, false, true, 0, visited, profile);
+            Inspect(shared.m_secondaryAttack?.m_attackProjectile, false, true, 0, visited, profile);
 
-            if (roles.Count == 0)
+            if (profile.Roles.Count == 0)
             {
-                roles.Add(StaffRole.Support);
+                profile.Roles.Add(StaffRole.Support);
             }
 
-            return roles;
+            return profile;
         }
 
         // Mirrors how vanilla finds the object to set up: the attack's own IProjectile, or for a spawn-on-hit
         // object the first IProjectile anywhere in its children.
         private static void Inspect(GameObject prefab, bool spawned, bool receivesHitData, int depth,
-            HashSet<GameObject> visited, HashSet<StaffRole> roles)
+            HashSet<GameObject> visited, Profile profile)
         {
             if (prefab == null || depth > MaxSpawnDepth || !visited.Add(prefab))
             {
@@ -104,20 +122,22 @@ namespace EpicLoot
             switch (target)
             {
                 case SpawnAbility:
-                    roles.Add(StaffRole.Summon);
+                    profile.Roles.Add(StaffRole.Summon);
                     break;
                 case Aoe aoe:
                     if (!receivesHitData && aoe.m_hitEnemy && aoe.m_damage.EpicLootGetTotalDamage() > 0f)
                     {
-                        roles.Add(StaffRole.Damage);
+                        profile.Roles.Add(StaffRole.Damage);
+                        profile.Dealt.Add(aoe.m_damage);
                     }
                     break;
                 case Projectile projectile:
                     if (!receivesHitData && projectile.m_damage.EpicLootGetTotalDamage() > 0f)
                     {
-                        roles.Add(StaffRole.Damage);
+                        profile.Roles.Add(StaffRole.Damage);
+                        profile.Dealt.Add(projectile.m_damage);
                     }
-                    Inspect(projectile.m_spawnOnHit, true, projectile.m_projectilesInheritHitData, depth + 1, visited, roles);
+                    Inspect(projectile.m_spawnOnHit, true, projectile.m_projectilesInheritHitData, depth + 1, visited, profile);
                     break;
             }
         }

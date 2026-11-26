@@ -19,23 +19,32 @@ namespace EpicLoot.MagicItemEffects
             Apply(player, MagicEffectType.SkuldsThread, "SkuldsThread");
         }
 
-        // From the item prefab rather than ObjectDB.GetStatusEffect: these status effects are only added to
-        // the main menu's ObjectDB, and the world's ObjectDB never gets them.
+        // Kept out of m_equipmentStatusEffects: vanilla removes every entry there that no worn item's own status effect
+        // provides on each equipment change, so an entry of ours would be removed and added back, replaying its start
+        // message, on every swap. One still listed there belongs to the worn Andvaranaut or Skuld's Thread item itself.
+        // From the item prefab rather than ObjectDB.GetStatusEffect: these status effects are only added to the main
+        // menu's ObjectDB, and the world's ObjectDB never gets them.
         private static void Apply(Player player, string effectType, string itemPrefabName)
         {
-            if (!player.HasActiveMagicEffect(effectType, out float _))
+            StatusEffect statusEffect = ObjectDB.instance.GetItemPrefab(itemPrefabName)?.GetComponent<ItemDrop>()?
+                .m_itemData.m_shared.m_equipStatusEffect;
+            if (statusEffect == null)
             {
                 return;
             }
 
-            var statusEffect = ObjectDB.instance.GetItemPrefab(itemPrefabName)?.GetComponent<ItemDrop>()?.m_itemData.m_shared.m_equipStatusEffect;
-            if (statusEffect == null || player.m_equipmentStatusEffects.Contains(statusEffect))
+            bool active = player.m_seman.HaveStatusEffect(statusEffect.NameHash());
+            if (player.HasActiveMagicEffect(effectType, out float _))
             {
-                return;
+                if (!active)
+                {
+                    player.m_seman.AddStatusEffect(statusEffect);
+                }
             }
-
-            player.m_equipmentStatusEffects.Add(statusEffect);
-            player.m_seman.AddStatusEffect(statusEffect);
+            else if (active && !player.m_equipmentStatusEffects.Contains(statusEffect))
+            {
+                player.m_seman.RemoveStatusEffect(statusEffect.NameHash());
+            }
         }
     }
 }

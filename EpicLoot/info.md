@@ -27,7 +27,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
   * **Display Text:** This text appears in the tooltip for the magic item, with {0:?} replaced with the rolled value for the effect, formatted using the shown C# string format. Higher placeholders such as {1:0.#} are other numbers the effect fills in.
   * **Description:** The longer explanation shown in the effect details (hold Shift over the item) and the Compendium; **X** stands for the rolled value.
   * **Requirements:** A set of requirements.
-    * **Flags:** A set of predefined flags to check certain weapon properties. The list of flags is: `NoRoll, ExclusiveSelf, ItemHasPhysicalDamage, ItemHasElementalDamage, ItemHasChopDamage, ItemHasBluntDamage, ItemHasSlashDamage, ItemHasPierceDamage, ItemUsesDurability, ItemHasNegativeMovementSpeedModifier, ItemHasBlockPower, ItemHasParryPower, ItemHasNoParryPower, ItemHasArmor, ItemHasBackstabBonus, ItemUsesStaminaOnAttack, ItemUsesEitrOnAttack, ItemUsesHealthOnAttack, ItemUsesDrawStaminaOnAttack, ItemGivesAdrenaline, ItemHasAdrenaline`. `NoRoll` is shown as *Can't be rolled*, and `ExclusiveSelf` (the effect can be on an item only once) is on unless an entry shows `!ExclusiveSelf`. The other flags check a property of the item: `Flag` requires it and `!Flag` requires its absence.
+    * **Flags:** A set of predefined flags to check certain weapon properties. The list of flags is: `NoRoll, ExclusiveSelf, ItemHasPhysicalDamage, ItemHasElementalDamage, ItemHasNonSpiritElementalDamage, ItemHasChopDamage, ItemHasBluntDamage, ItemHasSlashDamage, ItemHasPierceDamage, ItemUsesDurability, ItemHasNegativeMovementSpeedModifier, ItemHasBlockPower, ItemHasParryPower, ItemHasNoParryPower, ItemHasArmor, ItemHasBackstabBonus, ItemUsesStaminaOnAttack, ItemUsesEitrOnAttack, ItemUsesHealthOnAttack, ItemUsesDrawStaminaOnAttack, ItemGivesAdrenaline, ItemHasAdrenaline`. `NoRoll` is shown as *Can't be rolled*, and `ExclusiveSelf` (the effect can be on an item only once) is on unless an entry shows `!ExclusiveSelf`. The other flags check a property of the item: `Flag` requires it and `!Flag` requires its absence.
     * **ExclusiveEffectTypes:** This effect may not be rolled on an item that already has one of these effects. It works both ways: an effect listed here can't join an item that has this one either.
     * **MustHaveEffectTypes:** This effect may only be rolled on an item that already has every one of these effects. A spear counts as having `Throwable`.
     * **AllowedItemTypes:** This effect may only be rolled on items of one of the types in this list. When this list is empty any item type is allowed. Options are the item types `Helmet, Chest, Legs, Shoulder, Utility, Trinket, Bow, OneHandedWeapon, TwoHandedWeapon, TwoHandedWeaponLeft, Shield, Tool, Torch`, `Staff` (any ElementalMagic or BloodMagic weapon), and the item's type in `iteminfo.json`: `Swords, Axes, TwoHandAxes, Knives, Fists, Staffs, Clubs, Sledges, Polearms, Spears, Pickaxes, Bows, Bucklers, RoundShields, TowerShields, ChestArmor, LegsArmor, HeadArmor, ShouldersArmor, Torches, Tools, Utility, Trinket`
@@ -937,6 +937,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 > **Description:** Add poison damage equal to **X**% of this weapon's unenchanted physical damage, counting pierce three times, slash twice and blunt once. Elemental damage does not count.
 >
 > **Requirements:**
+> * **Flags:** `ItemHasPhysicalDamage`
 > * **AllowedItemTypes:** `OneHandedWeapon, TwoHandedWeapon, TwoHandedWeaponLeft, Bow, Torch, Staff`
 > * **ExcludedSkillTypes:** `Pickaxes`
 > * **ExcludedItemNames:** `$item_fishingrod, $item_graplinghook`
@@ -960,6 +961,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 > **Description:** Add spirit damage equal to **X**% of this weapon's fire, frost, lightning and poison damage, including what other imbues add.
 >
 > **Requirements:**
+> * **Flags:** `ItemHasNonSpiritElementalDamage`
 > * **AllowedItemTypes:** `OneHandedWeapon, TwoHandedWeapon, TwoHandedWeaponLeft, Bow, Torch, Staff`
 > * **ExcludedSkillTypes:** `Pickaxes`
 > * **ExcludedItemNames:** `$item_fishingrod, $item_graplinghook`
@@ -985,6 +987,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 > **Requirements:**
 > * **ExclusiveEffectTypes:** `AddElementalResistancePercentage, AddFrostResistancePercentage, AddLightningResistancePercentage, AddPoisonResistancePercentage`
 > * **AllowedItemTypes:** `Helmet, Chest, Legs, Shoulder, Utility, Trinket, Shield, Tool, Torch, TwoHandedWeaponLeft`
+> * *Legendary:* ExclusiveEffectTypes adds `AddSpiritResistancePercentage`.
 >
 > |Rarity|Minimal|Balanced|Legendary|
 > |--|--|--|--|
@@ -1012,6 +1015,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 > **Requirements:**
 > * **ExclusiveEffectTypes:** `AddElementalResistancePercentage, AddFireResistancePercentage, AddLightningResistancePercentage, AddPoisonResistancePercentage`
 > * **AllowedItemTypes:** `Helmet, Chest, Legs, Shoulder, Utility, Trinket, Shield, Tool, Torch, TwoHandedWeaponLeft`
+> * *Legendary:* ExclusiveEffectTypes adds `AddSpiritResistancePercentage`.
 >
 > |Rarity|Minimal|Balanced|Legendary|
 > |--|--|--|--|
@@ -1039,6 +1043,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 > **Requirements:**
 > * **ExclusiveEffectTypes:** `AddElementalResistancePercentage, AddFireResistancePercentage, AddFrostResistancePercentage, AddPoisonResistancePercentage`
 > * **AllowedItemTypes:** `Helmet, Chest, Legs, Shoulder, Utility, Trinket, Shield, Tool, Torch, TwoHandedWeaponLeft`
+> * *Legendary:* ExclusiveEffectTypes adds `AddSpiritResistancePercentage`.
 >
 > |Rarity|Minimal|Balanced|Legendary|
 > |--|--|--|--|
@@ -1066,6 +1071,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 > **Requirements:**
 > * **ExclusiveEffectTypes:** `AddElementalResistancePercentage, AddFireResistancePercentage, AddFrostResistancePercentage, AddLightningResistancePercentage`
 > * **AllowedItemTypes:** `Helmet, Chest, Legs, Shoulder, Utility, Trinket, Shield, Tool, Torch, TwoHandedWeaponLeft`
+> * *Legendary:* ExclusiveEffectTypes adds `AddSpiritResistancePercentage`.
 >
 > |Rarity|Minimal|Balanced|Legendary|
 > |--|--|--|--|
@@ -1092,7 +1098,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 >
 > **Requirements:**
 > * **AllowedItemTypes:** `Helmet, Chest, Legs, Shoulder, Utility, Trinket, Shield, Tool, Torch, TwoHandedWeaponLeft`
-> * *Legendary:* can be rolled.
+> * *Legendary:* can be rolled; ExclusiveEffectTypes `AddElementalResistancePercentage, AddFireResistancePercentage, AddFrostResistancePercentage, AddLightningResistancePercentage, AddPoisonResistancePercentage`.
 >
 > |Rarity|Minimal|Balanced|Legendary|
 > |--|--|--|--|
@@ -1123,12 +1129,12 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 > * **ExclusiveEffectTypes:** `AddFireResistancePercentage, AddFrostResistancePercentage, AddLightningResistancePercentage, AddPoisonResistancePercentage`
 > * **AllowedItemTypes:** `Helmet, Chest, Legs, Shoulder, Utility, Trinket, Shield, Tool, Torch, TwoHandedWeaponLeft`
 > * **AllowedRarities:** `Epic, Legendary, Mythic, Ancient`
-> * *Legendary:* AllowedRarities adds `Rare`.
+> * *Legendary:* ExclusiveEffectTypes adds `AddSpiritResistancePercentage`; AllowedRarities adds `Rare`.
 >
 > |Rarity|Minimal|Balanced|Legendary|
 > |--|--|--|--|
 > |Magic|—|2–4 (0.2)|—|
-> |Rare|2–4 (0.5)|3–6 (0.2)|1–2 (1)|
+> |Rare|2–4 (0.5)|3–6 (0.2)|5–9 (1)|
 > |Epic|3–6 (0.5)|4–8 (0.2)|6–12 (1)|
 > |Legendary|4–8 (0.5)|5–10 (0.2)|8–15 (1)|
 > |Mythic|5–10 (0.5)|6–12 (0.2)|9–18 (1)|
@@ -1238,7 +1244,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 > |Rarity|Minimal|Balanced|Legendary|
 > |--|--|--|--|
 > |Magic|—|2–4 (0.2)|—|
-> |Rare|2–4 (0.5)|3–6 (0.2)|1–2 (1)|
+> |Rare|2–4 (0.5)|3–6 (0.2)|5–9 (1)|
 > |Epic|3–6 (0.5)|4–8 (0.2)|6–12 (1)|
 > |Legendary|4–8 (0.5)|5–10 (0.2)|8–15 (1)|
 > |Mythic|5–10 (0.5)|6–12 (0.2)|9–18 (1)|

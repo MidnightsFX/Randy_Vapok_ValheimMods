@@ -48,6 +48,7 @@ namespace EpicLoot
         public List<StaffRole> AllowedStaffRoles = new List<StaffRole>();
         public bool? ItemHasPhysicalDamage;
         public bool? ItemHasElementalDamage;
+        public bool? ItemHasNonSpiritElementalDamage;
         public bool? ItemHasChopDamage;
         public bool? ItemHasBluntDamage;
         public bool? ItemHasSlashDamage;
@@ -321,6 +322,13 @@ namespace EpicLoot
                 return false;
             }
 
+            if (ItemHasNonSpiritElementalDamage != null &&
+                (ItemHasNonSpiritElementalDamage == !HasNonSpiritElementalDamage(itemData)))
+            {
+                failure = RequirementFailure.ItemPropertyMismatch;
+                return false;
+            }
+
             if (ItemHasChopDamage != null &&
                 (ItemHasChopDamage == itemData.m_shared.m_damages.m_chop <= 0))
             {
@@ -476,6 +484,15 @@ namespace EpicLoot
 
             failure = RequirementFailure.None;
             return true;
+        }
+
+        // The damage Spirit imbue builds on. A staff counts what its spawned orbs and blasts carry as well.
+        private static bool HasNonSpiritElementalDamage(ItemDrop.ItemData itemData)
+        {
+            HitData.DamageTypes damage = StaffRoles.IsStaff(itemData)
+                ? StaffRoles.GetDealtDamage(itemData)
+                : itemData.m_shared.m_damages;
+            return damage.m_fire + damage.m_frost + damage.m_lightning + damage.m_poison > 0f;
         }
 
         /// <summary>

@@ -29,6 +29,7 @@ Balance Changes:
     * Poison imbue now builds on physical damage, most from pierce and least from blunt, and no longer on elemental damage.
     * Lightning imbue now strikes with a random strength on every hit.
     * Spirit imbue now builds on the weapon's fire, frost, lightning and poison damage, including other imbues.
+* Spirit and Poison imbues now only roll on weapons that deal the damage they build on.
 * Elemental resistances can no longer share an item with each other in any template, and neither can physical resistances.
 * Health Regen and Add Health Regen can now roll on the same item.
 * The Dark Red and Dark Green shards now add Spirit damage on staffs.
@@ -85,6 +86,8 @@ Bugfixes:
 * The enchanting table's storage can hold unidentified items, and they can be identified straight from it.
 * The optional Epic patches now cover Ancient items and the newer enchantments, unique items and sets, and their unique item values take effect again.
 * The magicsetitem console command is now magicunique (short form miunique); magicsetitem still works
+* Changing how same-colored shardstones stack now updates gear that already has them socketed.
+* Abilities added by other mods no longer lose their actions when that mod updates them.
 
 **0.15.6**
 * Works with Auga 1.4.1 and newer

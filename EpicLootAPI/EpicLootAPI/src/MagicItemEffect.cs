@@ -213,6 +213,7 @@ public class MagicItemEffectRequirements
     public List<StaffRole> AllowedStaffRoles = new List<StaffRole>(); // only staffs are checked
     public bool? ItemHasPhysicalDamage;
     public bool? ItemHasElementalDamage;
+    public bool? ItemHasNonSpiritElementalDamage; // fire, frost, lightning or poison; a staff counts what it spawns
     public bool? ItemHasChopDamage;
     public bool? ItemHasBluntDamage;
     public bool? ItemHasSlashDamage;

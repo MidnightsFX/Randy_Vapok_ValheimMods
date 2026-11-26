@@ -4,6 +4,7 @@ using EpicLoot.ShardStones;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using UnityEngine;
 
@@ -81,6 +82,19 @@ namespace EpicLoot
         public bool IsActive()
         {
             return Effect != null && (ShardType != ShardType.None || ShardSocketManager.RuneSocketingEnabled);
+        }
+
+        // ShardType.None's number before it was pinned to 404 (it followed Fader). Every rune socket saved before
+        // 0.16.0 carries it.
+        private const int LegacyNone = 97;
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            if ((int)ShardType == LegacyNone)
+            {
+                ShardType = ShardType.None;
+            }
         }
     }
 

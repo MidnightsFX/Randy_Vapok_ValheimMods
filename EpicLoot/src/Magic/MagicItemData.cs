@@ -46,6 +46,16 @@ public static class MagicItemData
     // The item's component, made empty when it has none, for the SetMagicItem that follows.
     public static MagicItemComponent GetOrCreate(ItemDrop.ItemData item) => Resolve(item, create: true);
 
+    // Brings an already parsed item's sockets to the current Shards.GridVersion now. An item not parsed yet is left
+    // alone: its first read works them out anyway.
+    internal static void RefreshSocketValues(ItemDrop.ItemData item)
+    {
+        if (item != null && Components.TryGetValue(item, out MagicItemComponent component))
+        {
+            component.RefreshSocketValues();
+        }
+    }
+
     private static MagicItemComponent Resolve(ItemDrop.ItemData item, bool create)
     {
         if (item == null)

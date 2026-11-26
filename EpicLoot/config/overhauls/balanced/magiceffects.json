@@ -2338,7 +2338,8 @@
         "ExcludedItemNames": [
           "$item_fishingrod",
           "$item_graplinghook"
-        ]
+        ],
+        "ItemHasPhysicalDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -2402,7 +2403,8 @@
         "ExcludedItemNames": [
           "$item_fishingrod",
           "$item_graplinghook"
-        ]
+        ],
+        "ItemHasNonSpiritElementalDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {

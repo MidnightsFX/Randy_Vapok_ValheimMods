@@ -31,8 +31,11 @@ public static partial class API
             }
 
             AbilityFactory.Register(ability.ID, typeof(AbilityProxy));
-            AbilityProxies[ability.ID] = delegates;
-            AbilityProxyDefinition def = new AbilityProxyDefinition(ability, delegates);
+            // Our own copy: the shim hands the same dictionary to UpdateProxyAbility, which clears ours before
+            // refilling it from the caller's.
+            var callbacks = new Dictionary<string, Delegate>(delegates);
+            AbilityProxies[ability.ID] = callbacks;
+            AbilityProxyDefinition def = new AbilityProxyDefinition(ability, callbacks);
             // Recorded like AddAbility's entries, so ReloadExternalAbilities re-applies it on every
             // abilities.json reload and server push.
             ExternalAbilities[ability.ID] = ability;

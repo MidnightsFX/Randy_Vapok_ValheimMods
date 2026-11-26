@@ -1020,6 +1020,8 @@ internal class ELConfig {
         AllowRuneSocketing.SettingChanged += (_, _) => ShardSocketManager.OnRuneSocketRulesChanged();
         RuneDiminishingReturns.SettingChanged += (_, _) => ShardSocketManager.OnRuneSocketRulesChanged();
         RuneStackDecayFactor.SettingChanged += (_, _) => ShardSocketManager.OnRuneSocketRulesChanged();
+        ShardStackingMode.SettingChanged += (_, _) => Shards.ReapplySocketStacking();
+        ShardStackDecayFactor.SettingChanged += (_, _) => Shards.ReapplySocketStacking();
         // A shortcut written held keys first ("LeftControl + E", in the file or ConfigurationManager) would fire
         // on the held key. Put it right once now and again whenever it is edited; the second set is a no-op.
         NormalizeSocketOverlayShortcut();

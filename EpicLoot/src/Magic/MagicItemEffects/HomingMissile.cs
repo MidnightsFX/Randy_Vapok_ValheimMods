@@ -327,29 +327,49 @@ namespace EpicLoot.MagicItemEffects
             Character wanted = locked ?? preview;
             if (wanted != null)
             {
-                if (_ball == null)
+                Show(player.GetCenterPoint());
+                if (_ball != null)
                 {
-                    _ball = Spawn(player.GetCenterPoint());
+                    _ball.SetGoal(wanted, locked != null ? LockColor : PreviewColor);
                 }
-                _ball?.SetGoal(wanted, locked != null ? LockColor : PreviewColor);
             }
-            else if (_ball != null)
+            else if (_ball != null && _ball.gameObject.activeSelf)
             {
                 _ball.ReturnHome(player);
             }
         }
 
-        private static HomingWispBall Spawn(Vector3 position)
+        internal static void WarmupAtLoad(bool drawn)
         {
+            if (drawn)
+            {
+                GetTemplate();
+            }
+        }
+
+        // One ball per session, hidden when it gets home and shown again for the next mark, so a lock copies no
+        // prefab and no materials.
+        private static void Show(Vector3 position)
+        {
+            if (_ball != null)
+            {
+                if (!_ball.gameObject.activeSelf)
+                {
+                    _ball.transform.position = position;
+                    _ball.gameObject.SetActive(true);
+                }
+                return;
+            }
+
             GameObject template = GetTemplate();
             if (template == null)
             {
-                return null;
+                return;
             }
 
             GameObject ball = Object.Instantiate(template, position, Quaternion.identity);
             ball.name = template.name;
-            return ball.GetComponent<HomingWispBall>();
+            _ball = ball.GetComponent<HomingWispBall>();
         }
 
         private static GameObject GetTemplate()
@@ -412,13 +432,8 @@ namespace EpicLoot.MagicItemEffects
 
         private static GameObject FindSourcePrefab()
         {
-            GameObject item = ObjectDB.instance != null ? ObjectDB.instance.GetItemPrefab(WisplightItem) : null;
-            if (item != null)
-            {
-                return item;
-            }
-
-            return WeaponAuraKit.FindPrefab(BallPrefab);
+            GameObject item = WeaponAuraKit.FindPrefab(WisplightItem);
+            return item != null ? item : WeaponAuraKit.FindPrefab(BallPrefab);
         }
     }
 
@@ -445,6 +460,8 @@ namespace EpicLoot.MagicItemEffects
         private readonly Dictionary<ParticleSystem, float> _alphas = new Dictionary<ParticleSystem, float>();
         private readonly Dictionary<Material, float> _emissions = new Dictionary<Material, float>();
         private readonly HashSet<Material> _tintable = new HashSet<Material>();
+        // Renderer.materials hands out copies that destroying the GameObject does not free.
+        private readonly List<Material> _materialCopies = new List<Material>();
 
         private void Awake()
         {
@@ -467,7 +484,9 @@ namespace EpicLoot.MagicItemEffects
             }
             foreach (Renderer renderer in GetComponentsInChildren<Renderer>(true))
             {
-                foreach (Material material in renderer.materials)
+                Material[] copies = renderer.materials;
+                _materialCopies.AddRange(copies);
+                foreach (Material material in copies)
                 {
                     if (material.HasProperty(EmissionColor))
                     {
@@ -514,7 +533,7 @@ namespace EpicLoot.MagicItemEffects
             }
             else
             {
-                Destroy(gameObject);
+                Hide();
                 return;
             }
 
@@ -523,8 +542,25 @@ namespace EpicLoot.MagicItemEffects
             transform.position = Vector3.MoveTowards(transform.position, goal, step);
             if (_returning && distance < HomeRadius)
             {
-                Destroy(gameObject);
+                Hide();
             }
+        }
+
+        private void Hide()
+        {
+            _target = null;
+            _home = null;
+            _returning = false;
+            gameObject.SetActive(false);
+        }
+
+        private void OnDestroy()
+        {
+            foreach (Material material in _materialCopies)
+            {
+                Destroy(material);
+            }
+            _materialCopies.Clear();
         }
 
         private void Tint(Color color)

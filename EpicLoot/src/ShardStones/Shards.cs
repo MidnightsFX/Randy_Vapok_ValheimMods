@@ -39,7 +39,8 @@ namespace EpicLoot.ShardStones {
         Queen = 95,
         Fader = 96,
 
-        None
+        // Pinned so new shards can follow Fader. Saves before 0.16.0 hold it as 97 (SocketedEffect.LegacyNone).
+        None = 404
     }
 
     public enum ShardCategory {
@@ -169,6 +170,38 @@ namespace EpicLoot.ShardStones {
 
             GridVersion++;
             ShardSocketManager.OnRuneSocketRulesChanged();
+        }
+
+        // Shard Stack Mode and Shard Stack Decay Factor are baked into socket values like the grid is, so a change to
+        // either (an edit or the server's push) re-derives every loaded item's sockets: the player's inventory, items on
+        // the ground and the inventories of loaded containers. Anything else catches up on its next read.
+        public static void ReapplySocketStacking() {
+            GridVersion++;
+
+            Inventory inventory = Player.m_localPlayer != null ? Player.m_localPlayer.GetInventory() : null;
+            if (inventory != null) {
+                RefreshSocketValues(inventory);
+            }
+            foreach (ItemDrop drop in ItemDrop.s_instances) {
+                if (drop != null) {
+                    MagicItemData.RefreshSocketValues(drop.m_itemData);
+                }
+            }
+            foreach (Container container in UnityEngine.Object.FindObjectsByType<Container>(FindObjectsSortMode.None)) {
+                Inventory containerInventory = container.GetInventory();
+                if (containerInventory != null) {
+                    RefreshSocketValues(containerInventory);
+                }
+            }
+
+            ShardSocketManager.OnRuneSocketRulesChanged();
+            ItemTooltip.InvalidateCache();
+        }
+
+        private static void RefreshSocketValues(Inventory inventory) {
+            foreach (ItemDrop.ItemData item in inventory.GetAllItems()) {
+                MagicItemData.RefreshSocketValues(item);
+            }
         }
 
         public static ShardStonesConfig GetCFG() {

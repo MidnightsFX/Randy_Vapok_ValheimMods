@@ -339,6 +339,13 @@ namespace EpicLoot.GatedItemType
                     continue;
                 }
 
+                // A player on the respawn screen or still loading in has no character, and its UserID of 0 would
+                // route the credit to everybody.
+                if (info.m_characterID.IsNone())
+                {
+                    continue;
+                }
+
                 if (info.m_characterID == ZNet.instance.LocalPlayerCharacterID && Player.m_localPlayer != null)
                 {
                     Credit(biome);

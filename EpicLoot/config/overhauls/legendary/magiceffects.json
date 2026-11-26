@@ -2330,7 +2330,8 @@
         "ExcludedItemNames": [
           "$item_fishingrod",
           "$item_graplinghook"
-        ]
+        ],
+        "ItemHasPhysicalDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -2394,7 +2395,8 @@
         "ExcludedItemNames": [
           "$item_fishingrod",
           "$item_graplinghook"
-        ]
+        ],
+        "ItemHasNonSpiritElementalDamage": true
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -2457,7 +2459,8 @@
           "AddElementalResistancePercentage",
           "AddFrostResistancePercentage",
           "AddLightningResistancePercentage",
-          "AddPoisonResistancePercentage"
+          "AddPoisonResistancePercentage",
+          "AddSpiritResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2524,7 +2527,8 @@
           "AddElementalResistancePercentage",
           "AddFireResistancePercentage",
           "AddLightningResistancePercentage",
-          "AddPoisonResistancePercentage"
+          "AddPoisonResistancePercentage",
+          "AddSpiritResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2591,7 +2595,8 @@
           "AddElementalResistancePercentage",
           "AddFireResistancePercentage",
           "AddFrostResistancePercentage",
-          "AddPoisonResistancePercentage"
+          "AddPoisonResistancePercentage",
+          "AddSpiritResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2658,7 +2663,8 @@
           "AddElementalResistancePercentage",
           "AddFireResistancePercentage",
           "AddFrostResistancePercentage",
-          "AddLightningResistancePercentage"
+          "AddLightningResistancePercentage",
+          "AddSpiritResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2720,6 +2726,13 @@
           "Tool",
           "Torch",
           "TwoHandedWeaponLeft"
+        ],
+        "ExclusiveEffectTypes": [
+          "AddElementalResistancePercentage",
+          "AddFireResistancePercentage",
+          "AddFrostResistancePercentage",
+          "AddLightningResistancePercentage",
+          "AddPoisonResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
@@ -2793,13 +2806,14 @@
           "AddFireResistancePercentage",
           "AddFrostResistancePercentage",
           "AddLightningResistancePercentage",
-          "AddPoisonResistancePercentage"
+          "AddPoisonResistancePercentage",
+          "AddSpiritResistancePercentage"
         ]
       },
       "ValuesPerRarity": {
         "Rare": {
-          "MinValue": 1,
-          "MaxValue": 2,
+          "MinValue": 5,
+          "MaxValue": 9,
           "Increment": 1
         },
         "Epic": {
@@ -3064,8 +3078,8 @@
       },
       "ValuesPerRarity": {
         "Rare": {
-          "MinValue": 1,
-          "MaxValue": 2,
+          "MinValue": 5,
+          "MaxValue": 9,
           "Increment": 1
         },
         "Epic": {

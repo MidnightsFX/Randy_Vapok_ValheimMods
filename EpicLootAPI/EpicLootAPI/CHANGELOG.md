@@ -5,3 +5,4 @@
 - Mods can create an item or runestone carrying exactly the enchantments and set they choose.
 - Mods can limit an enchantment on staffs to those that deal damage, summon or support.
 - Mods can require a weapon to deal blunt, slash or pierce damage before an enchantment rolls on it.
+- Mods can require a weapon to deal fire, frost, lightning or poison damage before an enchantment rolls on it.
