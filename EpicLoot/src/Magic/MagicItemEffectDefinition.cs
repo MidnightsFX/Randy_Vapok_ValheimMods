@@ -171,10 +171,13 @@ namespace EpicLoot
         // Also reports why it failed. For ConflictingEffect, `conflictEffectType` names the offending effect
         // already on the item. checkItemTypeGating false skips the host-item gating (CheckItemTypeRequirements)
         // and keeps the effect-composition rules: shard socketing passes it, because the shard grid decides
-        // placement there.
+        // placement there. `socketedEffectTypes` are the effects the item's other sockets grant; they meet
+        // MustHaveEffectTypes (a Recall rune beside a Throwable rune) and nothing else, since exclusivity and
+        // duplicates between sockets are ShardSocketManager's.
         public bool CheckRequirements([NotNull] ItemDrop.ItemData itemData, [NotNull] MagicItem magicItem,
             out RequirementFailure failure, out string conflictEffectType, string magicEffectType = null,
-            bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false, bool checkItemTypeGating = true)
+            bool checklootroll = true, bool checkaugmentroll = false, bool checkruneroll = false, bool checkItemTypeGating = true,
+            ICollection<string> socketedEffectTypes = null)
         {
             failure = RequirementFailure.Other;
             conflictEffectType = null;
@@ -207,18 +210,12 @@ namespace EpicLoot
 
             if (MustHaveEffectTypes?.Count > 0)
             {
-                foreach(var effect in MustHaveEffectTypes)
+                foreach (var effect in MustHaveEffectTypes)
                 {
-                    if (effect.Equals("Throwable", StringComparison.InvariantCultureIgnoreCase) &&
-                        itemData.m_shared.m_skillType == Skills.SkillType.Spears)
-                    {
-                        continue;
-                    }
-                    else if (magicItem.HasEffect(effect))
-                    {
-                        continue;
-                    }
-                    else
+                    // Vanilla spears already throw.
+                    var spearThrows = effect.Equals("Throwable", StringComparison.InvariantCultureIgnoreCase) &&
+                        itemData.m_shared.m_skillType == Skills.SkillType.Spears;
+                    if (!spearThrows && !magicItem.HasEffect(effect) && socketedEffectTypes?.Contains(effect) != true)
                     {
                         failure = RequirementFailure.MissingRequiredEffect;
                         return false;

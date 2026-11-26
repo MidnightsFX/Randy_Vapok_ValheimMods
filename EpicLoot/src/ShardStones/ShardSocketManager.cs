@@ -124,10 +124,6 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
-            if (!CheckEffectRequirements(equipment, equipMagicItem, effect, color, out reason)) {
-                return false;
-            }
-
             // A rune sitting inert (rune socketing off) grants nothing, so it blocks nothing either.
             var occupants = new List<SocketOccupant>();
             foreach (var socket in equipMagicItem.Sockets) {
@@ -135,6 +131,11 @@ namespace EpicLoot.ShardStones {
                     occupants.Add(new SocketOccupant(socket.ShardType, socket.IsActive() ? socket.Effect : null));
                 }
             }
+
+            if (!CheckEffectRequirements(equipment, equipMagicItem, effect, color, occupants, out reason)) {
+                return false;
+            }
+
             if (!CheckDuplicateEffect(color, effect, occupants, out reason)) {
                 return false;
             }
@@ -170,10 +171,6 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
-            if (!CheckEffectRequirements(equipment, equipMagicItem, effect, color, out reason)) {
-                return false;
-            }
-
             var occupants = new List<SocketOccupant>();
             foreach (var other in coResident) {
                 if (other != null &&
@@ -182,6 +179,11 @@ namespace EpicLoot.ShardStones {
                     occupants.Add(new SocketOccupant(otherColor, inertRune ? null : otherEffect));
                 }
             }
+
+            if (!CheckEffectRequirements(equipment, equipMagicItem, effect, color, occupants, out reason)) {
+                return false;
+            }
+
             if (!CheckDuplicateEffect(color, effect, occupants, out reason)) {
                 return false;
             }
@@ -193,10 +195,11 @@ namespace EpicLoot.ShardStones {
             return true;
         }
 
-        // The rune-roll legality rules against the item's rolled effects. Host-item gating is skipped for
-        // shards because the shard grid already decides which effect a slot yields.
+        // The rune-roll legality rules against the item's rolled effects, with the occupants' effects meeting
+        // required effects too. Host-item gating is skipped for shards because the shard grid already decides
+        // which effect a slot yields.
         private static bool CheckEffectRequirements(ItemDrop.ItemData equipment, MagicItem equipMagicItem,
-            MagicItemEffect effect, ShardType color, out string reason) {
+            MagicItemEffect effect, ShardType color, List<SocketOccupant> occupants, out string reason) {
             reason = null;
 
             if (!MagicItemEffectDefinitions.TryGet(effect.EffectType, out var def)) {
@@ -204,9 +207,16 @@ namespace EpicLoot.ShardStones {
                 return false;
             }
 
+            var socketedEffectTypes = new List<string>();
+            foreach (var occupant in occupants) {
+                if (occupant.Effect != null) {
+                    socketedEffectTypes.Add(occupant.Effect.EffectType);
+                }
+            }
+
             if (!def.Requirements.CheckRequirements(equipment, equipMagicItem, out var failure, out var conflictType,
                     effect.EffectType, checklootroll: false, checkaugmentroll: false, checkruneroll: true,
-                    checkItemTypeGating: color == ShardType.None)) {
+                    checkItemTypeGating: color == ShardType.None, socketedEffectTypes: socketedEffectTypes)) {
                 // ExclusiveSelf reports the same effect as the conflict, which means "already on the item";
                 // a different effect is genuine cross-effect exclusivity and is still enforced.
                 var sameEffectAlreadyOnItem = failure == RequirementFailure.ConflictingEffect

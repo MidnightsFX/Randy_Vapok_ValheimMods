@@ -88,6 +88,7 @@ Bugfixes:
 * The magicsetitem console command is now magicunique (short form miunique); magicsetitem still works
 * Changing how same-colored shardstones stack now updates gear that already has them socketed.
 * Abilities added by other mods no longer lose their actions when that mod updates them.
+* Runes and shardstones that need another enchantment, such as a Recall rune needing Throwing, now accept one socketed on the item, and crafting an item into another keeps them.
 
 **0.15.6**
 * Works with Auga 1.4.1 and newer
