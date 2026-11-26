@@ -1362,34 +1362,34 @@
       },
       "ValuesPerRarity": {
         "Magic": {
-          "MinValue": 0.2,
+          "MinValue": 0.3,
           "MaxValue": 1.5,
-          "Increment": 0.1
+          "Increment": 0.3
         },
         "Rare": {
-          "MinValue": 0.4,
+          "MinValue": 0.3,
           "MaxValue": 3,
-          "Increment": 0.1
+          "Increment": 0.3
         },
         "Epic": {
           "MinValue": 0.6,
           "MaxValue": 4.5,
-          "Increment": 0.1
+          "Increment": 0.3
         },
         "Legendary": {
-          "MinValue": 0.8,
+          "MinValue": 0.9,
           "MaxValue": 6,
-          "Increment": 0.1
+          "Increment": 0.3
         },
         "Mythic": {
           "MinValue": 1.5,
-          "MaxValue": 10,
-          "Increment": 0.1
+          "MaxValue": 9.9,
+          "Increment": 0.3
         },
         "Ancient": {
-          "MinValue": 2.2,
-          "MaxValue": 14,
-          "Increment": 0.1
+          "MinValue": 2.1,
+          "MaxValue": 14.1,
+          "Increment": 0.3
         }
       },
       "SelectionWeight": 5.5,
@@ -2783,15 +2783,7 @@
       "Requirements": {
         "AllowedItemTypes": [
           "Helmet",
-          "Chest",
-          "Legs",
-          "Shoulder",
-          "Utility",
-          "Trinket",
-          "Shield",
-          "Tool",
-          "Torch",
-          "TwoHandedWeaponLeft"
+          "Utility"
         ],
         "AllowedRarities": [
           "Epic",
@@ -3053,16 +3045,8 @@
       "Description": "$mod_epicloot_me_addphysicalresistancepercentage_desc",
       "Requirements": {
         "AllowedItemTypes": [
-          "Helmet",
           "Chest",
-          "Legs",
-          "Shoulder",
-          "Utility",
-          "Trinket",
-          "Shield",
-          "Tool",
-          "Torch",
-          "TwoHandedWeaponLeft"
+          "Legs"
         ],
         "ExclusiveEffectTypes": [
           "AddBluntResistancePercentage",
@@ -6260,12 +6244,8 @@
         "AllowedItemTypes": [
           "Chest",
           "Utility",
-          "Trinket",
-          "Helmet",
-          "Legs",
-          "Shoulder"
-        ],
-        "ItemHasArmor": true
+          "Trinket"
+        ]
       },
       "ValuesPerRarity": {
         "Magic": {
@@ -7057,12 +7037,7 @@
           "Prosperity"
         ],
         "AllowedItemTypes": [
-          "Utility",
-          "Trinket",
-          "Helmet",
-          "Chest",
-          "Legs",
-          "Shoulder"
+          "Utility"
         ],
         "AllowedRarities": [
           "Epic",
@@ -7120,12 +7095,7 @@
           "Luck"
         ],
         "AllowedItemTypes": [
-          "Utility",
-          "Trinket",
-          "Helmet",
-          "Chest",
-          "Legs",
-          "Shoulder"
+          "Trinket"
         ],
         "AllowedRarities": [
           "Epic",

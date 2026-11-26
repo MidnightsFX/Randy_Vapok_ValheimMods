@@ -571,12 +571,12 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 >
 > |Rarity|Minimal|Balanced|Legendary|
 > |--|--|--|--|
-> |Magic|0.1–1 (0.1)|0.2–1.5 (0.1)|0.5–2 (0.5)|
-> |Rare|0.3–2.7 (0.1)|0.4–3 (0.1)|1–4 (0.5)|
-> |Epic|0.5–4 (0.1)|0.6–4.5 (0.1)|1.5–6 (0.5)|
-> |Legendary|0.7–5.4 (0.1)|0.8–6 (0.1)|3–8 (0.5)|
-> |Mythic|1.3–7.5 (0.1)|1.5–10 (0.1)|4.5–10 (0.5)|
-> |Ancient|1.9–9 (0.1)|2.2–14 (0.1)|6–21 (0.5)|
+> |Magic|0.3–0.9 (0.3)|0.3–1.5 (0.3)|0.6–2.1 (0.3)|
+> |Rare|0.3–2.7 (0.3)|0.3–3 (0.3)|0.9–3.9 (0.3)|
+> |Epic|0.6–3.9 (0.3)|0.6–4.5 (0.3)|1.5–6 (0.3)|
+> |Legendary|0.6–5.4 (0.3)|0.9–6 (0.3)|3–8.1 (0.3)|
+> |Mythic|1.2–7.5 (0.3)|1.5–9.9 (0.3)|4.5–9.9 (0.3)|
+> |Ancient|1.8–9 (0.3)|2.1–14.1 (0.3)|6–21 (0.3)|
 >
 > **Selection Weight:** Minimal 1 · Balanced 5.5 · Legendary 10
 
@@ -1127,7 +1127,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 >
 > **Requirements:**
 > * **ExclusiveEffectTypes:** `AddFireResistancePercentage, AddFrostResistancePercentage, AddLightningResistancePercentage, AddPoisonResistancePercentage`
-> * **AllowedItemTypes:** `Helmet, Chest, Legs, Shoulder, Utility, Trinket, Shield, Tool, Torch, TwoHandedWeaponLeft`
+> * **AllowedItemTypes:** `Helmet, Utility`
 > * **AllowedRarities:** `Epic, Legendary, Mythic, Ancient`
 > * *Legendary:* ExclusiveEffectTypes adds `AddSpiritResistancePercentage`; AllowedRarities adds `Rare`.
 >
@@ -1237,7 +1237,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 >
 > **Requirements:**
 > * **ExclusiveEffectTypes:** `AddBluntResistancePercentage, AddSlashingResistancePercentage, AddPiercingResistancePercentage`
-> * **AllowedItemTypes:** `Helmet, Chest, Legs, Shoulder, Utility, Trinket, Shield, Tool, Torch, TwoHandedWeaponLeft`
+> * **AllowedItemTypes:** `Chest, Legs`
 > * **AllowedRarities:** `Epic, Legendary, Mythic, Ancient`
 > * *Legendary:* AllowedRarities adds `Rare`.
 >
@@ -2546,8 +2546,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 > **Description:** The player's total armor is increased by **X**% when below {1:0.#}% health.
 >
 > **Requirements:**
-> * **Flags:** `ItemHasArmor`
-> * **AllowedItemTypes:** `Chest, Utility, Trinket, Helmet, Legs, Shoulder`
+> * **AllowedItemTypes:** `Chest, Utility, Trinket`
 >
 > |Rarity|Minimal|Balanced|Legendary|
 > |--|--|--|--|
@@ -2864,7 +2863,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 >
 > **Requirements:**
 > * **ExclusiveEffectTypes:** `Prosperity`
-> * **AllowedItemTypes:** `Utility, Trinket, Helmet, Chest, Legs, Shoulder`
+> * **AllowedItemTypes:** `Utility`
 > * **AllowedRarities:** `Epic, Legendary, Mythic, Ancient`
 > * *Legendary:* no AllowedRarities.
 >
@@ -2887,7 +2886,7 @@ MagicItemEffects are parsed and added to `MagicItemEffectDefinitions` each time 
 >
 > **Requirements:**
 > * **ExclusiveEffectTypes:** `Luck`
-> * **AllowedItemTypes:** `Utility, Trinket, Helmet, Chest, Legs, Shoulder`
+> * **AllowedItemTypes:** `Trinket`
 > * **AllowedRarities:** `Epic, Legendary, Mythic, Ancient`
 > * *Legendary:* no AllowedRarities.
 >

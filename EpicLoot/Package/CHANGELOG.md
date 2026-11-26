@@ -49,6 +49,8 @@ Balance Changes:
     * Rock chunks that collapse and logs that break on impact now get the bonus
     * Bonus drops land in stacks where normal drops land, with a floating +X and a sound
     * The balance template sets the percentage: half on Minimal, double on Legendary
+* Elemental Resistance now rolls only on helmets and utility items, and Physical Resistance only on chest and leg armor.
+* Luck now only rolls on utility items, and Prosperity only on trinkets.
 
 Bugfixes:
 * Offset Attack no longer rolls on blood magic weapons.
